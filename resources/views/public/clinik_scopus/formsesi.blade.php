@@ -1178,8 +1178,16 @@ Sesi Klinik Scopus | Rumah Scopus
             return `CLS-${randomAlphaNum(6)}`;
         }
 
+        /*
+         * Angkanya sudah 500-1500 sejak awal, tetapi ditulis tangan — dan
+         * katalog layanannya menyebut 1000-1500 untuk layanan yang sama.
+         * Dua angka untuk satu hal, dan tidak ada yang tahu mana yang
+         * berlaku sampai nominalnya diadu dengan mutasi rekening.
+         */
         function generateKodeUnik() {
-            return Math.floor(Math.random() * (1500 - 500 + 1)) + 500;
+            var r = @json(\App\Support\PendaftaranSemuaLayanan::KODE_UNIK);
+
+            return Math.floor(Math.random() * (r[1] - r[0] + 1)) + r[0];
         }
 
         function formatRupiah(number) {

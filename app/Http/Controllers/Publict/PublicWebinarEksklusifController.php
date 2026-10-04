@@ -64,10 +64,16 @@ class PublicWebinarEksklusifController extends Controller
         return max(0, min($nominal, $total));
     }
 
-    /** Batas kode unik, sesuai permintaan: 500 sampai 1.500 rupiah. */
-    public const KODE_UNIK_MIN = 500;
+    /*
+     * Batas kode unik: 500 sampai 1.500 rupiah, SAMA untuk semua layanan.
+     *
+     * Dibaca dari PendaftaranSemuaLayanan::KODE_UNIK, bukan ditulis ulang di
+     * sini: angkanya sempat berbeda-beda antar layanan, dan dua tempat yang
+     * menyebut hal yang sama pasti berselisih begitu salah satunya diubah.
+     */
+    public const KODE_UNIK_MIN = \App\Support\PendaftaranSemuaLayanan::KODE_UNIK[0];
 
-    public const KODE_UNIK_MAKS = 1500;
+    public const KODE_UNIK_MAKS = \App\Support\PendaftaranSemuaLayanan::KODE_UNIK[1];
 
     /**
      * Kode unik yang BELUM dipakai pendaftaran lain yang masih hidup.

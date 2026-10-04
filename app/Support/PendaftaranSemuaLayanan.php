@@ -63,7 +63,7 @@ class PendaftaranSemuaLayanan
             'nomor_pola' => 'acak5',
             'pakai_kode_unik' => true,
             'kolom_nomor' => 'id_transaksi',
-            'kode_unik_rentang' => [1, 99],
+            'kode_unik_rentang' => self::KODE_UNIK,
             'boleh_dibuat_panitia' => true,
             'model' => \App\PendaftaranScopusCamp::class,
             'angkatan_model' => \App\CategoriesScopusCamp::class,
@@ -108,7 +108,7 @@ class PendaftaranSemuaLayanan
             'nomor_pola' => 'acak5',
             'pakai_kode_unik' => true,
             'kolom_nomor' => 'id_transaksi',
-            'kode_unik_rentang' => [1, 99],
+            'kode_unik_rentang' => self::KODE_UNIK,
             'boleh_dibuat_panitia' => true,
             'model' => \App\AnalisisBibliometrik::class,
             'angkatan_model' => \App\CategoriesAnalisisBibliometrik::class,
@@ -156,7 +156,7 @@ class PendaftaranSemuaLayanan
             'nomor_pola' => 'we_berurut',
             'pakai_kode_unik' => true,
             'kolom_nomor' => 'id_transaksi',
-            'kode_unik_rentang' => [500, 1500],
+            'kode_unik_rentang' => self::KODE_UNIK,
             'boleh_dibuat_panitia' => true,
             'model' => \App\WebinarEksklusifPendaftaran::class,
             'angkatan_model' => \App\KategoriLayanan::class,
@@ -203,7 +203,7 @@ class PendaftaranSemuaLayanan
             'nomor_pola' => 'acak5',
             'pakai_kode_unik' => true,
             'kolom_nomor' => 'id_pemesanan',
-            'kode_unik_rentang' => [1, 999],
+            'kode_unik_rentang' => self::KODE_UNIK,
             'boleh_dibuat_panitia' => true,
             'model' => \App\PendaftaranScopusKafe::class,
             'angkatan_model' => null,
@@ -251,7 +251,7 @@ class PendaftaranSemuaLayanan
             'nomor_pola' => 'booking',
             'pakai_kode_unik' => true,
             'kolom_nomor' => 'id_transaksi',
-            'kode_unik_rentang' => [1000, 1500],
+            'kode_unik_rentang' => self::KODE_UNIK,
             'boleh_dibuat_panitia' => false,
             'model' => \App\ClinikScopusPemesanan::class,
             'angkatan_model' => null,
@@ -301,6 +301,22 @@ class PendaftaranSemuaLayanan
      * alasan yang sama seperti KEADAAN: kolomnya varchar, dan baris yang
      * nilainya belum terdaftar harus tetap bisa ditemukan.
      */
+    /**
+     * Rentang kode unik, SAMA untuk semua layanan.
+     *
+     * Dulu tiap layanan punya rentangnya sendiri — 1–99, 1–999, 1000–1500,
+     * 500–1500 — dan sebagiannya bahkan tidak sepakat dengan halaman
+     * pendaftaran umumnya: katalog Clinik Scopus menyebut 1000–1500
+     * sementara halamannya membuat 500–1500. Satu tetapan supaya tidak ada
+     * lagi dua angka untuk satu hal.
+     *
+     * 500–1500, bukan 1–99: dengan 99 pilihan, satu angkatan berisi puluhan
+     * pendaftar bernominal sama akan kehabisan kode dan nominalnya mulai
+     * kembar — dan dua transfer bernominal sama tidak bisa dibedakan milik
+     * siapa. Terukur di data: 1.001 pilihan untuk kuota angkatan 20 kursi.
+     */
+    public const KODE_UNIK = [500, 1500];
+
     public const CARA_BAYAR = [
         'tunai' => [
             'label' => 'Bayar di tempat',
@@ -678,7 +694,7 @@ class PendaftaranSemuaLayanan
      */
     public static function rentangKodeUnik(string $layanan): array
     {
-        return self::SUMBER[$layanan]['kode_unik_rentang'] ?? [1, 999];
+        return self::SUMBER[$layanan]['kode_unik_rentang'] ?? self::KODE_UNIK;
     }
 
     /** Kolom tempat nomor pendaftaran ditulis. */
