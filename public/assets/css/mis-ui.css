@@ -1340,6 +1340,38 @@ body.sidebar-show .main-footer {
     transition: all .25s ease;
 }
 
+/*
+ * Bantalan mendatarnya DIPAKSA kembali ke 10px.
+ *
+ * `.mis-tab .nav-link` di atas sudah menyebut `padding: 9px 10px`, tetapi
+ * style.css memasang `.nav-pills .nav-item .nav-link { padding-left: 15px
+ * !important; padding-right: 15px !important }` — dan `!important` menang
+ * atas bobot pemilih apa pun. Jadi nilai yang benar-benar berlaku selama ini
+ * 15px, bukan 10px yang tertulis di berkas ini.
+ *
+ * Terukur akibatnya di layar Rincian Pendaftaran: ketujuh tabnya menuntut
+ * 839px sementara stripnya 812px, jadi "Hapus" — satu-satunya tab yang
+ * merusak — terlempar sendirian ke baris kedua. Dengan 10px, tuntutannya
+ * 769px dan ketujuhnya muat satu baris.
+ *
+ * Timpaannya DIBATASI ke `.mis-tab`: `.nav-pills` lain di aplikasi ini tetap
+ * memakai 15px bawaannya.
+ *
+ * Pemilihnya SENGAJA sepanjang ini. Percobaan pertama memakai
+ * `.mis-tab .nav-link` (0,2,0) dan tetap kalah — saat kedua aturan sama-sama
+ * `!important`, yang menentukan bobot pemilihnya, dan lawannya (0,3,0).
+ * Terukur sesudah aturannya terpasang: bantalannya masih 15px dan "Hapus"
+ * masih terlempar. `.mis-tab.nav-pills .nav-item .nav-link` (0,4,0) menang
+ * tanpa bergantung pada urutan muat berkas.
+ *
+ * Pemilih keduanya untuk deret tab yang <li>-nya tidak berkelas .nav-item.
+ */
+.mis-tab.nav-pills .nav-item .nav-link,
+.mis-tab.nav-pills > li > .nav-link {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+}
+
 /* 12px, menyamai ukuran terukur ikon tab di halaman profil. !important perlu
    karena aturan global layout memaksa .fas jadi 20px. */
 .mis-tab .nav-link > .fas {
@@ -1432,6 +1464,43 @@ body.sidebar-show .main-footer {
 }
 
 .mis-tab .nav-link.active > .fas {
+    color: #fff !important;
+}
+
+/*
+ * Tab yang menghapus diberi rupa BAHAYA, bukan rupa tab biasa.
+ *
+ * Di antara enam tab yang semuanya sekadar berpindah tampilan, satu tab yang
+ * menghapus pendaftaran tampil persis sama — ikon dan tulisannya sewarna
+ * dengan "Peserta" di sebelahnya. Yang membedakan hanya kata "Hapus", dan
+ * itu menuntut orangnya membaca sebelum menekan.
+ *
+ * Merahnya terlihat TANPA hover: penanda bahaya yang baru muncul saat kursor
+ * di atasnya tidak menolong orang yang sudah berniat menekan.
+ *
+ * Membuka tabnya tidak menghapus apa pun — panel di baliknya masih meminta
+ * penegasan — jadi ini penanda, bukan pengaman.
+ */
+.mis-tab .nav-link.mis-tab-bahaya {
+    color: #be123c;
+}
+
+.mis-tab .nav-link.mis-tab-bahaya > .fas {
+    color: #e11d48 !important;
+}
+
+.mis-tab .nav-link.mis-tab-bahaya:hover {
+    color: #9f1239;
+    background: #fff1f2;
+}
+
+.mis-tab .nav-link.mis-tab-bahaya.active {
+    background: linear-gradient(135deg, #f43f5e, #be123c);
+    color: #fff;
+    box-shadow: 0 10px 20px -12px #be123c;
+}
+
+.mis-tab .nav-link.mis-tab-bahaya.active > .fas {
     color: #fff !important;
 }
 
@@ -1809,6 +1878,44 @@ textarea:focus-visible,
     padding: 16px 16px 18px;
     background: #f4f6fb;
     border-top: 1px solid var(--ui-garis);
+}
+
+/*
+ * Panel yang tidak aktif DISEMBUNYIKAN. Tanpa ini, ketujuhnya tetap ada di
+ * tata letak sekaligus.
+ *
+ * Bootstrap menyembunyikan panel lewat `.tab-content > .tab-pane`, dan
+ * pembungkus di sini bernama `.mis-tab-isi` — jadi aturannya TIDAK PERNAH
+ * cocok. Yang tersisa cuma `.fade` yang membuat panel tak aktif
+ * `opacity: 0`: tak terlihat, tetapi utuh menempati ruangnya.
+ *
+ * Terukur di layar Rincian Pendaftaran sebelum perbaikan: halamannya 3171px
+ * padahal panel yang terlihat cuma 478px, kartu kanannya 2883px, dan di
+ * sebelah kiri menganga 2176px kosong. Mengganti tab tidak mengubah tinggi
+ * halamannya satu piksel pun — sebab memang tidak ada yang disembunyikan.
+ *
+ * Lebih buruk daripada sekadar ruang terbuang: 38 kendali di panel tak
+ * terlihat tetap bisa difokus dan diklik, termasuk tombol "Hapus pendaftaran
+ * ini". Orang yang menelusuri halaman dengan Tab masuk ke borang yang tidak
+ * bisa dilihatnya.
+ *
+ * Layar Ubah Pelanggan TIDAK terkena, dan itu yang menunjukkan akarnya: di
+ * sana panelnya dibungkus `<div class="tab-content">` di dalam .mis-tab-isi,
+ * sehingga aturan Bootstrap cocok. Layar Rincian tidak memakainya. Jadi
+ * benarnya sebuah layar bergantung pada pembungkus tak terlihat yang harus
+ * diingat penulisnya — aturan di sini membuat .mis-tab-isi berdiri sendiri,
+ * dan layar berikutnya yang lupa membungkusnya tidak ikut rusak.
+ *
+ * Dipasang pada `> .tab-pane` langsung, bukan seluruh keturunan: panel boleh
+ * memuat tabnya sendiri di dalamnya, dan pembungkus .tab-content yang sudah
+ * ada tetap bekerja seperti biasa.
+ */
+.mis-tab-isi > .tab-pane {
+    display: none;
+}
+
+.mis-tab-isi > .tab-pane.active {
+    display: block;
 }
 
 @media (max-width: 767.98px) {
