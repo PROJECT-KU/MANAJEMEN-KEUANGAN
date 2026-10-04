@@ -119,7 +119,17 @@ class PublicAnalisisBibliometrikController extends Controller
     public function store(Request $request)
     {
         $token = $this->generateRandomToken(30);
-        $id_transaksi = $this->generateRandomId(5);
+        /*
+         * Nomornya dirakit di SATU tempat untuk kelima layanan.
+         *
+         * Dulu tiap pengendali umum punya salinan pembuat nomornya sendiri —
+         * lima aksara acak — sementara jalur panitia memakai pola berawalan
+         * dan bertanggal. Dua pembuat nomor untuk satu layanan berarti bentuk
+         * nomornya bergantung pada SIAPA yang mendaftarkan, dan itu persis
+         * yang tidak boleh terjadi: pendaftar yang mendaftar sendiri dan yang
+         * didaftarkan panitia harus menerima nomor yang sama bentuknya.
+         */
+        $id_transaksi = \App\Support\PendaftaranSemuaLayanan::nomorBaru('bibliometrik');
 
         // MENGHITUNG JUMLAH SISA KUOTA YANG TIDAK BOLEH MELEBIHI TOTAL KUOTA
         $kategoriId = $request->input('kategori_id');
