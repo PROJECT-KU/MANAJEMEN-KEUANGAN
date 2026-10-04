@@ -13,7 +13,9 @@
 @php
     // Nominalnya SUDAH termasuk kode unik — itulah angka yang harus
     // ditransfer persis. Tiga angka terakhirnya adalah kodenya sendiri.
-    $tigaAkhir = str_pad((string) ($total % 1000), 3, '0', STR_PAD_LEFT);
+    // Lihat alasannya di slip.blade.php: perbandingan tiga angka terakhir
+    // rusak sejak rentang kode unik diseragamkan ke 500-1500.
+    $kodeMasuk = $kodeUnik > 0 && $total > $kodeUnik && ($total - $kodeUnik) % 1000 === 0;
 @endphp
 <!DOCTYPE html>
 <html lang="id">
@@ -175,7 +177,7 @@
                             {{-- Hanya kalau nominalnya memang berakhir
                                  dengan kodenya; baris lama dari sebelum
                                  kodenya dimasukkan ke total berakhir 000. --}}
-                            @elseif ($kodeUnik > 0 && $total % 1000 === $kodeUnik)
+                            @elseif ($kodeMasuk)
                                 {{-- Alasannya disebut. Tanpa itu, angka ganjil di ujung nominal
                                      terbaca seperti salah hitung, dan sebagian orang
                                      membulatkannya — lalu pembayarannya tidak bisa dicocokkan. --}}
@@ -183,9 +185,10 @@
                                     style="border-left:3px solid #ea7a2c;background:#fff7ed;border-radius:0 10px 10px 0">
                                     <tr>
                                         <td style="padding:13px 15px;font-size:13px;line-height:1.6;color:#9a3412">
-                                            Mohon transfer <strong>persis sampai angka terakhirnya</strong>.
-                                            Tiga angka di ujungnya — <strong>{{ $tigaAkhir }}</strong> —
-                                            adalah penanda pendaftaran Anda, bukan kelebihan bayar.
+                                            Mohon transfer <strong>persis sampai rupiah terakhirnya</strong>.
+                                            Nominalnya sudah dilebihkan
+                                            <strong>Rp {{ number_format($kodeUnik, 0, ',', '.') }}</strong>
+                                            sebagai penanda pendaftaran Anda — bukan kelebihan bayar.
                                             Itulah yang membuat pembayaran Anda bisa kami kenali,
                                             jadi mohon jangan dibulatkan.
                                         </td>
