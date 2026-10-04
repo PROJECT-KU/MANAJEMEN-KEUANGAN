@@ -686,6 +686,25 @@ Daftarkan Pendaftar | MIS Rumah Scopus
         }
 
         /*
+         * Nama melebar saat afiliasi tidak diminta.
+         *
+         * Di jalur lembaga, afiliasi disembunyikan sebab nama lembaganya SUDAH
+         * afiliasinya — dan barisnya tinggal tiga isian di kisi empat jalur.
+         * Jalur keempat tidak runtuh sendiri: sakelar di baris berikutnya
+         * memakai dua jalur, jadi ia tidak muat di sisa satu jalur dan
+         * selnya ditinggalkan kosong.
+         */
+        .bar-isian-kisi:has(> #bar-bungkus-affiliasi[hidden]) > #bar-bungkus-nama {
+            grid-column: span 2;
+        }
+
+        @media (max-width: 575.98px) {
+            .bar-isian-kisi:has(> #bar-bungkus-affiliasi[hidden]) > #bar-bungkus-nama {
+                grid-column: 1 / -1;
+            }
+        }
+
+        /*
          * Kartu ringkas melebar saat jumlah orang tidak diminta.
          *
          * Di jalur perorangan jumlahnya selalu satu, jadi isiannya
@@ -1600,7 +1619,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                 </div>
 
                 <div class="bar-isian-kisi">
-                    <div class="mis-isian">
+                    <div class="mis-isian" id="bar-bungkus-nama">
                         <label class="mis-label" for="bar-nama">Nama lengkap<span class="bar-wajib" aria-hidden="true">*</span></label>
                         <input type="text" class="form-control-modern @error('nama') is-invalid @enderror" id="bar-nama" @error('nama') aria-invalid="true" @enderror name="nama"
                             value="{{ old('nama') }}" required maxlength="255" autocomplete="off">
@@ -1700,8 +1719,10 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                         </label>
                     </div>
 
+                    {{-- Tanpa label di atasnya: sakelar di sebelahnya tidak
+                         punya label, jadi keduanya tidak pernah sejajar.
+                         Kalimat di dalam kartunya sudah menyebutkan apa ini. --}}
                     <div class="mis-isian bar-lebar" id="bar-bungkus-kabari">
-                        <span class="mis-label">Kabar ke pendaftar</span>
                         <label class="bar-centang" for="bar-kabari">
                             <input type="checkbox" id="bar-kabari" name="kabari" value="1"
                                 @checked(old('kabari', true))>
@@ -1746,10 +1767,17 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                         </p>
                         <div class="bar-isian-kisi">
 
-                    <div class="mis-isian bar-lebar">
-                        <label class="mis-label" for="bar-pemesanan">Bagian dari pesanan</label>
+                    {{-- Menu ini HANYA muncul kalau memang ada pesanan yang
+                         masih terbuka.
+
+                         Tanpa itu, admin yang baru saja memilih jalur lembaga
+                         disuguhi menu berisi satu pilihan bertuliskan "Bukan
+                         pesanan lembaga" — menyangkal pilihan yang baru saja
+                         ia buat, dan tidak ada yang bisa dipilih di sana. --}}
+                    <div class="mis-isian bar-lebar" @if ($pemesanan->isEmpty()) hidden @endif>
+                        <label class="mis-label" for="bar-pemesanan">Gabung ke pesanan yang sudah ada?</label>
                         <select class="form-control-modern" id="bar-pemesanan" name="pemesanan_id">
-                            <option value="">Bukan pesanan lembaga</option>
+                            <option value="">Buat pesanan baru</option>
                             @foreach ($pemesanan as $pm)
                                 <option value="{{ $pm->id }}"
                                     @selected(old('pemesanan_id', $terpilihPemesanan) === $pm->id)>
@@ -1768,7 +1796,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                         </p>
                     </div>
 
-                    <div class="mis-isian bar-lebar" id="bar-bungkus-lembaga-nama">
+                    <div class="mis-isian bar-lebar{{ $pemesanan->isEmpty() ? ' bar-penuh' : '' }}" id="bar-bungkus-lembaga-nama">
                         <label class="mis-label" for="bar-lembaga-nama">Nama lembaga</label>
                         <input type="text" class="form-control-modern @error('lembaga_nama') is-invalid @enderror"
                             id="bar-lembaga-nama" name="lembaga_nama" value="{{ old('lembaga_nama') }}"
@@ -1843,7 +1871,7 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                                 </label>
                             </div>
 
-                            <div class="mis-isian bar-pic" hidden>
+                            <div class="mis-isian bar-pic bar-lebar" hidden>
                                 <label class="mis-label" for="bar-lembaga-pic">PIC lembaga</label>
                                 <input type="text" class="form-control-modern" id="bar-lembaga-pic"
                                     name="lembaga_pic" value="{{ old('lembaga_pic') }}" maxlength="255"
