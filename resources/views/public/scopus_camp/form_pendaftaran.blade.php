@@ -682,8 +682,22 @@ Form Pendaftaran Scopus Camp | Rumah Scopus
         return Number(number).toLocaleString('id-ID');
     }
 
+        /*
+         * Rentangnya SAMA untuk semua layanan: 500-1500.
+         *
+         * Dulu halaman ini membuat 1-100, sementara layanan lain memakai
+         * rentang yang berbeda-beda. Nominal transfer yang penanda uniknya
+         * bergantung pada layanan mana yang didaftar membuat panitia harus
+         * mengingat aturan berbeda untuk tiap layanan saat mencocokkan mutasi
+         * rekening.
+         *
+         * Angkanya diambil dari PendaftaranSemuaLayanan::KODE_UNIK supaya
+         * tidak ada dua tempat yang bisa berselisih.
+         */
     function generateUniqueCode() {
-        return Math.floor(Math.random() * 100) + 1;
+        var r = @json(\App\Support\PendaftaranSemuaLayanan::KODE_UNIK);
+
+        return Math.floor(Math.random() * (r[1] - r[0] + 1)) + r[0];
     }
 
     function hitungTotalPembayaran() {

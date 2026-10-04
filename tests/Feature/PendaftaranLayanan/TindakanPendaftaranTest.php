@@ -1289,6 +1289,81 @@ class TindakanPendaftaranTest extends TestCase
         $this->assertSame('', (string) $b->email);
     }
 
+    /**
+     * Rentang kode unik SAMA untuk kelima layanan.
+     *
+     * Dulu masing-masing punya rentangnya sendiri — 1–99, 1–999, 1000–1500,
+     * 500–1500 — sehingga nominal transfer yang penanda uniknya bergantung
+     * pada layanan mana yang didaftar, dan panitia harus mengingat aturan
+     * berbeda untuk tiap layanan saat mencocokkan mutasi rekening.
+     */
+    #[Test]
+    public function rentang_kode_unik_seragam_di_semua_layanan(): void
+    {
+        foreach (array_keys(Pendaftaran::katalog()) as $layanan) {
+            $this->assertSame(
+                [500, 1500],
+                Pendaftaran::rentangKodeUnik($layanan),
+                'Layanan ' . $layanan . ' memakai rentang kode unik yang berbeda.'
+            );
+        }
+
+        // Layanan yang belum terdaftar pun jatuh ke rentang yang sama, bukan
+        // ke angka cadangan tersendiri.
+        $this->assertSame([500, 1500], Pendaftaran::rentangKodeUnik('belum_ada'));
+    }
+
+    /**
+     * Tidak ada angka rentang yang ditulis tangan di luar satu tetapan itu.
+     *
+     * Terukur sebelum ini: katalog Clinik Scopus menyebut 1000–1500
+     * sementara halaman pendaftarannya membuat 500–1500 — dua angka untuk
+     * satu hal, dan tidak ada yang tahu mana yang berlaku sampai nominalnya
+     * diadu dengan mutasi rekening.
+     */
+    #[Test]
+    public function tidak_ada_rentang_kode_unik_yang_ditulis_tangan(): void
+    {
+        $akar = dirname(__DIR__, 3);
+        $melenceng = [];
+
+        foreach ([
+            '/app/Http/Controllers/Publict',
+            '/resources/views/public',
+        ] as $folder) {
+            $jalan = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($akar . $folder));
+
+            foreach ($jalan as $b) {
+                if (! $b->isFile() || ! preg_match('/\.(php|blade\.php)$/', $b->getFilename())) {
+                    continue;
+                }
+
+                $isi = (string) file_get_contents($b->getPathname());
+
+                /*
+                 * Yang dicari: pembuat kode unik yang menyebut angkanya
+                 * sendiri. Pola Math.random() dengan dua angka, atau
+                 * random_int dengan dua angka, di dalam fungsi yang namanya
+                 * menyebut kode unik.
+                 */
+                if (! preg_match('/function\s+generate\w*(?:Unique|Kode)\w*\s*\([^)]*\)\s*\{(.{0,300}?)\}/is', $isi, $m)) {
+                    continue;
+                }
+
+                if (preg_match('/\d{2,}/', $m[1])) {
+                    $melenceng[] = str_replace($akar . '/', '', $b->getPathname());
+                }
+            }
+        }
+
+        $this->assertSame(
+            [],
+            $melenceng,
+            "Berkas ini menulis sendiri rentang kode uniknya:\n- " . implode("\n- ", $melenceng)
+                . "\nBacalah dari PendaftaranSemuaLayanan::KODE_UNIK.\n"
+        );
+    }
+
     // ------------------------------------------------------------- pembantu
 
     private function akun(string $peran): User
