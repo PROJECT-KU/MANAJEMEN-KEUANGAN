@@ -191,8 +191,8 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             display: flex;
             align-items: center;
             gap: 11px;
-            margin-bottom: 13px;
-            padding-bottom: 11px;
+            margin-bottom: 11px;
+            padding-bottom: 9px;
             /* Garis tipis memisahkan pertanyaan dari isiannya; tanpa itu judul
                dan isian pertama terbaca sebagai satu gumpalan. */
             border-bottom: 1px solid var(--mis-garis);
@@ -231,16 +231,26 @@ Daftarkan Pendaftar | MIS Rumah Scopus
             }
         }
 
+        /*
+         * line-height disebut sendiri, dan itu bukan kerapian belaka.
+         *
+         * Tanpa itu keduanya mewarisi tinggi baris dari gaya global —
+         * terukur: baris judul DAN baris sub sama-sama 28px, padahal
+         * hurufnya 16px dan 13px. Kepala langkahnya jadi 69px untuk dua
+         * baris teks, dan jaraknya terbaca terlalu longgar.
+         */
         .bar-langkah-judul {
             margin: 0;
             font-size: 1.02rem;
             font-weight: 700;
+            line-height: 1.3;
             color: var(--mis-tinta);
         }
 
         .bar-langkah-sub {
-            margin: 1px 0 0;
+            margin: 2px 0 0;
             font-size: .8rem;
+            line-height: 1.4;
             color: var(--mis-tinta-3);
         }
 
@@ -1541,7 +1551,9 @@ Daftarkan Pendaftar | MIS Rumah Scopus
                     <span class="bar-nomor" aria-hidden="true">5</span>
                     <div>
                         <p class="bar-langkah-judul">Siapa yang mendaftar?</p>
-                        <p class="bar-langkah-sub">Empat isian; nomor, status, dan kode uniknya diisi sistem.</p>
+                        {{-- Bukan lagi "empat isian": blok lembaga dilebur ke
+                             langkah ini, jadi jumlahnya berbeda tiap jalur. --}}
+                        <p class="bar-langkah-sub">Nomor, status, dan kode uniknya diisi sistem.</p>
                     </div>
                 </div>
 
