@@ -447,6 +447,21 @@ Rincian Pendaftaran | MIS Rumah Scopus
         }
 
         /*
+         * Ubin DI DALAM kartu diberi latar lembut, bukan putih.
+         *
+         * .mis-ubin berlatar putih karena ia dirancang berdiri di atas latar
+         * lembut badan tab. Sejak ia dibungkus kartu putih, putih di atas
+         * putih tidak terbaca sebagai ubin lagi — yang memisahkannya tinggal
+         * garis tepinya saja.
+         *
+         * Dibalik di sini, DI DALAM .rin-bagian saja: ubin di layar daftar
+         * dan di luar kartu tetap memakai putih bawaannya.
+         */
+        .rin-bagian .mis-ubin {
+            background: #f8fafc;
+        }
+
+        /*
          * Keterangan kecil di bawah label ubin.
          *
          * Dinamai mengikuti INDUKNYA `.rin-angka`, bukan `.mis-ubin` — nama
@@ -1484,101 +1499,131 @@ Rincian Pendaftaran | MIS Rumah Scopus
                             yang memang menyusul angkanya: "dibayar lewat
                             apa", "22 ini apa", "15 orangnya siapa saja".
                         --}}
-                        <div class="rin-angka">
-                            <div class="mis-ubin">
-                                <span class="mis-medali kecil mis-hijau" aria-hidden="true"><i class="fas fa-money-bill-wave"></i></span>
-                                <div style="min-width: 0;">
-                                    <p class="mis-ubin-angka">Rp {{ number_format($totalBayar, 0, ',', '.') }}</p>
-                                    <p class="mis-ubin-label">Total bayar</p>
-                                    <p class="rin-angka-ket">
-                                        <i class="fas {{ $caraBayar['ikon'] }}" aria-hidden="true"></i>
-                                        {{ $caraBayar['ringkas'] ?? $caraBayar['label'] }}
-                                    </p>
+                        {{--
+                            Ubin dan notanya dibungkus SATU kartu, sama seperti
+                            dua bagian di bawahnya.
+
+                            Sebelum ini iramanya pecah: terukur, tiga blok
+                            teratas mengambang tanpa kartu sementara dua di
+                            bawahnya berkartu, dengan radius 0/14/14/15/15 dan
+                            celah 16/13/14/14. Mata yang membaca sekilas tidak
+                            menemukan satuan yang jelas — persis yang membuat
+                            layar terasa "belum rapi" walau tiap bagiannya
+                            sendiri sudah benar.
+
+                            Sekarang panelnya tiga kartu setara: Pembayaran,
+                            Status pembayaran, Jejak & catatan.
+                        --}}
+                        <div class="rin-bagian">
+                            <p class="rin-bagian-judul">
+                                <span class="mis-medali kecil mis-hijau" aria-hidden="true">
+                                    <i class="fas fa-wallet"></i>
+                                </span>
+                                <span class="teks">Pembayaran</span>
+                            </p>
+
+                            <div class="rin-angka">
+                                <div class="mis-ubin">
+                                    <span class="mis-medali kecil mis-hijau" aria-hidden="true"><i class="fas fa-money-bill-wave"></i></span>
+                                    <div style="min-width: 0;">
+                                        <p class="mis-ubin-angka">Rp {{ number_format($totalBayar, 0, ',', '.') }}</p>
+                                        <p class="mis-ubin-label">Total bayar</p>
+                                        <p class="rin-angka-ket">
+                                            <i class="fas {{ $caraBayar['ikon'] }}" aria-hidden="true"></i>
+                                            {{ $caraBayar['ringkas'] ?? $caraBayar['label'] }}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="mis-ubin">
+                                    <span class="mis-medali kecil mis-biru" aria-hidden="true"><i class="fas fa-hashtag"></i></span>
+                                    <div style="min-width: 0;">
+                                        <p class="mis-ubin-angka">
+                                            {{ $kodeUnik > 0 ? number_format($kodeUnik, 0, ',', '.') : '—' }}
+                                        </p>
+                                        <p class="mis-ubin-label">Kode unik</p>
+                                        <p class="rin-angka-ket">
+                                            @if ($kodeUnik > 0)
+                                                <i class="fas fa-angle-double-right" aria-hidden="true"></i>
+                                                angka terakhir nominalnya
+                                            @else
+                                                <i class="fas fa-minus" aria-hidden="true"></i>
+                                                tidak memakai kode unik
+                                            @endif
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="mis-ubin">
+                                    <span class="mis-medali kecil mis-ungu" aria-hidden="true"><i class="fas fa-users"></i></span>
+                                    <div style="min-width: 0;">
+                                        <p class="mis-ubin-angka">{{ $jumlahOrang }}</p>
+                                        <p class="mis-ubin-label">Jumlah orang</p>
+                                        @php
+                                            // Pendaftarnya sendiri ikut dihitung: ia memang
+                                            // salah satu peserta, dan panitia yang membaca
+                                            // "2 nama" untuk rombongan bertiga akan mengira
+                                            // ada satu yang hilang.
+                                            $namaTercatat = $pesertaLain->count() + 1;
+                                        @endphp
+                                        {{-- Disebut "x dari y", bukan "x nama tercatat":
+                                             selisihnya yang penting. Dibayar untuk 15
+                                             orang tetapi baru 1 nama tercatat berarti 14
+                                             sertifikat tidak bisa diterbitkan, dan itu
+                                             biasanya baru ketahuan di hari acara. --}}
+                                        <p class="rin-angka-ket {{ $namaTercatat >= $jumlahOrang ? '' : 'rin-angka-ket-kurang' }}">
+                                            <i class="fas {{ $namaTercatat >= $jumlahOrang ? 'fa-check-circle' : 'fa-exclamation-triangle' }}"
+                                                aria-hidden="true"></i>
+                                            @if ($namaTercatat >= $jumlahOrang)
+                                                semua namanya tercatat
+                                            @else
+                                                baru {{ $namaTercatat }} dari {{ $jumlahOrang }} nama
+                                            @endif
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="mis-ubin">
-                                <span class="mis-medali kecil mis-biru" aria-hidden="true"><i class="fas fa-hashtag"></i></span>
-                                <div style="min-width: 0;">
-                                    <p class="mis-ubin-angka">
-                                        {{ $kodeUnik > 0 ? number_format($kodeUnik, 0, ',', '.') : '—' }}
-                                    </p>
-                                    <p class="mis-ubin-label">Kode unik</p>
-                                    <p class="rin-angka-ket">
-                                        @if ($kodeUnik > 0)
-                                            <i class="fas fa-angle-double-right" aria-hidden="true"></i>
-                                            angka terakhir nominalnya
-                                        @else
-                                            <i class="fas fa-minus" aria-hidden="true"></i>
-                                            tidak memakai kode unik
-                                        @endif
-                                    </p>
-                                </div>
-                            </div>
+                            {{--
+                                SATU nota, bukan dua.
 
-                            <div class="mis-ubin">
-                                <span class="mis-medali kecil mis-ungu" aria-hidden="true"><i class="fas fa-users"></i></span>
-                                <div style="min-width: 0;">
-                                    <p class="mis-ubin-angka">{{ $jumlahOrang }}</p>
-                                    <p class="mis-ubin-label">Jumlah orang</p>
-                                    @php
-                                        // Pendaftarnya sendiri ikut dihitung: ia memang
-                                        // salah satu peserta, dan panitia yang membaca
-                                        // "2 nama" untuk rombongan bertiga akan mengira
-                                        // ada satu yang hilang.
-                                        $namaTercatat = $pesertaLain->count() + 1;
-                                    @endphp
-                                    {{-- Disebut "x dari y", bukan "x nama tercatat":
-                                         selisihnya yang penting. Dibayar untuk 15
-                                         orang tetapi baru 1 nama tercatat berarti 14
-                                         sertifikat tidak bisa diterbitkan, dan itu
-                                         biasanya baru ketahuan di hari acara. --}}
-                                    <p class="rin-angka-ket {{ $namaTercatat >= $jumlahOrang ? '' : 'rin-angka-ket-kurang' }}">
-                                        <i class="fas {{ $namaTercatat >= $jumlahOrang ? 'fa-check-circle' : 'fa-exclamation-triangle' }}"
-                                            aria-hidden="true"></i>
-                                        @if ($namaTercatat >= $jumlahOrang)
-                                            semua namanya tercatat
-                                        @else
-                                            baru {{ $namaTercatat }} dari {{ $jumlahOrang }} nama
-                                        @endif
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
+                                Keduanya sama-sama tentang pembayaran, dan sejak
+                                ubinnya membawa keterangan sendiri ("Transfer",
+                                "angka terakhir nominalnya") sebagian isinya jadi
+                                pengulangan. Dua kotak biru bertumpuk juga berat
+                                dilihat: terukur 105px untuk keterangan yang muat
+                                dalam satu kotak.
 
-                        {{-- Cara bayarnya disebut lebih dulu, SEBELUM petunjuk
-                             mencocokkan mutasi rekening: petunjuk itu tidak
-                             berlaku untuk yang membayar tunai di tempat, dan
-                             panitia yang membacanya tanpa tahu cara bayarnya
-                             akan mencari mutasi yang tidak akan pernah ada. --}}
-                        <p class="rin-nota rin-nota-biru">
-                            <i class="fas {{ $caraBayar['ikon'] }}" aria-hidden="true"></i>
-                            <span>
-                                Dibayar lewat <strong>{{ $caraBayar['label'] }}</strong>.
-                                {{ $caraBayar['ket'] }}
-                            </span>
-                        </p>
-
-                        @if ($kodeUnik > 0 && $caraBayar['kunci'] !== 'tunai')
+                                Cara bayarnya tetap disebut LEBIH DULU di dalam
+                                kalimatnya: petunjuk mencocokkan mutasi tidak
+                                berlaku bagi yang membayar tunai di tempat, dan
+                                panitia yang membacanya tanpa tahu cara bayarnya
+                                akan mencari mutasi yang tidak akan pernah ada.
+                            --}}
                             <p class="rin-nota rin-nota-biru">
-                                <i class="fas fa-info-circle" aria-hidden="true"></i>
+                                <i class="fas {{ $caraBayar['ikon'] }}" aria-hidden="true"></i>
                                 <span>
-                                    Cocokkan mutasi rekening dengan nominal
-                                    <strong>Rp {{ number_format($totalBayar, 0, ',', '.') }}</strong> —
-                                    angka {{ number_format($kodeUnik, 0, ',', '.') }} di ujungnya
-                                    memang kode unik pendaftaran ini, bukan kelebihan bayar.
+                                    Dibayar lewat <strong>{{ $caraBayar['label'] }}</strong>.
+                                    {{ $caraBayar['ket'] }}
+                                    @if ($kodeUnik > 0 && $caraBayar['kunci'] !== 'tunai')
+                                        Cocokkan mutasinya dengan nominal
+                                        <strong>Rp {{ number_format($totalBayar, 0, ',', '.') }}</strong> —
+                                        angka {{ number_format($kodeUnik, 0, ',', '.') }} di ujungnya
+                                        memang kode unik pendaftaran ini, bukan kelebihan bayar.
+                                    @endif
                                 </span>
                             </p>
-                        @endif
 
-                        @if ($diskon > 0)
-                            <p class="rin-nota rin-nota-biru">
-                                <i class="fas fa-tag" aria-hidden="true"></i>
-                                <span>
-                                    Dapat potongan <strong>Rp {{ number_format($diskon, 0, ',', '.') }}</strong>@if ($pendaftaran->kode_diskon) dengan kode <strong>{{ $pendaftaran->kode_diskon }}</strong>@endif.
-                                </span>
-                            </p>
-                        @endif
+                            @if ($diskon > 0)
+                                <p class="rin-nota rin-nota-biru">
+                                    <i class="fas fa-tag" aria-hidden="true"></i>
+                                    <span>
+                                        Dapat potongan <strong>Rp {{ number_format($diskon, 0, ',', '.') }}</strong>@if ($pendaftaran->kode_diskon) dengan kode <strong>{{ $pendaftaran->kode_diskon }}</strong>@endif.
+                                    </span>
+                                </p>
+                            @endif
+
+                        </div>{{-- kartu Pembayaran --}}
 
                         {{-- Borang status di tab Ringkasan, bukan tab sendiri:
                              inilah tindakan yang paling sering dikerjakan, dan
