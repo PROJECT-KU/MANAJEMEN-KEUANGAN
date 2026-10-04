@@ -336,6 +336,53 @@ class PembayaranTerminTest extends TestCase
     }
 
     #[Test]
+    public function panitia_diberi_tahu_di_mana_dp_dicatat(): void
+    {
+        /*
+         * Tab "Termin & DP" sudah ada, tetapi tidak ada yang tahu ia ada
+         * sampai mencarinya — dan yang dicari panitia justru tombol DP di
+         * borang pembuatan, tempat ia memang tidak ada.
+         *
+         * Dua tempat dijaga di sini: kalimat yang muncul tepat saat halaman
+         * rinciannya terbuka, dan nota di borangnya sendiri.
+         */
+        $orang = $this->akun();
+
+        $rombongan = $this->daftarkan($orang, 'Pemesan Diberi Tahu', ['jumlah' => 4]);
+
+        $this->assertStringContainsString(
+            'Termin & DP',
+            (string) session('sukses'),
+            'Pesanan rombongan harus disebutkan di mana DP-nya dicatat.'
+        );
+
+        // Dan pendaftar satu kursi TIDAK diberi kalimat itu: ia memang tidak
+        // dibukakan pembayaran bertermin, jadi menunjuk tab yang tidak muncul
+        // hanya membuat panitia mencarinya sia-sia.
+        $this->daftarkan($orang, 'Pendaftar Sendiri Saja');
+
+        $this->assertStringNotContainsString('Termin & DP', (string) session('sukses'));
+
+        /*
+         * Notanya ada di borang pembuatan, dan TERTUTUP saat borang dibuka —
+         * yang membukanya jumlah orang atau pilihan lembaganya.
+         */
+        $isi = $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.baru'))
+            ->assertOk()->getContent();
+
+        $this->assertMatchesRegularExpression('/id="bar-nota-dp"[^>]*\shidden/', $isi);
+        $this->assertStringContainsString('DP atau cicilan dicatat setelah ini', $isi);
+
+        // Notanya menunjuk tab yang namanya memang dipakai di layar rincian.
+        $rincian = $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.rincian', ['scopus_camp', $rombongan->id]))
+            ->assertOk()->getContent();
+
+        $this->assertStringContainsString('Termin &amp; DP', $rincian);
+    }
+
+    #[Test]
     public function hanya_orang_dalam_yang_boleh_mencatat_dan_menghapus(): void
     {
         $orang = $this->akun();
