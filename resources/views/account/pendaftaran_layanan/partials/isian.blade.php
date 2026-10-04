@@ -49,7 +49,11 @@
              yang menolak. --}}
         <p class="mis-bantuan">Hanya angkatan layanan ini yang bisa dipilih.</p>
     @elseif ($kolom === 'note' || $kolom === 'desc_kendala')
-        <textarea class="form-control-modern" id="{{ $id }}" name="{{ $kolom }}" rows="3">{{ $tampil }}</textarea>
+        {{-- data-mis-tumbuh: tingginya mengikuti isi, lihat skrip di layar
+             rincian. rows="3" tetap ditulis sebagai lantai dan sebagai
+             keadaan yang masuk akal kalau skripnya tidak jalan. --}}
+        <textarea class="form-control-modern" id="{{ $id }}" name="{{ $kolom }}" rows="3"
+            data-mis-tumbuh>{{ $tampil }}</textarea>
     @else
         <input type="{{ $jenisKotak }}" class="form-control-modern" id="{{ $id }}" name="{{ $kolom }}"
             value="{{ $tampil }}"
