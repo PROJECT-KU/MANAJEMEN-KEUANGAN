@@ -3829,4 +3829,48 @@ class TindakanPendaftaranTest extends TestCase
                     . 'berjajar di lajur terpisah, bukan bertumpuk.');
         }
     }
+
+    #[Test]
+    public function teks_kartu_identitas_tidak_mewarisi_tinggi_baris_mutlak(): void
+    {
+        /*
+         * style.css memasang `p, ul:not(.list-unstyled), ol { line-height:
+         * 28px }` — nilai MUTLAK, bukan rasio, untuk tiap paragraf di seluruh
+         * aplikasi.
+         *
+         * Pada label berhuruf 10,2px itu berarti kotaknya 28px: sekitar 9px
+         * ruang kosong menggantung di bawah hurufnya, dan 7px lagi di atas
+         * nilainya. Terukur, jarak antar KOTAKNYA 0 sementara jarak yang
+         * TERLIHAT antara "Email" dan alamatnya ±16px — jadi mengatur `gap`
+         * atau `margin` tidak pernah menolong, sebab ruang matinya ada DI
+         * DALAM kotak masing-masing. Itu yang membuat keluhannya terbaca
+         * sebagai "jaraknya terlalu lebar" padahal tidak ada jarak yang
+         * disetel.
+         *
+         * Sesudah tinggi barisnya disebut sendiri: kotak label 28 -> 14px,
+         * nilai 28 -> 19px, ruang mati 16 -> 5px, tinggi barisnya 77 -> 57px.
+         *
+         * Dijaga karena aturannya tampak berlebihan bagi yang tidak tahu
+         * warisan itu ada — persis jenis baris yang dibuang orang berikutnya
+         * saat merapikan.
+         */
+        $gaya = preg_replace('#/\*.*?\*/#s', ' ', file_get_contents(
+            resource_path('views/account/pendaftaran_layanan/rincian.blade.php')
+        )) ?? '';
+
+        foreach (['.rin-baris-label', '.rin-baris-nilai'] as $kelas) {
+            $this->assertSame(1, preg_match(
+                '/' . preg_quote($kelas, '/') . '\s*\{[^}]*line-height:\s*[\d.]+\s*;/',
+                $gaya
+            ), $kelas . ' tidak menyebut line-height sendiri, jadi ia mewarisi 28px MUTLAK dari '
+                . 'style.css dan menyisakan ruang mati di dalam kotaknya.');
+        }
+
+        // Rasio, BUKAN piksel: menyebutnya dalam px mengulangi kesalahan yang
+        // sama pada ukuran huruf yang berbeda.
+        $this->assertSame(0, preg_match(
+            '/\.rin-baris-(label|nilai)\s*\{[^}]*line-height:\s*\d+px/',
+            $gaya
+        ), 'Tinggi barisnya disebut dalam piksel; pakai rasio supaya ia ikut ukuran hurufnya.');
+    }
 }
