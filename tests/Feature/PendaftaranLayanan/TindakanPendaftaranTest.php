@@ -3642,6 +3642,25 @@ class TindakanPendaftaranTest extends TestCase
             $this->assertStringContainsString('data-surat="1"', $cocok[0],
                 'Status "' . $tulisan . '" mengirim email tetapi tombolnya tidak menandainya, '
                     . 'jadi penegasannya tidak akan menyebut email itu.');
+
+            /*
+             * Penandanya harus TERBACA, bukan sekadar ada di markah.
+             *
+             * Versi pertama cuma glif amplop 11px berwarna abu dengan
+             * keterangan di atribut title — dan title hanya muncul kalau
+             * kursor ditahan di atasnya. Panitia yang hendak memindahkan
+             * status tidak sedang menunggui tooltip; ia menekan. Emailnya
+             * tidak bisa ditarik kembali, jadi tandanya harus terbaca
+             * SEBELUM ditekan.
+             */
+            $this->assertSame(1, preg_match(
+                '#<button[^>]*data-nilai="' . preg_quote(e($nilai), '#') . '"[^>]*>(?<dalam>.*?)</button>#s',
+                $isi, $isiTombol
+            ));
+
+            $this->assertStringContainsString('kirim email', strtolower($isiTombol['dalam']),
+                'Tombol status "' . $tulisan . '" mengirim email tetapi tidak mengatakannya '
+                    . 'dengan kata — penandanya tidak terbaca sebelum ditekan.');
         }
 
         $this->assertTrue($adaYangBersurat,
