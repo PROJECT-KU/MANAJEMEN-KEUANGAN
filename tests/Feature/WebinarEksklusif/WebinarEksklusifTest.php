@@ -1642,7 +1642,7 @@ class WebinarEksklusifTest extends TestCase
      * pendaftaran transfer pasti kedaluwarsa walau uangnya sudah dikirim.
      */
     #[Test]
-    public function transfer_manual_diberi_waktu_jauh_lebih_panjang(): void
+    public function transfer_manual_diberi_waktu_satu_kali_24_jam(): void
     {
         $sesi = $this->sesi();
 
@@ -1655,10 +1655,21 @@ class WebinarEksklusifTest extends TestCase
 
         $this->assertSame('transfer', $p->cara_bayar, 'prasyarat: DOKU belum disetel');
 
-        $jam = now()->diffInHours($p->kedaluwarsa_pada, false);
+        /*
+         * Dipatok TEPAT 1x24 jam, bukan sekadar "lebih panjang dari gerbang".
+         *
+         * Bentuk longgarnya (> 12 jam) lolos juga untuk 13 jam maupun 72 jam,
+         * padahal angkanya dijanjikan kepada peserta di halaman status dan
+         * dipakai hitung mundur yang berjalan di layarnya. Yang dijanjikan
+         * harus yang dijaga.
+         *
+         * Dibandingkan dalam MENIT dengan kelonggaran satu menit: beberapa
+         * detik berlalu antara permintaannya diproses dan baris ini dijalankan.
+         */
+        $menit = now()->diffInMinutes($p->kedaluwarsa_pada, false);
 
-        $this->assertGreaterThan(12, $jam,
-            'batas transfer manual tidak boleh sependek batas gerbang pembayaran');
+        $this->assertEqualsWithDelta(24 * 60, $menit, 1,
+            'Batas transfer manual harus 1x24 jam; itu yang tertulis di halaman status.');
     }
 
     // --------------------------------------------- batas rombongan & email
@@ -2082,5 +2093,59 @@ class WebinarEksklusifTest extends TestCase
         $this->get(route('public.webinareksklusif.daftar', $sesi->id))
             ->assertOk()
             ->assertDontSee('ditambah kode unik', false);
+    }
+
+    #[Test]
+    public function hitung_mundur_di_halaman_status_berjalan_sendiri(): void
+    {
+        /*
+         * Angkanya dulu dirender peladen SEKALI lewat diffForHumans, jadi
+         * "23 jam 59 menit lagi" membeku di layar sampai halamannya dimuat
+         * ulang. Orang yang membuka tautan ini besok paginya tetap membaca
+         * 23 jam — padahal kursinya sudah dilepas semalam.
+         *
+         * Yang dijaga PENANDANYA berikut bentuk tanggalnya; di situlah
+         * skripnya berpegang.
+         */
+        $sesi = $this->sesi();
+
+        $this->post(route('public.webinareksklusif.store'), [
+            'kategori_id' => $sesi->id, 'nama' => 'Mundur', 'email' => 'mundur@contoh.test',
+            'telp' => '08123458888', 'jumlah_pendaftar' => 1, 'setuju' => '1',
+        ]);
+
+        $p = WebinarEksklusifPendaftaran::where('email', 'mundur@contoh.test')->firstOrFail();
+
+        $isi = $this->get(route('public.webinareksklusif.status', $p->getKey()))
+            ->assertOk()
+            ->getContent();
+
+        $ada = preg_match('/<strong data-mis-mundur="(?<batas>[^"]+)"/', $isi, $cocok);
+
+        $this->assertSame(1, $ada,
+            'Penanda hitung mundurnya hilang; angkanya akan membeku tanpa satu pun galat terbit.');
+
+        /*
+         * Selisih zonanya WAJIB ikut tertulis.
+         *
+         * Tanpa "+07:00", peramban menafsirkan angkanya memakai zona waktu
+         * PEMBACANYA — peserta yang membuka dari luar Jakarta melihat sisa
+         * waktu meleset berjam-jam, dan tidak ada yang tahu sampai ada yang
+         * kehilangan kursinya.
+         */
+        $this->assertMatchesRegularExpression('/[+-]\d{2}:\d{2}$/', $cocok['batas'],
+            'Batas waktunya ditulis tanpa selisih zona: ' . $cocok['batas']);
+
+        $this->assertSame(
+            $p->kedaluwarsa_pada->toIso8601String(), $cocok['batas'],
+            'Yang ditulis di halaman bukan batas waktu yang tersimpan.');
+
+        /*
+         * Kalimat dari peladen TETAP ada di dalamnya. Tanpa skrip — peramban
+         * lama, skrip gagal dimuat — yang terbaca harus tetap kalimat yang
+         * masuk akal, bukan kotak kosong.
+         */
+        $this->assertStringContainsString('lagi</strong>', $isi,
+            'Isi awal dari peladen hilang; halaman tanpa skrip akan menampilkan kotak kosong.');
     }
 }
