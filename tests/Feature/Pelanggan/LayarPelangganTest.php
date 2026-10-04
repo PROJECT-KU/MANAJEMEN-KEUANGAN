@@ -791,4 +791,125 @@ class LayarPelangganTest extends TestCase
             }
         }
     }
+
+    #[Test]
+    public function tombol_unduh_pelanggan_membawa_SELURUH_saringannya(): void
+    {
+        /*
+         * Diperiksa dari TAUTAN DI HALAMANNYA, bukan dari peladennya.
+         *
+         * Peladennya sudah menghormati kelima saringan sejak awal, dan kepala
+         * berkasnya pun sudah menyebut semuanya. Yang tidak terjaga: apakah
+         * tombol unduhnya benar-benar MENGIRIMKANNYA. Terukur sebelum
+         * perbaikan, 'pesanan' dan 'baru' tidak ada di tautannya — jadi
+         * menekan ubin "Pernah memesan" lalu Unduh Excel memulangkan SELURUH
+         * pelanggan, tanpa galat, dan kepala berkasnya ikut tidak menyebut
+         * saringan itu karena ia memang tidak pernah sampai.
+         *
+         * Dituntut SETIAP medan, bukan kedua nama itu saja: saringan
+         * berikutnya akan jatuh ke lubang yang sama.
+         */
+        $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        $saringan = [
+            'cari' => 'Budi',
+            'status' => 'aktif',
+            'verifikasi' => 'sudah',
+            'pesanan' => 'ada',
+            'baru' => '30',
+        ];
+
+        $isi = $this->actingAs($admin)
+            ->get(route('account.customer.index', $saringan))
+            ->assertOk()
+            ->getContent();
+
+        $jalur = [
+            'excel' => parse_url(route('account.customer.ekspor.excel'), PHP_URL_PATH),
+            'pdf' => parse_url(route('account.customer.ekspor'), PHP_URL_PATH),
+        ];
+
+        foreach ($jalur as $bentuk => $alamat) {
+            // Jalurnya dicari di mana saja di dalam hrefnya: route()
+            // memulangkan alamat penuh berikut hostnya.
+            $ada = preg_match(
+                '#href="([^"]*' . preg_quote((string) $alamat, '#') . '[^"]*)"#',
+                $isi,
+                $cocok
+            );
+
+            $this->assertSame(1, $ada, 'Tombol Unduh ' . $bentuk . ' tidak ditemukan.');
+
+            // Dibongkar jadi larik, bukan dicari sebagai untaian: tanda & di
+            // markah tertulis &amp; dan urutan medannya tidak dijamin.
+            parse_str((string) parse_url(html_entity_decode($cocok[1]), PHP_URL_QUERY), $medan);
+
+            foreach ($saringan as $nama => $nilai) {
+                $this->assertSame(
+                    $nilai,
+                    $medan[$nama] ?? null,
+                    'Tombol Unduh ' . $bentuk . ' tidak membawa saringan "' . $nama
+                        . '", jadi berkasnya berisi baris yang tidak terlihat di layar.'
+                );
+            }
+        }
+    }
+
+    #[Test]
+    public function mengurutkan_kolom_pelanggan_tidak_melepaskan_saringannya(): void
+    {
+        // Lubang yang sama lewat pintu lain: keempat kepala kolom pengurut
+        // memakai daftar bawaan yang itu juga.
+        $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        /*
+         * Barisnya dibuat sendiri, tidak mengandalkan data yang ada.
+         *
+         * Kepala kolom pengurut hanya ada kalau TABELNYA dirender; saat
+         * saringannya tidak menyisakan siapa pun, layarnya menampilkan keadaan
+         * kosong dan tidak ada satu pun tautan pengurut. Terukur: "pernah
+         * memesan" + "bergabung 30 hari terakhir" menyisakan nol dari 101
+         * pelanggan, jadi ujinya dulu gagal dengan alasan yang salah —
+         * mengabarkan kepala kolomnya hilang, padahal yang hilang barisnya.
+         *
+         * Satu pelanggan yang bergabung hari ini, berikut satu pendaftaran
+         * beremail sama supaya ia terhitung "pernah memesan" — penautannya
+         * lewat nomor, lalu email, lalu nama.
+         */
+        $tanda = substr(preg_replace('/[^A-Za-z]/', '', Str::random(40)) ?? '', 0, 10);
+        $surel = strtolower($tanda) . '@contoh.test';
+
+        $this->akun(User::PERAN_PELANGGAN, [
+            'full_name' => 'Pelanggan ' . $tanda,
+            'email' => $surel,
+        ]);
+
+        \App\PendaftaranScopusCamp::create([
+            'id_transaksi' => 'UJI-URUT-' . $tanda,
+            'kategori_id' => \App\KategoriLayanan::where('layanan', 'scopus_camp')->value('id'),
+            'nama' => 'Pelanggan ' . $tanda,
+            'email' => $surel,
+            'telp' => '081200000000',
+            'jumlah_pendaftar' => 1,
+            'total_pembayaran' => 100000,
+            'cara_bayar' => 'transfer',
+            'status' => 'diproses',
+        ]);
+
+        $isi = $this->actingAs($admin)
+            ->get(route('account.customer.index', ['pesanan' => 'ada', 'baru' => '30']))
+            ->assertOk()
+            ->getContent();
+
+        preg_match('/href="([^"]*urut=nama[^"]*)"/', $isi, $cocok);
+
+        $this->assertNotEmpty($cocok, 'Kepala kolom Pelanggan harus berupa tautan pengurut.');
+
+        parse_str((string) parse_url(html_entity_decode($cocok[1]), PHP_URL_QUERY), $medan);
+
+        $this->assertSame('ada', $medan['pesanan'] ?? null,
+            'Mengurutkan kolom melepaskan saringan "pernah memesan".');
+        $this->assertSame('30', $medan['baru'] ?? null,
+            'Mengurutkan kolom melepaskan saringan "30 hari terakhir".');
+    }
 }

@@ -72,6 +72,31 @@ class PendaftaranLayananController extends Controller
      */
     private const HARI_MENGGANTUNG = 7;
 
+    /**
+     * Nama medan saringan di alamat halaman, SELURUHNYA.
+     *
+     * Daftar ini yang dibawa serta oleh tombol unduh, kepala kolom pengurut,
+     * dan penomoran halaman — jadi ia menentukan apa yang masih terpasang
+     * sesudah orangnya menekan salah satu dari ketiganya.
+     *
+     * Ditaruh di sini, tepat di atas bacaPilihan() yang membaca medan-medan
+     * ini, karena kedua tempat itu WAJIB sepakat dan sebelumnya tidak.
+     * Daftarnya dulu ditulis ulang di dalam markah halaman daftar, dan saat
+     * saringan cara bayar ditambahkan, daftar di markah itu tidak ikut
+     * diperbarui. Akibatnya: menyaring "Transfer bank" lalu menekan Unduh
+     * Excel memulangkan SELURUH cara bayar, dan kepala berkasnya pun tidak
+     * menyebut "Cara bayar" — jadi tidak ada satu pun petunjuk bahwa
+     * saringannya tertinggal. Kegagalan yang paling buruk bentuknya: tidak
+     * ada galat, berkasnya terunduh, hanya isinya yang bukan yang diminta.
+     *
+     * 'urut' dan 'arah' TIDAK di sini. Keduanya bukan saringan, dan kepala
+     * kolom pengurut justru harus boleh menimpanya.
+     */
+    private const MEDAN_SARINGAN = [
+        'cari', 'layanan', 'keadaan', 'bukti', 'bayar',
+        'angkatan', 'dari', 'sampai', 'lama',
+    ];
+
     public function __construct()
     {
         $this->middleware('auth');
@@ -1498,6 +1523,25 @@ class PendaftaranLayananController extends Controller
                 fn ($n) => $n !== '' && $n !== null
             )),
             'adaSaringanLain' => $jumlahLain > 0,
+            /*
+             * Saringan yang sedang terpasang, siap ditempelkan ke tautan.
+             *
+             * Dirakit DI SINI, bukan di markah halamannya: ini satu-satunya
+             * tempat yang tahu medan apa saja yang dimengerti layar ini, dan
+             * merakitnya di tempat lain berarti dua daftar yang harus sepakat
+             * tanpa ada yang memaksanya. Lihat MEDAN_SARINGAN.
+             *
+             * Nilai mentah dari permintaan, BUKAN nilai yang sudah
+             * dibersihkan di atas: nama medannya berbeda ('bayar' vs
+             * 'caraBayar', 'lama' vs 'menggantung'), dan yang harus
+             * ditempelkan ke tautan adalah nama yang dibaca peladen.
+             * Nilai yang tidak sah tetap aman karena ia dibersihkan lagi saat
+             * alamat barunya dibuka.
+             */
+            'bawa' => array_filter(
+                $request->only(self::MEDAN_SARINGAN),
+                fn ($n) => $n !== null && $n !== ''
+            ),
         ];
     }
 
