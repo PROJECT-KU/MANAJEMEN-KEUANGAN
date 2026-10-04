@@ -3990,4 +3990,77 @@ class TindakanPendaftaranTest extends TestCase
         $this->assertStringContainsString('dari 15 nama', $isi,
             'Selisih antara jumlah orang yang dibayar dan nama yang tercatat tidak disebut.');
     }
+
+    #[Test]
+    public function tab_ringkasan_hanya_berisi_kartu_setara(): void
+    {
+        /*
+         * Iramanya pernah pecah: terukur, tiga blok teratas panel ini
+         * mengambang tanpa kartu (deret ubin dan dua nota) sementara dua di
+         * bawahnya berkartu — radius 0/14/14/15/15 dan celah 16/13/14/14.
+         *
+         * Tiap bagiannya sendiri sudah benar, dan justru itu yang membuatnya
+         * sulit ditunjuk: yang salah bukan isinya melainkan tidak adanya
+         * satuan yang seragam. Mata yang membaca sekilas tidak menemukan di
+         * mana satu hal berakhir dan hal berikutnya mulai.
+         *
+         * Yang dijaga: SELURUH anak langsung panel Ringkasan berupa
+         * .rin-bagian. Nota atau ubin yang ditambahkan lagi di luar kartu
+         * akan mengulang pecahnya irama itu.
+         */
+        [$camp] = $this->buat('scopus_camp');
+
+        // Catatannya diisi supaya kartu KETIGA ikut dirender: tanpa itu
+        // panelnya cuma dua kartu, dan uji ini lolos tanpa pernah melihat
+        // bagian yang paling mudah tertinggal saat markahnya disusun ulang.
+        $camp->forceFill(['note' => 'Catatan uji tata letak.'])->save();
+
+        $isi = $this->actingAs($this->akun(User::PERAN_ADMINISTRATOR))
+            ->get(route('account.pendaftaran-layanan.rincian', ['scopus_camp', $camp->getKey()]))
+            ->assertOk()
+            ->getContent();
+
+        /*
+         * Diperiksa lewat DOM, BUKAN lekukan markahnya.
+         *
+         * Percobaan pertama mengenali anak panel dari jumlah spasi di awal
+         * barisnya, dan itu salah: kartu "Jejak & catatan" ada di dalam @if
+         * sehingga lekukannya 28, bukan 24 — jadi ia tidak pernah terhitung
+         * dan ujinya merah pada markah yang sebenarnya benar. Lekukan sumber
+         * tidak pernah jadi pernyataan tentang struktur.
+         */
+        $dom = new \DOMDocument();
+        $sebelumnya = libxml_use_internal_errors(true);
+        $dom->loadHTML('<?xml encoding="utf-8" ?>' . $isi);
+        libxml_clear_errors();
+        libxml_use_internal_errors($sebelumnya);
+
+        $panel = (new \DOMXPath($dom))->query('//*[@id="rin-panel-ringkasan"]')->item(0);
+
+        $this->assertNotNull($panel, 'Panel Ringkasan tidak ketemu.');
+
+        $kelasAnak = [];
+
+        foreach ($panel->childNodes as $simpul) {
+            if ($simpul->nodeType !== XML_ELEMENT_NODE) {
+                continue;
+            }
+
+            $kelasAnak[] = $simpul->getAttribute('class');
+        }
+
+        $this->assertNotEmpty($kelasAnak, 'Tidak ada anak panel yang terbaca.');
+
+        $bukanKartu = array_values(array_filter(
+            $kelasAnak,
+            fn ($k) => ! str_contains($k, 'rin-bagian')
+        ));
+
+        $this->assertSame([], $bukanKartu,
+            'Ada isi tab Ringkasan yang tidak dibungkus kartu, jadi iramanya pecah: '
+                . implode(' | ', $bukanKartu));
+
+        $this->assertGreaterThanOrEqual(3, count($kelasAnak),
+            'Prasyarat ujinya hilang: panel Ringkasan harusnya memuat tiga kartu.');
+    }
 }
