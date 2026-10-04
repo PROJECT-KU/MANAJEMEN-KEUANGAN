@@ -911,6 +911,178 @@ class LayarPendaftaranLayananTest extends TestCase
         $this->assertSame('Transfer bank', $hasil['Cara bayar'] ?? null);
     }
 
+
+    #[Test]
+    public function setiap_saringan_ikut_ke_KEDUA_unduhan(): void
+    {
+        /*
+         * Diadu BERTIGA: jumlah baris di daftar, di lembar kerja, dan di PDF.
+         *
+         * Dua uji di atas menjaga TAUTANNYA membawa saringan, dan satu lagi
+         * menjaga isi lembar kerja menyusut. Yang belum dijaga: apakah SETIAP
+         * saringan benar-benar sampai ke KEDUA berkas. Menambal satu-dua
+         * saringan yang kebetulan dilaporkan tidak menyelesaikan apa pun —
+         * yang berikutnya akan jatuh ke lubang yang sama, dan diamnya
+         * sempurna: berkasnya terunduh, tidak ada galat, hanya isinya yang
+         * bukan yang diminta.
+         *
+         * Yang dituntut KESAMAAN, bukan "lebih sedikit". Saringan yang
+         * kebetulan mencakup semua baris memang harus memulangkan semuanya,
+         * dan uji yang menuntut penyusutan akan merah karena datanya, bukan
+         * karena kodenya. Daftar di layar jadi acuannya, sebab itulah yang
+         * dilihat orang sebelum menekan Unduh.
+         *
+         * Penyusutannya sendiri dijaga uji
+         * isi_lembar_kerja_benar_benar_menyusut_mengikuti_saringannya.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan();
+
+        $kasus = [
+            'cari' => ['cari' => 'a'],
+            'layanan' => ['layanan' => 'webinar_eksklusif'],
+            'keadaan' => ['keadaan' => 'lunas'],
+            'keadaan lain' => ['keadaan' => 'lain'],
+            'bukti' => ['bukti' => 'belum'],
+            'bayar' => ['bayar' => 'tunai'],
+            'angkatan' => ['angkatan' => (string) $angkatan->id],
+            'dari' => ['dari' => '2026-01-01'],
+            'sampai' => ['sampai' => '2026-06-30'],
+            'lama' => ['lama' => '1'],
+            // Bergabung: saringan yang bekerja sendiri-sendiri belum tentu
+            // bekerja bersama, dan beginilah orang memakainya.
+            'gabungan' => ['layanan' => 'scopus_camp', 'keadaan' => 'lunas', 'bukti' => 'ada'],
+        ];
+
+        foreach ($kasus as $nama => $q) {
+            $diDaftar = $this->actingAs($orang)
+                ->get(route('account.pendaftaran-layanan.index', $q))
+                ->assertOk()
+                ->viewData('baris')
+                ->total();
+
+            $diExcel = $this->barisLembarKerja($orang, $q);
+            $diPdf = $this->barisPdf($orang, $q);
+
+            $this->assertSame($diDaftar, $diExcel,
+                'Saringan "' . $nama . '": daftar ' . $diDaftar . ' baris, lembar kerja '
+                    . $diExcel . '. Berkasnya berisi baris yang tidak terlihat di layar.');
+
+            $this->assertSame($diDaftar, $diPdf,
+                'Saringan "' . $nama . '": daftar ' . $diDaftar . ' baris, PDF ' . $diPdf . '.');
+        }
+    }
+
+    /**
+     * Jumlah baris di lembar kerja untuk satu kumpulan saringan.
+     *
+     * Lewat Excel::fake(), bukan dengan membongkar berkas xlsx: yang perlu
+     * diperiksa jumlah barisnya, dan obyek ekspornya sudah memegangnya.
+     */
+    private function barisLembarKerja(User $orang, array $q): int
+    {
+        Excel::fake();
+
+        $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.excel', $q))
+            ->assertOk();
+
+        $jumlah = -1;
+
+        Excel::assertDownloaded(
+            'pendaftar-layanan-' . now()->format('Y-m-d-Hi') . '.xlsx',
+            function (PendaftaranLayananExport $ekspor) use (&$jumlah) {
+                $jumlah = count($ekspor->array());
+
+                return true;
+            }
+        );
+
+        return $jumlah;
+    }
+
+    /**
+     * Jumlah baris di PDF untuk satu kumpulan saringan.
+     *
+     * Isi PDF-nya terkompresi dan tidak bisa dihitung dari berkasnya, jadi
+     * yang ditangkap adalah data yang DISERAHKAN ke templatnya — tepat
+     * sebelum Dompdf merakitnya. Kalau saringannya tidak sampai ke sini, ia
+     * juga tidak sampai ke berkasnya.
+     */
+    private function barisPdf(User $orang, array $q): int
+    {
+        $terkumpul = null;
+
+        \Illuminate\Support\Facades\View::composer(
+            'account.pendaftaran_layanan.ekspor-pdf',
+            function ($view) use (&$terkumpul) {
+                $terkumpul = $view->getData();
+            }
+        );
+
+        $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.pdf', $q))
+            ->assertOk();
+
+        $this->assertNotNull($terkumpul, 'Templat PDF tidak pernah dirakit.');
+
+        return $terkumpul['baris']->count();
+    }
+
+
+    #[Test]
+    public function saringan_baru_tidak_bisa_lupa_didaftarkan(): void
+    {
+        /*
+         * Penjaga paling awal: menangkap saringan BARU pada saat ia ditambahkan.
+         *
+         * Uji-uji di atas mengadu jumlah baris untuk saringan yang sudah ada.
+         * Semuanya hijau — dan tetap hijau kalau besok ada medan baru di
+         * borang saringan yang tidak didaftarkan ke MEDAN_SARINGAN. Persis
+         * begitulah 'bayar' dulu lolos: borangnya mengirimnya, peladennya
+         * menyaringnya, hanya tautan unduhnya yang tidak membawanya.
+         *
+         * Jadi yang diadu di sini DAFTARNYA, bukan hasilnya: tiap medan di
+         * borang saringan harus terdaftar, kecuali yang memang bukan saringan.
+         */
+        $medanBukanSaringan = [
+            // Keduanya menentukan URUTAN, bukan isi. Kepala kolom pengurut
+            // justru harus boleh menimpanya, jadi ia sengaja di luar daftar.
+            'urut', 'arah',
+            // Menu urutan gabungan khusus ponsel; nilainya dipecah jadi
+            // urut+arah oleh skrip sebelum borangnya dikirim.
+            'urutgabung',
+        ];
+
+        $sumber = file_get_contents(resource_path('views/account/pendaftaran_layanan/index.blade.php'));
+
+        $this->assertSame(1, preg_match(
+            '/<form method="GET"(?<isi>.*?)<\/form>/s', $sumber, $cocok
+        ), 'Borang saringan tidak ketemu di tampilan daftarnya.');
+
+        preg_match_all('/\bname="([a-z_]+)"/', $cocok['isi'], $medan);
+
+        $terdaftar = (new \ReflectionClass(
+            \App\Http\Controllers\account\PendaftaranLayananController::class
+        ))->getReflectionConstant('MEDAN_SARINGAN')->getValue();
+
+        $belum = array_values(array_diff(array_unique($medan[1]), $terdaftar, $medanBukanSaringan));
+
+        $this->assertSame([], $belum,
+            'Medan saringan ini ada di borangnya tetapi tidak terdaftar di MEDAN_SARINGAN, '
+                . 'jadi tombol unduh dan kepala kolom pengurut akan melepaskannya diam-diam: '
+                . implode(', ', $belum));
+
+        // Arah sebaliknya: nama yang terdaftar tetapi tidak ada kendalinya di
+        // layar adalah saringan yang tidak bisa dipakai siapa pun kecuali
+        // dengan mengetik sendiri di bilah alamat.
+        $tanpaKendali = array_values(array_diff($terdaftar, array_unique($medan[1])));
+
+        $this->assertSame([], $tanpaKendali,
+            'Terdaftar di MEDAN_SARINGAN tetapi tidak punya kendali di layarnya: '
+                . implode(', ', $tanpaKendali));
+    }
+
     // ---------------------------------------------------------------- menu
 
     #[Test]

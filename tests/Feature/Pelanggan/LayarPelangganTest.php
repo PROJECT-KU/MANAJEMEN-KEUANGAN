@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\RateLimiter;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Str;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -911,5 +912,103 @@ class LayarPelangganTest extends TestCase
             'Mengurutkan kolom melepaskan saringan "pernah memesan".');
         $this->assertSame('30', $medan['baru'] ?? null,
             'Mengurutkan kolom melepaskan saringan "30 hari terakhir".');
+    }
+
+    #[Test]
+    public function setiap_saringan_pelanggan_ikut_ke_KEDUA_unduhan(): void
+    {
+        /*
+         * Sama seperti di layar Pendaftar Layanan: jumlah baris di daftar, di
+         * lembar kerja, dan di PDF diadu bertiga untuk SETIAP saringan.
+         *
+         * Layar ini punya lima saringan, dan dua di antaranya — "pernah
+         * memesan" dan "30 hari terakhir" — memang pernah tidak sampai ke
+         * unduhannya sama sekali. Menambal keduanya saja tidak cukup: yang
+         * dijaga di sini kelimanya, supaya saringan berikutnya tidak jatuh ke
+         * lubang yang sama.
+         *
+         * Yang dituntut KESAMAAN, bukan penyusutan: saringan yang kebetulan
+         * mencakup semua pelanggan memang harus memulangkan semuanya, dan
+         * uji yang menuntut penyusutan akan merah karena datanya.
+         */
+        $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        $kasus = [
+            'cari' => ['cari' => 'a'],
+            'status aktif' => ['status' => 'aktif'],
+            'status nonaktif' => ['status' => 'nonaktif'],
+            'verifikasi sudah' => ['verifikasi' => 'sudah'],
+            'verifikasi belum' => ['verifikasi' => 'belum'],
+            'pernah memesan' => ['pesanan' => 'ada'],
+            'bergabung 30 hari' => ['baru' => '30'],
+            'gabungan' => ['status' => 'aktif', 'pesanan' => 'ada', 'baru' => '30'],
+        ];
+
+        foreach ($kasus as $nama => $q) {
+            $diDaftar = $this->actingAs($admin)
+                ->get(route('account.customer.index', $q))
+                ->assertOk()
+                ->viewData('pelanggan')
+                ->total();
+
+            $diExcel = $this->barisLembarKerjaPelanggan($admin, $q);
+            $diPdf = $this->barisPdfPelanggan($admin, $q);
+
+            $this->assertSame($diDaftar, $diExcel,
+                'Saringan "' . $nama . '": daftar ' . $diDaftar . ' baris, lembar kerja '
+                    . $diExcel . '. Berkasnya berisi pelanggan yang tidak terlihat di layar.');
+
+            $this->assertSame($diDaftar, $diPdf,
+                'Saringan "' . $nama . '": daftar ' . $diDaftar . ' baris, PDF ' . $diPdf . '.');
+        }
+    }
+
+    /**
+     * Jumlah baris lembar kerja pelanggan untuk satu kumpulan saringan.
+     *
+     * Namanya dicocokkan lewat pola, bukan nama persis: berkasnya berpenanda
+     * waktu sampai DETIK, jadi nama yang dirakit ulang di dalam uji bisa
+     * meleset satu detik dan ujinya merah tanpa ada yang rusak.
+     */
+    private function barisLembarKerjaPelanggan(User $admin, array $q): int
+    {
+        Excel::fake();
+        Excel::matchByRegex();
+
+        $this->actingAs($admin)
+            ->get(route('account.customer.ekspor.excel', $q))
+            ->assertOk();
+
+        $jumlah = -1;
+
+        Excel::assertDownloaded('/^data-pelanggan-\d{8}-\d{6}\.xlsx$/',
+            function ($ekspor) use (&$jumlah) {
+                $jumlah = count($ekspor->array());
+
+                return true;
+            });
+
+        return $jumlah;
+    }
+
+    /** Jumlah baris PDF pelanggan, ditangkap sebelum Dompdf merakitnya. */
+    private function barisPdfPelanggan(User $admin, array $q): int
+    {
+        $terkumpul = null;
+
+        \Illuminate\Support\Facades\View::composer(
+            'account.customer.ekspor-pdf',
+            function ($view) use (&$terkumpul) {
+                $terkumpul = $view->getData();
+            }
+        );
+
+        $this->actingAs($admin)
+            ->get(route('account.customer.ekspor', $q))
+            ->assertOk();
+
+        $this->assertNotNull($terkumpul, 'Templat PDF pelanggan tidak pernah dirakit.');
+
+        return $terkumpul['pelanggan']->count();
     }
 }
