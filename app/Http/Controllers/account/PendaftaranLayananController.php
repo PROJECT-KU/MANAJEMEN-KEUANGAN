@@ -562,7 +562,7 @@ class PendaftaranLayananController extends Controller
      * Kuota tiap angkatan 20 kursi sedangkan lembaga rutin memesan lebih,
      * jadi pesanannya terpaksa dipecah ke beberapa angkatan. Faktur inilah
      * yang menyatukannya kembali: satu halaman, satu jumlah akhir, satu
-     * identitas lembaga beserta NPWP dan nomor PO-nya.
+     * identitas lembaga beserta NPWP dan nomor surat pesanannya.
      *
      * Halaman bergaya cetak, bukan PDF — alasannya sama seperti slip:
      * membuat PDF di peladen menambah satu kemungkinan gagal, dan Ctrl+P

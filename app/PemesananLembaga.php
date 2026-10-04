@@ -23,6 +23,12 @@ class PemesananLembaga extends Model
     public const TERBUKA = 'terbuka';
     public const SELESAI = 'selesai';
 
+    /*
+     * `no_po` menyimpan NOMOR SURAT PESANAN lembaganya (purchase order).
+     * Nama kolomnya dibiarkan apa adanya: mengganti nama kolom menuntut
+     * migrasi tersendiri, sedangkan yang membingungkan hanya kata di layar —
+     * dan itu sudah diganti.
+     */
     protected $fillable = [
         'kode', 'nama_lembaga', 'alamat', 'npwp', 'no_po',
         'pic_nama', 'pic_email', 'pic_telp', 'catatan', 'dibuat_oleh', 'status',
