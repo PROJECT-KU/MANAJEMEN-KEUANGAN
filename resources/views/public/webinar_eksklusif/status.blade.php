@@ -117,10 +117,12 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                  lolos begitu saja. Halaman publik memakai Font Awesome 5, dan
                  nama FA6 tidak merender apa pun TANPA galat sama sekali. --}}
             @php($rupa = $lunas
-                ? ['hijau', 'fa-check-circle']
+                ? ['hijau', 'fa-check-circle', '']
                 : (($habis || $batal)
-                    ? ['merah', 'fa-times-circle']
-                    : ($menunggu ? ['hijau', 'fa-check-circle'] : ['kuning', 'fa-hourglass-half'])))
+                    ? ['merah', 'fa-times-circle', '']
+                    : ($menunggu
+                        ? ['hijau', 'fa-check-circle', '']
+                        : ['kuning', 'fa-hourglass-half', 'sta-ubin-menanti'])))
             {{-- Ikon, judul, dan kalimat pembukanya dibungkus satu kepala.
 
                  Bertumpuk di tengah, ketiganya memakan 184px sebelum isi
@@ -129,7 +131,7 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                  jadi satu baris; di ponsel tetap bertumpuk di tengah, sebab
                  di sana lebarnya yang langka, bukan tingginya. --}}
             <div class="sta-kepala @if ($ringkas) sta-kepala-tengah @endif">
-                <span class="sta-ubin sta-ubin-{{ $rupa[0] }}" aria-hidden="true">
+                <span class="{{ trim('sta-ubin sta-ubin-' . $rupa[0] . ' ' . $rupa[2]) }}" aria-hidden="true">
                     <i class="fas {{ $rupa[1] }}"></i>
                 </span>
 
@@ -877,6 +879,49 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
     .sta-ubin-hijau { background: linear-gradient(135deg, #10b981, #059669); }
     .sta-ubin-kuning { background: linear-gradient(135deg, #f59e0b, #d97706); }
     .sta-ubin-merah { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+
+    /* Jam pasir ini satu-satunya ikon di halaman yang menunjuk pekerjaan yang
+       BELUM selesai: ikon lainnya (centang, silang) menandai keadaan yang
+       sudah berhenti, jadi hanya yang ini yang bergerak. Diam atau bergerak
+       sama-sama benar artinya; yang bergerak dipilih karena di atasnya ada
+       hitung mundur yang berdetak, dan ikon beku di sebelah angka berjalan
+       terbaca seperti halaman yang macet.
+
+       Ia BERPUTAR SEARAH terus, 0 -> 180 -> 360, bukan bolak-balik. Kalau
+       diputar balik ke 0, gerakan pulangnya terlihat sebagai jam pasir yang
+       dibalik dua kali untuk satu giliran pasir -- salah secara benda.
+
+       Dari 5 detik satu putaran, 4,2 detik dipakai DIAM (2,1 detik tegak,
+       2,1 detik terbalik) dan hanya 0,8 detik untuk dua kali balik. Perbandingan
+       itu yang membuatnya terbaca sebagai jam pasir yang sedang menunggu, bukan
+       sebagai ikon yang berputar-putar. */
+    .sta-ubin-menanti > .fas {
+        animation: sta-jam-balik 5s cubic-bezier(.65, 0, .35, 1) infinite;
+    }
+
+    @keyframes sta-jam-balik {
+        0%, 42%  { transform: rotate(0deg); }
+        50%, 92% { transform: rotate(180deg); }
+        100%     { transform: rotate(360deg); }
+    }
+
+    /* Halo yang mengembang pas di detik baliknya, lalu habis. Ukurannya
+       berhenti di 10px supaya tidak menyenggol judul di sebelahnya saat
+       kepalanya sebaris (di layar >= 992px jaraknya 16px). */
+    .sta-ubin-menanti {
+        animation: sta-ubin-denyut 5s ease-out infinite;
+    }
+
+    @keyframes sta-ubin-denyut {
+        0%, 36%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, .5); }
+        50%           { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
+    }
+
+    /* Gerakan berulang tanpa henti termasuk yang dimatikan setelan ini. */
+    @media (prefers-reduced-motion: reduce) {
+        .sta-ubin-menanti,
+        .sta-ubin-menanti > .fas { animation: none !important; }
+    }
 
     .sta-judul {
         margin: 0 0 10px;
