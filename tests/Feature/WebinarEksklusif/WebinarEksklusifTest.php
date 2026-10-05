@@ -2344,4 +2344,129 @@ class WebinarEksklusifTest extends TestCase
                 'Keterangan format terlalu panjang untuk lajur sempit: "' . $teks . '"');
         }
     }
+
+    #[Test]
+    public function nomor_yang_sama_dengan_email_berbeda_tidak_memotong_kuota_dua_kali(): void
+    {
+        /*
+         * Terukur sebelum penjaga ini diperluas: nomor yang sama dengan email
+         * berbeda menghasilkan DUA pendaftaran dan memotong kuota DUA KALI
+         * (20 -> 18), sementara email yang sama hanya satu (20 -> 19).
+         *
+         * Satu orang yang salah ketik emailnya, atau memakai email keduanya,
+         * menahan dua kursi sampai yang lama kedaluwarsa sendiri — dan yang
+         * dipakai panitia untuk mencocokkan transfer justru nomornya.
+         */
+        $sesi = $this->sesi(['total_kuota' => '20', 'sisa_kuota' => '20']);
+
+        $dasar = [
+            'kategori_id' => $sesi->id, 'nama' => 'Berto Juni Krisnanto',
+            'telp' => '0895421735441', 'jumlah_pendaftar' => 1, 'setuju' => '1',
+        ];
+
+        $this->post(route('public.webinareksklusif.store'), $dasar + ['email' => 'berto@contoh.test']);
+
+        $pertama = WebinarEksklusifPendaftaran::where('email', 'berto@contoh.test')->firstOrFail();
+
+        // Nomor SAMA, email BEDA, dan ditulis dalam bentuk lain (0895 vs 62895).
+        $jawab = $this->post(route('public.webinareksklusif.store'),
+            $dasar + ['email' => 'berto.lain@contoh.test']);
+
+        $this->assertSame(1,
+            WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)->count(),
+            'Pendaftaran keduanya tetap dibuat; kursinya terpotong dua kali.');
+
+        $this->assertSame(19, (int) $sesi->fresh()->sisa_kuota,
+            'Kuotanya terpotong lebih dari sekali untuk satu orang.');
+
+        // Diantar ke pendaftaran yang LAMA, bukan dibuatkan yang baru.
+        $jawab->assertRedirect(route('public.webinareksklusif.status', $pertama->getKey()));
+    }
+
+    #[Test]
+    public function pendaftar_yang_diantar_balik_tidak_disambut_pita_merah(): void
+    {
+        /*
+         * Ia tidak berbuat salah — pendaftarannya memang ada dan masih
+         * berlaku. Pita merah di layar orang yang tidak bersalah membuatnya
+         * mengira pendaftarannya gagal, lalu ia mencoba lagi; justru itu yang
+         * hendak dihentikan.
+         */
+        $sesi = $this->sesi(['total_kuota' => '20', 'sisa_kuota' => '20']);
+
+        $dasar = [
+            'kategori_id' => $sesi->id, 'nama' => 'Berto', 'telp' => '0895421735441',
+            'jumlah_pendaftar' => 1, 'setuju' => '1',
+        ];
+
+        $this->post(route('public.webinareksklusif.store'), $dasar + ['email' => 'a@contoh.test']);
+
+        $this->post(route('public.webinareksklusif.store'), $dasar + ['email' => 'b@contoh.test'])
+            ->assertSessionHas('kabar')
+            ->assertSessionMissing('error');
+
+        /*
+         * Kalimatnya menyebut YANG MANA yang cocok. "Email itu sudah
+         * terdaftar" pada orang yang justru memakai email baru terbaca seperti
+         * sistem yang salah, dan ia akan mencoba lagi dengan email ketiga.
+         */
+        $this->assertStringContainsString('Nomor WhatsApp', session('kabar'));
+    }
+
+    #[Test]
+    public function email_yang_sama_tetap_dijaga_seperti_sebelumnya(): void
+    {
+        // Jalur lama tidak boleh ikut rusak saat penjaganya diperluas.
+        $sesi = $this->sesi(['total_kuota' => '20', 'sisa_kuota' => '20']);
+
+        $dasar = [
+            'kategori_id' => $sesi->id, 'nama' => 'Siti', 'email' => 'siti@contoh.test',
+            'telp' => '08123450001', 'jumlah_pendaftar' => 1, 'setuju' => '1',
+        ];
+
+        $this->post(route('public.webinareksklusif.store'), $dasar);
+
+        // Nomor BEDA, email sama.
+        $this->post(route('public.webinareksklusif.store'), $dasar + ['telp' => '08123450002'])
+            ->assertSessionHas('kabar');
+
+        $this->assertSame(1, WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)->count());
+        $this->assertStringContainsString('Email', session('kabar'));
+    }
+
+    #[Test]
+    public function pendaftaran_yang_sudah_kedaluwarsa_tidak_menghalangi_pendaftaran_baru(): void
+    {
+        /*
+         * Penjaganya hanya berlaku selama pendaftaran lamanya MASIH BERLAKU.
+         * Berlaku juga untuk yang sudah kedaluwarsa, orang yang kelewat batas
+         * waktu tidak akan pernah bisa mendaftar ulang dengan nomornya
+         * sendiri.
+         *
+         * Yang dijaga PERILAKUNYA, bukan satu baris tertentu: ada DUA
+         * mekanisme yang sama-sama mencukupi — kursi kedaluwarsa dilepas lebih
+         * dulu (statusnya jadi 'expired', lalu tersaring whereIn status), dan
+         * klausa kedaluwarsa_pada > now(). Dicopot salah satu, uji ini tetap
+         * hijau; dicopot keduanya, barulah merah. Itu memang disengaja — dan
+         * dicatat di sini supaya tidak ada yang mengira salah satunya mubazir
+         * lalu membuangnya tanpa menyadari yang satunya ikut menanggung.
+         */
+        $sesi = $this->sesi(['total_kuota' => '20', 'sisa_kuota' => '20']);
+
+        $dasar = [
+            'kategori_id' => $sesi->id, 'nama' => 'Lewat', 'email' => 'lewat@contoh.test',
+            'telp' => '08123450003', 'jumlah_pendaftar' => 1, 'setuju' => '1',
+        ];
+
+        $this->post(route('public.webinareksklusif.store'), $dasar);
+
+        $lama = WebinarEksklusifPendaftaran::where('email', 'lewat@contoh.test')->firstOrFail();
+        $lama->forceFill(['kedaluwarsa_pada' => now()->subHour()])->save();
+
+        $this->post(route('public.webinareksklusif.store'),
+            $dasar + ['email' => 'lewat2@contoh.test'])->assertRedirect();
+
+        $this->assertSame(2, WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)->count(),
+            'Yang batas waktunya sudah lewat ikut menghalangi pendaftaran baru.');
+    }
 }

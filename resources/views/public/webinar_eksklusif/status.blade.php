@@ -54,6 +54,20 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
             </div>
         @endif
 
+        {{-- 'kabar' BUKAN 'error'.
+
+             Dipakai saat pendaftar diantar ke sini karena sudah punya
+             pendaftaran yang sama. Ia tidak berbuat salah — pendaftarannya
+             memang ada dan masih berlaku — dan pita merah di layar orang yang
+             tidak bersalah membuatnya mengira pendaftarannya gagal, lalu
+             mencoba lagi. Justru itu yang hendak dihentikan. --}}
+        @if (session('kabar'))
+            <div class="sta-kabar" role="status">
+                <i class="fas fa-info-circle" aria-hidden="true"></i>
+                <span>{{ session('kabar') }}</span>
+            </div>
+        @endif
+
         @if (session('sukses'))
             <div class="sta-sukses" role="status">
                 <i class="fas fa-check-circle" aria-hidden="true"></i>
@@ -562,7 +576,8 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
     .sta-kisi { display: block; }
 
     .sta-galat,
-    .sta-sukses {
+    .sta-sukses,
+    .sta-kabar {
         display: flex;
         align-items: flex-start;
         gap: 10px;
@@ -583,6 +598,17 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
         background: #ecfdf5;
         color: #065f46;
     }
+
+    /* Nila, bukan merah maupun hijau: ini kabar, bukan kesalahan dan bukan
+       keberhasilan. Warnanya sengaja menyamai kotak tawaran buat akun —
+       dua-duanya keterangan yang tidak menuntut apa pun seketika. */
+    .sta-kabar {
+        border: 1px solid #c7d2fe;
+        background: #eef2ff;
+        color: #3730a3;
+    }
+
+    .sta-kabar > .fas { margin: 2px 0 0 !important; }
 
     .sta-galat > .fas,
     .sta-sukses > .fas { margin: 0 !important; margin-top: 2px !important; }
