@@ -2757,13 +2757,17 @@ class WebinarEksklusifTest extends TestCase
     }
 
     #[Test]
-    public function kepala_layar_ringkas_terpusat_dengan_sub_judul_di_bawahnya(): void
+    public function kepala_kedua_layar_sama_bentuknya(): void
     {
         /*
-         * Di layar penuh kalimatnya menemani judul di baris yang sama supaya
-         * hemat tinggi — di sana ia pengantar menuju langkah berikutnya. Di
-         * layar ringkas tidak ada langkah berikutnya, yang ada cuma kabar,
-         * jadi kalimatnya berdiri sebagai sub judul di bawah judulnya.
+         * Kepala layar penuh dan layar ringkas dulu BERBEDA bentuk: yang
+         * ringkas dipusatkan dengan kalimatnya turun jadi sub judul, yang
+         * penuh sebaris di kiri. Bedanya dijaga satu pengubah kelas, dan
+         * pengubah itu harus dirawat di markah, di CSS, dan di dua uji yang
+         * saling bertolak belakang.
+         *
+         * Keduanya kini satu bentuk, jadi pengubahnya dibuang. Yang dijaga:
+         * tidak ada lagi pengubah yang bisa membuat keduanya menyimpang.
          */
         $sesi = $this->sesi(['total_kuota' => '20', 'sisa_kuota' => '20']);
 
@@ -2783,13 +2787,21 @@ class WebinarEksklusifTest extends TestCase
 
         preg_match('/<div class="(sta-kepala[^"]*)"/', $isi, $cocok);
 
-        $this->assertStringContainsString('sta-kepala-tengah', $cocok[1] ?? '',
-            'Judulnya tidak dipusatkan di layar ringkas.');
+        $this->assertSame('sta-kepala', $cocok[1] ?? '',
+            'Kepala layar ringkas memakai pengubah lagi; bentuknya bisa menyimpang dari layar penuh.');
+
+        $this->assertSame(0, substr_count($isi, 'sta-kepala-tengah'),
+            'Pengubah terpusatnya hidup lagi.');
     }
 
     #[Test]
-    public function kepala_layar_penuh_tidak_ikut_terpusat(): void
+    public function kepala_layar_penuh_ikut_terpusat(): void
     {
+        /*
+         * Penjaganya di SUMBER, bukan di markah: terpusatnya datang dari CSS
+         * sekarang, bukan dari kelas yang ditempelkan per keadaan. Markahnya
+         * sendiri sudah tidak bisa membedakan kedua layar.
+         */
         $sesi = $this->sesi(['total_kuota' => '20', 'sisa_kuota' => '20']);
 
         $this->post(route('public.webinareksklusif.store'), $this->borang($sesi));
@@ -2802,8 +2814,25 @@ class WebinarEksklusifTest extends TestCase
 
         preg_match('/<div class="(sta-kepala[^"]*)"/', $isi, $cocok);
 
-        $this->assertStringNotContainsString('sta-kepala-tengah', $cocok[1] ?? '',
-            'Layar penuh ikut dipusatkan; kalimatnya jadi turun dan menambah tinggi.');
+        $this->assertSame('sta-kepala', $cocok[1] ?? '', 'Pembungkus kepalanya berubah.');
+
+        $aturan = preg_replace('#/\*.*?\*/#s', '', file_get_contents(
+            resource_path('views/public/webinar_eksklusif/status.blade.php')
+        ));
+        $aturan = (string) preg_replace('#\{\{--.*?--\}\}#s', '', (string) $aturan);
+
+        $ada = preg_match('/@media\s*\(min-width:\s*992px\)\s*\{.*?\.sta-kepala\s*\{(?<isi>[^}]*)\}/s', $aturan, $kepala);
+
+        $this->assertSame(1, $ada, 'Aturan kepala di layar lebar hilang.');
+
+        $this->assertStringContainsString('justify-content: center', $kepala['isi'],
+            'Judulnya tidak lagi dipusatkan di layar lebar.');
+
+        $this->assertStringContainsString('text-align: center', $kepala['isi'],
+            'Teks kepalanya tidak lagi dipusatkan.');
+
+        $this->assertStringContainsString('flex-wrap: wrap', $kepala['isi'],
+            'Tanpa pembungkusan, kalimatnya tidak bisa turun jadi sub judul.');
     }
 
     #[Test]
@@ -2827,9 +2856,19 @@ class WebinarEksklusifTest extends TestCase
         $aturan = preg_replace('#/\*.*?\*/#s', '', $sumber);
         $aturan = preg_replace('#\{\{--.*?--\}\}#s', '', (string) $aturan);
 
-        $ada = preg_match('/\.sta-kepala-tengah\s*>\s*\.sta-sub\s*\{(?<isi>[^}]*)\}/', (string) $aturan, $cocok);
+        /*
+         * [^,] di depan WAJIB. Pemilih yang sama juga jadi anggota daftar
+         * gabungan beberapa baris di atasnya:
+         *
+         *     .sta-kepala > .sta-judul,
+         *     .sta-kepala > .sta-sub { max-width: none; ... }
+         *
+         * Tanpa penjaga itu, yang terbaca aturan gabungan tadi — dan ujinya
+         * merah pada berkas yang justru benar.
+         */
+        $ada = preg_match('/[^,]\s*\n\s*\.sta-kepala\s*>\s*\.sta-sub\s*\{(?<isi>[^}]*)\}/', (string) $aturan, $cocok);
 
-        $this->assertSame(1, $ada, 'Aturan sub judul layar ringkas hilang.');
+        $this->assertSame(1, $ada, 'Aturan sub judulnya hilang.');
 
         $this->assertStringContainsString('flex: 1 0 100%', $cocok['isi'],
             'Sub judulnya tidak lagi dipaksa turun ke baris sendiri.');
