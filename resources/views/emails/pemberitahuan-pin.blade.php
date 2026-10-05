@@ -45,7 +45,7 @@
                     {{-- logo (utuh, hanya diperkecil) --}}
                     <tr>
                         <td align="center" style="padding:30px 32px 6px">
-                            <img src="{{ $message->embed(public_path('assets/img/logo-email.png')) }}"
+                            <img src="{{ asset('assets/img/logo-email.png') }}"
                                 alt="MIS — Management Integration System by Rumah Scopus" width="190"
                                 style="display:block;border:0;width:190px;max-width:60%;height:auto">
                         </td>

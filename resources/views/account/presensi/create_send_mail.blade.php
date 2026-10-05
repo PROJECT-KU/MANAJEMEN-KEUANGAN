@@ -20,7 +20,7 @@
                 <div class="row">
                     <div class="col-12 col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-8 offset-lg-2 col-xl-8 offset-xl-2">
                         <div style="text-align: center;" class="login-brand">
-                            <a href="https://rumahscopusfoundation.com/"> <img src="{{ $message->embed(public_path('assets/img/logo-email.png')) }}"
+                            <a href="https://rumahscopusfoundation.com/"> <img src="{{ asset('assets/img/logo-email.png') }}"
                                     alt="MIS — Management Integration System by Rumah Scopus" width="190"
                                     style="display:block;border:0;width:190px;max-width:60%;height:auto"></a>
                         </div>

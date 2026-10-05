@@ -16,7 +16,7 @@
     // Logo DISISIPKAN sebagai lampiran, bukan ditautkan ke peladen. Gmail dan
     // Outlook memblokir gambar jauh secara bawaan, jadi logo bertautan muncul
     // sebagai kotak kosong sampai orangnya menekan "tampilkan gambar".
-    $logo = $message->embed(public_path('assets/img/logo-rsc-email.png'));
+    $logo = asset('assets/img/logo-rsc-email.png');
     $belumBayar = ! $pendaftaran->lunas;
 @endphp
 <!DOCTYPE html>
