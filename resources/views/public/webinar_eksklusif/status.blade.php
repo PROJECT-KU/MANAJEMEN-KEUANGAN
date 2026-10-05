@@ -78,41 +78,51 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                 : (($habis || $batal)
                     ? ['merah', 'fa-times-circle']
                     : ($menunggu ? ['hijau', 'fa-check-circle'] : ['kuning', 'fa-hourglass-half'])))
-            <span class="sta-ubin sta-ubin-{{ $rupa[0] }}" aria-hidden="true">
-                <i class="fas {{ $rupa[1] }}"></i>
-            </span>
+            {{-- Ikon, judul, dan kalimat pembukanya dibungkus satu kepala.
 
-            <h1 class="sta-judul">
-                @if ($lunas)
-                    Pendaftaran Anda sudah lunas
-                @elseif ($batal)
-                    Pendaftaran ini dibatalkan
-                @elseif ($habis)
-                    Batas waktu pembayarannya sudah lewat
-                @elseif ($menunggu)
-                    Bukti pembayaran Anda sudah masuk
-                @else
-                    Pendaftaran Anda sudah masuk
-                @endif
-            </h1>
+                 Bertumpuk di tengah, ketiganya memakan 184px sebelum isi
+                 pertamanya terlihat — di layar 846px itu seperlima layar
+                 habis untuk sapaan. Di layar lebar ketiganya disejajarkan
+                 jadi satu baris; di ponsel tetap bertumpuk di tengah, sebab
+                 di sana lebarnya yang langka, bukan tingginya. --}}
+            <div class="sta-kepala">
+                <span class="sta-ubin sta-ubin-{{ $rupa[0] }}" aria-hidden="true">
+                    <i class="fas {{ $rupa[1] }}"></i>
+                </span>
 
-            <p class="sta-sub">
-                @if ($lunas)
-                    Sampai jumpa di kelas. Tautan masuk dikirim ke
-                    <strong>{{ $pendaftaran->email }}</strong> paling lambat sehari sebelum acara.
-                @elseif ($batal || $habis)
-                    Kursinya sudah dilepas kembali. Silakan daftar ulang kalau masih ingin ikut.
-                @elseif ($menunggu)
-                    {{-- Kalimat terpentingnya: TIDAK ADA LAGI yang harus ia
-                         kerjakan. Tanpa itu orang menunggu sambil menduga-duga
-                         apakah ada langkah yang terlewat. --}}
-                    Panitia memeriksanya pada jam kerja.
-                    <strong>Anda tidak perlu mengirim apa pun lagi.</strong>
-                    Kursi Anda ditahan sampai pemeriksaannya selesai.
-                @else
-                    Tinggal satu langkah: selesaikan pembayarannya.
-                @endif
-            </p>
+                <h1 class="sta-judul">
+                    @if ($lunas)
+                        Pendaftaran Anda sudah lunas
+                    @elseif ($batal)
+                        Pendaftaran ini dibatalkan
+                    @elseif ($habis)
+                        Batas waktu pembayarannya sudah lewat
+                    @elseif ($menunggu)
+                        Bukti pembayaran Anda sudah masuk
+                    @else
+                        Pendaftaran Anda sudah masuk
+                    @endif
+                </h1>
+
+                <p class="sta-sub">
+                    @if ($lunas)
+                        Sampai jumpa di kelas. Tautan masuk dikirim ke
+                        <strong>{{ $pendaftaran->email }}</strong> paling lambat sehari sebelum acara.
+                    @elseif ($batal || $habis)
+                        Kursinya sudah dilepas kembali. Silakan daftar ulang kalau masih ingin ikut.
+                    @elseif ($menunggu)
+                        {{-- Kalimat terpentingnya: TIDAK ADA LAGI yang harus ia
+                             kerjakan. Tanpa itu orang menunggu sambil menduga-duga
+                             apakah ada langkah yang terlewat. --}}
+                        Panitia memeriksanya pada jam kerja.
+                        <strong>Anda tidak perlu mengirim apa pun lagi.</strong>
+                        Kursi Anda ditahan sampai pemeriksaannya selesai.
+                    @else
+                        Tinggal satu langkah: selesaikan pembayarannya.
+                    @endif
+                </p>
+            </div>
+
 
             {{-- DUA LAJUR di layar lebar, satu lajur di ponsel.
 
@@ -181,58 +191,6 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                 </div>
             </dl>
 
-
-            {{--
-                TAWARAN BUAT AKUN — opt-in, bukan dibuatkan diam-diam.
-
-                Akun tidak dibuat otomatis saat mendaftar dengan sengaja:
-                akun hasil buatan sistem tidak punya sandi yang dipilih
-                orangnya, dan email yang salah ketik akan menciptakan akun
-                yang tidak bisa dibuka siapa pun — sekaligus menghalangi
-                pendaftaran akun sungguhannya nanti, sebab emailnya unik.
-
-                Jadi ditawarkan di sini, sesudah pendaftarannya aman, dengan
-                email dan namanya sudah dibawa ke borang pendaftaran akun.
-                Tidak ditampilkan kepada yang sudah masuk.
-            --}}
-            @guest
-                @if (! $batal && ! $habis)
-                    <div class="sta-tawar-akun">
-                        <p class="sta-tawar-judul">Mau lebih mudah lain kali?</p>
-                        <p class="sta-tawar-isi">
-                            Dengan akun, riwayat pendaftaran Anda tersimpan dan borangnya
-                            terisi sendiri di sesi berikutnya.
-                        </p>
-                        <a href="{{ route('register', ['email' => $pendaftaran->email, 'nama' => $pendaftaran->nama]) }}">
-                            <i class="fas fa-user-plus" aria-hidden="true"></i>
-                            Buat akun pakai email ini
-                        </a>
-                    </div>
-                @endif
-            @endguest
-
-            {{--
-                Kirim ulang bukti pendaftaran.
-
-                Satu-satunya jalan kembali ke halaman ini adalah tautan
-                ber-UUID di email. Kalau emailnya terhapus atau masuk folder
-                sampah, orangnya kehilangan nomor pendaftaran dan cara
-                bayarnya sekaligus — dan yang menanggung panitia lewat
-                WhatsApp.
-
-                Tidak ditampilkan untuk yang sudah batal atau kedaluwarsa:
-                di sana tidak ada lagi yang perlu disimpan.
-            --}}
-            @if (! $batal && ! $habis)
-                <form method="POST" action="{{ route('public.webinareksklusif.kirimulang', $pendaftaran->getKey()) }}"
-                    class="sta-kirim-ulang">
-                    @csrf
-                    <button type="submit">
-                        <i class="fas fa-paper-plane" aria-hidden="true"></i>
-                        Kirim ulang bukti pendaftaran ke email saya
-                    </button>
-                </form>
-            @endif
 
             {{-- Daftar peserta ditampilkan supaya pendaftar bisa memeriksa
                  ejaan namanya sebelum sertifikat diterbitkan. Salah eja yang
@@ -340,6 +298,10 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                         </ol>
                     </div>
 
+                </div>{{-- /lajur tengah --}}
+
+                <div class="sta-lajur">
+
                     {{--
                         UNGGAH BUKTI TRANSFER — jalur UTAMA.
 
@@ -377,7 +339,7 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                                 <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
                                 <span class="sta-unggah-teks">
                                     <strong id="sta-bukti-nama">Pilih foto bukti transfer</strong>
-                                    <small>JPG, PNG, atau HEIC &middot; paling besar 8 MB</small>
+                                    <small>JPG, PNG, HEIC &middot; maksimal 8 MB</small>
                                 </span>
                             </label>
 
@@ -461,7 +423,7 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                                 <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
                                 <span class="sta-unggah-teks">
                                     <strong id="sta-bukti-nama">Pilih foto penggantinya</strong>
-                                    <small>JPG, PNG, atau HEIC &middot; paling besar 8 MB</small>
+                                    <small>JPG, PNG, HEIC &middot; maksimal 8 MB</small>
                                 </span>
                             </label>
 
@@ -480,6 +442,59 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                         </a>.
                     </p>
                 </div>
+            @endif
+
+
+            {{--
+                TAWARAN BUAT AKUN — opt-in, bukan dibuatkan diam-diam.
+
+                Akun tidak dibuat otomatis saat mendaftar dengan sengaja:
+                akun hasil buatan sistem tidak punya sandi yang dipilih
+                orangnya, dan email yang salah ketik akan menciptakan akun
+                yang tidak bisa dibuka siapa pun — sekaligus menghalangi
+                pendaftaran akun sungguhannya nanti, sebab emailnya unik.
+
+                Jadi ditawarkan di sini, sesudah pendaftarannya aman, dengan
+                email dan namanya sudah dibawa ke borang pendaftaran akun.
+                Tidak ditampilkan kepada yang sudah masuk.
+            --}}
+            @guest
+                @if (! $batal && ! $habis)
+                    <div class="sta-tawar-akun">
+                        <p class="sta-tawar-judul">Mau lebih mudah lain kali?</p>
+                        <p class="sta-tawar-isi">
+                            Dengan akun, riwayat pendaftaran Anda tersimpan dan borangnya
+                            terisi sendiri di sesi berikutnya.
+                        </p>
+                        <a href="{{ route('register', ['email' => $pendaftaran->email, 'nama' => $pendaftaran->nama]) }}">
+                            <i class="fas fa-user-plus" aria-hidden="true"></i>
+                            Buat akun pakai email ini
+                        </a>
+                    </div>
+                @endif
+            @endguest
+
+            {{--
+                Kirim ulang bukti pendaftaran.
+
+                Satu-satunya jalan kembali ke halaman ini adalah tautan
+                ber-UUID di email. Kalau emailnya terhapus atau masuk folder
+                sampah, orangnya kehilangan nomor pendaftaran dan cara
+                bayarnya sekaligus — dan yang menanggung panitia lewat
+                WhatsApp.
+
+                Tidak ditampilkan untuk yang sudah batal atau kedaluwarsa:
+                di sana tidak ada lagi yang perlu disimpan.
+            --}}
+            @if (! $batal && ! $habis)
+                <form method="POST" action="{{ route('public.webinareksklusif.kirimulang', $pendaftaran->getKey()) }}"
+                    class="sta-kirim-ulang">
+                    @csrf
+                    <button type="submit">
+                        <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                        Kirim ulang bukti pendaftaran ke email saya
+                    </button>
+                </form>
             @endif
 
                 </div>{{-- /lajur kanan --}}
@@ -516,7 +531,13 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
         background-image:
             radial-gradient(circle at 85% -5%, rgba(255, 106, 0, .12), transparent 45%),
             radial-gradient(circle at -10% 20%, rgba(15, 43, 91, .1), transparent 45%);
-        padding: 110px 0 90px;
+        /* 96px, bukan 110: kepala situsnya `fixed-top` setinggi 80px, jadi
+           angka ini TIDAK boleh turun di bawah itu — isinya akan tertutup.
+           96 menyisakan 16px napas, dan 14px kembali ke layar.
+
+           Bawahnya 44, bukan 90: di bawahnya sudah ada kaki situs setinggi
+           412px; 90px kosong di antaranya tidak memisahkan apa pun. */
+        padding: 96px 0 44px;
         min-height: 100vh;
         font-family: 'Poppins', 'Inter', system-ui, sans-serif;
         color: var(--tinta);
@@ -750,6 +771,10 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
     }
 
     .sta-sub { margin: 0 0 26px; font-size: .95rem; line-height: 1.7; color: var(--tinta-2); }
+
+    /* Bawaannya bertumpuk di tengah — keadaan ponsel, tempat yang langka
+       lebarnya, bukan tingginya. */
+    .sta-kepala { text-align: center; }
 
     .sta-rincian {
         margin: 0 0 22px;
@@ -1033,7 +1058,12 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
     }
 
     /* Keterangan formatnya TIDAK boleh patah: dipatahkan, "MB" turun
-       sendirian ke baris kedua dan kotaknya jadi setinggi 100px di ponsel. */
+       sendirian ke baris kedua dan kotaknya jadi setinggi 100px di ponsel.
+
+       Kalimatnya ikut diperpendek — "paling besar" jadi "maksimal", dan
+       kata "atau" dibuang. Yang panjang 242px tidak muat di lajur selebar
+       219px saat kisinya jadi tiga lajur di 1200px, dan karena tidak boleh
+       patah ia MELUBERKAN seluruh kartunya. */
     .sta-unggah-teks small {
         display: block;
         color: #64748b;
@@ -1110,6 +1140,21 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
             border-left: 1px solid var(--garis);
         }
 
+        /* 992-1299px: lajur KETIGA turun jadi pita selebar kisinya.
+
+           Dipaksa jadi lajur ketiga di lebar segini, tiap lajurnya tinggal
+           ~290px — nomor rekening yang berspasi tidak muat di situ. Turun ke
+           bawah, urutan bacanya tetap benar: rincian, cara bayar, lalu
+           unggah. */
+        .sta-kisi:not(.sta-kisi-tunggal) > .sta-lajur:nth-child(3) {
+            grid-column: 1 / -1;
+            margin-top: clamp(18px, 2vw, 26px);
+            padding-top: clamp(18px, 2vw, 26px);
+            padding-left: 0;
+            border-top: 1px solid var(--garis);
+            border-left: 0;
+        }
+
         /* Judul dan kalimat pembukanya tidak ikut melebar sampai ujung:
            baris teks sepanjang 1.400px tidak bisa diikuti mata, yang kehilangan
            tempatnya tiap kali berpindah ke baris berikutnya. */
@@ -1120,7 +1165,68 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
             margin-right: auto;
         }
 
-        .sta-kartu { padding: 40px clamp(28px, 3vw, 48px); }
+        /* Bantalan tegaknya dipangkas 40 -> 26. Kartunya sudah punya
+           jarak sendiri dari tepi layar; 40px di atas dan bawah cuma
+           menambah gulir. */
+        .sta-kartu { padding: 26px clamp(28px, 3vw, 48px) 30px; }
+
+        /* Ikon, judul, dan kalimatnya jadi SATU BARIS.
+
+           Terukur: bertumpuk 184px, sebaris 62px. Ikonnya ikut mengecil
+           68 -> 52 sebab di samping teks ia tidak lagi harus menyangga
+           perhatian sendirian. */
+        .sta-kepala {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 22px;
+            text-align: left;
+        }
+
+        .sta-kepala > .sta-ubin {
+            flex: 0 0 52px;
+            width: 52px;
+            height: 52px;
+            margin: 0;
+            border-radius: 16px;
+            font-size: 1.25rem;
+        }
+
+        /* min-width: 0 supaya judul panjang boleh menyusut, bukan mendorong
+           ikonnya keluar: unsur lentur memakai min-width auto. */
+        .sta-kepala > .sta-judul,
+        .sta-kepala > .sta-sub {
+            max-width: none;
+            margin: 0;
+            min-width: 0;
+        }
+
+        .sta-kepala > .sta-judul { font-size: 1.45rem; }
+
+        .sta-kepala > .sta-sub { flex: 1 1 320px; font-size: .88rem; line-height: 1.55; }
+
+        /* Jarak antar blok di dalam lajur dirapatkan; yang menumpuk tegak
+           di sini enam blok, jadi tiap 6px terbayar enam kali. */
+        .sta-kisi .sta-rincian { margin-bottom: 14px; padding: 14px 18px; }
+        .sta-kisi .sta-tawar-akun { margin-top: 14px; padding: 14px 16px; }
+        .sta-kisi .sta-bayar > ol { margin-bottom: 10px; }
+        .sta-kisi .sta-unggah { margin-top: 14px; padding-top: 14px; }
+
+        /* Barisnya dirapatkan 8px -> 5px. Enam baris, jadi tiap 3px yang
+           dihemat terbayar dua belas kali — 36px tanpa satu pun baris jadi
+           lebih sulit dibaca, sebab yang memisahkannya garis, bukan jarak. */
+        .sta-kisi .sta-rincian > div { padding: 5px 0; }
+
+        /* line-height 1.8 -> 1.6 pada daftar langkah bayar. Angkanya tetap
+           di atas 1.5, batas yang masih nyaman dibaca untuk teks panjang. */
+        .sta-kisi .sta-bayar ol { line-height: 1.6; }
+
+        .sta-kisi .sta-rekening { margin: 10px 0; padding: 12px 18px; }
+
+        /* Kalimat "fotonya kami ringkas" dan baris bantuan WhatsApp
+           dirapatkan; keduanya keterangan, bukan langkah. */
+        .sta-kisi .sta-unggah-nota { margin-top: 7px; }
+        .sta-kisi .sta-bantuan { margin-top: 9px; }
 
         /* Satu lajur walau layarnya lebar: tidak ada yang harus dikerjakan,
            jadi tidak ada lajur kanan untuk menampungnya. Isinya dipusatkan
@@ -1136,6 +1242,28 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
             margin: 0 auto;
             border-left: 0;
             padding-left: 0;
+        }
+    }
+
+    /* ------------------------------------------ layar sangat lebar: 3 lajur */
+
+    /* 1200px. Dipatok 1300 lebih dulu, dan di 1280 — ukuran laptop yang
+       lazim — lajur ketiganya turun jadi pita penuh dan kisinya justru
+       membengkak 670 -> 975. Ambangnya diturunkan sampai laptop 1280 ikut
+       kebagian tiga lajur. */
+    @media (min-width: 1200px) {
+        .sta-kisi:not(.sta-kisi-tunggal) {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        /* Pita penuh di lebar menengah dibatalkan; ia kembali jadi lajur. */
+        .sta-kisi:not(.sta-kisi-tunggal) > .sta-lajur:nth-child(3) {
+            grid-column: auto;
+            margin-top: 0;
+            padding-top: 0;
+            padding-left: clamp(24px, 3vw, 44px);
+            border-top: 0;
+            border-left: 1px solid var(--garis);
         }
     }
 

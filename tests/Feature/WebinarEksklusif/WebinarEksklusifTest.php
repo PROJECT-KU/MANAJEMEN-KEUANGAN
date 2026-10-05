@@ -2150,7 +2150,7 @@ class WebinarEksklusifTest extends TestCase
     }
 
     #[Test]
-    public function halaman_status_memakai_dua_lajur_selama_masih_harus_dibayar(): void
+    public function halaman_status_dibagi_berlajur_selama_masih_harus_dibayar(): void
     {
         /*
          * Halamannya dulu satu pita 640px di tengah layar. Di layar 1.470px
@@ -2190,10 +2190,29 @@ class WebinarEksklusifTest extends TestCase
         $this->assertStringNotContainsString('sta-wadah-ramping', $cocokWadah[1],
             'Halamannya disempitkan padahal isinya dua lajur.');
 
-        // Dua pembungkus lajur, bukan satu: satu saja berarti isi kanannya
-        // jatuh jadi anak langsung kisi dan lepas dari aturan lebarnya.
-        $this->assertSame(2, substr_count($isi, '<div class="sta-lajur">'),
-            'Jumlah lajurnya bukan dua.');
+        /*
+         * TIGA pembungkus lajur: rincian, cara bayar, dan unggah.
+         *
+         * Dua lajur menyisakan satu lajur setinggi 670px sementara lajur
+         * satunya 546px — dan halamannya 1,86 layar penuh. Dengan tiga, kisinya
+         * 568px di layar 1.470px dan halamannya turun jadi 1,48 layar.
+         *
+         * Jumlahnya dijaga karena pembagiannya ikut mengatur urutan baca:
+         * rincian dulu, cara bayar, baru unggah. Berkurang jadi dua, isi lajur
+         * ketiganya menempel ke lajur kedua dan urutannya tetap benar — tetapi
+         * tingginya kembali seperti semula tanpa ada yang tahu.
+         */
+        $this->assertSame(3, substr_count($isi, '<div class="sta-lajur">'),
+            'Jumlah lajurnya bukan tiga.');
+
+        /*
+         * Kepala halaman dibungkus supaya ikon, judul, dan kalimatnya bisa
+         * disejajarkan jadi satu baris di layar lebar. Bertumpuk di tengah
+         * ketiganya memakan 184px sebelum isi pertamanya terlihat; sebaris
+         * 62px.
+         */
+        $this->assertStringContainsString('class="sta-kepala"', $isi,
+            'Pembungkus kepala hilang; ikon dan judulnya akan bertumpuk lagi.');
     }
 
     #[Test]
@@ -2260,5 +2279,69 @@ class WebinarEksklusifTest extends TestCase
          */
         $this->assertStringContainsString('minmax(0, 1fr)', (string) $aturan,
             'Lajurnya tidak dijaga minmax(0,...); kartunya bisa meluber.');
+    }
+
+    #[Test]
+    public function tiga_lajurnya_dipasang_di_1200px_dan_turun_jadi_pita_di_bawahnya(): void
+    {
+        /*
+         * Penjaga tingkat SUMBER untuk dua ambang yang tidak terlihat dari
+         * markah.
+         *
+         * 1200px dipilih setelah diukur: dipatok 1300 lebih dulu, dan di 1280
+         * — ukuran laptop yang lazim — lajur ketiganya turun jadi pita penuh
+         * dan kisinya justru membengkak dari 670px jadi 975px.
+         *
+         * Di bawah 1200px lajur ketiganya memang HARUS turun: tiap lajur
+         * tinggal ~290px di situ, dan kotak unggahnya meluber keluar kartu.
+         */
+        $sumber = file_get_contents(
+            resource_path('views/public/webinar_eksklusif/status.blade.php')
+        );
+
+        // Komentar dibuang dulu; dua percobaan sebelumnya di berkas ini
+        // merah/hijau palsu karena yang cocok kalimat di komentarnya sendiri.
+        $aturan = preg_replace('#/\*.*?\*/#s', '', $sumber);
+        $aturan = preg_replace('#\{\{--.*?--\}\}#s', '', (string) $aturan);
+
+        $this->assertMatchesRegularExpression(
+            '/@media\s*\(min-width:\s*1200px\)\s*\{.*?grid-template-columns:\s*repeat\(3,/s',
+            (string) $aturan,
+            'Tiga lajurnya tidak dipasang di 1200px.'
+        );
+
+        $this->assertMatchesRegularExpression(
+            '/\.sta-lajur:nth-child\(3\)\s*\{[^}]*grid-column:\s*1 \/ -1/',
+            (string) $aturan,
+            'Lajur ketiganya tidak turun jadi pita di lebar menengah; kotak unggahnya akan meluber.'
+        );
+    }
+
+    #[Test]
+    public function keterangan_format_unggahan_cukup_pendek_untuk_lajur_sempit(): void
+    {
+        /*
+         * Kalimatnya dikunci agar tidak patah — dipatahkan, "MB" turun
+         * sendirian dan kotaknya jadi 100px di ponsel. Karena tidak boleh
+         * patah, ia MELUBERKAN seluruh kartu begitu lajurnya menyempit:
+         * terukur 242px di lajur selebar 219px pada 1200px.
+         *
+         * Jadi panjangnya ikut dijaga. Dihitung huruf, bukan piksel — piksel
+         * hanya ada di peramban.
+         */
+        $sumber = file_get_contents(
+            resource_path('views/public/webinar_eksklusif/status.blade.php')
+        );
+
+        $ada = preg_match_all('/<small>(?<teks>[^<]*8 MB)<\/small>/', $sumber, $cocok, PREG_SET_ORDER);
+
+        $this->assertGreaterThanOrEqual(1, $ada, 'Keterangan formatnya hilang.');
+
+        foreach ($cocok as $c) {
+            $teks = html_entity_decode(str_replace('&middot;', '.', $c['teks']));
+
+            $this->assertLessThanOrEqual(30, mb_strlen($teks),
+                'Keterangan format terlalu panjang untuk lajur sempit: "' . $teks . '"');
+        }
     }
 }
