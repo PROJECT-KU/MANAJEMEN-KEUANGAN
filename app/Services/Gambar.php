@@ -62,9 +62,22 @@ class Gambar
      * memutuskan apa artinya itu. Dilempar sebagai pengecualian, satu unggahan
      * rusak akan menggagalkan seluruh borang yang sudah susah payah diisi.
      */
-    public function simpan(UploadedFile $berkas, string $folder): ?string
+    /**
+     * @param  bool  $tegakkan  meluruskan putaran EXIF-nya. MATI secara
+     *                          bawaan, atas keputusan pemiliknya: foto yang
+     *                          sudah melewati WhatsApp kehilangan penandanya
+     *                          sementara pikselnya tetap miring, dan menebak
+     *                          berarti sebagian foto justru dimiringkan
+     *                          sistem. Galeri foto memakai tombol putar
+     *                          manual sebagai gantinya.
+     *
+     *                          Dinyalakan di layar yang TIDAK punya tombol
+     *                          itu — bukti transfer — sebab di sana yang
+     *                          miring tidak bisa dibetulkan siapa pun.
+     */
+    public function simpan(UploadedFile $berkas, string $folder, bool $tegakkan = false): ?string
     {
-        $sumber = $this->baca($berkas->getRealPath());
+        $sumber = $this->baca($berkas->getRealPath(), $tegakkan);
 
         if ($sumber === null) {
             return null;
@@ -150,13 +163,12 @@ class Gambar
             return false;
         }
 
-        $sumber = $this->baca($jalurAsal);
+        // Sampul dan foto pemateri memang selalu diluruskan sejak semula.
+        $sumber = $this->baca($jalurAsal, true);
 
         if ($sumber === null) {
             return false;
         }
-
-        $sumber = $this->tegakkanDariExif($sumber, $jalurAsal);
 
         $hasil = $this->kecilkan($sumber);
 
@@ -254,29 +266,73 @@ class Gambar
      *
      * @return \GdImage|null
      */
-    private function baca(string $jalur)
+    /**
+     * @param  bool  $tegakkan  meluruskan putaran EXIF berkas yang formatnya
+     *                          dikenal GD. HEIC selalu diluruskan, lihat di
+     *                          bawah — itu bagian dari membacanya dengan
+     *                          benar, bukan pilihan kebijakan.
+     */
+    private function baca(string $jalur, bool $tegakkan = false)
     {
         $tentang = @getimagesize($jalur);
 
         /*
          * getimagesize() tidak mengenal HEIC/HEIF — format bawaan foto iPhone.
-         * Yang seperti itu dibongkar dulu jadi PNG sementara oleh alat luar,
-         * baru dibaca GD seperti biasa.
+         * Yang seperti itu dibongkar dulu jadi berkas sementara oleh alat
+         * luar, baru dibaca GD seperti biasa.
          */
         if ($tentang === false) {
-            $sementara = $this->heicJadiPng($jalur);
+            $sementara = $this->heicJadiGambar($jalur);
 
             if ($sementara === null) {
                 return null;
             }
 
-            $gambar = @imagecreatefrompng($sementara);
+            $gambar = $this->bacaBiasa($sementara);
+
+            /*
+             * HEIC SELALU diluruskan, tanpa menunggu diminta — dan itu bukan
+             * melanggar aturan "sistem tidak memutar sendiri".
+             *
+             * Aturan itu lahir dari foto yang penandanya HILANG di jalan
+             * (lewat WhatsApp, lewat alat ekspor) sementara pikselnya tetap
+             * miring: dari berkas begitu tidak ada yang bisa ditebak. HEIC
+             * tidak punya keadaan itu. Penandanya selalu ikut, dan buffer
+             * mentahnya memang TIDAK PERNAH jadi yang dilihat orang —
+             * pemiliknya sendiri melihat fotonya sudah tegak di Finder.
+             * Membiarkannya mentah berarti menampilkan sesuatu yang belum
+             * pernah dilihat siapa pun.
+             *
+             * Penandanya dicari di berkas SEMENTARA, bukan di HEIC aslinya.
+             * exif_read_data() tidak bisa membaca HEIC sama sekali — diperiksa
+             * langsung pada foto iPhone 5712x4284: getimagesize() gagal,
+             * exif_read_data() mengembalikan false. Yang membawa penandanya
+             * justru hasil bongkarannya.
+             */
+            if ($gambar !== null) {
+                $gambar = $this->tegakkanDariExif($gambar, $sementara);
+            }
+
             @unlink($sementara);
 
-            return $gambar === false ? null : $gambar;
+            return $gambar;
         }
 
-        $gambar = match ($tentang[2]) {
+        $gambar = $this->bacaBiasa($jalur);
+
+        if ($gambar === null || ! $tegakkan) {
+            return $gambar;
+        }
+
+        return $this->tegakkanDariExif($gambar, $jalur);
+    }
+
+    /** Membaca berkas yang formatnya SUDAH dikenal GD. */
+    private function bacaBiasa(string $jalur)
+    {
+        $tentang = @getimagesize($jalur);
+
+        $gambar = match ($tentang[2] ?? null) {
             IMAGETYPE_JPEG => @imagecreatefromjpeg($jalur),
             IMAGETYPE_PNG => @imagecreatefrompng($jalur),
             IMAGETYPE_WEBP => @imagecreatefromwebp($jalur),
@@ -306,7 +362,8 @@ class Gambar
      * @param  int  $derajat  90 atau -90; positif searah jarum jam
      */
     /**
-     * Membongkar HEIC/HEIF jadi PNG sementara; null kalau tidak ada yang bisa.
+     * Membongkar HEIC/HEIF jadi berkas sementara; null kalau tidak ada yang
+     * bisa.
      *
      * HEIC adalah format bawaan foto iPhone, dan GD tidak bisa membacanya sama
      * sekali. Yang bisa membongkarnya berbeda-beda per peladen, jadi dicoba
@@ -320,18 +377,29 @@ class Gambar
      * tahu terus terang. Itu jauh lebih baik daripada diam: foto yang hilang
      * tanpa penjelasan membuat orang mengunggahnya berkali-kali.
      */
-    private function heicJadiPng(string $jalur): ?string
+    private function heicJadiGambar(string $jalur): ?string
     {
         if (! $this->sepertiHeic($jalur)) {
             return null;
         }
 
-        $keluar = sys_get_temp_dir() . '/heic-' . Str::uuid() . '.png';
+        $sidik = sys_get_temp_dir() . '/heic-' . Str::uuid();
+        $keluar = $sidik . '.png';
 
         // 1. Imagick — paling bersih, tanpa memanggil proses luar.
         if (class_exists(\Imagick::class)) {
             try {
                 $im = new \Imagick($jalur);
+
+                /*
+                 * Imagick membaca putaran HEIC-nya sendiri, tetapi PNG tidak
+                 * bisa membawa penanda itu — jadi putarannya dibakukan ke
+                 * pikselnya di sini, selagi masih terbaca.
+                 */
+                if (method_exists($im, 'autoOrient')) {
+                    $im->autoOrient();
+                }
+
                 $im->setImageFormat('png');
                 $im->writeImage($keluar);
                 $im->clear();
@@ -347,22 +415,44 @@ class Gambar
 
         // 2 & 3. Alat baris perintah. Dilewati kalau exec() dimatikan hosting —
         // itu hal biasa di hosting bersama.
+        /*
+         * sips menulis JPEG, bukan PNG — dan itu BUKAN soal selera format.
+         *
+         * Foto iPhone disimpan mendatar dengan satu penanda yang menyuruh
+         * penampilnya memutar. Diukur langsung pada IMG_3675.HEIC 5712x4284:
+         *
+         *   sips -s format png   -> 5712x4284, penandanya HILANG
+         *   sips -s format jpeg  -> 5712x4284, Orientation: 6 TERBAWA
+         *
+         * PNG tidak punya tempat untuk penanda itu, jadi lewat PNG tidak ada
+         * lagi yang bisa tahu fotonya harus diputar — dan yang tersimpan
+         * miring 90 derajat. Lewat JPEG, pelurusan EXIF yang sudah ada di
+         * baca() mendapat bahannya.
+         *
+         * heif-convert tetap menulis PNG: libheif menerapkan putarannya
+         * sendiri saat membongkar, jadi hasilnya sudah tegak dan tidak perlu
+         * penanda apa pun.
+         */
         foreach ([
-            ['heif-convert', '%s %s'],
-            ['sips', '-s format png %s --out %s'],
-        ] as [$alat, $pola]) {
+            ['heif-convert', '%s %s', '.png'],
+            ['sips', '-s format jpeg -s formatOptions best %s --out %s', '.jpg'],
+        ] as [$alat, $pola, $akhiran]) {
             $lokasi = $this->cariAlat($alat);
 
             if ($lokasi === null) {
                 continue;
             }
 
-            $perintah = $lokasi . ' ' . sprintf($pola, escapeshellarg($jalur), escapeshellarg($keluar));
+            $tujuan = $sidik . $akhiran;
+
+            $perintah = $lokasi . ' ' . sprintf($pola, escapeshellarg($jalur), escapeshellarg($tujuan));
             @exec($perintah . ' 2>/dev/null', $keluaran, $kode);
 
-            if ($kode === 0 && is_file($keluar) && @getimagesize($keluar) !== false) {
-                return $keluar;
+            if ($kode === 0 && is_file($tujuan) && @getimagesize($tujuan) !== false) {
+                return $tujuan;
             }
+
+            @unlink($tujuan);
         }
 
         @unlink($keluar);
