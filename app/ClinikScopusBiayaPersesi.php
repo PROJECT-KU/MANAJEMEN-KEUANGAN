@@ -121,7 +121,16 @@ class ClinikScopusBiayaPersesi extends Model
 
     public function clinikScopus()
     {
-        return $this->hasMany(\App\ClinikScopus::class, 'biaya_persesi_id');
+        /*
+         * Clinikscopus, BUKAN ClinikScopus. Kelasnya memang dieja begitu.
+         *
+         * ::class tidak memeriksa kelasnya ada atau tidak — ia cuma merangkai
+         * teks. Jadi salah huruf besar di sini lolos tanpa galat sampai
+         * relasinya benar-benar dipakai, dan di macOS ia tetap jalan karena
+         * berkasnya ditemukan tanpa peka huruf besar-kecil. Di peladen Linux
+         * halamannya 500: Class "App\ClinikScopus" not found.
+         */
+        return $this->hasMany(Clinikscopus::class, 'biaya_persesi_id');
     }
 
     // ----------------------------------------------------------------- kueri
