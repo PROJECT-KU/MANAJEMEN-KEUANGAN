@@ -29,27 +29,6 @@ Angkatan Layanan | MIS
 
     .ang-nama { margin: 0; line-height: 1.3; font-size: .86rem; font-weight: 700; color: var(--mis-tinta); overflow-wrap: anywhere; }
     .ang-ket { margin: 1px 0 0; line-height: 1.4; font-size: .73rem; color: var(--mis-tinta-3); }
-    /* Alasan "perlu dicek", ditulis di bawah lencananya.
-
-       Ditumpuk tegak, bukan disambung ke samping: menyambungnya membuat sel
-       status melebar dan tabelnya harus digeser. Ditumpuk, lebarnya tetap dan
-       yang bertambah cuma tinggi — itu pun hanya pada baris yang memang
-       bermasalah. */
-    .ang-alasan {
-        margin: 6px 0 0;
-        padding-left: 16px;
-        list-style: disc;
-        max-width: 42ch;
-    }
-
-    .ang-alasan > li {
-        margin: 0 0 3px;
-        font-size: .74rem;
-        line-height: 1.45;
-        color: #9f1239;
-    }
-
-    .ang-alasan > li:last-child { margin-bottom: 0; }
 
     .ang-aksi { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
 
@@ -887,19 +866,16 @@ Angkatan Layanan | MIS
                                                     : 'Perlu dicek' }}
                                             </span>
 
-                                            {{-- Alasannya TERLIHAT, bukan di tooltip.
-                                                 Tooltip menuntut orangnya tahu harus
-                                                 mengarahkan tetikus lalu menunggu — dan di
-                                                 layar sentuh ia tidak pernah muncul sama
-                                                 sekali. Yang memakai layar ini bukan orang
-                                                 teknis: lencana yang cuma bilang "perlu
-                                                 dicek" membuat mereka tahu ada yang salah
-                                                 tanpa tahu harus berbuat apa. --}}
-                                            <ul class="ang-alasan">
-                                                @foreach ($a->perlu_dicek_lain as $sebab)
-                                                    <li>{{ $sebab }}</li>
-                                                @endforeach
-                                            </ul>
+                                            {{-- Alasannya TIDAK dirinci di sini.
+
+                                                 Sempat dicoba: dirinci di bawah lencananya,
+                                                 baris Bibliometrik yang kena dua hal tumbuh
+                                                 dari 71px jadi 234px, dan daftar yang
+                                                 gunanya dipindai sekilas berubah jadi
+                                                 bacaan. Yang perlu diketahui di daftar cuma
+                                                 "baris ini perlu dicek dan berapa hal";
+                                                 rinciannya menunggu di halaman ubah, tempat
+                                                 orangnya memang akan membetulkannya. --}}
                                         @endif
                                     </td>
 
