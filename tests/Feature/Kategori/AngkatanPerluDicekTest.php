@@ -239,7 +239,7 @@ class AngkatanPerluDicekTest extends TestCase
             'mulai' => now()->subMonths(2), 'selesai' => now()->subMonths(2)->addDay(),
         ]);
 
-        $this->assertContains('masih aktif padahal tanggalnya sudah lewat', $a->perlu_dicek);
+        $this->assertContains('masih aktif padahal tanggalnya sudah lewat — nonaktifkan kalau acaranya memang selesai', $a->perlu_dicek);
         $this->assertTrue(KategoriLayanan::perlu('aktif-lewat')->where('id', $a->id)->exists());
         $this->assertTrue(KategoriLayanan::perluApaPun()->where('id', $a->id)->exists());
     }
@@ -420,4 +420,87 @@ class AngkatanPerluDicekTest extends TestCase
             ->assertOk()
             ->assertDontSee('tanggal hari ini', false);
     }
+    #[Test]
+    public function hitungan_kueri_dan_hitungan_php_tidak_boleh_berbeda(): void
+    {
+        /*
+         * Pertanyaan yang sama dijawab DUA tempat: ubin "Perlu dicek"
+         * menghitungnya lewat kueri (scopePerluApaPun), rincian per baris
+         * lewat accessor PHP (perlu_dicek). Keduanya pernah menyimpang tanpa
+         * ada yang terlihat rusak.
+         *
+         * Yang menyimpang pemeriksaan sampul: kueri cuma melihat
+         * public/<folder>/<berkas> — jalur lama — sementara accessor memakai
+         * AlamatGambar yang juga tahu cakram "unggahan". Sejak unggahan pindah
+         * ke sana, terukur 58 dari 59 angkatan dinyatakan kehilangan sampul
+         * padahal yang benar 9, dan ubinnya menulis 59 dari 59.
+         *
+         * Tanda yang menyala di SETIAP baris sama saja dengan tidak ada tanda.
+         * Dan gambarnya tetap tampil di layar — yang menggambarnya memakai
+         * accessor — jadi tidak ada satu pun gejala yang bisa dilihat.
+         */
+        $lewatKueri = KategoriLayanan::query()->perluApaPun()->count();
+
+        $lewatPhp = KategoriLayanan::all()
+            ->filter(fn (KategoriLayanan $a) => $a->perlu_dicek !== [])
+            ->count();
+
+        $this->assertSame($lewatPhp, $lewatKueri, sprintf(
+            'Ubin "Perlu dicek" menghitung %d angkatan, rincian per barisnya %d. '
+            . 'Dua jawaban berbeda untuk pertanyaan yang sama.',
+            $lewatKueri,
+            $lewatPhp
+        ));
+    }
+
+    #[Test]
+    public function tiap_alasan_menyebut_apa_yang_harus_dikerjakan(): void
+    {
+        /*
+         * Yang memakai layar ini bukan orang teknis. "Perlu dicek" saja
+         * membuat mereka tahu ada yang salah tetapi tidak tahu harus berbuat
+         * apa — dan yang tidak tahu harus berbuat apa akhirnya tidak berbuat
+         * apa-apa.
+         *
+         * Dijaga PEMISAHNYA, bukan kata kerjanya: tiap alasan wajib memuat
+         * tanda pisah yang memisahkan "apa yang salah" dari "apa yang
+         * dikerjakan". Menjaga daftar kata kerja akan merah tiap kali
+         * kalimatnya diperhalus.
+         */
+        $a = $this->angkatan([
+            'status' => 'draft',
+            'mulai' => now()->subDays(10)->toDateString(),
+            'selesai' => now()->subDays(9)->toDateString(),
+        ]);
+
+        $this->assertNotEmpty($a->perlu_dicek, 'prasyarat ujinya: angkatan ini harus punya alasan');
+
+        foreach ($a->perlu_dicek as $alasan) {
+            $this->assertStringContainsString(' — ', $alasan, sprintf(
+                'Alasan "%s" cuma menyebut apa yang salah, tanpa apa yang harus dikerjakan.',
+                $alasan
+            ));
+        }
+    }
+
+    #[Test]
+    public function alasannya_tergambar_di_layar_bukan_disembunyikan_di_tooltip(): void
+    {
+        /*
+         * Alasannya dulu cuma ada di atribut title. Tooltip menuntut orangnya
+         * tahu harus mengarahkan tetikus lalu menunggu, dan di layar sentuh ia
+         * TIDAK PERNAH muncul sama sekali — jadi bagi sebagian pemakai
+         * informasinya memang tidak ada.
+         */
+        $markah = file_get_contents(
+            resource_path('views/account/kategori_layanan/index.blade.php')
+        );
+
+        $this->assertStringContainsString('class="ang-alasan"', $markah,
+            'Daftar alasan yang terlihat hilang dari daftar angkatan.');
+
+        $this->assertSame(0, preg_match('/title="Perlu dicek:/', $markah),
+            'Alasannya kembali disembunyikan di tooltip; di layar sentuh ia tidak akan terbaca.');
+    }
+
 }
