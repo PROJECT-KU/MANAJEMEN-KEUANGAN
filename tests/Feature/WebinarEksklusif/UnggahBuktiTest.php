@@ -124,6 +124,101 @@ class UnggahBuktiTest extends TestCase
     }
 
     #[Test]
+    public function layar_bukti_masuk_ikut_selebar_layar_dan_berlajur(): void
+    {
+        /*
+         * Layar ini dulu ikut dipaksa menyempit, karena aturannya "yang tidak
+         * sedang harus membayar berarti satu lajur". Padahal isinya ADA di
+         * kedua sisi: rincian di kiri, lalu panel "kursi Anda ditahan", tombol
+         * lihat bukti, lipatan ganti bukti, dan tombol kirim ulang di kanan.
+         *
+         * Terukur sesudah dilepas: dua lajur 661 dan 586px di layar 1.470px,
+         * kartunya 1.382x700. Yang menyempit tinggal lunas, batal, dan
+         * kedaluwarsa — ketiganya memang tidak punya apa-apa di lajur kanan.
+         */
+        $p = $this->pendaftaran();
+
+        $this->kirim($p, UploadedFile::fake()->image('bukti.jpg', 600, 400))->assertRedirect();
+
+        $isi = $this->get(route('public.webinareksklusif.status', $p->getKey()))
+            ->assertOk()
+            ->getContent();
+
+        preg_match('/<div class="container (sta-wadah[^"]*)"/', $isi, $wadah);
+        preg_match('/<div class="(sta-kisi[^"]*)"/', $isi, $kisi);
+
+        $this->assertStringNotContainsString('sta-wadah-ramping', $wadah[1] ?? '',
+            'Layar bukti-masuk masih disempitkan padahal isinya dua lajur.');
+
+        $this->assertStringNotContainsString('sta-kisi-tunggal', $kisi[1] ?? '',
+            'Isinya masih ditumpuk satu lajur.');
+
+        $this->assertSame(2, substr_count($isi, '<div class="sta-lajur '),
+            'Lajurnya bukan dua.');
+
+        $kiri = substr($isi, (int) strpos($isi, 'sta-lajur-kiri'),
+            (int) strpos($isi, 'sta-lajur-kanan') - (int) strpos($isi, 'sta-lajur-kiri'));
+
+        $this->assertStringContainsString('class="sta-rincian"', $kiri,
+            'Rinciannya tidak di lajur kiri.');
+
+        $this->assertStringNotContainsString('class="sta-selesai"', $kiri,
+            'Panel "kursi ditahan" ikut ke lajur kiri; lajur kanannya jadi kosong.');
+    }
+
+    #[Test]
+    public function centang_bergerak_sekali_lalu_diam(): void
+    {
+        /*
+         * Beda maksud dengan jam pasirnya, jadi beda pula gerakannya.
+         *
+         * Jam pasir berdetak TERUS karena waktunya memang masih berjalan.
+         * Centang ini menandai satu kejadian yang sudah selesai: bergerak
+         * sekali lalu diam. Diberi "infinite", yang sudah beres terbaca
+         * seperti masih dikerjakan — dan gerakan berulang yang tidak perlu
+         * itu juga yang paling mengganggu di layar yang orangnya cuma
+         * menunggu.
+         *
+         * "both" WAJIB. Tanpa itu ubinnya kembali ke keadaan sebelum animasi
+         * di antara halaman termuat dan detik pertama gerakan, dan yang
+         * terlihat centang berkedip dulu sebelum melenting.
+         */
+        $p = $this->pendaftaran();
+
+        $this->kirim($p, UploadedFile::fake()->image('bukti.jpg', 600, 400))->assertRedirect();
+
+        $isi = $this->get(route('public.webinareksklusif.status', $p->getKey()))
+            ->assertOk()
+            ->getContent();
+
+        preg_match('/<span class="(sta-ubin[^"]*)"/', $isi, $ubin);
+
+        $this->assertStringContainsString('sta-ubin-selesai', $ubin[1] ?? '',
+            'Centangnya tidak ditandai; ia akan muncul begitu saja tanpa gerakan.');
+
+        $aturan = preg_replace('#/\*.*?\*/#s', '', $isi);
+
+        $ada = preg_match('/\.sta-ubin-selesai\s*\{(?<isi>[^}]*)\}/', (string) $aturan, $cocok);
+
+        $this->assertSame(1, $ada, 'Aturan gerak centangnya hilang.');
+
+        $this->assertStringContainsString('both', $cocok['isi'],
+            'Gerakannya tidak dikunci "both"; centangnya akan berkedip dulu sebelum melenting.');
+
+        $this->assertStringNotContainsString('infinite', $cocok['isi'],
+            'Centangnya bergerak berulang; yang sudah beres jadi terbaca masih dikerjakan.');
+
+        $this->assertMatchesRegularExpression('/\.sta-ubin-selesai::after\s*\{/', (string) $aturan,
+            'Cincin gelombangnya hilang.');
+
+        $this->assertMatchesRegularExpression(
+            '/@media \(prefers-reduced-motion: reduce\) \{[^}]*sta-ubin-selesai/s',
+            (string) $aturan,
+            'Gerak centangnya tidak bisa dimatikan lewat setelan peramban.'
+        );
+    }
+
+    #[Test]
     public function pembersihan_tidak_menyentuh_bukti_yang_diunggah_orang_saat_uji_berjalan(): void
     {
         /*
