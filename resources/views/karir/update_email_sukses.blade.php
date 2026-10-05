@@ -74,7 +74,7 @@
                         <center>
                             <div class="card mt-5 mb-5" style="width: 35rem;">
                                 <div style="text-align: center;" class="login-brand">
-                                    <a href="https://rumahscopusfoundation.com/"> <img src="{{ $message->embed(public_path('assets/img/logo-email.png')) }}"
+                                    <a href="https://rumahscopusfoundation.com/"> <img src="{{ asset('assets/img/logo-email.png') }}"
                                     alt="MIS — Management Integration System by Rumah Scopus" width="190"
                                     style="display:block;border:0;width:190px;max-width:60%;height:auto"></a>
                                 </div>
@@ -97,9 +97,9 @@
                                         Bangunsari, Jl. Bangunsari, Bangunsari, Bangun Kerto, Turi,<br>
                                         Sleman Regency, Special Region of Yogyakarta 55551 <br>
                                         Telp: 0812-2688-3280</p>
-                                    <a href="https://www.instagram.com/rumah_scopus/"> <img src="{{ $message->embed(public_path('assets/img/instagram.png')) }}" alt="logo" width="40" height="40" style="margin-right: 20px; margin-top:10px"></a>
-                                    <a href="https://www.youtube.com/@rumahscopus"> <img src="{{ $message->embed(public_path('assets/img/youtube.png')) }}" alt="logo" width="40" style="margin-right: 20px; margin-top:10px"></a>
-                                    <a href="https://www.facebook.com/RumahScopusAkademi"> <img src="{{ $message->embed(public_path('assets/img/facebook.png')) }}" alt="logo" width="40" style="margin-top:10px"></a>
+                                    <a href="https://www.instagram.com/rumah_scopus/"> <img src="{{ asset('assets/img/instagram.png') }}" alt="logo" width="40" height="40" style="margin-right: 20px; margin-top:10px"></a>
+                                    <a href="https://www.youtube.com/@rumahscopus"> <img src="{{ asset('assets/img/youtube.png') }}" alt="logo" width="40" style="margin-right: 20px; margin-top:10px"></a>
+                                    <a href="https://www.facebook.com/RumahScopusAkademi"> <img src="{{ asset('assets/img/facebook.png') }}" alt="logo" width="40" style="margin-top:10px"></a>
                                 </div>
                             </div>
                         </center>
