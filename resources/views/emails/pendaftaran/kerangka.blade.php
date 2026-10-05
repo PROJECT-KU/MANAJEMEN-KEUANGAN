@@ -44,7 +44,7 @@
                      pada <img>. --}}
                 <tr>
                     <td align="center" style="background-color:#ffffff; padding:28px 24px 8px 24px;">
-                        <img src="{{ $message->embed(public_path('assets/img/logo-rsc-email.png')) }}"
+                        <img src="{{ asset('assets/img/logo-rsc-email.png') }}"
                             alt="Rumah Scopus Foundation" width="200"
                             style="display:block; width:200px; max-width:60%; height:auto; border:0;">
                     </td>
@@ -157,19 +157,19 @@
                                         <tr>
                                             <td style="padding:0 6px;">
                                                 <a href="https://www.instagram.com/rumah_scopus/">
-                                                    <img src="{{ $message->embed(public_path('assets/img/instagram.png')) }}"
+                                                    <img src="{{ asset('assets/img/instagram.png') }}"
                                                         alt="Instagram" width="28" style="display:block; width:28px; height:auto; border:0;">
                                                 </a>
                                             </td>
                                             <td style="padding:0 6px;">
                                                 <a href="https://www.youtube.com/@rumahscopus">
-                                                    <img src="{{ $message->embed(public_path('assets/img/youtube.png')) }}"
+                                                    <img src="{{ asset('assets/img/youtube.png') }}"
                                                         alt="YouTube" width="28" style="display:block; width:28px; height:auto; border:0;">
                                                 </a>
                                             </td>
                                             <td style="padding:0 6px;">
                                                 <a href="https://www.facebook.com/RumahScopusAkademi">
-                                                    <img src="{{ $message->embed(public_path('assets/img/facebook.png')) }}"
+                                                    <img src="{{ asset('assets/img/facebook.png') }}"
                                                         alt="Facebook" width="28" style="display:block; width:28px; height:auto; border:0;">
                                                 </a>
                                             </td>

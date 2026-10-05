@@ -51,7 +51,7 @@
                          bukan logo alat internalnya. --}}
                     <tr>
                         <td align="center" style="padding:26px 28px 18px;background:#ffffff">
-                            <img src="{{ $message->embed(public_path('assets/img/LogoRSC.png')) }}"
+                            <img src="{{ asset('assets/img/LogoRSC.png') }}"
                                 alt="Rumah Scopus Foundation" width="210"
                                 style="display:block;border:0;width:210px;max-width:72%;height:auto">
                         </td>

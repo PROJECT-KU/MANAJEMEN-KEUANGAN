@@ -52,7 +52,7 @@
                     <tr>
                         <td align="center" style="padding: 40px 20px 20px 20px;">
                             <a href="https://rumahscopusfoundation.com/" target="_blank">
-                                <img src="{{ $message->embed(public_path('assets/img/logo-email.png')) }}"
+                                <img src="{{ asset('assets/img/logo-email.png') }}"
                                     alt="MIS — Management Integration System by Rumah Scopus" width="190"
                                     style="display:block;border:0;width:190px;max-width:60%;height:auto">
                             </a>
@@ -144,17 +144,17 @@
                                 <tr>
                                     <td style="padding-right: 15px;">
                                         <a href="https://www.instagram.com/rumah_scopus/" target="_blank">
-                                            <img src="{{ $message->embed(public_path('assets/img/instagram.png')) }}" alt="Instagram" width="35" style="display: block; border: 0;">
+                                            <img src="{{ asset('assets/img/instagram.png') }}" alt="Instagram" width="35" style="display: block; border: 0;">
                                         </a>
                                     </td>
                                     <td style="padding-right: 15px;">
                                         <a href="https://www.youtube.com/@rumahscopus" target="_blank">
-                                            <img src="{{ $message->embed(public_path('assets/img/youtube.png')) }}" alt="YouTube" width="35" style="display: block; border: 0;">
+                                            <img src="{{ asset('assets/img/youtube.png') }}" alt="YouTube" width="35" style="display: block; border: 0;">
                                         </a>
                                     </td>
                                     <td>
                                         <a href="https://www.facebook.com/RumahScopusAkademi" target="_blank">
-                                            <img src="{{ $message->embed(public_path('assets/img/facebook.png')) }}" alt="Facebook" width="35" style="display: block; border: 0;">
+                                            <img src="{{ asset('assets/img/facebook.png') }}" alt="Facebook" width="35" style="display: block; border: 0;">
                                         </a>
                                     </td>
                                 </tr>
