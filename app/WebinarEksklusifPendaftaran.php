@@ -299,6 +299,24 @@ class WebinarEksklusifPendaftaran extends Model
         return $this->created_at?->locale('id')->translatedFormat('j F Y, H:i') ?? '—';
     }
 
+    /**
+     * Sisa waktu membayar dalam DETIK; 0 kalau sudah lewat atau tidak berbatas.
+     *
+     * Dipakai hitung mundur di halaman status untuk menggambar angka awalnya
+     * di peladen — tanpa itu, yang tergambar sebelum skripnya jalan tiga kotak
+     * kosong. Dihitung di sini, bukan di dalam Blade: perhitungannya
+     * bersarang kurung, dan @php(...) sebaris di Blade salah mengurainya
+     * dengan galat yang menunjuk tempat lain sama sekali.
+     */
+    public function getSisaDetikAttribute(): int
+    {
+        if ($this->kedaluwarsa_pada === null) {
+            return 0;
+        }
+
+        return max(0, (int) now()->diffInSeconds($this->kedaluwarsa_pada, false));
+    }
+
     /** Sisa waktu membayar, dalam kalimat. */
     public function getSisaWaktuAttribute(): ?string
     {

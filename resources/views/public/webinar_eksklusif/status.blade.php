@@ -287,23 +287,62 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                         terpisah. Dengan satu pembungkus, flexnya tinggal dua
                         item: ikon dan kalimat.
                     --}}
-                    <p class="sta-waktu">
-                        <i class="fas fa-stopwatch" aria-hidden="true"></i>
-                        <span>
-                            {{-- Batas waktunya ditulis sebagai ISO 8601 LENGKAP
-                                 DENGAN SELISIH ZONA (+07:00), bukan "2026-10-05
-                                 23:43". Tanpa selisihnya, peramban menafsirkan
-                                 angka itu memakai zona waktu PEMBACANYA — dan
-                                 peserta yang membuka dari luar Jakarta akan
-                                 melihat sisa waktu meleset berjam-jam.
+                    {{-- Angka awalnya dihitung DI PELADEN, bukan diserahkan ke
+                         skripnya. Tanpa ini, yang tergambar sebelum skripnya
+                         jalan — atau di peramban yang skripnya gagal dimuat —
+                         tiga kotak berisi "--".
 
-                                 Isi awalnya tetap dirender peladen: tanpa
-                                 skrip, yang terbaca kalimat yang sama seperti
-                                 dulu, bukan kotak kosong. --}}
-                            Selesaikan dalam <strong data-mis-mundur="{{ $pendaftaran->kedaluwarsa_pada->toIso8601String() }}">{{ $pendaftaran->sisa_waktu }}</strong>,
-                            setelah itu kursinya dilepas untuk orang lain.
-                        </span>
-                    </p>
+                         Hitungannya di MODEL, bukan di sini.
+
+                         Dan nama direktifnya SENGAJA tidak ditulis di komentar
+                         ini. Blade menjalankan compileStatements SEBELUM
+                         compileComments, jadi direktif yang cuma disebut di
+                         dalam komentar tetap dikompilasi jadi PHP sungguhan —
+                         yang terbit "unexpected endif, expecting end of file"
+                         menunjuk baris yang tidak bersalah. Percobaan kedua
+                         saya di berkas ini jatuh persis di situ. --}}
+                    @php($sisaDetik = $pendaftaran->sisa_detik)
+
+                    {{-- Hitung mundurnya BERDIRI SENDIRI, tidak lagi menyelip
+                         di tengah kalimat.
+
+                         Dulu angkanya satu kata di antara "Selesaikan dalam"
+                         dan "setelah itu kursinya dilepas" — ia berdetak tiap
+                         detik tetapi tidak pernah terbaca sebagai penghitung,
+                         cuma sebagai kalimat yang gelisah.
+
+                         Batas waktunya ditulis ISO 8601 LENGKAP DENGAN SELISIH
+                         ZONA (+07:00). Tanpa selisihnya, peramban menafsirkan
+                         angka itu memakai zona waktu PEMBACANYA — dan peserta
+                         yang membuka dari luar Jakarta melihat sisa waktu
+                         meleset berjam-jam. --}}
+                    <div class="sta-mundur" data-mis-mundur="{{ $pendaftaran->kedaluwarsa_pada->toIso8601String() }}">
+                        <p class="sta-mundur-kop">
+                            <i class="fas fa-stopwatch" aria-hidden="true"></i>
+                            Selesaikan dalam
+                        </p>
+
+                        {{-- aria-live="off": pembaca layar tidak boleh
+                             membacakan angka yang berganti tiap detik. --}}
+                        <div class="sta-mundur-angka" aria-live="off">
+                            <span class="sta-mundur-unit">
+                                <strong data-mundur-jam>{{ sprintf('%02d', intdiv($sisaDetik, 3600)) }}</strong>
+                                <small>jam</small>
+                            </span>
+                            <span class="sta-mundur-pisah" aria-hidden="true">:</span>
+                            <span class="sta-mundur-unit">
+                                <strong data-mundur-menit>{{ sprintf('%02d', intdiv($sisaDetik % 3600, 60)) }}</strong>
+                                <small>menit</small>
+                            </span>
+                            <span class="sta-mundur-pisah" aria-hidden="true">:</span>
+                            <span class="sta-mundur-unit">
+                                <strong data-mundur-detik>{{ sprintf('%02d', $sisaDetik % 60) }}</strong>
+                                <small>detik</small>
+                            </span>
+                        </div>
+
+                        <p class="sta-mundur-nota">Setelah itu kursinya dilepas untuk orang lain.</p>
+                    </div>
                 @endif
 
                 @if ($pendaftaran->cara_bayar === 'transfer' && ! $ringkas && ! $menunggu)
@@ -949,6 +988,99 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
     }
 
 
+    /* ------------------------------------------------------- hitung mundur */
+
+    .sta-mundur {
+        padding: 16px 18px 14px;
+        border: 1px solid #fde68a;
+        border-radius: 16px;
+        background: linear-gradient(180deg, #fffbeb, #fef9e7);
+        text-align: center;
+    }
+
+    .sta-mundur-kop {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        margin: 0 0 10px;
+        color: #92400e;
+        font-size: .76rem;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+    }
+
+    .sta-mundur-kop > .fas { margin: 0 !important; font-size: .9rem; }
+
+    .sta-mundur-angka {
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 6px;
+    }
+
+    .sta-mundur-unit {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 3px;
+        min-width: 62px;
+        padding: 8px 6px 7px;
+        border-radius: 12px;
+        background: #fff;
+        box-shadow: 0 1px 2px rgba(146, 64, 14, .12);
+    }
+
+    /* tabular-nums menahan goyangan: angka berlebar beda membuat seluruh
+       kotaknya bergeser tiap kali 1 berganti jadi 8. */
+    .sta-mundur-unit > strong {
+        color: #b45309;
+        font-size: 1.6rem;
+        font-weight: 800;
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .sta-mundur-unit > small {
+        color: #a16207;
+        font-size: .66rem;
+        font-weight: 600;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+    }
+
+    /* Titik duanya disejajarkan dengan ANGKANYA, bukan dengan tengah kotak:
+       di bawah angka masih ada label satuan, jadi tengah kotak jatuh terlalu
+       rendah dan titiknya menggantung di bawah deret angkanya. */
+    .sta-mundur-pisah {
+        padding-top: 12px;
+        color: #d97706;
+        font-size: 1.3rem;
+        font-weight: 800;
+        line-height: 1;
+    }
+
+    .sta-mundur-nota {
+        margin: 11px 0 0;
+        color: #92400e;
+        font-size: .78rem;
+        line-height: 1.5;
+    }
+
+    /* Saat waktunya habis warnanya berubah merah — sekejap sebelum halamannya
+       memuat ulang sendiri, supaya pergantiannya tidak terasa tiba-tiba. */
+    .sta-mundur-habis {
+        border-color: #fecaca;
+        background: linear-gradient(180deg, #fef2f2, #fee2e2);
+    }
+
+    .sta-mundur-habis .sta-mundur-kop,
+    .sta-mundur-habis .sta-mundur-nota { color: #991b1b; }
+    .sta-mundur-habis .sta-mundur-unit > strong { color: #b91c1c; }
+    .sta-mundur-habis .sta-mundur-unit > small { color: #dc2626; }
+    .sta-mundur-habis .sta-mundur-pisah { color: #ef4444; }
+
     /* ------------------------------------------------- layar bukti terkirim */
 
     .sta-selesai { margin-top: 20px; }
@@ -1425,27 +1557,33 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
      * apa pun di layar bahwa batas waktunya memang sedang berjalan.
      */
     document.addEventListener('DOMContentLoaded', function () {
-        var kotak = document.querySelector('[data-mis-mundur]');
+        var wadah = document.querySelector('[data-mis-mundur]');
 
-        if (!kotak) { return; }
+        if (!wadah) { return; }
 
-        var batas = new Date(kotak.getAttribute('data-mis-mundur')).getTime();
+        var batas = new Date(wadah.getAttribute('data-mis-mundur')).getTime();
 
-        // Tanggal yang tidak terbaca dibiarkan apa adanya: kalimat dari
-        // peladen masih benar, dan menggantinya dengan "NaN" jauh lebih buruk.
+        // Tanggal yang tidak terbaca dibiarkan apa adanya: angka yang sudah
+        // dirender peladen masih benar, dan menggantinya dengan "NaN" jauh
+        // lebih buruk.
         if (isNaN(batas)) { return; }
+
+        var jam = wadah.querySelector('[data-mundur-jam]');
+        var menit = wadah.querySelector('[data-mundur-menit]');
+        var detik = wadah.querySelector('[data-mundur-detik]');
+
+        if (!jam || !menit || !detik) { return; }
 
         var sudahMuatUlang = false;
 
-        var sebut = function (angka, satuan) {
-            return angka + ' ' + satuan;
-        };
+        var dua = function (n) { return n < 10 ? '0' + n : String(n); };
 
         var gambar = function () {
             var sisa = Math.floor((batas - Date.now()) / 1000);
 
             if (sisa <= 0) {
-                kotak.textContent = 'waktunya sudah habis';
+                wadah.classList.add('sta-mundur-habis');
+                jam.textContent = menit.textContent = detik.textContent = '00';
 
                 /*
                  * Dimuat ulang SEKALI, bukan berulang: peladen yang menentukan
@@ -1460,18 +1598,9 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                 return;
             }
 
-            var jam = Math.floor(sisa / 3600);
-            var menit = Math.floor((sisa % 3600) / 60);
-            var detik = sisa % 60;
-
-            var bagian = [];
-
-            if (jam > 0) { bagian.push(sebut(jam, 'jam')); }
-            if (jam > 0 || menit > 0) { bagian.push(sebut(menit, 'menit')); }
-
-            bagian.push(sebut(detik, 'detik'));
-
-            kotak.textContent = bagian.join(' ') + ' lagi';
+            jam.textContent = dua(Math.floor(sisa / 3600));
+            menit.textContent = dua(Math.floor((sisa % 3600) / 60));
+            detik.textContent = dua(sisa % 60);
         };
 
         gambar();

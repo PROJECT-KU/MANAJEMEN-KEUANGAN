@@ -2120,7 +2120,15 @@ class WebinarEksklusifTest extends TestCase
             ->assertOk()
             ->getContent();
 
-        $ada = preg_match('/<strong data-mis-mundur="(?<batas>[^"]+)"/', $isi, $cocok);
+        /*
+         * Penandanya kini di <div class="sta-mundur">, bukan lagi di <strong>
+         * di tengah kalimat: hitung mundurnya berdiri sendiri sebagai kotak
+         * angka per satuan.
+         *
+         * Dicari dengan tanda "=" dan kutip — tanpa itu, pemilih
+         * [data-mis-mundur] di dalam skripnya sendiri ikut terhitung.
+         */
+        $ada = preg_match('/data-mis-mundur="(?<batas>[^"]+)"/', $isi, $cocok);
 
         $this->assertSame(1, $ada,
             'Penanda hitung mundurnya hilang; angkanya akan membeku tanpa satu pun galat terbit.');
@@ -2145,8 +2153,18 @@ class WebinarEksklusifTest extends TestCase
          * lama, skrip gagal dimuat — yang terbaca harus tetap kalimat yang
          * masuk akal, bukan kotak kosong.
          */
-        $this->assertStringContainsString('lagi</strong>', $isi,
-            'Isi awal dari peladen hilang; halaman tanpa skrip akan menampilkan kotak kosong.');
+        /*
+         * Angka awalnya dirender PELADEN. Tanpa itu, yang tergambar sebelum
+         * skripnya jalan — atau di peramban yang skripnya gagal dimuat — tiga
+         * kotak kosong.
+         */
+        $this->assertMatchesRegularExpression('/<strong data-mundur-jam>\d{2}<\/strong>/', $isi,
+            'Angka jamnya tidak dirender peladen; kotaknya akan kosong tanpa skrip.');
+        $this->assertMatchesRegularExpression('/<strong data-mundur-menit>\d{2}<\/strong>/', $isi);
+        $this->assertMatchesRegularExpression('/<strong data-mundur-detik>\d{2}<\/strong>/', $isi);
+
+        // Kalimatnya turun ke bawah angkanya, tidak lagi menyelip di tengah.
+        $this->assertStringContainsString('Setelah itu kursinya dilepas untuk orang lain.', $isi);
     }
 
     #[Test]
@@ -2548,7 +2566,7 @@ class WebinarEksklusifTest extends TestCase
 
         // Yang HARUS tetap ada: rincian, hitung mundur, dan statusnya.
         $this->assertStringContainsString('Nomor pendaftaran', $isi);
-        $this->assertMatchesRegularExpression('/<strong[^>]*data-mis-mundur=/', $isi,
+        $this->assertStringContainsString('data-mis-mundur="', $isi,
             'Hitung mundurnya hilang; justru itu yang dicari orang saat kembali.');
         $this->assertStringContainsString('Pendaftaran Anda sudah masuk', $isi);
 

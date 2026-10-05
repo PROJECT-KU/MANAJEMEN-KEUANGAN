@@ -364,7 +364,7 @@ class UnggahBuktiTest extends TestCase
          * sebagai pemilih di dalam skrip hitung mundurnya sendiri, dan
          * percobaan pertama merah pada markah yang justru benar.
          */
-        $this->assertSame(0, preg_match_all('/<strong[^>]*data-mis-mundur=/', $isi),
+        $this->assertSame(0, substr_count($isi, 'data-mis-mundur="'),
             'Hitung mundurnya masih berjalan, padahal kursinya justru sedang ditahan.');
 
         /*
