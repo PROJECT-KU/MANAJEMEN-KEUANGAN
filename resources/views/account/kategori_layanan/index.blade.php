@@ -822,22 +822,29 @@ Angkatan Layanan | MIS
                                         <span class="mis-pil {{ $s[0] }}"><i class="fas {{ $s[2] }}"></i> {{ $s[1] }}</span>
 
                                         @if ($a->sudah_lewat)
-                                            {{-- Tidak ada apa pun yang menutup angkatan otomatis,
-                                                 jadi ia bisa terpajang "Aktif" berbulan-bulan
-                                                 sesudah acaranya selesai. --}}
+                                            {{-- "Sudah mulai", bukan "Lewat".
+
+                                                 Patokannya tanggal MULAI sejak 5 Okt 2026, jadi
+                                                 lencana ini menyala pada angkatan yang acaranya
+                                                 justru sedang BERJALAN — dan "Lewat" pada acara
+                                                 yang sedang berlangsung terbaca salah.
+
+                                                 Perintah harian menutupnya sendiri; lencana ini
+                                                 untuk jarak antara acaranya mulai dan perintahnya
+                                                 jalan, dan untuk peladen yang penjadwalnya mati. --}}
                                             @if ($bolehUbah)
                                                 {{-- Memberi tahu tanpa menawarkan jalan keluar cuma
                                                      setengah pekerjaan: menekannya menonaktifkan
                                                      angkatan itu. --}}
                                                 <button type="button" class="mis-pil mis-pil-kuning tar-pil-tombol"
                                                     data-nonaktifkan="{{ $a->id }}" data-nama="{{ $a->nama }}"
-                                                    title="Masih aktif padahal tanggalnya sudah lewat — tekan untuk menonaktifkan">
-                                                    <i class="fas fa-exclamation-triangle"></i> Lewat
+                                                    title="Masih menerima pendaftar padahal acaranya sudah mulai — tekan untuk menutup">
+                                                    <i class="fas fa-exclamation-triangle"></i> Sudah mulai
                                                 </button>
                                             @else
                                                 <span class="mis-pil mis-pil-kuning"
-                                                    title="Masih aktif padahal tanggalnya sudah lewat">
-                                                    <i class="fas fa-exclamation-triangle"></i> Lewat
+                                                    title="Masih menerima pendaftar padahal acaranya sudah mulai">
+                                                    <i class="fas fa-exclamation-triangle"></i> Sudah mulai
                                                 </span>
                                             @endif
                                         @endif
