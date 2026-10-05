@@ -2211,7 +2211,12 @@ class WebinarEksklusifTest extends TestCase
          * ketiganya memakan 184px sebelum isi pertamanya terlihat; sebaris
          * 62px.
          */
-        $this->assertStringContainsString('class="sta-kepala"', $isi,
+        /*
+         * Dicocokkan dengan pola, bukan teks persis: atribut kelasnya kini
+         * dirakit @if, jadi isinya "sta-kepala " berspasi ekor saat pengubah
+         * terpusatnya tidak dipakai.
+         */
+        $this->assertMatchesRegularExpression('/<div class="sta-kepala[ "]/', $isi,
             'Pembungkus kepala hilang; ikon dan judulnya akan bertumpuk lagi.');
     }
 
@@ -2646,5 +2651,87 @@ class WebinarEksklusifTest extends TestCase
         $this->assertStringContainsString('Cara membayar', $isi);
         $this->assertStringContainsString('2164 0100 0467 563', $isi);
         $this->assertMatchesRegularExpression('/<input[^>]*type="file"/', $isi);
+    }
+
+    #[Test]
+    public function kepala_layar_ringkas_terpusat_dengan_sub_judul_di_bawahnya(): void
+    {
+        /*
+         * Di layar penuh kalimatnya menemani judul di baris yang sama supaya
+         * hemat tinggi — di sana ia pengantar menuju langkah berikutnya. Di
+         * layar ringkas tidak ada langkah berikutnya, yang ada cuma kabar,
+         * jadi kalimatnya berdiri sebagai sub judul di bawah judulnya.
+         */
+        $sesi = $this->sesi(['total_kuota' => '20', 'sisa_kuota' => '20']);
+
+        $this->post(route('public.webinareksklusif.store'), $this->borang($sesi));
+        $this->post(route('public.webinareksklusif.store'), $this->borang($sesi));
+
+        $p = WebinarEksklusifPendaftaran::where('email', 'berto@contoh.test')->firstOrFail();
+
+        /*
+         * Dicocokkan ATRIBUT class unsurnya, bukan kata mentah di seluruh
+         * halaman: nama kelas yang sama juga tertulis sebagai pemilih di
+         * dalam blok <style> halaman ini.
+         */
+        $isi = $this->get(route('public.webinareksklusif.status', $p->getKey()))
+            ->assertOk()
+            ->getContent();
+
+        preg_match('/<div class="(sta-kepala[^"]*)"/', $isi, $cocok);
+
+        $this->assertStringContainsString('sta-kepala-tengah', $cocok[1] ?? '',
+            'Judulnya tidak dipusatkan di layar ringkas.');
+    }
+
+    #[Test]
+    public function kepala_layar_penuh_tidak_ikut_terpusat(): void
+    {
+        $sesi = $this->sesi(['total_kuota' => '20', 'sisa_kuota' => '20']);
+
+        $this->post(route('public.webinareksklusif.store'), $this->borang($sesi));
+
+        $p = WebinarEksklusifPendaftaran::where('email', 'berto@contoh.test')->firstOrFail();
+
+        $isi = $this->get(route('public.webinareksklusif.status', $p->getKey()))
+            ->assertOk()
+            ->getContent();
+
+        preg_match('/<div class="(sta-kepala[^"]*)"/', $isi, $cocok);
+
+        $this->assertStringNotContainsString('sta-kepala-tengah', $cocok[1] ?? '',
+            'Layar penuh ikut dipusatkan; kalimatnya jadi turun dan menambah tinggi.');
+    }
+
+    #[Test]
+    public function sub_judul_layar_ringkas_tidak_dipotong_lebar(): void
+    {
+        /*
+         * Yang memaksa kalimatnya turun ke baris sendiri flex-basis 100% —
+         * dan basis itu hanya berlaku kalau tidak ada yang memotongnya.
+         *
+         * Percobaan pertama memberinya max-width: 68ch untuk menjaga panjang
+         * barisnya. Terukur: lebarnya jadi 601px, dan 52 (ikon) + 343 (judul)
+         * + 601 masih muat di baris selebar 1.294px — jadi ia TIDAK PERNAH
+         * membungkus, dan kalimatnya tetap duduk di samping judul. Tidak ada
+         * galat, tidak ada yang terlihat rusak; cuma tata letaknya diam-diam
+         * tidak berubah.
+         */
+        $sumber = file_get_contents(
+            resource_path('views/public/webinar_eksklusif/status.blade.php')
+        );
+
+        $aturan = preg_replace('#/\*.*?\*/#s', '', $sumber);
+        $aturan = preg_replace('#\{\{--.*?--\}\}#s', '', (string) $aturan);
+
+        $ada = preg_match('/\.sta-kepala-tengah\s*>\s*\.sta-sub\s*\{(?<isi>[^}]*)\}/', (string) $aturan, $cocok);
+
+        $this->assertSame(1, $ada, 'Aturan sub judul layar ringkas hilang.');
+
+        $this->assertStringContainsString('flex: 1 0 100%', $cocok['isi'],
+            'Sub judulnya tidak lagi dipaksa turun ke baris sendiri.');
+
+        $this->assertStringNotContainsString('max-width', $cocok['isi'],
+            'Lebarnya dipotong lagi; sub judulnya akan kembali duduk di samping judul.');
     }
 }

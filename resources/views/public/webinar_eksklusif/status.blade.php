@@ -128,7 +128,7 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                  habis untuk sapaan. Di layar lebar ketiganya disejajarkan
                  jadi satu baris; di ponsel tetap bertumpuk di tengah, sebab
                  di sana lebarnya yang langka, bukan tingginya. --}}
-            <div class="sta-kepala">
+            <div class="sta-kepala @if ($ringkas) sta-kepala-tengah @endif">
                 <span class="sta-ubin sta-ubin-{{ $rupa[0] }}" aria-hidden="true">
                     <i class="fas {{ $rupa[1] }}"></i>
                 </span>
@@ -1281,6 +1281,37 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
         .sta-kepala > .sta-judul { font-size: 1.45rem; }
 
         .sta-kepala > .sta-sub { flex: 1 1 320px; font-size: .88rem; line-height: 1.55; }
+
+        /* Layar ringkas: judulnya DI TENGAH, kalimatnya di bawahnya.
+
+           Di layar penuh kalimatnya menemani judul di baris yang sama supaya
+           hemat tinggi, dan di sana ia memang pengantar menuju langkah
+           berikutnya. Di layar ringkas tidak ada langkah berikutnya — yang ada
+           cuma kabar — jadi kalimatnya berdiri sebagai sub judul.
+
+           Dikerjakan dengan MEMBUNGKUS, bukan menambah pembungkus baru:
+           ikon dan judul tetap jadi satu baris yang dipusatkan, lalu
+           kalimatnya dipaksa turun dengan flex-basis 100%. */
+        .sta-kepala-tengah {
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px 14px;
+            text-align: center;
+        }
+
+        /* TANPA max-width.
+
+           Percobaan pertama memakai max-width: 68ch untuk menjaga panjang
+           barisnya. Terukur: lebarnya jadi 601px, dan 52 (ikon) + 343 (judul)
+           + 601 masih muat di baris selebar 1.294px — jadi ia TIDAK PERNAH
+           membungkus, dan kalimatnya tetap duduk di samping judul.
+
+           Yang memaksanya turun basis 100%, dan basis itu hanya berlaku kalau
+           tidak ada yang memotongnya. */
+        .sta-kepala-tengah > .sta-sub {
+            flex: 1 0 100%;
+            margin: 0;
+        }
 
         /* Jarak antar blok di dalam lajur dirapatkan; yang menumpuk tegak
            di sini enam blok, jadi tiap 6px terbayar enam kali. */
