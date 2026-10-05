@@ -13,8 +13,39 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
     Satu halaman, bukan dua, karena yang ditanyakan orang di keduanya sama —
     "pendaftaran saya sudah masuk belum, dan sekarang saya harus apa".
 --}}
+@php($lunas = $pendaftaran->lunas)
+@php($habis = $pendaftaran->sudah_kedaluwarsa || $pendaftaran->status === 'expired')
+@php($batal = $pendaftaran->status === 'cancel')
+
+{{-- Keadaan KEEMPAT: bukti sudah dikirim, panitia belum mencocokkan.
+
+     Dulu halaman ini cuma punya tiga keadaan, jadi sesudah mengunggah
+     peserta kembali ke layar yang sama persis — lengkap dengan nomor
+     rekening, langkah "transfer dulu", dan borang unggah yang masih
+     menganga. Yang awam membacanya sebagai "belum berhasil", lalu
+     mengunggah lagi. Dan lagi.
+
+     Sejak ada keadaan ini, yang sudah mengirim bukti tidak lagi
+     disuguhi satu pun hal yang bisa ditekan berulang. --}}
+@php($menunggu = ! $lunas && ! $batal && ! $habis && $buktiAda)
+
+{{-- Dua lajur hanya kalau lajur KANANNYA memang berisi.
+
+     Yang sudah lunas, dibatalkan, atau kedaluwarsa tidak punya satu
+     pun hal yang harus dikerjakan — tanpa penjaga ini kartunya
+     menggambar lajur kanan kosong lengkap dengan garis pemisah yang
+     berdiri sendiri di tengah ruang putih. --}}
+@php($duaLajur = ! $lunas && ! $batal && ! $habis && ! $menunggu)
+
 <section class="sta-latar">
-    <div class="container sta-wadah">
+    {{-- Lebarnya ikut keadaan.
+
+         Yang masih harus membayar punya DUA lajur isi, dan di situ layar penuh
+         memang terpakai. Yang sudah lunas, sudah mengirim bukti, batal, atau
+         kedaluwarsa cuma punya satu lajur — dibiarkan selebar layar juga,
+         yang tergambar kartu putih 1.382px dengan kolom 620px melayang di
+         tengahnya. --}}
+    <div class="container sta-wadah @if (! $duaLajur) sta-wadah-ramping @endif">
 
         @if (session('error'))
             <div class="sta-galat" role="alert">
@@ -30,21 +61,7 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
             </div>
         @endif
 
-        @php($lunas = $pendaftaran->lunas)
-        @php($habis = $pendaftaran->sudah_kedaluwarsa || $pendaftaran->status === 'expired')
-        @php($batal = $pendaftaran->status === 'cancel')
 
-        {{-- Keadaan KEEMPAT: bukti sudah dikirim, panitia belum mencocokkan.
-
-             Dulu halaman ini cuma punya tiga keadaan, jadi sesudah mengunggah
-             peserta kembali ke layar yang sama persis — lengkap dengan nomor
-             rekening, langkah "transfer dulu", dan borang unggah yang masih
-             menganga. Yang awam membacanya sebagai "belum berhasil", lalu
-             mengunggah lagi. Dan lagi.
-
-             Sejak ada keadaan ini, yang sudah mengirim bukti tidak lagi
-             disuguhi satu pun hal yang bisa ditekan berulang. --}}
-        @php($menunggu = ! $lunas && ! $batal && ! $habis && $buktiAda)
 
         <div class="sta-kartu">
 
@@ -96,6 +113,16 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                     Tinggal satu langkah: selesaikan pembayarannya.
                 @endif
             </p>
+
+            {{-- DUA LAJUR di layar lebar, satu lajur di ponsel.
+
+                 Dibungkus div sungguhan, bukan diserahkan ke penempatan
+                 otomatis grid pada anak-anak .sta-kartu: sebagian anaknya ada
+                 di dalam @if, jadi yang tergambar berbeda-beda per keadaan —
+                 dan penempatan otomatis akan menaruh hal yang sama di baris
+                 yang berbeda tergantung keadaan mana yang sedang aktif. --}}
+            <div class="sta-kisi @if (! $duaLajur) sta-kisi-tunggal @endif">
+                <div class="sta-lajur">
 
             <dl class="sta-rincian">
                 <div>
@@ -153,6 +180,83 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                     <dd class="sta-total">Rp {{ number_format((int) $pendaftaran->total_pembayaran, 0, ',', '.') }}</dd>
                 </div>
             </dl>
+
+
+            {{--
+                TAWARAN BUAT AKUN — opt-in, bukan dibuatkan diam-diam.
+
+                Akun tidak dibuat otomatis saat mendaftar dengan sengaja:
+                akun hasil buatan sistem tidak punya sandi yang dipilih
+                orangnya, dan email yang salah ketik akan menciptakan akun
+                yang tidak bisa dibuka siapa pun — sekaligus menghalangi
+                pendaftaran akun sungguhannya nanti, sebab emailnya unik.
+
+                Jadi ditawarkan di sini, sesudah pendaftarannya aman, dengan
+                email dan namanya sudah dibawa ke borang pendaftaran akun.
+                Tidak ditampilkan kepada yang sudah masuk.
+            --}}
+            @guest
+                @if (! $batal && ! $habis)
+                    <div class="sta-tawar-akun">
+                        <p class="sta-tawar-judul">Mau lebih mudah lain kali?</p>
+                        <p class="sta-tawar-isi">
+                            Dengan akun, riwayat pendaftaran Anda tersimpan dan borangnya
+                            terisi sendiri di sesi berikutnya.
+                        </p>
+                        <a href="{{ route('register', ['email' => $pendaftaran->email, 'nama' => $pendaftaran->nama]) }}">
+                            <i class="fas fa-user-plus" aria-hidden="true"></i>
+                            Buat akun pakai email ini
+                        </a>
+                    </div>
+                @endif
+            @endguest
+
+            {{--
+                Kirim ulang bukti pendaftaran.
+
+                Satu-satunya jalan kembali ke halaman ini adalah tautan
+                ber-UUID di email. Kalau emailnya terhapus atau masuk folder
+                sampah, orangnya kehilangan nomor pendaftaran dan cara
+                bayarnya sekaligus — dan yang menanggung panitia lewat
+                WhatsApp.
+
+                Tidak ditampilkan untuk yang sudah batal atau kedaluwarsa:
+                di sana tidak ada lagi yang perlu disimpan.
+            --}}
+            @if (! $batal && ! $habis)
+                <form method="POST" action="{{ route('public.webinareksklusif.kirimulang', $pendaftaran->getKey()) }}"
+                    class="sta-kirim-ulang">
+                    @csrf
+                    <button type="submit">
+                        <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                        Kirim ulang bukti pendaftaran ke email saya
+                    </button>
+                </form>
+            @endif
+
+            {{-- Daftar peserta ditampilkan supaya pendaftar bisa memeriksa
+                 ejaan namanya sebelum sertifikat diterbitkan. Salah eja yang
+                 baru ketahuan saat sertifikatnya jadi adalah pekerjaan ulang
+                 yang bisa dicegah di sini. --}}
+            @php($semuaPeserta = $pendaftaran->semuaPeserta())
+
+            @if (count($semuaPeserta) > 1)
+                <div class="sta-peserta">
+                    <p class="sta-peserta-judul">Nama peserta ({{ count($semuaPeserta) }} orang)</p>
+                    <ol>
+                        @foreach ($semuaPeserta as $orang)
+                            <li>{{ $orang['nama'] }}@if ($orang['utama'])<span>pendaftar</span>@endif</li>
+                        @endforeach
+                    </ol>
+                    <p class="sta-peserta-catatan">
+                        Sertifikat diterbitkan atas nama ini. Kalau ada yang salah eja,
+                        kabari panitia sebelum hari pelaksanaan.
+                    </p>
+                </div>
+            @endif
+                </div>{{-- /lajur kiri --}}
+
+                <div class="sta-lajur">
 
             @if (! $lunas && ! $batal && ! $habis && ! $menunggu)
                 @if ($pendaftaran->sisa_waktu)
@@ -378,78 +482,9 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                 </div>
             @endif
 
-            {{--
-                TAWARAN BUAT AKUN — opt-in, bukan dibuatkan diam-diam.
+                </div>{{-- /lajur kanan --}}
+            </div>{{-- /kisi --}}
 
-                Akun tidak dibuat otomatis saat mendaftar dengan sengaja:
-                akun hasil buatan sistem tidak punya sandi yang dipilih
-                orangnya, dan email yang salah ketik akan menciptakan akun
-                yang tidak bisa dibuka siapa pun — sekaligus menghalangi
-                pendaftaran akun sungguhannya nanti, sebab emailnya unik.
-
-                Jadi ditawarkan di sini, sesudah pendaftarannya aman, dengan
-                email dan namanya sudah dibawa ke borang pendaftaran akun.
-                Tidak ditampilkan kepada yang sudah masuk.
-            --}}
-            @guest
-                @if (! $batal && ! $habis)
-                    <div class="sta-tawar-akun">
-                        <p class="sta-tawar-judul">Mau lebih mudah lain kali?</p>
-                        <p class="sta-tawar-isi">
-                            Dengan akun, riwayat pendaftaran Anda tersimpan dan borangnya
-                            terisi sendiri di sesi berikutnya.
-                        </p>
-                        <a href="{{ route('register', ['email' => $pendaftaran->email, 'nama' => $pendaftaran->nama]) }}">
-                            <i class="fas fa-user-plus" aria-hidden="true"></i>
-                            Buat akun pakai email ini
-                        </a>
-                    </div>
-                @endif
-            @endguest
-
-            {{--
-                Kirim ulang bukti pendaftaran.
-
-                Satu-satunya jalan kembali ke halaman ini adalah tautan
-                ber-UUID di email. Kalau emailnya terhapus atau masuk folder
-                sampah, orangnya kehilangan nomor pendaftaran dan cara
-                bayarnya sekaligus — dan yang menanggung panitia lewat
-                WhatsApp.
-
-                Tidak ditampilkan untuk yang sudah batal atau kedaluwarsa:
-                di sana tidak ada lagi yang perlu disimpan.
-            --}}
-            @if (! $batal && ! $habis)
-                <form method="POST" action="{{ route('public.webinareksklusif.kirimulang', $pendaftaran->getKey()) }}"
-                    class="sta-kirim-ulang">
-                    @csrf
-                    <button type="submit">
-                        <i class="fas fa-paper-plane" aria-hidden="true"></i>
-                        Kirim ulang bukti pendaftaran ke email saya
-                    </button>
-                </form>
-            @endif
-
-            {{-- Daftar peserta ditampilkan supaya pendaftar bisa memeriksa
-                 ejaan namanya sebelum sertifikat diterbitkan. Salah eja yang
-                 baru ketahuan saat sertifikatnya jadi adalah pekerjaan ulang
-                 yang bisa dicegah di sini. --}}
-            @php($semuaPeserta = $pendaftaran->semuaPeserta())
-
-            @if (count($semuaPeserta) > 1)
-                <div class="sta-peserta">
-                    <p class="sta-peserta-judul">Nama peserta ({{ count($semuaPeserta) }} orang)</p>
-                    <ol>
-                        @foreach ($semuaPeserta as $orang)
-                            <li>{{ $orang['nama'] }}@if ($orang['utama'])<span>pendaftar</span>@endif</li>
-                        @endforeach
-                    </ol>
-                    <p class="sta-peserta-catatan">
-                        Sertifikat diterbitkan atas nama ini. Kalau ada yang salah eja,
-                        kabari panitia sebelum hari pelaksanaan.
-                    </p>
-                </div>
-            @endif
 
             <div class="sta-aksi">
                 @if ($batal || $habis)
@@ -487,7 +522,23 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
         color: var(--tinta);
     }
 
-    .sta-wadah { max-width: 640px; }
+    /* Selebar layar, bukan strip 640px di tengah.
+
+       Bantalan sampingnya ikut lebar layar lewat clamp: 16px di ponsel sampai
+       48px di layar besar. Dipatok satu angka, 16px terasa sesak di meja dan
+       48px memakan separuh layar ponsel.
+
+       Yang menjaga barisnya tetap terbaca BUKAN lebar wadahnya, melainkan kisi
+       dua lajur di bawah — itu sebabnya wadahnya boleh dilepas sepenuhnya. */
+    .sta-wadah {
+        max-width: none;
+        padding-left: clamp(16px, 3vw, 48px);
+        padding-right: clamp(16px, 3vw, 48px);
+    }
+
+    /* Satu lajur dulu. Dua lajurnya dipasang di media query layar lebar,
+       bukan sebaliknya — halaman ini paling sering dibuka di ponsel. */
+    .sta-kisi { display: block; }
 
     .sta-galat,
     .sta-sukses {
@@ -1037,6 +1088,56 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
     .sta-tautan { font-size: .9rem; font-weight: 700; color: var(--navy); }
 
     .sta-simpan { margin: 18px 0 0; font-size: .76rem; color: var(--tinta-2); }
+
+    /* ------------------------------------------------- layar lebar: 2 lajur */
+
+    @media (min-width: 992px) {
+        .sta-kisi {
+            display: grid;
+            /* minmax(0, ...) WAJIB: tanpa itu lajurnya memakai min-width auto
+               dan isi terlebar di dalamnya — nomor rekening yang berspasi —
+               melebarkan lajurnya melewati jatahnya, lalu kartunya meluber. */
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 0 clamp(24px, 3vw, 44px);
+            align-items: start;
+        }
+
+        /* Garis pemisah tipis di antaranya. Dipasang sebagai border lajur
+           kedua, bukan unsur sendiri: unsur pemisah akan ikut tergambar di
+           ponsel saat lajurnya menumpuk. */
+        .sta-kisi:not(.sta-kisi-tunggal) > .sta-lajur + .sta-lajur {
+            padding-left: clamp(24px, 3vw, 44px);
+            border-left: 1px solid var(--garis);
+        }
+
+        /* Judul dan kalimat pembukanya tidak ikut melebar sampai ujung:
+           baris teks sepanjang 1.400px tidak bisa diikuti mata, yang kehilangan
+           tempatnya tiap kali berpindah ke baris berikutnya. */
+        .sta-judul,
+        .sta-sub {
+            max-width: 46ch;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .sta-kartu { padding: 40px clamp(28px, 3vw, 48px); }
+
+        /* Satu lajur walau layarnya lebar: tidak ada yang harus dikerjakan,
+           jadi tidak ada lajur kanan untuk menampungnya. Isinya dipusatkan
+           supaya tidak jadi satu pita sempit yang menempel ke kiri. */
+        .sta-kisi-tunggal { display: block; }
+
+        /* Satu lajur: halamannya ikut menyempit, bukan kartunya dibiarkan
+           melar dengan kolom sempit melayang di tengah. */
+        .sta-wadah-ramping { max-width: 900px; }
+
+        .sta-kisi-tunggal > .sta-lajur {
+            max-width: 620px;
+            margin: 0 auto;
+            border-left: 0;
+            padding-left: 0;
+        }
+    }
 
     @media (max-width: 575.98px) {
         .sta-kartu { padding: 26px 18px; }
