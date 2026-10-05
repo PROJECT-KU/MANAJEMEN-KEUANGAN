@@ -228,6 +228,123 @@ class AngkatanAuditTigaTest extends TestCase
     }
 
     #[Test]
+    public function angkatan_ditutup_pada_HARI_MULAINYA_bukan_menunggu_selesai(): void
+    {
+        /*
+         * Inti perubahan 5 Okt 2026, dan uji lama TIDAK bisa membuktikannya:
+         * ia memakai angkatan sebulan lalu, yang sudah lewat menurut patokan
+         * lama MAUPUN baru. Hijau di kedua aturan berarti tidak membuktikan
+         * apa-apa tentang perbedaannya.
+         *
+         * Yang dibedakan di sini angkatan yang SEDANG BERJALAN: mulai
+         * kemarin, selesai minggu depan. Dengan patokan lama ia tetap
+         * terpajang dan tetap menerima pendaftar sampai hari terakhir — orang
+         * membayar untuk acara yang sudah separuh jalan.
+         */
+        $sedangBerjalan = $this->angkatan([
+            'status' => 'active',
+            'mulai' => now()->subDay()->toDateString(),
+            'selesai' => now()->addWeek()->toDateString(),
+        ]);
+
+        $mulaiHariIni = $this->angkatan([
+            'status' => 'active',
+            'mulai' => now()->toDateString(),
+            'selesai' => now()->addDays(2)->toDateString(),
+        ]);
+
+        $besok = $this->angkatan([
+            'status' => 'active',
+            'mulai' => now()->addDay()->toDateString(),
+            'selesai' => now()->addDays(3)->toDateString(),
+        ]);
+
+        $this->artisan('angkatan:tutup-lewat')->assertSuccessful();
+
+        $this->assertSame('non active', $sedangBerjalan->fresh()->status,
+            'Angkatan yang sudah berjalan masih menerima pendaftar.');
+
+        $this->assertSame('non active', $mulaiHariIni->fresh()->status,
+            'Angkatan yang mulai HARI INI seharusnya sudah ditutup.');
+
+        $this->assertSame('active', $besok->fresh()->status,
+            'Angkatan yang baru mulai besok tidak boleh ikut ditutup.');
+    }
+
+    #[Test]
+    public function lencana_di_layar_sepakat_dengan_perintah_penutupnya(): void
+    {
+        /*
+         * Aturannya dipakai EMPAT tempat: lencana di daftar, dua saringan
+         * "perlu dicek", dan perintah penutup harian. Sebelumnya masing-masing
+         * menuliskannya sendiri.
+         *
+         * Kalau menyimpang, tidak ada yang terlihat rusak: perintahnya menutup
+         * angkatan yang menurut layar admin baik-baik saja, atau sebaliknya
+         * layar menyalahkan angkatan yang tidak akan pernah ditutup.
+         */
+        $sedangBerjalan = $this->angkatan([
+            'status' => 'active',
+            'mulai' => now()->subDay()->toDateString(),
+            'selesai' => now()->addWeek()->toDateString(),
+        ]);
+
+        $besok = $this->angkatan([
+            'status' => 'active',
+            'mulai' => now()->addDay()->toDateString(),
+            'selesai' => now()->addDays(3)->toDateString(),
+        ]);
+
+        // Lencana (accessor PHP)
+        $this->assertTrue($sedangBerjalan->sudah_lewat);
+        $this->assertFalse($besok->sudah_lewat);
+
+        // Saringan (kueri) — harus menunjuk angkatan yang SAMA
+        $lewatKueri = KategoriLayanan::query()->perlu('aktif-lewat')->pluck('id')->all();
+
+        $this->assertContains($sedangBerjalan->getKey(), $lewatKueri,
+            'Saringan tidak menemukan angkatan yang lencananya menyalahkan.');
+
+        $this->assertNotContains($besok->getKey(), $lewatKueri,
+            'Saringan menyalahkan angkatan yang lencananya menyatakan baik-baik saja.');
+    }
+
+    #[Test]
+    public function draf_tetap_memakai_patokan_tanggal_selesai(): void
+    {
+        /*
+         * Yang berubah hanya angkatan AKTIF. Draf tidak terpajang di mana pun
+         * dan tidak menerima pendaftar, jadi menutupnya lebih awal tidak
+         * menyelamatkan apa pun — yang perlu diingatkan cuma bahwa ia
+         * tertinggal, dan itu baru benar sesudah acaranya habis.
+         */
+        $drafBerjalan = $this->angkatan([
+            'status' => 'draft',
+            'mulai' => now()->subDay()->toDateString(),
+            'selesai' => now()->addWeek()->toDateString(),
+        ]);
+
+        $drafHabis = $this->angkatan([
+            'status' => 'draft',
+            'mulai' => now()->subMonth()->toDateString(),
+            'selesai' => now()->subMonth()->addDays(2)->toDateString(),
+        ]);
+
+        $basi = KategoriLayanan::query()->perlu('draf-lewat')->pluck('id')->all();
+
+        $this->assertNotContains($drafBerjalan->getKey(), $basi,
+            'Draf yang acaranya belum selesai belum basi.');
+
+        $this->assertContains($drafHabis->getKey(), $basi,
+            'Draf yang acaranya sudah habis seharusnya ditandai basi.');
+
+        $this->artisan('angkatan:tutup-lewat')->assertSuccessful();
+
+        $this->assertSame('draft', $drafBerjalan->fresh()->status,
+            'Perintah penutup tidak boleh menyentuh draf.');
+    }
+
+    #[Test]
     public function jalan_kering_tidak_mengubah_apa_pun(): void
     {
         $lewat = $this->angkatan([

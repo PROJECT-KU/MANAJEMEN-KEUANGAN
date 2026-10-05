@@ -239,7 +239,7 @@ class AngkatanPerluDicekTest extends TestCase
             'mulai' => now()->subMonths(2), 'selesai' => now()->subMonths(2)->addDay(),
         ]);
 
-        $this->assertContains('masih aktif padahal tanggalnya sudah lewat — nonaktifkan kalau acaranya memang selesai', $a->perlu_dicek);
+        $this->assertContains('masih menerima pendaftar padahal acaranya sudah mulai — tutup angkatannya', $a->perlu_dicek);
         $this->assertTrue(KategoriLayanan::perlu('aktif-lewat')->where('id', $a->id)->exists());
         $this->assertTrue(KategoriLayanan::perluApaPun()->where('id', $a->id)->exists());
     }
@@ -420,6 +420,39 @@ class AngkatanPerluDicekTest extends TestCase
             ->assertOk()
             ->assertDontSee('tanggal hari ini', false);
     }
+    #[Test]
+    public function alasan_dibuang_lewat_kunci_bukan_lewat_kata_pembukanya(): void
+    {
+        /*
+         * "Sudah mulai" punya lencananya sendiri, jadi ia tidak boleh muncul
+         * lagi di dalam lencana "Perlu dicek" — dua peringatan untuk satu hal.
+         *
+         * Penyaringnya dulu mencocokkan kata pembuka kalimatnya ("masih
+         * aktif"). Begitu kalimatnya diperhalus, penyaringnya diam-diam
+         * berhenti bekerja dan lencananya muncul dua kali — tanpa satu pun
+         * galat, dan tanpa ada yang terlihat rusak sampai ada yang menghitung.
+         *
+         * Dijaga BENTUKNYA: alasannya berkunci, dan kuncinya ada di daftar
+         * resmi PERLU. Kalimatnya boleh diubah kapan saja.
+         */
+        $a = $this->angkatan([
+            'status' => 'active',
+            'mulai' => now()->subDay()->toDateString(),
+            'selesai' => now()->addWeek()->toDateString(),
+        ]);
+
+        $this->assertArrayHasKey('aktif-lewat', $a->perlu_dicek,
+            'Alasannya tidak lagi berkunci; penyaringnya akan kembali menebak dari kalimat.');
+
+        $this->assertArrayNotHasKey('aktif-lewat', $a->perlu_dicek_lain,
+            'Alasan yang sudah punya lencana sendiri muncul dua kali.');
+
+        foreach (array_keys($a->perlu_dicek) as $kunci) {
+            $this->assertArrayHasKey($kunci, KategoriLayanan::PERLU,
+                'Kunci "' . $kunci . '" tidak ada di daftar PERLU, jadi saringannya tidak akan menemukannya.');
+        }
+    }
+
     #[Test]
     public function hitungan_kueri_dan_hitungan_php_tidak_boleh_berbeda(): void
     {
