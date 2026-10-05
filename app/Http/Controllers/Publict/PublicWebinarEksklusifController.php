@@ -30,6 +30,9 @@ class PublicWebinarEksklusifController extends Controller
 {
     private const KODE = 'webinar_eksklusif';
 
+    /** Awalan kunci sesi penanda layar ringkas, disambung id pendaftarannya. */
+    private const KUNCI_RINGKAS = 'we_ringkas_';
+
     /*
      * Batas ukuran bukti transfer, dalam KB.
      *
@@ -607,8 +610,23 @@ class PublicWebinarEksklusifController extends Controller
              * salah membuatnya mengira pendaftarannya gagal, lalu ia mencoba
              * lagi; justru itu yang hendak dihentikan.
              */
+            /*
+             * Penandanya DISIMPAN di sesi, bukan dikirim sebagai pesan
+             * sekali-pakai.
+             *
+             * Versi pertama memakai flash, dan ia hilang begitu halamannya
+             * dimuat ulang — layar penuh beserta borang unggahnya muncul lagi
+             * tepat pada orang yang baru saja diberi tahu tidak perlu berbuat
+             * apa-apa. Ditekan F5 sekali, seluruh penjagaannya batal.
+             *
+             * Diberi kunci per pendaftaran, bukan satu penanda untuk semua:
+             * satu peramban bisa memegang beberapa pendaftaran sekaligus
+             * (panitia yang mendaftarkan beberapa orang), dan penanda tunggal
+             * akan meringkas halaman yang bukan haknya.
+             */
+            session()->put(self::KUNCI_RINGKAS . $sudahAda->getKey(), true);
+
             return redirect()->route('public.webinareksklusif.status', $sudahAda->getKey())
-                ->with('ringkas', true)
                 ->with('kabar', $sudahAda->status === 'paid'
                     ? 'Data ini sudah terdaftar di sesi ini dan pembayarannya sudah lunas.'
                         . ' Ini rincian pendaftaran Anda.'
@@ -773,7 +791,27 @@ class PublicWebinarEksklusifController extends Controller
          */
         $buktiUrl = AlamatGambar::url($pendaftaran->gambar);
 
+        /*
+         * Layar ringkas: hanya rincian, hitung mundur, dan statusnya.
+         *
+         * Dipasang saat orangnya dicegat karena mendaftar lagi dengan data
+         * yang sama, dan BERTAHAN sampai ia sendiri memintanya dibuka —
+         * dimuat ulang pun tidak menghapusnya.
+         *
+         * TIDAK ada jalan keluar dari layar ini, dan itu disengaja. Versi
+         * sebelumnya menyediakan tautan ?penuh=1, dan sekali ditekan penanda
+         * ringkasnya terhapus — sejak itu tiap muat ulang memulangkan layar
+         * penuh beserta borang unggahnya, persis keadaan yang hendak
+         * dihindari.
+         *
+         * Yang dicegat memang sudah pernah mendaftar, dan cara membayarnya
+         * sudah ada di email bukti pendaftaran yang ia terima saat itu —
+         * tombol pengirim ulangnya ada di layar ini.
+         */
+        $kunciRingkas = self::KUNCI_RINGKAS . $pendaftaran->getKey();
+
         return view('public.webinar_eksklusif.status', [
+            'ringkas' => (bool) session($kunciRingkas),
             'pendaftaran' => $pendaftaran,
             'sesi' => $pendaftaran->angkatan,
             'buktiUrl' => $buktiUrl,
