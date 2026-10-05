@@ -135,7 +135,7 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                  habis untuk sapaan. Di layar lebar ketiganya disejajarkan
                  jadi satu baris; di ponsel tetap bertumpuk di tengah, sebab
                  di sana lebarnya yang langka, bukan tingginya. --}}
-            <div class="sta-kepala @if ($ringkas) sta-kepala-tengah @endif">
+            <div class="sta-kepala">
                 <span class="{{ trim('sta-ubin sta-ubin-' . $rupa[0] . ' ' . $rupa[2]) }}" aria-hidden="true">
                     <i class="fas {{ $rupa[1] }}"></i>
                 </span>
@@ -1496,10 +1496,12 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
            perhatian sendirian. */
         .sta-kepala {
             display: flex;
+            flex-wrap: wrap;
             align-items: center;
-            gap: 16px;
+            justify-content: center;
+            gap: 8px 14px;
             margin-bottom: 22px;
-            text-align: left;
+            text-align: center;
         }
 
         .sta-kepala > .sta-ubin {
@@ -1522,38 +1524,25 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
 
         .sta-kepala > .sta-judul { font-size: 1.45rem; }
 
-        .sta-kepala > .sta-sub { flex: 1 1 320px; font-size: .88rem; line-height: 1.55; }
+        /* Kalimatnya SELALU turun jadi sub judul, di layar penuh maupun
+           ringkas.
 
+           Dulu hanya layar ringkas yang dipusatkan; di layar penuh kalimatnya
+           menemani judul di baris yang sama untuk menghemat tinggi. Dua layar
+           dengan kepala yang berbeda bentuk itu dibayar 28px tinggi — dan
+           dibayar juga dengan satu pengubah kelas yang harus dirawat di markah,
+           di CSS, dan di dua uji yang saling bertolak belakang.
 
-        /* Layar ringkas: judulnya DI TENGAH, kalimatnya di bawahnya.
-
-           Di layar penuh kalimatnya menemani judul di baris yang sama supaya
-           hemat tinggi, dan di sana ia memang pengantar menuju langkah
-           berikutnya. Di layar ringkas tidak ada langkah berikutnya — yang ada
-           cuma kabar — jadi kalimatnya berdiri sebagai sub judul.
-
-           Dikerjakan dengan MEMBUNGKUS, bukan menambah pembungkus baru:
-           ikon dan judul tetap jadi satu baris yang dipusatkan, lalu
-           kalimatnya dipaksa turun dengan flex-basis 100%. */
-        .sta-kepala-tengah {
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 8px 14px;
-            text-align: center;
-        }
-
-        /* TANPA max-width.
-
-           Percobaan pertama memakai max-width: 68ch untuk menjaga panjang
-           barisnya. Terukur: lebarnya jadi 601px, dan 52 (ikon) + 343 (judul)
-           + 601 masih muat di baris selebar 1.294px — jadi ia TIDAK PERNAH
-           membungkus, dan kalimatnya tetap duduk di samping judul.
-
-           Yang memaksanya turun basis 100%, dan basis itu hanya berlaku kalau
-           tidak ada yang memotongnya. */
-        .sta-kepala-tengah > .sta-sub {
+           TANPA max-width. Percobaan pertama memakai max-width: 68ch untuk
+           menjaga panjang barisnya. Terukur: lebarnya jadi 601px, dan 52
+           (ikon) + 343 (judul) + 601 masih muat di baris selebar 1.294px —
+           jadi ia TIDAK PERNAH membungkus, dan kalimatnya tetap duduk di
+           samping judul. Yang memaksanya turun basis 100%, dan basis itu
+           hanya berlaku kalau tidak ada yang memotongnya. */
+        .sta-kepala > .sta-sub {
             flex: 1 0 100%;
-            margin: 0;
+            font-size: .88rem;
+            line-height: 1.55;
         }
 
         /* Jarak antar blok di dalam lajur dirapatkan; yang menumpuk tegak
