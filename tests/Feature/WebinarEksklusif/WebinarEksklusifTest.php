@@ -2345,94 +2345,8 @@ class WebinarEksklusifTest extends TestCase
         }
     }
 
-    #[Test]
-    public function nomor_yang_sama_dengan_email_berbeda_tidak_memotong_kuota_dua_kali(): void
-    {
-        /*
-         * Terukur sebelum penjaga ini diperluas: nomor yang sama dengan email
-         * berbeda menghasilkan DUA pendaftaran dan memotong kuota DUA KALI
-         * (20 -> 18), sementara email yang sama hanya satu (20 -> 19).
-         *
-         * Satu orang yang salah ketik emailnya, atau memakai email keduanya,
-         * menahan dua kursi sampai yang lama kedaluwarsa sendiri — dan yang
-         * dipakai panitia untuk mencocokkan transfer justru nomornya.
-         */
-        $sesi = $this->sesi(['total_kuota' => '20', 'sisa_kuota' => '20']);
 
-        $dasar = [
-            'kategori_id' => $sesi->id, 'nama' => 'Berto Juni Krisnanto',
-            'telp' => '0895421735441', 'jumlah_pendaftar' => 1, 'setuju' => '1',
-        ];
 
-        $this->post(route('public.webinareksklusif.store'), $dasar + ['email' => 'berto@contoh.test']);
-
-        $pertama = WebinarEksklusifPendaftaran::where('email', 'berto@contoh.test')->firstOrFail();
-
-        // Nomor SAMA, email BEDA, dan ditulis dalam bentuk lain (0895 vs 62895).
-        $jawab = $this->post(route('public.webinareksklusif.store'),
-            $dasar + ['email' => 'berto.lain@contoh.test']);
-
-        $this->assertSame(1,
-            WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)->count(),
-            'Pendaftaran keduanya tetap dibuat; kursinya terpotong dua kali.');
-
-        $this->assertSame(19, (int) $sesi->fresh()->sisa_kuota,
-            'Kuotanya terpotong lebih dari sekali untuk satu orang.');
-
-        // Diantar ke pendaftaran yang LAMA, bukan dibuatkan yang baru.
-        $jawab->assertRedirect(route('public.webinareksklusif.status', $pertama->getKey()));
-    }
-
-    #[Test]
-    public function pendaftar_yang_diantar_balik_tidak_disambut_pita_merah(): void
-    {
-        /*
-         * Ia tidak berbuat salah — pendaftarannya memang ada dan masih
-         * berlaku. Pita merah di layar orang yang tidak bersalah membuatnya
-         * mengira pendaftarannya gagal, lalu ia mencoba lagi; justru itu yang
-         * hendak dihentikan.
-         */
-        $sesi = $this->sesi(['total_kuota' => '20', 'sisa_kuota' => '20']);
-
-        $dasar = [
-            'kategori_id' => $sesi->id, 'nama' => 'Berto', 'telp' => '0895421735441',
-            'jumlah_pendaftar' => 1, 'setuju' => '1',
-        ];
-
-        $this->post(route('public.webinareksklusif.store'), $dasar + ['email' => 'a@contoh.test']);
-
-        $this->post(route('public.webinareksklusif.store'), $dasar + ['email' => 'b@contoh.test'])
-            ->assertSessionHas('kabar')
-            ->assertSessionMissing('error');
-
-        /*
-         * Kalimatnya menyebut YANG MANA yang cocok. "Email itu sudah
-         * terdaftar" pada orang yang justru memakai email baru terbaca seperti
-         * sistem yang salah, dan ia akan mencoba lagi dengan email ketiga.
-         */
-        $this->assertStringContainsString('Nomor WhatsApp', session('kabar'));
-    }
-
-    #[Test]
-    public function email_yang_sama_tetap_dijaga_seperti_sebelumnya(): void
-    {
-        // Jalur lama tidak boleh ikut rusak saat penjaganya diperluas.
-        $sesi = $this->sesi(['total_kuota' => '20', 'sisa_kuota' => '20']);
-
-        $dasar = [
-            'kategori_id' => $sesi->id, 'nama' => 'Siti', 'email' => 'siti@contoh.test',
-            'telp' => '08123450001', 'jumlah_pendaftar' => 1, 'setuju' => '1',
-        ];
-
-        $this->post(route('public.webinareksklusif.store'), $dasar);
-
-        // Nomor BEDA, email sama.
-        $this->post(route('public.webinareksklusif.store'), $dasar + ['telp' => '08123450002'])
-            ->assertSessionHas('kabar');
-
-        $this->assertSame(1, WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)->count());
-        $this->assertStringContainsString('Email', session('kabar'));
-    }
 
     #[Test]
     public function pendaftaran_yang_sudah_kedaluwarsa_tidak_menghalangi_pendaftaran_baru(): void
@@ -2468,5 +2382,198 @@ class WebinarEksklusifTest extends TestCase
 
         $this->assertSame(2, WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)->count(),
             'Yang batas waktunya sudah lewat ikut menghalangi pendaftaran baru.');
+    }
+    // ------------------------------------------- penjaga pendaftaran ganda
+
+    /** Satu borang pendaftaran, dengan bagian yang ditimpa seperlunya. */
+    private function borang(KategoriLayanan $sesi, array $lain = []): array
+    {
+        return array_merge([
+            'kategori_id' => $sesi->id,
+            'nama' => 'Berto Juni Krisnanto',
+            'email' => 'berto@contoh.test',
+            'telp' => '0895421735441',
+            'jumlah_pendaftar' => 1,
+            'setuju' => '1',
+        ], $lain);
+    }
+
+    #[Test]
+    public function data_yang_sama_persis_hanya_jadi_satu_pendaftaran(): void
+    {
+        /*
+         * Yang dicegat hanya pengulangan data yang BENAR-BENAR sama — orang
+         * yang menekan "Daftar" dua kali, atau menyegarkan halaman
+         * pembayarannya. Tiap pengulangan yang lolos memotong satu kursi yang
+         * baru kembali 24 jam kemudian.
+         */
+        $sesi = $this->sesi(['total_kuota' => '20', 'sisa_kuota' => '20']);
+
+        $this->post(route('public.webinareksklusif.store'), $this->borang($sesi));
+
+        $pertama = WebinarEksklusifPendaftaran::where('email', 'berto@contoh.test')->firstOrFail();
+
+        // Nomornya ditulis dalam bentuk lain, namanya berspasi ganda dan
+        // berhuruf besar — ketiganya tetap orang yang sama.
+        $jawab = $this->post(route('public.webinareksklusif.store'), $this->borang($sesi, [
+            'telp' => '62895421735441',
+            'nama' => 'BERTO  JUNI   KRISNANTO',
+        ]));
+
+        $this->assertSame(1, WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)->count(),
+            'Pendaftaran keduanya tetap dibuat; kursinya terpotong dua kali.');
+
+        $this->assertSame(19, (int) $sesi->fresh()->sisa_kuota);
+
+        $jawab->assertRedirect(route('public.webinareksklusif.status', $pertama->getKey()));
+    }
+
+    #[Test]
+    public function nomor_sama_tetapi_nama_dan_email_beda_tetap_dapat_pendaftaran_sendiri(): void
+    {
+        /*
+         * Satu nomor WhatsApp dipakai bersama lebih sering daripada yang
+         * terlihat: panitia kampus mendaftarkan beberapa orang dari nomornya
+         * sendiri, dan suami-istri berbagi satu nomor.
+         *
+         * Dicegat dari nomornya saja, orang kedua tidak akan pernah bisa
+         * didaftarkan — yang terjadi bukan kuota terjaga, melainkan
+         * pendaftaran yang hilang.
+         */
+        $sesi = $this->sesi(['total_kuota' => '20', 'sisa_kuota' => '20']);
+
+        $this->post(route('public.webinareksklusif.store'), $this->borang($sesi));
+
+        $this->post(route('public.webinareksklusif.store'), $this->borang($sesi, [
+            'nama' => 'Siti Aminah',
+            'email' => 'siti@contoh.test',
+        ]));
+
+        $this->assertSame(2, WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)->count(),
+            'Orang kedua dari nomor yang sama ikut dicegat; ia tidak bisa mendaftar sama sekali.');
+
+        $this->assertSame(18, (int) $sesi->fresh()->sisa_kuota);
+    }
+
+    #[Test]
+    public function nomor_sama_nama_sama_tetapi_email_beda_tetap_pendaftaran_sendiri(): void
+    {
+        // Satu dari tiga berbeda sudah cukup; yang dicegat hanya yang ketiganya sama.
+        $sesi = $this->sesi(['total_kuota' => '20', 'sisa_kuota' => '20']);
+
+        $this->post(route('public.webinareksklusif.store'), $this->borang($sesi));
+        $this->post(route('public.webinareksklusif.store'),
+            $this->borang($sesi, ['email' => 'berto.lain@contoh.test']));
+
+        $this->assertSame(2, WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)->count());
+    }
+
+    #[Test]
+    public function nomor_dan_email_sama_tetapi_nama_beda_tetap_pendaftaran_sendiri(): void
+    {
+        /*
+         * Satu-satunya yang berbeda NAMANYA. Ini keadaan panitia yang
+         * mendaftarkan orang kedua memakai nomor dan email kantornya sendiri —
+         * dan tanpa pembandingan nama, orang kedua itu tidak akan pernah bisa
+         * didaftarkan.
+         */
+        $sesi = $this->sesi(['total_kuota' => '20', 'sisa_kuota' => '20']);
+
+        $this->post(route('public.webinareksklusif.store'), $this->borang($sesi));
+        $this->post(route('public.webinareksklusif.store'),
+            $this->borang($sesi, ['nama' => 'Siti Aminah']));
+
+        $this->assertSame(2, WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)->count(),
+            'Orang kedua ikut dicegat padahal namanya berbeda.');
+    }
+
+    #[Test]
+    public function email_dan_nama_sama_tetapi_nomor_beda_tetap_pendaftaran_sendiri(): void
+    {
+        $sesi = $this->sesi(['total_kuota' => '20', 'sisa_kuota' => '20']);
+
+        $this->post(route('public.webinareksklusif.store'), $this->borang($sesi));
+        $this->post(route('public.webinareksklusif.store'),
+            $this->borang($sesi, ['telp' => '08123450009']));
+
+        $this->assertSame(2, WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)->count());
+    }
+
+    #[Test]
+    public function yang_dicegat_tidak_disambut_pita_merah(): void
+    {
+        /*
+         * Ia tidak berbuat salah — pendaftarannya memang ada dan masih
+         * berlaku. Pita merah di layar orang yang tidak bersalah membuatnya
+         * mengira pendaftarannya gagal, lalu ia mencoba lagi; justru itu yang
+         * hendak dihentikan.
+         */
+        $sesi = $this->sesi(['total_kuota' => '20', 'sisa_kuota' => '20']);
+
+        $this->post(route('public.webinareksklusif.store'), $this->borang($sesi));
+
+        $this->post(route('public.webinareksklusif.store'), $this->borang($sesi))
+            ->assertSessionHas('kabar')
+            ->assertSessionHas('ringkas', true)
+            ->assertSessionMissing('error');
+    }
+
+    #[Test]
+    public function layar_yang_dicegat_tidak_menawarkan_bayar_maupun_unggah(): void
+    {
+        /*
+         * Orang yang sudah mengirim bukti lalu mendaftar lagi — karena ragu,
+         * atau karena kehilangan tautannya — akan melihat borang unggah
+         * terbuka lagi dan mengunggah lagi. Dan lagi. Yang tertinggal di
+         * panitia sepuluh salinan bukti yang sama.
+         *
+         * Maka yang digambar hanya rincian transaksinya, hitung mundur sisa
+         * waktunya, dan statusnya.
+         */
+        $sesi = $this->sesi(['total_kuota' => '20', 'sisa_kuota' => '20']);
+
+        $this->post(route('public.webinareksklusif.store'), $this->borang($sesi));
+
+        $isi = $this->followingRedirects()
+            ->post(route('public.webinareksklusif.store'), $this->borang($sesi))
+            ->assertOk()
+            ->getContent();
+
+        // Yang HARUS tetap ada: rincian, hitung mundur, dan statusnya.
+        $this->assertStringContainsString('Nomor pendaftaran', $isi);
+        $this->assertMatchesRegularExpression('/<strong[^>]*data-mis-mundur=/', $isi,
+            'Hitung mundurnya hilang; justru itu yang dicari orang saat kembali.');
+        $this->assertStringContainsString('Pendaftaran Anda sudah masuk', $isi);
+
+        // Yang HARUS hilang.
+        $this->assertStringNotContainsString('Cara membayar', $isi,
+            'Langkah membayar masih tergambar di layar orang yang cuma memeriksa.');
+        $this->assertStringNotContainsString('2164 0100 0467 563', $isi,
+            'Nomor rekening masih tergambar.');
+        $this->assertSame(0, preg_match_all('/<input[^>]*type="file"/', $isi),
+            'Borang unggahnya masih ada; ia akan mengunggah lagi.');
+    }
+
+    #[Test]
+    public function membuka_alamatnya_langsung_tetap_menampilkan_halaman_penuh(): void
+    {
+        /*
+         * Mode ringkas hanya berlaku untuk kedatangan ITU. Dibuat menetap,
+         * orang yang memang belum membayar kehilangan satu-satunya jalan
+         * membayar — dan tautan di emailnya menuju halaman yang sama.
+         */
+        $sesi = $this->sesi(['total_kuota' => '20', 'sisa_kuota' => '20']);
+
+        $this->post(route('public.webinareksklusif.store'), $this->borang($sesi));
+
+        $p = WebinarEksklusifPendaftaran::where('email', 'berto@contoh.test')->firstOrFail();
+
+        $isi = $this->get(route('public.webinareksklusif.status', $p->getKey()))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('Cara membayar', $isi);
+        $this->assertStringContainsString('2164 0100 0467 563', $isi);
+        $this->assertMatchesRegularExpression('/<input[^>]*type="file"/', $isi);
     }
 }

@@ -540,13 +540,21 @@ class PublicWebinarEksklusifController extends Controller
         $email = mb_strtolower(trim($data['email']));
 
         /*
-         * Dicocokkan EMAIL ATAU NOMOR WHATSAPP, tidak lagi email saja.
+         * Dicocokkan KETIGANYA sekaligus: nomor, email, DAN nama.
          *
-         * Terukur sebelum ini: nomor yang sama dengan email berbeda — satu
-         * orang yang salah ketik emailnya, atau memakai email keduanya —
-         * menghasilkan DUA pendaftaran dan memotong kuota DUA KALI, sementara
-         * email yang sama hanya satu. Padahal yang dipakai panitia untuk
-         * mencocokkan transfer justru nomornya.
+         * Bukan salah satunya. Satu nomor WhatsApp dipakai bersama lebih sering
+         * daripada yang terlihat — panitia kampus mendaftarkan beberapa orang
+         * dari nomornya sendiri, dan suami-istri berbagi satu nomor. Dicegat
+         * dari nomornya saja, orang kedua tidak akan pernah bisa didaftarkan;
+         * yang terjadi bukan kuota terjaga, melainkan pendaftaran yang hilang.
+         *
+         * Yang dicegat hanya pengulangan data yang BENAR-BENAR sama — orang
+         * yang menekan "Daftar" dua kali, atau menyegarkan halaman
+         * pembayarannya.
+         *
+         *   nomor + email + nama sama   -> satu pendaftaran (dicegat)
+         *   nomor sama, email/nama beda -> pendaftaran sendiri
+         *   ketiganya beda              -> pendaftaran sendiri
          *
          * Nomornya dicari lewat semuaBentuk(): kolomnya diisi bertahun-tahun
          * oleh layar yang berbeda, jadi satu orang bisa tersimpan sebagai
@@ -557,13 +565,8 @@ class PublicWebinarEksklusifController extends Controller
         $bentukNomor = NomorTelepon::semuaBentuk($data['telp']);
 
         $sudahAda = WebinarEksklusifPendaftaran::where('kategori_id', $sesi->getKey())
-            ->where(function ($q) use ($email, $bentukNomor) {
-                $q->where('email', $email);
-
-                if ($bentukNomor !== []) {
-                    $q->orWhereIn('telp', $bentukNomor);
-                }
-            })
+            ->where('email', $email)
+            ->when($bentukNomor !== [], fn ($q) => $q->whereIn('telp', $bentukNomor))
             ->whereIn('status', ['pending', 'paid'])
             ->where(function ($q) {
                 // Yang sudah dibayar selalu dihitung; yang masih menunggu
@@ -573,18 +576,29 @@ class PublicWebinarEksklusifController extends Controller
                     ->orWhere('kedaluwarsa_pada', '>', now());
             })
             ->latest()
-            ->first();
+            ->get()
+            /*
+             * NAMANYA dibandingkan di PHP, bukan di dalam kueri.
+             *
+             * Perapiannya — huruf kecil semua, spasi ganda dirapatkan — tidak
+             * bisa ditulis sama persis di SQL: REPLACE bersarang hanya
+             * merapatkan spasi ganda beberapa lapis, sementara preg_replace
+             * merapatkan tab dan spasi berapa pun sekaligus. Dua aturan yang
+             * tidak persis sama berarti penjaganya diam-diam berhenti bekerja
+             * pada nama yang kebetulan jatuh di antaranya.
+             *
+             * Barisnya sedikit — sudah disaring email, nomor, dan sesi — jadi
+             * menyaringnya di PHP tidak menambah beban yang terasa.
+             */
+            ->first(fn ($baris) => $this->namaRapi($baris->nama) === $this->namaRapi($data['nama']));
 
         if ($sudahAda !== null) {
             /*
-             * Disebut yang mana yang cocok. "Email itu sudah terdaftar" pada
-             * orang yang justru memakai email BARU terbaca seperti sistem yang
-             * salah, dan ia akan mencoba lagi dengan email ketiga.
+             * Yang cocok KETIGANYA, jadi kalimatnya menyebut datanya sebagai
+             * satu kesatuan. Menyebut salah satu saja — "Email itu sudah
+             * terdaftar" — membuat orang mengira cukup mengganti email itu,
+             * lalu ia mencoba lagi.
              */
-            $lewatEmail = mb_strtolower((string) $sudahAda->email) === $email;
-
-            $yangCocok = $lewatEmail ? 'Email' : 'Nomor WhatsApp';
-
             /*
              * Dikirim sebagai 'kabar', BUKAN 'error'.
              *
@@ -594,12 +608,12 @@ class PublicWebinarEksklusifController extends Controller
              * lagi; justru itu yang hendak dihentikan.
              */
             return redirect()->route('public.webinareksklusif.status', $sudahAda->getKey())
+                ->with('ringkas', true)
                 ->with('kabar', $sudahAda->status === 'paid'
-                    ? $yangCocok . ' itu sudah terdaftar di sesi ini dan pembayarannya sudah lunas.'
+                    ? 'Data ini sudah terdaftar di sesi ini dan pembayarannya sudah lunas.'
                         . ' Ini rincian pendaftaran Anda.'
-                    : $yangCocok . ' itu sudah punya pendaftaran yang belum dibayar di sesi ini.'
-                        . ' Lanjutkan yang ini saja — kursinya sudah ditahan untuk Anda, dan'
-                        . ' mendaftar lagi justru memotongnya dua kali.');
+                    : 'Data ini sudah punya pendaftaran di sesi ini. Kursinya sudah ditahan'
+                        . ' untuk Anda — tidak perlu mendaftar lagi.');
         }
 
         try {
@@ -1027,6 +1041,19 @@ class PublicWebinarEksklusifController extends Controller
          * pita hijau membuat tiga kalimat yang sama bertumpuk di satu layar.
          */
         return back()->with('sukses', 'Bukti transfer Anda sudah kami terima.');
+    }
+
+    /**
+     * Nama yang sudah dirapikan untuk DIBANDINGKAN, bukan untuk ditampilkan.
+     *
+     * Huruf kecil semua dan spasi gandanya dirapatkan. Dipakai bersama
+     * dengan kueri penjaga pendaftaran ganda; kalau perapiannya di sini
+     * berbeda dari yang di SQL, pembandingannya tidak akan pernah cocok dan
+     * penjaganya diam-diam berhenti bekerja.
+     */
+    private function namaRapi(?string $nama): string
+    {
+        return mb_strtolower(preg_replace('/\s+/u', ' ', trim((string) $nama)));
     }
 
     /**

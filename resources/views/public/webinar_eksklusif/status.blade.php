@@ -35,7 +35,23 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
      pun hal yang harus dikerjakan — tanpa penjaga ini kartunya
      menggambar lajur kanan kosong lengkap dengan garis pemisah yang
      berdiri sendiri di tengah ruang putih. --}}
-@php($duaLajur = ! $lunas && ! $batal && ! $habis && ! $menunggu)
+{{-- MODE RINGKAS: pendaftar diantar ke sini karena mendaftar lagi dengan
+     data yang sama persis.
+
+     Yang digambar hanya rincian transaksinya, hitung mundur sisa waktunya,
+     dan statusnya. Cara membayar dan borang unggah DIHILANGKAN.
+
+     Alasannya perilaku, bukan rupa: orang yang sudah mengirim bukti lalu
+     mendaftar lagi — karena ragu, atau karena kehilangan tautannya — akan
+     melihat borang unggah terbuka lagi dan mengunggah lagi. Dan lagi. Yang
+     tertinggal di panitia sepuluh salinan bukti yang sama.
+
+     Hanya berlaku untuk kedatangan ITU. Membuka alamat yang sama dari tautan
+     di emailnya tetap menampilkan halaman penuh — kalau tidak, orang yang
+     memang belum membayar kehilangan satu-satunya jalan membayar. --}}
+@php($ringkas = (bool) session('ringkas'))
+
+@php($duaLajur = ! $lunas && ! $batal && ! $habis && ! $menunggu && ! $ringkas)
 
 <section class="sta-latar">
     {{-- Lebarnya ikut keadaan.
@@ -124,6 +140,14 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                         <strong>{{ $pendaftaran->email }}</strong> paling lambat sehari sebelum acara.
                     @elseif ($batal || $habis)
                         Kursinya sudah dilepas kembali. Silakan daftar ulang kalau masih ingin ikut.
+                    @elseif ($ringkas)
+                        {{-- Di mode ringkas cara bayarnya memang tidak digambar,
+                             jadi "tinggal selesaikan pembayarannya" akan menunjuk
+                             sesuatu yang tidak ada di layar. Ditunjukkan jalannya:
+                             emailnya, yang memuat tautan ke halaman ini — dan
+                             tombol pengirim ulangnya ada di bawah. --}}
+                        Rincian cara membayarnya ada di email bukti pendaftaran Anda.
+                        Belum menerimanya? Kirim ulang lewat tombol di bawah.
                     @elseif ($menunggu)
                         {{-- Kalimat terpentingnya: TIDAK ADA LAGI yang harus ia
                              kerjakan. Tanpa itu orang menunggu sambil menduga-duga
@@ -230,6 +254,13 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
 
                 <div class="sta-lajur">
 
+            {{-- Hitung mundurnya TETAP digambar di mode ringkas; itu justru
+                 yang dicari orang saat kembali ke sini. Yang dibuang cuma
+                 cara bayar dan borang unggahnya.
+
+                 Yang buktinya SUDAH masuk tetap dikecualikan: di sana kursinya
+                 ditahan sampai panitia memeriksa, dan batas 24 jam itu memang
+                 tidak lagi berjalan untuknya. --}}
             @if (! $lunas && ! $batal && ! $habis && ! $menunggu)
                 @if ($pendaftaran->sisa_waktu)
                     {{--
@@ -262,7 +293,7 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                     </p>
                 @endif
 
-                @if ($pendaftaran->cara_bayar === 'transfer')
+                @if ($pendaftaran->cara_bayar === 'transfer' && ! $ringkas && ! $menunggu)
                     {{-- Cara bayar manual. Nomor rekeningnya SENGAJA diketik di
                          sini dan bukan diambil dari basis data: tidak ada layar
                          yang mengaturnya, dan mengambilnya dari kolom yang bisa
@@ -421,6 +452,11 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                         <p class="sta-unggah-galat" role="alert">{{ $message }}</p>
                     @enderror
 
+                    {{-- Penggantian bukti ikut disembunyikan di mode ringkas.
+                         Yang baru saja mendaftar lagi datang untuk MEMERIKSA,
+                         bukan mengirim ulang — dan satu-satunya tombol unggah
+                         yang tersisa di layar akan ditekannya juga. --}}
+                    @if (! $ringkas)
                     <details class="sta-ganti" @if ($errors->has('bukti')) open @endif>
                         <summary>Salah kirim? Ganti buktinya</summary>
 
@@ -447,6 +483,7 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                             </button>
                         </form>
                     </details>
+                    @endif
 
                     <p class="sta-bantuan">
                         Ada kendala?
