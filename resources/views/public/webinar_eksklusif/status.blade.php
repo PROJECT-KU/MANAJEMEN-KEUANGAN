@@ -68,8 +68,16 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
      Dua lajur: rincian di kiri, sisanya menumpuk di kanan. --}}
 @php($ringkasBerlajur = $ringkas && ! $lunas && ! $batal && ! $habis)
 
-{{-- Yang menyempit hanya yang benar-benar satu lajur. --}}
-@php($lebarPenuh = $duaLajur || $ringkasBerlajur)
+{{-- Yang buktinya sudah masuk JUGA punya isi di kedua sisi: rinciannya di
+     kiri, lalu panel "kursi Anda ditahan", tombol lihat bukti, lipatan ganti
+     bukti, dan tombol kirim ulang di kanan. Disempitkan jadi satu lajur,
+     semuanya menumpuk tegak di kolom 620px dan halamannya menggulung panjang
+     untuk isi yang sebenarnya sedikit. --}}
+@php($menungguBerlajur = $menunggu && ! $ringkas)
+
+{{-- Yang menyempit hanya yang benar-benar satu lajur: lunas, batal, dan
+     kedaluwarsa. Ketiganya tidak punya apa-apa di lajur kanan. --}}
+@php($lebarPenuh = $duaLajur || $ringkasBerlajur || $menungguBerlajur)
 
 <section class="sta-latar">
     {{-- Lebarnya ikut keadaan.
@@ -122,11 +130,11 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                  lolos begitu saja. Halaman publik memakai Font Awesome 5, dan
                  nama FA6 tidak merender apa pun TANPA galat sama sekali. --}}
             @php($rupa = $lunas
-                ? ['hijau', 'fa-check-circle', '']
+                ? ['hijau', 'fa-check-circle', 'sta-ubin-selesai']
                 : (($habis || $batal)
                     ? ['merah', 'fa-times-circle', '']
                     : ($menunggu
-                        ? ['hijau', 'fa-check-circle', '']
+                        ? ['hijau', 'fa-check-circle', 'sta-ubin-selesai']
                         : ['kuning', 'fa-hourglass-half', 'sta-ubin-menanti'])))
             {{-- Ikon, judul, dan kalimat pembukanya dibungkus satu kepala.
 
@@ -190,7 +198,7 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                  di dalam @if, jadi yang tergambar berbeda-beda per keadaan —
                  dan penempatan otomatis akan menaruh hal yang sama di baris
                  yang berbeda tergantung keadaan mana yang sedang aktif. --}}
-            <div class="sta-kisi @if ($ringkasBerlajur) sta-kisi-ringkas @elseif (! $duaLajur) sta-kisi-tunggal @endif">
+            <div class="sta-kisi @if ($ringkasBerlajur) sta-kisi-ringkas @elseif (! $duaLajur && ! $menungguBerlajur) sta-kisi-tunggal @endif">
                 {{-- Hitung mundur bukan anak lajur mana pun, melainkan anak
                      LANGSUNG kisinya, dan itu demi ponsel.
 
@@ -897,6 +905,7 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
     .sta-ubin {
         display: grid;
         place-items: center;
+        position: relative;
         width: 68px;
         height: 68px;
         margin: 0 auto 18px;
@@ -910,6 +919,77 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
     .sta-ubin-hijau { background: linear-gradient(135deg, #10b981, #059669); }
     .sta-ubin-kuning { background: linear-gradient(135deg, #f59e0b, #d97706); }
     .sta-ubin-merah { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+
+    /* Centang yang BARU SAJA terjadi.
+
+       Beda maksud dengan jam pasirnya, jadi beda pula gerakannya: jam pasir
+       berdetak terus karena waktunya memang masih berjalan; centang ini
+       menandai satu kejadian yang sudah selesai, jadi ia bergerak SEKALI lalu
+       diam. Gerakan yang berulang di sini justru akan membuat yang sudah
+       beres terbaca seperti masih dikerjakan.
+
+       Yang digerakkan tiga lapis yang saling menyusul. Terukur di Chrome
+       dengan waktu animasinya dipaksa ke titik tertentu, bukan ditunggu:
+
+         saat     ubin          ikon          cincin
+            0ms   0,40  op 0     0     op 0    1,00 op 0,75
+          180ms   1,14  op 1     0,15  op 0,17 1,00 op 0,75
+          400ms   1,04  op 1     0,95  op 0,95 1,22 op 0,51
+         1200ms   1,00  op 1     1,00  op 1    1,70 op 0
+
+       Puncak ubinnya 1,14 walau keyframe-nya menulis 1,08: lengkung
+       cubic-bezier(.34, 1.56, .64, 1) melampaui nilai yang ditulis. Angka
+       yang ditulis di keyframe bukan tinggi yang sebenarnya terjadi.
+
+       Ikonnya SENGAJA tertinggal 160ms dari ubinnya. Dijalankan berbarengan,
+       keduanya terbaca sebagai satu gambar yang membesar; tertinggal sedikit,
+       ubinnya dulu yang datang lalu centangnya jatuh ke dalamnya.
+
+       "both" WAJIB di ketiganya. Tanpa itu, ubinnya kembali ke keadaan
+       sebelum animasi di antara pemuatan halaman dan detik pertama gerakan —
+       dan yang terlihat centang berkedip dulu sebelum melenting. */
+    .sta-ubin-selesai {
+        animation: sta-ceklis-ubin 620ms cubic-bezier(.34, 1.56, .64, 1) both;
+    }
+
+    @keyframes sta-ceklis-ubin {
+        0%   { transform: scale(.4); opacity: 0; }
+        60%  { transform: scale(1.08); opacity: 1; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    .sta-ubin-selesai > .fas {
+        animation: sta-ceklis-ikon 520ms cubic-bezier(.22, 1, .36, 1) 160ms both;
+    }
+
+    @keyframes sta-ceklis-ikon {
+        0%   { transform: scale(0) rotate(-35deg); opacity: 0; }
+        100% { transform: scale(1) rotate(0); opacity: 1; }
+    }
+
+    /* Cincinnya unsur semu, bukan unsur sungguhan: ia murni hiasan, dan
+       unsur kosong di markah akan ikut terbaca pembaca layar. */
+    .sta-ubin-selesai::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        border: 2px solid rgba(16, 185, 129, .55);
+        animation: sta-ceklis-cincin 880ms ease-out 220ms both;
+    }
+
+    @keyframes sta-ceklis-cincin {
+        0%   { transform: scale(1); opacity: .75; }
+        100% { transform: scale(1.7); opacity: 0; }
+    }
+
+    /* Yang minta gerakannya dikurangi tetap melihat centangnya, cuma tanpa
+       lentingannya; cincinnya dibuang sama sekali. */
+    @media (prefers-reduced-motion: reduce) {
+        .sta-ubin-selesai,
+        .sta-ubin-selesai > .fas { animation: none !important; }
+        .sta-ubin-selesai::after { display: none; }
+    }
 
     /* Jam pasir ini satu-satunya ikon di halaman yang menunjuk pekerjaan yang
        BELUM selesai: ikon lainnya (centang, silang) menandai keadaan yang
