@@ -43,6 +43,16 @@ class UnggahBuktiTest extends TestCase
      */
     private array $milikOrang = [];
 
+    /**
+     * @var array<int, string> id pendaftaran yang SUDAH ADA sebelum uji jalan
+     */
+    private array $sebelumUji = [];
+
+    /**
+     * @var array<int, string> jalur yang DIDAFTARKAN uji ini saat mengunggah
+     */
+    private array $sampah = [];
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -51,17 +61,54 @@ class UnggahBuktiTest extends TestCase
         ClinikScopusBiayaPersesi::lupakanPemeriksaanJadwal();
 
         $this->milikOrang = Storage::disk(Gambar::CAKRAM)->files(self::FOLDER);
+        $this->sebelumUji = WebinarEksklusifPendaftaran::pluck('id')->all();
     }
 
     protected function tearDown(): void
     {
-        foreach (Storage::disk(Gambar::CAKRAM)->files(self::FOLDER) as $berkas) {
-            if (! in_array($berkas, $this->milikOrang, true)) {
-                Storage::disk(Gambar::CAKRAM)->delete($berkas);
-            }
-        }
+        $this->bersihkanBerkasUji();
 
         parent::tearDown();
+    }
+
+    /**
+     * Membuang HANYA berkas yang lahir dari uji ini.
+     *
+     * Versi pertama menyapu apa pun di folder bukti yang tidak ada di potret
+     * awal. Itu menghapus bukti transfer SUNGGUHAN milik pendaftar: ia
+     * mengunggah pada detik yang sama uji ini berjalan, berkasnya belum ada
+     * saat potret diambil, jadi ia dianggap sampah uji. Barisnya tertinggal
+     * menunjuk berkas yang tidak ada, dan halaman statusnya diam-diam kembali
+     * menawarkan "unggah bukti" seolah ia belum pernah mengirim apa pun.
+     *
+     * GaleriTest di berkas sebelah sudah pernah kena persis begitu dan sudah
+     * memakai jalan yang benar: hanya menghapus jalur yang DIDAFTARKAN uji.
+     * Pola itu tidak ikut terbawa ke sini.
+     *
+     * Sekarang yang dihapus hanya berkas yang ditunjuk pendaftaran yang
+     * DIBUAT uji ini — barisnya tidak ada sebelum uji jalan. Pendaftaran
+     * orang sungguhan sudah ada sebelumnya, jadi berkas barunya tidak pernah
+     * masuk daftar hapus, berapa pun sempitnya jarak waktunya.
+     *
+     * Potret berkas awal tetap dipertahankan sebagai pagar kedua.
+     */
+    private function bersihkanBerkasUji(): void
+    {
+        $lama = $this->sebelumUji === [] ? ['-'] : $this->sebelumUji;
+
+        $buatanUji = WebinarEksklusifPendaftaran::whereNotIn('id', $lama)
+            ->whereNotNull('gambar')
+            ->where('gambar', '!=', '')
+            ->pluck('gambar')
+            ->all();
+
+        foreach (array_unique(array_merge($this->sampah, $buatanUji)) as $jalur) {
+            if (in_array($jalur, $this->milikOrang, true)) {
+                continue;
+            }
+
+            Storage::disk(Gambar::CAKRAM)->delete($jalur);
+        }
     }
 
     private function sesi(array $lain = []): KategoriLayanan
@@ -74,6 +121,46 @@ class UnggahBuktiTest extends TestCase
             'pemateri' => 'Pemateri', 'total_kuota' => '20', 'sisa_kuota' => '18',
             'biaya' => '129000', 'status' => 'active',
         ], $lain));
+    }
+
+    #[Test]
+    public function pembersihan_tidak_menyentuh_bukti_yang_diunggah_orang_saat_uji_berjalan(): void
+    {
+        /*
+         * Ini menirukan kejadian sungguhan, bukan kemungkinan di atas kertas.
+         *
+         * Seorang pendaftar mengunggah bukti transfernya pada 17:48:52. Uji
+         * di berkas ini berjalan beberapa detik kemudian, memotret isi folder
+         * — potretnya sudah memuat berkas itu atau belum, tergantung detik —
+         * lalu menyapu semua yang tidak ada di potret. Berkasnya hilang.
+         * Barisnya tertinggal menunjuk berkas yang tidak ada, dan halaman
+         * statusnya kembali menawarkan "unggah bukti" kepada orang yang baru
+         * saja mengirimkannya. Tidak ada satu pun galat yang terbit.
+         *
+         * Yang membedakan keduanya bukan WAKTU, melainkan ASAL BARISNYA:
+         * pendaftaran orang sungguhan sudah ada sebelum uji dimulai.
+         */
+        $orang = $this->pendaftaran();
+        $this->sebelumUji[] = $orang->getKey();
+
+        $jalurOrang = self::FOLDER . '/orang-' . Str::random(8) . '.webp';
+        Storage::disk(Gambar::CAKRAM)->put($jalurOrang, 'bukan gambar sungguhan');
+        $orang->forceFill(['gambar' => $jalurOrang])->save();
+
+        $buatanUji = $this->pendaftaran();
+        $jalurUji = self::FOLDER . '/uji-' . Str::random(8) . '.webp';
+        Storage::disk(Gambar::CAKRAM)->put($jalurUji, 'bukan gambar sungguhan');
+        $buatanUji->forceFill(['gambar' => $jalurUji])->save();
+
+        $this->bersihkanBerkasUji();
+
+        $this->assertTrue(Storage::disk(Gambar::CAKRAM)->exists($jalurOrang),
+            'Bukti yang diunggah orang saat uji berjalan ikut terhapus; buktinya hilang tanpa galat apa pun.');
+
+        $this->assertFalse(Storage::disk(Gambar::CAKRAM)->exists($jalurUji),
+            'Berkas buatan uji tidak dibersihkan; folder bukti akan terus menumpuk.');
+
+        Storage::disk(Gambar::CAKRAM)->delete($jalurOrang);
     }
 
     private function pendaftaran(array $lain = []): WebinarEksklusifPendaftaran
@@ -89,10 +176,26 @@ class UnggahBuktiTest extends TestCase
 
     private function kirim(WebinarEksklusifPendaftaran $p, UploadedFile $berkas)
     {
-        return $this->post(
+        $jawab = $this->post(
             route('public.webinareksklusif.bukti', $p->getKey()),
             ['bukti' => $berkas]
         );
+
+        /*
+         * Jalurnya DIDAFTARKAN di sini, bukan disimpulkan belakangan dari isi
+         * folder. Menyimpulkan dari baris pendaftaran saja ternyata belum
+         * cukup: dijalankan satu-satu tiap uji bersih, dijalankan berurutan
+         * satu WebP tetap tertinggal tiap kali — jadi ada jalur yang lolos
+         * dari kesimpulan itu, dan menebak-nebak jalur mana hanya menunda
+         * masalahnya.
+         */
+        $baru = (string) $p->fresh()?->gambar;
+
+        if ($baru !== '') {
+            $this->sampah[] = $baru;
+        }
+
+        return $jawab;
     }
 
     // ------------------------------------------------------- jalan bahagia
