@@ -278,11 +278,18 @@ class UnggahBuktiTest extends TestCase
 
         /*
          * Jalurnya DIDAFTARKAN di sini, bukan disimpulkan belakangan dari isi
-         * folder. Menyimpulkan dari baris pendaftaran saja ternyata belum
-         * cukup: dijalankan satu-satu tiap uji bersih, dijalankan berurutan
-         * satu WebP tetap tertinggal tiap kali — jadi ada jalur yang lolos
-         * dari kesimpulan itu, dan menebak-nebak jalur mana hanya menunda
-         * masalahnya.
+         * folder.
+         *
+         * RALAT atas alasan yang tertulis di commit yang memasangnya. Di sana
+         * tertulis lapis ini perlu karena "satu WebP tetap tertinggal tiap
+         * jalan berurutan". Itu KELIRU: WebP yang terlihat tertinggal itu
+         * bukan sampah uji, melainkan bukti transfer yang BARU SAJA diunggah
+         * pendaftar — dan ia lalu dihapus dengan tangan karena dikira sampah.
+         * Ujinya sendiri tidak pernah bocor.
+         *
+         * Lapis ini tetap dipertahankan, dengan alasan yang benar: mendaftar
+         * saat membuat tidak pernah bisa salah mengenali milik siapa, sedang
+         * menyimpulkan dari isi folder selalu bisa.
          */
         $baru = (string) $p->fresh()?->gambar;
 
