@@ -484,23 +484,63 @@ class AngkatanPerluDicekTest extends TestCase
     }
 
     #[Test]
-    public function alasannya_tergambar_di_layar_bukan_disembunyikan_di_tooltip(): void
+    public function alasannya_dirinci_di_halaman_ubah_bukan_di_daftar(): void
     {
         /*
-         * Alasannya dulu cuma ada di atribut title. Tooltip menuntut orangnya
-         * tahu harus mengarahkan tetikus lalu menunggu, dan di layar sentuh ia
-         * TIDAK PERNAH muncul sama sekali — jadi bagi sebagian pemakai
+         * Alasannya dulu cuma ada di atribut title di daftar. Tooltip menuntut
+         * orangnya tahu harus mengarahkan tetikus lalu menunggu, dan di layar
+         * sentuh ia TIDAK PERNAH muncul — jadi bagi sebagian pemakai
          * informasinya memang tidak ada.
+         *
+         * Dicoba merincinya di daftar, dan itu salah tempat: baris yang kena
+         * dua hal tumbuh dari 71px jadi 234px, dan daftar yang gunanya
+         * dipindai sekilas berubah jadi bacaan.
+         *
+         * Tempatnya di halaman ubah — di sana orangnya sudah datang untuk
+         * membetulkan, dan semua tombol yang disebut alasannya ada di layar
+         * yang sama. Di daftar cukup lencana berisi jumlahnya.
+         */
+        $a = $this->angkatan([
+            'status' => 'draft',
+            'mulai' => now()->subDays(10)->toDateString(),
+            'selesai' => now()->subDays(9)->toDateString(),
+        ]);
+
+        $this->assertNotEmpty($a->perlu_dicek, 'prasyarat ujinya: angkatan ini harus punya alasan');
+
+        $this->actingAs($this->akun());
+
+        $isi = $this->get(route('account.kategori-layanan.edit', $a))
+            ->assertOk()
+            ->getContent();
+
+        /*
+         * Dicocokkan sebagai ATRIBUT class yang utuh, bukan potongan teks.
+         * Percobaan pertama mencari "brg-perlu" saja, dan itu tetap hijau saat
+         * pembungkusnya diganti nama — sebab "brg-perlu-judul" di dalamnya
+         * masih memuat potongan yang sama.
+         */
+        $this->assertMatchesRegularExpression('/class="brg-perlu"/', $isi,
+            'Panel rincian "perlu dicek" hilang dari halaman ubah.');
+
+        foreach ($a->perlu_dicek as $sebab) {
+            $this->assertStringContainsString(e(ucfirst($sebab)), $isi,
+                'Alasan "' . $sebab . '" tidak tergambar di halaman ubah.');
+        }
+
+        /*
+         * Dan di DAFTAR alasannya tidak dirinci — cukup lencana. Dijaga dari
+         * markahnya, sebab yang diperiksa ketiadaan sesuatu.
          */
         $markah = file_get_contents(
             resource_path('views/account/kategori_layanan/index.blade.php')
         );
 
-        $this->assertStringContainsString('class="ang-alasan"', $markah,
-            'Daftar alasan yang terlihat hilang dari daftar angkatan.');
-
         $this->assertSame(0, preg_match('/title="Perlu dicek:/', $markah),
             'Alasannya kembali disembunyikan di tooltip; di layar sentuh ia tidak akan terbaca.');
+
+        $this->assertSame(0, preg_match('/class="ang-alasan"/', $markah),
+            'Alasannya dirinci lagi di daftar; barisnya akan membengkak seperti semula.');
     }
 
 }
