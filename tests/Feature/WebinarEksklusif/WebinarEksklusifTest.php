@@ -41,6 +41,27 @@ class WebinarEksklusifTest extends TestCase
             ->update(['status' => 'non active']);
     }
 
+    /*
+     * Memotong isi satu lajur dari markah. Dicari dari pembuka berkelasnya
+     * sampai pembuka lajur berikutnya (atau penutup kisinya) — bukan dengan
+     * mencocokkan penutup div, yang di dalamnya ada puluhan dan pencocokan
+     * sederhana akan berhenti di yang pertama.
+     */
+    private function isiLajur(string $isi, string $kelas): string
+    {
+        $awal = strpos($isi, '<div class="sta-lajur ' . $kelas . '">');
+
+        if ($awal === false) {
+            return '';
+        }
+
+        $berikut = strpos($isi, '<div class="sta-lajur ', $awal + 10);
+        $tutup = strpos($isi, '/kisi', $awal);
+        $akhir = $berikut !== false ? $berikut : ($tutup !== false ? $tutup : strlen($isi));
+
+        return substr($isi, $awal, $akhir - $awal);
+    }
+
     private function sesi(array $lain = []): KategoriLayanan
     {
         return KategoriLayanan::create(array_merge([
@@ -2209,19 +2230,70 @@ class WebinarEksklusifTest extends TestCase
             'Halamannya disempitkan padahal isinya dua lajur.');
 
         /*
-         * TIGA pembungkus lajur: rincian, cara bayar, dan unggah.
+         * DUA pembungkus lajur, dan keduanya BERNAMA.
          *
-         * Dua lajur menyisakan satu lajur setinggi 670px sementara lajur
-         * satunya 546px — dan halamannya 1,86 layar penuh. Dengan tiga, kisinya
-         * 568px di layar 1.470px dan halamannya turun jadi 1,48 layar.
+         * Tiga lajur memaksa ketiganya berbagi baris yang sama: rinciannya
+         * 341px sementara dua lajur di kanannya 606px, jadi 265px menggantung
+         * kosong di bawah lajur kiri. Dua lajur yang masing-masing menumpuk
+         * isinya sendiri terukur 621 lawan 671 — sisa kosongnya 50px.
          *
-         * Jumlahnya dijaga karena pembagiannya ikut mengatur urutan baca:
-         * rincian dulu, cara bayar, baru unggah. Berkurang jadi dua, isi lajur
-         * ketiganya menempel ke lajur kedua dan urutannya tetap benar — tetapi
-         * tingginya kembali seperti semula tanpa ada yang tahu.
+         * Namanya ikut dijaga, bukan cuma jumlahnya: letaknya dipatok per
+         * kelas, jadi lajur tanpa nama akan jatuh ke sel yang salah tanpa
+         * satu pun galat terbit.
          */
-        $this->assertSame(3, substr_count($isi, '<div class="sta-lajur">'),
-            'Jumlah lajurnya bukan tiga.');
+        $this->assertSame(2, substr_count($isi, '<div class="sta-lajur '),
+            'Jumlah lajurnya bukan dua.');
+
+        $this->assertStringContainsString('<div class="sta-lajur sta-lajur-kiri">', $isi,
+            'Lajur kirinya kehilangan nama; letaknya tidak lagi bisa dipatok.');
+
+        $this->assertStringContainsString('<div class="sta-lajur sta-lajur-kanan">', $isi,
+            'Lajur kanannya kehilangan nama; letaknya tidak lagi bisa dipatok.');
+
+        /*
+         * Isinya ikut dijaga. Pembagiannya bukan selera: yang kiri bahan
+         * BACAAN (rincian lalu cara bayar), yang kanan TINDAKAN (sisa waktu
+         * lalu borang unggah). Tertukar, hitung mundurnya kembali berdiri di
+         * samping rincian dan ketimpangan 265px itu kembali.
+         */
+        $kiri = $this->isiLajur($isi, 'sta-lajur-kiri');
+        $kanan = $this->isiLajur($isi, 'sta-lajur-kanan');
+
+        $this->assertStringContainsString('class="sta-rincian"', $kiri, 'Rinciannya tidak di lajur kiri.');
+        $this->assertStringContainsString('class="sta-bayar"', $kiri, 'Cara bayarnya tidak di lajur kiri.');
+        $this->assertStringNotContainsString('class="sta-bayar"', $kanan, 'Cara bayarnya bocor ke lajur kanan.');
+
+        $this->assertStringContainsString('class="sta-unggah"', $kanan, 'Borang unggahnya tidak di lajur kanan.');
+
+        /*
+         * Hitung mundurnya bukan anak lajur mana pun, melainkan anak LANGSUNG
+         * kisinya — demi ponsel.
+         *
+         * Di dalam lajur kanan ia baru tergambar sesudah seluruh isi lajur
+         * kiri habis: terukur 1.395px dari puncak halaman di layar 390px, dua
+         * layar penuh ke bawah. Yang paling mendesak jadi yang paling akhir
+         * terlihat. Letaknya di layar lebar dipatok CSS, jadi menaikkannya di
+         * markah tidak memindahkannya di layar lebar.
+         */
+        $this->assertStringNotContainsString('data-mis-mundur="', $kiri,
+            'Hitung mundurnya masuk ke lajur kiri; di ponsel ia akan tenggelam di bawah cara bayar.');
+
+        $this->assertStringNotContainsString('data-mis-mundur="', $kanan,
+            'Hitung mundurnya masuk ke lajur kanan; di ponsel ia akan tenggelam di bawah cara bayar.');
+
+        /*
+         * Dibandingkan LETAKNYA, bukan dicocokkan dengan pola jarak. Pola
+         * "paling jauh sekian ratus huruf" tetap hijau walau hitung mundurnya
+         * sudah pindah, asal pindahnya tidak terlalu jauh.
+         */
+        $letakMundur = strpos($isi, 'data-mis-mundur="');
+        $letakLajur = strpos($isi, '<div class="sta-lajur ');
+
+        $this->assertNotFalse($letakMundur, 'Penanda hitung mundurnya hilang.');
+        $this->assertNotFalse($letakLajur, 'Pembungkus lajurnya hilang.');
+
+        $this->assertLessThan($letakLajur, $letakMundur,
+            'Hitung mundurnya turun ke bawah lajur; di ponsel ia akan tenggelam di bawah cara bayar.');
 
         /*
          * Kepala halaman dibungkus supaya ikon, judul, dan kalimatnya bisa
@@ -2300,23 +2372,30 @@ class WebinarEksklusifTest extends TestCase
          * isi terlebar di dalamnya — nomor rekening yang berspasi — melebarkan
          * lajurnya melewati jatahnya, lalu kartunya meluber keluar layar.
          */
-        $this->assertStringContainsString('minmax(0, 1fr)', (string) $aturan,
-            'Lajurnya tidak dijaga minmax(0,...); kartunya bisa meluber.');
+        $this->assertMatchesRegularExpression(
+            '/grid-template-columns:\s*minmax\(0,[^;]*minmax\(0,/',
+            (string) $aturan,
+            'Lajurnya tidak dijaga minmax(0,...); kartunya bisa meluber.'
+        );
     }
 
     #[Test]
-    public function tiga_lajurnya_dipasang_di_1200px_dan_turun_jadi_pita_di_bawahnya(): void
+    public function dua_lajurnya_ditempatkan_per_kelas_tanpa_lajur_ketiga(): void
     {
         /*
-         * Penjaga tingkat SUMBER untuk dua ambang yang tidak terlihat dari
+         * Penjaga tingkat SUMBER untuk tata letak yang tidak terlihat dari
          * markah.
          *
-         * 1200px dipilih setelah diukur: dipatok 1300 lebih dulu, dan di 1280
-         * — ukuran laptop yang lazim — lajur ketiganya turun jadi pita penuh
-         * dan kisinya justru membengkak dari 670px jadi 975px.
+         * Dulu ada ambang KEDUA di 1200px yang memasang lajur ketiga, dan di
+         * bawah itu lajur ketiganya turun jadi pita selebar kisi. Tiga lajur
+         * sudah tidak ada: ketiganya dipaksa berbagi baris, dan rincian yang
+         * 341px bersanding dengan lajur 606px meninggalkan 265px kosong.
          *
-         * Di bawah 1200px lajur ketiganya memang HARUS turun: tiap lajur
-         * tinggal ~290px di situ, dan kotak unggahnya meluber keluar kartu.
+         * Yang dijaga sekarang: letaknya dipatok per KELAS, bukan per urutan.
+         * Isi tiap lajur berbeda-beda per keadaan — borang unggah hilang saat
+         * buktinya sudah masuk, cara bayar hilang di layar ringkas — dan
+         * penempatan per urutan akan menggeser sisanya ke sel yang salah
+         * begitu salah satunya tidak digambar.
          */
         $sumber = file_get_contents(
             resource_path('views/public/webinar_eksklusif/status.blade.php')
@@ -2328,16 +2407,22 @@ class WebinarEksklusifTest extends TestCase
         $aturan = preg_replace('#\{\{--.*?--\}\}#s', '', (string) $aturan);
 
         $this->assertMatchesRegularExpression(
-            '/@media\s*\(min-width:\s*1200px\)\s*\{.*?grid-template-columns:\s*repeat\(3,/s',
+            '/\.sta-lajur-kiri\s*\{[^}]*grid-column:\s*1/',
             (string) $aturan,
-            'Tiga lajurnya tidak dipasang di 1200px.'
+            'Lajur kirinya tidak lagi dipatok ke kolom 1.'
         );
 
         $this->assertMatchesRegularExpression(
-            '/\.sta-lajur:nth-child\(3\)\s*\{[^}]*grid-column:\s*1 \/ -1/',
+            '/\.sta-lajur-kanan\s*\{[^}]*grid-column:\s*2/',
             (string) $aturan,
-            'Lajur ketiganya tidak turun jadi pita di lebar menengah; kotak unggahnya akan meluber.'
+            'Lajur kanannya tidak lagi dipatok ke kolom 2.'
         );
+
+        $this->assertSame(0, preg_match('/grid-template-columns:\s*repeat\(3,/', (string) $aturan),
+            'Lajur ketiganya dipasang lagi; ketiganya akan kembali berbagi baris.');
+
+        $this->assertSame(0, preg_match('/\.sta-lajur:nth-child\(/', (string) $aturan),
+            'Letaknya kembali dipatok per urutan; satu lajur yang tidak digambar akan menggeser sisanya.');
     }
 
     #[Test]

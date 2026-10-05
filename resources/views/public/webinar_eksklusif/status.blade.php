@@ -17,6 +17,11 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
 @php($habis = $pendaftaran->sudah_kedaluwarsa || $pendaftaran->status === 'expired')
 @php($batal = $pendaftaran->status === 'cancel')
 
+{{-- Dipakai di tiga tempat yang berjauhan: hitung mundur di kepala,
+     cara bayar di lajur kiri, borang unggah di lajur kanan. Ditulis
+     ulang di tiap tempat, ketiganya pernah berbeda isi. --}}
+@php($belumBayar = ! $lunas && ! $batal && ! $habis && ! $buktiAda)
+
 {{-- Keadaan KEEMPAT: bukti sudah dikirim, panitia belum mencocokkan.
 
      Dulu halaman ini cuma punya tiga keadaan, jadi sesudah mengunggah
@@ -174,6 +179,7 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                         Tinggal satu langkah: selesaikan pembayarannya.
                     @endif
                 </p>
+
             </div>
 
 
@@ -185,7 +191,100 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                  dan penempatan otomatis akan menaruh hal yang sama di baris
                  yang berbeda tergantung keadaan mana yang sedang aktif. --}}
             <div class="sta-kisi @if ($ringkasBerlajur) sta-kisi-ringkas @elseif (! $duaLajur) sta-kisi-tunggal @endif">
-                <div class="sta-lajur">
+                {{-- Hitung mundur bukan anak lajur mana pun, melainkan anak
+                     LANGSUNG kisinya, dan itu demi ponsel.
+
+                     Di dalam lajur kanan ia baru tergambar sesudah seluruh isi
+                     lajur kiri habis: terukur 1.395px dari puncak halaman di
+                     layar 390px — dua layar penuh ke bawah. Yang mendesak tidak
+                     terlihat sampai orangnya menggulung mencarinya.
+
+                     Sempat dicoba di kepala halaman juga. Terukur jadi lebih
+                     buruk: kotaknya 149px sementara judul dan kalimatnya 62px,
+                     jadi barisnya ikut setinggi 149px dan 87px kosong pindah ke
+                     samping judul — halamannya tumbuh 1.374 -> 1.487px untuk
+                     menukar satu ruang kosong dengan ruang kosong yang lain.
+
+                     Letaknya di layar lebar dipatok lewat CSS ke kolom kanan
+                     baris pertama, jadi urutan markah ini tidak mengikatnya. --}}
+                {{-- Hitung mundurnya TETAP digambar di mode ringkas; itu justru
+                     yang dicari orang saat kembali ke sini. Yang dibuang cuma
+                     cara bayar dan borang unggahnya.
+
+                     Yang buktinya SUDAH masuk tetap dikecualikan: di sana kursinya
+                     ditahan sampai panitia memeriksa, dan batas 24 jam itu memang
+                     tidak lagi berjalan untuknya. --}}
+                @if ($belumBayar && $pendaftaran->sisa_waktu)
+                    {{--
+                        Kalimatnya DIBUNGKUS <span>, dan itu bukan hiasan.
+
+                        .sta-waktu memakai display:flex, dan pada flex setiap
+                        unsur anak jadi item tersendiri — <strong> di tengah
+                        kalimat terlempar jadi kolomnya sendiri, sehingga
+                        terbaca "Selesaikan dalam | 23 jam 59 menit lagi |
+                        , setelah itu kursinya dilepas" dalam tiga kolom
+                        terpisah. Dengan satu pembungkus, flexnya tinggal dua
+                        item: ikon dan kalimat.
+                    --}}
+                    {{-- Angka awalnya dihitung DI PELADEN, bukan diserahkan ke
+                         skripnya. Tanpa ini, yang tergambar sebelum skripnya
+                         jalan — atau di peramban yang skripnya gagal dimuat —
+                         tiga kotak berisi "--".
+
+                         Hitungannya di MODEL, bukan di sini.
+
+                         Dan nama direktifnya SENGAJA tidak ditulis di komentar
+                         ini. Blade menjalankan compileStatements SEBELUM
+                         compileComments, jadi direktif yang cuma disebut di
+                         dalam komentar tetap dikompilasi jadi PHP sungguhan —
+                         yang terbit "unexpected endif, expecting end of file"
+                         menunjuk baris yang tidak bersalah. Percobaan kedua
+                         saya di berkas ini jatuh persis di situ. --}}
+                    @php($sisaDetik = $pendaftaran->sisa_detik)
+
+                    {{-- Hitung mundurnya BERDIRI SENDIRI, tidak lagi menyelip
+                         di tengah kalimat.
+
+                         Dulu angkanya satu kata di antara "Selesaikan dalam"
+                         dan "setelah itu kursinya dilepas" — ia berdetak tiap
+                         detik tetapi tidak pernah terbaca sebagai penghitung,
+                         cuma sebagai kalimat yang gelisah.
+
+                         Batas waktunya ditulis ISO 8601 LENGKAP DENGAN SELISIH
+                         ZONA (+07:00). Tanpa selisihnya, peramban menafsirkan
+                         angka itu memakai zona waktu PEMBACANYA — dan peserta
+                         yang membuka dari luar Jakarta melihat sisa waktu
+                         meleset berjam-jam. --}}
+                    <div class="sta-mundur" data-mis-mundur="{{ $pendaftaran->kedaluwarsa_pada->toIso8601String() }}">
+                        <p class="sta-mundur-kop">
+                            <i class="fas fa-stopwatch" aria-hidden="true"></i>
+                            Selesaikan dalam
+                        </p>
+
+                        {{-- aria-live="off": pembaca layar tidak boleh
+                             membacakan angka yang berganti tiap detik. --}}
+                        <div class="sta-mundur-angka" aria-live="off">
+                            <span class="sta-mundur-unit">
+                                <strong data-mundur-jam>{{ sprintf('%02d', intdiv($sisaDetik, 3600)) }}</strong>
+                                <small>jam</small>
+                            </span>
+                            <span class="sta-mundur-pisah" aria-hidden="true">:</span>
+                            <span class="sta-mundur-unit">
+                                <strong data-mundur-menit>{{ sprintf('%02d', intdiv($sisaDetik % 3600, 60)) }}</strong>
+                                <small>menit</small>
+                            </span>
+                            <span class="sta-mundur-pisah" aria-hidden="true">:</span>
+                            <span class="sta-mundur-unit">
+                                <strong data-mundur-detik>{{ sprintf('%02d', $sisaDetik % 60) }}</strong>
+                                <small>detik</small>
+                            </span>
+                        </div>
+
+                        <p class="sta-mundur-nota">Setelah itu kursinya dilepas untuk orang lain.</p>
+                    </div>
+                @endif
+
+                <div class="sta-lajur sta-lajur-kiri">
 
             <dl class="sta-rincian">
                 <div>
@@ -265,89 +364,15 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                     </p>
                 </div>
             @endif
-                </div>{{-- /lajur kiri --}}
 
-                <div class="sta-lajur">
+                {{-- Cara bayar duduk di lajur YANG SAMA dengan rinciannya.
 
-            {{-- Hitung mundurnya TETAP digambar di mode ringkas; itu justru
-                 yang dicari orang saat kembali ke sini. Yang dibuang cuma
-                 cara bayar dan borang unggahnya.
-
-                 Yang buktinya SUDAH masuk tetap dikecualikan: di sana kursinya
-                 ditahan sampai panitia memeriksa, dan batas 24 jam itu memang
-                 tidak lagi berjalan untuknya. --}}
-            @if (! $lunas && ! $batal && ! $habis && ! $menunggu)
-                @if ($pendaftaran->sisa_waktu)
-                    {{--
-                        Kalimatnya DIBUNGKUS <span>, dan itu bukan hiasan.
-
-                        .sta-waktu memakai display:flex, dan pada flex setiap
-                        unsur anak jadi item tersendiri — <strong> di tengah
-                        kalimat terlempar jadi kolomnya sendiri, sehingga
-                        terbaca "Selesaikan dalam | 23 jam 59 menit lagi |
-                        , setelah itu kursinya dilepas" dalam tiga kolom
-                        terpisah. Dengan satu pembungkus, flexnya tinggal dua
-                        item: ikon dan kalimat.
-                    --}}
-                    {{-- Angka awalnya dihitung DI PELADEN, bukan diserahkan ke
-                         skripnya. Tanpa ini, yang tergambar sebelum skripnya
-                         jalan — atau di peramban yang skripnya gagal dimuat —
-                         tiga kotak berisi "--".
-
-                         Hitungannya di MODEL, bukan di sini.
-
-                         Dan nama direktifnya SENGAJA tidak ditulis di komentar
-                         ini. Blade menjalankan compileStatements SEBELUM
-                         compileComments, jadi direktif yang cuma disebut di
-                         dalam komentar tetap dikompilasi jadi PHP sungguhan —
-                         yang terbit "unexpected endif, expecting end of file"
-                         menunjuk baris yang tidak bersalah. Percobaan kedua
-                         saya di berkas ini jatuh persis di situ. --}}
-                    @php($sisaDetik = $pendaftaran->sisa_detik)
-
-                    {{-- Hitung mundurnya BERDIRI SENDIRI, tidak lagi menyelip
-                         di tengah kalimat.
-
-                         Dulu angkanya satu kata di antara "Selesaikan dalam"
-                         dan "setelah itu kursinya dilepas" — ia berdetak tiap
-                         detik tetapi tidak pernah terbaca sebagai penghitung,
-                         cuma sebagai kalimat yang gelisah.
-
-                         Batas waktunya ditulis ISO 8601 LENGKAP DENGAN SELISIH
-                         ZONA (+07:00). Tanpa selisihnya, peramban menafsirkan
-                         angka itu memakai zona waktu PEMBACANYA — dan peserta
-                         yang membuka dari luar Jakarta melihat sisa waktu
-                         meleset berjam-jam. --}}
-                    <div class="sta-mundur" data-mis-mundur="{{ $pendaftaran->kedaluwarsa_pada->toIso8601String() }}">
-                        <p class="sta-mundur-kop">
-                            <i class="fas fa-stopwatch" aria-hidden="true"></i>
-                            Selesaikan dalam
-                        </p>
-
-                        {{-- aria-live="off": pembaca layar tidak boleh
-                             membacakan angka yang berganti tiap detik. --}}
-                        <div class="sta-mundur-angka" aria-live="off">
-                            <span class="sta-mundur-unit">
-                                <strong data-mundur-jam>{{ sprintf('%02d', intdiv($sisaDetik, 3600)) }}</strong>
-                                <small>jam</small>
-                            </span>
-                            <span class="sta-mundur-pisah" aria-hidden="true">:</span>
-                            <span class="sta-mundur-unit">
-                                <strong data-mundur-menit>{{ sprintf('%02d', intdiv($sisaDetik % 3600, 60)) }}</strong>
-                                <small>menit</small>
-                            </span>
-                            <span class="sta-mundur-pisah" aria-hidden="true">:</span>
-                            <span class="sta-mundur-unit">
-                                <strong data-mundur-detik>{{ sprintf('%02d', $sisaDetik % 60) }}</strong>
-                                <small>detik</small>
-                            </span>
-                        </div>
-
-                        <p class="sta-mundur-nota">Setelah itu kursinya dilepas untuk orang lain.</p>
-                    </div>
-                @endif
-
-                @if ($pendaftaran->cara_bayar === 'transfer' && ! $ringkas && ! $menunggu)
+                     Sebagai lajur sendiri ia jadi lajur ketiga, dan ketiganya
+                     dipaksa berbagi baris: rinciannya 341px sementara dua
+                     lajur di kanannya 606px, jadi 265px kosong menggantung
+                     di bawah lajur kiri. Ditumpuk begini, tiap lajur
+                     setinggi isinya sendiri. --}}
+                @if ($belumBayar && $pendaftaran->cara_bayar === 'transfer' && ! $ringkas)
                     {{-- Cara bayar manual. Nomor rekeningnya SENGAJA diketik di
                          sini dan bukan diambil dari basis data: tidak ada layar
                          yang mengaturnya, dan mengambilnya dari kolom yang bisa
@@ -384,8 +409,13 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                                  sampai ke baris pendaftarannya; yang memeriksa
                                  harus mencocokkan tangkapan layar dengan
                                  daftar, satu per satu. --}}
+                            {{-- Ditunjuk lewat NAMA kotaknya, bukan lewat arah.
+                                 Dulu tertulis "di kotak tepat di bawah", dan itu
+                                 hanya benar di ponsel; di layar lebar kotaknya di
+                                 sebelah kanan. Arah ikut berubah tiap kali tata
+                                 letaknya berubah, namanya tidak. --}}
                             <li><strong>Unggah bukti transfernya di halaman ini</strong>,
-                                di kotak tepat di bawah. Nomor
+                                di kotak <em>Sudah transfer?</em>. Nomor
                                 <code>{{ $pendaftaran->id_transaksi }}</code> sudah menempel
                                 sendiri, jadi tidak perlu Anda ketik.</li>
                             {{-- Yang BENAR-BENAR terjadi. Sebelumnya tertulis
@@ -396,10 +426,12 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                                 di WhatsApp — tautan masuk sesinya dibagikan di sana.</li>
                         </ol>
                     </div>
+                @endif
+                </div>{{-- /lajur kiri --}}
 
-                </div>{{-- /lajur tengah --}}
+                <div class="sta-lajur sta-lajur-kanan">
 
-                <div class="sta-lajur">
+                @if ($belumBayar && $pendaftaran->cara_bayar === 'transfer' && ! $ringkas)
 
                     {{--
                         UNGGAH BUKTI TRANSFER — jalur UTAMA.
@@ -471,7 +503,6 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                         </p>
                     </div>
                 @endif
-            @endif
 
             {{--
                 LAYAR SELESAI — buktinya sudah dikirim, panitia belum mencocokkan.
@@ -991,6 +1022,14 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
     .sta-waktu > .fas { margin: 0 !important; flex: 0 0 auto; }
     .sta-waktu > span { line-height: 1.55; }
 
+    /* Nomor pendaftarannya tidak boleh dipatah.
+
+       Terukur di lajur 661px: "WE-20261005-0001" pecah jadi "WE-" di ujung
+       baris dan "20261005-0001" di baris berikutnya, sebab tanda hubungnya
+       dianggap tempat boleh patah. Yang dibacakan lewat telepon ke panitia
+       jadi dua potong, dan potongan pertamanya tidak berarti apa-apa. */
+    .sta-bayar code { white-space: nowrap; }
+
     .sta-bayar { text-align: left; }
 
     .sta-bayar-judul { margin: 0 0 10px; font-size: .95rem; font-weight: 800; color: var(--navy); }
@@ -1219,10 +1258,23 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
 
     /* ---------------------------------------------- unggah bukti transfer */
 
+    /* Panel, bukan potongan bergaris putus.
+
+       Garis putus di atasnya dulu masuk akal sewaktu borang ini menempel di
+       bawah langkah-langkah cara bayar — ia memisahkan dua hal yang
+       bersambung. Sekarang ia blok PERTAMA di lajurnya sendiri, dan garis
+       putus yang menggantung di pucuk lajur memisahkannya dari tidak ada
+       apa-apa. */
+    /* Jarak ke bawah dibawa hitung mundurnya sendiri, bukan oleh yang
+       mengikutinya: yang mengikutinya berbeda-beda per keadaan — borang
+       unggah, panel selesai, atau tombol kirim ulang. */
+    .sta-kisi > .sta-mundur { margin-bottom: 16px; }
+
     .sta-unggah {
-        margin-top: 18px;
-        padding-top: 18px;
-        border-top: 1px dashed #d9e1ef;
+        padding: 18px 18px 16px;
+        border: 1px solid #dbe3f0;
+        border-radius: 16px;
+        background: linear-gradient(180deg, #fbfcfe, #f6f8fc);
     }
 
     .sta-unggah-ada {
@@ -1381,32 +1433,45 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
             /* minmax(0, ...) WAJIB: tanpa itu lajurnya memakai min-width auto
                dan isi terlebar di dalamnya — nomor rekening yang berspasi —
                melebarkan lajurnya melewati jatahnya, lalu kartunya meluber. */
-            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            grid-template-columns: minmax(0, 1.06fr) minmax(0, .94fr);
             gap: 0 clamp(24px, 3vw, 44px);
             align-items: start;
         }
 
-        /* Garis pemisah tipis di antaranya. Dipasang sebagai border lajur
-           kedua, bukan unsur sendiri: unsur pemisah akan ikut tergambar di
-           ponsel saat lajurnya menumpuk. */
-        .sta-kisi:not(.sta-kisi-tunggal):not(.sta-kisi-ringkas) > .sta-lajur + .sta-lajur {
-            padding-left: clamp(24px, 3vw, 44px);
-            border-left: 1px solid var(--garis);
+        /* Letaknya DIPATOK per kelas, tidak diserahkan ke penempatan
+           otomatis. Isi tiap lajur berbeda-beda per keadaan — borang unggah
+           hilang saat buktinya sudah masuk, cara bayar hilang di layar
+           ringkas — dan penempatan otomatis akan menggeser sisanya ke sel
+           yang berbeda tiap kali salah satunya tidak digambar. */
+        .sta-kisi > .sta-lajur-kiri {
+            grid-column: 1;
+            grid-row: 1 / span 2;
         }
 
-        /* 992-1299px: lajur KETIGA turun jadi pita selebar kisinya.
+        /* BARISNYA tidak ikut dipatok, hanya kolomnya.
 
-           Dipaksa jadi lajur ketiga di lebar segini, tiap lajurnya tinggal
-           ~290px — nomor rekening yang berspasi tidak muat di situ. Turun ke
-           bawah, urutan bacanya tetap benar: rincian, cara bayar, lalu
-           unggah. */
-        .sta-kisi:not(.sta-kisi-tunggal):not(.sta-kisi-ringkas) > .sta-lajur:nth-child(3) {
-            grid-column: 1 / -1;
-            margin-top: clamp(18px, 2vw, 26px);
-            padding-top: clamp(18px, 2vw, 26px);
-            padding-left: 0;
-            border-top: 1px solid var(--garis);
-            border-left: 0;
+           Hitung mundurnya tidak selalu digambar — yang buktinya sudah masuk
+           tidak punya sisa waktu lagi. Dipatok ke baris 1, lajur kanan akan
+           tetap duduk di baris 2 dan menyisakan lubang setinggi baris 1 yang
+           kosong. Dibiarkan mengalir, lajur kanannya naik sendiri ke baris
+           pertama begitu hitung mundurnya tidak ada. */
+        .sta-kisi > .sta-mundur { grid-column: 2; }
+        .sta-kisi > .sta-lajur-kanan { grid-column: 2; }
+
+        /* Garis pemisahnya dipasang sebagai border KANAN lajur kiri, bukan
+           border kiri bagian kanan.
+
+           Bukan sekadar selera: bagian kanan terdiri dari DUA kotak, dan
+           kotak hitung mundur sudah punya garis tepinya sendiri yang kuning.
+           Border kiri abu-abu akan menimpa sisi kiri kotak kuning itu, jadi
+           satu sisi kotaknya berwarna lain. Digambar lajur kiri, garisnya
+           satu, utuh, dan tidak menyentuh kotak mana pun.
+
+           Dipasang sebagai border, bukan unsur sendiri: unsur pemisah akan
+           ikut tergambar di ponsel saat isinya menumpuk. */
+        .sta-kisi:not(.sta-kisi-tunggal) > .sta-lajur-kiri {
+            padding-right: clamp(24px, 3vw, 44px);
+            border-right: 1px solid var(--garis);
         }
 
         /* Judul dan kalimat pembukanya tidak ikut melebar sampai ujung:
@@ -1459,6 +1524,7 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
 
         .sta-kepala > .sta-sub { flex: 1 1 320px; font-size: .88rem; line-height: 1.55; }
 
+
         /* Layar ringkas: judulnya DI TENGAH, kalimatnya di bawahnya.
 
            Di layar penuh kalimatnya menemani judul di baris yang sama supaya
@@ -1495,7 +1561,7 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
         .sta-kisi .sta-rincian { margin-bottom: 14px; padding: 14px 18px; }
         .sta-kisi .sta-tawar-akun { margin-top: 14px; padding: 14px 16px; }
         .sta-kisi .sta-bayar > ol { margin-bottom: 10px; }
-        .sta-kisi .sta-unggah { margin-top: 14px; padding-top: 14px; }
+        .sta-kisi .sta-unggah { padding: 14px 15px 13px; }
 
         /* Barisnya dirapatkan 8px -> 5px. Enam baris, jadi tiap 3px yang
            dihemat terbayar dua belas kali — 36px tanpa satu pun baris jadi
@@ -1520,29 +1586,10 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
 
         /* ---------------------------------- mode ringkas: DUA bagian saja */
 
-        /* Kiri rincian transaksinya, kanan sisa waktunya dan tindak lanjutnya.
-
-           Dibagi tiga seperti layar penuh, lajur tengahnya cuma berisi hitung
-           mundur setinggi 70px di samping rincian setinggi 305px — satu lajur
-           nyaris kosong di tengah layar. Dua bagian membaginya rata. */
-        .sta-kisi-ringkas {
-            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-        }
-
-        /* Letaknya DIPATOK, bukan diserahkan ke penempatan otomatis: isi
-           bagian kanan datang dari DUA pembungkus yang berbeda, dan otomatis
-           akan menaruh yang kedua di baris baru bagian KIRI. */
-        .sta-kisi-ringkas > .sta-lajur:nth-child(1) { grid-column: 1; grid-row: 1 / span 2; }
-        .sta-kisi-ringkas > .sta-lajur:nth-child(2) { grid-column: 2; grid-row: 1; }
-        .sta-kisi-ringkas > .sta-lajur:nth-child(3) { grid-column: 2; grid-row: 2; }
-
-        /* Garisnya dipasang di KEDUA baris bagian kanan supaya tersambung
-           jadi satu garis utuh, bukan dua potong dengan celah di tengahnya. */
-        .sta-kisi-ringkas > .sta-lajur:nth-child(2),
-        .sta-kisi-ringkas > .sta-lajur:nth-child(3) {
-            padding-left: clamp(24px, 3vw, 44px);
-            border-left: 1px solid var(--garis);
-        }
+        /* Layar ringkas memakai aturan dua lajur yang sama persis; yang
+           membedakannya cuma isinya yang lebih sedikit. Dulu ia punya blok
+           aturan sendiri dengan letak dipatok per nth-child, sebab lajurnya
+           tiga dan yang di tengah nyaris kosong. Lajurnya kini memang dua. */
 
         /* Satu lajur: halamannya ikut menyempit, bukan kartunya dibiarkan
            melar dengan kolom sempit melayang di tengah. */
@@ -1553,28 +1600,6 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
             margin: 0 auto;
             border-left: 0;
             padding-left: 0;
-        }
-    }
-
-    /* ------------------------------------------ layar sangat lebar: 3 lajur */
-
-    /* 1200px. Dipatok 1300 lebih dulu, dan di 1280 — ukuran laptop yang
-       lazim — lajur ketiganya turun jadi pita penuh dan kisinya justru
-       membengkak 670 -> 975. Ambangnya diturunkan sampai laptop 1280 ikut
-       kebagian tiga lajur. */
-    @media (min-width: 1200px) {
-        .sta-kisi:not(.sta-kisi-tunggal):not(.sta-kisi-ringkas) {
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-        }
-
-        /* Pita penuh di lebar menengah dibatalkan; ia kembali jadi lajur. */
-        .sta-kisi:not(.sta-kisi-tunggal):not(.sta-kisi-ringkas) > .sta-lajur:nth-child(3) {
-            grid-column: auto;
-            margin-top: 0;
-            padding-top: 0;
-            padding-left: clamp(24px, 3vw, 44px);
-            border-top: 0;
-            border-left: 1px solid var(--garis);
         }
     }
 
