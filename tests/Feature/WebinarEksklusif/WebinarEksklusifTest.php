@@ -2752,4 +2752,127 @@ class WebinarEksklusifTest extends TestCase
         $this->assertStringNotContainsString('max-width', $cocok['isi'],
             'Lebarnya dipotong lagi; sub judulnya akan kembali duduk di samping judul.');
     }
+
+    #[Test]
+    public function jam_pasirnya_berputar_hanya_selama_masih_menunggu(): void
+    {
+        /*
+         * Ikon kepala halaman ini dipakai ulang untuk EMPAT keadaan: jam pasir
+         * (belum dibayar), centang (lunas / bukti masuk), dan silang (batal,
+         * kedaluwarsa). Animasinya menempel di kelas penanda, bukan di
+         * .sta-ubin — kalau dipasang di .sta-ubin, centang "sudah lunas" ikut
+         * berputar-putar, dan keadaan yang sudah SELESAI jadi terbaca seperti
+         * masih dikerjakan.
+         *
+         * Yang dijaga: penandanya ADA saat menunggu dan TIDAK ADA saat lunas.
+         *
+         * Dicocokkan ke atribut class elemennya, bukan ke nama kelas di mana
+         * pun di halaman — aturan CSS-nya sendiri menyebut nama yang sama di
+         * dalam <style>, jadi pencarian polos selalu hijau walau markahnya
+         * sudah kehilangan kelas itu.
+         */
+        $sesi = $this->sesi();
+
+        $this->post(route('public.webinareksklusif.store'), [
+            'kategori_id' => $sesi->id, 'nama' => 'Jam Pasir', 'email' => 'jampasir@contoh.test',
+            'telp' => '08123457777', 'jumlah_pendaftar' => 1, 'setuju' => '1',
+        ]);
+
+        $p = WebinarEksklusifPendaftaran::where('email', 'jampasir@contoh.test')->firstOrFail();
+
+        $menunggu = $this->get(route('public.webinareksklusif.status', $p->getKey()))
+            ->assertOk()
+            ->getContent();
+
+        $ada = preg_match('/<span class="(?<kelas>sta-ubin[^"]*)"/', $menunggu, $cocok);
+
+        $this->assertSame(1, $ada, 'Ubin ikon kepala halamannya hilang.');
+
+        $this->assertStringContainsString('sta-ubin-menanti', $cocok['kelas'],
+            'Jam pasirnya tidak lagi ditandai; ikonnya akan diam padahal hitung mundurnya berdetak.');
+
+        $this->assertStringContainsString('fa-hourglass-half', $menunggu,
+            'Ikon jam pasirnya hilang dari keadaan menunggu.');
+
+        $p->update(['status' => 'paid']);
+
+        $lunas = $this->get(route('public.webinareksklusif.status', $p->getKey()))
+            ->assertOk()
+            ->getContent();
+
+        $ada = preg_match('/<span class="(?<kelas>sta-ubin[^"]*)"/', $lunas, $cocok);
+
+        $this->assertSame(1, $ada, 'Ubin ikon kepala halamannya hilang di keadaan lunas.');
+
+        $this->assertStringNotContainsString('sta-ubin-menanti', $cocok['kelas'],
+            'Centang "sudah lunas" ikut berputar; keadaan yang sudah selesai terbaca masih berjalan.');
+
+        /*
+         * Penanda di markah saja TIDAK CUKUP, dan lubang ini terbukti nyata:
+         * memindahkan animasinya dari ".sta-ubin-menanti > .fas" ke
+         * ".sta-ubin > .fas" membuat centang lunas ikut berputar sementara
+         * markahnya tetap benar — dua pernyataan di atas hijau semua.
+         *
+         * Jadi PEMILIHNYA ikut dijaga: animasinya wajib menggantung di
+         * penanda, dan .sta-ubin polos wajib bersih dari animasi.
+         */
+        $aturan = preg_replace('#/\*.*?\*/#s', '', file_get_contents(
+            resource_path('views/public/webinar_eksklusif/status.blade.php')
+        ));
+        $aturan = (string) preg_replace('#\{\{--.*?--\}\}#s', '', (string) $aturan);
+
+        $ada = preg_match('/\.sta-ubin-menanti\s*>\s*\.fas\s*\{(?<isi>[^}]*)\}/', $aturan, $pemilih);
+
+        $this->assertSame(1, $ada, 'Aturan animasi jam pasirnya hilang.');
+
+        $this->assertStringContainsString('animation: sta-jam-balik', $pemilih['isi'],
+            'Gerak baliknya tidak lagi dipasang di penanda jam pasir.');
+
+        $this->assertSame(0, preg_match('/\.sta-ubin\s*>\s*\.fas\s*\{[^}]*animation/', $aturan),
+            'Animasinya dipasang di .sta-ubin polos; centang lunas dan silang batal ikut berputar.');
+    }
+
+    #[Test]
+    public function putaran_jam_pasirnya_searah_dan_bisa_dimatikan(): void
+    {
+        /*
+         * Dua hal yang tidak terlihat dari markah dan tidak pernah menerbitkan
+         * galat kalau rusak.
+         *
+         * SEARAH. Jam pasir dibalik SATU kali tiap giliran pasir. Kalau
+         * sudutnya pulang 180 -> 0, mata membacanya sebagai dibalik dua kali
+         * untuk satu giliran — salah secara benda, walau gambarnya sama.
+         * Karena itu putarannya ditutup di 360, bukan dikembalikan ke 0.
+         * Terukur di peramban: 0 0 0 0 0 0 177 180 180 180 180 180 333 0.
+         *
+         * BISA DIMATIKAN. Gerakan berulang tanpa henti memicu rasa mual bagi
+         * sebagian orang, dan setelan peramban mereka sudah menyatakannya.
+         * Tanpa blok ini, pernyataan itu diabaikan tanpa tanda apa pun.
+         */
+        $sumber = file_get_contents(
+            resource_path('views/public/webinar_eksklusif/status.blade.php')
+        );
+
+        $aturan = preg_replace('#/\*.*?\*/#s', '', $sumber);
+        $aturan = preg_replace('#\{\{--.*?--\}\}#s', '', (string) $aturan);
+
+        $ada = preg_match('/@keyframes\s+sta-jam-balik\s*\{(?<isi>.*?)\}\s*\n\s*\n/s', (string) $aturan, $cocok);
+
+        $this->assertSame(1, $ada, 'Gerak baliknya hilang; jam pasirnya akan diam.');
+
+        $this->assertStringContainsString('rotate(360deg)', $cocok['isi'],
+            'Putarannya tidak lagi ditutup di 360; ia akan pulang ke 0 dan terbaca dibalik dua kali.');
+
+        $mati = preg_match(
+            '/@media \(prefers-reduced-motion: reduce\) \{(?<isi>[^}]*sta-ubin-menanti[^}]*)\}/s',
+            (string) $aturan,
+            $cocokMati
+        );
+
+        $this->assertSame(1, $mati,
+            'Animasi jam pasirnya tidak lagi dimatikan untuk yang minta gerakan dikurangi.');
+
+        $this->assertStringContainsString('animation: none', $cocokMati['isi'],
+            'Blok gerakan-dikurangi ada tetapi tidak benar-benar menghentikan animasinya.');
+    }
 }
