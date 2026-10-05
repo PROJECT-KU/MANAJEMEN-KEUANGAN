@@ -2148,4 +2148,117 @@ class WebinarEksklusifTest extends TestCase
         $this->assertStringContainsString('lagi</strong>', $isi,
             'Isi awal dari peladen hilang; halaman tanpa skrip akan menampilkan kotak kosong.');
     }
+
+    #[Test]
+    public function halaman_status_memakai_dua_lajur_selama_masih_harus_dibayar(): void
+    {
+        /*
+         * Halamannya dulu satu pita 640px di tengah layar. Di layar 1.470px
+         * itu menyisakan 830px kosong di kiri-kanan, sementara isinya sendiri
+         * menggulung panjang.
+         *
+         * Dijaga PENANDA KELASNYA, bukan lebarnya: lebar hanya ada di
+         * peramban, dan uji yang mengukurnya tidak bisa dijalankan di sini.
+         */
+        $sesi = $this->sesi();
+
+        $this->post(route('public.webinareksklusif.store'), [
+            'kategori_id' => $sesi->id, 'nama' => 'Tata', 'email' => 'tata@contoh.test',
+            'telp' => '08123459999', 'jumlah_pendaftar' => 1, 'setuju' => '1',
+        ]);
+
+        $p = WebinarEksklusifPendaftaran::where('email', 'tata@contoh.test')->firstOrFail();
+
+        $isi = $this->get(route('public.webinareksklusif.status', $p->getKey()))
+            ->assertOk()
+            ->getContent();
+
+        /*
+         * Dicocokkan sebagai ATRIBUT class unsurnya, bukan kata mentah di
+         * seluruh halaman: nama kelas yang sama juga tertulis sebagai pemilih
+         * di dalam blok <style> halaman ini, dan percobaan pertama merah pada
+         * markah yang justru benar karena menemukannya di situ.
+         */
+        $kisi = preg_match('/<div class="(sta-kisi[^"]*)"/', $isi, $cocokKisi);
+        $wadah = preg_match('/<div class="container (sta-wadah[^"]*)"/', $isi, $cocokWadah);
+
+        $this->assertSame(1, $kisi, 'Pembungkus dua lajurnya hilang.');
+        $this->assertStringNotContainsString('sta-kisi-tunggal', $cocokKisi[1],
+            'Yang masih harus membayar justru dipaksa satu lajur.');
+
+        $this->assertSame(1, $wadah, 'Pembungkus halamannya hilang.');
+        $this->assertStringNotContainsString('sta-wadah-ramping', $cocokWadah[1],
+            'Halamannya disempitkan padahal isinya dua lajur.');
+
+        // Dua pembungkus lajur, bukan satu: satu saja berarti isi kanannya
+        // jatuh jadi anak langsung kisi dan lepas dari aturan lebarnya.
+        $this->assertSame(2, substr_count($isi, '<div class="sta-lajur">'),
+            'Jumlah lajurnya bukan dua.');
+    }
+
+    #[Test]
+    public function halaman_status_menyempit_saat_tidak_ada_yang_harus_dikerjakan(): void
+    {
+        /*
+         * Yang sudah lunas tidak punya lajur kanan sama sekali. Dibiarkan
+         * selebar layar, yang tergambar kartu putih 1.382px dengan kolom
+         * 620px melayang di tengahnya — dan garis pemisah vertikal berdiri
+         * sendiri di sebelah ruang kosong.
+         */
+        $sesi = $this->sesi();
+
+        $this->post(route('public.webinareksklusif.store'), [
+            'kategori_id' => $sesi->id, 'nama' => 'Tata Lunas', 'email' => 'tatalunas@contoh.test',
+            'telp' => '08123459998', 'jumlah_pendaftar' => 1, 'setuju' => '1',
+        ]);
+
+        $p = WebinarEksklusifPendaftaran::where('email', 'tatalunas@contoh.test')->firstOrFail();
+        $p->forceFill(['status' => 'paid', 'bayar_status' => 'lunas', 'bayar_pada' => now()])->save();
+
+        $isi = $this->get(route('public.webinareksklusif.status', $p->getKey()))
+            ->assertOk()
+            ->getContent();
+
+        preg_match('/<div class="(sta-kisi[^"]*)"/', $isi, $cocokKisi);
+        preg_match('/<div class="container (sta-wadah[^"]*)"/', $isi, $cocokWadah);
+
+        $this->assertStringContainsString('sta-kisi-tunggal', $cocokKisi[1] ?? '',
+            'Masih dua lajur padahal lajur kanannya kosong.');
+        $this->assertStringContainsString('sta-wadah-ramping', $cocokWadah[1] ?? '',
+            'Halamannya tetap selebar layar untuk isi satu lajur.');
+    }
+
+    #[Test]
+    public function lebarnya_dilepas_dan_dua_lajurnya_dipasang_di_layar_lebar(): void
+    {
+        /*
+         * Penjaga tingkat SUMBER untuk dua aturan yang tidak bisa dilihat dari
+         * markah: wadahnya tidak lagi dipatok 640px, dan kisinya baru jadi dua
+         * lajur mulai 992px.
+         *
+         * Komentar dibuang lebih dulu. Percobaan sebelumnya di proyek ini
+         * merah/hijau palsu karena yang cocok justru kalimat di komentarnya
+         * sendiri, bukan aturannya.
+         */
+        $sumber = file_get_contents(
+            resource_path('views/public/webinar_eksklusif/status.blade.php')
+        );
+
+        $aturan = preg_replace('#/\*.*?\*/#s', '', $sumber);
+        $aturan = preg_replace('#\{\{--.*?--\}\}#s', '', (string) $aturan);
+
+        $this->assertMatchesRegularExpression('/\.sta-wadah\s*\{[^}]*max-width:\s*none/', (string) $aturan,
+            'Wadahnya masih dipatok lebar tetap; halamannya tidak akan penuh.');
+
+        $this->assertMatchesRegularExpression('/@media\s*\(min-width:\s*992px\)\s*\{.*?\.sta-kisi\s*\{[^}]*display:\s*grid/s', (string) $aturan,
+            'Kisi dua lajurnya tidak dipasang di layar lebar.');
+
+        /*
+         * minmax(0, ...) WAJIB. Tanpa itu lajurnya memakai min-width auto dan
+         * isi terlebar di dalamnya — nomor rekening yang berspasi — melebarkan
+         * lajurnya melewati jatahnya, lalu kartunya meluber keluar layar.
+         */
+        $this->assertStringContainsString('minmax(0, 1fr)', (string) $aturan,
+            'Lajurnya tidak dijaga minmax(0,...); kartunya bisa meluber.');
+    }
 }
