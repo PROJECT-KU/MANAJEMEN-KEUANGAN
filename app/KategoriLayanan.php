@@ -310,10 +310,38 @@ class KategoriLayanan extends Model
     }
 
     /**
-     * Aktif padahal tanggalnya sudah lewat.
+     * Angkatan ditutup begitu TANGGAL MULAI-nya tiba, bukan menunggu
+     * selesainya.
      *
-     * Tidak ada apa pun yang menutup angkatan otomatis, jadi ia bisa terpajang
-     * sebagai "Aktif" berbulan-bulan sesudah acaranya selesai.
+     * Dulu patokannya tanggal selesai, dan itu membuat angkatan tiga hari
+     * tetap menerima pendaftar di hari kedua dan ketiga — orang membayar
+     * untuk acara yang sudah separuh jalan. Ditetapkan 5 Okt 2026 atas
+     * permintaan pemiliknya.
+     *
+     * SATU tempat, dipakai empat pemanggil: lencana di daftar, dua saringan
+     * "perlu dicek", dan perintah penutup harian. Sebelumnya aturan yang sama
+     * ditulis ulang di tiap tempat, dan menggesernya di satu tempat saja akan
+     * membuat lencananya menyalahkan angkatan yang justru sudah benar.
+     */
+    public static function tanggalMulaiSudahTiba(?string $mulai): bool
+    {
+        return $mulai !== null && $mulai !== ''
+            && ! \Carbon\Carbon::parse($mulai)->startOfDay()->isFuture();
+    }
+
+    /** Bentuk SQL dari aturan yang sama. */
+    public function scopeMulainyaSudahTiba(Builder $kueri): Builder
+    {
+        return $kueri->whereNotNull('mulai')
+            ->whereDate('mulai', '<=', Carbon::today()->toDateString());
+    }
+
+    /**
+     * Aktif padahal tanggal mulainya sudah tiba.
+     *
+     * Tidak ada apa pun yang menutup angkatan otomatis sampai perintah
+     * harian jalan, jadi ia bisa terpajang sebagai "Aktif" padahal acaranya
+     * sudah berjalan — dan tetap menerima pendaftar.
      */
     public function getSudahLewatAttribute(): bool
     {
@@ -321,9 +349,7 @@ class KategoriLayanan extends Model
             return false;
         }
 
-        $akhir = $this->selesai ?: $this->mulai;
-
-        return $akhir && \Carbon\Carbon::parse($akhir)->endOfDay()->isPast();
+        return self::tanggalMulaiSudahTiba($this->mulai);
     }
 
     /**
@@ -387,7 +413,7 @@ class KategoriLayanan extends Model
      * "Tidak menemukan tarif i…".
      */
     public const PERLU = [
-        'aktif-lewat' => 'Aktif tapi sudah lewat',
+        'aktif-lewat' => 'Masih buka padahal sudah mulai',
         'draf-lewat' => 'Draf kadaluwarsa',
         'tanpa-tarif' => 'Tanpa tarif induk',
         'sampul-hilang' => 'Sampul hilang',
@@ -444,28 +470,28 @@ class KategoriLayanan extends Model
          * berbuat apa, dan akhirnya tidak berbuat apa-apa.
          */
         if ($this->sudah_lewat) {
-            $alasan[] = 'masih aktif padahal tanggalnya sudah lewat — nonaktifkan kalau acaranya memang selesai';
+            $alasan['aktif-lewat'] = 'masih menerima pendaftar padahal acaranya sudah mulai — tutup angkatannya';
         }
 
         if ($this->draf_kadaluwarsa) {
-            $alasan[] = 'masih draf padahal tanggalnya sudah lewat — ubah tanggalnya, atau hapus kalau batal';
+            $alasan['draf-lewat'] = 'masih draf padahal tanggalnya sudah lewat — ubah tanggalnya, atau hapus kalau batal';
         }
 
         if ($this->tarif_hilang) {
-            $alasan[] = 'tarif induknya tidak ketemu, jadi harga dan fasilitasnya kosong — pilih ulang tarifnya lewat tombol ubah';
+            $alasan['tanpa-tarif'] = 'tarif induknya tidak ketemu, jadi harga dan fasilitasnya kosong — pilih ulang tarifnya lewat tombol ubah';
         }
 
         if ($this->sampul_hilang) {
-            $alasan[] = 'berkas sampulnya tidak ada di peladen — unggah ulang gambarnya lewat tombol ubah';
+            $alasan['sampul-hilang'] = 'berkas sampulnya tidak ada di peladen — unggah ulang gambarnya lewat tombol ubah';
         }
 
         if ($this->kuota_melenceng) {
-            $alasan[] = 'sisa kuota tertulis ' . (int) $this->sisa_kuota . ', seharusnya '
+            $alasan['kuota-melenceng'] = 'sisa kuota tertulis ' . (int) $this->sisa_kuota . ', seharusnya '
                 . $this->sisa_kuota_seharusnya . ' — betulkan sisa kuotanya lewat tombol ubah';
         }
 
         if ($this->nomor_ganda) {
-            $alasan[] = 'nomor angkatannya dipakai angkatan lain di lokasi yang sama — ganti nomornya';
+            $alasan['nomor-ganda'] = 'nomor angkatannya dipakai angkatan lain di lokasi yang sama — ganti nomornya';
         }
 
         return $alasan;
@@ -474,18 +500,24 @@ class KategoriLayanan extends Model
     /**
      * Alasan yang belum punya lencananya sendiri di daftar.
      *
-     * "Masih aktif padahal tanggalnya lewat" sudah ditandai lencana "Lewat"
-     * yang bisa ditekan untuk menonaktifkan. Menambahkan lencana "Perlu dicek"
-     * di sebelahnya berarti dua peringatan untuk satu hal yang sama.
+     * "Sudah mulai" sudah ditandai lencananya sendiri — yang bisa ditekan
+     * untuk menutup angkatannya. Menambahkan lencana "Perlu dicek" di
+     * sebelahnya berarti dua peringatan untuk satu hal yang sama.
      *
-     * @return array<int, string>
+     * Dibuang lewat KUNCI, bukan lewat kata pembuka kalimatnya. Versi
+     * sebelumnya mencocokkan "masih aktif" di awal kalimat, dan penyaringnya
+     * diam-diam berhenti bekerja begitu kalimatnya diperhalus — lencananya
+     * muncul dua kali tanpa ada yang terlihat rusak.
+     *
+     * @return array<string, string>
      */
     public function getPerluDicekLainAttribute(): array
     {
-        return array_values(array_filter(
-            $this->perlu_dicek,
-            fn ($a) => ! str_starts_with($a, 'masih aktif')
-        ));
+        $lain = $this->perlu_dicek;
+
+        unset($lain['aktif-lewat']);
+
+        return $lain;
     }
 
     /** Tidak menemukan tarif induk, jadi harga dan fasilitasnya kosong. */
@@ -792,8 +824,16 @@ class KategoriLayanan extends Model
         $sampulHilang = self::jalurSampulHilang();
 
         return $kueri->where(function (Builder $q) use ($bertarif, $sampulHilang) {
-            $q->where(fn (Builder $x) => $x->whereIn('status', ['draft', 'active'])
-                ->whereRaw('coalesce(selesai, mulai) < ?', [Carbon::today()->toDateString()]))
+            /*
+             * Dipisah: yang AKTIF ditutup begitu tanggal mulainya tiba,
+             * sementara DRAF baru dianggap basi sesudah tanggal selesainya
+             * lewat. Draf tidak terpajang di mana pun, jadi menutupnya lebih
+             * awal tidak menyelamatkan apa-apa — yang perlu diingatkan cuma
+             * bahwa ia tertinggal.
+             */
+            $q->where(fn (Builder $x) => $x->where('status', 'active')->mulainyaSudahTiba())
+                ->orWhere(fn (Builder $x) => $x->where('status', 'draft')
+                    ->whereRaw('coalesce(selesai, mulai) < ?', [Carbon::today()->toDateString()]))
                 ->orWhereNotIn(
                     DB::raw("concat(layanan, '|', coalesce(varian, ''))"),
                     $bertarif
@@ -859,8 +899,7 @@ class KategoriLayanan extends Model
     public function scopePerlu(Builder $kueri, ?string $jenis): Builder
     {
         return match ($jenis) {
-            'aktif-lewat' => $kueri->where('status', 'active')
-                ->whereRaw('coalesce(selesai, mulai) < ?', [Carbon::today()->toDateString()]),
+            'aktif-lewat' => $kueri->where('status', 'active')->mulainyaSudahTiba(),
 
             'draf-lewat' => $kueri->where('status', 'draft')
                 ->whereRaw('coalesce(selesai, mulai) < ?', [Carbon::today()->toDateString()]),
