@@ -260,6 +260,35 @@
         text-decoration: underline; cursor: pointer;
     }
 
+    /* Rincian "perlu dicek": MERAH, bukan kuning.
+
+       Peringatan tanggal di bawahnya sudah kuning, dan dua kotak sewarna
+       untuk dua arti berbeda membuat keduanya harus dibaca dulu sebelum bisa
+       dibedakan. Merah juga jujur: ini bukan sekadar mengingatkan, ada yang
+       memang salah dan sudah terlanjur tersimpan. */
+    .brg-perlu {
+        margin: 0 0 12px; padding: 12px 14px;
+        border: 1px solid #fecdd3; border-radius: 12px;
+        background: #fff1f2; color: #9f1239;
+    }
+
+    .brg-perlu-judul {
+        display: flex; gap: 8px; align-items: baseline;
+        margin: 0 0 7px;
+        font-size: .82rem; font-weight: 700; line-height: 1.45;
+    }
+
+    .brg-perlu-judul .fas { font-size: 13px !important; }
+
+    .brg-perlu > ul { margin: 0; padding-left: 18px; list-style: disc; }
+
+    .brg-perlu > ul > li {
+        margin: 0 0 4px;
+        font-size: .78rem; line-height: 1.5;
+    }
+
+    .brg-perlu > ul > li:last-child { margin-bottom: 0; }
+
     /* Peringatan tanggal pada hasil gandakan: kuning, sebab ia meminta
        perhatian tetapi bukan galat — borangnya tetap bisa disimpan. */
     .brg-digandakan {
@@ -363,6 +392,33 @@
                     <p class="mis-kartu-judul">
                         <i class="fas fa-info-circle mis-ikon-biru"></i> Keterangan angkatan
                     </p>
+
+                    {{-- Rincian "perlu dicek", DI SINI — bukan di daftar.
+
+                         Di daftar ia cuma lencana berisi jumlah: di sana orang
+                         memindai sekilas, dan merinci alasannya membuat baris
+                         yang kena dua hal tumbuh dari 71px jadi 234px.
+
+                         Di halaman ini sebaliknya: orangnya sudah datang untuk
+                         membetulkan, dan semua tombol yang disebut alasannya
+                         ada di layar yang sama. Tiap kalimat menyebut apa yang
+                         salah lalu apa yang harus dikerjakan, sebab yang
+                         memakainya bukan orang teknis. --}}
+                    @if ($sunting && $angkatan->perlu_dicek)
+                        <div class="brg-perlu" role="alert">
+                            <p class="brg-perlu-judul">
+                                <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+                                {{ count($angkatan->perlu_dicek) > 1
+                                    ? 'Ada ' . count($angkatan->perlu_dicek) . ' hal yang perlu dibetulkan di angkatan ini'
+                                    : 'Ada satu hal yang perlu dibetulkan di angkatan ini' }}
+                            </p>
+                            <ul>
+                                @foreach ($angkatan->perlu_dicek as $sebab)
+                                    <li>{{ ucfirst($sebab) }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
 
                     @if ($baruDigandakan)
                         {{-- Tanggalnya diisi hari ini saat menggandakan, sebab
