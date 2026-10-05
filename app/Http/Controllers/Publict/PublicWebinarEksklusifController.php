@@ -537,8 +537,33 @@ class PublicWebinarEksklusifController extends Controller
          * Yang sudah lunas tidak boleh mendaftar lagi; yang masih menunggu
          * bayar diantar ke tagihannya yang lama, bukan dibuatkan yang baru.
          */
+        $email = mb_strtolower(trim($data['email']));
+
+        /*
+         * Dicocokkan EMAIL ATAU NOMOR WHATSAPP, tidak lagi email saja.
+         *
+         * Terukur sebelum ini: nomor yang sama dengan email berbeda — satu
+         * orang yang salah ketik emailnya, atau memakai email keduanya —
+         * menghasilkan DUA pendaftaran dan memotong kuota DUA KALI, sementara
+         * email yang sama hanya satu. Padahal yang dipakai panitia untuk
+         * mencocokkan transfer justru nomornya.
+         *
+         * Nomornya dicari lewat semuaBentuk(): kolomnya diisi bertahun-tahun
+         * oleh layar yang berbeda, jadi satu orang bisa tersimpan sebagai
+         * "62895...", "0895...", atau "+62 895-...". Mencari satu bentuk saja
+         * membuat sebagian orang tidak pernah ketemu, dan diamnya terbaca
+         * sebagai "memang belum pernah mendaftar".
+         */
+        $bentukNomor = NomorTelepon::semuaBentuk($data['telp']);
+
         $sudahAda = WebinarEksklusifPendaftaran::where('kategori_id', $sesi->getKey())
-            ->where('email', mb_strtolower(trim($data['email'])))
+            ->where(function ($q) use ($email, $bentukNomor) {
+                $q->where('email', $email);
+
+                if ($bentukNomor !== []) {
+                    $q->orWhereIn('telp', $bentukNomor);
+                }
+            })
             ->whereIn('status', ['pending', 'paid'])
             ->where(function ($q) {
                 // Yang sudah dibayar selalu dihitung; yang masih menunggu
@@ -551,11 +576,30 @@ class PublicWebinarEksklusifController extends Controller
             ->first();
 
         if ($sudahAda !== null) {
+            /*
+             * Disebut yang mana yang cocok. "Email itu sudah terdaftar" pada
+             * orang yang justru memakai email BARU terbaca seperti sistem yang
+             * salah, dan ia akan mencoba lagi dengan email ketiga.
+             */
+            $lewatEmail = mb_strtolower((string) $sudahAda->email) === $email;
+
+            $yangCocok = $lewatEmail ? 'Email' : 'Nomor WhatsApp';
+
+            /*
+             * Dikirim sebagai 'kabar', BUKAN 'error'.
+             *
+             * Ini bukan kesalahan pendaftar — pendaftarannya memang ada dan
+             * masih berlaku. Pita merah di layar orang yang tidak berbuat
+             * salah membuatnya mengira pendaftarannya gagal, lalu ia mencoba
+             * lagi; justru itu yang hendak dihentikan.
+             */
             return redirect()->route('public.webinareksklusif.status', $sudahAda->getKey())
-                ->with('error', $sudahAda->status === 'paid'
-                    ? 'Email itu sudah terdaftar di sesi ini. Ini rincian pendaftaran Anda.'
-                    : 'Email itu sudah punya pendaftaran yang belum dibayar di sesi ini. '
-                        . 'Lanjutkan yang ini saja supaya kursinya tidak terpotong dua kali.');
+                ->with('kabar', $sudahAda->status === 'paid'
+                    ? $yangCocok . ' itu sudah terdaftar di sesi ini dan pembayarannya sudah lunas.'
+                        . ' Ini rincian pendaftaran Anda.'
+                    : $yangCocok . ' itu sudah punya pendaftaran yang belum dibayar di sesi ini.'
+                        . ' Lanjutkan yang ini saja — kursinya sudah ditahan untuk Anda, dan'
+                        . ' mendaftar lagi justru memotongnya dua kali.');
         }
 
         try {
