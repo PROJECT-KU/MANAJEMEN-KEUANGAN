@@ -49,9 +49,22 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
      Hanya berlaku untuk kedatangan ITU. Membuka alamat yang sama dari tautan
      di emailnya tetap menampilkan halaman penuh — kalau tidak, orang yang
      memang belum membayar kehilangan satu-satunya jalan membayar. --}}
-@php($ringkas = (bool) session('ringkas'))
+{{-- $ringkas datang dari pengendalinya, bukan dibaca dari pesan sesi di
+     sini: penandanya berkunci per pendaftaran, dan merakit kuncinya di dua
+     tempat berarti dua aturan yang harus sepakat selamanya. --}}
 
 @php($duaLajur = ! $lunas && ! $batal && ! $habis && ! $menunggu && ! $ringkas)
+
+{{-- Mode ringkas punya kisinya SENDIRI, bukan menumpang yang tiga lajur.
+
+     Isinya tinggal tiga blok — rincian, hitung mundur, dan tawaran akun
+     beserta tombol kirim ulang — dan dibagi tiga lajur, lajur tengahnya cuma
+     berisi hitung mundur setinggi 70px di samping rincian setinggi 305px.
+     Dua lajur: rincian di kiri, sisanya menumpuk di kanan. --}}
+@php($ringkasBerlajur = $ringkas && ! $lunas && ! $batal && ! $habis)
+
+{{-- Yang menyempit hanya yang benar-benar satu lajur. --}}
+@php($lebarPenuh = $duaLajur || $ringkasBerlajur)
 
 <section class="sta-latar">
     {{-- Lebarnya ikut keadaan.
@@ -61,7 +74,7 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
          kedaluwarsa cuma punya satu lajur — dibiarkan selebar layar juga,
          yang tergambar kartu putih 1.382px dengan kolom 620px melayang di
          tengahnya. --}}
-    <div class="container sta-wadah @if (! $duaLajur) sta-wadah-ramping @endif">
+    <div class="container sta-wadah @if (! $lebarPenuh) sta-wadah-ramping @endif">
 
         @if (session('error'))
             <div class="sta-galat" role="alert">
@@ -169,7 +182,7 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                  di dalam @if, jadi yang tergambar berbeda-beda per keadaan —
                  dan penempatan otomatis akan menaruh hal yang sama di baris
                  yang berbeda tergantung keadaan mana yang sedang aktif. --}}
-            <div class="sta-kisi @if (! $duaLajur) sta-kisi-tunggal @endif">
+            <div class="sta-kisi @if ($ringkasBerlajur) sta-kisi-ringkas @elseif (! $duaLajur) sta-kisi-tunggal @endif">
                 <div class="sta-lajur">
 
             <dl class="sta-rincian">
@@ -646,6 +659,7 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
     }
 
     .sta-kabar > .fas { margin: 2px 0 0 !important; }
+
 
     .sta-galat > .fas,
     .sta-sukses > .fas { margin: 0 !important; margin-top: 2px !important; }
@@ -1198,7 +1212,7 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
         /* Garis pemisah tipis di antaranya. Dipasang sebagai border lajur
            kedua, bukan unsur sendiri: unsur pemisah akan ikut tergambar di
            ponsel saat lajurnya menumpuk. */
-        .sta-kisi:not(.sta-kisi-tunggal) > .sta-lajur + .sta-lajur {
+        .sta-kisi:not(.sta-kisi-tunggal):not(.sta-kisi-ringkas) > .sta-lajur + .sta-lajur {
             padding-left: clamp(24px, 3vw, 44px);
             border-left: 1px solid var(--garis);
         }
@@ -1209,7 +1223,7 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
            ~290px — nomor rekening yang berspasi tidak muat di situ. Turun ke
            bawah, urutan bacanya tetap benar: rincian, cara bayar, lalu
            unggah. */
-        .sta-kisi:not(.sta-kisi-tunggal) > .sta-lajur:nth-child(3) {
+        .sta-kisi:not(.sta-kisi-tunggal):not(.sta-kisi-ringkas) > .sta-lajur:nth-child(3) {
             grid-column: 1 / -1;
             margin-top: clamp(18px, 2vw, 26px);
             padding-top: clamp(18px, 2vw, 26px);
@@ -1296,6 +1310,32 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
            supaya tidak jadi satu pita sempit yang menempel ke kiri. */
         .sta-kisi-tunggal { display: block; }
 
+        /* ---------------------------------- mode ringkas: DUA bagian saja */
+
+        /* Kiri rincian transaksinya, kanan sisa waktunya dan tindak lanjutnya.
+
+           Dibagi tiga seperti layar penuh, lajur tengahnya cuma berisi hitung
+           mundur setinggi 70px di samping rincian setinggi 305px — satu lajur
+           nyaris kosong di tengah layar. Dua bagian membaginya rata. */
+        .sta-kisi-ringkas {
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        }
+
+        /* Letaknya DIPATOK, bukan diserahkan ke penempatan otomatis: isi
+           bagian kanan datang dari DUA pembungkus yang berbeda, dan otomatis
+           akan menaruh yang kedua di baris baru bagian KIRI. */
+        .sta-kisi-ringkas > .sta-lajur:nth-child(1) { grid-column: 1; grid-row: 1 / span 2; }
+        .sta-kisi-ringkas > .sta-lajur:nth-child(2) { grid-column: 2; grid-row: 1; }
+        .sta-kisi-ringkas > .sta-lajur:nth-child(3) { grid-column: 2; grid-row: 2; }
+
+        /* Garisnya dipasang di KEDUA baris bagian kanan supaya tersambung
+           jadi satu garis utuh, bukan dua potong dengan celah di tengahnya. */
+        .sta-kisi-ringkas > .sta-lajur:nth-child(2),
+        .sta-kisi-ringkas > .sta-lajur:nth-child(3) {
+            padding-left: clamp(24px, 3vw, 44px);
+            border-left: 1px solid var(--garis);
+        }
+
         /* Satu lajur: halamannya ikut menyempit, bukan kartunya dibiarkan
            melar dengan kolom sempit melayang di tengah. */
         .sta-wadah-ramping { max-width: 900px; }
@@ -1315,12 +1355,12 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
        membengkak 670 -> 975. Ambangnya diturunkan sampai laptop 1280 ikut
        kebagian tiga lajur. */
     @media (min-width: 1200px) {
-        .sta-kisi:not(.sta-kisi-tunggal) {
+        .sta-kisi:not(.sta-kisi-tunggal):not(.sta-kisi-ringkas) {
             grid-template-columns: repeat(3, minmax(0, 1fr));
         }
 
         /* Pita penuh di lebar menengah dibatalkan; ia kembali jadi lajur. */
-        .sta-kisi:not(.sta-kisi-tunggal) > .sta-lajur:nth-child(3) {
+        .sta-kisi:not(.sta-kisi-tunggal):not(.sta-kisi-ringkas) > .sta-lajur:nth-child(3) {
             grid-column: auto;
             margin-top: 0;
             padding-top: 0;
