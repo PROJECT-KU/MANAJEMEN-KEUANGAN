@@ -437,29 +437,35 @@ class KategoriLayanan extends Model
          * sehingga keadaan yang paling perlu ditindaklanjuti tidak bisa
          * ditemukan lewat saringan yang justru dibuat untuk itu.
          */
+        /*
+         * Tiap kalimat menyebut DUA hal: apa yang salah, lalu apa yang harus
+         * dikerjakan. Yang memakai layar ini bukan orang teknis; "perlu dicek"
+         * saja membuat mereka tahu ada yang salah tetapi tidak tahu harus
+         * berbuat apa, dan akhirnya tidak berbuat apa-apa.
+         */
         if ($this->sudah_lewat) {
-            $alasan[] = 'masih aktif padahal tanggalnya sudah lewat';
+            $alasan[] = 'masih aktif padahal tanggalnya sudah lewat — nonaktifkan kalau acaranya memang selesai';
         }
 
         if ($this->draf_kadaluwarsa) {
-            $alasan[] = 'draf yang tanggalnya sudah lewat';
+            $alasan[] = 'masih draf padahal tanggalnya sudah lewat — ubah tanggalnya, atau hapus kalau batal';
         }
 
         if ($this->tarif_hilang) {
-            $alasan[] = 'tidak menemukan tarif induk, jadi harga dan fasilitasnya kosong';
+            $alasan[] = 'tarif induknya tidak ketemu, jadi harga dan fasilitasnya kosong — pilih ulang tarifnya lewat tombol ubah';
         }
 
         if ($this->sampul_hilang) {
-            $alasan[] = 'berkas sampulnya tidak ada di peladen';
+            $alasan[] = 'berkas sampulnya tidak ada di peladen — unggah ulang gambarnya lewat tombol ubah';
         }
 
         if ($this->kuota_melenceng) {
-            $alasan[] = 'sisa kuotanya ' . (int) $this->sisa_kuota . ', seharusnya '
-                . $this->sisa_kuota_seharusnya;
+            $alasan[] = 'sisa kuota tertulis ' . (int) $this->sisa_kuota . ', seharusnya '
+                . $this->sisa_kuota_seharusnya . ' — betulkan sisa kuotanya lewat tombol ubah';
         }
 
         if ($this->nomor_ganda) {
-            $alasan[] = 'nomor angkatannya dipakai angkatan lain di lokasi yang sama';
+            $alasan[] = 'nomor angkatannya dipakai angkatan lain di lokasi yang sama — ganti nomornya';
         }
 
         return $alasan;
@@ -746,7 +752,25 @@ class KategoriLayanan extends Model
         foreach ($baris as $b) {
             $folder = self::FOLDER_SAMPUL[$b->layanan] ?? 'angkatan';
 
-            if (! is_file(public_path($folder . '/' . basename((string) $b->gambar)))) {
+            /*
+             * Lewat AlamatGambar, SAMA seperti accessor sampul_hilang.
+             *
+             * Dulu di sini cuma diperiksa public/<folder>/<nama berkas> —
+             * jalur lama. Sejak unggahan pindah ke cakram "unggahan"
+             * (storage/app/public), hampir semua sampul tidak ketemu di jalur
+             * itu: terukur 58 dari 59 angkatan dinyatakan kehilangan sampul,
+             * padahal yang benar-benar hilang 9.
+             *
+             * Akibatnya ubin "Perlu dicek" menulis 59 dari 59 — setiap baris
+             * ditandai, jadi tandanya berhenti berarti apa-apa. Dan tidak ada
+             * yang terlihat rusak: gambarnya tetap tampil di layar, sebab yang
+             * menggambarnya memakai accessor yang tahu kedua jalur.
+             *
+             * Dua tempat yang menjawab pertanyaan yang SAMA harus memakai
+             * jalan yang sama; kalau tidak, keduanya akan menyimpang diam-diam
+             * seperti ini.
+             */
+            if (\App\Support\AlamatGambar::url($b->gambar, $folder) === null) {
                 $hilang[] = $b->gambar;
             }
         }

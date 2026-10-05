@@ -359,7 +359,16 @@ class UnggahBuktiTest extends TestCase
         $this->kirim($p, UploadedFile::fake()->image('rahasia-nama-asli.jpg', 900, 600))
             ->assertRedirect();
 
-        $semua = Storage::disk(Gambar::CAKRAM)->allFiles(self::FOLDER);
+        /*
+         * Sampah bikinan sistem operasi dikecualikan. macOS menaruh .DS_Store
+         * di folder mana pun yang pernah dibuka Finder, dan uji ini merah
+         * karenanya — padahal yang dijaga: berkas UNGGAHAN yang bukan WebP
+         * tidak boleh tertinggal. Berkas itu bukan unggahan siapa pun.
+         */
+        $semua = array_values(array_filter(
+            Storage::disk(Gambar::CAKRAM)->allFiles(self::FOLDER),
+            fn ($b) => ! str_starts_with(basename($b), '.')
+        ));
 
         foreach ($semua as $berkas) {
             $this->assertStringEndsWith('.webp', $berkas,
