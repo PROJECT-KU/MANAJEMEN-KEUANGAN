@@ -1048,7 +1048,15 @@ class PublicWebinarEksklusifController extends Controller
 
         $lama = (string) $pendaftaran->gambar;
 
-        $jalur = (new Gambar())->simpan($request->file('bukti'), 'bukti/' . self::KODE);
+        /*
+         * Diluruskan — layar ini tidak punya tombol putar. Foto iPhone yang
+         * tegak di ponsel pengirimnya tersimpan miring 90 derajat di layar
+         * panitia, dan tidak ada seorang pun yang bisa membetulkannya:
+         * pengirimnya tidak melihat hasilnya, panitia tidak punya tombolnya.
+         *
+         * Galeri foto sengaja TIDAK begini; di sana ada tombol putarnya.
+         */
+        $jalur = (new Gambar())->simpan($request->file('bukti'), 'bukti/' . self::KODE, true);
 
         if ($jalur === null) {
             /*

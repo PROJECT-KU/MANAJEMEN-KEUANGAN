@@ -175,6 +175,104 @@ class GambarKeJalurTest extends TestCase
     }
 
     #[Test]
+    public function putaran_exif_dibakukan_lewat_simpan_kalau_diminta(): void
+    {
+        /*
+         * simpan() tidak meluruskan secara bawaan, dan itu keputusan
+         * pemiliknya yang dijaga uji lain (GaleriTest): foto yang sudah
+         * melewati WhatsApp kehilangan penandanya sementara pikselnya tetap
+         * miring, jadi menebak berarti sebagian foto justru dimiringkan.
+         * Galeri foto punya tombol putar manual sebagai gantinya.
+         *
+         * Yang dijaga di sini jalan MASUKNYA, untuk layar yang tidak punya
+         * tombol itu. Bukti transfer dari iPhone tersimpan miring 90 derajat
+         * di layar panitia 5 Okt 2026, dan tidak ada seorang pun yang bisa
+         * membetulkannya — pengirimnya tidak melihat hasilnya, panitia tidak
+         * punya tombolnya.
+         */
+        $asal = $this->buatJpegBerputar();
+
+        $this->assertSame(6, @exif_read_data($asal)['Orientation'] ?? null,
+            'prasyarat ujinya: berkasnya memang harus bertanda Orientation 6');
+
+        $unggahan = new \Illuminate\Http\UploadedFile($asal, 'berputar.jpg', null, null, true);
+
+        $jalur = app(\App\Services\Gambar::class)->simpan($unggahan, 'uji-putaran', true);
+
+        $this->assertNotNull($jalur, 'berkasnya tidak tersimpan sama sekali');
+
+        $cakram = \Illuminate\Support\Facades\Storage::disk(\App\Services\Gambar::CAKRAM);
+
+        [$lebar, $tinggi] = getimagesize($cakram->path($jalur));
+
+        $cakram->delete($jalur);
+
+        $this->assertGreaterThan($lebar, $tinggi,
+            'diminta meluruskan tetapi yang tersimpan tetap mendatar');
+    }
+
+    #[Test]
+    public function simpan_tidak_meluruskan_kalau_tidak_diminta(): void
+    {
+        /*
+         * Sisi satunya, dan ini yang paling mudah hilang: menambah pelurusan
+         * di tempat yang salah tidak pernah terasa seperti merusak sesuatu.
+         * Percobaan pertama memasangnya untuk SEMUA jalur, dan yang jatuh
+         * justru keputusan pemiliknya soal galeri foto.
+         */
+        $asal = $this->buatJpegBerputar();
+
+        $unggahan = new \Illuminate\Http\UploadedFile($asal, 'berputar.jpg', null, null, true);
+
+        $jalur = app(\App\Services\Gambar::class)->simpan($unggahan, 'uji-putaran');
+
+        $this->assertNotNull($jalur);
+
+        $cakram = \Illuminate\Support\Facades\Storage::disk(\App\Services\Gambar::CAKRAM);
+
+        [$lebar, $tinggi] = getimagesize($cakram->path($jalur));
+
+        $cakram->delete($jalur);
+
+        $this->assertGreaterThan($tinggi, $lebar,
+            'sistem memutar sendiri padahal tidak diminta; foto galeri yang penandanya basi akan dimiringkan sistem');
+    }
+
+    #[Test]
+    public function heic_dibongkar_lewat_format_yang_membawa_penanda_putaran(): void
+    {
+        /*
+         * Penjaga tingkat SUMBER, karena hasilnya bergantung alat yang ada di
+         * mesin — dan di peladen sungguhan belum tentu ada satu pun.
+         *
+         * Yang dijaga PILIHAN FORMATNYA. sips dulu menulis PNG, dan PNG tidak
+         * punya tempat untuk penanda putaran. Diukur pada IMG_3675.HEIC
+         * 5712x4284 milik iPhone:
+         *
+         *   sips -s format png   -> 5712x4284, penandanya HILANG
+         *   sips -s format jpeg  -> 5712x4284, Orientation: 6 TERBAWA
+         *
+         * Lewat PNG tidak ada lagi yang bisa tahu fotonya harus diputar, dan
+         * yang tersimpan miring 90 derajat tanpa satu pun galat.
+         *
+         * heif-convert tetap PNG: libheif memutarnya sendiri saat membongkar,
+         * jadi hasilnya sudah tegak dan tidak butuh penanda apa pun.
+         */
+        $sumber = file_get_contents(app_path('Services/Gambar.php'));
+
+        $kode = preg_replace('#/\*.*?\*/#s', '', $sumber);
+
+        $this->assertMatchesRegularExpression("/\['sips',\s*'-s format jpeg/", (string) $kode,
+            'sips kembali menulis PNG; penanda putaran foto iPhone akan hilang lagi.');
+
+        $this->assertMatchesRegularExpression("/\['heif-convert',\s*'%s %s'/", (string) $kode,
+            'heif-convert tidak lagi dipakai lebih dulu; ia satu-satunya yang memutar sendiri.');
+
+        $this->assertSame(0, preg_match("/\['sips',\s*'-s format png/", (string) $kode),
+            'cabang sips yang lama masih ada.');
+    }
+
+    #[Test]
     public function berkas_yang_tidak_terbaca_mengembalikan_false(): void
     {
         $rusak = $this->folder . '/rusak.jpg';
