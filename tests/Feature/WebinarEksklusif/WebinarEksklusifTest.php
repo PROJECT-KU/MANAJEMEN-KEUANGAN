@@ -2512,9 +2512,11 @@ class WebinarEksklusifTest extends TestCase
 
         $this->post(route('public.webinareksklusif.store'), $this->borang($sesi));
 
+        $p = WebinarEksklusifPendaftaran::where('email', 'berto@contoh.test')->firstOrFail();
+
         $this->post(route('public.webinareksklusif.store'), $this->borang($sesi))
             ->assertSessionHas('kabar')
-            ->assertSessionHas('ringkas', true)
+            ->assertSessionHas('we_ringkas_' . $p->getKey(), true)
             ->assertSessionMissing('error');
     }
 
@@ -2552,6 +2554,75 @@ class WebinarEksklusifTest extends TestCase
             'Nomor rekening masih tergambar.');
         $this->assertSame(0, preg_match_all('/<input[^>]*type="file"/', $isi),
             'Borang unggahnya masih ada; ia akan mengunggah lagi.');
+    }
+
+    #[Test]
+    public function layar_ringkas_bertahan_saat_halamannya_dimuat_ulang(): void
+    {
+        /*
+         * Versi pertama memakai pesan sesi sekali-pakai, dan layar ringkasnya
+         * hilang begitu halamannya dimuat ulang — layar penuh beserta borang
+         * unggahnya muncul lagi tepat pada orang yang baru saja diberi tahu
+         * tidak perlu berbuat apa-apa. Ditekan F5 sekali, seluruh penjagaannya
+         * batal.
+         */
+        $sesi = $this->sesi(['total_kuota' => '20', 'sisa_kuota' => '20']);
+
+        $this->post(route('public.webinareksklusif.store'), $this->borang($sesi));
+        $this->post(route('public.webinareksklusif.store'), $this->borang($sesi));
+
+        $p = WebinarEksklusifPendaftaran::where('email', 'berto@contoh.test')->firstOrFail();
+
+        // Dimuat ulang — persis seperti menekan F5.
+        $isi = $this->get(route('public.webinareksklusif.status', $p->getKey()))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringNotContainsString('Cara membayar', $isi,
+            'Layar penuh muncul lagi sesudah dimuat ulang.');
+        $this->assertSame(0, preg_match_all('/<input[^>]*type="file"/', $isi),
+            'Borang unggahnya muncul lagi sesudah dimuat ulang; ia akan mengunggah lagi.');
+
+        // Dan dua kali muat ulang pun tetap ringkas.
+        $this->get(route('public.webinareksklusif.status', $p->getKey()))
+            ->assertOk()
+            ->assertDontSee('Cara membayar');
+    }
+
+    #[Test]
+    public function layar_ringkas_tidak_punya_jalan_keluar_ke_layar_penuh(): void
+    {
+        /*
+         * Versi sebelumnya menyediakan tautan ?penuh=1 sebagai pintu darurat.
+         * Sekali ditekan penanda ringkasnya terhapus — dan sejak itu TIAP muat
+         * ulang memulangkan layar penuh beserta borang unggahnya, persis
+         * keadaan yang hendak dihindari. Pintu daruratnya sendiri yang jadi
+         * lubangnya.
+         *
+         * Yang dicegat memang sudah pernah mendaftar; cara membayarnya ada di
+         * email bukti pendaftaran yang ia terima saat itu, dan tombol
+         * pengirim ulangnya ada di layar ini.
+         */
+        $sesi = $this->sesi(['total_kuota' => '20', 'sisa_kuota' => '20']);
+
+        $this->post(route('public.webinareksklusif.store'), $this->borang($sesi));
+        $this->post(route('public.webinareksklusif.store'), $this->borang($sesi));
+
+        $p = WebinarEksklusifPendaftaran::where('email', 'berto@contoh.test')->firstOrFail();
+
+        $this->get(route('public.webinareksklusif.status', $p->getKey()))
+            ->assertOk()
+            ->assertDontSee('penuh=1', false);
+
+        // Dan alamat itu pun tidak lagi membuka layar penuhnya.
+        $this->get(route('public.webinareksklusif.status', $p->getKey()) . '?penuh=1')
+            ->assertOk()
+            ->assertDontSee('Cara membayar');
+
+        // Tombol pengirim ulang email TETAP ada; itu jalan satu-satunya.
+        $this->get(route('public.webinareksklusif.status', $p->getKey()))
+            ->assertOk()
+            ->assertSee('Kirim ulang bukti pendaftaran');
     }
 
     #[Test]
