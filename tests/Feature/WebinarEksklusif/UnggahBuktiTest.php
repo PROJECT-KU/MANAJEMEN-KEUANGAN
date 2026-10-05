@@ -43,6 +43,16 @@ class UnggahBuktiTest extends TestCase
      */
     private array $milikOrang = [];
 
+    /**
+     * @var array<int, string> id pendaftaran yang SUDAH ADA sebelum uji jalan
+     */
+    private array $sebelumUji = [];
+
+    /**
+     * @var array<int, string> jalur yang DIDAFTARKAN uji ini saat mengunggah
+     */
+    private array $sampah = [];
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -51,17 +61,54 @@ class UnggahBuktiTest extends TestCase
         ClinikScopusBiayaPersesi::lupakanPemeriksaanJadwal();
 
         $this->milikOrang = Storage::disk(Gambar::CAKRAM)->files(self::FOLDER);
+        $this->sebelumUji = WebinarEksklusifPendaftaran::pluck('id')->all();
     }
 
     protected function tearDown(): void
     {
-        foreach (Storage::disk(Gambar::CAKRAM)->files(self::FOLDER) as $berkas) {
-            if (! in_array($berkas, $this->milikOrang, true)) {
-                Storage::disk(Gambar::CAKRAM)->delete($berkas);
-            }
-        }
+        $this->bersihkanBerkasUji();
 
         parent::tearDown();
+    }
+
+    /**
+     * Membuang HANYA berkas yang lahir dari uji ini.
+     *
+     * Versi pertama menyapu apa pun di folder bukti yang tidak ada di potret
+     * awal. Itu menghapus bukti transfer SUNGGUHAN milik pendaftar: ia
+     * mengunggah pada detik yang sama uji ini berjalan, berkasnya belum ada
+     * saat potret diambil, jadi ia dianggap sampah uji. Barisnya tertinggal
+     * menunjuk berkas yang tidak ada, dan halaman statusnya diam-diam kembali
+     * menawarkan "unggah bukti" seolah ia belum pernah mengirim apa pun.
+     *
+     * GaleriTest di berkas sebelah sudah pernah kena persis begitu dan sudah
+     * memakai jalan yang benar: hanya menghapus jalur yang DIDAFTARKAN uji.
+     * Pola itu tidak ikut terbawa ke sini.
+     *
+     * Sekarang yang dihapus hanya berkas yang ditunjuk pendaftaran yang
+     * DIBUAT uji ini — barisnya tidak ada sebelum uji jalan. Pendaftaran
+     * orang sungguhan sudah ada sebelumnya, jadi berkas barunya tidak pernah
+     * masuk daftar hapus, berapa pun sempitnya jarak waktunya.
+     *
+     * Potret berkas awal tetap dipertahankan sebagai pagar kedua.
+     */
+    private function bersihkanBerkasUji(): void
+    {
+        $lama = $this->sebelumUji === [] ? ['-'] : $this->sebelumUji;
+
+        $buatanUji = WebinarEksklusifPendaftaran::whereNotIn('id', $lama)
+            ->whereNotNull('gambar')
+            ->where('gambar', '!=', '')
+            ->pluck('gambar')
+            ->all();
+
+        foreach (array_unique(array_merge($this->sampah, $buatanUji)) as $jalur) {
+            if (in_array($jalur, $this->milikOrang, true)) {
+                continue;
+            }
+
+            Storage::disk(Gambar::CAKRAM)->delete($jalur);
+        }
     }
 
     private function sesi(array $lain = []): KategoriLayanan
@@ -74,6 +121,141 @@ class UnggahBuktiTest extends TestCase
             'pemateri' => 'Pemateri', 'total_kuota' => '20', 'sisa_kuota' => '18',
             'biaya' => '129000', 'status' => 'active',
         ], $lain));
+    }
+
+    #[Test]
+    public function layar_bukti_masuk_ikut_selebar_layar_dan_berlajur(): void
+    {
+        /*
+         * Layar ini dulu ikut dipaksa menyempit, karena aturannya "yang tidak
+         * sedang harus membayar berarti satu lajur". Padahal isinya ADA di
+         * kedua sisi: rincian di kiri, lalu panel "kursi Anda ditahan", tombol
+         * lihat bukti, lipatan ganti bukti, dan tombol kirim ulang di kanan.
+         *
+         * Terukur sesudah dilepas: dua lajur 661 dan 586px di layar 1.470px,
+         * kartunya 1.382x700. Yang menyempit tinggal lunas, batal, dan
+         * kedaluwarsa — ketiganya memang tidak punya apa-apa di lajur kanan.
+         */
+        $p = $this->pendaftaran();
+
+        $this->kirim($p, UploadedFile::fake()->image('bukti.jpg', 600, 400))->assertRedirect();
+
+        $isi = $this->get(route('public.webinareksklusif.status', $p->getKey()))
+            ->assertOk()
+            ->getContent();
+
+        preg_match('/<div class="container (sta-wadah[^"]*)"/', $isi, $wadah);
+        preg_match('/<div class="(sta-kisi[^"]*)"/', $isi, $kisi);
+
+        $this->assertStringNotContainsString('sta-wadah-ramping', $wadah[1] ?? '',
+            'Layar bukti-masuk masih disempitkan padahal isinya dua lajur.');
+
+        $this->assertStringNotContainsString('sta-kisi-tunggal', $kisi[1] ?? '',
+            'Isinya masih ditumpuk satu lajur.');
+
+        $this->assertSame(2, substr_count($isi, '<div class="sta-lajur '),
+            'Lajurnya bukan dua.');
+
+        $kiri = substr($isi, (int) strpos($isi, 'sta-lajur-kiri'),
+            (int) strpos($isi, 'sta-lajur-kanan') - (int) strpos($isi, 'sta-lajur-kiri'));
+
+        $this->assertStringContainsString('class="sta-rincian"', $kiri,
+            'Rinciannya tidak di lajur kiri.');
+
+        $this->assertStringNotContainsString('class="sta-selesai"', $kiri,
+            'Panel "kursi ditahan" ikut ke lajur kiri; lajur kanannya jadi kosong.');
+    }
+
+    #[Test]
+    public function centang_bergerak_sekali_lalu_diam(): void
+    {
+        /*
+         * Beda maksud dengan jam pasirnya, jadi beda pula gerakannya.
+         *
+         * Jam pasir berdetak TERUS karena waktunya memang masih berjalan.
+         * Centang ini menandai satu kejadian yang sudah selesai: bergerak
+         * sekali lalu diam. Diberi "infinite", yang sudah beres terbaca
+         * seperti masih dikerjakan — dan gerakan berulang yang tidak perlu
+         * itu juga yang paling mengganggu di layar yang orangnya cuma
+         * menunggu.
+         *
+         * "both" WAJIB. Tanpa itu ubinnya kembali ke keadaan sebelum animasi
+         * di antara halaman termuat dan detik pertama gerakan, dan yang
+         * terlihat centang berkedip dulu sebelum melenting.
+         */
+        $p = $this->pendaftaran();
+
+        $this->kirim($p, UploadedFile::fake()->image('bukti.jpg', 600, 400))->assertRedirect();
+
+        $isi = $this->get(route('public.webinareksklusif.status', $p->getKey()))
+            ->assertOk()
+            ->getContent();
+
+        preg_match('/<span class="(sta-ubin[^"]*)"/', $isi, $ubin);
+
+        $this->assertStringContainsString('sta-ubin-selesai', $ubin[1] ?? '',
+            'Centangnya tidak ditandai; ia akan muncul begitu saja tanpa gerakan.');
+
+        $aturan = preg_replace('#/\*.*?\*/#s', '', $isi);
+
+        $ada = preg_match('/\.sta-ubin-selesai\s*\{(?<isi>[^}]*)\}/', (string) $aturan, $cocok);
+
+        $this->assertSame(1, $ada, 'Aturan gerak centangnya hilang.');
+
+        $this->assertStringContainsString('both', $cocok['isi'],
+            'Gerakannya tidak dikunci "both"; centangnya akan berkedip dulu sebelum melenting.');
+
+        $this->assertStringNotContainsString('infinite', $cocok['isi'],
+            'Centangnya bergerak berulang; yang sudah beres jadi terbaca masih dikerjakan.');
+
+        $this->assertMatchesRegularExpression('/\.sta-ubin-selesai::after\s*\{/', (string) $aturan,
+            'Cincin gelombangnya hilang.');
+
+        $this->assertMatchesRegularExpression(
+            '/@media \(prefers-reduced-motion: reduce\) \{[^}]*sta-ubin-selesai/s',
+            (string) $aturan,
+            'Gerak centangnya tidak bisa dimatikan lewat setelan peramban.'
+        );
+    }
+
+    #[Test]
+    public function pembersihan_tidak_menyentuh_bukti_yang_diunggah_orang_saat_uji_berjalan(): void
+    {
+        /*
+         * Ini menirukan kejadian sungguhan, bukan kemungkinan di atas kertas.
+         *
+         * Seorang pendaftar mengunggah bukti transfernya pada 17:48:52. Uji
+         * di berkas ini berjalan beberapa detik kemudian, memotret isi folder
+         * — potretnya sudah memuat berkas itu atau belum, tergantung detik —
+         * lalu menyapu semua yang tidak ada di potret. Berkasnya hilang.
+         * Barisnya tertinggal menunjuk berkas yang tidak ada, dan halaman
+         * statusnya kembali menawarkan "unggah bukti" kepada orang yang baru
+         * saja mengirimkannya. Tidak ada satu pun galat yang terbit.
+         *
+         * Yang membedakan keduanya bukan WAKTU, melainkan ASAL BARISNYA:
+         * pendaftaran orang sungguhan sudah ada sebelum uji dimulai.
+         */
+        $orang = $this->pendaftaran();
+        $this->sebelumUji[] = $orang->getKey();
+
+        $jalurOrang = self::FOLDER . '/orang-' . Str::random(8) . '.webp';
+        Storage::disk(Gambar::CAKRAM)->put($jalurOrang, 'bukan gambar sungguhan');
+        $orang->forceFill(['gambar' => $jalurOrang])->save();
+
+        $buatanUji = $this->pendaftaran();
+        $jalurUji = self::FOLDER . '/uji-' . Str::random(8) . '.webp';
+        Storage::disk(Gambar::CAKRAM)->put($jalurUji, 'bukan gambar sungguhan');
+        $buatanUji->forceFill(['gambar' => $jalurUji])->save();
+
+        $this->bersihkanBerkasUji();
+
+        $this->assertTrue(Storage::disk(Gambar::CAKRAM)->exists($jalurOrang),
+            'Bukti yang diunggah orang saat uji berjalan ikut terhapus; buktinya hilang tanpa galat apa pun.');
+
+        $this->assertFalse(Storage::disk(Gambar::CAKRAM)->exists($jalurUji),
+            'Berkas buatan uji tidak dibersihkan; folder bukti akan terus menumpuk.');
+
+        Storage::disk(Gambar::CAKRAM)->delete($jalurOrang);
     }
 
     private function pendaftaran(array $lain = []): WebinarEksklusifPendaftaran
@@ -89,10 +271,26 @@ class UnggahBuktiTest extends TestCase
 
     private function kirim(WebinarEksklusifPendaftaran $p, UploadedFile $berkas)
     {
-        return $this->post(
+        $jawab = $this->post(
             route('public.webinareksklusif.bukti', $p->getKey()),
             ['bukti' => $berkas]
         );
+
+        /*
+         * Jalurnya DIDAFTARKAN di sini, bukan disimpulkan belakangan dari isi
+         * folder. Menyimpulkan dari baris pendaftaran saja ternyata belum
+         * cukup: dijalankan satu-satu tiap uji bersih, dijalankan berurutan
+         * satu WebP tetap tertinggal tiap kali — jadi ada jalur yang lolos
+         * dari kesimpulan itu, dan menebak-nebak jalur mana hanya menunda
+         * masalahnya.
+         */
+        $baru = (string) $p->fresh()?->gambar;
+
+        if ($baru !== '') {
+            $this->sampah[] = $baru;
+        }
+
+        return $jawab;
     }
 
     // ------------------------------------------------------- jalan bahagia
