@@ -33,19 +33,44 @@ class UbahDataPendaftaran
      * karena namanya muncul di kiriman.
      */
     private const MEDAN = [
+        /*
+         * tanggal_reschedule DIBUANG dari borang, dan group_wa ikut dibuang
+         * KHUSUS di sini.
+         *
+         * Keduanya tidak pernah dibaca apa pun untuk Scopus Camp: ditelusuri
+         * ke seluruh kode, surat "diterima" maupun "reschedule" mengambil
+         * tautan grupnya dari ANGKATAN (CategoriesScopusCamp->group_wa), bukan
+         * dari baris pendaftarannya. Dua isian yang harus diisi panitia tanpa
+         * ada satu pun yang membacanya.
+         *
+         * Kolomnya tetap ada di basis data — yang dibuang pintu masuknya, bukan
+         * datanya.
+         */
         'scopus_camp' => [
             'nama' => 'teks', 'email' => 'teks', 'telp' => 'teks', 'affiliasi' => 'teks',
             'kategori_id' => 'teks', 'jumlah_pendaftar' => 'angka',
             'ppn' => 'uang', 'kode_unik' => 'uang', 'nominal_diskon' => 'uang',
             'total_pembayaran' => 'uang', 'kode_diskon' => 'teks',
-            'tanggal_reschedule' => 'tanggal', 'group_wa' => 'teks', 'note' => 'teks',
+            'note' => 'teks',
         ],
+        /*
+         * group_wa DIPERTAHANKAN di sini, dan hanya di sini.
+         *
+         * Berbeda dengan Scopus Camp, surat Bibliometrik membaca tautan grup
+         * dari BARIS PENDAFTARANNYA — AnalisisBibliometrik->group_wa muncul di
+         * surat "diterima" dan "reschedule" sebagai "Grup WhatsApp peserta".
+         * Membuangnya di sini berarti kolom yang terbit di surat tidak bisa
+         * diisi dari mana pun.
+         *
+         * tanggal_reschedule tetap dibuang: bahkan surat yang bernama
+         * mail_reschedule pun tidak membacanya.
+         */
         'bibliometrik' => [
             'nama' => 'teks', 'email' => 'teks', 'telp' => 'teks', 'affiliasi' => 'teks',
             'kategori_id' => 'teks', 'jumlah_pendaftar' => 'angka',
             'ppn' => 'uang', 'kode_unik' => 'uang', 'nominal_diskon' => 'uang',
             'total_pembayaran' => 'uang', 'kode_diskon' => 'teks',
-            'tanggal_reschedule' => 'tanggal', 'group_wa' => 'teks', 'note' => 'teks',
+            'group_wa' => 'teks', 'note' => 'teks',
         ],
         'webinar_eksklusif' => [
             // Nominalnya TIDAK disunting: totalnya memuat kode unik

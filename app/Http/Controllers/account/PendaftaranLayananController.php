@@ -1249,8 +1249,7 @@ class PendaftaranLayananController extends Controller
             // tab Pembayaran sementara isiannya ada di tab Jadwal.
             'sesi' => ['kategori_id', 'tanggal_pemesanan', 'sesi', 'jam_sesi', 'waktu_mulai',
                 'waktu_selesai', 'lokasi', 'biaya', 'kode_unik_pembayaran',
-                'subtotal_pembayaran', 'sesi_kedua', 'sesi_ketiga',
-                'tanggal_reschedule', 'group_wa'],
+                'subtotal_pembayaran', 'sesi_kedua', 'sesi_ketiga', 'group_wa'],
             'diri' => ['nama', 'nama_pemesan', 'email', 'email_pemesan', 'telp',
                 'telp_pemesan', 'affiliasi', 'afiliasi_pemesan', 'note',
                 'kendala', 'desc_kendala'],

@@ -5,6 +5,7 @@ namespace Tests\Feature\PendaftaranLayanan;
 use App\AnalisisBibliometrik;
 use App\ClinikScopusPemesanan;
 use App\ClinikScopusTestimoni;
+use App\Actions\Pendaftaran\UbahDataPendaftaran;
 use App\KategoriLayanan;
 use App\Mail\AnalisisBibliometrikUpdateDiterimaMail;
 use App\Mail\ScopusCampUpdateDiterimaMail;
@@ -4474,11 +4475,52 @@ class TindakanPendaftaranTest extends TestCase
         $this->assertStringContainsString('kursi di angkatan', $isi,
             'Bagian Angkatan tidak menerangkan bahwa kursinya ikut berpindah.');
 
-        $this->assertStringContainsString('CATATAN panitia saja', $isi,
-            'Bagian penjadwalan ulang tidak menerangkan bahwa ia cuma catatan.');
-
         $this->assertStringContainsString('pindah ke tab Jadwal', $isi,
             'Tab Pembayaran tidak menunjukkan ke mana isian Angkatan pindah.');
+
+        /*
+         * Isian MATI tidak boleh kembali. "Tanggal jadwal ulang" tidak pernah
+         * dibaca apa pun — bahkan surat yang bernama mail_reschedule pun
+         * tidak. Ia cuma menambah pekerjaan panitia tanpa akibat apa pun, dan
+         * lebih buruk: namanya membuat orang mengira sudah memindahkan jadwal
+         * padahal pesertanya tidak ke mana-mana.
+         *
+         * Tautan grupnya juga tidak ada DI SINI: untuk Scopus Camp suratnya
+         * membaca tautan dari ANGKATAN, bukan dari baris pendaftaran.
+         */
+        $this->assertStringNotContainsString('name="tanggal_reschedule"', $isi,
+            'Isian "Tanggal jadwal ulang" hidup lagi; tidak ada yang membacanya.');
+
+        $this->assertStringNotContainsString('name="group_wa"', $isi,
+            'Isian tautan grup hidup lagi di Scopus Camp; suratnya membacanya dari angkatan.');
+    }
+
+    #[Test]
+    public function tautan_grup_tetap_bisa_diisi_untuk_bibliometrik(): void
+    {
+        /*
+         * Sisi sebaliknya dari pembuangan isian mati, dan ini yang paling
+         * mudah ikut terbuang saat merapikan.
+         *
+         * Berbeda dengan Scopus Camp, surat Bibliometrik membaca tautan grup
+         * dari BARIS PENDAFTARANNYA — AnalisisBibliometrik->group_wa muncul di
+         * surat "diterima" dan "reschedule" sebagai "Grup WhatsApp peserta".
+         * Dibuang dari borang, kolom yang terbit di surat tidak bisa diisi
+         * dari mana pun, dan suratnya diam-diam kehilangan satu bagian.
+         */
+        $medanCamp = UbahDataPendaftaran::medan('scopus_camp');
+        $medanBiblio = UbahDataPendaftaran::medan('bibliometrik');
+
+        $this->assertArrayHasKey('group_wa', $medanBiblio,
+            'Tautan grup hilang dari borang Bibliometrik; suratnya membacanya dari sini.');
+
+        $this->assertArrayNotHasKey('group_wa', $medanCamp,
+            'Tautan grup hidup lagi di Scopus Camp; suratnya membacanya dari angkatan, bukan dari sini.');
+
+        foreach (['scopus_camp', 'bibliometrik'] as $layanan) {
+            $this->assertArrayNotHasKey('tanggal_reschedule', UbahDataPendaftaran::medan($layanan),
+                'Isian "Tanggal jadwal ulang" hidup lagi di ' . $layanan . '; tidak ada yang membacanya.');
+        }
     }
 
     #[Test]
