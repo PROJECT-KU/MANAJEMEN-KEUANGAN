@@ -1951,11 +1951,14 @@ class TindakanPendaftaranTest extends TestCase
 
         $this->actingAs($orang);
 
+        // Lewat PPN, sebab totalnya sendiri sudah tidak diterima dari borang —
+        // peladen yang menghitungnya, dan jejaknya mencatat hasil hitungan itu.
         (new UbahDataPendaftaran)->jalankan('scopus_camp', (string) $baris->id, [
-            'total_pembayaran' => '3.250.000',
+            'ppn' => '250.000',
         ]);
 
-        $satu = \App\PendaftaranJejak::milik('scopus_camp', (string) $baris->id)->firstOrFail();
+        $satu = \App\PendaftaranJejak::milik('scopus_camp', (string) $baris->id)
+            ->where('medan', 'total_pembayaran')->firstOrFail();
 
         $this->assertSame('Rp 3.000.000', $satu->dari);
         $this->assertSame('Rp 3.250.000', $satu->ke);
@@ -2005,6 +2008,177 @@ class TindakanPendaftaranTest extends TestCase
             'Kalimat jejak suntingan tidak sampai ke layar.');
         $this->assertStringContainsString('fa-pen', $isi,
             'Jejak suntingan tidak dibedakan rupanya dari jejak status di layar.');
+    }
+
+    /*
+     * ------------------------------------------------------------------
+     * Total bayar dihitung peladen
+     * ------------------------------------------------------------------
+     */
+
+    #[Test]
+    public function total_yang_dititipkan_borang_tidak_dipakai(): void
+    {
+        /*
+         * Kotaknya dimatikan di layar, jadi nilainya tidak ikut terkirim.
+         * Tetapi kiriman tidak selalu datang dari layar — dan satu baris yang
+         * menerima total apa adanya meniadakan seluruh gunanya kotak itu
+         * dimatikan: siapa pun yang bisa menekan Simpan bisa menetapkan
+         * berapa pun yang harus dibayar peserta.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        [$baris] = $this->buat('scopus_camp', ['total_pembayaran' => '5000000']);
+
+        $this->actingAs($orang);
+
+        (new UbahDataPendaftaran)->jalankan('scopus_camp', (string) $baris->id, [
+            'total_pembayaran' => '1',
+            'nominal_diskon' => '500000',
+        ]);
+
+        $this->assertSame(4500000, (int) $baris->fresh()->total_pembayaran,
+            'Total yang dikirim borang dipakai apa adanya.');
+    }
+
+    #[Test]
+    public function menyunting_medan_lain_tidak_menggeser_totalnya(): void
+    {
+        /*
+         * Dasarnya diukur dari SELISIH nilai yang sudah tersimpan, bukan
+         * dihitung ulang dari tarif angkatan dikali jumlah orang. Angka
+         * tersimpan bisa lahir dari potongan alumni, promo rombongan, atau
+         * harga yang dirundingkan; menghitung ulang dari tarif akan
+         * menimpanya diam-diam begitu ada yang membetulkan ejaan nama.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        [$baris] = $this->buat('scopus_camp', [
+            'total_pembayaran' => '7777777', 'ppn' => '12345', 'nominal_diskon' => '600000',
+        ]);
+
+        $this->actingAs($orang);
+
+        (new UbahDataPendaftaran)->jalankan('scopus_camp', (string) $baris->id, [
+            'nama' => 'Nama Yang Dibetulkan Ejaannya',
+        ]);
+
+        $this->assertSame(7777777, (int) $baris->fresh()->total_pembayaran);
+
+        $this->assertSame(0,
+            \App\PendaftaranJejak::milik('scopus_camp', (string) $baris->id)
+                ->where('medan', 'total_pembayaran')->count(),
+            'Total yang tidak bergeser tetap meninggalkan jejak.');
+    }
+
+    #[Test]
+    public function potongan_yang_melebihi_tagihan_menahan_total_di_nol(): void
+    {
+        /*
+         * Bukan angka negatif: total minus terbit di faktur sebagai utang
+         * peladen kepada pendaftarnya, dan tidak ada satu pun layar yang tahu
+         * harus berbuat apa dengannya.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        [$baris] = $this->buat('scopus_camp', ['total_pembayaran' => '1000000']);
+
+        $this->actingAs($orang);
+
+        (new UbahDataPendaftaran)->jalankan('scopus_camp', (string) $baris->id, [
+            'nominal_diskon' => '9.000.000',
+        ]);
+
+        $this->assertSame(0, (int) $baris->fresh()->total_pembayaran);
+    }
+
+    #[Test]
+    public function peladen_memulangkan_angka_yang_sama_dengan_pratinjaunya(): void
+    {
+        /*
+         * Angka-angka ini DIUKUR dari pratinjau di peramban sungguhan
+         * (Chrome lewat CDP) pada baris yang sama: potongan Rp 1.550.000 →
+         * Rp 3.950.000, lalu PPN Rp 200.000 → Rp 4.150.000, lalu potongan
+         * Rp 99.000.000 → Rp 0.
+         *
+         * Dua rumus di dua tempat yang masing-masing benar sendiri adalah
+         * cacat yang paling sulit dilihat: panitia menekan Simpan sambil
+         * melihat satu angka, dan yang tersimpan angka yang lain. Maka yang
+         * dibandingkan HASILNYA, bukan bentuk rumusnya.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        [$baris] = $this->buat('scopus_camp', [
+            'total_pembayaran' => '4950000', 'ppn' => '0',
+            'kode_unik' => '50', 'nominal_diskon' => '550000',
+        ]);
+
+        $this->actingAs($orang);
+
+        $ubah = fn (array $isi) => (new UbahDataPendaftaran)
+            ->jalankan('scopus_camp', (string) $baris->id, $isi);
+
+        $ubah(['nominal_diskon' => '1.550.000']);
+        $this->assertSame(3950000, (int) $baris->fresh()->total_pembayaran);
+
+        $ubah(['ppn' => '200.000']);
+        $this->assertSame(4150000, (int) $baris->fresh()->total_pembayaran);
+
+        $ubah(['nominal_diskon' => '99.000.000']);
+        $this->assertSame(0, (int) $baris->fresh()->total_pembayaran);
+    }
+
+    #[Test]
+    public function rumus_peladen_dan_tanda_di_layar_satu_daftar(): void
+    {
+        /*
+         * Tanda tambah/kurang di layar dan rumus peladen dulu ditulis dua
+         * kali: sekali di partial isian, sekali di skripnya. Sekarang
+         * peladen yang berwenang, jadi yang dijaga keduanya menyebut
+         * penyusun yang SAMA — kalau salah satu bertambah sendiri, pratinjau
+         * di layar menampilkan angka yang tidak pernah jadi angka tersimpan.
+         */
+        $peladen = UbahDataPendaftaran::medanHitungan('scopus_camp');
+
+        $this->assertArrayHasKey('total_pembayaran', $peladen,
+            'Total bayar tidak lagi dihitung peladen; kotaknya yang mati jadi membuang nilainya.');
+
+        $this->assertSame(['ppn', 'kode_unik'], $peladen['total_pembayaran']['tambah']);
+        $this->assertSame(['nominal_diskon'], $peladen['total_pembayaran']['kurang']);
+
+        $partial = file_get_contents(resource_path(
+            'views/account/pendaftaran_layanan/partials/isian.blade.php'
+        ));
+
+        foreach ($peladen['total_pembayaran']['tambah'] as $kolom) {
+            $this->assertMatchesRegularExpression("/'{$kolom}' => 'tambah'/", $partial,
+                "Penyusun {$kolom} ada di rumus peladen tetapi tidak bertanda tambah di layar.");
+        }
+
+        foreach ($peladen['total_pembayaran']['kurang'] as $kolom) {
+            $this->assertMatchesRegularExpression("/'{$kolom}' => 'kurang'/", $partial,
+                "Penyusun {$kolom} ada di rumus peladen tetapi tidak bertanda kurang di layar.");
+        }
+    }
+
+    #[Test]
+    public function layanan_tanpa_penyusun_lengkap_tidak_ikut_dihitung(): void
+    {
+        /*
+         * Scopus Kafe punya total_keseluruhan_pembayaran tetapi tidak punya
+         * PPN maupun potongan. Menghitungnya dengan rumus yang sama berarti
+         * menimpanya dengan angka yang tidak pernah dimaksudkan siapa pun.
+         */
+        $this->assertSame([], UbahDataPendaftaran::medanHitungan('scopus_kafe'));
+        $this->assertSame([], UbahDataPendaftaran::medanHitungan('clinik_scopus'));
+
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        [$kafe] = $this->buat('scopus_kafe');
+
+        $this->actingAs($orang);
+
+        (new UbahDataPendaftaran)->jalankan('scopus_kafe', (string) $kafe->id, [
+            'total_keseluruhan_pembayaran' => '2.400.000',
+        ]);
+
+        $this->assertSame(2400000, (int) $kafe->fresh()->total_keseluruhan_pembayaran,
+            'Nominal Scopus Kafe ikut ditimpa hitungan yang bukan rumusnya.');
     }
 
     // ------------------------------------------------------------- pembantu
@@ -2535,17 +2709,24 @@ class TindakanPendaftaranTest extends TestCase
         $orang = $this->akun(User::PERAN_ADMINISTRATOR);
         [$camp, $angkatan] = $this->buat('scopus_camp');
 
+        /*
+         * Diuji lewat POTONGAN, bukan Total bayar: total sudah tidak lagi
+         * diterima dari borang sejak kotaknya dimatikan — peladen yang
+         * menghitungnya. Yang hendak dibuktikan di sini tetap sama, yaitu
+         * pembacaan pemisah ribuannya, dan potongan dibaca lewat baca() yang
+         * sama persis.
+         */
         foreach (['4.275.028', '4,275,028', '4 275 028', 'Rp 4.275.028'] as $ditulis) {
             $this->actingAs($orang)->put(
                 route('account.pendaftaran-layanan.ubah', ['scopus_camp', $camp->getKey()]),
                 [
                     'nama' => $camp->nama, 'email' => $camp->email, 'telp' => $camp->telp,
                     'kategori_id' => $angkatan->id, 'jumlah_pendaftar' => 2,
-                    'total_pembayaran' => $ditulis,
+                    'nominal_diskon' => $ditulis,
                 ]
             )->assertRedirect();
 
-            $this->assertSame(4275028, (int) $camp->refresh()->total_pembayaran,
+            $this->assertSame(4275028, (int) $camp->refresh()->nominal_diskon,
                 'Nominal "' . $ditulis . '" tidak terbaca benar.');
 
             $this->flushSession();
@@ -4572,19 +4753,22 @@ class TindakanPendaftaranTest extends TestCase
          * dan selisihnya tidak akan ketahuan sampai ada yang mencocokkan
          * mutasi rekening.
          */
-        [$camp] = $this->buat('scopus_camp');
+        [$camp] = $this->buat('scopus_camp', ['total_pembayaran' => '1000000']);
 
         $this->actingAs($this->akun(User::PERAN_ADMINISTRATOR))->put(
             route('account.pendaftaran-layanan.ubah', ['scopus_camp', $camp->getKey()]),
-            ['total_pembayaran' => 'Rp 82.500.022', 'ppn' => '1.000', 'nominal_diskon' => '450.000']
+            ['ppn' => '1.000', 'nominal_diskon' => '450.000', 'kode_unik' => 'Rp 2.022']
         )->assertRedirect();
 
         $segar = $camp->fresh();
 
-        $this->assertSame(82500022, (int) $segar->total_pembayaran,
+        $this->assertSame(1000, (int) $segar->ppn,
             'Pemisah ribuan ikut tersimpan; nominalnya jadi salah.');
-        $this->assertSame(1000, (int) $segar->ppn);
         $this->assertSame(450000, (int) $segar->nominal_diskon);
+        $this->assertSame(2022, (int) $segar->kode_unik);
+
+        // Totalnya ikut terhitung dari ketiganya, bukan diterima dari borang.
+        $this->assertSame(1000000 + 1000 + 2022 - 450000, (int) $segar->total_pembayaran);
     }
 
     #[Test]
@@ -4665,6 +4849,14 @@ class TindakanPendaftaranTest extends TestCase
             $this->assertSame(1, $ada, "Kotak {$kolom} tidak tergambar sama sekali.");
             $this->assertStringContainsString('data-mis-hitung="' . $harusnya . '"', $cocok[0],
                 "Kotak {$kolom} kehilangan penanda hitungnya; Total bayar akan diam saja saat disunting.");
+
+            // Hanya medan hasil yang dimatikan. Kalau salah satu PENYUSUNNYA
+            // ikut dimatikan, hitungannya tetap jalan di layar tetapi
+            // nilainya tidak pernah sampai ke peladen.
+            $dimatikan = str_contains($cocok[0], 'disabled');
+
+            $this->assertSame($harusnya === 'hasil', $dimatikan,
+                "Medan {$kolom} salah keadaan matinya.");
         }
 
         /*
@@ -4680,10 +4872,22 @@ class TindakanPendaftaranTest extends TestCase
 
         // Keterangannya ikut dijaga: angka yang berubah sendiri tanpa
         // penjelasan membuat orang ragu apakah ia sempat salah ketik.
-        $this->assertStringContainsString('data-mis-hitung-nota', $isi);
         $this->assertStringContainsString('Dihitung sendiri dari PPN, kode unik, dan potongan di atas.', $isi);
-        $this->assertStringContainsString('data-mis-hitung-ulang', $isi,
-            'Tanpa jalan pulang, total yang terlanjur diketik tangan tidak bisa dihitung ulang.');
+
+        /*
+         * Jalan pulang "Hitung sendiri lagi" DIBUANG bersama kemampuan
+         * mengetik totalnya. Kalau salah satunya kembali tanpa yang lain,
+         * layarnya menjanjikan sesuatu yang tidak ada: tombol yang mengembalikan
+         * dari keadaan yang tidak bisa dimasuki lagi.
+         */
+        $this->assertStringNotContainsString('data-mis-hitung-ulang', $isi,
+            'Tombol hitung ulang kembali padahal totalnya sudah tidak bisa diketik.');
+        $this->assertStringNotContainsString('Diisi tangan', $isi);
+
+        // Panelnya, bukan kotak isian biasa: kotak isian berjanji boleh
+        // diketik, dan janji itu sekarang tidak berlaku lagi untuk total.
+        $this->assertStringContainsString('class="rin-total"', $isi,
+            'Total bayar kembali berbentuk kotak isian biasa.');
     }
 
     #[Test]
