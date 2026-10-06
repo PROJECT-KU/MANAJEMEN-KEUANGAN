@@ -130,15 +130,49 @@
     @if ($kolom === 'kategori_id')
         <select class="form-control-modern" id="{{ $id }}" name="{{ $kolom }}" required>
             @foreach ($angkatan as $a)
+                @php
+                    /*
+                     * Nomor dan tanggalnya WAJIB ikut. Angkatan Scopus Camp
+                     * bernama SAMA PERSIS berpuluh-puluh — tanpa keduanya,
+                     * daftar pilihannya berisi dua puluh baris "Scopus Camp
+                     * Yogyakarta" yang tidak bisa dibedakan satu pun, dan
+                     * memilih salah satu jadi menebak.
+                     *
+                     * Tanggalnya dirangkai di PHP: APP_LOCALE=en, jadi nama
+                     * bulan Indonesia hanya keluar lewat Carbon ->locale('id').
+                     */
+                    $labelAngkatan = \Illuminate\Support\Str::limit($a->nama, 48);
+
+                    if (($a->nama_ke ?? '') !== '') {
+                        $labelAngkatan .= ' ke-' . $a->nama_ke;
+                    }
+
+                    if ($a->mulai) {
+                        $labelAngkatan .= ' · ' . \Illuminate\Support\Carbon::parse($a->mulai)
+                            ->locale('id')->translatedFormat('j M Y');
+                    }
+
+                    if ($a->total_kuota !== null) {
+                        $labelAngkatan .= ' — sisa ' . (int) $a->sisa_kuota . '/' . (int) $a->total_kuota;
+                    }
+
+                    // Angkatan yang sudah ditutup hanya muncul kalau memang
+                    // sedang dipakai baris ini; ditandai supaya tidak terbaca
+                    // sebagai pilihan yang wajar.
+                    if (($a->status ?? 'active') !== 'active') {
+                        $labelAngkatan .= ' (sudah ditutup)';
+                    }
+                @endphp
                 <option value="{{ $a->id }}" @selected((string) $nilai === (string) $a->id)>
-                    {{ \Illuminate\Support\Str::limit($a->nama, 60) }}@if ($a->total_kuota !== null) &mdash; sisa {{ (int) $a->sisa_kuota }}/{{ (int) $a->total_kuota }}@endif
+                    {{ $labelAngkatan }}
                 </option>
             @endforeach
         </select>
-        {{-- Pilihannya DIBATASI angkatan layanan ini; memindahkan pendaftaran
-             ke angkatan layanan lain membuat kuota keduanya salah tanpa ada
-             yang menolak. --}}
-        <p class="mis-bantuan">Hanya angkatan layanan ini yang bisa dipilih.</p>
+        {{-- Pilihannya DIBATASI angkatan layanan ini yang MASIH AKTIF;
+             memindahkan pendaftaran ke angkatan layanan lain membuat kuota
+             keduanya salah tanpa ada yang menolak, dan memindahkannya ke
+             angkatan yang sudah ditutup tidak ada gunanya sama sekali. --}}
+        <p class="mis-bantuan">Hanya angkatan aktif di layanan ini yang bisa dipilih.</p>
     @elseif ($kolom === 'note' || $kolom === 'desc_kendala')
         {{-- data-mis-tumbuh: tingginya mengikuti isi, lihat skrip di layar
              rincian. rows="3" tetap ditulis sebagai lantai dan sebagai
