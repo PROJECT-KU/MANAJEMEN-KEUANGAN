@@ -100,10 +100,48 @@ class UbahDataPendaftaran
         ],
     ];
 
+    /**
+     * Medan yang nilainya DIHITUNG peladen, bukan diterima dari borang.
+     *
+     * Kotaknya di layar dimatikan (disabled), jadi nilainya tidak pernah ikut
+     * terkirim sama sekali — dan itu memang yang diinginkan: angka yang
+     * menentukan berapa orang harus membayar tidak boleh bergantung pada apa
+     * yang sempat dititipkan peramban.
+     *
+     * Rumusnya sama persis dengan yang dulu dijalankan di layar:
+     *
+     *     total = dasar + PPN + kode unik − potongan
+     *
+     * Dasarnya TIDAK ditebak dari tarif angkatan dikali jumlah orang. Angka
+     * tersimpan bisa lahir dari potongan alumni, promo rombongan, atau harga
+     * yang dirundingkan, dan menghitung ulang dari tarif akan menimpanya
+     * diam-diam. Yang dipakai selisih dari nilai yang SUDAH tersimpan, jadi
+     * menyunting medan lain tidak menggeser totalnya sepeser pun.
+     */
+    private const HITUNG = [
+        'total_pembayaran' => [
+            'tambah' => ['ppn', 'kode_unik'],
+            'kurang' => ['nominal_diskon'],
+        ],
+    ];
+
     /** @return array<string, string> medan => jenisnya */
     public static function medan(string $layanan): array
     {
         return self::MEDAN[$layanan] ?? [];
+    }
+
+    /** Medan yang dihitung peladen untuk satu layanan, beserta penyusunnya. */
+    public static function medanHitungan(string $layanan): array
+    {
+        $punya = self::medan($layanan);
+
+        return array_filter(
+            self::HITUNG,
+            fn ($rumus, $hasil) => array_key_exists($hasil, $punya)
+                && array_diff(array_merge($rumus['tambah'], $rumus['kurang']), array_keys($punya)) === [],
+            ARRAY_FILTER_USE_BOTH
+        );
     }
 
     /**
@@ -137,6 +175,8 @@ class UbahDataPendaftaran
         if ($isi === []) {
             return ['berhasil' => false, 'pesan' => 'Tidak ada yang diubah.'];
         }
+
+        $this->hitungkan($layanan, $pendaftaran, $isi);
 
         /*
          * Nilai SEBELUM disimpan, untuk jejaknya.
@@ -176,6 +216,56 @@ class UbahDataPendaftaran
         }
 
         return ['berhasil' => true, 'pesan' => 'Perubahannya tersimpan.'];
+    }
+
+    /**
+     * Medan hitungan diisi ulang peladen, apa pun yang dikirim borang.
+     *
+     * Yang dikirim DIBUANG lebih dulu, bukan dipakai kalau ada. Kotaknya
+     * memang dimatikan di layar, tetapi kiriman tidak datang dari layar saja —
+     * dan satu baris yang menerima total apa adanya meniadakan seluruh
+     * gunanya kotak itu dimatikan.
+     *
+     * @param  array<string, mixed>  $isi
+     */
+    private function hitungkan(string $layanan, $pendaftaran, array &$isi): void
+    {
+        foreach (self::medanHitungan($layanan) as $hasil => $rumus) {
+            unset($isi[$hasil]);
+
+            $nilai = function (string $kolom) use ($pendaftaran, $isi): int {
+                $mentah = array_key_exists($kolom, $isi) ? $isi[$kolom] : $pendaftaran->{$kolom};
+
+                return (int) preg_replace('/\D+/', '', (string) $mentah);
+            };
+
+            $lama = fn (string $kolom) => (int) preg_replace('/\D+/', '', (string) $pendaftaran->{$kolom});
+
+            $dasar = $lama($hasil);
+
+            foreach ($rumus['tambah'] as $kolom) {
+                $dasar -= $lama($kolom);
+            }
+
+            foreach ($rumus['kurang'] as $kolom) {
+                $dasar += $lama($kolom);
+            }
+
+            $baru = $dasar;
+
+            foreach ($rumus['tambah'] as $kolom) {
+                $baru += $nilai($kolom);
+            }
+
+            foreach ($rumus['kurang'] as $kolom) {
+                $baru -= $nilai($kolom);
+            }
+
+            // Tidak pernah minus: potongan yang melebihi tagihan menahan
+            // totalnya di nol, bukan menyimpan angka negatif yang lalu terbit
+            // di faktur sebagai utang peladen kepada pendaftarnya.
+            $isi[$hasil] = (string) max(0, $baru);
+        }
     }
 
     /**
