@@ -180,7 +180,36 @@
         <textarea class="form-control-modern" id="{{ $id }}" name="{{ $kolom }}" rows="3"
             data-mis-tumbuh>{{ $tampil }}</textarea>
     @else
-        @if ($uang)
+        @if ($uang && $peranHitung === 'hasil')
+            {{--
+                Medan hasil TIDAK bisa diketik.
+
+                Dulu ia kotak biasa yang boleh ditimpa tangan, dengan tautan
+                "Hitung sendiri lagi" untuk kembali. Satu angka yang menentukan
+                berapa orang harus membayar jadi punya dua sumber kebenaran —
+                hitungan dan ketikan — dan tidak ada apa pun di layar yang
+                memberi tahu mana yang sedang berlaku selain satu kalimat kecil
+                di bawahnya.
+
+                Harga yang dirundingkan tetap bisa dimasukkan: lewat POTONGAN
+                di atas, yang memang tempatnya, dan yang ikut terbaca di faktur
+                maupun jejak perubahan.
+
+                `disabled`, bukan `readonly`: medan disabled tidak ikut
+                terkirim sama sekali, dan peladen memang tidak lagi
+                membacanya — totalnya dihitung ulang di sana (lihat
+                UbahDataPendaftaran::hitungkan()).
+            --}}
+            <div class="rin-total" data-mis-hitung="bungkus">
+                <span class="rin-total-rp" aria-hidden="true">Rp</span>
+                <input type="text" class="rin-total-isian" id="{{ $id }}" name="{{ $kolom }}"
+                    value="{{ $tampil }}" data-mis-hitung="hasil" disabled>
+                <span class="rin-total-gembok" aria-hidden="true"><i class="fas fa-lock"></i></span>
+            </div>
+            <p class="mis-bantuan rin-hitung-nota">
+                Dihitung sendiri dari PPN, kode unik, dan potongan di atas.
+            </p>
+        @elseif ($uang)
             {{-- "Rp" MENEMPEL di dalam kotaknya, bukan jadi label terpisah.
                  Kepala berkas ini sudah menjanjikannya sejak lama, tetapi
                  yang ada hanya kalimat bantuan "Dalam rupiah" di bawah kotak
@@ -193,20 +222,6 @@
                     inputmode="numeric" data-mis-rupiah
                     @if ($peranHitung) data-mis-hitung="{{ $peranHitung }}" @endif>
             </span>
-            @if ($peranHitung === 'hasil')
-                {{-- SATU-SATUNYA nominal yang diberi kalimat bantuan.
-
-                     Angka yang berubah sendiri tanpa keterangan membuat orang
-                     ragu apakah ia sempat salah ketik; kalimat ini yang
-                     memberitahunya bahwa itu memang hitungan, dan tautannya
-                     jalan pulang kalau totalnya sempat diketik tangan. --}}
-                <p class="mis-bantuan rin-hitung-nota" data-mis-hitung-nota>
-                    <span data-mis-hitung-nota-otomatis>Dihitung sendiri dari PPN, kode unik, dan potongan di atas.</span>
-                    <span data-mis-hitung-nota-tangan hidden>Diisi tangan, tidak ikut berubah lagi.
-                        <button type="button" class="rin-hitung-ulang" data-mis-hitung-ulang>Hitung sendiri lagi</button>
-                    </span>
-                </p>
-            @endif
 
             {{-- Tidak ada kalimat bantuan di sini.
 

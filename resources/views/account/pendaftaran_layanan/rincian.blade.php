@@ -624,15 +624,78 @@ Rincian Pendaftaran | MIS Rumah Scopus
             line-height: 1.45;
         }
 
-        .rin-hitung-ulang {
+        /*
+         * Panel Total bayar.
+         *
+         * Sengaja TIDAK berbentuk kotak isian. Kotak isian berjanji boleh
+         * diketik, dan kotak isian yang ternyata tidak boleh diketik adalah
+         * janji yang diingkari — panitia mengklik, tidak terjadi apa-apa, dan
+         * tidak ada yang menjelaskan kenapa. Jadi bentuknya diganti: latar
+         * bergradien, angkanya besar, dan gemboknya terlihat sebelum
+         * disentuh.
+         *
+         * Tingginya dipatok 46px, sama dengan .form-control-modern di
+         * sebelahnya — terukur; tanpa itu panel ini duduk lebih pendek dan
+         * barisnya terlihat miring.
+         */
+        .rin-total {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 46px;
+            padding: 0 44px 0 14px;
+            border: 1.5px solid #bbf7d0;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #f0fdf4 0%, #ecfeff 100%);
+        }
+
+        .rin-total-rp {
+            flex: 0 0 auto;
+            font-size: .82rem;
+            font-weight: 700;
+            color: #15803d;
+        }
+
+        /*
+         * Isiannya dibuat tak terlihat sebagai isian: tanpa bingkai, tanpa
+         * latar. Ia tetap <input> supaya <label for> tetap sah dan skrip
+         * pratinjau bisa menulis .value seperti biasa.
+         *
+         * color dan -webkit-text-fill-color keduanya disebut: Safari memudarkan
+         * teks medan disabled lewat text-fill-color, dan color saja tidak
+         * menang atasnya — angkanya terbit kelabu pucat di sana padahal di
+         * Chrome tampak pekat.
+         */
+        .rin-total-isian {
+            flex: 1 1 auto;
+            min-width: 0;
+            width: 100%;
             border: 0;
             background: none;
             padding: 0;
-            font: inherit;
-            font-weight: 600;
-            color: var(--mis-ungu, #6d4aff);
-            text-decoration: underline;
-            cursor: pointer;
+            font-size: 1.02rem;
+            font-weight: 800;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -.01em;
+            color: #14532d;
+            -webkit-text-fill-color: #14532d;
+            opacity: 1;
+        }
+
+        .rin-total-gembok {
+            position: absolute;
+            top: 50%;
+            right: 13px;
+            transform: translateY(-50%);
+            display: grid;
+            place-items: center;
+            width: 22px;
+            height: 22px;
+            border-radius: 7px;
+            background: #dcfce7;
+            color: #15803d;
+            font-size: 10px;
         }
 
         /* Kedipan sekali jalan saat angkanya berganti sendiri.
@@ -645,8 +708,8 @@ Rincian Pendaftaran | MIS Rumah Scopus
         }
 
         @keyframes rin-hitung-kedip {
-            0% { background-color: #dcfce7; }
-            100% { background-color: transparent; }
+            0% { border-color: #22c55e; box-shadow: 0 0 0 4px rgba(34, 197, 94, .18); }
+            100% { border-color: #bbf7d0; box-shadow: 0 0 0 4px rgba(34, 197, 94, 0); }
         }
 
         /* Yang tidak mau gerakan tetap mendapat angkanya, tanpa kedipan. */
@@ -2917,7 +2980,13 @@ Rincian Pendaftaran | MIS Rumah Scopus
      *     dasar = total - (PPN + kode unik) + potongan
      *
      * diukur sekali dari nilai yang sudah tersimpan, sehingga membuka halaman
-     * menghasilkan angka yang sama persis dan hanya ketikan yang menggesernya.
+     * menghasilkan angka yang sama persis.
+     *
+     * Yang di sini hanya PRATINJAU. Kotaknya dimatikan dan tidak ikut
+     * terkirim; yang benar-benar tersimpan dihitung ulang peladen dengan
+     * rumus yang sama (UbahDataPendaftaran::hitungkan()). Jadi kalau skrip ini
+     * tidak jalan sama sekali, yang hilang cuma angka yang bergerak di layar —
+     * bukan ketepatan angka yang tersimpan.
      */
     document.addEventListener('DOMContentLoaded', function () {
         var angka = function (kotak) {
@@ -2946,22 +3015,7 @@ Rincian Pendaftaran | MIS Rumah Scopus
 
             var dasar = angka(hasil) - jumlahkan(tambah) + jumlahkan(kurang);
 
-            var nota = borang.querySelector('[data-mis-hitung-nota]');
-            var notaOtomatis = nota && nota.querySelector('[data-mis-hitung-nota-otomatis]');
-            var notaTangan = nota && nota.querySelector('[data-mis-hitung-nota-tangan]');
-
-            // Begitu totalnya diketik tangan, hitungan berhenti menimpanya —
-            // ada harga yang dirundingkan dan tidak bisa dirumuskan.
-            var diketikTangan = false;
-
-            var gambarNota = function () {
-                if (notaOtomatis) { notaOtomatis.hidden = diketikTangan; }
-                if (notaTangan) { notaTangan.hidden = ! diketikTangan; }
-            };
-
             var hitung = function () {
-                if (diketikTangan) { return; }
-
                 // Tidak pernah minus: potongan yang melebihi tagihan menahan
                 // totalnya di nol, bukan menampilkan angka negatif.
                 var total = Math.max(0, dasar + jumlahkan(tambah) - jumlahkan(kurang));
@@ -2970,31 +3024,18 @@ Rincian Pendaftaran | MIS Rumah Scopus
 
                 // Penanda singkat supaya perubahannya tertangkap mata; tanpa
                 // ini angkanya berganti tanpa ada yang bergerak di layar.
-                hasil.classList.remove('rin-hitung-berubah');
-                void hasil.offsetWidth;
-                hasil.classList.add('rin-hitung-berubah');
+                // Dipasang di PEMBUNGKUSNYA: kotaknya sendiri disabled dan
+                // latarnya sudah bergradien, jadi kedipan di situ tidak
+                // terlihat sama sekali.
+                var sasaran = hasil.closest('[data-mis-hitung="bungkus"]') || hasil;
+
+                sasaran.classList.remove('rin-hitung-berubah');
+                void sasaran.offsetWidth;
+                sasaran.classList.add('rin-hitung-berubah');
             };
 
             tambah.forEach(function (k) { k.addEventListener('input', hitung); });
             kurang.forEach(function (k) { k.addEventListener('input', hitung); });
-
-            hasil.addEventListener('input', function (e) {
-                // Hanya ketikan orang yang menghentikannya; nilai yang
-                // DIPASANG skrip ini tidak menerbitkan 'input'.
-                if (e.isTrusted) { diketikTangan = true; gambarNota(); }
-            });
-
-            var tombolUlang = nota && nota.querySelector('[data-mis-hitung-ulang]');
-
-            if (tombolUlang) {
-                tombolUlang.addEventListener('click', function () {
-                    diketikTangan = false;
-                    gambarNota();
-                    hitung();
-                });
-            }
-
-            gambarNota();
         });
     });
 
