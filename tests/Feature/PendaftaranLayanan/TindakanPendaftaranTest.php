@@ -4394,4 +4394,111 @@ class TindakanPendaftaranTest extends TestCase
         $this->assertMatchesRegularExpression('/\$total\s*\+=\s*\$kodeUnik\s*;/', $sumber,
             'Kode unik tidak lagi menambah total; tanda "tambah" di layar jadi salah.');
     }
+    #[Test]
+    public function isian_angkatan_ada_di_tab_jadwal_bukan_pembayaran(): void
+    {
+        /*
+         * Memindahkan peserta ke angkatan berikutnya adalah tindakan JADWAL,
+         * dan satu-satunya isian yang benar-benar melakukannya adalah
+         * "Angkatan" — kuotanya ikut berpindah.
+         *
+         * Dulu ia duduk di tab Pembayaran, sementara tab Jadwal cuma berisi
+         * "Tanggal jadwal ulang": sebuah CATATAN yang tidak dibaca apa pun.
+         * Admin yang mau memindahkan peserta membuka tab Jadwal, mengisi
+         * tanggal, menekan Simpan, dan merasa selesai — padahal pesertanya
+         * masih di angkatan lama dan kursinya masih terpakai di sana.
+         *
+         * Dijaga LETAKNYA di markah: isian angkatan harus berada di dalam
+         * panel tab Jadwal, bukan panel Pembayaran.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Uji Letak Angkatan',
+            'email' => 'letak' . Str::random(6) . '@contoh.test',
+            'telp' => '0816-0000-0077',
+            'cara_bayar' => 'tunai',
+            'uang_diterima' => '1',
+        ])->assertRedirect();
+
+        $b = PendaftaranScopusCamp::where('nama', 'Uji Letak Angkatan')->firstOrFail();
+
+        $isi = $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.rincian', ['scopus_camp', $b->getKey()]))
+            ->assertOk()
+            ->getContent();
+
+        $panelJadwal = $this->panel($isi, 'sesi');
+        $panelBayar = $this->panel($isi, 'bayar');
+
+        $this->assertNotSame('', $panelJadwal, 'Panel tab Jadwal tidak tergambar.');
+
+        $this->assertStringContainsString('name="kategori_id"', $panelJadwal,
+            'Isian Angkatan tidak ada di tab Jadwal; memindahkan peserta jadi tidak bisa ditemukan di sana.');
+
+        $this->assertStringNotContainsString('name="kategori_id"', $panelBayar,
+            'Isian Angkatan masih di tab Pembayaran; dua tempat untuk satu isian.');
+    }
+
+    #[Test]
+    public function tiap_tab_menerangkan_akibat_isiannya(): void
+    {
+        /*
+         * Judul bagian saja tidak membedakan isian yang MEMINDAHKAN KURSI
+         * dari isian yang cuma MENCATAT. Yang memakai layar ini bukan orang
+         * teknis, dan keduanya sama-sama berbunyi seperti "mengatur jadwal".
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Uji Keterangan Tab',
+            'email' => 'ket' . Str::random(6) . '@contoh.test',
+            'telp' => '0816-0000-0078',
+            'cara_bayar' => 'tunai',
+            'uang_diterima' => '1',
+        ])->assertRedirect();
+
+        $b = PendaftaranScopusCamp::where('nama', 'Uji Keterangan Tab')->firstOrFail();
+
+        $isi = $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.rincian', ['scopus_camp', $b->getKey()]))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('kursi di angkatan', $isi,
+            'Bagian Angkatan tidak menerangkan bahwa kursinya ikut berpindah.');
+
+        $this->assertStringContainsString('CATATAN panitia saja', $isi,
+            'Bagian penjadwalan ulang tidak menerangkan bahwa ia cuma catatan.');
+
+        $this->assertStringContainsString('pindah ke tab Jadwal', $isi,
+            'Tab Pembayaran tidak menunjukkan ke mana isian Angkatan pindah.');
+    }
+
+    /**
+     * Memotong satu panel tab dari markah.
+     *
+     * Dicari dari pembuka panelnya sampai pembuka panel berikutnya — bukan
+     * dengan mencocokkan penutup div, yang di dalamnya ada puluhan dan
+     * pencocokan sederhana akan berhenti di yang pertama.
+     */
+    private function panel(string $isi, string $kunci): string
+    {
+        $awal = strpos($isi, 'id="rin-panel-' . $kunci . '"');
+
+        if ($awal === false) {
+            return '';
+        }
+
+        $berikut = strpos($isi, 'id="rin-panel-', $awal + 20);
+
+        return substr($isi, $awal, ($berikut !== false ? $berikut : strlen($isi)) - $awal);
+    }
+
 }
