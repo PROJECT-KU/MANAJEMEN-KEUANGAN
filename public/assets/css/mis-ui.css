@@ -2121,6 +2121,28 @@ textarea:focus-visible,
     grid-column: 1 / -1;
 }
 
+/*
+ * Isian tidak boleh melebihi selnya.
+ *
+ * .mis-isian sudah min-width: 0, tetapi itu melonggarkan SELNYA — bukan
+ * kotak isian di dalamnya. Isian adalah item grid juga, dan item grid
+ * bawaannya min-width: auto, yaitu selebar isi terkecilnya.
+ *
+ * Untuk <input type="date"> isi terkecil itu ditentukan peramban, dan di
+ * iOS Safari jauh lebih lebar daripada di Chrome. Itu sebabnya ia meluber
+ * keluar kartu di ponsel sementara di komputer tampak baik-baik saja —
+ * golongan kerusakan yang tidak bisa dilihat di tempat ia ditulis.
+ */
+.mis-isian > input,
+.mis-isian > select,
+.mis-isian > textarea,
+.mis-isian > .form-control-modern,
+.mis-isian > .mis-isian-berikon > input,
+.mis-isian > .mis-isian-berikon > .form-control-modern {
+    min-width: 0;
+    max-width: 100%;
+}
+
 .mis-isian {
     display: grid;
     gap: 7px;

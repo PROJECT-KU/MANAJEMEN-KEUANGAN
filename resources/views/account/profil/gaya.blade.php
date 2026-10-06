@@ -277,11 +277,29 @@
         justify-items: center;
     }
 
+    /*
+     * grid-template WAJIB, dan bukan hiasan.
+     *
+     * Bingkainya 92px, tetapi JALUR grid di dalamnya berukuran auto — dan
+     * tinggi persen pada item grid diukur terhadap jalurnya, bukan terhadap
+     * bingkainya. Jalur auto ukurannya ditentukan isinya, sementara isinya
+     * (height: 100%) menunggu jalurnya: saling menunggu, jadi peramban
+     * menyerah dan memperlakukan keduanya sebagai auto.
+     *
+     * Akibatnya foto TEGAK memakai tinggi aslinya. Terukur di layar 393px:
+     * fotonya 84x175 di dalam bingkai 92x92 — meluber 87px ke bawah, dan
+     * bingkai ungunya tertutup di sisi itu sehingga terlihat terpotong.
+     *
+     * Dengan jalur minmax(0, 1fr), tingginya pasti dan persennya bisa
+     * dihitung. minmax(0, ...) bukan 1fr polos: 1fr punya dasar auto, dan
+     * dasar itulah yang tadi membuatnya melar.
+     */
     .prof-foto-bingkai {
         position: relative;
         width: 92px;
         height: 92px;
         display: grid;
+        grid-template: minmax(0, 1fr) / minmax(0, 1fr);
         place-items: center;
         border-radius: 28px;
         background: var(--mis-ungu);
