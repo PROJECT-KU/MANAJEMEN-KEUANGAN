@@ -1210,10 +1210,13 @@ class PendaftaranLayananController extends Controller
     private function tabDari(array $medanKiriman): string
     {
         $peta = [
-            'bayar' => ['kategori_id', 'jumlah_pendaftar', 'ppn', 'kode_unik',
+            'bayar' => ['jumlah_pendaftar', 'ppn', 'kode_unik',
                 'kode_diskon', 'nominal_diskon', 'total_pembayaran',
                 'total_keseluruhan_pembayaran'],
-            'sesi' => ['tanggal_pemesanan', 'sesi', 'jam_sesi', 'waktu_mulai',
+            // kategori_id ikut tab Jadwal, mengikuti letak isiannya di layar.
+            // Kalau tertinggal di 'bayar', galat angkatan penuh akan membuka
+            // tab Pembayaran sementara isiannya ada di tab Jadwal.
+            'sesi' => ['kategori_id', 'tanggal_pemesanan', 'sesi', 'jam_sesi', 'waktu_mulai',
                 'waktu_selesai', 'lokasi', 'biaya', 'kode_unik_pembayaran',
                 'subtotal_pembayaran', 'sesi_kedua', 'sesi_ketiga',
                 'tanggal_reschedule', 'group_wa'],
