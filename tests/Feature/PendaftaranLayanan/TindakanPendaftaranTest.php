@@ -4481,6 +4481,130 @@ class TindakanPendaftaranTest extends TestCase
             'Tab Pembayaran tidak menunjukkan ke mana isian Angkatan pindah.');
     }
 
+    #[Test]
+    public function daftar_angkatan_hanya_yang_aktif(): void
+    {
+        /*
+         * Memindahkan peserta ke angkatan yang sudah ditutup tidak ada
+         * gunanya: ia tidak terpajang, tidak menerima pendaftar, acaranya
+         * sudah lewat. Daftarnya pun jadi panjang tanpa guna — terukur 59
+         * angkatan, 36 di antaranya tidak aktif.
+         *
+         * Borang TAMBAH sudah menyaring begini sejak awal; yang tertinggal
+         * cuma borang ubah di halaman rincian.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        $aktif = $this->angkatan('scopus_camp', 20, 20);
+        $ditutup = $this->angkatan('scopus_camp', 20, 20);
+        $ditutup->forceFill(['status' => 'non active'])->save();
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $aktif->id,
+            'nama' => 'Uji Saring Angkatan',
+            'email' => 'saring' . Str::random(6) . '@contoh.test',
+            'telp' => '0816-0000-0079',
+            'cara_bayar' => 'tunai',
+            'uang_diterima' => '1',
+        ])->assertRedirect();
+
+        $b = PendaftaranScopusCamp::where('nama', 'Uji Saring Angkatan')->firstOrFail();
+
+        $isi = $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.rincian', ['scopus_camp', $b->getKey()]))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('value="' . $aktif->id . '"', $isi,
+            'Angkatan aktif tidak ditawarkan.');
+
+        $this->assertStringNotContainsString('value="' . $ditutup->id . '"', $isi,
+            'Angkatan yang sudah ditutup masih ditawarkan; memindahkan ke sana tidak ada gunanya.');
+    }
+
+    #[Test]
+    public function angkatan_yang_sedang_dipakai_tetap_ada_walau_sudah_ditutup(): void
+    {
+        /*
+         * Ini BUKAN kelonggaran atas aturan di atas, melainkan syarat supaya
+         * aturan itu aman.
+         *
+         * Pendaftaran yang angkatannya sudah ditutup akan membuka borang
+         * dengan daftar pilihan yang TIDAK MEMUAT nilainya sendiri. Select
+         * lalu menampilkan baris pertama seolah itu pilihannya, dan satu
+         * tekan Simpan memindahkan pesertanya ke angkatan lain tanpa ada yang
+         * meminta — diam-diam, dan kuotanya ikut berpindah.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Uji Angkatan Tertutup',
+            'email' => 'tutup' . Str::random(6) . '@contoh.test',
+            'telp' => '0816-0000-0080',
+            'cara_bayar' => 'tunai',
+            'uang_diterima' => '1',
+        ])->assertRedirect();
+
+        // Angkatannya ditutup SESUDAH orangnya mendaftar — persis yang terjadi
+        // saat acaranya dimulai dan perintah harian menutupnya.
+        $angkatan->forceFill(['status' => 'non active'])->save();
+
+        $b = PendaftaranScopusCamp::where('nama', 'Uji Angkatan Tertutup')->firstOrFail();
+
+        $isi = $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.rincian', ['scopus_camp', $b->getKey()]))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('value="' . $angkatan->id . '"', $isi,
+            'Angkatan yang sedang dipakai hilang dari pilihan; satu tekan Simpan akan memindahkan pesertanya diam-diam.');
+
+        $this->assertStringContainsString('sudah ditutup', $isi,
+            'Angkatan tertutup yang masih ditawarkan tidak ditandai, jadi terbaca sebagai pilihan yang wajar.');
+    }
+
+    #[Test]
+    public function pilihan_angkatan_bisa_dibedakan_satu_sama_lain(): void
+    {
+        /*
+         * Angkatan Scopus Camp bernama SAMA PERSIS berpuluh-puluh. Tanpa nomor
+         * dan tanggalnya, daftar pilihannya berisi dua puluh baris "Scopus
+         * Camp Yogyakarta" yang tidak bisa dibedakan satu pun — dan memilih
+         * salah satu jadi menebak.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        $angkatan = $this->angkatan('scopus_camp', 20, 20);
+        $angkatan->forceFill(['nama_ke' => '777', 'mulai' => '2026-11-20'])->save();
+
+        $this->actingAs($orang)->post(route('account.pendaftaran-layanan.simpan'), [
+            'layanan' => 'scopus_camp',
+            'kategori_id' => $angkatan->id,
+            'nama' => 'Uji Label Angkatan',
+            'email' => 'label' . Str::random(6) . '@contoh.test',
+            'telp' => '0816-0000-0081',
+            'cara_bayar' => 'tunai',
+            'uang_diterima' => '1',
+        ])->assertRedirect();
+
+        $b = PendaftaranScopusCamp::where('nama', 'Uji Label Angkatan')->firstOrFail();
+
+        $isi = $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.rincian', ['scopus_camp', $b->getKey()]))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('ke-777', $isi,
+            'Nomor angkatan tidak ikut; pilihan yang bernama sama tidak bisa dibedakan.');
+
+        $this->assertStringContainsString('20 Nov 2026', $isi,
+            'Tanggal angkatan tidak ikut, atau bulannya tidak berbahasa Indonesia.');
+    }
+
     /**
      * Memotong satu panel tab dari markah.
      *
