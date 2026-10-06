@@ -1094,10 +1094,41 @@ class PendaftaranLayananController extends Controller
          * Bibliometrik — dan memindahkan pendaftaran ke angkatan layanan lain
          * membuat kuota keduanya salah tanpa ada yang menolak.
          */
+        /*
+         * HANYA angkatan aktif — ditambah angkatan yang SEDANG dipakai baris
+         * ini, walau sudah nonaktif.
+         *
+         * Memindahkan peserta ke angkatan yang sudah ditutup tidak ada
+         * gunanya: ia tidak terpajang, tidak menerima pendaftar, dan
+         * acaranya sudah lewat. Daftarnya pun jadi panjang tanpa guna —
+         * terukur 59 angkatan, 36 di antaranya tidak aktif.
+         *
+         * Yang sedang dipakai tetap disertakan, dan itu BUKAN kelonggaran:
+         * tanpa itu, pendaftaran di angkatan yang sudah ditutup akan membuka
+         * borang dengan pilihan yang tidak memuat nilainya sendiri. Select
+         * lalu menampilkan baris pertama seolah itu pilihannya, dan satu
+         * tekan Simpan memindahkan pesertanya tanpa ada yang meminta.
+         *
+         * Borang TAMBAH sudah menyaring begini sejak awal; yang tertinggal
+         * cuma borang ubah di halaman ini.
+         */
         $angkatan = Pendaftaran::berangkatan($layanan)
             ? \App\KategoriLayanan::where('layanan', $layanan)
+                /*
+                 * Nilainya dibaca dari MODEL pendaftarannya, bukan dari $baris.
+                 * $baris datang dari kueri gabungan yang tidak selalu membawa
+                 * kolom kategori_id — dan saat ia kosong, angkatan yang sedang
+                 * dipakai ikut hilang dari pilihan tanpa satu pun galat.
+                 */
+                ->where(function ($q) use ($pendaftaran) {
+                    $q->where('status', 'active')
+                        ->orWhere('id', (string) ($pendaftaran->kategori_id ?? ''));
+                })
                 ->orderByDesc('mulai')
-                ->get(['id', 'nama', 'mulai', 'total_kuota', 'sisa_kuota'])
+                // nama_ke dan mulai ikut dibaca: angkatan Scopus Camp bernama
+                // SAMA PERSIS berpuluh-puluh, dan tanpa nomor serta tanggalnya
+                // pilihan di daftar tidak bisa dibedakan satu pun.
+                ->get(['id', 'nama', 'nama_ke', 'mulai', 'status', 'total_kuota', 'sisa_kuota'])
             : collect();
 
         return view('account.pendaftaran_layanan.rincian', [
