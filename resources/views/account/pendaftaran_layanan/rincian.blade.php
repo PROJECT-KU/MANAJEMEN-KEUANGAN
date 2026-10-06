@@ -860,6 +860,17 @@ Rincian Pendaftaran | MIS Rumah Scopus
             margin: 0 0 13px;
         }
 
+    /* Keterangan bagian: satu tingkat lebih pelan dari judulnya, tetapi tetap
+       terbaca — ia menerangkan akibat, bukan hiasan. Dibatasi lebar baca
+       supaya kalimat panjang tidak membentang selebar kartu. */
+    .rin-bagian-nota {
+        margin: -2px 0 12px;
+        max-width: 68ch;
+        font-size: .78rem;
+        line-height: 1.55;
+        color: #64748b;
+    }
+
         .rin-bagian-judul span.teks {
             font-size: .72rem;
             font-weight: 800;
@@ -1387,18 +1398,41 @@ Rincian Pendaftaran | MIS Rumah Scopus
             ['Catatan panitia', 'fa-sticky-note', 'mis-kuning', ['note']],
         ],
         'bayar' => [
-            ['Angkatan & jumlah orang', 'fa-layer-group', 'mis-ungu', ['kategori_id', 'jumlah_pendaftar']],
+            ['Jumlah orang', 'fa-users', 'mis-ungu', ['jumlah_pendaftar'],
+                'Mau memindahkan peserta ke angkatan lain? Isiannya pindah ke tab Jadwal.'],
             ['Nominal', 'fa-money-bill-wave', 'mis-hijau',
                 ['ppn', 'kode_unik', 'kode_diskon', 'nominal_diskon', 'total_pembayaran', 'total_keseluruhan_pembayaran']],
         ],
         'sesi' => [
+            /*
+             * ANGKATAN ADA DI SINI, bukan lagi di tab Pembayaran.
+             *
+             * Memindahkan peserta ke angkatan berikutnya adalah tindakan
+             * JADWAL, dan satu-satunya isian yang benar-benar melakukannya
+             * adalah ini — kuotanya ikut berpindah: kursinya dikembalikan ke
+             * angkatan lama, diambil dari angkatan baru, dan ditolak kalau
+             * yang baru sudah penuh.
+             *
+             * Dulu ia duduk di tab Pembayaran sementara tab ini cuma berisi
+             * "Tanggal jadwal ulang" — sebuah CATATAN yang tidak dibaca apa
+             * pun. Admin yang mau memindahkan peserta membuka tab Jadwal,
+             * mengisi tanggal, menekan Simpan, dan merasa selesai. Padahal
+             * pesertanya masih di angkatan lama dan kursinya masih terpakai
+             * di sana.
+             */
+            ['Angkatan', 'fa-layer-group', 'mis-ungu', ['kategori_id'],
+                'Mengganti angkatan memindahkan peserta beserta kursinya: kursi di angkatan '
+                . 'lama dikembalikan, kursi di angkatan baru diambil. Kalau angkatan barunya '
+                . 'sudah penuh, perpindahannya ditolak.'],
             ['Sesi pertama', 'fa-calendar-check', 'mis-biru',
                 ['tanggal_pemesanan', 'sesi', 'jam_sesi', 'waktu_mulai', 'waktu_selesai', 'lokasi', 'biaya', 'kode_unik_pembayaran', 'subtotal_pembayaran']],
             ['Sesi kedua', 'fa-calendar-plus', 'mis-jingga',
                 ['sesi_kedua', 'waktu_mulai_kedua', 'waktu_selesai_kedua', 'lokasi_kedua', 'biaya_kedua', 'kode_unik_pembayaran_kedua', 'subtotal_pembayaran_kedua']],
             ['Sesi ketiga', 'fa-calendar-plus', 'mis-kuning',
                 ['sesi_ketiga', 'waktu_mulai_ketiga', 'waktu_selesai_ketiga', 'lokasi_ketiga', 'biaya_ketiga', 'kode_unik_pembayaran_ketiga', 'subtotal_pembayaran_ketiga']],
-            ['Penjadwalan ulang & grup', 'fa-redo', 'mis-merah', ['tanggal_reschedule', 'group_wa']],
+            ['Penjadwalan ulang & grup', 'fa-redo', 'mis-merah', ['tanggal_reschedule', 'group_wa'],
+                'Ini CATATAN panitia saja — tidak memindahkan peserta dan tidak mengubah kursi. '
+                . 'Pakai untuk menggeser jadwal di dalam angkatan yang sama.'],
         ],
     ];
 
@@ -1406,7 +1440,9 @@ Rincian Pendaftaran | MIS Rumah Scopus
     $bagianTab = function (string $tab) use ($isiTab, $medan, $label) {
         $hasil = [];
 
-        foreach ($isiTab[$tab] ?? [] as [$judul, $ikon, $warna, $daftar]) {
+        foreach ($isiTab[$tab] ?? [] as $bagian) {
+            [$judul, $ikon, $warna, $daftar] = $bagian;
+            $keterangan = $bagian[4] ?? null;
             $ada = [];
 
             foreach ($daftar as $kolom) {
@@ -1416,7 +1452,7 @@ Rincian Pendaftaran | MIS Rumah Scopus
             }
 
             if ($ada !== []) {
-                $hasil[] = [$judul, $ikon, $warna, $ada];
+                $hasil[] = [$judul, $ikon, $warna, $ada, $keterangan];
             }
         }
 
@@ -2120,7 +2156,7 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                     @csrf
                                     @method('PUT')
 
-                                    @foreach ($bagian as [$judulBagian, $ikonBagian, $warnaBagian, $daftarMedan])
+                                    @foreach ($bagian as [$judulBagian, $ikonBagian, $warnaBagian, $daftarMedan, $ketBagian])
                                         <div class="rin-bagian">
                                             <p class="rin-bagian-judul">
                                                 <span class="mis-medali kecil {{ $warnaBagian }}" aria-hidden="true">
@@ -2128,6 +2164,16 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                                 </span>
                                                 <span class="teks">{{ $judulBagian }}</span>
                                             </p>
+
+                                            {{-- Keterangan bagian: menyebut apa yang
+                                                 BENAR-BENAR terjadi saat isiannya diubah.
+                                                 Yang memakai layar ini bukan orang teknis,
+                                                 dan judul bagian saja tidak membedakan
+                                                 isian yang memindahkan kursi dari isian
+                                                 yang cuma mencatat. --}}
+                                            @if ($ketBagian)
+                                                <p class="rin-bagian-nota">{{ $ketBagian }}</p>
+                                            @endif
 
                                             @php
                                                 /*
