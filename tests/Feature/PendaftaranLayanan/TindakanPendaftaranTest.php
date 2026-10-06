@@ -1697,6 +1697,316 @@ class TindakanPendaftaranTest extends TestCase
         $this->assertSame(4950000 + (int) $b->kode_unik, (int) $b->total_pembayaran);
     }
 
+    /*
+     * ------------------------------------------------------------------
+     * Jejak suntingan data
+     * ------------------------------------------------------------------
+     *
+     * Sebelum ini jejaknya HANYA mencatat perpindahan status. Semua suntingan
+     * lain — nama, email, angkatan, nominal — tersimpan tanpa meninggalkan
+     * bekas apa pun, sehingga pertanyaan "siapa yang mengubah nominalnya"
+     * tidak punya jawaban di layar mana pun.
+     */
+
+    #[Test]
+    public function suntingan_data_meninggalkan_satu_jejak_per_medan(): void
+    {
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        [$baris] = $this->buat('scopus_camp');
+
+        $this->actingAs($orang);
+
+        $hasil = (new UbahDataPendaftaran)->jalankan('scopus_camp', (string) $baris->id, [
+            'nama' => 'Nama Sesudah Disunting',
+            'email' => 'sesudah@contoh.test',
+        ]);
+
+        $this->assertTrue($hasil['berhasil'], $hasil['pesan']);
+
+        $jejak = \App\PendaftaranJejak::milik('scopus_camp', (string) $baris->id)->terurut()->get();
+
+        $this->assertCount(2, $jejak, 'Satu medan satu jejak — dua medan berarti dua baris.');
+
+        $medan = $jejak->pluck('medan')->all();
+        sort($medan);
+        $this->assertSame(['email', 'nama'], $medan);
+
+        $kalimat = $jejak->pluck('kalimat')->implode(' | ');
+
+        $this->assertStringContainsString('Nama', $kalimat);
+        $this->assertStringContainsString('Nama Sesudah Disunting', $kalimat);
+        $this->assertStringContainsString('sesudah@contoh.test', $kalimat);
+        $this->assertStringContainsString('oleh ' . $orang->full_name, $kalimat,
+            'Jejak tanpa nama pelakunya tidak menjawab pertanyaan yang jadi alasannya ada.');
+
+        $this->assertSame('ubah', $jejak->first()->aksi);
+    }
+
+    #[Test]
+    public function medan_yang_nilainya_tidak_berubah_tidak_dijejaki(): void
+    {
+        /*
+         * Borang mengirim SELURUH medan satu tab sekaligus, bukan yang
+         * disentuh saja. Tanpa penyaring ini satu tekan Simpan meninggalkan
+         * belasan jejak yang semuanya berbunyi "A → A", dan jejak yang
+         * sebenarnya tenggelam di antaranya.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        [$baris] = $this->buat('scopus_camp');
+
+        $this->actingAs($orang);
+
+        $hasil = (new UbahDataPendaftaran)->jalankan('scopus_camp', (string) $baris->id, [
+            'nama' => $baris->nama,
+            'email' => $baris->email,
+            'telp' => $baris->telp,
+            'affiliasi' => 'Instansi Yang Berubah',
+        ]);
+
+        $this->assertTrue($hasil['berhasil'], $hasil['pesan']);
+
+        $jejak = \App\PendaftaranJejak::milik('scopus_camp', (string) $baris->id)->get();
+
+        $this->assertCount(1, $jejak, 'Hanya afiliasinya yang berubah.');
+        $this->assertSame('affiliasi', $jejak->first()->medan);
+    }
+
+    #[Test]
+    public function nominal_dari_borang_tidak_terbaca_sebagai_perubahan(): void
+    {
+        /*
+         * Borang mengirim nominal berformat "1.000.000" dan basis data
+         * menyimpan 1000000. Keduanya nilai yang sama; kalau dibandingkan apa
+         * adanya, tiap Simpan meninggalkan jejak palsu
+         * "Total bayar "1000000" → "1000000"".
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        [$baris] = $this->buat('scopus_camp', ['total_pembayaran' => '1000000']);
+
+        $this->actingAs($orang);
+
+        (new UbahDataPendaftaran)->jalankan('scopus_camp', (string) $baris->id, [
+            'total_pembayaran' => '1.000.000',
+        ]);
+
+        $this->assertSame(0,
+            \App\PendaftaranJejak::milik('scopus_camp', (string) $baris->id)->count(),
+            'Nominal yang sama ditulis berbeda format bukan perubahan.');
+    }
+
+    #[Test]
+    public function perpindahan_angkatan_dijejaki_dengan_namanya_bukan_uuid(): void
+    {
+        /*
+         * Justru perpindahan angkatan yang paling perlu bisa ditelusuri —
+         * ia memindahkan kursi. Dan justru itu yang tersimpan sebagai UUID:
+         * jejak berbunyi "Angkatan "e111be54-…" → "a9d2f8b3-…"" tidak memberi
+         * tahu apa pun kepada panitia yang membacanya.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        [$baris, $lama] = $this->buat('scopus_camp');
+        $baru = $this->angkatan('scopus_camp', 30, 30);
+
+        $this->actingAs($orang);
+
+        $hasil = (new UbahDataPendaftaran)->jalankan('scopus_camp', (string) $baris->id, [
+            'kategori_id' => (string) $baru->id,
+        ]);
+
+        $this->assertTrue($hasil['berhasil'], $hasil['pesan']);
+
+        $satu = \App\PendaftaranJejak::milik('scopus_camp', (string) $baris->id)->first();
+
+        $this->assertNotNull($satu);
+        $this->assertSame('kategori_id', $satu->medan);
+
+        $this->assertStringContainsString($lama->nama, (string) $satu->dari);
+        $this->assertStringContainsString($baru->nama, (string) $satu->ke);
+
+        $this->assertStringNotContainsString((string) $lama->id, (string) $satu->kalimat,
+            'UUID angkatan masih bocor ke kalimat jejaknya.');
+        $this->assertStringNotContainsString((string) $baru->id, (string) $satu->kalimat);
+    }
+
+    #[Test]
+    public function medan_kosong_disebut_kosong_bukan_dua_kutip_hampa(): void
+    {
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        [$baris] = $this->buat('scopus_camp', ['note' => null]);
+
+        $this->actingAs($orang);
+
+        (new UbahDataPendaftaran)->jalankan('scopus_camp', (string) $baris->id, [
+            'note' => 'Sudah dihubungi lewat WhatsApp.',
+        ]);
+
+        $satu = \App\PendaftaranJejak::milik('scopus_camp', (string) $baris->id)->first();
+
+        $this->assertNotNull($satu);
+        $this->assertStringContainsString('(kosong)', $satu->kalimat);
+        $this->assertStringNotContainsString('""', $satu->kalimat);
+    }
+
+    #[Test]
+    public function suntingan_yang_gagal_tidak_meninggalkan_jejak(): void
+    {
+        /*
+         * Jejak tanpa perubahan sama menyesatkannya dengan perubahan tanpa
+         * jejak. Kuota yang tidak cukup membatalkan simpanannya; jejaknya
+         * harus ikut mundur, dan itu hanya terjadi kalau ia ditulis di dalam
+         * transaksi yang sama.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        [$baris] = $this->buat('scopus_camp');
+        $sempit = $this->angkatan('scopus_camp', 1, 1);
+
+        $this->actingAs($orang);
+
+        $hasil = (new UbahDataPendaftaran)->jalankan('scopus_camp', (string) $baris->id, [
+            'kategori_id' => (string) $sempit->id,
+            'nama' => 'Nama Yang Tidak Boleh Tersimpan',
+            'jumlah_pendaftar' => '5',
+        ]);
+
+        $this->assertFalse($hasil['berhasil']);
+        $this->assertStringContainsString('kuota', $hasil['pesan']);
+
+        $this->assertSame(0,
+            \App\PendaftaranJejak::milik('scopus_camp', (string) $baris->id)->count(),
+            'Suntingan yang ditolak tetap meninggalkan jejak — transaksinya tidak satu.');
+
+        $this->assertSame($baris->nama, $baris->fresh()->nama);
+    }
+
+    #[Test]
+    public function tiap_medan_yang_bisa_disunting_punya_namanya_di_jejak(): void
+    {
+        /*
+         * Dua daftar yang harus seiring: medan yang boleh disunting, dan nama
+         * medan dalam bahasa panitia. Kalau salah satu bertambah sendiri,
+         * jejaknya berbunyi "total_keseluruhan_pembayaran" — bukan bahasa
+         * siapa pun — dan tidak ada yang memberi tahu.
+         */
+        $semua = [];
+
+        foreach (array_keys(Pendaftaran::katalog()) as $layanan) {
+            $semua = array_merge($semua, array_keys(UbahDataPendaftaran::medan($layanan)));
+        }
+
+        $semua = array_values(array_unique($semua));
+
+        $this->assertNotEmpty($semua, 'prasyarat: ada medan yang bisa disunting');
+
+        $tanpaNama = array_diff($semua, array_keys(\App\PendaftaranJejak::NAMA_MEDAN));
+
+        $this->assertSame([], array_values($tanpaNama),
+            'Medan ini belum punya namanya di PendaftaranJejak::NAMA_MEDAN: '
+            . implode(', ', $tanpaNama));
+
+        $menganggur = array_diff(array_keys(\App\PendaftaranJejak::NAMA_MEDAN), $semua);
+
+        $this->assertSame([], array_values($menganggur),
+            'Nama medan ini tidak lagi dipakai siapa pun: ' . implode(', ', $menganggur));
+    }
+
+    #[Test]
+    public function jejak_suntingan_dibedakan_rupanya_dari_jejak_status(): void
+    {
+        /*
+         * Kolom `ke` pada jejak suntingan memuat nilai bebas. Nilai yang
+         * KEBETULAN sama dengan status yang dikenal — "pending", "expired" —
+         * dulu akan diwarnai dengan palet status: kuning jam pasir untuk
+         * sesuatu yang bukan status sama sekali.
+         */
+        $markah = file_get_contents(
+            resource_path('views/account/pendaftaran_layanan/rincian.blade.php')
+        );
+
+        $this->assertStringContainsString("\$satu->aksi === 'status' && \$satu->ke", $markah,
+            'Palet status dipakai lagi untuk semua jejak, bukan untuk jejak status saja.');
+
+        $this->assertStringContainsString("'ubah' => ['fa-pen'", $markah,
+            'Jejak suntingan tidak lagi punya ikonnya sendiri.');
+
+        // Prasyarat pembanding: nilai bebas memang tidak dikenali sebagai
+        // status, tetapi kata statusnya sendiri dikenali.
+        $this->assertSame('lain', Pendaftaran::keadaanDari('Budi Santoso'));
+        $this->assertNotSame('lain', Pendaftaran::keadaanDari('pending'));
+    }
+
+    #[Test]
+    public function nominal_dan_tanggal_di_jejak_ditulis_cara_orang_membacanya(): void
+    {
+        /*
+         * Terbaca mentah, jejaknya berbunyi
+         * "Total bayar "3000000" → "3250000"" — angka yang harus dihitung
+         * sendiri digitnya oleh yang membacanya, padahal nominal itu justru
+         * yang paling sering dipersoalkan.
+         *
+         * Jenis medannya diambil dari peta MEDAN yang sama yang dipakai
+         * membaca kiriman, jadi medan uang baru ikut terformat sendiri.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        [$baris] = $this->buat('scopus_camp', ['total_pembayaran' => '3000000']);
+
+        $this->actingAs($orang);
+
+        (new UbahDataPendaftaran)->jalankan('scopus_camp', (string) $baris->id, [
+            'total_pembayaran' => '3.250.000',
+        ]);
+
+        $satu = \App\PendaftaranJejak::milik('scopus_camp', (string) $baris->id)->firstOrFail();
+
+        $this->assertSame('Rp 3.000.000', $satu->dari);
+        $this->assertSame('Rp 3.250.000', $satu->ke);
+
+        // Scopus Kafe: tanggal pemesanannya dalam bahasa Indonesia, bukan
+        // "2026-11-14". APP_LOCALE=en, jadi tanpa locale('id') bulannya
+        // terbit "November" bergaya Inggris di layar berbahasa Indonesia.
+        [$kafe] = $this->buat('scopus_kafe', ['tanggal_pemesanan' => '2026-11-14']);
+
+        (new UbahDataPendaftaran)->jalankan('scopus_kafe', (string) $kafe->id, [
+            'tanggal_pemesanan' => '2026-12-01',
+        ]);
+
+        $satu = \App\PendaftaranJejak::milik('scopus_kafe', (string) $kafe->id)
+            ->where('medan', 'tanggal_pemesanan')->firstOrFail();
+
+        $this->assertSame('14 November 2026', $satu->dari);
+        $this->assertSame('01 Desember 2026', $satu->ke);
+    }
+
+    #[Test]
+    public function layar_rincian_menampilkan_jejak_suntingannya(): void
+    {
+        /*
+         * Yang dikerjakan di atas baru separuhnya: baris di basis data yang
+         * tidak sampai ke layar sama saja dengan tidak dicatat.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        [$baris, $lama] = $this->buat('scopus_camp');
+        $baru = $this->angkatan('scopus_camp', 30, 30);
+
+        $this->actingAs($orang);
+
+        (new UbahDataPendaftaran)->jalankan('scopus_camp', (string) $baris->id, [
+            'kategori_id' => (string) $baru->id,
+            'note' => 'Minta dipindah lewat WhatsApp.',
+        ]);
+
+        $isi = $this->actingAs($orang)->get(route(
+            'account.pendaftaran-layanan.rincian', ['scopus_camp', $baris->id]
+        ))->assertOk()->getContent();
+
+        $this->assertStringContainsString('Jejak perubahan', $isi);
+        $this->assertStringContainsString('Angkatan', $isi);
+        $this->assertStringContainsString(e($baru->nama), $isi);
+        $this->assertStringContainsString('Catatan panitia (kosong) →', $isi,
+            'Kalimat jejak suntingan tidak sampai ke layar.');
+        $this->assertStringContainsString('fa-pen', $isi,
+            'Jejak suntingan tidak dibedakan rupanya dari jejak status di layar.');
+    }
+
     // ------------------------------------------------------------- pembantu
 
     private function akun(string $peran): User

@@ -821,6 +821,28 @@ class PendaftaranLayananController extends Controller
 
         $this->simpanBuktiTermin($pembayaran, $request->file('bukti'));
 
+        /*
+         * Uang masuk ikut dicatat di jejak pendaftarannya.
+         *
+         * Daftar terminnya sendiri sudah menampilkan nominal dan tanggalnya,
+         * tetapi jejaklah satu-satunya tempat yang menyimpan URUTAN kejadian:
+         * tanpa baris ini, termin yang dicatat lalu dihapus menghilang tanpa
+         * bekas, dan pertanyaan "kemarin tercatat lunas, kok sekarang kurang"
+         * tidak punya jawaban di layar mana pun.
+         *
+         * HANYA termin yang induknya memang satu pendaftaran. Termin pesanan
+         * lembaga induknya PemesananLembaga — satu pesanan bisa menaungi
+         * beberapa pendaftaran — jadi menautkannya ke $id berarti
+         * "Pembayaran Rp 10.000.000 dicatat" muncul di rincian satu peserta
+         * padahal uang itu untuk sepuluh orang. Penghapusannya pun tidak bisa
+         * ditautkan kembali ke sana (hapusPembayaran hanya memegang id
+         * terminnya), jadi tanpa syarat ini jejaknya timpang: masuknya
+         * tercatat, pembatalannya tidak.
+         */
+        if ($induk['jenis'] === \App\PembayaranPendaftaran::PENDAFTARAN) {
+            $this->catatJejakBayar($layanan, $id, 'bayar', null, $nominal);
+        }
+
         $ringkas = \App\PembayaranPendaftaran::ringkas(
             $induk['jenis'], $induk['induk_id'], $induk['tagihan']
         );
@@ -859,10 +881,49 @@ class PendaftaranLayananController extends Controller
         }
 
         $nominal = (int) $baris->nominal;
+
+        /*
+         * Jejaknya ditulis HANYA untuk termin yang induknya memang satu
+         * pendaftaran. Termin pesanan lembaga induknya PemesananLembaga —
+         * satu pesanan bisa menaungi beberapa pendaftaran — jadi menautkannya
+         * ke salah satu dari mereka berarti jejak yang menunjuk tempat yang
+         * keliru. Untuk itu daftar terminnya sendiri yang jadi catatannya.
+         */
+        if ($baris->jenis === \App\PembayaranPendaftaran::PENDAFTARAN && $baris->layanan) {
+            $this->catatJejakBayar(
+                (string) $baris->layanan, (string) $baris->induk_id, 'hapus-bayar', $nominal, null
+            );
+        }
+
         $baris->delete();
 
         return back()->with('sukses',
             'Catatan pembayaran Rp ' . number_format($nominal, 0, ',', '.') . ' dihapus.');
+    }
+
+    /**
+     * Satu jejak untuk uang masuk yang dicatat atau dibatalkan.
+     *
+     * Nominalnya disimpan apa adanya di `dari`/`ke` — bukan dirangkai jadi
+     * kalimat di sini — supaya kalimatnya dirakit di satu tempat yang sama
+     * dengan jejak lainnya. Lihat PendaftaranJejak::getKalimatAttribute().
+     */
+    private function catatJejakBayar(
+        string $layanan,
+        string $id,
+        string $aksi,
+        ?int $dari,
+        ?int $ke
+    ): void {
+        \App\PendaftaranJejak::create([
+            'layanan' => $layanan,
+            'pendaftaran_id' => $id,
+            'aksi' => $aksi,
+            'dari' => $dari === null ? null : (string) $dari,
+            'ke' => $ke === null ? null : (string) $ke,
+            'oleh_id' => Auth::id(),
+            'oleh_nama' => $this->siapa(),
+        ]);
     }
 
     /**
