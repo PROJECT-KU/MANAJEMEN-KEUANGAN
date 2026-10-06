@@ -2116,17 +2116,40 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                              * seperti dulu: sekarang nilainya tersimpan
                                              * utuh di kolomnya sendiri, jadi tidak perlu
                                              * ditebak lagi.
+                                             *
+                                             * HANYA untuk jejak status. Kolom `ke` pada
+                                             * jejak lain memuat nilai bebas — nama orang,
+                                             * nominal, tautan grup — dan mewarnainya dengan
+                                             * palet status membuat tiap suntingan tampak
+                                             * seperti perpindahan status. Untuk nilai yang
+                                             * KEBETULAN sama dengan salah satu status yang
+                                             * dikenal ("pending", "expired", "completed"
+                                             * — misalnya diketik panitia di kolom kendala)
+                                             * warnanya bahkan salah arti: kuning jam pasir
+                                             * untuk sesuatu yang bukan status.
                                              */
-                                            $keadaanJejak = $satu->ke
-                                                ? Pendaftaran::keadaanDari($satu->ke)
-                                                : null;
-                                            $rupaJejak = $keadaanJejak
-                                                ? (Pendaftaran::KEADAAN[$keadaanJejak] ?? null)
-                                                : null;
+                                            $rupaJejak = null;
+
+                                            if ($satu->aksi === 'status' && $satu->ke) {
+                                                $keadaanJejak = Pendaftaran::keadaanDari($satu->ke);
+                                                $rupaJejak = Pendaftaran::KEADAAN[$keadaanJejak] ?? null;
+                                            }
+
+                                            // Suntingan data: pensil, dan warnanya tenang
+                                            // supaya perpindahan status tetap yang paling
+                                            // menarik mata di daftar yang sama.
+                                            $rupaAksi = [
+                                                'ubah' => ['fa-pen', 'ungu'],
+                                                'bayar' => ['fa-money-bill-wave', 'hijau'],
+                                                'hapus-bayar' => ['fa-undo', 'merah'],
+                                            ];
+
+                                            [$ikonJejak, $warnaJejak] = $rupaAksi[$satu->aksi]
+                                                ?? ['fa-exchange-alt', 'biru'];
                                         @endphp
                                         <li>
-                                            <span class="mis-medali mini mis-{{ $rupaJejak['warna'] ?? 'biru' }}" aria-hidden="true">
-                                                <i class="fas {{ $rupaJejak['ikon'] ?? 'fa-exchange-alt' }}"></i>
+                                            <span class="mis-medali mini mis-{{ $rupaJejak['warna'] ?? $warnaJejak }}" aria-hidden="true">
+                                                <i class="fas {{ $rupaJejak['ikon'] ?? $ikonJejak }}"></i>
                                             </span>
                                             <span class="rin-jejak-teks">
                                                 {{ $satu->kalimat }}

@@ -138,9 +138,21 @@ class UbahDataPendaftaran
             return ['berhasil' => false, 'pesan' => 'Tidak ada yang diubah.'];
         }
 
+        /*
+         * Nilai SEBELUM disimpan, untuk jejaknya.
+         *
+         * Dibaca di sini, bukan sesudah forceFill: sesudah itu modelnya sudah
+         * memuat nilai baru dan yang lama tidak bisa diambil lagi.
+         */
+        $sebelum = [];
+
+        foreach (array_keys($isi) as $kolom) {
+            $sebelum[$kolom] = $pendaftaran->{$kolom};
+        }
+
         $galat = null;
 
-        DB::transaction(function () use ($layanan, $pendaftaran, &$isi, &$galat) {
+        DB::transaction(function () use ($layanan, $pendaftaran, $sebelum, &$isi, &$galat) {
             if (Pendaftaran::berangkatan($layanan)) {
                 $hasil = $this->sesuaikanKuota($layanan, $pendaftaran, $isi);
 
@@ -152,6 +164,11 @@ class UbahDataPendaftaran
             }
 
             $pendaftaran->forceFill($isi)->save();
+
+            // Di dalam transaksi yang sama dengan simpanannya: kalau salah
+            // satunya gagal, keduanya mundur. Jejak tanpa perubahan — atau
+            // perubahan tanpa jejak — sama-sama menyesatkan yang membacanya.
+            $this->catatJejak($layanan, $pendaftaran, $sebelum, $isi);
         });
 
         if ($galat !== null) {
@@ -159,6 +176,109 @@ class UbahDataPendaftaran
         }
 
         return ['berhasil' => true, 'pesan' => 'Perubahannya tersimpan.'];
+    }
+
+    /**
+     * Satu jejak untuk tiap medan yang BENAR-BENAR berubah.
+     *
+     * Satu baris per medan, bukan satu baris berisi daftar: tiap baris jadi
+     * satu kalimat utuh yang bisa dibaca sendiri, dan kalimatnya dirakit saat
+     * ditampilkan sehingga boleh diperbaiki kapan saja tanpa menyentuh baris
+     * yang sudah tersimpan.
+     *
+     * Yang nilainya tidak berubah TIDAK dicatat. Borang mengirim seluruh
+     * medan satu tab sekaligus, jadi tanpa penyaring ini satu tekan Simpan
+     * meninggalkan belasan jejak yang semuanya berbunyi "A → A".
+     *
+     * @param  array<string, mixed>  $sebelum
+     * @param  array<string, mixed>  $isi
+     */
+    private function catatJejak(string $layanan, $pendaftaran, array $sebelum, array $isi): void
+    {
+        $oleh = \Illuminate\Support\Facades\Auth::user();
+        $medan = self::medan($layanan);
+
+        foreach ($isi as $kolom => $baru) {
+            $lama = $sebelum[$kolom] ?? null;
+
+            // Dibandingkan sebagai untaian: kolomnya bercampur angka, uang,
+            // dan teks, dan "1250000" dari borang tidak pernah identik dengan
+            // 1250000 dari basis data.
+            if ((string) $lama === (string) $baru) {
+                continue;
+            }
+
+            \App\PendaftaranJejak::create([
+                'layanan' => $layanan,
+                'pendaftaran_id' => (string) $pendaftaran->getKey(),
+                'aksi' => 'ubah',
+                'medan' => $kolom,
+                'dari' => $this->terbaca($layanan, $kolom, $medan[$kolom] ?? 'teks', $lama),
+                'ke' => $this->terbaca($layanan, $kolom, $medan[$kolom] ?? 'teks', $baru),
+                'oleh_id' => $oleh?->getKey(),
+                'oleh_nama' => $oleh?->full_name ?? $oleh?->username,
+            ]);
+        }
+    }
+
+    /**
+     * Nilai yang bisa dibaca panitia, bukan nilai mentah.
+     *
+     * Angkatan tersimpan sebagai UUID. Jejak yang berbunyi
+     * "Angkatan "e111be54-…" → "a9d2f8b3-…"" tidak memberi tahu apa pun
+     * kepada yang membacanya — padahal justru perpindahan angkatan yang
+     * paling perlu bisa ditelusuri.
+     *
+     * Jenisnya diambil dari peta MEDAN yang sama yang dipakai membaca
+     * kiriman, bukan dari daftar nama kolom tersendiri: satu daftar, jadi
+     * medan uang yang baru ditambahkan ikut terformat tanpa disebut dua kali.
+     * Terbaca mentah, jejaknya berbunyi "Total bayar "3000000" → "3250000"" —
+     * angka yang harus dihitung sendiri digitnya oleh yang membacanya.
+     */
+    private function terbaca(string $layanan, string $kolom, string $jenis, $nilai): ?string
+    {
+        $nilai = $nilai === null ? null : trim((string) $nilai);
+
+        if ($nilai === null || $nilai === '') {
+            return null;
+        }
+
+        if ($jenis === 'uang') {
+            return 'Rp ' . number_format((int) preg_replace('/\D+/', '', $nilai), 0, ',', '.');
+        }
+
+        if ($jenis === 'tanggal') {
+            /*
+             * Tanggal dibaca dalam bahasa Indonesia, bukan "2026-11-14":
+             * APP_LOCALE=en, jadi translatedFormat perlu locale('id') di
+             * depannya — pola yang sama dipakai seluruh pengakses tanggal di
+             * aplikasi ini.
+             */
+            try {
+                return \Carbon\Carbon::parse($nilai)->locale('id')->translatedFormat('d F Y');
+            } catch (\Throwable) {
+                return $nilai;
+            }
+        }
+
+        if ($kolom !== 'kategori_id') {
+            return \Illuminate\Support\Str::limit($nilai, 250);
+        }
+
+        $angkatanModel = Pendaftaran::angkatanModel($layanan);
+        $angkatan = $angkatanModel === null ? null : $angkatanModel::whereKey($nilai)->first();
+
+        if ($angkatan === null) {
+            return $nilai;
+        }
+
+        $teks = (string) $angkatan->nama;
+
+        if (($angkatan->nama_ke ?? '') !== '') {
+            $teks .= ' ke-' . $angkatan->nama_ke;
+        }
+
+        return \Illuminate\Support\Str::limit($teks, 250);
     }
 
     /**

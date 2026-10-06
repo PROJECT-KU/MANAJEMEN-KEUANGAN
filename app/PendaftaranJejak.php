@@ -28,8 +28,63 @@ class PendaftaranJejak extends Model
      * lima jejak yang aslinya pukul 20:45-20:46 semuanya tercatat 22:46.
      */
     protected $fillable = [
-        'layanan', 'pendaftaran_id', 'aksi', 'dari', 'ke',
+        'layanan', 'pendaftaran_id', 'aksi', 'medan', 'dari', 'ke',
         'ringkasan', 'oleh_id', 'oleh_nama', 'created_at',
+    ];
+
+    /**
+     * Nama medan dalam bahasa yang dibaca panitia.
+     *
+     * Ditaruh di MODEL JEJAK, bukan di tampilan: yang merakit kalimat jejak
+     * adalah model ini, dan nama medan yang dipakainya harus sama dengan yang
+     * dipakai saat mencatatnya. Dijaga uji supaya tiap medan yang bisa
+     * disunting punya namanya di sini — tanpa itu jejaknya berbunyi
+     * "total_keseluruhan_pembayaran", yang bukan bahasa siapa pun.
+     */
+    public const NAMA_MEDAN = [
+        'nama' => 'Nama',
+        'nama_pemesan' => 'Nama pemesan',
+        'email' => 'Email',
+        'email_pemesan' => 'Email pemesan',
+        'telp' => 'Nomor WhatsApp',
+        'telp_pemesan' => 'Nomor WhatsApp pemesan',
+        'affiliasi' => 'Afiliasi',
+        'afiliasi_pemesan' => 'Afiliasi pemesan',
+        'kategori_id' => 'Angkatan',
+        'jumlah_pendaftar' => 'Jumlah orang',
+        'ppn' => 'PPN',
+        'kode_unik' => 'Kode unik',
+        'kode_diskon' => 'Kode diskon',
+        'nominal_diskon' => 'Nominal potongan',
+        'total_pembayaran' => 'Total bayar',
+        'total_keseluruhan_pembayaran' => 'Total keseluruhan',
+        'group_wa' => 'Tautan grup WhatsApp',
+        'note' => 'Catatan panitia',
+        'kendala' => 'Kendala',
+        'desc_kendala' => 'Keterangan kendala',
+        'tanggal_pemesanan' => 'Tanggal pemesanan',
+        'sesi' => 'Sesi',
+        'jam_sesi' => 'Jam sesi',
+        'waktu_mulai' => 'Mulai',
+        'waktu_selesai' => 'Selesai',
+        'lokasi' => 'Lokasi',
+        'biaya' => 'Biaya',
+        'kode_unik_pembayaran' => 'Kode unik',
+        'subtotal_pembayaran' => 'Subtotal',
+        'sesi_kedua' => 'Sesi kedua',
+        'waktu_mulai_kedua' => 'Mulai sesi kedua',
+        'waktu_selesai_kedua' => 'Selesai sesi kedua',
+        'lokasi_kedua' => 'Lokasi sesi kedua',
+        'biaya_kedua' => 'Biaya sesi kedua',
+        'kode_unik_pembayaran_kedua' => 'Kode unik sesi kedua',
+        'subtotal_pembayaran_kedua' => 'Subtotal sesi kedua',
+        'sesi_ketiga' => 'Sesi ketiga',
+        'waktu_mulai_ketiga' => 'Mulai sesi ketiga',
+        'waktu_selesai_ketiga' => 'Selesai sesi ketiga',
+        'lokasi_ketiga' => 'Lokasi sesi ketiga',
+        'biaya_ketiga' => 'Biaya sesi ketiga',
+        'kode_unik_pembayaran_ketiga' => 'Kode unik sesi ketiga',
+        'subtotal_pembayaran_ketiga' => 'Subtotal sesi ketiga',
     ];
 
     protected $casts = ['created_at' => 'datetime'];
@@ -62,6 +117,29 @@ class PendaftaranJejak extends Model
 
         if ($this->aksi === 'status') {
             return 'Status "' . $this->dari . '" → "' . $this->ke . '"' . $siapa;
+        }
+
+        if ($this->aksi === 'bayar') {
+            return 'Pembayaran Rp ' . number_format((int) $this->ke, 0, ',', '.') . ' dicatat' . $siapa;
+        }
+
+        if ($this->aksi === 'hapus-bayar') {
+            return 'Catatan pembayaran Rp ' . number_format((int) $this->dari, 0, ',', '.')
+                . ' dihapus' . $siapa;
+        }
+
+        if ($this->aksi === 'ubah' && $this->medan) {
+            $nama = self::NAMA_MEDAN[$this->medan] ?? $this->medan;
+
+            /*
+             * Nilai kosong ditulis sebagai kata, bukan dua kutip hampa.
+             * "Catatan panitia "" → "sudah dihubungi"" terbaca seperti
+             * kesalahan cetak; "(kosong)" terbaca seperti keadaan.
+             */
+            $dari = ($this->dari === null || $this->dari === '') ? '(kosong)' : '"' . $this->dari . '"';
+            $ke = ($this->ke === null || $this->ke === '') ? '(kosong)' : '"' . $this->ke . '"';
+
+            return $nama . ' ' . $dari . ' → ' . $ke . $siapa;
         }
 
         return ucfirst($this->aksi) . $siapa;
