@@ -1430,9 +1430,20 @@ Rincian Pendaftaran | MIS Rumah Scopus
                 ['sesi_kedua', 'waktu_mulai_kedua', 'waktu_selesai_kedua', 'lokasi_kedua', 'biaya_kedua', 'kode_unik_pembayaran_kedua', 'subtotal_pembayaran_kedua']],
             ['Sesi ketiga', 'fa-calendar-plus', 'mis-kuning',
                 ['sesi_ketiga', 'waktu_mulai_ketiga', 'waktu_selesai_ketiga', 'lokasi_ketiga', 'biaya_ketiga', 'kode_unik_pembayaran_ketiga', 'subtotal_pembayaran_ketiga']],
-            ['Penjadwalan ulang & grup', 'fa-redo', 'mis-merah', ['tanggal_reschedule', 'group_wa'],
-                'Ini CATATAN panitia saja — tidak memindahkan peserta dan tidak mengubah kursi. '
-                . 'Pakai untuk menggeser jadwal di dalam angkatan yang sama.'],
+            /*
+             * "Penjadwalan ulang" DIBUANG. Isiannya tanggal_reschedule, dan
+             * tidak ada satu pun yang membacanya — bahkan surat yang bernama
+             * mail_reschedule pun tidak. Satu isian yang harus diisi panitia
+             * tanpa akibat apa pun; yang memindahkan jadwal sesungguhnya
+             * isian Angkatan di atas.
+             *
+             * Yang tersisa cuma tautan grup, dan itu pun hanya tergambar untuk
+             * Bibliometrik — di sanalah suratnya membacanya dari baris
+             * pendaftaran. Untuk Scopus Camp medannya sudah tidak ada di
+             * daftar putih, jadi bagian ini tidak ikut tergambar sama sekali.
+             */
+            ['Grup WhatsApp peserta', 'fab fa-whatsapp', 'mis-hijau', ['group_wa'],
+                'Tautan ini ikut terkirim di surat "pendaftaran diterima" peserta.'],
         ],
     ];
 
