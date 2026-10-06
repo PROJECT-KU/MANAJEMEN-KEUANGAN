@@ -427,6 +427,93 @@ class PembayaranTerminTest extends TestCase
     }
 
     #[Test]
+    public function uang_masuk_dan_pembatalannya_tercatat_di_jejak(): void
+    {
+        /*
+         * Daftar terminnya sendiri menampilkan nominal dan tanggalnya, tetapi
+         * jejaklah satu-satunya tempat yang menyimpan URUTAN kejadian: termin
+         * yang dicatat lalu dihapus menghilang tanpa bekas dari daftar itu,
+         * dan pertanyaan "kemarin tercatat lunas, kok sekarang kurang"
+         * tidak punya jawaban di layar mana pun.
+         */
+        $orang = $this->akun();
+        $a = $this->daftarkan($orang, 'Peserta Jejak Termin', ['jumlah' => 4]);
+
+        $this->actingAs($orang)->post(
+            route('account.pendaftaran-layanan.pembayaran', ['scopus_camp', $a->id]),
+            ['nominal' => '2.500.000', 'tanggal' => now()->toDateString(), 'cara_bayar' => 'transfer']
+        )->assertRedirect()->assertSessionHasNoErrors();
+
+        $jejak = \App\PendaftaranJejak::milik('scopus_camp', (string) $a->id)->terurut()->get();
+
+        $this->assertCount(1, $jejak);
+        $this->assertSame('bayar', $jejak->first()->aksi);
+        $this->assertStringContainsString('Rp 2.500.000', $jejak->first()->kalimat);
+        $this->assertStringContainsString('oleh ' . $orang->full_name, $jejak->first()->kalimat);
+
+        $termin = PembayaranPendaftaran::milik(
+            PembayaranPendaftaran::PENDAFTARAN, (string) $a->id
+        )->firstOrFail();
+
+        $this->actingAs($orang)->delete(
+            route('account.pendaftaran-layanan.pembayaran.hapus', $termin->id)
+        )->assertRedirect()->assertSessionHasNoErrors();
+
+        $jejak = \App\PendaftaranJejak::milik('scopus_camp', (string) $a->id)->terurut()->get();
+
+        $this->assertCount(2, $jejak,
+            'Termin yang dihapus tidak meninggalkan bekas apa pun.');
+        $this->assertSame('hapus-bayar', $jejak->last()->aksi);
+        $this->assertStringContainsString('Rp 2.500.000', $jejak->last()->kalimat);
+        $this->assertStringContainsString('dihapus', $jejak->last()->kalimat);
+    }
+
+    #[Test]
+    public function termin_lembaga_tidak_dijejakkan_ke_salah_satu_pendaftarannya(): void
+    {
+        /*
+         * Termin pesanan lembaga induknya PemesananLembaga — satu pesanan bisa
+         * menaungi beberapa pendaftaran — jadi menautkan jejaknya ke salah
+         * satu dari mereka berarti jejak yang menunjuk tempat yang keliru:
+         * "Pembayaran Rp 10.000.000 dicatat" muncul di rincian satu peserta
+         * padahal uang itu untuk sepuluh orang.
+         *
+         * Kedua sisinya dijaga sekaligus. Saat pertama ditulis hanya sisi
+         * HAPUS yang disyarati, dan hasilnya jejak yang timpang: masuknya
+         * tercatat di rincian peserta, pembatalannya tidak — persis kebalikan
+         * dari gunanya jejak itu ada.
+         */
+        $orang = $this->akun();
+
+        $a = $this->daftarkan($orang, 'Peserta Lembaga Tanpa Jejak', [
+            'jenis' => 'lembaga',
+            'lembaga_nama' => 'Universitas Uji Jejak',
+            'jumlah' => 10,
+        ]);
+
+        $this->actingAs($orang)->post(
+            route('account.pendaftaran-layanan.pembayaran', ['scopus_camp', $a->id]),
+            ['nominal' => '10.000.000', 'tanggal' => now()->toDateString(), 'cara_bayar' => 'transfer']
+        )->assertRedirect()->assertSessionHasNoErrors();
+
+        $lembaga = PemesananLembaga::untukPendaftaran('scopus_camp', (string) $a->id);
+        $termin = PembayaranPendaftaran::milik(
+            PembayaranPendaftaran::LEMBAGA, (string) $lembaga->id
+        )->firstOrFail();
+
+        $this->actingAs($orang)->delete(
+            route('account.pendaftaran-layanan.pembayaran.hapus', $termin->id)
+        )->assertRedirect();
+
+        $this->assertSame(
+            0,
+            \App\PendaftaranJejak::milik('scopus_camp', (string) $a->id)
+                ->whereIn('aksi', ['bayar', 'hapus-bayar'])->count(),
+            'Termin lembaga dijejakkan ke salah satu pendaftarannya.'
+        );
+    }
+
+    #[Test]
     public function panel_termin_tidak_menyisakan_blok_mengambang(): void
     {
         /*
