@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\ClinikscopusPromo;
+use App\ClinikScopusPromo;
 use Carbon\Carbon;
 use App\Events\PromoStatusUpdated;
 
@@ -14,7 +14,7 @@ class ExpirePromoStatus extends Command
 
     public function handle()
     {
-        $promos = ClinikscopusPromo::where('status', 'active')
+        $promos = ClinikScopusPromo::where('status', 'active')
             ->where('tanggal_selesai_promo', '<', Carbon::now())
             ->get();
 

@@ -53,7 +53,7 @@ class Clinikscopus extends Model
     public function promos()
     {
         return $this->belongsToMany(
-            ClinikscopusPromo::class,
+            ClinikScopusPromo::class,
             'clinikscopus_promo_items',
             'clinikscopus_id',
             'promo_id'
