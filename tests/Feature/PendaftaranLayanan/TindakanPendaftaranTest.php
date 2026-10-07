@@ -2714,11 +2714,20 @@ class TindakanPendaftaranTest extends TestCase
     }
 
     #[Test]
-    public function webinar_dan_clinik_tidak_mengirim_surat_apa_pun(): void
+    public function webinar_dan_clinik_sekarang_ikut_mengirim_surat(): void
     {
-        // Bukan kelalaian: pemberitahuan lunas webinar sudah dikirim jalur
-        // pendaftarannya sendiri, dan Clinik Scopus memang tidak pernah
-        // mengirim surat dari layar panitia.
+        /*
+         * DIBALIK 7 Okt 2026, atas permintaan pemiliknya.
+         *
+         * Dulu uji ini menuntut KEDUANYA DIAM, dengan alasan "pemberitahuan
+         * lunas webinar sudah dikirim jalur pendaftarannya sendiri". Alasan
+         * itu hanya menutupi satu status dari empat: pendaftar webinar yang
+         * dibatalkan atau kursinya dilepas karena batas waktu tidak pernah
+         * diberi tahu apa pun, begitu pula seluruh status Clinik Scopus.
+         *
+         * Sekarang tiap perubahan status memberi tahu pendaftarnya. Lihat
+         * SuratPerubahanStatusTest untuk jaminan cakupan kedua puluh tiganya.
+         */
         Mail::fake();
 
         $orang = $this->akun(User::PERAN_ADMINISTRATOR);
@@ -2736,7 +2745,7 @@ class TindakanPendaftaranTest extends TestCase
             $this->flushSession();
         }
 
-        Mail::assertNothingSent();
+        Mail::assertSent(\App\Mail\PerubahanStatusPendaftaranMail::class, 2);
     }
 
     #[Test]
@@ -4397,6 +4406,21 @@ class TindakanPendaftaranTest extends TestCase
             $bersurat = Pendaftaran::suratUntuk('scopus_camp', $nilai) !== null;
 
             if (! $bersurat) {
+                continue;
+            }
+
+            /*
+             * Status yang SEDANG berlaku dilewati.
+             *
+             * Tombolnya mati — tidak ada yang bisa berpindah ke status yang
+             * sudah dipakainya — jadi penanda "kirim email" di situ justru
+             * menjanjikan sesuatu yang tidak akan terjadi.
+             *
+             * Dulu tidak perlu dilewati karena status awal 'diproses' memang
+             * tidak bersurat. Sejak 7 Okt 2026 seluruh status bersurat, dan
+             * ujinya mulai menuntut penanda pada tombol yang mati.
+             */
+            if ((string) $camp->status === (string) $nilai) {
                 continue;
             }
 
