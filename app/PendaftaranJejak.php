@@ -128,6 +128,14 @@ class PendaftaranJejak extends Model
                 . ' dihapus' . $siapa;
         }
 
+        if ($this->aksi === 'bukti') {
+            return 'Bukti bayar diunggahkan' . $siapa;
+        }
+
+        if ($this->aksi === 'ganti-bukti') {
+            return 'Bukti bayar diganti' . $siapa;
+        }
+
         if ($this->aksi === 'ubah' && $this->medan) {
             $nama = self::NAMA_MEDAN[$this->medan] ?? $this->medan;
 

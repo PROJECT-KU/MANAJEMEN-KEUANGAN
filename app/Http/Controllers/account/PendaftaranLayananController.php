@@ -58,6 +58,16 @@ class PendaftaranLayananController extends Controller
      */
     public const FOLDER_BUKTI_TERMIN = 'bukti-termin';
 
+    /*
+     * Batas ukuran bukti yang diunggahkan panitia.
+     *
+     * Disamakan dengan batas unggahan peserta sendiri di halaman status
+     * Webinar Eksklusif: bukti yang sama persis tidak boleh diterima lewat
+     * satu pintu dan ditolak lewat pintu lainnya. Foto bukti transfer dari
+     * ponsel modern rutin 4-6 MB sebelum dipadatkan.
+     */
+    private const BUKTI_MAKS_KB = 8192;
+
     /**
      * Berapa hari sebuah pendaftaran boleh menunggu sebelum disebut
      * menggantung.
@@ -1287,6 +1297,104 @@ class PendaftaranLayananController extends Controller
             // orang yang membetulkan nominal ingin melihat hasilnya, bukan
             // mencari tabnya lagi.
             ->with('tab', $this->tabDari(array_keys($request->all())));
+    }
+
+    /**
+     * Panitia mengunggahkan bukti bayar untuk pendaftarnya.
+     *
+     * Jalur yang sudah ada hanya satu: peserta Webinar Eksklusif mengunggah
+     * sendiri dari halaman statusnya. Empat layanan lain sama sekali tidak
+     * punya jalurnya — buktinya datang lewat WhatsApp ke panitia, dan berhenti
+     * di situ: kolom buktinya kosong selamanya, dan satu-satunya orang yang
+     * pernah melihat bukti itu adalah yang kebetulan memegang ponselnya.
+     *
+     * Berkasnya diperlakukan sama persis dengan unggahan peserta sendiri —
+     * folder yang sama, pelurusan EXIF yang sama, penghapusan berkas lama yang
+     * sama — supaya panitia yang membantu tidak menghasilkan bukti yang
+     * berbeda sifatnya dari bukti yang diunggah pesertanya.
+     */
+    public function unggahBukti(Request $request, string $layanan, string $id)
+    {
+        if (! $this->bolehMelihat()) {
+            return $this->tolak();
+        }
+
+        if (! array_key_exists($layanan, Pendaftaran::katalog())) {
+            abort(404);
+        }
+
+        $pendaftaran = Pendaftaran::temukan($layanan, $id);
+
+        if ($pendaftaran === null) {
+            abort(404);
+        }
+
+        /*
+         * HEIC/HEIF ikut diterima — itu format BAWAAN kamera iPhone, dan
+         * bukti yang diteruskan peserta lewat WhatsApp sering sampai apa
+         * adanya. Diperiksa lewat AKHIRAN namanya, bukan jenis MIME-nya:
+         * finfo di sebagian peladen memulangkan application/octet-stream
+         * untuk HEIC, dan aturan mimes: akan menolak berkas yang sebetulnya
+         * sah. Isinya sendiri tetap diperiksa — Gambar::simpan() memulangkan
+         * null kalau yang diunggah ternyata bukan gambar yang bisa dibaca.
+         */
+        $request->validate([
+            'bukti' => ['required', 'file', 'max:' . self::BUKTI_MAKS_KB,
+                'extensions:jpg,jpeg,png,webp,heic,heif'],
+        ], [
+            'bukti.required' => 'Pilih dulu berkas buktinya.',
+            'bukti.extensions' => 'Formatnya harus JPG, PNG, WEBP, atau HEIC.',
+            'bukti.max' => 'Berkasnya terlalu besar; paling besar '
+                . (self::BUKTI_MAKS_KB / 1024) . ' MB.',
+        ]);
+
+        $lama = trim((string) $pendaftaran->gambar);
+
+        /*
+         * Diluruskan (argumen ketiga true). Layar ini tidak punya tombol
+         * putar, dan foto iPhone yang tegak di ponsel pengirimnya tersimpan
+         * miring 90 derajat di sini — persis alasan yang sama dengan unggahan
+         * peserta di halaman status.
+         */
+        $jalur = (new \App\Services\Gambar())->simpan($request->file('bukti'), 'bukti/' . $layanan, true);
+
+        if ($jalur === null) {
+            // Yang paling mungkin: HEIC di peladen tanpa alat pembongkarnya.
+            // Pesannya menyebut jalan keluar yang bisa dikerjakan panitia
+            // sendiri, bukan "terjadi kesalahan".
+            return back()->with('error',
+                'Berkasnya tidak bisa kami baca sebagai gambar. Kalau itu foto dari iPhone,'
+                . ' coba simpan ulang sebagai JPG lalu unggah lagi.');
+        }
+
+        $pendaftaran->forceFill(['gambar' => $jalur])->save();
+
+        \App\PendaftaranJejak::create([
+            'layanan' => $layanan,
+            'pendaftaran_id' => (string) $pendaftaran->getKey(),
+            'aksi' => $lama === '' ? 'bukti' : 'ganti-bukti',
+            'oleh_id' => Auth::id(),
+            'oleh_nama' => $this->siapa(),
+        ]);
+
+        /*
+         * Bukti yang DIGANTI ikut dibuang dari cakram. Tanpa ini tiap
+         * unggahan ulang meninggalkan satu WebP yatim yang tidak ditunjuk
+         * baris mana pun dan tidak pernah terhapus.
+         *
+         * Hanya bentuk BARU (jalur di cakram unggahan) yang dibuang. Nilai
+         * lama berupa nama berkas di public/<folder> dibiarkan: folder itu
+         * dipakai bersama hal lain, dan menghapus dari sana pernah
+         * menghilangkan berkas yang bukan milik baris ini.
+         */
+        if ($lama !== '' && $lama !== $jalur && str_contains($lama, '/')
+            && \Illuminate\Support\Facades\Storage::disk(\App\Services\Gambar::CAKRAM)->exists($lama)) {
+            \Illuminate\Support\Facades\Storage::disk(\App\Services\Gambar::CAKRAM)->delete($lama);
+        }
+
+        return back()->with('sukses', $lama === ''
+            ? 'Bukti bayarnya sudah terunggah.'
+            : 'Bukti bayarnya sudah diganti.');
     }
 
     /**

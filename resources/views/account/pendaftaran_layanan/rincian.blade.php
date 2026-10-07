@@ -356,6 +356,29 @@ Rincian Pendaftaran | MIS Rumah Scopus
         }
 
         /*
+         * Pengunggah bukti di kartu kiri.
+         *
+         * Dipisahkan dari baris di atasnya oleh garis, bukan cuma oleh jarak:
+         * baris-baris di kartu ini semuanya BACAAN, dan satu-satunya tempat
+         * yang bisa ditindak harus terbaca sebagai bagian yang lain.
+         */
+        .rin-bukti-borang {
+            display: grid;
+            gap: 9px;
+            margin-top: 13px;
+            padding-top: 13px;
+            border-top: 1px dashed var(--mis-garis);
+        }
+
+        /* Tombolnya selebar kartunya: di kolom sesempit ini tombol yang
+           mengikuti lebar tulisannya berdiri sendirian di kiri dan terbaca
+           seperti tertinggal. */
+        .rin-bukti-kirim {
+            justify-content: center;
+            width: 100%;
+        }
+
+        /*
          * Tab di halaman ini menyesuaikan lebarnya dengan tulisannya.
          *
          * Bawaan .mis-tab memberi tiap tab `flex: 1 1 0` — lebar sama rata.
@@ -1796,13 +1819,12 @@ Rincian Pendaftaran | MIS Rumah Scopus
                         <p class="rin-baris-label">Bukti bayar</p>
                         <p class="rin-baris-nilai">
                             @if (! $bukti['nilai'])
-                                <span class="rin-samar">
-                                    @if ($layanan === 'webinar_eksklusif')
-                                        tidak memakai unggahan bukti
-                                    @else
-                                        belum diunggah
-                                    @endif
-                                </span>
+                                {{-- Dulu Webinar Eksklusif berbunyi "tidak memakai
+                                     unggahan bukti". Itu benar sampai pesertanya bisa
+                                     mengunggah sendiri dari halaman status — sejak itu
+                                     kalimatnya menyangkal sesuatu yang justru ada, dan
+                                     panitia yang membacanya berhenti mencari. --}}
+                                <span class="rin-samar">belum diunggah</span>
                             @elseif ($bukti['ada'])
                                 <a href="{{ $bukti['url'] }}" target="_blank" rel="noopener">
                                     Buka ukuran penuh <i class="fas fa-external-link-alt" aria-hidden="true"></i>
@@ -1821,6 +1843,58 @@ Rincian Pendaftaran | MIS Rumah Scopus
                     <img class="rin-bukti-gambar" src="{{ $bukti['url'] }}"
                         alt="Bukti bayar {{ $namaOrang }}" loading="lazy">
                 @endif
+
+                {{--
+                    Panitia bisa mengunggahkan buktinya.
+
+                    Satu-satunya jalur yang ada sebelum ini: peserta Webinar
+                    Eksklusif mengunggah sendiri dari halaman statusnya. Empat
+                    layanan lain tidak punya jalurnya sama sekali — buktinya
+                    sampai lewat WhatsApp dan berhenti di ponsel panitia yang
+                    kebetulan menerimanya.
+
+                    Diletakkan di SINI, menempel pada baris "Bukti bayar" dan
+                    gambarnya, bukan di tab borang sebelah kanan: yang
+                    dikerjakan panitia adalah melihat buktinya kosong lalu
+                    mengisinya, dan dua tempat berjauhan untuk satu hal yang
+                    sama membuat yang kedua tidak pernah ditemukan.
+                --}}
+                <form class="rin-bukti-borang" method="POST" enctype="multipart/form-data"
+                    action="{{ route('account.pendaftaran-layanan.bukti', [$layanan, $pendaftaran->getKey()]) }}">
+                    @csrf
+
+                    <input type="file" class="rin-berkas" id="rin-bukti-berkas" name="bukti"
+                        accept="image/jpeg,image/png,image/webp,.heic,.heif"
+                        data-mis-berkas="rin-bukti-nama">
+                    <label for="rin-bukti-berkas" class="rin-unggah">
+                        <span class="mis-medali kecil mis-ungu" aria-hidden="true">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </span>
+                        <span class="rin-unggah-teks">
+                            <span class="rin-unggah-nama" id="rin-bukti-nama">
+                                {{ $bukti['nilai'] ? 'Ganti bukti bayarnya' : 'Unggahkan bukti bayarnya' }}
+                            </span>
+                            {{-- HEIC disebut: itu format bawaan kamera iPhone, dan bukti
+                                 yang diteruskan peserta lewat WhatsApp sering sampai apa
+                                 adanya. Panitia yang tidak melihatnya di daftar akan
+                                 mengira berkasnya ditolak. --}}
+                            <span class="mis-bantuan">JPG, PNG, WebP, atau HEIC — paling besar 8 MB</span>
+                        </span>
+                    </label>
+
+                    @error('bukti')
+                        <p class="mis-bantuan" style="color:#be123c">{{ $message }}</p>
+                    @enderror
+
+                    {{-- Tombolnya baru muncul sesudah ada berkas yang dipilih:
+                         tombol kirim yang selalu ada pada borang yang masih kosong
+                         mengundang ditekan, dan yang didapat cuma galat merah. --}}
+                    <button type="submit" class="mis-tombol mis-tombol-ungu rin-bukti-kirim" hidden
+                        data-mis-berkas-tombol="rin-bukti-berkas">
+                        <i class="fas fa-save" aria-hidden="true"></i>
+                        <span>{{ $bukti['nilai'] ? 'Ganti buktinya' : 'Simpan buktinya' }}</span>
+                    </button>
+                </form>
             </section>
 
             {{-- -------------------------------------- kartu bertab (kanan) --}}
@@ -2205,6 +2279,8 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                                 'ubah' => ['fa-pen', 'ungu'],
                                                 'bayar' => ['fa-money-bill-wave', 'hijau'],
                                                 'hapus-bayar' => ['fa-undo', 'merah'],
+                                                'bukti' => ['fa-receipt', 'biru'],
+                                                'ganti-bukti' => ['fa-receipt', 'kuning'],
                                             ];
 
                                             [$ikonJejak, $warnaJejak] = $rupaAksi[$satu->aksi]
@@ -2923,6 +2999,28 @@ Rincian Pendaftaran | MIS Rumah Scopus
                     ? kotak.files[0].name
                     : semula;
             });
+        });
+
+        /*
+         * Tombol kirim yang menunggu berkasnya dipilih.
+         *
+         * Dipasang lewat penanda, bukan lewat satu id yang ditulis di skrip:
+         * borang kedua yang butuh perilaku yang sama tinggal membawa
+         * penandanya sendiri, tanpa cabang kedua di sini.
+         */
+        document.querySelectorAll('[data-mis-berkas-tombol]').forEach(function (tombol) {
+            var kotak = document.getElementById(tombol.dataset.misBerkasTombol);
+
+            if (!kotak) {
+                return;
+            }
+
+            var gambar = function () {
+                tombol.hidden = !(kotak.files && kotak.files.length);
+            };
+
+            kotak.addEventListener('change', gambar);
+            gambar();
         });
     });
 

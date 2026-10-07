@@ -537,6 +537,11 @@ Route::prefix('account')
                 ->name('account.pendaftaran-layanan.ubah');
             Route::post('Pendaftaran-Layanan/{layanan}/{id}/status', 'account\\PendaftaranLayananController@ubahStatus')
                 ->name('account.pendaftaran-layanan.status');
+            // Panitia mengunggahkan bukti untuk pendaftar yang kesulitan.
+            // Didaftarkan SEBELUM rute hapus dan sesudah rute rincian supaya
+            // segmen /bukti tidak pernah terbaca sebagai {id}.
+            Route::post('Pendaftaran-Layanan/{layanan}/{id}/bukti', 'account\\PendaftaranLayananController@unggahBukti')
+                ->name('account.pendaftaran-layanan.bukti');
             Route::delete('Pendaftaran-Layanan/{layanan}/{id}', 'account\\PendaftaranLayananController@hapus')
                 ->name('account.pendaftaran-layanan.hapus');
 
