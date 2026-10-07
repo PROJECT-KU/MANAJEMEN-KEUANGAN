@@ -21,6 +21,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -39,6 +40,17 @@ class TindakanPendaftaranTest extends TestCase
 
     /** @var array<int, string> berkas yang dibuat uji ini di cakram */
     private array $berkasUji = [];
+
+    /**
+     * @var array<int, string> jalur di cakram unggahan yang dibuat uji ini
+     *
+     * Didaftarkan satu per satu, BUKAN disapu dengan membandingkan isi folder
+     * sebelum dan sesudah. Sapuan semacam itu pernah ikut menghapus tiga
+     * bukti bayar milik pendaftar sungguhan: DatabaseTransactions memulangkan
+     * barisnya, tetapi berkasnya sudah lenyap dari cakram dan tidak ada
+     * cadangannya.
+     */
+    private array $unggahanUji = [];
 
     protected function setUp(): void
     {
@@ -62,6 +74,10 @@ class TindakanPendaftaranTest extends TestCase
             if (is_file($berkas)) {
                 @unlink($berkas);
             }
+        }
+
+        foreach (array_unique($this->unggahanUji) as $jalur) {
+            \Illuminate\Support\Facades\Storage::disk(\App\Services\Gambar::CAKRAM)->delete($jalur);
         }
 
         parent::tearDown();
@@ -2179,6 +2195,249 @@ class TindakanPendaftaranTest extends TestCase
 
         $this->assertSame(2400000, (int) $kafe->fresh()->total_keseluruhan_pembayaran,
             'Nominal Scopus Kafe ikut ditimpa hitungan yang bukan rumusnya.');
+    }
+
+    /*
+     * ------------------------------------------------------------------
+     * Panitia mengunggahkan bukti bayar
+     * ------------------------------------------------------------------
+     *
+     * Satu-satunya jalur sebelum ini: peserta Webinar Eksklusif mengunggah
+     * sendiri dari halaman statusnya. Empat layanan lain tidak punya jalurnya
+     * sama sekali — buktinya sampai lewat WhatsApp dan berhenti di ponsel
+     * panitia yang kebetulan menerimanya.
+     */
+
+    #[Test]
+    public function panitia_bisa_mengunggahkan_bukti_untuk_tiap_layanan(): void
+    {
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        foreach (array_keys(Pendaftaran::katalog()) as $layanan) {
+            [$baris] = $this->buat($layanan);
+
+            $this->actingAs($orang)->post(
+                route('account.pendaftaran-layanan.bukti', [$layanan, $baris->getKey()]),
+                ['bukti' => UploadedFile::fake()->image('transfer.jpg', 900, 1200)]
+            )->assertRedirect()->assertSessionHasNoErrors();
+
+            $jalur = (string) $baris->fresh()->gambar;
+
+            $this->assertNotSame('', $jalur, "Bukti {$layanan} tidak tersimpan.");
+            $this->unggahanUji[] = $jalur;
+
+            $this->assertTrue(
+                Storage::disk(\App\Services\Gambar::CAKRAM)->exists($jalur),
+                "Berkas bukti {$layanan} tidak ada di cakram."
+            );
+
+            // Buktinya harus bisa DIBUKA panitia, bukan cuma tersimpan:
+            // terukur 72 dari 183 nilai bukti lama menunjuk berkas yang tidak
+            // ada, dan baris baru tidak boleh menambah daftar itu.
+            $this->assertNotNull(
+                Pendaftaran::buktiBaris((object) ['bukti' => $jalur, 'layanan' => $layanan])['url'],
+                "Alamat bukti {$layanan} tidak bisa dirakit."
+            );
+        }
+    }
+
+    #[Test]
+    public function mengganti_bukti_membuang_berkas_lamanya(): void
+    {
+        /*
+         * Tanpa ini tiap unggahan ulang meninggalkan satu WebP yatim yang
+         * tidak ditunjuk baris mana pun dan tidak pernah terhapus — dan
+         * panitia yang membantu biasanya mencoba lebih dari sekali.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        [$baris] = $this->buat('scopus_camp');
+
+        $kirim = fn (string $nama) => $this->actingAs($orang)->post(
+            route('account.pendaftaran-layanan.bukti', ['scopus_camp', $baris->getKey()]),
+            ['bukti' => UploadedFile::fake()->image($nama, 800, 600)]
+        )->assertRedirect()->assertSessionHasNoErrors();
+
+        $kirim('pertama.jpg');
+        $pertama = (string) $baris->fresh()->gambar;
+        $this->unggahanUji[] = $pertama;
+
+        $kirim('kedua.jpg');
+        $kedua = (string) $baris->fresh()->gambar;
+        $this->unggahanUji[] = $kedua;
+
+        $this->assertNotSame($pertama, $kedua, 'prasyarat: jalurnya memang berganti');
+
+        $this->assertFalse(Storage::disk(\App\Services\Gambar::CAKRAM)->exists($pertama),
+            'Bukti lama tertinggal di cakram sebagai berkas yatim.');
+        $this->assertTrue(Storage::disk(\App\Services\Gambar::CAKRAM)->exists($kedua));
+    }
+
+    #[Test]
+    public function unggahan_panitia_meninggalkan_jejak(): void
+    {
+        /*
+         * Dibedakan antara mengunggah pertama kali dan MENGGANTI. Bukti yang
+         * ditimpa menghilang tanpa bekas — dan justru penggantian itu yang
+         * perlu bisa dipertanyakan belakangan.
+         */
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        [$baris] = $this->buat('scopus_camp');
+
+        $kirim = fn () => $this->actingAs($orang)->post(
+            route('account.pendaftaran-layanan.bukti', ['scopus_camp', $baris->getKey()]),
+            ['bukti' => UploadedFile::fake()->image('bukti.jpg', 600, 400)]
+        )->assertRedirect();
+
+        $kirim();
+        $this->unggahanUji[] = (string) $baris->fresh()->gambar;
+
+        $kirim();
+        $this->unggahanUji[] = (string) $baris->fresh()->gambar;
+
+        $jejak = \App\PendaftaranJejak::milik('scopus_camp', (string) $baris->getKey())
+            ->terurut()->get();
+
+        $this->assertSame(['bukti', 'ganti-bukti'], $jejak->pluck('aksi')->all());
+
+        $this->assertStringContainsString('diunggahkan', $jejak->first()->kalimat);
+        $this->assertStringContainsString('diganti', $jejak->last()->kalimat);
+        $this->assertStringContainsString('oleh ' . $orang->full_name, $jejak->first()->kalimat);
+    }
+
+    #[Test]
+    public function pelanggan_tidak_boleh_mengunggahkan_bukti_orang_lain(): void
+    {
+        /*
+         * Diperiksa di PELADEN, bukan cuma disembunyikan di tampilan.
+         * Borangnya memang tidak digambar untuk pelanggan, tetapi alamatnya
+         * tetap bisa dikirimi permintaan — dan menerima gambar dari siapa pun
+         * untuk pendaftaran siapa pun adalah pintu yang terbuka.
+         */
+        $pelanggan = $this->akun(User::PERAN_PELANGGAN);
+        [$baris] = $this->buat('scopus_camp');
+
+        $this->actingAs($pelanggan)->post(
+            route('account.pendaftaran-layanan.bukti', ['scopus_camp', $baris->getKey()]),
+            ['bukti' => UploadedFile::fake()->image('bukti.jpg')]
+        )->assertRedirect(route('account.dashboard.index'));
+
+        $this->assertSame('', (string) $baris->fresh()->gambar,
+            'Pelanggan berhasil menitipkan bukti ke pendaftaran orang lain.');
+
+        \Illuminate\Support\Facades\Auth::logout();
+
+        $this->post(
+            route('account.pendaftaran-layanan.bukti', ['scopus_camp', $baris->getKey()]),
+            ['bukti' => UploadedFile::fake()->image('bukti.jpg')]
+        )->assertRedirect();
+
+        $this->assertSame('', (string) $baris->fresh()->gambar, 'Tamu pun bisa menitipkan bukti.');
+
+        /*
+         * Didaftarkan walau SEHARUSNYA kosong.
+         *
+         * Uji ini memastikan tidak ada yang terunggah, jadi ia tidak punya
+         * jalur untuk dibersihkan — sampai penjaganya benar-benar bobol.
+         * Saat membuktikan penjaga ini merah (penjaga aksesnya sengaja
+         * dimatikan sebentar), unggahannya lolos dan berkasnya tertinggal di
+         * cakram tanpa ada yang membuangnya. Satu baris ini membuat
+         * pembuktian merah tidak meninggalkan sampah.
+         */
+        $sisa = (string) $baris->fresh()->gambar;
+
+        if ($sisa !== '') {
+            $this->unggahanUji[] = $sisa;
+        }
+    }
+
+    #[Test]
+    public function berkas_yang_bukan_gambar_ditolak_dengan_jalan_keluarnya(): void
+    {
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        [$baris] = $this->buat('scopus_camp');
+
+        $this->actingAs($orang)->post(
+            route('account.pendaftaran-layanan.bukti', ['scopus_camp', $baris->getKey()]),
+            ['bukti' => UploadedFile::fake()->create('tagihan.pdf', 40, 'application/pdf')]
+        )->assertSessionHasErrors('bukti');
+
+        $this->assertSame('', (string) $baris->fresh()->gambar);
+
+        // HEIC diterima aturannya — formatnya bawaan kamera iPhone, dan
+        // menolaknya di pintu membuat panitia melihat "format tidak didukung"
+        // tanpa tahu harus berbuat apa. Yang tidak bisa dibongkar peladen
+        // ditangkap belakangan oleh Gambar::simpan(), dengan pesan yang
+        // menyebut jalan keluarnya.
+        $this->actingAs($orang)->post(
+            route('account.pendaftaran-layanan.bukti', ['scopus_camp', $baris->getKey()]),
+            ['bukti' => UploadedFile::fake()->create('IMG_0042.heic', 60, 'image/heic')]
+        )->assertSessionHasNoErrors();
+
+        $jalur = (string) $baris->fresh()->gambar;
+
+        if ($jalur !== '') {
+            $this->unggahanUji[] = $jalur;
+        }
+    }
+
+    #[Test]
+    public function borang_unggah_bukti_ada_di_halaman_rinciannya(): void
+    {
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+        [$baris] = $this->buat('webinar_eksklusif');
+
+        $isi = $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.rincian', ['webinar_eksklusif', $baris->getKey()]))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString(
+            route('account.pendaftaran-layanan.bukti', ['webinar_eksklusif', $baris->getKey()]),
+            $isi,
+            'Borang unggah bukti tidak tergambar; panitia tidak punya jalan membantu.'
+        );
+
+        /*
+         * Diperiksa di dalam TAG PEMBUKA borang ini, bukan di seluruh halaman.
+         *
+         * Percobaan pertama mencari 'enctype="multipart/form-data"' di mana
+         * saja, dan tetap hijau sesudah enctype-nya sengaja dibuang: yang
+         * cocok ternyata borang bukti TERMIN di tab Pembayaran. Penjaga yang
+         * dipuaskan unsur lain tidak menjaga apa pun.
+         */
+        $ada = preg_match('/<form class="rin-bukti-borang"[^>]*>/', $isi, $tagBorang);
+
+        $this->assertSame(1, $ada, 'Borang unggah bukti di kartu kiri hilang.');
+
+        $this->assertStringContainsString('enctype="multipart/form-data"', $tagBorang[0],
+            'Borangnya tidak mengirim berkas sama sekali.');
+        $this->assertStringContainsString('method="POST"', $tagBorang[0]);
+
+        // HEIC disebut di layar: panitia yang tidak melihatnya di daftar akan
+        // mengira berkas dari iPhone ditolak dan tidak pernah mencobanya.
+        $this->assertStringContainsString('HEIC', $isi);
+
+        /*
+         * Kalimat lama "tidak memakai unggahan bukti" tidak boleh kembali.
+         * Itu benar sampai peserta Webinar Eksklusif bisa mengunggah sendiri
+         * dari halaman status — sejak itu ia menyangkal sesuatu yang justru
+         * ada, dan panitia yang membacanya berhenti mencari.
+         */
+        $this->assertStringNotContainsString('tidak memakai unggahan bukti', $isi);
+
+        /*
+         * Tombol kirimnya menunggu berkasnya dipilih. Tombol yang selalu ada
+         * pada borang yang masih kosong mengundang ditekan, dan yang didapat
+         * cuma galat merah — terukur di peramban: tersembunyi saat dibuka,
+         * muncul begitu berkasnya dipilih.
+         */
+        $ada = preg_match('/<button[^>]*rin-bukti-kirim[^>]*>/', $isi, $tombol);
+
+        $this->assertSame(1, $ada, 'Tombol simpan bukti hilang.');
+        $this->assertStringContainsString('hidden', $tombol[0],
+            'Tombol simpan sudah terlihat sebelum ada berkas yang dipilih.');
+        $this->assertStringContainsString('data-mis-berkas-tombol="rin-bukti-berkas"', $tombol[0],
+            'Tombolnya tidak terhubung ke isian berkasnya; ia tidak akan pernah muncul.');
     }
 
     // ------------------------------------------------------------- pembantu
