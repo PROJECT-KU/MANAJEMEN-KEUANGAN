@@ -118,6 +118,19 @@ class WebinarEksklusifTest extends TestCase
     #[Test]
     public function api_mengirim_sesi_yang_sedang_dibuka(): void
     {
+        /*
+         * Sesi sungguhan ditutup dulu, seperti dua uji API di bawah.
+         *
+         * API-nya mengurutkan dari `mulai` paling awal lalu mengambil satu.
+         * Tanpa baris ini ujinya mengandaikan sesi buatannya sendiri yang
+         * paling awal — dan itu runtuh begitu ada sesi SUNGGUHAN di basis
+         * data uji dengan tanggal yang sama atau lebih awal. Terukur 7 Okt
+         * 2026: sesi nyata 21 Okt, sesi uji juga 21 Okt (now + 14 hari),
+         * dan yang menang justru yang nyata — ujinya merah tanpa ada kode
+         * yang salah.
+         */
+        $this->tutupSemuaSesi();
+
         $sesi = $this->sesi(['nama' => 'Sesi API Uji']);
 
         $jawab = $this->getJson('/api/webinar-eksklusif');
@@ -171,6 +184,10 @@ class WebinarEksklusifTest extends TestCase
     #[Test]
     public function api_memecah_kontak_jadi_tautan_whatsapp(): void
     {
+        // Alasan yang sama seperti di atas: yang diperiksa kontak sesi BUATAN
+        // uji ini, jadi ia harus memastikan sesi itu yang terpilih.
+        $this->tutupSemuaSesi();
+
         $this->sesi();
 
         $kontak = $this->getJson('/api/webinar-eksklusif')->json('sesi.kontak');

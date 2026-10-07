@@ -770,7 +770,28 @@ class PendaftaranSemuaLayanan
             return null;
         }
 
-        return self::SUMBER[$layanan]['surat'][$status] ?? null;
+        $khusus = self::SUMBER[$layanan]['surat'][$status] ?? null;
+
+        if ($khusus !== null) {
+            return $khusus;
+        }
+
+        /*
+         * Yang TIDAK punya surat khusus tetap mengirim surat.
+         *
+         * Dulu baris ini memulangkan null, dan null berarti diam: terukur 5
+         * dari 23 status yang mengirim surat, sisanya tidak sama sekali —
+         * termasuk SELURUH status Webinar Eksklusif dan Clinik Scopus.
+         * Pendaftar yang ditolak, dibatalkan, atau kursinya dilepas karena
+         * batas waktu menunggu kabar yang tidak akan pernah datang, lalu
+         * bertanya lewat WhatsApp; dan itu jadi pekerjaan panitia.
+         *
+         * Surat khusus yang sudah ada sengaja didahulukan: isinya lebih kaya
+         * (tautan grup WhatsApp, tanggal mulai dan selesai angkatan).
+         */
+        return \App\Support\KabarStatusPendaftaran::ada($status)
+            ? \App\Mail\PerubahanStatusPendaftaranMail::class
+            : null;
     }
 
     /**
@@ -1056,6 +1077,39 @@ class PendaftaranSemuaLayanan
         $pilih[] = DB::raw('created_at as waktu');
 
         return DB::table($s['tabel'])->select($pilih);
+    }
+
+    /**
+     * Nilai satu kolom seragam, dibaca dari MODEL-nya.
+     *
+     * Pasangan `ungkapan()` untuk sisi PHP. Yang itu merakit SQL untuk kueri
+     * gabungan; yang ini membaca baris yang sudah ada di tangan.
+     *
+     * Dipakai surat perubahan status, yang harus melayani kelima layanan
+     * sekaligus. Kelimanya menyimpan hal yang sama di kolom bernama berbeda —
+     * `id_transaksi` vs `id_pemesanan`, `nama` vs `nama_pemesan` — jadi
+     * menuliskan salah satunya di templat berarti sebagian layanan mengirim
+     * surat berisi baris kosong.
+     *
+     * Peran yang nilainya ungkapan SQL (`nomor_mentah`, `sesi_mentah`)
+     * dilewati: ungkapan itu hanya berarti di dalam kueri. Pemanggilnya
+     * mendapat null dan memilih sendiri jalan lain.
+     */
+    public static function nilaiKolom(object $baris, string $layanan, string $peran)
+    {
+        $s = self::SUMBER[$layanan] ?? null;
+
+        if ($s === null) {
+            return null;
+        }
+
+        $kolom = $s['kolom'][$peran] ?? null;
+
+        if ($kolom === null || ($s['kolom'][$peran . '_mentah'] ?? false) === true) {
+            return null;
+        }
+
+        return $baris->{$kolom} ?? null;
     }
 
     /**

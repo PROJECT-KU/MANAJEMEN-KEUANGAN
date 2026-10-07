@@ -216,6 +216,15 @@ class UbahStatusPendaftaran
     {
         $namaAplikasi = 'Rumah Scopus Foundation';
 
+        /*
+         * Surat umum cukup tahu layanan dan barisnya — dan sengaja begitu.
+         * Ia melayani kelima layanan termasuk yang TIDAK berangkatan, jadi ia
+         * tidak boleh ikut menuntut angkatan seperti cabang di bawah.
+         */
+        if ($kelas === \App\Mail\PerubahanStatusPendaftaranMail::class) {
+            return new $kelas($layanan, $pendaftaran);
+        }
+
         if ($layanan === 'scopus_kafe') {
             // Dua argumen pertama memang model yang sama; begitu pula di
             // pengendali lamanya.
