@@ -44,7 +44,27 @@ class Kernel extends ConsoleKernel
             ->name($perintah)
             ->withoutOverlapping();
 
-        $tugas('send:email')->everyMinute();
+        /*
+         * send:email TIDAK dijadwalkan lagi.
+         *
+         * Perintahnya bukan kode yang bisa jalan: isinya kerangka yang tidak
+         * pernah diselesaikan — `Presensi::where()` yang argumennya cuma
+         * komentar "Your conditions here", dua baris berbunyi
+         * `$x = // logic to determine $x;`, dan
+         * `$request->input(...)` di dalam perintah konsol yang tidak punya
+         * permintaan HTTP. Ia gagal pada baris PERTAMA, selalu.
+         *
+         * Selama penjadwalnya mati karena proc_open, kegagalan itu tidak
+         * terlihat. Begitu penjadwalnya diperbaiki, ia menulis satu galat
+         * "Too few arguments to function Builder::where()" ke log TIAP MENIT
+         * — terukur di produksi 7 Okt 2026 — dan menenggelamkan galat
+         * sungguhan yang perlu dibaca.
+         *
+         * Yang dibuang JADWALNYA, bukan perintahnya: niat aslinya (mengirim
+         * pemberitahuan presensi) mungkin masih diinginkan, dan menghapus
+         * berkasnya menghilangkan jejak niat itu. Ia tetap bisa dipanggil
+         * dengan tangan oleh siapa pun yang hendak menyelesaikannya.
+         */
         $tugas('promo:expire')->everyMinute();
 
         // Pangkas jejak masuk supaya tabelnya tidak tumbuh tanpa batas.
