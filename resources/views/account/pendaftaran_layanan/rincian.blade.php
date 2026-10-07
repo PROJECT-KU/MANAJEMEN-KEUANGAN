@@ -1611,15 +1611,6 @@ Rincian Pendaftaran | MIS Rumah Scopus
 
     $kunciTab = array_column($tab, 0);
     $tabSekarang = in_array($tabAktif, $kunciTab, true) ? $tabAktif : 'ringkasan';
-
-    /* Status mana yang MENGIRIM EMAIL ke pendaftarnya. */
-    $statusBersurat = [];
-
-    foreach (array_keys($pilihanStatus) as $nilaiStatus) {
-        if (Pendaftaran::suratUntuk($layanan, $nilaiStatus) !== null) {
-            $statusBersurat[] = $pilihanStatus[$nilaiStatus];
-        }
-    }
 @endphp
 <div class="main-content mis-badan">
     <section class="section">
