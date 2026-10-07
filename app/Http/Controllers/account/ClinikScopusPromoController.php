@@ -29,13 +29,13 @@ class ClinikScopusPromoController extends Controller
     public function index(Request $request)
     {
         // 🔥 AUTO NON-AKTIFKAN PROMO YANG SUDAH LEWAT TANGGAL + JAM
-        ClinikscopusPromo::where('status', 'active')
+        ClinikScopusPromo::where('status', 'active')
             ->where('tanggal_selesai_promo', '<', Carbon::now())
             ->update([
                 'status' => 'non active'
             ]);
 
-        $promos = ClinikscopusPromo::with(['events', 'sesi'])
+        $promos = ClinikScopusPromo::with(['events', 'sesi'])
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
@@ -64,7 +64,7 @@ class ClinikScopusPromoController extends Controller
         DB::transaction(function () use ($request) {
 
             // 1️⃣ Simpan Promo
-            $promo = ClinikscopusPromo::create([
+            $promo = ClinikScopusPromo::create([
                 'id' => Str::uuid(),
                 'nama_promo' => $request->nama_promo,
                 'status' => $request->status,
@@ -107,7 +107,7 @@ class ClinikScopusPromoController extends Controller
     // <!--================== UPDATE DATA ==================-->
     public function edit($id)
     {
-        $promo = ClinikscopusPromo::with(['events', 'sesi'])->findOrFail($id);
+        $promo = ClinikScopusPromo::with(['events', 'sesi'])->findOrFail($id);
 
         // 🔥 Mapping sesi: [event_id][sesi_key] => true
         $selectedSesi = [];
@@ -129,7 +129,7 @@ class ClinikScopusPromoController extends Controller
     public function update(Request $request, $id)
     {
         DB::transaction(function () use ($request, $id) {
-            $promo = ClinikscopusPromo::findOrFail($id);
+            $promo = ClinikScopusPromo::findOrFail($id);
             // 1️⃣ Update Promo 
             $promo->update([
                 'nama_promo' => $request->nama_promo,

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 
-class ClinikscopusPromo extends Model
+class ClinikScopusPromo extends Model
 {
     protected $table = 'clinikscopus_promo';
     protected $primaryKey = 'id';

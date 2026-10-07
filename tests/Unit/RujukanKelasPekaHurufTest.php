@@ -118,6 +118,76 @@ class RujukanKelasPekaHurufTest extends TestCase
      *
      * @return array<string, string>
      */
+    #[Test]
+    public function nama_kelas_sama_dengan_nama_berkasnya(): void
+    {
+        /*
+         * Lubang yang terlewat sampai 7 Okt 2026.
+         *
+         * Uji di atas menyusun daftar "kelas yang benar-benar ada" dari nama
+         * yang DIDEKLARASIKAN di dalam berkasnya. Tetapi PSR-4 memuat kelas
+         * berdasarkan nama BERKASNYA — jadi kelas `ClinikscopusPromo` yang
+         * tinggal di `app/ClinikScopusPromo.php` dianggap ada oleh uji itu,
+         * padahal autoloader Linux tidak akan pernah menemukannya.
+         *
+         * Akibatnya terukur di produksi: `App\ClinikscopusPromo` TIDAK ADA
+         * di peladen sementara `App\ClinikScopusPromo` ada. Delapan rujukan
+         * memakai ejaan yang salah — seluruh layar admin Promo dan perintah
+         * terjadwal `promo:expire`, yang menulis satu galat ke log tiap menit
+         * begitu penjadwalnya diperbaiki.
+         *
+         * Di macOS tidak satu pun dari itu menampakkan diri.
+         */
+        /*
+         * Dua berkas MATI yang sudah ada sebelum uji ini dipasang.
+         *
+         * Keduanya tidak dirujuk satu rute pun maupun satu baris kode pun —
+         * ditelusuri ke seluruh app/, routes/, resources/, tests/, config/.
+         * Keduanya juga memang tidak bisa dimuat: yang pertama berisi kelas
+         * bernama lain, yang kedua berakhiran ganda `.php.php`.
+         *
+         * Didaftarkan di sini, BUKAN dihapus diam-diam: menghapus berkas
+         * orang bukan bagian dari pekerjaan yang diminta. Keduanya pantas
+         * dibuang, dan itu keputusan pemiliknya.
+         *
+         * Daftar tertutup: berkas baru yang namanya tidak cocok tetap
+         * ditangkap.
+         */
+        $matiSejakAwal = [
+            'app/Http/Controllers/account/PesananController.php',
+            'app/Http/Controllers/account/ArtikelKomentarController.php.php',
+        ];
+
+        $melenceng = [];
+
+        foreach ($this->berkasPhp(['app']) as $berkas) {
+            $relatif = str_replace(base_path() . '/', '', $berkas);
+
+            if (in_array($relatif, $matiSejakAwal, true)) {
+                continue;
+            }
+
+            $isi = file_get_contents($berkas);
+
+            if (! preg_match('/^(?:final\s+|abstract\s+)?class\s+(\w+)/m', $isi, $kelas)) {
+                continue;
+            }
+
+            $namaBerkas = pathinfo($berkas, PATHINFO_FILENAME);
+
+            if ($kelas[1] !== $namaBerkas) {
+                $melenceng[] = str_replace(base_path() . '/', '', $berkas)
+                    . ' berisi class ' . $kelas[1];
+            }
+        }
+
+        $this->assertSame([], $melenceng,
+            "Nama kelas berikut tidak sama dengan nama berkasnya. PSR-4 memuat "
+            . "berdasarkan nama berkas, jadi di Linux kelasnya tidak akan ketemu "
+            . "— dan di macOS semuanya terlihat baik-baik saja:\n- "
+            . implode("\n- ", $melenceng) . "\n");
+    }
+
     private function kelasYangBenarBenarAda(): array
     {
         $hasil = [];
