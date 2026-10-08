@@ -1422,6 +1422,129 @@ class PendaftaranLayananController extends Controller
         return \App\Support\TabPendaftaran::tabDariKiriman($layanan, $medanKiriman);
     }
 
+    /**
+     * Panitia mengisikan nama peserta rombongan.
+     *
+     * Kelima tabel pendaftaran hanya punya SATU nama, sementara jumlahnya bisa
+     * lebih dari satu — peserta kedua dan seterusnya tinggal di tabel
+     * tersendiri. Borang TAMBAH sudah bisa mengisinya sejak awal; layar
+     * rinciannya tidak, jadi rombongan yang terlanjur tersimpan tanpa daftar
+     * nama tidak bisa dilengkapi dari mana pun.
+     *
+     * Terukur di produksi 8 Okt 2026: enam pendaftaran rombongan, NOL nama
+     * peserta tercatat. Layar rinciannya bahkan sudah memperingatkan "baru 1
+     * nama yang tercatat, tanyakan sisanya ke pendaftarnya" — peringatan
+     * tanpa jalan keluar, di layar orang yang justru hendak mengerjakannya.
+     *
+     * Kotak teks, bukan sederet isian, dan pembacanya DaftarPeserta yang sama
+     * dengan borang tambah: menempelkan daftar dari WhatsApp atau Excel jauh
+     * lebih cepat daripada mengetik ke sepuluh kotak, dan dua pembaca terpisah
+     * akan berbeda perlahan.
+     */
+    public function simpanPeserta(Request $request, string $layanan, string $id)
+    {
+        if (! $this->bolehMelihat()) {
+            return $this->tolak();
+        }
+
+        if (! array_key_exists($layanan, Pendaftaran::katalog())) {
+            abort(404);
+        }
+
+        $pendaftaran = Pendaftaran::temukan($layanan, $id);
+
+        if ($pendaftaran === null) {
+            abort(404);
+        }
+
+        $request->validate(
+            ['peserta' => ['nullable', 'string', 'max:20000']],
+            ['peserta.max' => 'Daftarnya terlalu panjang; kirim per bagian saja.']
+        );
+
+        $jumlah = max(1, (int) ($pendaftaran->jumlah_pendaftar ?? 1));
+
+        /*
+         * Dipotong sebanyak kursi yang DIBAYAR, dikurangi pemesannya sendiri —
+         * aturan yang sama persis dengan borang tambah. Nama ke-enam pada
+         * rombongan berbayar lima adalah orang yang kursinya tidak pernah
+         * dibeli.
+         */
+        $orang = array_slice(
+            \App\Support\DaftarPeserta::dariTeks($request->input('peserta')),
+            0,
+            max(0, $jumlah - 1)
+        );
+
+        $lama = \App\PendaftaranPeserta::milik($layanan, (string) $pendaftaran->getKey())
+            ->terurut()->get();
+
+        /*
+         * Email baris lama DIPERTAHANKAN kalau namanya di urutan itu tidak
+         * berubah.
+         *
+         * Kotak teks ini hanya membawa nama dan nomor; kolom `email` tidak
+         * punya tempat di dalamnya. Hari ini tidak ada satu pun kode yang
+         * mengisinya — diperiksa ke seluruh app/ — jadi tanpa baris ini pun
+         * belum ada yang hilang. Tetapi kolomnya ada dan suatu hari akan
+         * terisi, dan saat itu menyimpan ulang daftar nama akan menghapus
+         * email seluruh rombongan tanpa satu pun pesan.
+         */
+        $emailLama = [];
+
+        foreach ($lama as $baris) {
+            $emailLama[(int) $baris->urutan] = [
+                'nama' => (string) $baris->nama,
+                'email' => $baris->email,
+            ];
+        }
+
+        DB::transaction(function () use ($layanan, $pendaftaran, $orang, $lama, $emailLama) {
+            foreach ($lama as $baris) {
+                $baris->delete();
+            }
+
+            foreach ($orang as $ke => $o) {
+                // Mulai dari 1: urutan 0 untuk pemesannya, yang tersimpan di
+                // baris pendaftarannya sendiri.
+                $urutan = $ke + 1;
+                $sebelumnya = $emailLama[$urutan] ?? null;
+
+                \App\PendaftaranPeserta::create([
+                    'layanan' => $layanan,
+                    'pendaftaran_id' => (string) $pendaftaran->getKey(),
+                    'urutan' => $urutan,
+                    'nama' => $o['nama'],
+                    'email' => ($sebelumnya !== null && $sebelumnya['nama'] === $o['nama'])
+                        ? $sebelumnya['email']
+                        : null,
+                    // Kosong disimpan null, bukan untaian kosong: dua penanda
+                    // "tidak ada nomor" di satu kolom membuat tiap pembacanya
+                    // harus memeriksa keduanya.
+                    'telp' => $o['telp'] !== '' ? $o['telp'] : null,
+                ]);
+            }
+
+            \App\PendaftaranJejak::create([
+                'layanan' => $layanan,
+                'pendaftaran_id' => (string) $pendaftaran->getKey(),
+                'aksi' => 'peserta',
+                'dari' => (string) $lama->count(),
+                'ke' => (string) count($orang),
+                'oleh_id' => Auth::id(),
+                'oleh_nama' => $this->siapa(),
+            ]);
+        });
+
+        $tercatat = count($orang) + 1;
+
+        return back()
+            ->with('tab', 'peserta')
+            ->with('sukses', $tercatat >= $jumlah
+                ? 'Daftar pesertanya lengkap: ' . $tercatat . ' dari ' . $jumlah . ' orang.'
+                : 'Tersimpan. Baru ' . $tercatat . ' dari ' . $jumlah . ' nama yang tercatat.');
+    }
+
     /** Memindahkan status satu pendaftaran. */
     public function ubahStatus(Request $request, string $layanan, string $id)
     {
