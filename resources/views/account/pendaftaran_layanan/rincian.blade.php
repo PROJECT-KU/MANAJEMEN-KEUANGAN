@@ -355,6 +355,23 @@ Rincian Pendaftaran | MIS Rumah Scopus
             background: #f8fafc;
         }
 
+        /* Borang daftar peserta, dipisahkan dari daftar bacanya oleh garis. */
+        .rin-peserta-borang {
+            display: grid;
+            gap: 9px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px dashed var(--mis-garis);
+        }
+
+        .rin-peserta-kabar {
+            margin: 0;
+        }
+
+        /* Kabar berhasil hijau, gagal merah — dipasang skripnya. */
+        .rin-peserta-kabar.berhasil { color: #047857; }
+        .rin-peserta-kabar.gagal { color: #be123c; }
+
         /*
          * Pengunggah bukti di kartu kiri.
          *
@@ -2307,6 +2324,7 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                                 'hapus-bayar' => ['fa-undo', 'merah'],
                                                 'bukti' => ['fa-receipt', 'biru'],
                                                 'ganti-bukti' => ['fa-receipt', 'kuning'],
+                                                'peserta' => ['fa-users', 'ungu'],
                                             ];
 
                                             [$ikonJejak, $warnaJejak] = $rupaAksi[$satu->aksi]
@@ -2797,16 +2815,96 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                 {{-- Selisihnya disebut, bukan dibiarkan: pendaftaran
                                      yang dibayar untuk lima orang tetapi hanya memuat
                                      tiga nama berarti dua sertifikat tidak bisa
-                                     diterbitkan, dan itu baru ketahuan di hari acara. --}}
+                                     diterbitkan, dan itu baru ketahuan di hari acara.
+
+                                     Kalimat "Tanyakan sisanya ke pendaftarnya" DIBUANG:
+                                     sejak borang di bawah ada, panitia tidak perlu
+                                     menunggu siapa pun — ia bisa mengetiknya sendiri. --}}
                                 <p class="rin-nota">
                                     <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
                                     <span>
                                         Dibayar untuk <strong>{{ $jumlahOrang }}</strong> orang, tetapi baru
-                                        <strong>{{ $terdaftar }}</strong> nama yang tercatat. Tanyakan
-                                        sisanya ke pendaftarnya.
+                                        <strong>{{ $terdaftar }}</strong> nama yang tercatat.
+                                        Lengkapi di bawah.
                                     </span>
                                 </p>
                             @endif
+
+                            {{--
+                                Panitia mengisikan nama pesertanya sendiri.
+
+                                Sebelum ini daftar di atas hanya bisa DIBACA, sementara
+                                peringatan di atasnya menyuruh "tanyakan sisanya ke
+                                pendaftarnya" — peringatan tanpa jalan keluar, di layar
+                                orang yang justru hendak mengerjakannya. Terukur di
+                                produksi 8 Okt 2026: enam pendaftaran rombongan, nol nama
+                                peserta tercatat.
+
+                                Satu kotak teks, bukan sederet isian, dan pembacanya
+                                DaftarPeserta yang sama dengan borang Tambah: yang
+                                mengisi panitia yang sedang menghadapi antrean, dan
+                                menempelkan daftar dari WhatsApp atau Excel jauh lebih
+                                cepat daripada mengetik ke sepuluh kotak.
+                            --}}
+                            <form class="rin-peserta-borang" method="POST"
+                                action="{{ route('account.pendaftaran-layanan.peserta', [$layanan, $pendaftaran->getKey()]) }}">
+                                @csrf
+                                @method('PUT')
+
+                                <label class="mis-label rin-label" for="rin-peserta-teks">
+                                    <span class="mis-medali mini mis-ungu" aria-hidden="true">
+                                        <i class="fas fa-users"></i>
+                                    </span>
+                                    <span>Nama &amp; nomor peserta selain pendaftarnya</span>
+                                </label>
+
+                                {{-- Jalur berkas DI ATAS kotak teksnya, seperti di borang
+                                     Tambah: lembaga mengirim daftarnya sebagai lampiran
+                                     Excel, dan panitia yang terlanjur melihat kotak kosong
+                                     akan mulai mengetik sebelum sempat tahu ada jalan yang
+                                     lebih cepat. --}}
+                                <input type="file" class="rin-berkas" id="rin-peserta-berkas"
+                                    accept=".xlsx,.xls,.csv,text/csv"
+                                    data-mis-peserta-berkas="{{ route('account.pendaftaran-layanan.baca-peserta') }}">
+                                <label for="rin-peserta-berkas" class="rin-unggah">
+                                    <span class="mis-medali kecil mis-hijau" aria-hidden="true">
+                                        <i class="fas fa-file-excel"></i>
+                                    </span>
+                                    <span class="rin-unggah-teks">
+                                        <span class="rin-unggah-nama" id="rin-peserta-berkas-nama">
+                                            Ambil dari Excel atau CSV
+                                        </span>
+                                        <span class="mis-bantuan">Nama dan nomornya terisi sendiri ke kotak di bawah</span>
+                                    </span>
+                                </label>
+
+                                <p class="mis-bantuan rin-peserta-kabar" id="rin-peserta-kabar" hidden></p>
+
+                                <textarea class="form-control-modern @error('peserta') is-invalid @enderror"
+                                    id="rin-peserta-teks" name="peserta" rows="5"
+                                    data-mis-tumbuh
+                                    placeholder="Satu orang per baris — nama, lalu nomornya:&#10;Budi Santoso, 081234567890&#10;Siti Rahma, 085700011122">{{ old('peserta', \App\Support\DaftarPeserta::sebagaiTeks($pesertaLain->map(fn ($p) => ['nama' => (string) $p->nama, 'telp' => (string) ($p->telp ?? '')])->all())) }}</textarea>
+
+                                @error('peserta')
+                                    <p class="mis-bantuan" style="color:#be123c">{{ $message }}</p>
+                                @enderror
+
+                                {{-- Batasnya disebut DI MUKA. Peladen memang memotong
+                                     daftarnya sebanyak kursi yang dibayar, tetapi memotong
+                                     diam-diam berarti nama yang hilang baru ketahuan di
+                                     hari acara. --}}
+                                <p class="mis-bantuan">
+                                    Pendaftarnya sudah terhitung satu, jadi di sini paling banyak
+                                    <strong>{{ max(0, $jumlahOrang - 1) }}</strong> nama.
+                                    Yang lebih dari itu tidak ikut tersimpan.
+                                </p>
+
+                                <div class="rin-kaki">
+                                    <button type="submit" class="mis-tombol mis-tombol-ungu">
+                                        <i class="fas fa-save" aria-hidden="true"></i> Simpan daftar peserta
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     @endif
 
@@ -3160,6 +3258,105 @@ Rincian Pendaftaran | MIS Rumah Scopus
 
             tambah.forEach(function (k) { k.addEventListener('input', hitung); });
             kurang.forEach(function (k) { k.addEventListener('input', hitung); });
+        });
+    });
+
+    /*
+     * Daftar peserta diambil dari berkas Excel/CSV.
+     *
+     * Berkasnya dikirim ke peladen untuk DIBACA, bukan diurai di peramban:
+     * pembacanya satu-satunya — App\Support\DaftarPeserta — dan pembaca kedua
+     * di sisi peramban akan berbeda perlahan, lalu "Budi, 0812..." terbaca
+     * benar saat diketik dan salah saat diunggah tanpa ada yang bisa
+     * menjelaskan kenapa.
+     *
+     * Alamat tujuannya dibawa penanda, bukan ditulis di skrip: rutenya sudah
+     * dipakai borang Tambah, dan menuliskannya dua kali berarti satu di
+     * antaranya tertinggal saat rutenya berganti nama.
+     */
+    document.addEventListener('DOMContentLoaded', function () {
+        var kotak = document.getElementById('rin-peserta-berkas');
+        var teks = document.getElementById('rin-peserta-teks');
+        var kabar = document.getElementById('rin-peserta-kabar');
+        var namaBerkas = document.getElementById('rin-peserta-berkas-nama');
+
+        if (!kotak || !teks || !kabar) {
+            return;
+        }
+
+        var semula = namaBerkas ? namaBerkas.textContent : '';
+
+        var beriKabar = function (pesan, jenis) {
+            kabar.textContent = pesan;
+            kabar.classList.remove('berhasil', 'gagal');
+
+            if (jenis) {
+                kabar.classList.add(jenis);
+            }
+
+            kabar.hidden = !pesan;
+        };
+
+        kotak.addEventListener('change', function () {
+            var berkas = kotak.files && kotak.files[0];
+
+            if (!berkas) {
+                return;
+            }
+
+            if (namaBerkas) {
+                namaBerkas.textContent = berkas.name;
+            }
+
+            beriKabar('Sedang dibaca…', null);
+
+            var muatan = new FormData();
+            muatan.append('berkas', berkas);
+
+            // Token lewat TAJUK dan Accept: application/json, sama persis
+            // dengan borang Tambah. Tanpa Accept, isian yang ditolak peladen
+            // dibalas pengalihan HTML dan .json() melempar — yang terlihat
+            // panitia cuma "gagal dikirim", tanpa alasan yang sebenarnya ada.
+            fetch(kotak.dataset.misPesertaBerkas, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                },
+                body: muatan
+            })
+                .then(function (j) { return j.json().then(function (d) { return { ok: j.ok, d: d }; }); })
+                .then(function (h) {
+                    if (!h.ok || !h.d.ok) {
+                        var sebab = h.d.pesan
+                            || (h.d.errors && h.d.errors.berkas && h.d.errors.berkas[0])
+                            || 'Berkasnya tidak bisa dibaca.';
+
+                        beriKabar(sebab, 'gagal');
+
+                        if (namaBerkas) { namaBerkas.textContent = semula; }
+
+                        return;
+                    }
+
+                    // DITIMPA, bukan ditambahkan: daftar yang diunggah adalah
+                    // daftar yang berlaku. Menambahkannya ke isi lama membuat
+                    // nama ganda saat panitia mengunggah ulang berkas yang
+                    // sudah dibetulkan — dan ia tidak akan menyadarinya.
+                    teks.value = h.d.teks;
+                    teks.dispatchEvent(new Event('input', { bubbles: true }));
+
+                    beriKabar(
+                        h.d.jumlah + ' nama terbaca, ' + h.d.bernomor + ' di antaranya bernomor. '
+                            + 'Periksa dulu, lalu tekan Simpan.',
+                        'berhasil'
+                    );
+                })
+                .catch(function () {
+                    beriKabar('Berkasnya gagal dikirim. Coba lagi.', 'gagal');
+
+                    if (namaBerkas) { namaBerkas.textContent = semula; }
+                });
         });
     });
 

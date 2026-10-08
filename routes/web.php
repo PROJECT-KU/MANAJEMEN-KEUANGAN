@@ -542,6 +542,9 @@ Route::prefix('account')
             // segmen /bukti tidak pernah terbaca sebagai {id}.
             Route::post('Pendaftaran-Layanan/{layanan}/{id}/bukti', 'account\\PendaftaranLayananController@unggahBukti')
                 ->name('account.pendaftaran-layanan.bukti');
+            // Panitia mengisikan nama peserta rombongan dari layar rinciannya.
+            Route::put('Pendaftaran-Layanan/{layanan}/{id}/peserta', 'account\\PendaftaranLayananController@simpanPeserta')
+                ->name('account.pendaftaran-layanan.peserta');
             Route::delete('Pendaftaran-Layanan/{layanan}/{id}', 'account\\PendaftaranLayananController@hapus')
                 ->name('account.pendaftaran-layanan.hapus');
 
