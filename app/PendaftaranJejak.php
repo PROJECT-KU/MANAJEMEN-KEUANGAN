@@ -128,6 +128,16 @@ class PendaftaranJejak extends Model
                 . ' dihapus' . $siapa;
         }
 
+        if ($this->aksi === 'peserta') {
+            /*
+             * Jumlahnya, bukan daftar namanya. Jejak yang memuat sepuluh nama
+             * membuat satu baris riwayat setinggi layar, dan yang dicari saat
+             * membacanya adalah KAPAN daftarnya berubah — namanya sendiri ada
+             * di tab Peserta, selalu yang terbaru.
+             */
+            return 'Daftar peserta ' . (int) $this->dari . ' → ' . (int) $this->ke . ' nama' . $siapa;
+        }
+
         if ($this->aksi === 'bukti') {
             return 'Bukti bayar diunggahkan' . $siapa;
         }
