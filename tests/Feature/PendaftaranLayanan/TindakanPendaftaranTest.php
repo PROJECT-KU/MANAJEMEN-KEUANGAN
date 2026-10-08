@@ -5193,12 +5193,21 @@ class TindakanPendaftaranTest extends TestCase
             'Kode unik tidak lagi menambah total; tanda "tambah" di layar jadi salah.');
     }
     #[Test]
-    public function isian_angkatan_ada_di_tab_jadwal_bukan_pembayaran(): void
+    public function isian_angkatan_ada_di_tab_data_bukan_pembayaran(): void
     {
         /*
          * Memindahkan peserta ke angkatan berikutnya adalah tindakan JADWAL,
          * dan satu-satunya isian yang benar-benar melakukannya adalah
          * "Angkatan" — kuotanya ikut berpindah.
+         *
+         * DIPERBARUI 8 Okt 2026: letaknya kini tab "Data pendaftaran", bukan
+         * tab Jadwal. Tab Jadwal Scopus Camp isinya tinggal SATU isian —
+         * Angkatan itu sendiri — dan satu tab untuk satu isian menambah satu
+         * klik tanpa menghemat gulungan apa pun. Aturan peleburannya ada di
+         * App\Support\TabPendaftaran.
+         *
+         * Yang dijaga tetap sama dan itu bagian pentingnya: Angkatan TIDAK
+         * boleh kembali ke tab Pembayaran.
          *
          * Dulu ia duduk di tab Pembayaran, sementara tab Jadwal cuma berisi
          * "Tanggal jadwal ulang": sebuah CATATAN yang tidak dibaca apa pun.
@@ -5229,16 +5238,32 @@ class TindakanPendaftaranTest extends TestCase
             ->assertOk()
             ->getContent();
 
-        $panelJadwal = $this->panel($isi, 'sesi');
+        $panelData = $this->panel($isi, 'diri');
         $panelBayar = $this->panel($isi, 'bayar');
 
-        $this->assertNotSame('', $panelJadwal, 'Panel tab Jadwal tidak tergambar.');
+        $this->assertNotSame('', $panelData, 'Panel tab Data pendaftaran tidak tergambar.');
 
-        $this->assertStringContainsString('name="kategori_id"', $panelJadwal,
-            'Isian Angkatan tidak ada di tab Jadwal; memindahkan peserta jadi tidak bisa ditemukan di sana.');
+        $this->assertStringContainsString('name="kategori_id"', $panelData,
+            'Isian Angkatan tidak ada di tab Data pendaftaran; memindahkan peserta '
+            . 'jadi tidak bisa ditemukan di mana pun.');
 
         $this->assertStringNotContainsString('name="kategori_id"', $panelBayar,
-            'Isian Angkatan masih di tab Pembayaran; dua tempat untuk satu isian.');
+            'Isian Angkatan kembali ke tab Pembayaran; itu yang dulu membuat panitia '
+            . 'tidak menemukannya.');
+
+        /*
+         * Tab Jadwal memang HILANG untuk Scopus Camp — isinya tinggal satu
+         * isian. Dijaga supaya tidak diam-diam kembali: tab kosong atau
+         * berisi satu isian adalah persis keadaan yang hendak dibuang.
+         */
+        $this->assertSame('', $this->panel($isi, 'sesi'),
+            'Tab Jadwal kembali padahal isinya cuma satu isian.');
+
+        $this->assertStringNotContainsString('>Jadwal<', $isi,
+            'Tab Jadwal masih tergambar di deret tabnya.');
+
+        // Dan tabnya memang bernama sesuai isinya sekarang.
+        $this->assertStringContainsString('Data pendaftaran', $isi);
     }
 
     #[Test]
@@ -5272,8 +5297,18 @@ class TindakanPendaftaranTest extends TestCase
         $this->assertStringContainsString('kursi di angkatan', $isi,
             'Bagian Angkatan tidak menerangkan bahwa kursinya ikut berpindah.');
 
-        $this->assertStringContainsString('pindah ke tab Jadwal', $isi,
-            'Tab Pembayaran tidak menunjukkan ke mana isian Angkatan pindah.');
+        /*
+         * Nama tabnya DIRAKIT, bukan ditulis mati — dan di sinilah ujinya
+         * harus ikut membaca dari sumber yang sama. Percobaan sebelumnya
+         * menuntut kata "tab Jadwal", dan tab itu sudah tidak ada: petunjuk
+         * yang menyebut tab yang tidak ada lebih buruk daripada tidak ada
+         * petunjuk sama sekali.
+         */
+        $this->assertStringContainsString(
+            'ada di tab ' . \App\Support\TabPendaftaran::namaTabUtama('scopus_camp'),
+            $isi,
+            'Tab Pembayaran tidak menunjukkan ke mana isian Angkatan pindah.'
+        );
 
         /*
          * Isian MATI tidak boleh kembali. "Tanggal jadwal ulang" tidak pernah

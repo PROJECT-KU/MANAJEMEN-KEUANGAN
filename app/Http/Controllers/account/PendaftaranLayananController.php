@@ -1287,7 +1287,7 @@ class PendaftaranLayananController extends Controller
         if (! $hasil['berhasil']) {
             return back()->withInput()
                 ->with('error', $hasil['pesan'])
-                ->with('tab', $this->tabDari(array_keys($request->all())));
+                ->with('tab', $this->tabDari($layanan, array_keys($request->all())));
         }
 
         return redirect()
@@ -1296,7 +1296,7 @@ class PendaftaranLayananController extends Controller
             // Dikembalikan ke tab yang baru disimpan, bukan ke tab pertama:
             // orang yang membetulkan nominal ingin melihat hasilnya, bukan
             // mencari tabnya lagi.
-            ->with('tab', $this->tabDari(array_keys($request->all())));
+            ->with('tab', $this->tabDari($layanan, array_keys($request->all())));
     }
 
     /**
@@ -1407,32 +1407,19 @@ class PendaftaranLayananController extends Controller
      *
      * @param  array<int, string>  $medanKiriman
      */
-    private function tabDari(array $medanKiriman): string
+    private function tabDari(string $layanan, array $medanKiriman): string
     {
-        $peta = [
-            'bayar' => ['jumlah_pendaftar', 'ppn', 'kode_unik',
-                'kode_diskon', 'nominal_diskon', 'total_pembayaran',
-                'total_keseluruhan_pembayaran'],
-            // kategori_id ikut tab Jadwal, mengikuti letak isiannya di layar.
-            // Kalau tertinggal di 'bayar', galat angkatan penuh akan membuka
-            // tab Pembayaran sementara isiannya ada di tab Jadwal.
-            'sesi' => ['kategori_id', 'tanggal_pemesanan', 'sesi', 'jam_sesi', 'waktu_mulai',
-                'waktu_selesai', 'lokasi', 'biaya', 'kode_unik_pembayaran',
-                'subtotal_pembayaran', 'sesi_kedua', 'sesi_ketiga', 'group_wa'],
-            'diri' => ['nama', 'nama_pemesan', 'email', 'email_pemesan', 'telp',
-                'telp_pemesan', 'affiliasi', 'afiliasi_pemesan', 'note',
-                'kendala', 'desc_kendala'],
-        ];
-
-        foreach ($peta as $tab => $daftar) {
-            foreach ($medanKiriman as $k) {
-                if (in_array($k, $daftar, true)) {
-                    return $tab;
-                }
-            }
-        }
-
-        return 'diri';
+        /*
+         * Daftar medannya PINDAH ke App\Support\TabPendaftaran.
+         *
+         * Di sanalah aturan peleburan tab tinggal, dan keduanya harus
+         * sepakat: tab yang isinya kurang dari tiga isian dilebur ke tab
+         * identitas, sehingga kunci tab yang dipulangkan di sini bisa
+         * BERBEDA dari tab asal medannya. Ditulis dua kali, satu tekan Simpan
+         * akan mendarat di tab yang sudah tidak ada dan halamannya diam-diam
+         * kembali ke Ringkasan.
+         */
+        return \App\Support\TabPendaftaran::tabDariKiriman($layanan, $medanKiriman);
     }
 
     /** Memindahkan status satu pendaftaran. */
