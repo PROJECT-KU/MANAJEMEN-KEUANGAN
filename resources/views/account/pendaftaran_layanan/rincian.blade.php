@@ -1312,6 +1312,55 @@ Rincian Pendaftaran | MIS Rumah Scopus
             color: var(--mis-tinta-4);
         }
 
+        /*
+         * Jejak lama ditahan sampai tombolnya ditekan.
+         *
+         * `display: none` di sini WAJIB berbobot lebih tinggi daripada
+         * `.rin-jejak li { display: grid }` di atasnya — makanya pemilihnya
+         * menyebut keduanya. Kelas tunggal `.rin-jejak-lama` berbobot (0,1,0)
+         * dan akan KALAH, lalu barisnya tetap tergambar tanpa ada galat apa
+         * pun yang menunjukkannya.
+         */
+        .rin-jejak li.rin-jejak-lama {
+            display: none;
+        }
+
+        .rin-jejak.rin-jejak-penuh li.rin-jejak-lama {
+            display: grid;
+        }
+
+        /* Tombol pembuka jejak lama. Tenang, sebab ia bukan tindakan —
+           cuma membuka yang sudah ada. */
+        .rin-jejak-lagi {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            margin: 0 0 11px;
+            padding: 5px 11px;
+            border: 1px solid var(--mis-garis);
+            border-radius: 999px;
+            background: #fff;
+            font-size: .76rem;
+            font-weight: 600;
+            color: var(--mis-tinta-3);
+            cursor: pointer;
+            transition: border-color .2s ease, color .2s ease;
+        }
+
+        .rin-jejak-lagi:hover {
+            border-color: var(--mis-ungu, #6d4aff);
+            color: var(--mis-ungu, #6d4aff);
+        }
+
+        .rin-jejak-lagi > i {
+            font-size: 10px;
+            transition: transform .2s ease;
+        }
+
+        .rin-jejak-lagi[aria-expanded="true"] > i {
+            transform: rotate(180deg);
+        }
+
         .rin-jejak-teks {
             min-width: 0;
             font-size: .84rem;
@@ -2347,6 +2396,44 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                     <span class="teks">Jejak perubahan</span>
                                 </p>
 
+                                @php
+                                    /*
+                                     * Hanya enam jejak TERBARU yang tergambar.
+                                     *
+                                     * Sejak tiap medan yang disunting menulis jejaknya
+                                     * sendiri, daftarnya tumbuh jauh lebih cepat daripada
+                                     * waktu ia cuma mencatat perpindahan status: satu
+                                     * tekan Simpan di tab Data pendaftaran bisa
+                                     * meninggalkan empat baris sekaligus. Kartunya lalu
+                                     * memanjang ke bawah tanpa batas dan mendorong
+                                     * "Catatan panitia" jauh dari pandangan.
+                                     *
+                                     * Enam, bukan tiga: satu kali Simpan saja sudah bisa
+                                     * menghasilkan empat jejak, dan batas yang lebih
+                                     * rendah akan menyembunyikan satu tindakan yang baru
+                                     * saja dikerjakan orang yang sedang melihat layarnya.
+                                     *
+                                     * Yang lama DITAHAN, bukan dibuang — tombol di atas
+                                     * daftarnya membukanya. Jejak audit yang tidak bisa
+                                     * dibuka lagi sama saja dengan tidak dicatat.
+                                     */
+                                    $batasJejak = 6;
+                                    $jumlahLama = max(0, $jejak->count() - $batasJejak);
+                                @endphp
+
+                                @if ($jumlahLama > 0)
+                                    {{-- Tombolnya DI ATAS daftarnya, sebab yang
+                                         dibukanya memang muncul di atas: jejak tertua
+                                         ada di puncak, terbaru di dasar. --}}
+                                    <button type="button" class="rin-jejak-lagi" data-mis-jejak-lagi
+                                        data-buka="Tampilkan {{ $jumlahLama }} jejak lebih lama"
+                                        data-tutup="Sembunyikan jejak lama"
+                                        aria-expanded="false">
+                                        <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                                        <span data-mis-jejak-lagi-teks>Tampilkan {{ $jumlahLama }} jejak lebih lama</span>
+                                    </button>
+                                @endif
+
                                 <ul class="rin-jejak">
                                     @foreach ($jejak as $satu)
                                         @php
@@ -2390,7 +2477,11 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                             [$ikonJejak, $warnaJejak] = $rupaAksi[$satu->aksi]
                                                 ?? ['fa-exchange-alt', 'biru'];
                                         @endphp
-                                        <li>
+                                        {{-- Yang lama tergambar juga, hanya disembunyikan:
+                                             memuatnya belakangan lewat permintaan kedua
+                                             berarti satu jalur lagi yang bisa gagal, untuk
+                                             daftar yang paling banyak pun puluhan baris. --}}
+                                        <li @class(['rin-jejak-lama' => $loop->index < $jumlahLama])>
                                             <span class="mis-medali mini mis-{{ $rupaJejak['warna'] ?? $warnaJejak }}" aria-hidden="true">
                                                 <i class="fas {{ $rupaJejak['ikon'] ?? $ikonJejak }}"></i>
                                             </span>
@@ -3417,6 +3508,38 @@ Rincian Pendaftaran | MIS Rumah Scopus
 
                     if (namaBerkas) { namaBerkas.textContent = semula; }
                 });
+        });
+    });
+
+    /*
+     * Membuka jejak lama yang ditahan.
+     *
+     * Barisnya SUDAH tergambar dan hanya disembunyikan CSS, jadi membukanya
+     * tidak menuntut permintaan kedua ke peladen — satu jalur lagi yang bisa
+     * gagal, untuk daftar yang paling banyak pun puluhan baris.
+     *
+     * Tulisan tombolnya dibawa penanda data, bukan dirangkai di skrip: yang
+     * membacanya panitia, dan kalimatnya harus bisa dibetulkan di markahnya
+     * tanpa menyentuh skrip ini.
+     */
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('[data-mis-jejak-lagi]').forEach(function (tombol) {
+            var daftar = tombol.parentElement.querySelector('.rin-jejak');
+            var teks = tombol.querySelector('[data-mis-jejak-lagi-teks]');
+
+            if (!daftar) {
+                return;
+            }
+
+            tombol.addEventListener('click', function () {
+                var terbuka = daftar.classList.toggle('rin-jejak-penuh');
+
+                tombol.setAttribute('aria-expanded', terbuka ? 'true' : 'false');
+
+                if (teks) {
+                    teks.textContent = terbuka ? tombol.dataset.tutup : tombol.dataset.buka;
+                }
+            });
         });
     });
 
