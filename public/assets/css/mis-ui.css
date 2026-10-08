@@ -1357,6 +1357,18 @@ body.sidebar-show .main-footer {
  *
  * Jadi JANGAN menimpanya lagi tanpa menanyakan dulu — yang dikorbankan
  * keseragaman jarak dengan Profil, bukan sekadar selera.
+ *
+ * DITANYAKAN, DAN DIBALIK 8 Okt 2026 — hanya untuk #rin-tab.
+ *
+ * Pemiliknya memilih deret sebaris: keenam tab layar Rincian kurang 10px
+ * untuk muat (752px lebar alami + 30px jeda = 782px melawan strip 772px),
+ * dan tanpa itu "Hapus" duduk sendirian di baris kedua. Timpaannya ada di
+ * rincian.blade.php, 13px, ber-!important — sebab !important di style.css
+ * menang atas bobot pemilih apa pun, dan timpaan tanpa itu terbukti tidak
+ * berlaku sama sekali.
+ *
+ * Deret tab layar LAIN tetap 15px. Jadi aturan di atas masih berlaku untuk
+ * semuanya kecuali #rin-tab, dan tetap: jangan menimpanya tanpa bertanya.
  */
 
 /* 12px, menyamai ukuran terukur ikon tab di halaman profil. !important perlu

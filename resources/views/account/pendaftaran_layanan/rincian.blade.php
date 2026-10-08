@@ -414,44 +414,104 @@ Rincian Pendaftaran | MIS Rumah Scopus
          * satu baris berpenanda tepi; timpaan ini tidak dipakai di sana.
          */
         @media (min-width: 768px) {
+            /*
+             * KISI berkolom sama rata, bukan deret lentur.
+             *
+             * Dengan `flex: 1 1 auto` + `max-width: 200px`, lebar tiap tab
+             * dibatasi dan sisanya jadi ruang kosong. Terukur sebelum
+             * diperbaiki:
+             *
+             *     3 tab @1440px   sisa kanan 164px
+             *     6 tab @1440px   baris ke-2 berisi SATU tab, sisa 576px
+             *     6 tab @820px    baris ke-2 berisi SATU tab, sisa 552px
+             *
+             * Batas 200px itu sendiri dipasang untuk menahan gejala yang lain:
+             * saat barisnya membungkus, tab terakhir sendirian melar membagi
+             * seluruh lebar baris itu. Kisi menghapus KEDUANYA sekaligus —
+             * tidak ada yang membungkus, jadi tidak ada baris yatim, dan
+             * kolomnya selalu habis dibagi rata.
+             *
+             * Yang ditukar: saat barisnya membungkus, tab di baris terakhir
+             * ikut melebar membagi lebar baris itu — "Hapus" sendirian bisa
+             * jadi selebar separuh kartunya. Itu diterima: tab yang lebar
+             * masih terbaca sebagai tab, sedangkan ruang kosong di sebelahnya
+             * terbaca seperti ada yang belum selesai dimuat.
+             */
             #rin-tab > li {
-                flex: 1 1 auto;
                 /*
-                 * Batas atasnya WAJIB ada.
+                 * Tumbuh dari lebar ISINYA, tanpa batas atas.
                  *
-                 * `flex: 1 1 auto` membuat tiap tab tumbuh rata dari lebar
-                 * isinya — itu yang membuat deretnya mengisi penuh seperti di
-                 * halaman Profil. Tetapi saat barisnya membungkus, sisa tab di
-                 * baris kedua ikut tumbuh membagi SELURUH lebar baris itu:
-                 * terukur di 768px, tab "Hapus" sendirian melar jadi 694px —
-                 * satu tombol merah selebar kartunya.
+                 * `flex: 1 1 auto` membuat tiap tab berdasar lebar tulisannya
+                 * lalu membagi sisa ruang baris itu rata — jadi TIAP BARIS
+                 * habis terpakai, termasuk baris terakhir. Itu yang tidak bisa
+                 * dilakukan kisi: `repeat(auto-fit, minmax(...))` mengisi
+                 * penuh semua baris KECUALI yang terakhir, dan sisa tabnya
+                 * duduk di kolom selebar yang lain sambil meninggalkan kolom
+                 * kosong di sebelahnya.
                  *
-                 * 200px kira-kira 1,6 kali tab terlebar ("Pembayaran", 130px),
-                 * jadi deretnya masih terbaca rata tanpa ada yang melar.
+                 * Dan karena dasarnya lebar isi, tabnya hanya pernah TUMBUH —
+                 * tulisannya tidak pernah meluber. Kisi berkolom sama rata
+                 * sempat dicoba dan justru meluber: 6 tab di kolom kanan
+                 * selebar 445px berarti 74px per tab, dan "Data pendaftaran"
+                 * tidak muat di situ berapa pun pembungkusannya.
                  */
-                max-width: 200px;
+                flex: 1 1 auto;
+                min-width: 0;
+                max-width: none;
             }
 
             /*
-             * Tulisan tab MEMBUNGKUS, tidak dipotong.
+             * Tulisan tab MEMBUNGKUS, tidak meluber.
              *
              * .mis-tab menyetel white-space: nowrap, dan itu benar untuk deret
-             * yang tabnya selebar isinya. Di sini lebarnya dibagi rata tujuh,
-             * jadi yang terpanjang tidak selalu kebagian cukup: terukur
-             * hurufnya meluber 12px di 1024px dan 1280px, dan 6px di 768px —
-             * meluber tanpa galat, tanpa penggulung, dan tanpa tanda apa pun
-             * bahwa ada tulisan yang tidak terbaca.
+             * yang tabnya selebar isinya. Di kisi, lebarnya dibagi rata
+             * sebanyak tabnya — yang terpanjang tidak selalu kebagian cukup,
+             * dan dengan nowrap ia meluber keluar kotaknya tanpa galat, tanpa
+             * penggulung, dan tanpa tanda apa pun bahwa ada tulisan yang tidak
+             * terbaca.
              *
              * Dibiarkan membungkus, stripnya bertambah tinggi di lebar-lebar
-             * itu dan tidak ada satu huruf pun yang hilang. Di 1470px dan
-             * 1920px ketujuhnya tetap sebaris.
+             * sempit dan tidak ada satu huruf pun yang hilang.
              */
             #rin-tab .nav-link {
+                /* Tetap sebaris: lebarnya memang mengikuti tulisannya, jadi
+                   tidak ada yang perlu dibungkus. */
                 white-space: nowrap;
             }
 
-            /* Lihat catatan di markahnya: yang membuatnya bisa membungkus
-               adalah pembungkus <span> ini, bukan white-space di atas. */
+            /*
+             * Bantalan samping 13px, bukan 15px — DITANYAKAN DULU, 8 Okt 2026.
+             *
+             * Keenam tab layanan berangkatan kurang 10px untuk muat sebaris di
+             * 1440px: lebar alaminya 752px ditambah lima jeda 6px jadi 782px,
+             * sementara ruang yang ada 772px. Karena sepuluh piksel itu,
+             * "Hapus" pecah ke baris kedua sendirian.
+             *
+             * Ini MEMBALIK keputusan 4 Okt 2026 di mis-ui.css, yang menuntut
+             * jaraknya sama persis dengan halaman Profil dan menutup dengan
+             * "JANGAN menimpanya lagi tanpa menanyakan dulu". Ditanyakan, dan
+             * pemiliknya memilih deret sebaris — keseragaman jarak dengan
+             * Profil yang dikorbankan, sadar dan disengaja.
+             *
+             * `!important` WAJIB: style.css memasang
+             * `.nav-pills .nav-item .nav-link { padding-left: 15px !important }`,
+             * dan !important menang atas bobot pemilih apa pun. Timpaan tanpa
+             * itu pernah dicoba di sini dan diukur TIDAK berlaku sama sekali —
+             * bantalannya tetap 15px, dan yang tersisa cuma aturan mati yang
+             * terbaca seolah bekerja.
+             *
+             * 13px, bukan 12px: 2px per sisi × 12 sisi menghemat 24px, jadi
+             * 758px dengan sisa 14px. Cukup longgar untuk tulisan tab yang
+             * sedikit lebih panjang nanti, dan sedekat mungkin dengan 15px
+             * supaya bedanya dengan Profil tidak terbaca mencolok.
+             *
+             * Hanya #rin-tab yang disentuh; deret tab layar lain tetap 15px.
+             */
+            #rin-tab .nav-link {
+                padding-left: 13px !important;
+                padding-right: 13px !important;
+            }
+
             #rin-tab .rin-tab-teks {
                 min-width: 0;
             }
