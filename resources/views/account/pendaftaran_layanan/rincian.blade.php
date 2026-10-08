@@ -1484,8 +1484,18 @@ Rincian Pendaftaran | MIS Rumah Scopus
             ['Catatan panitia', 'fa-sticky-note', 'mis-kuning', ['note']],
         ],
         'bayar' => [
+            /*
+             * Nama tab tujuannya DIRAKIT, tidak ditulis mati.
+             *
+             * Kalimatnya dulu berbunyi "pindah ke tab Jadwal" — dan tab Jadwal
+             * tidak ada lagi untuk Scopus Camp sejak isian tunggalnya dilebur.
+             * Petunjuk yang menyebut tab yang tidak ada lebih buruk daripada
+             * tidak ada petunjuk sama sekali: yang membacanya mencari, tidak
+             * ketemu, lalu mengira isiannya memang dihapus.
+             */
             ['Jumlah orang', 'fa-users', 'mis-ungu', ['jumlah_pendaftar'],
-                'Mau memindahkan peserta ke angkatan lain? Isiannya pindah ke tab Jadwal.'],
+                'Mau memindahkan peserta ke angkatan lain? Isiannya ada di tab '
+                . \App\Support\TabPendaftaran::namaTabUtama($layanan) . '.'],
             ['Nominal', 'fa-money-bill-wave', 'mis-hijau',
                 ['ppn', 'kode_unik', 'kode_diskon', 'nominal_diskon', 'total_pembayaran', 'total_keseluruhan_pembayaran']],
         ],
@@ -1561,6 +1571,31 @@ Rincian Pendaftaran | MIS Rumah Scopus
     $bagianSesi = $bagianTab('sesi');
 
     /*
+     * Tab yang isinya kurang dari tiga isian DILEBUR ke tab identitas.
+     *
+     * Aturannya ada di App\Support\TabPendaftaran, bukan di sini: pengendali
+     * memakai aturan yang sama untuk mengembalikan panitia ke tab yang baru ia
+     * simpan, dan dua salinan pasti berselisih suatu hari.
+     *
+     * Yang dilebur ditaruh DI DEPAN bagian identitas, bukan di belakangnya.
+     * Yang paling sering dicari di antaranya adalah Angkatan — memindahkan
+     * peserta — dan menaruhnya di bawah "Catatan panitia" sama saja
+     * menyembunyikannya, hanya dengan satu klik lebih sedikit.
+     */
+    $dilebur = \App\Support\TabPendaftaran::dilebur($layanan);
+
+    $sumberLebur = ['bayar' => &$bagianBayar, 'sesi' => &$bagianSesi];
+
+    foreach ($dilebur as $tabLebur) {
+        $bagianDiri = array_merge($sumberLebur[$tabLebur], $bagianDiri);
+        $sumberLebur[$tabLebur] = [];
+    }
+
+    unset($sumberLebur);
+
+    $namaTabDiri = \App\Support\TabPendaftaran::namaTabUtama($layanan);
+
+    /*
      * Tab peserta untuk SEMUA layanan, bukan webinar saja.
      *
      * Sejak panitia bisa mencatat nama rombongan untuk layanan mana pun,
@@ -1573,7 +1608,7 @@ Rincian Pendaftaran | MIS Rumah Scopus
     $tab = [['ringkasan', 'Ringkasan', 'fa-clipboard-check', 'mis-ikon-ungu']];
 
     if ($bagianDiri !== []) {
-        $tab[] = ['diri', 'Identitas', 'fa-user-edit', 'mis-ikon-biru'];
+        $tab[] = ['diri', $namaTabDiri, 'fa-user-edit', 'mis-ikon-biru'];
     }
 
     if ($bagianBayar !== []) {
