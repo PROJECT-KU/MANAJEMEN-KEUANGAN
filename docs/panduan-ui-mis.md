@@ -118,6 +118,39 @@ jadi petak putih **di dalam** kartu — pernah terukur 341px kosong di bawah
 daftar syarat kata sandi. Kartu yang berhenti di ujung isinya jauh lebih enak
 dilihat daripada kartu yang dipaksa rata bawah.
 
+Tapi kartu yang berhenti di ujung isinya meninggalkan lajur kosong begitu
+halamannya digulir — di layar Rincian Pendaftaran terukur 973px kosong di
+sebelah kiri (kolom kanan 1725px, kartu kiri 752px, di 1440x900). Jawabannya
+**bukan** menyamakan tingginya: tinggi kolom kanan berayun mengikuti tab yang
+sedang dibuka (170px di tab Hapus, 1410px di tab Ringkasan), jadi susunan
+tetap mana pun pasti timpang di salah satu tab.
+
+Kartu kiri dibuat **melekat** saja, hanya di `>= 992px`:
+
+```css
+@media (min-width: 992px) {
+    .xxx-identitas {
+        position: sticky;
+        top: 90px;                      /* bilah atas melayang 15px..80px */
+        max-height: calc(100vh - 106px);
+        overflow: auto;
+    }
+}
+```
+
+Dua hal yang wajib ikut, dan keduanya gagal tanpa suara:
+
+- **`max-height` + `overflow`.** Elemen melekat yang lebih tinggi dari layar
+  membuat ujung bawahnya **tidak pernah bisa dilihat** — ia melekat terus,
+  jadi menggulir tidak membawanya naik. Terbukti di 1440x700 dan 1280x800.
+  Palangnya hanya muncul kalau memang tidak muat.
+- **Tidak boleh ada induk yang memotong luapan.** Satu saja induk dengan
+  `overflow` selain `visible` membuat `sticky` diam-diam mati: tidak ada
+  galat, kartunya cuma berhenti melekat.
+
+Dan jangan dibiarkan bocor ke ponsel: di 390px kartunya 711px pada layar
+844px, jadi kalau melekat ia menutupi hampir seluruh layar.
+
 Kisi isian memakai `repeat(auto-fit, minmax(210px, 1fr))`, bukan `col-md-*`:
 tiga kolom di layar lebar, dua di tablet, satu di ponsel, tanpa titik putus
 yang harus dijaga satu per satu. Kartunya wajib `align-content: start`.
