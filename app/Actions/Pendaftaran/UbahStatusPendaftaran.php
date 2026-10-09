@@ -2,11 +2,10 @@
 
 namespace App\Actions\Pendaftaran;
 
+
 use App\KategoriLayanan;
 use App\Support\PendaftaranSemuaLayanan as Pendaftaran;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 
 /**
  * Mengubah status satu pendaftaran, layanan apa pun.
@@ -116,7 +115,17 @@ class UbahStatusPendaftaran
             $pendaftaran->forceFill($isi)->save();
         });
 
-        $surat = $this->kirimSurat($layanan, $pendaftaran->refresh());
+        /*
+         * Pengirimnya PINDAH ke KirimSuratStatus.
+         *
+         * Tiga pemanggil sekarang: perpindahan status, tombol "kirim ulang"
+         * di layar rincian, dan perintah pengingat terjadwal. Ketiganya harus
+         * mengirim surat yang sama persis dan mencatatnya dengan cara yang
+         * sama — dan yang terakhir itu baru ada sejak hasil kirimnya dicatat
+         * di jejak, bukan cuma di log peladen.
+         */
+        $hasilSurat = (new KirimSuratStatus)->jalankan($layanan, $pendaftaran->refresh(), $olehSiapa);
+        $surat = $hasilSurat['terkirim'];
 
         return [
             'berhasil' => true,
@@ -164,85 +173,4 @@ class UbahStatusPendaftaran
         ])->save();
     }
 
-    /**
-     * Surat pemberitahuan ke pendaftarnya, kalau statusnya memang memicu satu.
-     *
-     * Dibungkus try/catch: peladen surat yang bermasalah TIDAK boleh
-     * menggagalkan perubahan status yang sudah tersimpan — panitia akan
-     * mengulang, dan statusnya berpindah dua kali. Konsekuensinya kegagalannya
-     * hanya muncul di log, jadi pemanggilnya diberi tahu lewat nilai kembali
-     * supaya layarnya bisa mengatakan suratnya tidak terkirim.
-     */
-    private function kirimSurat(string $layanan, $pendaftaran): bool
-    {
-        $kelas = Pendaftaran::suratUntuk($layanan, (string) $pendaftaran->status);
-
-        if ($kelas === null) {
-            return false;
-        }
-
-        $alamat = trim((string) ($pendaftaran->email ?? $pendaftaran->email_pemesan ?? ''));
-
-        if ($alamat === '' || ! filter_var($alamat, FILTER_VALIDATE_EMAIL)) {
-            Log::warning('Surat status pendaftaran tidak dikirim: alamatnya tidak sah.', [
-                'layanan' => $layanan, 'id' => $pendaftaran->getKey(), 'alamat' => $alamat,
-            ]);
-
-            return false;
-        }
-
-        try {
-            Mail::to($alamat)->send($this->rakitSurat($kelas, $layanan, $pendaftaran));
-
-            return true;
-        } catch (\Throwable $e) {
-            Log::error('Surat status pendaftaran gagal dikirim.', [
-                'layanan' => $layanan, 'id' => $pendaftaran->getKey(), 'galat' => $e->getMessage(),
-            ]);
-
-            return false;
-        }
-    }
-
-    /**
-     * Merakit surat sesuai tanda tangan masing-masing.
-     *
-     * Ketiga surat menuntut argumen yang berbeda, dan dua di antaranya
-     * BERTIPE subkelas angkatannya (`CategoriesScopusCamp`,
-     * `CategoriesAnalisisBibliometrik`) — menyerahkan `KategoriLayanan` apa
-     * adanya melempar TypeError saat suratnya dirakit, bukan saat dikirim.
-     */
-    private function rakitSurat(string $kelas, string $layanan, $pendaftaran)
-    {
-        $namaAplikasi = 'Rumah Scopus Foundation';
-
-        /*
-         * Surat umum cukup tahu layanan dan barisnya — dan sengaja begitu.
-         * Ia melayani kelima layanan termasuk yang TIDAK berangkatan, jadi ia
-         * tidak boleh ikut menuntut angkatan seperti cabang di bawah.
-         */
-        if ($kelas === \App\Mail\PerubahanStatusPendaftaranMail::class) {
-            return new $kelas($layanan, $pendaftaran);
-        }
-
-        if ($layanan === 'scopus_kafe') {
-            // Dua argumen pertama memang model yang sama; begitu pula di
-            // pengendali lamanya.
-            return new $kelas($pendaftaran, $pendaftaran, $namaAplikasi, true);
-        }
-
-        $angkatanModel = Pendaftaran::angkatanModel($layanan);
-        $angkatan = $angkatanModel === null
-            ? null
-            : $angkatanModel::find($pendaftaran->kategori_id);
-
-        if ($angkatan === null) {
-            throw new \RuntimeException(
-                'Angkatan pendaftaran ' . $pendaftaran->getKey() . ' tidak ditemukan, '
-                . 'jadi suratnya tidak bisa dirakit.'
-            );
-        }
-
-        return new $kelas($pendaftaran, $angkatan, $namaAplikasi);
-    }
 }
