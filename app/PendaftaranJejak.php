@@ -151,6 +151,21 @@ class PendaftaranJejak extends Model
             return 'Surat "' . $this->dari . '" GAGAL dikirim — ' . $this->ke . $siapa;
         }
 
+        /*
+         * Pengingat dibedakan dari surat status, meski jalurnya sama.
+         *
+         * Keduanya "surat terkirim", tapi yang dicari panitia saat membuka
+         * riwayat ini biasanya "sudah berapa kali orang ini ditagih" — dan
+         * itu tidak terbaca kalau pengingat tercampur dengan surat status.
+         */
+        if ($this->aksi === 'ingat-bayar') {
+            return 'Pengingat pembayaran terkirim ke ' . $this->ke;
+        }
+
+        if ($this->aksi === 'ingat-bayar-gagal') {
+            return 'Pengingat pembayaran GAGAL dikirim — ' . $this->ke;
+        }
+
         if ($this->aksi === 'peserta') {
             /*
              * Jumlahnya, bukan daftar namanya. Jejak yang memuat sepuluh nama

@@ -2764,6 +2764,8 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                                 'hapus-refund' => ['fa-undo', 'merah'],
                                                 'surat' => ['fa-paper-plane', 'biru'],
                                                 'surat-gagal' => ['fa-exclamation-triangle', 'merah'],
+                                                'ingat-bayar' => ['fa-bell', 'kuning'],
+                                                'ingat-bayar-gagal' => ['fa-exclamation-triangle', 'merah'],
                                             ];
 
                                             [$ikonJejak, $warnaJejak] = $rupaAksi[$satu->aksi]
