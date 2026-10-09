@@ -123,14 +123,25 @@ class WebinarEksklusifAdminTest extends TestCase
          * Jejaknya di tabelnya sendiri, BUKAN di kolom catatan: jejak sistem
          * tidak boleh menumpang di kolom yang disunting panitia.
          */
+        /*
+         * Disaring ke aksi 'status'. Satu perpindahan kini meninggalkan DUA
+         * jejak: perpindahannya sendiri, dan hasil kirim suratnya ('surat'
+         * atau 'surat-gagal'). Menghitung seluruh barisnya membuat uji ini
+         * merah tiap kali ada jejak sah yang baru ditambahkan.
+         */
         $jejak = \App\PendaftaranJejak::milik('webinar_eksklusif', (string) $p->getKey())
-            ->terurut()->get();
+            ->where('aksi', 'status')->terurut()->get();
 
         $this->assertCount(1, $jejak, 'perpindahan statusnya harus tercatat');
         $this->assertSame('pending', $jejak[0]->dari);
         $this->assertSame('paid', $jejak[0]->ke);
         $this->assertSame('Panitia Uji', $jejak[0]->oleh_nama,
             'siapa yang menandai harus tercatat — kalau ada selisih uang, yang ditanya orangnya');
+
+        // Dan hasil kirim suratnya ikut tercatat — itu jejak keduanya.
+        $this->assertSame(1, \App\PendaftaranJejak::milik('webinar_eksklusif', (string) $p->getKey())
+            ->whereIn('aksi', ['surat', 'surat-gagal'])->count(),
+            'hasil kirim surat harus tercatat juga');
     }
 
     /**
@@ -185,9 +196,11 @@ class WebinarEksklusifAdminTest extends TestCase
         $this->actingAs($panitia)->post(route('account.pendaftaran-layanan.status', ['webinar_eksklusif', $p->getKey()]), ['status' => 'paid']);
 
         $this->assertSame('18', (string) $sesi->fresh()->sisa_kuota);
-        // Perpindahan kedua ditolak sebab statusnya sudah sama, jadi jejaknya
-        // tetap SATU baris — bukan dua yang isinya sama.
-        $this->assertSame(1, \App\PendaftaranJejak::milik('webinar_eksklusif', (string) $p->getKey())->count());
+        // Perpindahan kedua ditolak sebab statusnya sudah sama, jadi jejak
+        // statusnya tetap SATU baris — bukan dua yang isinya sama. (Jejak
+        // suratnya dihitung terpisah, lihat uji menandai lunas.)
+        $this->assertSame(1, \App\PendaftaranJejak::milik('webinar_eksklusif', (string) $p->getKey())
+            ->where('aksi', 'status')->count());
     }
 
     #[Test]

@@ -4197,13 +4197,27 @@ class TindakanPendaftaranTest extends TestCase
                 ['status' => $status]
             )->assertRedirect();
 
+            /*
+             * Disaring ke aksi 'status'.
+             *
+             * Satu perpindahan status kini meninggalkan DUA jejak: perpindahan
+             * itu sendiri, dan hasil kirim suratnya ('surat' atau
+             * 'surat-gagal'). Menghitung seluruh barisnya membuat uji ini
+             * merah tiap kali ada jejak baru yang sah ditambahkan.
+             */
             $jejak = \App\PendaftaranJejak::milik($layanan, (string) $b->getKey())
-                ->terurut()->get();
+                ->where('aksi', 'status')->terurut()->get();
 
             $this->assertCount(1, $jejak, "Jejak perubahan {$layanan} tidak tercatat.");
             $this->assertSame($statusLama, $jejak[0]->dari, "Status asal {$layanan} tidak tercatat.");
             $this->assertSame($status, $jejak[0]->ke, "Status tujuan {$layanan} tidak tercatat.");
             $this->assertNotEmpty($jejak[0]->oleh_nama, "Jejak {$layanan} tidak menyebut siapa yang mengubah.");
+
+            // Dan hasil suratnya IKUT tercatat — itu jejak kedua yang baru.
+            $this->assertSame(1,
+                \App\PendaftaranJejak::milik($layanan, (string) $b->getKey())
+                    ->whereIn('aksi', ['surat', 'surat-gagal'])->count(),
+                "Hasil kirim surat {$layanan} tidak tercatat di jejak.");
 
             /*
              * Dan catatan panitianya TIDAK tersentuh. Inilah inti

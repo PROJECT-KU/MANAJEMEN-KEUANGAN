@@ -128,6 +128,29 @@ class PendaftaranJejak extends Model
                 . ' dihapus' . $siapa;
         }
 
+        if ($this->aksi === 'refund') {
+            return 'Pengembalian dana Rp ' . number_format((int) $this->ke, 0, ',', '.')
+                . ' dicatat' . $siapa;
+        }
+
+        if ($this->aksi === 'hapus-refund') {
+            return 'Catatan pengembalian Rp ' . number_format((int) $this->dari, 0, ',', '.')
+                . ' dihapus' . $siapa;
+        }
+
+        if ($this->aksi === 'surat') {
+            return 'Surat "' . $this->dari . '" terkirim ke ' . $this->ke . $siapa;
+        }
+
+        if ($this->aksi === 'surat-gagal') {
+            /*
+             * Sebabnya ikut disebut. "Surat gagal dikirim" tanpa sebab
+             * membuat panitia mengulang-ulang hal yang sama; "alamat emailnya
+             * kosong" memberitahunya apa yang harus dibetulkan.
+             */
+            return 'Surat "' . $this->dari . '" GAGAL dikirim — ' . $this->ke . $siapa;
+        }
+
         if ($this->aksi === 'peserta') {
             /*
              * Jumlahnya, bukan daftar namanya. Jejak yang memuat sepuluh nama

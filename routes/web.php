@@ -545,6 +545,14 @@ Route::prefix('account')
             // Panitia mengisikan nama peserta rombongan dari layar rinciannya.
             Route::put('Pendaftaran-Layanan/{layanan}/{id}/peserta', 'account\\PendaftaranLayananController@simpanPeserta')
                 ->name('account.pendaftaran-layanan.peserta');
+            // Dana yang dikembalikan ke pendaftar.
+            Route::post('Pendaftaran-Layanan/{layanan}/{id}/pengembalian', 'account\\PendaftaranLayananController@catatPengembalian')
+                ->name('account.pendaftaran-layanan.pengembalian');
+            Route::delete('Pendaftaran-Layanan/pengembalian/{pengembalian}', 'account\\PendaftaranLayananController@hapusPengembalian')
+                ->name('account.pendaftaran-layanan.pengembalian.hapus');
+            // Kirim ulang surat status yang sedang berlaku, tanpa menyentuh statusnya.
+            Route::post('Pendaftaran-Layanan/{layanan}/{id}/kirim-ulang', 'account\\PendaftaranLayananController@kirimUlangSurat')
+                ->name('account.pendaftaran-layanan.kirim-ulang');
             Route::delete('Pendaftaran-Layanan/{layanan}/{id}', 'account\\PendaftaranLayananController@hapus')
                 ->name('account.pendaftaran-layanan.hapus');
 

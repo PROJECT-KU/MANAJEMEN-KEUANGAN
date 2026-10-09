@@ -1545,6 +1545,164 @@ class PendaftaranLayananController extends Controller
                 : 'Tersimpan. Baru ' . $tercatat . ' dari ' . $jumlah . ' nama yang tercatat.');
     }
 
+    /**
+     * Mencatat dana yang dikembalikan ke pendaftar.
+     *
+     * Status "Dana dikembalikan" sudah ada sejak lama, tetapi ANGKANYA tidak
+     * pernah tersimpan di mana pun — jadi pendaftaran yang sudah direfund
+     * tetap terhitung penuh di ringkasan uang masuk.
+     *
+     * Boleh LEBIH DARI SATU kali: refund sebagian lalu sebagian lagi memang
+     * terjadi, dan satu baris per pendaftaran akan menimpa catatan pertama
+     * tanpa jejak.
+     */
+    public function catatPengembalian(Request $request, string $layanan, string $id)
+    {
+        if (! $this->bolehMelihat()) {
+            return $this->tolak();
+        }
+
+        if (! array_key_exists($layanan, Pendaftaran::katalog())) {
+            abort(404);
+        }
+
+        $pendaftaran = Pendaftaran::temukan($layanan, $id);
+
+        if ($pendaftaran === null) {
+            abort(404);
+        }
+
+        $data = $request->validate([
+            'nominal' => ['required', 'string', 'max:20'],
+            /*
+             * Tanggal uang KELUAR, dan tidak boleh di masa depan — aturan yang
+             * sama persis dengan pencatatan termin. Mencatat uang yang belum
+             * keluar berarti ringkasan kas yang salah sampai hari itu tiba.
+             */
+            'tanggal' => ['required', 'date', 'before_or_equal:today'],
+            'cara' => ['nullable', Rule::in(array_keys(Pendaftaran::caraBayarPilihan()))],
+            'catatan' => ['nullable', 'string', 'max:255'],
+        ], [
+            'nominal.required' => 'Nominal yang dikembalikan belum diisi.',
+            'tanggal.required' => 'Tanggal uang keluarnya belum diisi.',
+            'tanggal.before_or_equal' => 'Tanggalnya tidak boleh di masa depan — '
+                . 'yang dicatat di sini uang yang SUDAH keluar.',
+        ]);
+
+        // Diketik berformat "1.500.000" oleh pemolesnya di layar.
+        $nominal = (int) preg_replace('/\D+/', '', $data['nominal']);
+
+        if ($nominal < 1) {
+            return back()->withErrors(['nominal' => 'Nominalnya harus lebih dari nol.'])
+                ->withInput()->with('tab', 'termin');
+        }
+
+        /*
+         * Tidak boleh melebihi yang dibayar. Refund yang lebih besar daripada
+         * tagihannya membuat ringkasan uang masuk MINUS, dan tidak ada satu
+         * pun layar yang tahu harus berbuat apa dengan angka itu.
+         */
+        $kolomTotal = Pendaftaran::sumber($layanan)['kolom']['total'];
+        $tagihan = (int) preg_replace('/\D+/', '', (string) $pendaftaran->{$kolomTotal});
+        $sudah = \App\PendaftaranPengembalian::totalMilik($layanan, (string) $pendaftaran->getKey());
+
+        if ($tagihan > 0 && $sudah + $nominal > $tagihan) {
+            return back()->withInput()->with('tab', 'termin')->with('error',
+                'Totalnya melebihi yang dibayar — sisa yang masih bisa dikembalikan Rp '
+                . number_format(max(0, $tagihan - $sudah), 0, ',', '.') . '.');
+        }
+
+        DB::transaction(function () use ($layanan, $pendaftaran, $nominal, $data) {
+            \App\PendaftaranPengembalian::create([
+                'layanan' => $layanan,
+                'pendaftaran_id' => (string) $pendaftaran->getKey(),
+                'nominal' => $nominal,
+                'tanggal' => $data['tanggal'],
+                'cara' => $data['cara'] ?? null,
+                'catatan' => trim((string) ($data['catatan'] ?? '')) ?: null,
+                'oleh_id' => Auth::id(),
+                'oleh_nama' => $this->siapa(),
+            ]);
+
+            \App\PendaftaranJejak::create([
+                'layanan' => $layanan,
+                'pendaftaran_id' => (string) $pendaftaran->getKey(),
+                'aksi' => 'refund',
+                'ke' => (string) $nominal,
+                'oleh_id' => Auth::id(),
+                'oleh_nama' => $this->siapa(),
+            ]);
+        });
+
+        return back()->with('tab', 'termin')->with('sukses',
+            'Pengembalian Rp ' . number_format($nominal, 0, ',', '.') . ' tercatat.');
+    }
+
+    /** Menghapus satu catatan pengembalian yang salah ketik. */
+    public function hapusPengembalian(string $pengembalian)
+    {
+        if (! $this->bolehMenghapus()) {
+            return $this->tolak();
+        }
+
+        $baris = \App\PendaftaranPengembalian::find($pengembalian);
+
+        if ($baris === null) {
+            abort(404);
+        }
+
+        $nominal = (int) $baris->nominal;
+
+        \App\PendaftaranJejak::create([
+            'layanan' => $baris->layanan,
+            'pendaftaran_id' => (string) $baris->pendaftaran_id,
+            'aksi' => 'hapus-refund',
+            'dari' => (string) $nominal,
+            'oleh_id' => Auth::id(),
+            'oleh_nama' => $this->siapa(),
+        ]);
+
+        $baris->delete();
+
+        return back()->with('tab', 'termin')->with('sukses',
+            'Catatan pengembalian Rp ' . number_format($nominal, 0, ',', '.') . ' dihapus.');
+    }
+
+    /**
+     * Mengirim ULANG surat status yang sedang berlaku.
+     *
+     * Sebelum ini tidak ada jalannya sama sekali. Surat yang tidak sampai —
+     * alamat salah ketik, kotak masuk penuh, peladen surat sedang rewel —
+     * hanya bisa diulang dengan MEMINDAHKAN STATUSNYA BOLAK-BALIK, dan itu
+     * meninggalkan dua jejak palsu pada riwayat yang justru dipakai menelusuri
+     * perselisihan.
+     *
+     * Statusnya TIDAK disentuh: yang dikirim surat untuk status yang sekarang.
+     */
+    public function kirimUlangSurat(string $layanan, string $id)
+    {
+        if (! $this->bolehMelihat()) {
+            return $this->tolak();
+        }
+
+        if (! array_key_exists($layanan, Pendaftaran::katalog())) {
+            abort(404);
+        }
+
+        $pendaftaran = Pendaftaran::temukan($layanan, $id);
+
+        if ($pendaftaran === null) {
+            abort(404);
+        }
+
+        $hasil = (new \App\Actions\Pendaftaran\KirimSuratStatus)
+            ->jalankan($layanan, $pendaftaran, $this->siapa());
+
+        return back()
+            ->with('tab', 'ringkasan')
+            ->with($hasil['terkirim'] ? 'sukses' : 'error', $hasil['pesan']);
+    }
+
     /** Memindahkan status satu pendaftaran. */
     public function ubahStatus(Request $request, string $layanan, string $id)
     {
@@ -2096,6 +2254,11 @@ class PendaftaranLayananController extends Controller
             'semua' => 0,
             'orang' => 0,
             'uang_lunas' => 0,
+            // Dana yang sudah dikembalikan, untuk DIKURANGKAN dari uang
+            // masuk. Sebelum tabel pengembalian ada, angkanya tidak tersimpan
+            // di mana pun dan pendaftaran yang sudah direfund tetap terhitung
+            // penuh di ubin "uang masuk".
+            'uang_refund' => 0,
             // Yang paling menuntut tindakan: sudah mengunggah bukti transfer
             // tetapi statusnya masih menunggu. Terukur lima baris di tiga
             // layanan — dan sebelum ada layar ini, menemukannya menuntut
@@ -2118,6 +2281,24 @@ class PendaftaranLayananController extends Controller
                 $ringkasan['perlu_diperiksa'] += (int) $r->berbukti;
             }
         }
+
+        /*
+         * Dana yang dikembalikan, dikurangkan dari uang masuk.
+         *
+         * Kueri TERPISAH, bukan ikut penjumlahan di atas: pengembaliannya
+         * tinggal di tabelnya sendiri — satu pendaftaran bisa direfund
+         * sebagian lalu sebagian lagi — jadi ia tidak bisa dijumlahkan dari
+         * baris pendaftarannya.
+         *
+         * Saringan layanan ikut diteruskan; saringan lain TIDAK, dan itu
+         * disengaja: yang lain menyaring baris pendaftaran, sementara angka
+         * ini menjawab "berapa uang yang benar-benar tinggal di kas".
+         */
+        $ringkasan['uang_refund'] = (int) \App\PendaftaranPengembalian::query()
+            ->when($layanan !== '', fn ($q) => $q->where('layanan', $layanan))
+            ->sum('nominal');
+
+        $ringkasan['uang_bersih'] = max(0, $ringkasan['uang_lunas'] - $ringkasan['uang_refund']);
 
         /*
          * Pendaftaran yang menunggu terlalu lama, dihitung terpisah.
