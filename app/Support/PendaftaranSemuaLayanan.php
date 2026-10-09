@@ -720,6 +720,26 @@ class PendaftaranSemuaLayanan
         return self::SUMBER[$layanan]['kolom_catatan'] ?? null;
     }
 
+    /**
+     * Nama kolom asli satu peran pada satu layanan.
+     *
+     * Pasangan PHP dari `ungkapan()`, untuk kode yang bekerja pada MODELNYA
+     * dan bukan pada baris hasil union. Peran yang nilainya ungkapan SQL
+     * (`*_mentah`, mis. 'nomor' Clinik Scopus) memulangkan null: tidak ada
+     * satu kolom pun yang bisa disebutkan, dan memulangkan ungkapannya
+     * membuat pemanggil menulis `->where("COALESCE(...)", ...)`.
+     */
+    public static function kolomPeran(string $layanan, string $peran): ?string
+    {
+        $s = self::SUMBER[$layanan] ?? null;
+
+        if ($s === null || ($s['kolom'][$peran . '_mentah'] ?? false) === true) {
+            return null;
+        }
+
+        return $s['kolom'][$peran] ?? null;
+    }
+
     /** Kelas model Eloquent satu layanan, atau null. */
     public static function modelUntuk(string $layanan): ?string
     {

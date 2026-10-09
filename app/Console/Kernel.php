@@ -94,6 +94,22 @@ class Kernel extends ConsoleKernel
          * membacanya pagi-pagi sudah melewatkan satu kesempatan mengingat.
          */
         $tugas('webinar-eksklusif:ingatkan')->dailyAt('08:00');
+
+        /*
+         * Pengingat pembayaran untuk KELIMA layanan.
+         *
+         * 09:30, sesudah `verifikasi:ingatkan` (09:00): keduanya menyurati
+         * orang yang sama kalau ia baru mendaftar, dan dua surat yang tiba
+         * dalam detik yang sama lebih mudah diabaikan daripada dua surat
+         * yang berjarak.
+         *
+         * Harian, tetapi yang menentukan seberapa sering satu orang disurati
+         * bukan jadwal ini melainkan pilihan --ulang dan --maks di dalam
+         * perintahnya: paling cepat tujuh hari sekali, paling banyak tiga
+         * kali. Jadwal harian hanya membuat pendaftar yang baru memenuhi
+         * syarat tidak perlu menunggu sampai minggu depan.
+         */
+        $tugas('pendaftaran:ingatkan-bayar')->dailyAt('09:30');
     }
 
     protected function commands()
