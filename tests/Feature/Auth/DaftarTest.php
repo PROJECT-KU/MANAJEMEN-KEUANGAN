@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Livewire;
+use Illuminate\Support\Carbon;
 use Tests\TestCase;
 
 class DaftarTest extends TestCase
@@ -236,7 +237,26 @@ class DaftarTest extends TestCase
 
     public function test_kiriman_terlalu_cepat_ditolak(): void
     {
-        // Tanpa jeda: seperti skrip yang mengirim formulir seketika.
+        /*
+         * Waktunya DIKENDALIKAN, tidak dibalap.
+         *
+         * Perangkapnya menolak kiriman di bawah 4 detik sesudah borangnya
+         * dibuka (Daftar::DETIK_TERCEPAT). Uji ini dulu mengandalkan dirinya
+         * sendiri selesai lebih cepat dari itu — dan berhenti benar begitu
+         * mesinnya melambat: enam putaran Livewire plus bcrypt memakan 7,5
+         * detik, jadi perangkapnya TIDAK fire dan ujinya merah pada kode yang
+         * justru bekerja persis seperti seharusnya.
+         *
+         * WAKTUNYA DIBEKUKAN, bukan nilainya yang dipatok. Percobaan pertama
+         * menyetel session('daftar_dibuka') sebelum komponennya dibuat, dan
+         * tetap merah: mount() menyetelnya ulang ke waktu saat itu juga, jadi
+         * nilai yang dipasang di muka langsung tertimpa.
+         *
+         * Dengan waktu beku, mount() dan pemeriksaannya membaca detik yang
+         * sama persis — selisihnya nol, berapa pun lamanya uji ini berjalan.
+         */
+        Carbon::setTestNow(Carbon::now());
+
         Livewire::test(Daftar::class)
             ->set('namaLengkap', 'Robot Cepat')
             ->set('username', 'robot_' . uniqid())
@@ -246,5 +266,9 @@ class DaftarTest extends TestCase
             ->set('setuju', true)
             ->call('daftar')
             ->assertHasErrors('email');
+
+        // Dikembalikan: waktu beku yang menetap akan menyesatkan uji berikutnya
+        // di proses yang sama.
+        Carbon::setTestNow();
     }
 }
