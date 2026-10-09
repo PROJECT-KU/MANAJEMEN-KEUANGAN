@@ -104,12 +104,17 @@ class JejakPanjangDitahanTest extends TestCase
         /*
          * Dicari TOMBOLNYA, bukan untaian penandanya di mana saja.
          *
-         * Percobaan pertama mencari 'data-mis-jejak-lagi' di seluruh halaman
-         * dan langsung merah pada markah yang justru benar: skrip pembukanya
-         * sendiri memuat pemilih `[data-mis-jejak-lagi]`. Pemindai yang
-         * menjaring kodenya sendiri tidak menjaga apa pun.
+         * Percobaan pertama mencari penandanya di seluruh halaman dan langsung
+         * merah pada markah yang justru benar: skrip pembukanya sendiri memuat
+         * pemilih itu. Pemindai yang menjaring kodenya sendiri tidak menjaga
+         * apa pun.
+         *
+         * Penandanya `data-mis-ringkas`, dan namanya pernah berganti dari
+         * `data-mis-jejak-lagi` saat skripnya dijadikan umum untuk daftar
+         * peserta. Penjaga yang tertinggal di nama lama berubah jadi HAMPA —
+         * ia mencari sesuatu yang tidak pernah ada lagi, jadi selalu hijau.
          */
-        $this->assertSame(0, preg_match('/<button[^>]*data-mis-jejak-lagi/', $isi),
+        $this->assertSame(0, preg_match('/<button[^>]*data-mis-ringkas/', $isi),
             'Tombol pembuka tergambar padahal tidak ada yang ditahan.');
     }
 

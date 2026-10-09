@@ -1394,6 +1394,25 @@ Rincian Pendaftaran | MIS Rumah Scopus
             color: var(--mis-tinta);
         }
 
+        /*
+         * Peserta yang ditahan. Pemilihnya menyebut `.rin-peserta li` juga —
+         * aturan di atas menyetel `display: flex`, dan kelas tunggal berbobot
+         * (0,1,0) akan KALAH terhadapnya: barisnya tetap tergambar tanpa ada
+         * galat apa pun yang menunjukkannya. Pelajaran yang sama sudah dibayar
+         * di daftar jejak perubahan.
+         */
+        .rin-peserta li.rin-peserta-lama {
+            display: none;
+        }
+
+        .rin-peserta.rin-peserta-penuh li.rin-peserta-lama {
+            display: flex;
+        }
+
+        .rin-peserta-lagi {
+            margin-bottom: 11px;
+        }
+
         .rin-peserta li::before {
             counter-increment: peserta;
             content: counter(peserta);
@@ -2425,12 +2444,13 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                     {{-- Tombolnya DI ATAS daftarnya, sebab yang
                                          dibukanya memang muncul di atas: jejak tertua
                                          ada di puncak, terbaru di dasar. --}}
-                                    <button type="button" class="rin-jejak-lagi" data-mis-jejak-lagi
+                                    <button type="button" class="rin-jejak-lagi"
+                                        data-mis-ringkas=".rin-jejak" data-kelas-penuh="rin-jejak-penuh"
                                         data-buka="Tampilkan {{ $jumlahLama }} jejak lebih lama"
                                         data-tutup="Sembunyikan jejak lama"
                                         aria-expanded="false">
                                         <i class="fas fa-chevron-down" aria-hidden="true"></i>
-                                        <span data-mis-jejak-lagi-teks>Tampilkan {{ $jumlahLama }} jejak lebih lama</span>
+                                        <span data-mis-ringkas-teks>Tampilkan {{ $jumlahLama }} jejak lebih lama</span>
                                     </button>
                                 @endif
 
@@ -2934,9 +2954,62 @@ Rincian Pendaftaran | MIS Rumah Scopus
                             {{-- Dibawa dari layar pendaftar webinar yang dibuang:
                                  tanpa daftar ini, nama peserta kedua dan seterusnya
                                  tidak bisa dilihat di mana pun lagi. --}}
+                            @php
+                                /*
+                                 * Hanya enam peserta PERTAMA yang tergambar.
+                                 *
+                                 * Rombongan di layanan ini bisa belasan orang — terukur
+                                 * satu pendaftaran berisi 15 — dan tiap orang satu kartu
+                                 * setinggi 44px. Lima belas di antaranya memanjangkan
+                                 * kartunya jauh ke bawah dan mendorong borang
+                                 * pengisiannya keluar dari pandangan, padahal borang itu
+                                 * yang justru dibuka panitia di tab ini.
+                                 *
+                                 * Yang DITAHAN yang belakang, bukan yang depan: nomor
+                                 * urut daftar ini yang dipakai menerbitkan sertifikat,
+                                 * jadi ia dibaca dari atas. Pendaftarnya sendiri selalu
+                                 * nomor satu.
+                                 *
+                                 * Enam, menyamai batas jejak perubahan di kartu sebelah:
+                                 * dua daftar bertingkah beda di satu layar menuntut
+                                 * panitia mengingat dua aturan.
+                                 */
+                                $batasPeserta = 6;
+                                $pesertaDitahan = max(0, count($semuaPeserta) - $batasPeserta);
+                            @endphp
+
+                            @if ($pesertaDitahan > 0)
+                                {{-- Tombolnya DI ATAS daftarnya, menyamai jejak
+                                     perubahan — walau yang dibukanya muncul di BAWAH.
+                                     Letak yang sama untuk tuas yang sama kerjanya lebih
+                                     mudah ditemukan daripada letak yang paling tepat
+                                     untuk masing-masing. --}}
+                                <button type="button" class="rin-jejak-lagi rin-peserta-lagi"
+                                    data-mis-ringkas=".rin-peserta" data-kelas-penuh="rin-peserta-penuh"
+                                    data-buka="Tampilkan {{ $pesertaDitahan }} peserta lainnya"
+                                    data-tutup="Sembunyikan sebagiannya"
+                                    aria-expanded="false">
+                                    <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                                    <span data-mis-ringkas-teks>Tampilkan {{ $pesertaDitahan }} peserta lainnya</span>
+                                </button>
+                            @endif
+
                             <ol class="rin-peserta">
                                 @foreach ($semuaPeserta as $orangKe)
-                                    <li>
+                                    {{-- Yang ditahan tergambar juga, hanya disembunyikan
+                                         CSS: membukanya jadi tidak menuntut permintaan
+                                         kedua ke peladen.
+
+                                         Soal nomor urutnya — `display: none` memang
+                                         MEMATIKAN counter-increment, jadi yang ditahan
+                                         tidak ikut menghitung. Tidak jadi masalah di
+                                         sini sebab yang ditahan semuanya di BUNTUT:
+                                         tidak ada baris tampak sesudahnya yang bisa
+                                         meleset. Diperiksa di peramban — tertutup
+                                         bernomor 1..6, terbuka 1..15. Kalau suatu hari
+                                         yang ditahan dipindah ke tengah, penomorannya
+                                         harus pindah ke PHP. --}}
+                                    <li @class(['rin-peserta-lama' => $loop->index >= $batasPeserta])>
                                         <span class="rin-peserta-nama">
                                             {{ $orangKe['nama'] ?: 'Tanpa nama' }}
                                             @if (! empty($orangKe['email']))
@@ -3512,7 +3585,15 @@ Rincian Pendaftaran | MIS Rumah Scopus
     });
 
     /*
-     * Membuka jejak lama yang ditahan.
+     * Membuka sisa daftar yang ditahan. SATU skrip untuk SEMUA daftar.
+     *
+     * Dipakai jejak perubahan dan daftar peserta; keduanya punya gejala yang
+     * sama — kartunya memanjang ke bawah tanpa batas dan mendorong isi di
+     * bawahnya jauh dari pandangan.
+     *
+     * Umum sejak awal, bukan disalin: versi pertamanya khusus jejak, dan
+     * daftar peserta datang beberapa jam kemudian menuntut hal yang sama
+     * persis. Dua salinan perilaku yang sama pasti berbeda perlahan.
      *
      * Barisnya SUDAH tergambar dan hanya disembunyikan CSS, jadi membukanya
      * tidak menuntut permintaan kedua ke peladen — satu jalur lagi yang bisa
@@ -3523,16 +3604,24 @@ Rincian Pendaftaran | MIS Rumah Scopus
      * tanpa menyentuh skrip ini.
      */
     document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('[data-mis-jejak-lagi]').forEach(function (tombol) {
-            var daftar = tombol.parentElement.querySelector('.rin-jejak');
-            var teks = tombol.querySelector('[data-mis-jejak-lagi-teks]');
+        document.querySelectorAll('[data-mis-ringkas]').forEach(function (tombol) {
+            /*
+             * Daftarnya ditunjuk PEMILIH, bukan ditebak dari induk tombolnya.
+             * Versi pertama mencarinya di parentElement, dan itu diam-diam
+             * mengikat tombolnya ke satu susunan markah tertentu — daftar
+             * berikutnya yang strukturnya sedikit berbeda akan gagal tanpa
+             * galat apa pun.
+             */
+            var daftar = tombol.parentElement.querySelector(tombol.dataset.misRingkas);
+            var teks = tombol.querySelector('[data-mis-ringkas-teks]');
+            var kelasPenuh = tombol.dataset.kelasPenuh;
 
-            if (!daftar) {
+            if (!daftar || !kelasPenuh) {
                 return;
             }
 
             tombol.addEventListener('click', function () {
-                var terbuka = daftar.classList.toggle('rin-jejak-penuh');
+                var terbuka = daftar.classList.toggle(kelasPenuh);
 
                 tombol.setAttribute('aria-expanded', terbuka ? 'true' : 'false');
 
