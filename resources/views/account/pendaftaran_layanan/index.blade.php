@@ -794,6 +794,16 @@ Pendaftar Layanan | MIS Rumah Scopus
             overflow-wrap: anywhere;
         }
 
+        /* Keterangan refund di bawah angkanya: lebih kecil dan ungu, sebab
+           ia menjelaskan angka di atasnya, bukan angka tersendiri. */
+        .pdl-uang-refund {
+            display: block;
+            margin-top: 2px;
+            font-size: .72rem;
+            font-weight: 600;
+            color: var(--mis-ungu, #6d4aff);
+        }
+
         .pdl-uang-angka {
             min-width: 0;
             line-height: 1.35;
@@ -1138,8 +1148,17 @@ Pendaftar Layanan | MIS Rumah Scopus
             <span>
                 <i class="fas fa-wallet mis-ikon-hijau" aria-hidden="true"></i>
                 <span class="pdl-uang-angka">
-                    <strong>Rp {{ number_format($ringkasan['uang_lunas'], 0, ',', '.') }}</strong>
+                    <strong>Rp {{ number_format($ringkasan['uang_bersih'], 0, ',', '.') }}</strong>
                     <span>uang masuk dari yang lunas</span>
+                    {{-- Refund disebut TERPISAH, bukan diam-diam dikurangkan
+                         saja. Angka yang menyusut tanpa keterangan membuat
+                         panitia mengira ada pembayaran yang hilang; dengan
+                         barisnya, ia tahu persis apa yang terjadi. --}}
+                    @if ($ringkasan['uang_refund'] > 0)
+                        <span class="pdl-uang-refund">
+                            sudah dikurangi Rp {{ number_format($ringkasan['uang_refund'], 0, ',', '.') }} yang dikembalikan
+                        </span>
+                    @endif
                 </span>
             </span>
 

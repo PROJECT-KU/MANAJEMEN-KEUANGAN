@@ -1331,6 +1331,60 @@ Rincian Pendaftaran | MIS Rumah Scopus
 
         /* Tombol pembuka jejak lama. Tenang, sebab ia bukan tindakan —
            cuma membuka yang sudah ada. */
+        /* Daftar pengembalian dana. Satu baris satu kali uang keluar. */
+        .rin-refund {
+            display: grid;
+            gap: 8px;
+            margin: 0 0 12px;
+            padding: 0;
+            list-style: none;
+        }
+
+        .rin-refund li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border: 1px solid var(--mis-garis);
+            border-radius: var(--mis-radius-kecil);
+            background: #fff;
+        }
+
+        .rin-refund-isi {
+            display: grid;
+            gap: 1px;
+            min-width: 0;
+            font-size: .86rem;
+        }
+
+        .rin-refund-ket {
+            font-size: .74rem;
+            color: var(--mis-tinta-4);
+            overflow-wrap: anywhere;
+        }
+
+        /* Tombol hapusnya didorong ke ujung, dan borangnya tidak boleh ikut
+           menyisakan ruang: ia cuma pembungkus satu tombol. */
+        .rin-refund-hapus {
+            margin-left: auto;
+            display: contents;
+        }
+
+        .rin-refund-borang {
+            display: grid;
+            gap: 12px;
+        }
+
+        /* Tombol kirim ulang surat, dipisah garis dari deret tombol status. */
+        .rin-kirim-ulang {
+            display: grid;
+            gap: 6px;
+            justify-items: start;
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px dashed var(--mis-garis);
+        }
+
         .rin-jejak-lagi {
             display: inline-flex;
             align-items: center;
@@ -2395,7 +2449,187 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                     </p>
                                 @endif
                             </form>
+
+                            {{--
+                                Kirim ULANG surat status yang sedang berlaku.
+
+                                Borang TERSENDIRI, di luar borang status di atasnya:
+                                borang bersarang bukan markah yang sah, dan tombol ini
+                                tidak boleh ikut mengirim nilai status apa pun — yang
+                                dikerjakannya justru TIDAK menyentuh status.
+
+                                Sebelum ini tidak ada jalannya sama sekali. Surat yang
+                                tidak sampai hanya bisa diulang dengan memindahkan
+                                statusnya bolak-balik, dan itu meninggalkan dua jejak
+                                palsu pada riwayat yang justru dipakai menelusuri
+                                perselisihan.
+                            --}}
+                            @if (Pendaftaran::suratUntuk($layanan, $pendaftaran->status))
+                                <form method="POST" class="rin-kirim-ulang"
+                                    action="{{ route('account.pendaftaran-layanan.kirim-ulang', [$layanan, $pendaftaran->getKey()]) }}">
+                                    @csrf
+                                    <button type="submit" class="mis-tombol mis-tombol-halus" data-mis-kirim-ulang>
+                                        <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                                        <span>Kirim ulang suratnya</span>
+                                    </button>
+                                    <span class="mis-bantuan">
+                                        Mengirim lagi surat untuk status yang sekarang. Statusnya tidak berubah.
+                                    </span>
+                                </form>
+                            @endif
                         </div>
+
+                        @php
+                            /*
+                             * Pengembalian dana.
+                             *
+                             * Di kartu RINGKASAN, bukan di tab "Termin & DP": tab itu
+                             * hanya ada untuk pesanan rombongan dan lembaga, sedangkan
+                             * refund bisa terjadi pada pendaftaran satu orang juga —
+                             * dan itu justru yang paling sering.
+                             *
+                             * Muncul hanya saat statusnya memang refund, atau saat
+                             * sudah ada catatannya. Menampilkannya di semua
+                             * pendaftaran berarti satu borang uang keluar terpampang
+                             * di 180 layar yang tidak membutuhkannya.
+                             */
+                            $pengembalian = \App\PendaftaranPengembalian::milik(
+                                $layanan, (string) $pendaftaran->getKey()
+                            )->terurut()->get();
+
+                            $totalRefund = (int) $pengembalian->sum('nominal');
+                            $sisaRefund = max(0, $totalBayar - $totalRefund);
+                            $tampilkanRefund = $keadaan === 'refund' || $pengembalian->isNotEmpty();
+                        @endphp
+
+                        @if ($tampilkanRefund)
+                            <div class="rin-bagian">
+                                <p class="rin-bagian-judul">
+                                    <span class="mis-medali kecil mis-ungu" aria-hidden="true"><i class="fas fa-undo"></i></span>
+                                    <span class="teks">Pengembalian dana</span>
+                                </p>
+
+                                @if ($pengembalian->isNotEmpty())
+                                    <ul class="rin-refund">
+                                        @foreach ($pengembalian as $satu)
+                                            <li>
+                                                <span class="rin-refund-isi">
+                                                    <strong>{{ $satu->nominal_tulis }}</strong>
+                                                    <span class="rin-refund-ket">
+                                                        {{ $satu->tanggal_tulis }}@if ($satu->cara) &middot; {{ Pendaftaran::caraBayar($satu->cara)['label'] }}@endif
+                                                        @if ($satu->catatan) &middot; {{ $satu->catatan }}@endif
+                                                    </span>
+                                                </span>
+                                                @if ($bolehMenghapus)
+                                                    <form method="POST" class="rin-refund-hapus"
+                                                        action="{{ route('account.pendaftaran-layanan.pengembalian.hapus', $satu->id) }}">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="mis-tombol mis-tombol-halus mis-tombol-bahaya"
+                                                            title="Hapus catatan ini">
+                                                            <i class="fas fa-times" aria-hidden="true"></i>
+                                                        </button>
+                                                    </form>
+                                                @endif
+                                            </li>
+                                        @endforeach
+                                    </ul>
+
+                                    @php
+                                        /*
+                                         * Dirakit di PHP, BUKAN dengan @ if sebaris.
+                                         *
+                                         * Kalimatnya harus berbunyi "...yang dibayar, sisa
+                                         * Rp X." tanpa spasi sebelum koma — dan direktif
+                                         * yang didahului HURUF tidak dikompilasi Blade.
+                                         * Versi pertama menulis "dibayar" lalu direktifnya
+                                         * menempel: yang pembuka lolos jadi teks biasa
+                                         * sementara penutupnya tetap dikompilasi, dan
+                                         * seluruh halaman 500 dengan pesan "unexpected
+                                         * token endif" yang tidak menunjuk baris ini sama
+                                         * sekali.
+                                         */
+                                        $sisaKalimat = $sisaRefund > 0
+                                            ? ', sisa Rp ' . number_format($sisaRefund, 0, ',', '.') . '.'
+                                            : '.';
+                                    @endphp
+                                    <p class="rin-nota">
+                                        <i class="fas fa-wallet" aria-hidden="true"></i>
+                                        <span>
+                                            Sudah dikembalikan <strong>Rp {{ number_format($totalRefund, 0, ',', '.') }}</strong>
+                                            dari Rp {{ number_format($totalBayar, 0, ',', '.') }} yang dibayar{{ $sisaKalimat }}
+                                        </span>
+                                    </p>
+                                @endif
+
+                                @if ($sisaRefund > 0 || $pengembalian->isEmpty())
+                                    <form method="POST" class="rin-refund-borang"
+                                        action="{{ route('account.pendaftaran-layanan.pengembalian', [$layanan, $pendaftaran->getKey()]) }}">
+                                        @csrf
+
+                                        <div class="rin-kisi">
+                                            <div class="mis-isian">
+                                                <label class="mis-label rin-label" for="rin-r-nominal">
+                                                    <span class="mis-medali mini mis-ungu" aria-hidden="true"><i class="fas fa-money-bill-wave"></i></span>
+                                                    <span>Nominal dikembalikan</span>
+                                                </label>
+                                                <span class="rin-uang-kotak">
+                                                    <span class="rin-uang-awalan" aria-hidden="true">Rp</span>
+                                                    <input type="text" class="form-control-modern rin-uang-isian @error('nominal') is-invalid @enderror"
+                                                        id="rin-r-nominal" name="nominal" inputmode="numeric" data-mis-rupiah
+                                                        value="{{ old('nominal') }}"
+                                                        placeholder="{{ number_format(max(1, $sisaRefund), 0, ',', '.') }}">
+                                                </span>
+                                                @error('nominal')
+                                                    <p class="mis-bantuan" style="color:#be123c">{{ $message }}</p>
+                                                @enderror
+                                            </div>
+
+                                            <div class="mis-isian">
+                                                <label class="mis-label rin-label" for="rin-r-tanggal">
+                                                    <span class="mis-medali mini mis-jingga" aria-hidden="true"><i class="fas fa-calendar-alt"></i></span>
+                                                    <span>Tanggal uang keluar</span>
+                                                </label>
+                                                <input type="date" class="form-control-modern @error('tanggal') is-invalid @enderror"
+                                                    id="rin-r-tanggal" name="tanggal" max="{{ now()->toDateString() }}"
+                                                    value="{{ old('tanggal', now()->toDateString()) }}">
+                                                @error('tanggal')
+                                                    <p class="mis-bantuan" style="color:#be123c">{{ $message }}</p>
+                                                @enderror
+                                            </div>
+
+                                            <div class="mis-isian">
+                                                <label class="mis-label rin-label" for="rin-r-cara">
+                                                    <span class="mis-medali mini mis-biru" aria-hidden="true"><i class="fas fa-university"></i></span>
+                                                    <span>Lewat apa</span>
+                                                </label>
+                                                <select class="form-control-modern" id="rin-r-cara" name="cara">
+                                                    @foreach (Pendaftaran::caraBayarPilihan() as $kode => $cara)
+                                                        <option value="{{ $kode }}" @selected(old('cara') === $kode)>{{ $cara['label'] }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+
+                                            <div class="mis-isian rin-isian-penuh">
+                                                <label class="mis-label rin-label" for="rin-r-catatan">
+                                                    <span class="mis-medali mini mis-kuning" aria-hidden="true"><i class="fas fa-sticky-note"></i></span>
+                                                    <span>Catatan <span style="font-weight:500;text-transform:none;letter-spacing:0;">(boleh dikosongkan)</span></span>
+                                                </label>
+                                                <input type="text" class="form-control-modern" id="rin-r-catatan"
+                                                    name="catatan" maxlength="255" value="{{ old('catatan') }}"
+                                                    placeholder="mis. transfer balik ke rekening pendaftar">
+                                            </div>
+                                        </div>
+
+                                        <div class="rin-kaki">
+                                            <button type="submit" class="mis-tombol mis-tombol-ungu">
+                                                <i class="fas fa-save" aria-hidden="true"></i> Catat pengembalian
+                                            </button>
+                                        </div>
+                                    </form>
+                                @endif
+                            </div>
+                        @endif
 
                         {{--
                             Jejak sistem dan catatan panitia DIPISAH jadi dua
@@ -2492,6 +2726,10 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                                 'bukti' => ['fa-receipt', 'biru'],
                                                 'ganti-bukti' => ['fa-receipt', 'kuning'],
                                                 'peserta' => ['fa-users', 'ungu'],
+                                                'refund' => ['fa-undo', 'ungu'],
+                                                'hapus-refund' => ['fa-undo', 'merah'],
+                                                'surat' => ['fa-paper-plane', 'biru'],
+                                                'surat-gagal' => ['fa-exclamation-triangle', 'merah'],
                                             ];
 
                                             [$ikonJejak, $warnaJejak] = $rupaAksi[$satu->aksi]
