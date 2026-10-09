@@ -1585,6 +1585,25 @@ Rincian Pendaftaran | MIS Rumah Scopus
     $kodeUnik = (int) ($pendaftaran->kode_unik ?: $pendaftaran->kode_unik_pembayaran);
 
     /*
+     * Tautan WhatsApp lewat api.whatsapp.com, BUKAN wa.me — lihat
+     * App\Support\TautanWa. Lewat wa.me emoji dan sebagian tanda baca
+     * sampai dalam keadaan rusak, dan pengirimnya tidak pernah tahu sebab
+     * di layarnya sendiri tampak benar.
+     *
+     * Barisnya dirakit di sini karena halaman ini memegang MODELNYA, bukan
+     * baris hasil union — dan perakit pesannya membaca nama seragam
+     * (nama_orang, nomor, total) yang hanya ada pada baris union.
+     */
+    $tautanWa = \App\Support\TautanWa::kirim($telpOrang, \App\Support\PesanWaPendaftaran::untuk((object) [
+        'nama_orang' => $namaOrang,
+        'nomor' => $nomor,
+        'total' => $totalBayar,
+        'kode_unik' => $kodeUnik,
+        'status' => $pendaftaran->status,
+        'layanan' => $layanan,
+    ]));
+
+    /*
      * Dibaca lewat katalog, bukan dari kolomnya langsung: baris lama dari
      * sebelum kolom `cara_bayar` ada bernilai kosong, dan nilai tak dikenal
      * tetap harus punya label — kolomnya varchar, jadi jalur pendaftaran mana
@@ -2011,8 +2030,9 @@ Rincian Pendaftaran | MIS Rumah Scopus
                         </p>
                     </div>
                     @if ($wa)
-                        <a class="rin-aksi rin-warna-hijau" href="https://wa.me/{{ $wa }}"
-                            target="_blank" rel="noopener" title="Hubungi lewat WhatsApp"
+                        <a class="rin-aksi rin-warna-hijau" href="{{ $tautanWa }}"
+                            target="_blank" rel="noopener"
+                            title="Hubungi lewat WhatsApp — pesannya sudah terisi, masih bisa disunting"
                             aria-label="Hubungi lewat WhatsApp">
                             <i class="fab fa-whatsapp" aria-hidden="true"></i>
                         </a>
@@ -3295,7 +3315,7 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                                  per satu. --}}
                                             @if (! empty($orangKe['telp']))
                                                 <a class="rin-peserta-telp"
-                                                    href="https://wa.me/{{ \App\Support\NomorTelepon::rapikan($orangKe['telp']) }}"
+                                                    href="{{ \App\Support\TautanWa::kirim($orangKe['telp'], \App\Support\PesanWaPendaftaran::peserta($orangKe['nama'] ?? null, $layanan)) }}"
                                                     target="_blank" rel="noopener">
                                                     <i class="fab fa-whatsapp" aria-hidden="true"></i>
                                                     {{ \App\Support\DaftarPeserta::bentukLokal(\App\Support\NomorTelepon::rapikan($orangKe['telp'])) }}

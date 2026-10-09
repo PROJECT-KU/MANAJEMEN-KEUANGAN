@@ -911,13 +911,25 @@ class TindakanPendaftaranTest extends TestCase
             ['Rina Tanpa Nomor', null],
         ], $peserta);
 
-        // Di layar rincian nomornya jadi tautan WhatsApp: daftar ini dibuka
-        // justru saat panitia hendak menghubungi orangnya satu per satu.
-        $this->actingAs($orang)
+        /*
+         * Di layar rincian nomornya jadi tautan WhatsApp: daftar ini dibuka
+         * justru saat panitia hendak menghubungi orangnya satu per satu.
+         *
+         * Endpointnya api.whatsapp.com, BUKAN wa.me, dan itu bukan selera:
+         * lewat wa.me emoji dan sebagian tanda baca sampai dalam keadaan
+         * rusak, sementara pengirimnya melihat teks yang benar di layarnya
+         * sendiri. Kegagalan yang tidak terlihat seperti itulah yang harus
+         * dijaga uji, bukan "ada tautannya".
+         */
+        $isi = $this->actingAs($orang)
             ->get(route('account.pendaftaran-layanan.rincian', ['scopus_camp', $b->id]))
             ->assertOk()
-            ->assertSee('wa.me/6281234567890')
-            ->assertSee('081234567890');
+            ->assertSee('api.whatsapp.com/send?phone=6281234567890', false)
+            ->assertSee('081234567890')
+            ->getContent();
+
+        $this->assertStringNotContainsString('wa.me/', $isi,
+            'Masih ada tautan wa.me; emoji di pesannya akan sampai dalam keadaan rusak.');
     }
 
     #[Test]
@@ -4609,7 +4621,7 @@ class TindakanPendaftaranTest extends TestCase
 
         $dalam = $kartu['isi'];
 
-        $this->assertSame(1, preg_match_all('#href="https://wa\.me/#', $dalam),
+        $this->assertSame(1, preg_match_all('#href="https://api\.whatsapp\.com/send\?phone=#', $dalam),
             'Tautan WhatsApp muncul lebih dari sekali di kartu identitas.');
 
         $this->assertSame(1, preg_match_all('#href="mailto:#', $dalam),

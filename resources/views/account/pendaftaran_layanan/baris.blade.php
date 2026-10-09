@@ -48,7 +48,13 @@
     $waktuBaris = Pendaftaran::waktuBaris($b);
     $tautanBaris = Pendaftaran::tautanBaris($b);
 
+    /*
+     * api.whatsapp.com, BUKAN wa.me — lihat App\Support\TautanWa. Lewat
+     * wa.me emoji dan sebagian tanda baca sampai dalam keadaan rusak, dan
+     * pengirimnya tidak pernah tahu sebab di layarnya sendiri tampak benar.
+     */
     $wa = PesananPelanggan::nomorWa($b->telp);
+    $tautanWa = \App\Support\TautanWa::kirim($b->telp, \App\Support\PesanWaPendaftaran::untuk($b));
     $jumlahOrang = max(1, (int) $b->jumlah);
     $diskon = (int) $b->nominal_diskon;
     $kodeUnik = (int) $b->kode_unik;
@@ -111,12 +117,15 @@
 
                  Tautan, bukan teks: kolom ini gunanya menghubungi orangnya,
                  dan sebagai teks nomornya harus disalin dulu ke aplikasi lain.
-                 wa.me menuntut nomor berformat internasional tanpa tanda baca,
-                 dan itulah yang dikerjakan nomorWa(). --}}
+                 Nomornya harus berformat internasional tanpa tanda baca,
+                 dan itulah yang dikerjakan nomorWa(). Teksnya sudah terisi:
+                 panitia yang menagih tidak perlu mengetik ulang nominal dan
+                 kode unik yang sudah tergambar di baris ini — dan kode unik
+                 itulah yang paling sering salah ketik. --}}
             <div class="pdl-kontak">
                 @if ($wa)
-                    <a href="https://wa.me/{{ $wa }}" target="_blank" rel="noopener"
-                        title="Hubungi {{ $b->nama_orang }} lewat WhatsApp">
+                    <a href="{{ $tautanWa }}" target="_blank" rel="noopener"
+                        title="Hubungi {{ $b->nama_orang }} lewat WhatsApp — pesannya sudah terisi, masih bisa disunting">
                         <i class="fab fa-whatsapp mis-ikon-hijau" aria-hidden="true"></i> {{ $b->telp }}
                     </a>
                 @elseif ($b->telp)
