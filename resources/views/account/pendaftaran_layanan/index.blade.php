@@ -338,6 +338,155 @@ Pendaftar Layanan | MIS Rumah Scopus
          * seperti yang pernah terjadi saat keping ini masih menempel di
          * samping nama angkatannya.
          */
+        /*
+         * Menu angkatan memakai Select2 — menu bawaan peramban tidak bisa
+         * dicari.
+         *
+         * Terukur: menunya memuat 39 angkatan yang punya pendaftar, dan
+         * belasan di antaranya bernama SAMA PERSIS ("Angkatan Penuh …")
+         * sehingga yang membedakan cuma kode acak dan bulannya. Di menu
+         * bawaan, menemukan satu di antaranya berarti menggulung sambil
+         * membaca satu per satu; mengetik huruf pertama pun melompat ke nama
+         * yang sama berulang kali.
+         *
+         * Gayanya DITULIS DI SINI supaya kotaknya serupa .form-control-modern
+         * di sebelahnya. Tanpa ini Select2 memakai rupa bawaannya — tinggi,
+         * sudut, dan warna garisnya berbeda — dan satu isian di deret saringan
+         * terbaca seperti unsur dari aplikasi lain.
+         */
+        /*
+         * `width: 100%` saja TIDAK cukup.
+         *
+         * Containernya inline-block dan lebar alaminya ditentukan pilihan
+         * terpanjang di menunya — 55 butir, yang terpanjang berpuluh aksara.
+         * Sel kisi bawaannya `min-width: auto`, jadi SELNYA yang melar
+         * mengikuti lebar alami itu, lalu `width: 100%` menghitung diri
+         * terhadap sel yang sudah terlanjur lebar. Terukur: kotaknya 1130px
+         * sementara isian di sebelahnya 211px — satu saringan selebar seluruh
+         * baris, dan sisanya terdorong keluar.
+         */
+        #pdl-borang .select2-container {
+            width: 100% !important;
+            min-width: 0;
+            max-width: 100%;
+        }
+
+        #pdl-borang .select2-container--default .select2-selection--single {
+            height: auto;
+            min-height: 40px;
+            padding: 9px 13px;
+            border: 1px solid var(--mis-garis);
+            border-radius: 11px;
+            background: #fff;
+        }
+
+        #pdl-borang .select2-container--default .select2-selection--single
+            .select2-selection__rendered {
+            padding: 0;
+            /*
+             * min-height-nya DINOLKAN, dan itu yang menentukan tingginya.
+             *
+             * Gaya lain memberi `.select2-selection__rendered` min-height
+             * 42px — dan 42 ditambah bantalan 9+9 ditambah garis 2 jadi tepat
+             * 62px, persis yang terukur, sementara isian di sebelahnya 40px.
+             * Membungkus atau tidak sama sekali bukan sebabnya; percobaan
+             * pertama menduga begitu dan tingginya tidak bergeser sepiksel pun.
+             */
+            min-height: 0;
+            line-height: 1.3;
+            /* Sebaris dan dipotong: nama angkatan bisa berpuluh aksara, dan
+               yang membungkus akan menaikkan tingginya lagi. */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            font-size: .86rem;
+            line-height: 1.3;
+            font-weight: 600;
+            color: var(--mis-tinta);
+        }
+
+        #pdl-borang .select2-container--default .select2-selection--single
+            .select2-selection__placeholder {
+            color: #cbd5e1;
+            font-weight: 600;
+        }
+
+        /* Panah bawaannya setinggi 26px dan menggantung di atas; ditengahkan
+           supaya sejajar dengan panah <select> di sebelahnya. */
+        #pdl-borang .select2-container--default .select2-selection--single
+            .select2-selection__arrow {
+            top: 50%;
+            right: 8px;
+            transform: translateY(-50%);
+        }
+
+        #pdl-borang .select2-container--default.select2-container--open
+            .select2-selection--single,
+        #pdl-borang .select2-container--default.select2-container--focus
+            .select2-selection--single {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, .12);
+        }
+
+        /*
+         * Popupnya menempel ke <body>, BUKAN ke kartu saringannya — jadi
+         * pemilihnya tidak boleh diawali #pdl-borang. Ini yang membuat
+         * setengah gaya select2 sering terlihat tidak berlaku: kotaknya
+         * berubah, daftarnya tidak.
+         */
+        .select2-container--default .select2-dropdown {
+            /*
+             * Lebarnya DIBIARKAN mengikuti kotaknya — 211px di deret saringan.
+             *
+             * Sempat dilebarkan jadi 330px supaya "Yogyakarta · angkatan
+             * ke-199 · Okt 2026" muat sebaris, sebab nomor itulah yang
+             * membedakan satu angkatan dari dua ratus angkatan Yogyakarta
+             * lainnya. DIBATALKAN: saringan ini isian paling kanan, jadi
+             * popupnya tumbuh ke luar layar — terukur di 1440px, tepi
+             * kanannya 1512 dan halamannya menerbitkan penggulung MENDATAR.
+             *
+             * `max-width: calc(100vw - …)` tidak menolong: yang melewati tepi
+             * bukan lebarnya, melainkan titik mulainya di kanan layar.
+             *
+             * Yang ditukar: nama angkatan membungkus jadi dua baris di
+             * popupnya. Nomornya tetap terbaca, cuma turun satu baris —
+             * sedangkan penggulung mendatar menggeser SELURUH halaman.
+             */
+            border: 1px solid var(--mis-garis);
+            border-radius: 11px;
+            box-shadow: 0 14px 34px rgba(15, 23, 42, .12);
+            overflow: hidden;
+        }
+
+        .select2-container--default .select2-search--dropdown .select2-search__field {
+            min-height: 36px;
+            padding: 7px 11px;
+            border: 1px solid var(--mis-garis);
+            border-radius: 9px;
+            font-size: .84rem;
+        }
+
+        .select2-container--default .select2-results__option {
+            padding: 8px 12px;
+            font-size: .84rem;
+        }
+
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            background: #6366f1;
+        }
+
+        /* Nama layanannya tetap terbaca sebagai judul kelompok, bukan sebagai
+           pilihan yang bisa diklik. */
+        .select2-container--default .select2-results__group {
+            padding: 9px 12px 5px;
+            font-size: .72rem;
+            font-weight: 800;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            color: var(--mis-tinta-4);
+        }
+
         .pdl-angkatan-no {
             display: inline-block;
             margin-left: 5px;
@@ -623,6 +772,15 @@ Pendaftar Layanan | MIS Rumah Scopus
         /* Tuasnya sejajar dasar kotak isian di sebelahnya, bukan dasar
            labelnya: .mis-saring memakai align-items: flex-end, dan tombol
            tanpa label di atasnya akan duduk lebih tinggi. */
+        /*
+         * Pembungkus Reset. display:contents saat KOSONG supaya ia tidak
+         * menyisakan petak kosong di deret saringan; saat berisi, tombolnya
+         * yang jadi item lentur barisnya, persis seperti sebelum dibungkus.
+         */
+        .pdl-reset {
+            display: contents;
+        }
+
         .pdl-lain-tuas {
             flex: 0 0 auto;
             align-self: flex-end;
@@ -1048,14 +1206,16 @@ Pendaftar Layanan | MIS Rumah Scopus
             <summary>
                 <i class="fas fa-sliders-h mis-ikon-ungu" aria-hidden="true"></i>
                 Cari &amp; saring
-                @if ($adaSaringan)
-                    <span class="mis-pil mis-pil-ungu">aktif</span>
-                @endif
+                {{-- Pembungkusnya SELALU ada walau isinya kosong: penyaring
+                     hidup memperbaruinya lewat innerHTML, dan unsur yang baru
+                     lahir saat saringan terpasang tidak akan pernah ketemu
+                     untuk diperbarui. --}}
+                <span id="pdl-aktif">@if ($adaSaringan)<span class="mis-pil mis-pil-ungu">aktif</span>@endif</span>
             </summary>
 
         <div class="mis-saring-kartu">
         <form method="GET" action="{{ route($rute) }}" class="mis-saring" id="pdl-borang" data-mis-saring="pdl-hasil"
-            data-mis-saring-juga="pdl-ringkas,pdl-aksi">
+            data-mis-saring-juga="pdl-ringkas,pdl-aksi,pdl-reset,pdl-aktif,pdl-lain-jumlah">
             {{-- Urutan ikut terbawa saat menyaring; tanpa ini, menekan tombol
                  terapkan diam-diam mengembalikan urutannya ke bawaan. --}}
             <input type="hidden" name="urut" value="{{ $urut }}">
@@ -1084,9 +1244,7 @@ Pendaftar Layanan | MIS Rumah Scopus
                 aria-expanded="{{ $adaSaringanLain ? 'true' : 'false' }}" aria-controls="pdl-lain">
                 <i class="fas fa-sliders-h" aria-hidden="true"></i>
                 <span>Saringan lain</span>
-                @if ($jumlahSaringanLain > 0)
-                    <span class="mis-pil mis-pil-ungu">{{ $jumlahSaringanLain }}</span>
-                @endif
+                <span id="pdl-lain-jumlah">@if ($jumlahSaringanLain > 0)<span class="mis-pil mis-pil-ungu">{{ $jumlahSaringanLain }}</span>@endif</span>
             </button>
 
             <div class="mis-isian mis-saring-pilih">
@@ -1119,12 +1277,33 @@ Pendaftar Layanan | MIS Rumah Scopus
                  SESUDAHNYA terdorong ke baris berikutnya. Di belakang
                  lipatan, tombol ini berdiri sendirian di satu baris dengan
                  1.029px petak kosong di kanannya. --}}
-            @if ($adaSaringan)
-                <a href="{{ route($rute) }}" class="mis-tombol mis-tombol-halus pdl-lain-tuas"
-                    title="Hapus semua saringan">
-                    <i class="fas fa-times" aria-hidden="true"></i> Reset
-                </a>
-            @endif
+            {{--
+                Pembungkusnya SELALU tergambar, isinya yang kosong-isi.
+
+                Reset dirender PELADEN, sementara saringannya dipasang tanpa
+                memuat ulang halaman: penyaring hidup menukar daftar hasil dan
+                wilayah yang disebut data-mis-saring-juga, lalu mengganti
+                alamatnya lewat history.replaceState. Borangnya sendiri tidak
+                pernah ikut ditukar.
+
+                Akibatnya terukur: halaman dibuka tanpa saringan (Reset tidak
+                dirender), lalu panitia memilih layanan, keadaan, dan angkatan
+                — alamatnya berubah, daftarnya menyusut, dan Reset TIDAK
+                PERNAH muncul. Satu-satunya jalan membersihkan saringan jadi
+                menghapus alamatnya dengan tangan.
+
+                Pembungkus kosong yang sudah ada sejak awal itulah yang
+                membuatnya bisa diperbarui; unsur yang baru lahir belakangan
+                tidak akan pernah ketemu untuk ditukar.
+            --}}
+            <span id="pdl-reset" class="pdl-reset">
+                @if ($adaSaringan)
+                    <a href="{{ route($rute) }}" class="mis-tombol mis-tombol-halus pdl-lain-tuas"
+                        title="Hapus semua saringan">
+                        <i class="fas fa-times" aria-hidden="true"></i> Reset
+                    </a>
+                @endif
+            </span>
 
             {{-- Lima saringan yang jarang dipakai, DILIPAT.
 
@@ -1387,16 +1566,100 @@ Pendaftar Layanan | MIS Rumah Scopus
 
         var kelompok = Array.prototype.slice.call(menuAngkatan.querySelectorAll('optgroup'));
 
+        /*
+         * Select2: menu bawaan peramban tidak bisa dicari.
+         *
+         * Terukur, menunya memuat 39 angkatan yang punya pendaftar, dan
+         * belasan di antaranya bernama SAMA PERSIS ("Angkatan Penuh …") —
+         * yang membedakan cuma kode acak dan bulannya. Di menu bawaan,
+         * menemukan satu di antaranya berarti menggulung sambil membaca satu
+         * per satu.
+         *
+         * Dipasang bersyarat, bukan diandaikan ada: Select2 datang dari tata
+         * letak, dan layar yang memuatnya tanpa itu akan melempar
+         * "$ is not a function" lalu MEMATIKAN seluruh skrip di bawahnya —
+         * termasuk penyempitan kelompok dan penyaring lainnya.
+         */
+        var select2Siap = false;
+
+        /*
+         * Dipasang di dalam DOCUMENT.READY, bukan langsung.
+         *
+         * scripts.js menjalankan `$(".select2").select2()` di dalam
+         * document.ready — dan Select2 menamai SPAN buatannya sendiri dengan
+         * kelas `select2`. Dipasang langsung di sini, skrip ini jalan lebih
+         * dulu, lalu scripts.js menemukan span itu dan memasang Select2 di
+         * ATAS container yang baru saja dibuat: terukur dua container untuk
+         * satu isian, dan yang terlihat di layar yang kosong.
+         *
+         * Di dalam ready, urutannya terbalik dan benar: scripts.js terdaftar
+         * lebih dulu — tag skripnya di atas tumpukan skrip layout — jadi ia
+         * jalan saat belum ada span apa pun untuk dijaring.
+         *
+         * Nama direktif Blade SENGAJA tidak ditulis di komentar ini. Versi
+         * pertama menyebutnya apa adanya, dan Blade tetap mengompilasinya
+         * walau ia di dalam komentar JS: halamannya 500 dengan pesan
+         * "Undefined property: Factory::$yieldPushContent" yang tidak
+         * menyebut-nyebut komentar ini sama sekali.
+         */
+        if (typeof window.jQuery === 'function'
+            && typeof window.jQuery.fn.select2 === 'function') {
+            window.jQuery(function () {
+                window.jQuery(menuAngkatan).select2({
+                    width: '100%',
+                    placeholder: 'Semua angkatan',
+                    // Kotak carinya SELALU ada. Bawaannya menyembunyikan kotak
+                    // itu untuk menu pendek, dan menu ini kadang memang pendek
+                    // — tetapi kotak yang kadang ada kadang tidak membuat orang
+                    // ragu apakah ia boleh mengetik.
+                    minimumResultsForSearch: 0,
+                });
+
+                select2Siap = true;
+            });
+        }
+
         var sempitkan = function (bersihkanPilihan) {
             var layanan = menuLayanan.value;
 
             kelompok.forEach(function (g) {
-                // disabled, bukan display:none — Safari mengabaikan `display`
-                // pada <optgroup>, dan kelompok yang tetap terlihat di sana
-                // membuat aturan ini berlaku di sebagian peramban saja.
                 var cocok = !layanan || g.dataset.layanan === layanan;
-                g.hidden = !cocok;
-                g.disabled = !cocok;
+
+                /*
+                 * DICOPOT dari DOM, bukan cuma disembunyikan.
+                 *
+                 * Sebelum Select2, yang dipakai `hidden` + `disabled` — sebab
+                 * Safari mengabaikan `display` pada <optgroup>. Select2 TIDAK
+                 * membaca keduanya seperti peramban: kelompok disabled tetap
+                 * tergambar di daftarnya, cuma kelabu. Angkatan layanan lain
+                 * jadi tetap memenuhi daftar yang justru hendak disempitkan.
+                 *
+                 * Mencopotnya bekerja untuk keduanya sekaligus, dan di menu
+                 * bawaan pun lebih kuat daripada `hidden`.
+                 */
+                if (cocok) {
+                    if (!g.parentElement) {
+                        menuAngkatan.appendChild(g);
+                    }
+
+                    g.hidden = false;
+                    g.disabled = false;
+                } else if (g.parentElement) {
+                    g.parentElement.removeChild(g);
+                }
+            });
+
+            /*
+             * Urutannya dikembalikan sesudah ada yang dipasang ulang.
+             *
+             * appendChild menaruhnya di buntut, jadi kelompok yang sempat
+             * dicopot lalu kembali akan muncul di urutan yang berbeda dari
+             * semula — dan urutan itu yang dipakai panitia mengenali daftarnya.
+             */
+            kelompok.forEach(function (g) {
+                if (g.parentElement === menuAngkatan) {
+                    menuAngkatan.appendChild(g);
+                }
             });
 
             /*
@@ -1411,11 +1674,23 @@ Pendaftar Layanan | MIS Rumah Scopus
             if (bersihkanPilihan) {
                 var terpilih = menuAngkatan.options[menuAngkatan.selectedIndex];
 
-                if (terpilih && terpilih.parentElement
+                if (!terpilih || (terpilih.parentElement
                     && terpilih.parentElement.tagName === 'OPTGROUP'
-                    && terpilih.parentElement.disabled) {
+                    && terpilih.parentElement.disabled)) {
                     menuAngkatan.value = '';
                 }
+            }
+
+            /*
+             * Select2 menyalin isi menunya saat dipasang, jadi ia HARUS
+             * diberi tahu kalau pilihannya berubah — tanpa ini kotaknya masih
+             * menampilkan angkatan yang barusan dicopot, sementara menunya
+             * sudah kosong. Dilempar sebagai 'change.select2', bukan
+             * 'change': 'change' biasa akan membangunkan penyaring hidup dan
+             * mengirim permintaan kedua yang tidak diminta siapa pun.
+             */
+            if (select2Siap) {
+                window.jQuery(menuAngkatan).trigger('change.select2');
             }
         };
 
