@@ -37,6 +37,40 @@ Rincian Pendaftaran | MIS Rumah Scopus
         }
 
         /*
+         * Kartu identitas IKUT TERGULIR bersama kolom kanannya.
+         *
+         * Terukur di layar 1440x900, tab Ringkasan: kolom kanan 1725px,
+         * kartu ini 752px. Begitu panitia menggulir untuk membaca Jejak
+         * perubahan, kartu ini sudah lewat di atas layar dan menyisakan 973px
+         * lajur kosong di sebelah kiri — persis yang terlihat sekarang.
+         *
+         * Dibuat melekat, BUKAN dipaksa setinggi kolom kanan: tinggi kolom
+         * kanan berayun dari 170px (tab Hapus) sampai 1410px (tab Ringkasan),
+         * jadi tidak ada satu pun susunan tetap yang bisa menyamakan keduanya
+         * di semua tab. Yang melekat selalu sejajar dengan apa pun yang
+         * sedang dibaca.
+         *
+         * Ini jalan karena tidak satu pun induknya memotong luapan
+         * (sudah ditelusuri sampai <html>: tidak ada overflow selain
+         * visible) — satu saja yang memotong, `sticky` diam-diam mati.
+         *
+         * 90px itu bilah atas yang melayang: terukur menempati 15px..80px.
+         *
+         * max-height + overflow untuk layar pendek. Tanpa itu, di layar yang
+         * tingginya kurang dari 842px ujung bawah kartu TIDAK PERNAH bisa
+         * dilihat — ia melekat terus, jadi menggulir tidak membawanya naik.
+         * Palangnya cuma muncul kalau memang tidak muat.
+         */
+        @media (min-width: 992px) {
+            .rin-identitas {
+                position: sticky;
+                top: 90px;
+                max-height: calc(100vh - 106px);
+                overflow: auto;
+            }
+        }
+
+        /*
          * Medali besar: MODIFIER di atas .mis-medali, bukan kelas baru.
          *
          * Dengan begitu ia ikut mewarisi seluruh perbaikan yang sudah ada di
