@@ -80,7 +80,6 @@ class PendaftaranLayananController extends Controller
      * hari, dan 2 lebih dari 90 hari. Satu minggu batas yang masih masuk akal
      * untuk "mestinya sudah ditagih".
      */
-    private const HARI_MENGGANTUNG = 7;
 
     /**
      * Nama medan saringan di alamat halaman, SELURUHNYA.
@@ -2129,7 +2128,7 @@ class PendaftaranLayananController extends Controller
             ->when($p['menggantung'], fn ($q) => $q
                 ->whereIn('status', Pendaftaran::KEADAAN['menunggu']['nilai'])
                 ->where('cara_bayar', '<>', 'tunai')
-                ->where('waktu', '<', now()->subDays(self::HARI_MENGGANTUNG)->toDateTimeString()))
+                ->where('waktu', '<', Pendaftaran::batasMenggantung()))
             ->when($p['bukti'] === 'ada', fn ($q) => $q->whereNotNull('bukti')->where('bukti', '<>', ''))
             ->when($p['bukti'] === 'belum', fn ($q) => $q->where(function ($sub) {
                 $sub->whereNull('bukti')->orWhere('bukti', '');
@@ -2353,10 +2352,10 @@ class PendaftaranLayananController extends Controller
             ->when($angkatan !== '', fn ($q) => $q->where('angkatan_id', $angkatan))
             ->whereIn('status', Pendaftaran::KEADAAN['menunggu']['nilai'])
             ->where('cara_bayar', '<>', 'tunai')
-            ->where('waktu', '<', now()->subDays(self::HARI_MENGGANTUNG)->toDateTimeString())
+            ->where('waktu', '<', Pendaftaran::batasMenggantung())
             ->count();
 
-        $ringkasan['hari_menggantung'] = self::HARI_MENGGANTUNG;
+        $ringkasan['hari_menggantung'] = Pendaftaran::HARI_MENGGANTUNG;
 
         return $ringkasan + $hitung;
     }
@@ -2400,7 +2399,7 @@ class PendaftaranLayananController extends Controller
              * justru yang paling sering diteruskan ke orang lain.
              */
             'Tanggal daftar' => $this->kalimatRentang($p['dari'], $p['sampai']),
-            'Menunggu lebih dari' => $p['menggantung'] ? self::HARI_MENGGANTUNG . ' hari' : null,
+            'Menunggu lebih dari' => $p['menggantung'] ? Pendaftaran::HARI_MENGGANTUNG . ' hari' : null,
             'Urutan' => $p['urut'] . ' (' . ($p['arah'] === 'asc' ? 'menaik' : 'menurun') . ')',
         ]);
     }
