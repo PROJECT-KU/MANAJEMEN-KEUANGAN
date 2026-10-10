@@ -485,6 +485,8 @@ Route::prefix('account')
              */
             Route::get('Pendaftaran-Layanan/terhapus', 'account\\PendaftaranLayananController@terhapus')
                 ->name('account.pendaftaran-layanan.terhapus');
+            Route::get('Pendaftaran-Layanan/terhapus/unduh-excel', 'account\\PendaftaranLayananController@terhapusExcel')
+                ->name('account.pendaftaran-layanan.terhapus.excel');
 
             /*
              * Mendaftarkan orang dari sisi panitia — untuk yang mendaftar
@@ -535,6 +537,11 @@ Route::prefix('account')
                 ->name('account.pendaftaran-layanan.kwitansi');
             Route::delete('Pendaftaran-Layanan/pembayaran/{pembayaran}', 'account\\PendaftaranLayananController@hapusPembayaran')
                 ->name('account.pendaftaran-layanan.pembayaran.hapus');
+            // Membetulkan catatan yang salah ketik, tanpa harus menghapusnya
+            // dulu — penghapusan meninggalkan jejak yang terbaca seperti
+            // pembatalan, bukan koreksi.
+            Route::put('Pendaftaran-Layanan/pembayaran/{pembayaran}', 'account\\PendaftaranLayananController@ubahPembayaran')
+                ->name('account.pendaftaran-layanan.pembayaran.ubah');
             Route::post('Pendaftaran-Layanan/{layanan}/{id}/pembayaran', 'account\\PendaftaranLayananController@catatPembayaran')
                 ->name('account.pendaftaran-layanan.pembayaran');
             Route::get('Pendaftaran-Layanan/{layanan}/{id}/slip', 'account\\PendaftaranLayananController@slip')

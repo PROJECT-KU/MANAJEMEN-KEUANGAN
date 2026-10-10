@@ -879,6 +879,88 @@ class PendaftaranLayananController extends Controller
     }
 
     /**
+     * Membetulkan satu catatan pembayaran.
+     *
+     * Sebelum ini satu-satunya cara memperbaiki angka yang salah ketik
+     * adalah menghapusnya lalu mencatat ulang — dan penghapusannya
+     * meninggalkan jejak "Catatan pembayaran Rp X dihapus", yang terbaca
+     * seperti pembatalan, bukan koreksi. Yang membaca riwayatnya setengah
+     * tahun kemudian tidak bisa membedakan keduanya.
+     *
+     * Buktinya boleh ikut diganti, tetapi TIDAK boleh dikosongkan dari sini:
+     * membuang bukti transfer lewat borang yang niatnya membetulkan angka
+     * adalah kehilangan yang tidak disengaja siapa pun.
+     */
+    public function ubahPembayaran(Request $request, string $pembayaran)
+    {
+        if (! $this->bolehMelihat()) {
+            return $this->tolak();
+        }
+
+        $baris = \App\PembayaranPendaftaran::find($pembayaran);
+
+        if ($baris === null) {
+            abort(404);
+        }
+
+        $data = $request->validate([
+            'nominal' => ['required', 'string', 'max:20'],
+            'tanggal' => ['required', 'date', 'before_or_equal:today'],
+            'cara_bayar' => ['nullable', Rule::in(array_keys(Pendaftaran::caraBayarPilihan()))],
+            'bukti' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'catatan' => ['nullable', 'string', 'max:255'],
+        ], [
+            'nominal.required' => 'Nominalnya belum diisi.',
+            'tanggal.required' => 'Tanggal uang masuknya belum diisi.',
+            'tanggal.before_or_equal' => 'Tanggalnya tidak boleh di masa depan — '
+                . 'yang dicatat di sini uang yang SUDAH masuk.',
+            'bukti.max' => 'Bukti transfernya lebih dari 4 MB.',
+        ]);
+
+        $nominal = (int) preg_replace('/\D+/', '', $data['nominal']);
+
+        if ($nominal < 1) {
+            return back()->withErrors(['nominal' => 'Nominalnya harus lebih dari nol.'])
+                ->withInput()->with('tab', 'termin');
+        }
+
+        $lama = (int) $baris->nominal;
+
+        $baris->forceFill([
+            'nominal' => $nominal,
+            'tanggal' => $data['tanggal'],
+            'cara_bayar' => $data['cara_bayar'] ?? null,
+            'catatan' => trim((string) ($data['catatan'] ?? '')) ?: null,
+        ])->save();
+
+        $this->simpanBuktiTermin($baris, $request->file('bukti'));
+
+        /*
+         * Jejaknya hanya untuk termin yang induknya memang satu pendaftaran,
+         * alasan yang sama persis seperti pencatatan dan penghapusannya:
+         * termin pesanan lembaga menaungi beberapa pendaftaran sekaligus.
+         *
+         * Dicatat HANYA kalau nominalnya benar-benar berubah. Membetulkan
+         * tanggal atau catatan tidak mengubah uangnya, dan jejak "Rp 2.000.000
+         * -> Rp 2.000.000" cuma memanjangkan riwayat tanpa memberi tahu apa
+         * pun.
+         */
+        if ($lama !== $nominal
+            && $baris->jenis === \App\PembayaranPendaftaran::PENDAFTARAN
+            && $baris->layanan) {
+            $this->catatJejakBayar(
+                (string) $baris->layanan, (string) $baris->induk_id, 'ubah-bayar', $lama, $nominal
+            );
+        }
+
+        return back()->with('tab', 'termin')->with('sukses',
+            $lama === $nominal
+                ? 'Catatan pembayarannya dibetulkan.'
+                : 'Catatan pembayarannya dibetulkan: Rp ' . number_format($lama, 0, ',', '.')
+                    . ' jadi Rp ' . number_format($nominal, 0, ',', '.') . '.');
+    }
+
+    /**
      * Menghapus satu catatan pembayaran.
      *
      * Dihapus seutuhnya, bukan ditandai batal: yang dihapus adalah catatan
@@ -1849,6 +1931,37 @@ class PendaftaranLayananController extends Controller
             'uangSemua' => (int) \App\PendaftaranDihapus::sum('uang_terhapus'),
             'jumlahSemua' => (int) \App\PendaftaranDihapus::count(),
         ]);
+    }
+
+    /**
+     * Catatan penghapusan sebagai lembar kerja.
+     *
+     * Saringannya ikut terbawa, sama seperti kedua unduhan di layar daftar:
+     * yang diunduh orang hampir selalu yang sedang dilihatnya.
+     */
+    public function terhapusExcel(Request $request)
+    {
+        if (! $this->bolehMenghapus()) {
+            return redirect()
+                ->route('account.pendaftaran-layanan.index')
+                ->with('error', 'Catatan penghapusan hanya bisa dibuka administrator.');
+        }
+
+        $cari = trim((string) $request->query('cari', ''));
+
+        $baris = \App\PendaftaranDihapus::query()
+            ->when($cari !== '', function ($q) use ($cari) {
+                $q->where(fn ($w) => $w->where('nomor', 'like', '%' . $cari . '%')
+                    ->orWhere('nama', 'like', '%' . $cari . '%')
+                    ->orWhere('email', 'like', '%' . $cari . '%'));
+            })
+            ->terbaru()
+            ->get();
+
+        return Excel::download(
+            new \App\Exports\PendaftaranDihapusExport($baris),
+            'catatan-penghapusan-' . now()->format('Y-m-d-Hi') . '.xlsx'
+        );
     }
 
     public function index(Request $request)

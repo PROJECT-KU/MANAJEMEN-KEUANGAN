@@ -284,6 +284,59 @@ class CatatanPenghapusanTest extends TestCase
             ->assertSee('tidak bisa dikembalikan', false);
     }
 
+    /**
+     * Arsipnya bisa diunduh untuk direkap.
+     *
+     * Yang dibutuhkan saat menutup buku bukan membaca dua puluh baris per
+     * halaman melainkan MENJUMLAHKAN: berapa uang yang keluar dari pembukuan
+     * bulan ini, dan oleh siapa.
+     */
+    #[Test]
+    public function catatannya_bisa_diunduh(): void
+    {
+        [$admin, $b] = $this->dengan();
+
+        $this->actingAs($admin)->hapus($b);
+
+        $jawab = $this->actingAs($admin)
+            ->get(route('account.pendaftaran-layanan.terhapus.excel'));
+
+        $jawab->assertOk();
+
+        $this->assertStringContainsString('spreadsheet',
+            strtolower((string) $jawab->headers->get('content-type')),
+            'Unduhannya bukan lembar kerja.');
+    }
+
+    #[Test]
+    public function unduhannya_juga_hanya_untuk_administrator(): void
+    {
+        [$admin] = $this->dengan();
+
+        $this->actingAs($admin)
+            ->get(route('account.pendaftaran-layanan.terhapus.excel'))->assertOk();
+
+        $this->flushSession();
+
+        $biasa = User::create([
+            'full_name' => 'Karyawan Uji', 'username' => 'kry_' . Str::random(8),
+            'email' => Str::random(8) . '@contoh.test',
+            'password' => Hash::make('RahasiaUji2026'), 'level' => 'user',
+        ]);
+        $biasa->forceFill(['status' => 'active', 'email_verified_at' => now(),
+            'peran' => User::PERAN_KARYAWAN])->save();
+
+        /*
+         * Diperiksa TERPISAH dari layarnya: menutup halaman tanpa menutup
+         * unduhannya meninggalkan seluruh datanya tetap bisa diambil — dan
+         * isi berkas ini email serta nominal orang yang barisnya sudah tidak
+         * ada.
+         */
+        $this->actingAs($biasa)
+            ->get(route('account.pendaftaran-layanan.terhapus.excel'))
+            ->assertRedirect(route('account.pendaftaran-layanan.index'));
+    }
+
     // ------------------------------------------------------------- pembantu
 
     private function hapus(PendaftaranScopusCamp $b): void

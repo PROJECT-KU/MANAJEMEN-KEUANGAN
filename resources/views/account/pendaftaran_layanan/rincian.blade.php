@@ -325,6 +325,19 @@ Rincian Pendaftaran | MIS Rumah Scopus
             [data-mis-ringkas] {
                 min-height: 40px;
             }
+
+            /*
+             * Tautan ke pendaftaran ganda: terukur 16px tinggi, di bawah
+             * ambang yang bisa dikenai jempol dengan andal. Blok ini
+             * ditambahkan SESUDAH penyisiran sasaran ketuk sebelumnya, jadi
+             * ia lolos — dan itu sebabnya penjaganya sekarang menyebut
+             * kelasnya, bukan sekadar "yang di layar rincian".
+             */
+            .rin-ganda-teks > a {
+                display: inline-flex;
+                align-items: center;
+                min-height: 40px;
+            }
         }
 
         .rin-aksi i {
@@ -1383,6 +1396,17 @@ Rincian Pendaftaran | MIS Rumah Scopus
             display: block;
             font-size: .74rem;
             color: #a16207;
+        }
+
+        /* Borang pembetul catatan pembayaran: menempel di bawah barisnya,
+           bertepi supaya jelas ia milik baris itu dan bukan borang baru. */
+        .rin-betul {
+            grid-column: 1 / -1;
+            margin-top: 10px;
+            padding: 12px 13px;
+            border: 1px dashed var(--mis-garis);
+            border-radius: 12px;
+            background: #f8fafc;
         }
 
         .rin-nota {
@@ -3301,6 +3325,21 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                                     target="_blank" rel="noopener">
                                                     <i class="fas fa-receipt" aria-hidden="true"></i> Kwitansi
                                                 </a>
+                                                {{-- Membetulkan, bukan menghapus lalu mencatat
+                                                     ulang. Penghapusan meninggalkan jejak
+                                                     "Rp X dihapus" yang terbaca seperti
+                                                     pembatalan — dan yang membaca riwayatnya
+                                                     setengah tahun kemudian tidak bisa
+                                                     membedakan koreksi salah ketik dari uang
+                                                     yang benar-benar ditarik kembali. --}}
+                                                <button type="button" class="mis-tombol mis-tombol-halus"
+                                                    data-rin-buka="rin-betul-{{ $bayar->getKey() }}"
+                                                    aria-expanded="false"
+                                                    aria-controls="rin-betul-{{ $bayar->getKey() }}"
+                                                    aria-label="Betulkan catatan pembayaran Rp {{ number_format((int) $bayar->nominal, 0, ',', '.') }}"
+                                                    title="Betulkan catatan ini">
+                                                    <i class="fas fa-pen" aria-hidden="true"></i>
+                                                </button>
                                                 @if ($bolehMenghapus)
                                                     <form method="POST" class="rin-termin-hapus"
                                                         action="{{ route('account.pendaftaran-layanan.pembayaran.hapus', $bayar->getKey()) }}">
@@ -3314,6 +3353,74 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                                     </form>
                                                 @endif
                                             </span>
+
+                                            {{-- Borang pembetulnya di dalam <li> yang sama dan
+                                                 tersembunyi sampai dibuka: borang terbuka untuk
+                                                 tiap termin sekaligus membuat daftar tiga
+                                                 pembayaran jadi tiga layar penuh. --}}
+                                            <form method="POST" enctype="multipart/form-data"
+                                                class="rin-betul" id="rin-betul-{{ $bayar->getKey() }}" hidden
+                                                action="{{ route('account.pendaftaran-layanan.pembayaran.ubah', $bayar->getKey()) }}">
+                                                @csrf
+                                                @method('PUT')
+                                                <div class="rin-isian-kisi rin-isian-kolom-2">
+                                                    <div class="mis-isian">
+                                                        <label class="mis-label" for="betul-nominal-{{ $bayar->getKey() }}">Nominal</label>
+                                                        <input type="text" class="form-control-modern" data-mis-rupiah
+                                                            id="betul-nominal-{{ $bayar->getKey() }}" name="nominal"
+                                                            value="{{ number_format((int) $bayar->nominal, 0, ',', '.') }}">
+                                                    </div>
+                                                    <div class="mis-isian">
+                                                        <label class="mis-label" for="betul-tanggal-{{ $bayar->getKey() }}">Tanggal uang masuk</label>
+                                                        <input type="date" class="form-control-modern"
+                                                            id="betul-tanggal-{{ $bayar->getKey() }}" name="tanggal"
+                                                            max="{{ now()->toDateString() }}"
+                                                            value="{{ $bayar->tanggal?->toDateString() }}">
+                                                    </div>
+                                                    <div class="mis-isian">
+                                                        <label class="mis-label" for="betul-cara-{{ $bayar->getKey() }}">Lewat apa</label>
+                                                        <select class="form-control-modern" id="betul-cara-{{ $bayar->getKey() }}" name="cara_bayar">
+                                                            <option value="">— tidak disebut —</option>
+                                                            {{-- caraBayarPilihan() memulangkan LARIK per
+                                                                 cara (label, ikon, …), bukan pasangan
+                                                                 kode => label. Dicetak apa adanya,
+                                                                 halamannya 500 dengan pesan
+                                                                 htmlspecialchars() yang tidak
+                                                                 menyebut-nyebut menu ini. --}}
+                                                            @foreach (Pendaftaran::caraBayarPilihan() as $kodeCara => $caraPilih)
+                                                                <option value="{{ $kodeCara }}" @selected($bayar->cara_bayar === $kodeCara)>
+                                                                    {{ $caraPilih['label'] }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                    <div class="mis-isian">
+                                                        <label class="mis-label" for="betul-catatan-{{ $bayar->getKey() }}">Catatan</label>
+                                                        <input type="text" class="form-control-modern" maxlength="255"
+                                                            id="betul-catatan-{{ $bayar->getKey() }}" name="catatan"
+                                                            value="{{ $bayar->catatan }}">
+                                                    </div>
+                                                    <div class="mis-isian rin-isian-penuh">
+                                                        <label class="mis-label" for="betul-bukti-{{ $bayar->getKey() }}">
+                                                            Ganti bukti transfernya <span class="mis-bantuan">(boleh dikosongkan)</span>
+                                                        </label>
+                                                        <input type="file" class="form-control-modern" accept="image/*"
+                                                            id="betul-bukti-{{ $bayar->getKey() }}" name="bukti">
+                                                        {{-- Dikosongkan berarti bukti lamanya TETAP.
+                                                             Membuang bukti transfer lewat borang
+                                                             yang niatnya membetulkan angka adalah
+                                                             kehilangan yang tidak disengaja
+                                                             siapa pun. --}}
+                                                    </div>
+                                                </div>
+                                                <div class="rin-kaki">
+                                                    <button type="button" class="mis-tombol mis-tombol-halus"
+                                                        data-rin-tutup="rin-betul-{{ $bayar->getKey() }}">Batal</button>
+                                                    <button type="submit" class="mis-tombol mis-tombol-ungu">
+                                                        <i class="fas fa-save" aria-hidden="true"></i> Simpan betulannya
+                                                    </button>
+                                                </div>
+                                            </form>
                                         </li>
                                     @endforeach
                                 </ul>
@@ -3949,6 +4056,61 @@ Rincian Pendaftaran | MIS Rumah Scopus
      * mustahil. Yang dihitung jumlah DIGIT di kiri kursor, bukan posisinya,
      * sebab jumlah titik di kirinya berubah.
      */
+    /*
+     * Buka/tutup borang pembetul catatan pembayaran.
+     *
+     * Didengarkan di DOCUMENT, bukan dipasang per tombol: daftar terminnya
+     * digambar ulang sesudah tiap penyimpanan, dan pendengar yang menempel
+     * pada tombol lama ikut terbuang bersamanya.
+     *
+     * Satu terbuka, yang lain ditutup. Tiga borang terbuka sekaligus membuat
+     * daftar tiga pembayaran jadi tiga layar penuh, dan yang sedang disunting
+     * tidak lagi kelihatan yang mana.
+     */
+    document.addEventListener('click', function (e) {
+        var buka = e.target.closest('[data-rin-buka]');
+        var tutup = e.target.closest('[data-rin-tutup]');
+
+        if (!buka && !tutup) {
+            return;
+        }
+
+        e.preventDefault();
+
+        if (tutup) {
+            var sasaranTutup = document.getElementById(tutup.dataset.rinTutup);
+
+            if (sasaranTutup) {
+                sasaranTutup.hidden = true;
+                var tuasnya = document.querySelector('[data-rin-buka="' + tutup.dataset.rinTutup + '"]');
+                if (tuasnya) { tuasnya.setAttribute('aria-expanded', 'false'); }
+            }
+
+            return;
+        }
+
+        var sasaran = document.getElementById(buka.dataset.rinBuka);
+
+        if (!sasaran) {
+            return;
+        }
+
+        var sedangTertutup = sasaran.hidden;
+
+        document.querySelectorAll('.rin-betul').forEach(function (b) { b.hidden = true; });
+        document.querySelectorAll('[data-rin-buka]').forEach(function (t) {
+            t.setAttribute('aria-expanded', 'false');
+        });
+
+        sasaran.hidden = !sedangTertutup;
+        buka.setAttribute('aria-expanded', sedangTertutup ? 'true' : 'false');
+
+        if (sedangTertutup) {
+            var isian = sasaran.querySelector('input, select');
+            if (isian) { isian.focus(); }
+        }
+    });
+
     document.addEventListener('DOMContentLoaded', function () {
         var pisah = function (angka) {
             return angka.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
