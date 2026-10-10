@@ -479,6 +479,14 @@ Route::prefix('account')
                 ->name('account.pendaftaran-layanan.excel');
 
             /*
+             * Catatan penghapusan. Di ATAS rute {layanan}/{id} di bawahnya —
+             * 'terhapus' akan tertangkap sebagai nama layanan kalau
+             * urutannya terbalik, dan jawabannya 404 tanpa petunjuk apa pun.
+             */
+            Route::get('Pendaftaran-Layanan/terhapus', 'account\\PendaftaranLayananController@terhapus')
+                ->name('account.pendaftaran-layanan.terhapus');
+
+            /*
              * Mendaftarkan orang dari sisi panitia — untuk yang mendaftar
              * lewat WhatsApp atau datang langsung. Ditaruh SEBELUM rute
              * rincian yang berpola {layanan}/{id} supaya 'baru' tidak terbaca

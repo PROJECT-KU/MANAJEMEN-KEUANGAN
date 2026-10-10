@@ -3213,6 +3213,7 @@ dialog {
 
 /* Tiga ubin dan lima ubin sama-sama mungkin; yang dipatok cuma lebar
    minimumnya, supaya layar yang punya jumlah berbeda tidak perlu CSS sendiri. */
+.mis-ringkas-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .mis-ringkas-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .mis-ringkas-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 
