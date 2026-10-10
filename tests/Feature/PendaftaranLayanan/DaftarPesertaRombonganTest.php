@@ -158,6 +158,104 @@ class DaftarPesertaRombonganTest extends TestCase
             . 'orang yang sebenarnya sudah membayar.');
     }
 
+    /**
+     * Daftarnya penuh: tempat mengetiknya HILANG.
+     *
+     * Borang yang tetap terbuka saat kursinya habis terbaca sebagai "masih
+     * boleh menambah" — dan yang mengetik nama kesekian baru tahu saat
+     * kirimannya ditolak. Yang paling jelas menyampaikan "sudah lengkap"
+     * adalah hilangnya tempat mengetik.
+     */
+    #[Test]
+    public function borangnya_dilipat_saat_daftarnya_sudah_penuh(): void
+    {
+        [$orang, $baris] = $this->rombongan(2);
+
+        $this->actingAs($orang)->put(
+            route('account.pendaftaran-layanan.peserta', ['scopus_camp', $baris->getKey()]),
+            ['peserta' => 'Satu']
+        )->assertRedirect();
+
+        $isi = $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.rincian', ['scopus_camp', $baris->getKey()]))
+            ->assertOk()->getContent();
+
+        $this->assertStringContainsString('Daftarnya sudah lengkap', $isi,
+            'Tidak ada yang memberi tahu bahwa kursinya sudah habis.');
+
+        $this->assertMatchesRegularExpression(
+            '/<form[^>]*id="rin-peserta-borang"[^>]*\shidden/s', $isi,
+            'Kotak isian dan pemilih berkasnya masih menganga padahal tidak ada '
+            . 'kursi tersisa.'
+        );
+    }
+
+    /**
+     * DILIPAT, bukan dibuang. Kotak itu satu-satunya cara membetulkan nama
+     * yang salah ketik — simpanPeserta mengganti seluruh daftar, tidak ada
+     * penyunting per baris. Dibuang, satu huruf salah di nama berarti
+     * sertifikat yang salah cetak dan tidak ada jalan membetulkannya.
+     */
+    #[Test]
+    public function daftar_penuh_masih_bisa_dibetulkan(): void
+    {
+        [$orang, $baris] = $this->rombongan(2);
+
+        $this->actingAs($orang)->put(
+            route('account.pendaftaran-layanan.peserta', ['scopus_camp', $baris->getKey()]),
+            ['peserta' => 'Sattu']
+        )->assertRedirect();
+
+        $isi = $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.rincian', ['scopus_camp', $baris->getKey()]))
+            ->assertOk()->getContent();
+
+        $this->assertStringContainsString('data-rin-buka="rin-peserta-borang"', $isi,
+            'Tidak ada jalan membuka borangnya lagi; salah ketik jadi permanen.');
+
+        // Dan pembetulannya memang tersimpan.
+        $this->actingAs($orang)->put(
+            route('account.pendaftaran-layanan.peserta', ['scopus_camp', $baris->getKey()]),
+            ['peserta' => 'Satu']
+        )->assertRedirect()->assertSessionHasNoErrors();
+
+        $this->assertSame(['Satu'],
+            PendaftaranPeserta::milik('scopus_camp', (string) $baris->getKey())
+                ->terurut()->pluck('nama')->all());
+    }
+
+    /**
+     * Kiriman yang ditolak membuka borangnya kembali.
+     *
+     * Tanpa ini, panitia yang mengisi terlalu banyak akan dibalikkan ke
+     * layar yang borangnya TERTUTUP — pesan salahnya ada di dalam lipatan,
+     * dan yang dilihatnya cuma panel hijau "sudah lengkap" yang seolah
+     * mengatakan tidak terjadi apa-apa.
+     */
+    #[Test]
+    public function kiriman_yang_ditolak_membuka_borangnya_lagi(): void
+    {
+        [$orang, $baris] = $this->rombongan(2);
+
+        $this->actingAs($orang)->put(
+            route('account.pendaftaran-layanan.peserta', ['scopus_camp', $baris->getKey()]),
+            ['peserta' => 'Satu']
+        )->assertRedirect();
+
+        $this->actingAs($orang)->put(
+            route('account.pendaftaran-layanan.peserta', ['scopus_camp', $baris->getKey()]),
+            ['peserta' => "Satu\nDua"]
+        )->assertSessionHasErrors('peserta');
+
+        $isi = $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.rincian', ['scopus_camp', $baris->getKey()]))
+            ->assertOk()->getContent();
+
+        $this->assertSame(0, preg_match('/<form[^>]*id="rin-peserta-borang"[^>]*\shidden/s', $isi),
+            'Borangnya tetap terlipat sesudah kirimannya ditolak, jadi pesan '
+            . 'salahnya tersembunyi di dalam lipatan.');
+    }
+
     #[Test]
     public function menyimpan_ulang_mengganti_daftarnya_bukan_menumpuk(): void
     {
