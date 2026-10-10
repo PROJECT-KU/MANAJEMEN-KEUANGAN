@@ -114,8 +114,18 @@ class JejakPanjangDitahanTest extends TestCase
          * peserta. Penjaga yang tertinggal di nama lama berubah jadi HAMPA —
          * ia mencari sesuatu yang tidak pernah ada lagi, jadi selalu hijau.
          */
-        $this->assertSame(0, preg_match('/<button[^>]*data-mis-ringkas/', $isi),
-            'Tombol pembuka tergambar padahal tidak ada yang ditahan.');
+        /*
+         * Pemilihnya menyebut DAFTAR MANA yang dibuka tombol itu.
+         *
+         * Versi sebelumnya mencari `data-mis-ringkas` apa saja, dan penanda
+         * itu kini dipakai bersama oleh tiga daftar — jejak, peserta, dan
+         * pendaftaran ganda. Begitu blok ganda muncul di halaman yang sama
+         * (pendaftaran uji ini bernomor telepon yang juga dipakai baris
+         * lain, jadi ia memang punya kembaran), penjaga ini merah pada
+         * markah jejak yang justru benar.
+         */
+        $this->assertSame(0, preg_match('/<button[^>]*data-mis-ringkas="\.rin-jejak"/', $isi),
+            'Tombol pembuka jejak tergambar padahal tidak ada jejak yang ditahan.');
     }
 
     #[Test]

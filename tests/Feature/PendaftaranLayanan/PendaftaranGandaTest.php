@@ -149,6 +149,109 @@ class PendaftaranGandaTest extends TestCase
             ->assertOk()->getContent());
     }
 
+    // ------------------------------------------- rupa bloknya di layar
+
+    private function gaya(): string
+    {
+        return file_get_contents(
+            resource_path('views/account/pendaftaran_layanan/rincian.blade.php')
+        );
+    }
+
+    /**
+     * Keping berkisi, bukan enam baris penuh.
+     *
+     * Terukur sebelum diperbaiki: bloknya 488px di 1440px — 41% dari
+     * SELURUH tab Ringkasan — dan 785px di ponsel. Peringatan yang memakan
+     * empat persepuluh layar mendorong isi utama tab ini, ringkasan
+     * pembayaran, ke bawah lipatan.
+     */
+    #[Test]
+    public function kepingnya_berkisi_bukan_enam_baris(): void
+    {
+        $this->assertMatchesRegularExpression(
+            '/\.rin-ganda-daftar\s*\{[^}]*grid-template-columns:\s*repeat\(auto-fit/s',
+            $this->gaya(),
+            'Daftar pendaftaran ganda kembali satu lajur; enam baris penuh untuk '
+            . 'sesuatu yang cuma perlu disadari.'
+        );
+    }
+
+    /**
+     * Keterangannya MEMBUNGKUS, tidak dipotong ellipsis.
+     *
+     * Versi pertama memotongnya dan menaruh teks penuhnya di `title` — dan
+     * title tidak bisa dibuka di ponsel sama sekali. Yang terbaca di sana
+     * tinggal "Menunggu baya…", jadi statusnya hilang permanen justru di
+     * layar yang paling sempit.
+     */
+    #[Test]
+    public function keterangannya_tidak_dipotong(): void
+    {
+        $aturan = preg_match('/\.rin-ganda-ket\s*\{([^}]*)\}/s', $this->gaya(), $cocok)
+            ? $cocok[1] : '';
+
+        $this->assertNotSame('', $aturan, 'Aturan .rin-ganda-ket tidak ketemu.');
+
+        $this->assertStringNotContainsString('text-overflow', $aturan,
+            'Keterangannya dipotong lagi; di ponsel title tidak bisa dibuka, '
+            . 'jadi yang terpotong hilang permanen.');
+    }
+
+    /**
+     * Aturan penyembunyinya WAJIB menyebut `.rin-ganda-daftar > li` DAN
+     * kelasnya: `> li` menyetel display: flex dan berbobot (0,1,1),
+     * sedangkan kelas tunggal (0,1,0) kalah terhadapnya — kepingnya tetap
+     * tergambar tanpa galat apa pun. Jebakan yang sama pernah terjadi pada
+     * daftar jejak.
+     */
+    #[Test]
+    public function aturan_sembunyinya_cukup_berbobot(): void
+    {
+        $isi = $this->gaya();
+
+        $this->assertMatchesRegularExpression(
+            '/\.rin-ganda-daftar > li\.rin-ganda-lagi\s*\{[^}]*display:\s*none/s', $isi,
+            'Bobot pemilih penyembunyinya kalah; kepingnya tetap tergambar di ponsel.'
+        );
+
+        $this->assertMatchesRegularExpression(
+            '/\.rin-ganda-daftar\.rin-ganda-penuh > li\.rin-ganda-lagi\s*\{[^}]*display:\s*flex/s', $isi,
+            'Aturan pembukanya hilang; tombolnya tidak akan menampilkan apa pun.'
+        );
+    }
+
+    /**
+     * Nama layanan tidak diulang kalau sama dengan yang sedang dibuka.
+     *
+     * Yang ganda hampir selalu di layanan yang sama, jadi "Scopus Camp"
+     * terulang enam kali sambil mendesak status dan tanggalnya keluar dari
+     * keping — dan medali di sebelah kirinya sudah menyebutkan layanannya.
+     */
+    #[Test]
+    public function nama_layanan_yang_sama_tidak_diulang(): void
+    {
+        [$orang, $a, $t] = $this->dengan();
+
+        $this->camp($t, ['email' => $a->email]);
+
+        $isi = $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.rincian', ['scopus_camp', $a->getKey()]))
+            ->assertOk()->getContent();
+
+        $blok = preg_match('/<ul class="rin-ganda-daftar">(.*?)<\/ul>/s', $isi, $cocok)
+            ? $cocok[1] : '';
+
+        $this->assertNotSame('', $blok, 'Daftar gandanya tidak tergambar.');
+
+        $this->assertStringNotContainsString('Scopus Camp', $blok,
+            'Nama layanan yang sama diulang di tiap keping, dan itu yang '
+            . 'mendesak status serta tanggalnya keluar.');
+
+        $this->assertStringContainsString('Menunggu bayar', $blok,
+            'Statusnya justru hilang; yang dibuang seharusnya nama layanannya.');
+    }
+
     // ------------------------------------------------------------- pembantu
 
     private function ganda(PendaftaranScopusCamp $a)
