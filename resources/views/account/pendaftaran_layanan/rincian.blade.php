@@ -296,6 +296,37 @@ Rincian Pendaftaran | MIS Rumah Scopus
             transition: all .2s ease;
         }
 
+        /*
+         * Sasaran ketuk di ponsel: minimal 40px.
+         *
+         * Terukur di 390px — tombol salin 24x24, tombol aksi 32x32, dan
+         * tombol pembuka jejak 30px tinggi. Ketiganya di bawah ambang yang
+         * bisa dikenai jempol dengan andal, dan ketiganya berdampingan rapat
+         * dengan tautan lain: yang meleset bukan tidak terjadi apa-apa,
+         * melainkan membuka WhatsApp orang yang salah.
+         *
+         * Hanya di lebar ponsel. Di layar lebar penunjuknya tetikus yang
+         * presisi, dan tombol 40px di sebelah teks 13px tampak kasar.
+         */
+        @media (max-width: 575.98px) {
+            .rin-salin {
+                flex: 0 0 40px;
+                width: 40px;
+                height: 40px;
+            }
+
+            .rin-aksi {
+                flex: 0 0 40px;
+                width: 40px;
+                height: 40px;
+            }
+
+            /* Tombol "Tampilkan N lainnya" pada jejak dan daftar peserta. */
+            [data-mis-ringkas] {
+                min-height: 40px;
+            }
+        }
+
         .rin-aksi i {
             font-size: 13px !important;
             margin: 0 !important;
@@ -471,6 +502,29 @@ Rincian Pendaftaran | MIS Rumah Scopus
              * masih terbaca sebagai tab, sedangkan ruang kosong di sebelahnya
              * terbaca seperti ada yang belum selesai dimuat.
              */
+            /*
+             * Tab Hapus didorong ke UJUNG KANAN strip.
+             *
+             * Jumlah tabnya berayun 2 sampai 7 tergantung isi pendaftarannya
+             * — Pembayaran, Termin, Jadwal, dan Peserta masing-masing muncul
+             * hanya kalau ada isinya. Akibatnya "Hapus" duduk di tempat yang
+             * berbeda-beda, dan hafalan tangan dari satu pendaftaran mendarat
+             * di tab lain pada pendaftaran berikutnya. Yang paling mahal
+             * kalau meleset justru tab itu.
+             *
+             * Didorong ke tepi kanan, tempatnya TETAP: bukan "tab ke-sekian",
+             * melainkan "yang paling ujung" — satu-satunya posisi yang tidak
+             * berubah berapa pun tab di depannya.
+             *
+             * Hanya di sini, bukan di .mis-tab bersama: layar lain tidak
+             * punya tab yang merusak, dan satu tab yang terdorong jauh dari
+             * saudaranya di sana cuma tampak seperti kesalahan susunan.
+             */
+            #rin-tab > li:last-child {
+                margin-left: auto;
+                flex-grow: 0;
+            }
+
             #rin-tab > li {
                 /*
                  * Tumbuh dari lebar ISINYA, tanpa batas atas.
