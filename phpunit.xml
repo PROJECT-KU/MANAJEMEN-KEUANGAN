@@ -18,6 +18,20 @@
         </include>
     </source>
     <php>
+        <!--
+          Batas memorinya dinaikkan dari 256M bawaan PHP CLI.
+
+          Suitenya melewatinya di sekitar seribu seratus uji: galatnya muncul
+          di FileinfoMimeTypeGuesser saat satu uji unggahan menebak jenis
+          berkas 7 MB, dan prosesnya MATI DI TENGAH JALAN — hasilnya terpotong
+          sebelum daftar kegagalan tercetak, jadi uji yang benar-benar merah
+          tidak pernah terbaca. Yang terlihat cuma "N failed" tanpa namanya.
+
+          Ditaruh di sini, bukan lewat `php -d`: `artisan test` menjalankan
+          PHPUnit di proses ANAK, dan -d pada proses induk tidak sampai ke
+          sana — terukur, galatnya tetap menyebut 268435456.
+        -->
+        <ini name="memory_limit" value="1024M"/>
         <env name="APP_ENV" value="testing"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="CACHE_DRIVER" value="array"/>

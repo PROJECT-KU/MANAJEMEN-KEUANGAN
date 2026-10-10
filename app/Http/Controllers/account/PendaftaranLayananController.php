@@ -1221,6 +1221,20 @@ class PendaftaranLayananController extends Controller
              */
             'jejak' => \App\PendaftaranJejak::milik($layanan, (string) $pendaftaran->getKey())
                 ->terurut()->get(),
+
+            /*
+             * Pendaftaran lain atas nama orang yang sama.
+             *
+             * Dihitung di pengendali, bukan di markah: ia satu kueri union
+             * lima cabang, dan kueri di dalam blade tidak pernah terlihat
+             * saat menghitung berapa kueri yang dijalankan satu halaman.
+             */
+            'ganda' => \App\Support\PendaftaranGanda::lain(
+                $layanan,
+                (string) $pendaftaran->getKey(),
+                $pendaftaran->email ?? $pendaftaran->email_pemesan ?? null,
+                $pendaftaran->telp ?? $pendaftaran->telp_pemesan ?? null,
+            ),
         ]);
     }
 
