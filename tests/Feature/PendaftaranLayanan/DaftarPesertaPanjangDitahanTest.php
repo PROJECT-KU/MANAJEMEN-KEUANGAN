@@ -185,4 +185,76 @@ class DaftarPesertaPanjangDitahanTest extends TestCase
 
         return [$u, $baris];
     }
+
+    // ------------------------------------------------- rupa daftarnya
+
+    private function gaya(): string
+    {
+        return file_get_contents(
+            resource_path('views/account/pendaftaran_layanan/rincian.blade.php')
+        );
+    }
+
+    /**
+     * Kartu berkisi, bukan baris selebar kolomnya.
+     *
+     * Terukur sebelum diperbaiki: tiap baris 750px lebar dengan 154px isi —
+     * empat perlima kartunya petak kosong — dan 109px tinggi untuk satu
+     * orang. Rombongan 13 orang berarti 13 baris sepanjang itu, dan daftar
+     * hadir yang harus digulir tiga layar tidak bisa dipakai mencocokkan
+     * nama saat orangnya sudah berdiri di depan meja.
+     */
+    #[Test]
+    public function daftarnya_berkisi(): void
+    {
+        $this->assertMatchesRegularExpression(
+            '/\.rin-peserta\s*\{[^}]*grid-template-columns:\s*repeat\(auto-fill/s',
+            $this->gaya(),
+            'Daftar peserta kembali satu lajur selebar kolomnya.'
+        );
+    }
+
+    /**
+     * auto-FILL, bukan auto-fit: dengan auto-fit lajur kosong diciutkan,
+     * jadi rombongan berisi SATU nama memanjang selebar 750px lagi — persis
+     * keadaan yang hendak diperbaiki.
+     */
+    #[Test]
+    public function satu_nama_tidak_memanjang_selebar_kolom(): void
+    {
+        $this->assertSame(0, preg_match(
+            '/\.rin-peserta\s*\{[^}]*repeat\(auto-fit/s', $this->gaya()
+        ), 'auto-fit membuat satu kartu memanjang selebar kolomnya lagi.');
+    }
+
+    /**
+     * Nomor WhatsApp tidak boleh terpatah. Terukur di kartu selebar 245px:
+     * "08110000000" lalu "1" sendirian di baris berikutnya — tidak bisa
+     * dibaca maupun disalin.
+     */
+    #[Test]
+    public function nomor_peserta_tidak_terpatah(): void
+    {
+        $this->assertMatchesRegularExpression(
+            '/\.rin-peserta-telp\s*\{[^}]*white-space:\s*nowrap/s', $this->gaya(),
+            'Nomor WhatsApp peserta bisa terpatah dua baris lagi.'
+        );
+    }
+
+    /**
+     * Kalimat bantuannya harus sepakat dengan yang dikerjakan peladen.
+     * Dulu berbunyi "tidak ikut tersimpan" — dan memang begitu: kelebihannya
+     * dipotong diam-diam lalu layarnya menjawab "lengkap".
+     */
+    #[Test]
+    public function kalimat_bantuannya_menyebut_ditolak(): void
+    {
+        $isi = $this->gaya();
+
+        $this->assertStringContainsString('kirimannya ditolak', $isi,
+            'Kalimat bantuannya masih menjanjikan pemotongan diam-diam.');
+
+        $this->assertStringNotContainsString('Yang lebih dari itu tidak ikut tersimpan', $isi,
+            'Kalimat lama yang menjanjikan pemotongan masih ada.');
+    }
 }

@@ -59,24 +59,103 @@ class DaftarPesertaRombonganTest extends TestCase
         $this->assertNull($peserta[2]->telp);
     }
 
+    /**
+     * Kelebihan nama DITOLAK, bukan dipotong diam-diam.
+     *
+     * Versi sebelumnya memotongnya lewat array_slice dan layarnya tetap
+     * menjawab "Daftar pesertanya lengkap: 2 dari 2 orang" — terukur: tiga
+     * nama diketik, SATU tersimpan, dan sistemnya mengucapkan selamat. Dua
+     * nama hilang tanpa satu pun tanda, dan panitia baru tahu saat
+     * menerbitkan sertifikat.
+     *
+     * Nama ke-empat pada rombongan berbayar tiga adalah orang yang kursinya
+     * tidak pernah dibeli; yang harus terjadi bukan membuangnya diam-diam,
+     * melainkan bertanya.
+     */
     #[Test]
-    public function daftarnya_dipotong_sebanyak_kursi_yang_dibayar(): void
+    public function kelebihan_nama_ditolak_bukan_dipotong(): void
     {
-        /*
-         * Nama ke-empat pada rombongan berbayar tiga adalah orang yang
-         * kursinya tidak pernah dibeli. Aturan yang sama persis dengan borang
-         * Tambah — pendaftarnya sendiri sudah terhitung satu.
-         */
         [$orang, $baris] = $this->rombongan(3);
 
         $this->actingAs($orang)->put(
             route('account.pendaftaran-layanan.peserta', ['scopus_camp', $baris->getKey()]),
             ['peserta' => "Satu\nDua\nTiga\nEmpat\nLima"]
-        )->assertRedirect();
+        )->assertSessionHasErrors('peserta');
+
+        $this->assertSame([],
+            PendaftaranPeserta::milik('scopus_camp', (string) $baris->getKey())
+                ->terurut()->pluck('nama')->all(),
+            'Sebagian namanya tetap tersimpan padahal kirimannya ditolak.');
+    }
+
+    /** Pas sebanyak kursinya tetap diterima — batasnya bukan satu kurangnya. */
+    #[Test]
+    public function pas_sebanyak_kursinya_diterima(): void
+    {
+        [$orang, $baris] = $this->rombongan(3);
+
+        $this->actingAs($orang)->put(
+            route('account.pendaftaran-layanan.peserta', ['scopus_camp', $baris->getKey()]),
+            ['peserta' => "Satu\nDua"]
+        )->assertRedirect()->assertSessionHasNoErrors();
 
         $this->assertSame(['Satu', 'Dua'],
             PendaftaranPeserta::milik('scopus_camp', (string) $baris->getKey())
                 ->terurut()->pluck('nama')->all());
+    }
+
+    /**
+     * Penolakannya TIDAK BOLEH menghapus daftar yang sudah benar.
+     *
+     * Panitia yang menempelkan daftar terlalu panjang lalu ditolak akan
+     * mengira daftarnya hilang — dan kalau benar-benar hilang, ia harus
+     * mengetik ulang semuanya dari awal.
+     */
+    #[Test]
+    public function penolakannya_tidak_menghapus_daftar_lama(): void
+    {
+        [$orang, $baris] = $this->rombongan(3);
+
+        $this->actingAs($orang)->put(
+            route('account.pendaftaran-layanan.peserta', ['scopus_camp', $baris->getKey()]),
+            ['peserta' => "Satu\nDua"]
+        )->assertRedirect();
+
+        $this->actingAs($orang)->put(
+            route('account.pendaftaran-layanan.peserta', ['scopus_camp', $baris->getKey()]),
+            ['peserta' => "Satu\nDua\nTiga\nEmpat"]
+        )->assertSessionHasErrors('peserta');
+
+        $this->assertSame(['Satu', 'Dua'],
+            PendaftaranPeserta::milik('scopus_camp', (string) $baris->getKey())
+                ->terurut()->pluck('nama')->all(),
+            'Daftar yang sudah benar ikut terhapus oleh kiriman yang ditolak.');
+    }
+
+    /**
+     * Pesan salahnya menyebut jalan keluarnya. Kelebihan nama hampir selalu
+     * berarti salah satu dari dua hal — ada nama yang tidak seharusnya di
+     * situ, atau rombongannya memang bertambah — dan panitia yang tidak
+     * diberi tahu yang kedua akan menghapus nama orang yang sudah membayar.
+     */
+    #[Test]
+    public function pesan_salahnya_menyebut_jalan_keluarnya(): void
+    {
+        [$orang, $baris] = $this->rombongan(2);
+
+        $this->actingAs($orang)->put(
+            route('account.pendaftaran-layanan.peserta', ['scopus_camp', $baris->getKey()]),
+            ['peserta' => "Satu\nDua\nTiga"]
+        );
+
+        $pesan = session('errors')->first('peserta');
+
+        $this->assertStringContainsString('paling banyak 1 nama', $pesan);
+        $this->assertStringContainsString('mengisi 3 nama', $pesan,
+            'Berapa yang diisi tidak disebut, jadi panitia menebak apa yang salah.');
+        $this->assertStringContainsString('Jumlah orang', $pesan,
+            'Jalan keluarnya tidak disebut; yang membacanya akan menghapus nama '
+            . 'orang yang sebenarnya sudah membayar.');
     }
 
     #[Test]
