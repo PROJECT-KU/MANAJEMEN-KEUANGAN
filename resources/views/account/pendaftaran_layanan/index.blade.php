@@ -38,6 +38,46 @@ Pendaftar Layanan | MIS Rumah Scopus
             min-width: 0;
         }
 
+        /*
+         * Penanda menggantung: keping kuning + tepi kiri pada barisnya.
+         *
+         * Kepingnya saja tidak cukup. Dalam tabel tujuh kolom, keping kecil
+         * di kolom kelima harus DICARI; tepi kiri yang berwarna terbaca saat
+         * memindai ke bawah tanpa membaca satu kata pun. Ubin ringkasan sudah
+         * memberi tahu BERAPA yang menggantung — yang belum terjawab cuma
+         * yang mana.
+         */
+        .pdl-lama {
+            color: #92400e;
+            background: #fef3c7;
+            border-color: #fde68a;
+            font-weight: 700;
+        }
+
+        .pdl-baris-lama > td:first-child {
+            box-shadow: inset 3px 0 0 #f59e0b;
+        }
+
+        /* Tombol aksi berdampingan; di mode kartu mereka turun sendiri. */
+        .pdl-aksi-baris {
+            display: flex;
+            gap: 6px;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
+        /*
+         * Borangnya display: contents.
+         *
+         * Sebagai blok, <form> jadi anak flex tersendiri dan tombolnya
+         * terbungkus satu lapis lagi — jaraknya jadi dobel dan tombolnya
+         * tidak sejajar dengan tautan Rincian di sebelahnya. Dengan contents,
+         * tombolnyalah yang jadi anak flex.
+         */
+        .pdl-lunas-borang {
+            display: contents;
+        }
+
         /* display: flex + wrap, bukan teks biasa: pil rombongan di ujung nama
            ber-nowrap, dan pada nama panjang ia mendorong barisnya melewati
            tepi kartu — terukur 41px di 390px. Dengan wrap, pilnya turun ke
@@ -602,7 +642,8 @@ Pendaftar Layanan | MIS Rumah Scopus
                 white-space: nowrap;
             }
 
-            .pdl-tombol-buka {
+            .pdl-tombol-buka,
+            .pdl-tombol-lunas {
                 padding: 0 11px;
             }
 
@@ -1556,6 +1597,55 @@ Pendaftar Layanan | MIS Rumah Scopus
 
 @push('scripts')
 <script>
+    /*
+     * Konfirmasi "Tandai lunas".
+     *
+     * Lewat misKonfirmasi(), bukan Swal.fire langsung — pembungkus bersama
+     * itu yang menjaga rupanya seragam di semua layar. Nama orangnya lewat
+     * `sorot`, BUKAN dirangkai ke `pesan`: ia disisipkan sebagai teks, jadi
+     * tanda < di dalam nama tidak pernah tertafsir markah.
+     *
+     * Dialognya bukan pengaman — peladennya tetap memvalidasi statusnya.
+     * Yang dijaga di sini kekeliruan, bukan penyusup: tombol ini duduk
+     * persis di sebelah "Rincian" pada dua puluh baris sekaligus, dan satu
+     * salah tekan menandai lunas orang yang belum membayar sekaligus
+     * mengirimi dia surat pemberitahuan.
+     *
+     * Didengarkan di DOCUMENT, bukan di tiap tombol: daftarnya ditukar utuh
+     * tiap kali saringannya berubah tanpa muat ulang, dan pendengar yang
+     * dipasang per tombol ikut terbuang bersama baris lamanya — tombolnya
+     * lalu mengirim borangnya tanpa bertanya apa-apa.
+     */
+    document.addEventListener('click', function (e) {
+        var tombol = e.target.closest('[data-pdl-lunas]');
+
+        if (!tombol || typeof window.misKonfirmasi !== 'function') {
+            return;
+        }
+
+        e.preventDefault();
+
+        window.misKonfirmasi({
+            judul: 'Tandai lunas pendaftaran ini?',
+            /*
+             * %s diisi NAMA orangnya, bukan nominalnya: yang perlu diyakinkan
+             * sebelum menekan adalah "baris yang mana", sebab tombol ini
+             * duduk di antara dua puluh baris yang rupanya sama. Nominalnya
+             * menyusul sebagai keterangan — ia angka hasil number_format,
+             * bukan teks yang diketik orang.
+             */
+            pesan: 'Pendaftaran %s (' + tombol.dataset.nominal + ') ditandai lunas, '
+                + 'dan pemberitahuannya dikirim ke emailnya.',
+            sorot: tombol.dataset.nama,
+            tombol: 'Ya, tandai lunas',
+            jenis: 'tanya',
+        }).then(function (setuju) {
+            if (setuju) {
+                tombol.closest('form').submit();
+            }
+        });
+    });
+
     (function () {
         'use strict';
 

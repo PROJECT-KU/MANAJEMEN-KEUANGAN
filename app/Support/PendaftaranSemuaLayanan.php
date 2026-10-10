@@ -647,6 +647,46 @@ class PendaftaranSemuaLayanan
         ],
     ];
 
+    /**
+     * Berapa hari sampai satu pendaftaran disebut MENGGANTUNG.
+     *
+     * Dipindah ke sini dari pengendalinya karena aturannya kini dipakai di
+     * TIGA tempat: ubin ringkasan yang menghitungnya, saringan yang memilih
+     * barisnya, dan penanda di baris tabelnya. Tiga salinan aturan waktu
+     * akan berselisih tanpa suara — ubin berbunyi 12 sementara yang bertanda
+     * cuma 9, dan tidak ada galat apa pun yang menunjukkannya.
+     */
+    public const HARI_MENGGANTUNG = 7;
+
+    /** Ambang waktunya sebagai teks siap pakai di kueri. */
+    public static function batasMenggantung(): string
+    {
+        return Carbon::now()->subDays(self::HARI_MENGGANTUNG)->toDateTimeString();
+    }
+
+    /**
+     * Satu baris sudah menunggu terlalu lama.
+     *
+     * Yang membayar di tempat DIKECUALIKAN: penanda ini mencari pendaftar
+     * yang transfernya ditunggu, sedangkan pembayar tunai menyerahkan
+     * uangnya saat datang. Memasukkannya berarti daftar tagihan berisi orang
+     * yang tidak perlu ditagih, dan daftar seperti itu berhenti dibaca.
+     */
+    public static function menggantung(object $b): bool
+    {
+        if (! in_array((string) ($b->status ?? ''), self::KEADAAN['menunggu']['nilai'], true)) {
+            return false;
+        }
+
+        if ((string) ($b->cara_bayar ?? '') === 'tunai') {
+            return false;
+        }
+
+        $waktu = self::waktuBaris($b);
+
+        return $waktu !== null && $waktu->lt(Carbon::now()->subDays(self::HARI_MENGGANTUNG));
+    }
+
     /** Kolom yang boleh dipakai mengurutkan, beserta ungkapan SQL-nya. */
     public const URUTAN = [
         'waktu' => 'waktu',

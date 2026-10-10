@@ -70,8 +70,31 @@
      * mentahnya tetap terbaca di halaman rincian.
      */
     $statusAsing = $keadaanBaris === 'lain';
+
+    /*
+     * Menggantung: menunggu bayar lebih lama dari ambangnya.
+     *
+     * Aturannya dari Pendaftaran::menggantung(), BUKAN disalin ke sini.
+     * Ubin ringkasan menghitungnya, saringan memilih barisnya, dan penanda
+     * ini menandainya — tiga salinan aturan waktu akan berselisih tanpa
+     * suara: ubin berbunyi 12 sementara yang bertanda cuma 9, dan tidak ada
+     * galat apa pun yang menunjukkannya.
+     */
+    $menggantung = Pendaftaran::menggantung($b);
+    $hariMenunggu = $menggantung && $waktuBaris ? (int) $waktuBaris->diffInDays(now()) : 0;
+
+    /*
+     * Status "lunas" milik layanan ini, untuk jalan pintas menandainya.
+     *
+     * Dibaca dari katalog, bukan ditulis di sini: kelima layanan memakai
+     * kata yang berbeda ('Pendaftaran Diterima', 'paid', 'pembayaran
+     * diterima'), dan nilai yang salah ditolak validator lalu berbalik jadi
+     * halaman galat tanpa menjelaskan apa-apa.
+     */
+    $statusLunas = Pendaftaran::statusLunas($b->layanan);
+    $bolehTandaiLunas = $statusLunas !== null && $keadaanBaris === 'menunggu';
 @endphp
-<tr class="pdl-baris {{ $layananBaris['warna'] }}">
+<tr @class(['pdl-baris', $layananBaris['warna'], 'pdl-baris-lama' => $menggantung])>
     <td class="mis-td-utama">
         <div class="pdl-layanan">
             <span class="mis-medali kecil {{ $layananBaris['warna'] }}" aria-hidden="true">
@@ -273,6 +296,22 @@
                 @endif
             </span>
 
+            {{-- Penanda menggantung. TIDAK memakai .mis-pil, alasannya sama
+                 seperti keping bukti di atas: mis-tabel-kartu menandai sel
+                 status lewat `:has(.mis-pil)` lalu menaikkannya ke baris kaki
+                 kartu, dan dua sel berpil membuat keduanya berbagi satu baris
+                 sempit.
+
+                 Angkanya disebut, bukan cuma "sudah lama": yang menentukan
+                 siapa dihubungi lebih dulu adalah berapa lamanya. --}}
+            @if ($menggantung)
+                <span class="pdl-bukti pdl-lama"
+                    title="Menunggu bayar lebih dari {{ \App\Support\PendaftaranSemuaLayanan::HARI_MENGGANTUNG }} hari tanpa kabar">
+                    <i class="fas fa-hourglass-half" aria-hidden="true"></i>
+                    menunggu {{ $hariMenunggu }} hari
+                </span>
+            @endif
+
             @if ($statusAsing)
                 {{-- Nilai yang belum punya keadaan WAJIB terbaca apa adanya:
                      lencananya cuma berbunyi "Belum dikenali", dan tanpa nilai
@@ -300,11 +339,40 @@
             {{-- aria-label WAJIB: di lebar tablet tulisan "Rincian"
                  disembunyikan supaya tabelnya tidak terklip, dan tombol ikon
                  tanpa nama tidak menyebut apa pun ke pembaca layar. --}}
-            <a class="mis-tombol mis-tombol-halus pdl-tombol-buka" href="{{ $tautanBaris }}"
-                aria-label="Buka rincian pendaftaran {{ $b->nama_orang }}"
-                title="Buka rincian pendaftaran {{ $b->nama_orang }}">
-                <i class="fas fa-eye" aria-hidden="true"></i> <span class="pdl-tombol-teks">Rincian</span>
-            </a>
+            <div class="pdl-aksi-baris">
+                @if ($bolehTandaiLunas)
+                    {{-- Jalan pintas untuk tindakan yang PALING SERING
+                         dikerjakan.
+
+                         Dari sini sebelumnya butuh dua klik dan satu muat
+                         halaman — buka rincian, cari satu dari enam tombol
+                         status yang rupanya sama persis — untuk pekerjaan
+                         yang isinya satu keputusan.
+
+                         Borangnya POST ke rute status yang sudah ada, jadi
+                         jejak, surat, dan kuota tetap lewat jalur yang sama;
+                         tidak ada jalur kedua yang harus ikut sepakat. --}}
+                    <form method="POST" class="pdl-lunas-borang"
+                        action="{{ route('account.pendaftaran-layanan.status', [$b->layanan, $b->id]) }}">
+                        @csrf
+                        <input type="hidden" name="status" value="{{ $statusLunas }}">
+                        <button type="submit" class="mis-tombol mis-tombol-hijau pdl-tombol-lunas"
+                            data-pdl-lunas data-nama="{{ $b->nama_orang ?: 'Tanpa nama' }}"
+                            data-nominal="Rp {{ number_format((int) $b->total, 0, ',', '.') }}"
+                            aria-label="Tandai lunas pendaftaran {{ $b->nama_orang }}"
+                            title="Tandai lunas tanpa membuka rinciannya">
+                            <i class="fas fa-check" aria-hidden="true"></i>
+                            <span class="pdl-tombol-teks">Tandai lunas</span>
+                        </button>
+                    </form>
+                @endif
+
+                <a class="mis-tombol mis-tombol-halus pdl-tombol-buka" href="{{ $tautanBaris }}"
+                    aria-label="Buka rincian pendaftaran {{ $b->nama_orang }}"
+                    title="Buka rincian pendaftaran {{ $b->nama_orang }}">
+                    <i class="fas fa-eye" aria-hidden="true"></i> <span class="pdl-tombol-teks">Rincian</span>
+                </a>
+            </div>
         @else
             <span class="pdl-bukti pdl-bukti-nihil">tanpa layar</span>
         @endif
