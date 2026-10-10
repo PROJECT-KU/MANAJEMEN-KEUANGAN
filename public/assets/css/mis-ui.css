@@ -3652,3 +3652,55 @@ a.mis-ubin.terpilih {
         padding: 0 10px;
     }
 }
+
+/*
+ * Tiga tombol sekunder: satu baris, ikon saja, hanya di lebar ponsel.
+ *
+ * Opt-in sendiri, BUKAN perluasan .mis-kepala-aksi-pasangan: dengan dua
+ * tombol, setengah lebar masih memuat tulisannya, dan membuang tulisan dari
+ * tombol yang sebenarnya muat adalah kemunduran.
+ *
+ * Terukur di 390px pada layar Pendaftar Layanan: tombol keempat membuat
+ * kepala halaman 278px — tiga baris tombol — dan kartu pertama baru mulai
+ * di 773px dari 844px layar. Praktis tidak ada satu pendaftar pun yang
+ * terlihat sebelum menggulir.
+ *
+ * Tulisannya disembunyikan untuk MATA saja; aria-label dan title tetap di
+ * markahnya, jadi pembaca layar dan tooltip tetap menyebut tujuannya.
+ */
+@media (max-width: 575.98px) {
+    .mis-kepala-aksi-trio .mis-tombol-halus {
+        flex: 1 1 0;
+        width: auto;
+        min-width: 0;
+        padding: 0 10px;
+    }
+
+    .mis-kepala-aksi-trio .mis-tombol-halus .mis-tombol-teks {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+    }
+}
+
+/*
+ * Medali kepala SEBARIS dengan judulnya di ponsel.
+ *
+ * .mis-kepala-teks berbasis 260px, dan 260 + medali 44 + sela 16 = 320px
+ * melewati lebar isi 390px (±302px). Teksnya lalu membungkus ke baris
+ * berikutnya dan medalinya duduk SENDIRIAN di satu baris penuh — 44px
+ * terbuang untuk satu ikon. Terukur di layar Pendaftar Layanan: kepala
+ * halaman 278px di ponsel melawan 102px di 1440px.
+ *
+ * Basisnya dinolkan, bukan medalinya disembunyikan: medali itu yang
+ * membedakan satu layar dari layar lain saat berpindah-pindah cepat.
+ */
+@media (max-width: 575.98px) {
+    .mis-kepala > .mis-kepala-teks {
+        flex: 1 1 0;
+        min-width: 0;
+    }
+}

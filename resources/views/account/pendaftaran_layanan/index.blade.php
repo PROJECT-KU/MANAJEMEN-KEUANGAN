@@ -315,11 +315,34 @@ Pendaftar Layanan | MIS Rumah Scopus
             line-height: 1.35;
         }
 
-        /* Rombongan ditandai di sebelah nama, bukan di kolom angka sendiri.
-           Terukur ada baris berisi 5, 6, dan 13 orang di antara 187 baris. */
+        /*
+         * Rombongan ditandai di sebelah nama, bukan di kolom angka sendiri.
+         * Terukur ada baris berisi 5, 6, dan 13 orang di antara 187 baris.
+         *
+         * Rupanya disalin dari .mis-pil, tetapi kelasnya TIDAK dipakai:
+         * mis-tabel-kartu menaikkan sel mana pun yang `:has(.mis-pil)` ke
+         * kaki kartu, dan sel Pendaftar — yang memuat nomor dan nama —
+         * terdorong ke bawah Sesi, Total bayar, dan Daftar.
+         */
         .pdl-pil-orang {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
             margin-left: 5px;
+            padding: 3px 10px;
+            border-radius: 999px;
+            background: #ede9fe;
+            color: #6d28d9;
+            font-size: .72rem;
+            font-weight: 700;
+            white-space: nowrap;
             vertical-align: middle;
+        }
+
+        /* Glifnya ikut ukuran pilnya; layout memasang .fas { font-size: 20px }
+           untuk seluruh halaman dan aturan itu menang atas pewarisan. */
+        .pdl-pil-orang .fas {
+            font-size: inherit !important;
         }
 
         /* Keping bukti bayar: teks berikon, bukan lencana. mis-tabel-kartu
@@ -789,6 +812,55 @@ Pendaftar Layanan | MIS Rumah Scopus
             border-color: #c7d2fe;
         }
 
+        /*
+         * Angka pokok di ringkasan lipatan: yang paling sering dicari tetap
+         * terbaca tanpa membuka lipatannya.
+         *
+         * Namanya SENGAJA tidak memuat "-ringkas". RupaBersamaTest melarang
+         * kelas berawalan layar yang memuat `-ubin` atau `-ringkas`, sebab
+         * itu pertanda satu layar membuat salinan ubin ringkasannya sendiri.
+         * Kelas ini bukan salinan ubin — tetapi penjaganya tidak bisa tahu
+         * itu dari namanya, dan melonggarkan penjaga demi satu nama yang
+         * kebetulan mirip adalah menukar yang dijaga dengan yang nyaman.
+         */
+        .pdl-lipat-angka {
+            margin-left: auto;
+            font-size: .78rem;
+            font-weight: 700;
+            color: var(--mis-tinta-2);
+        }
+
+        /*
+         * Dua lajur di ponsel, bukan satu.
+         *
+         * minmax(min(100%, 215px), 1fr) menyisakan SATU lajur pada lebar isi
+         * 302px, jadi keempat kotaknya bertumpuk: terukur 205px — lebih
+         * tinggi daripada barisan ubin di atasnya (93px), dan ketiga
+         * terbesar dari semua yang menutupi kartu pertama.
+         *
+         * Angkanya dikecilkan sedikit dan dibiarkan menyusut
+         * (font-size + min-width: 0) supaya "Rp 495.438.943" tidak memaksa
+         * kotaknya melebar lalu kembali jadi satu lajur.
+         */
+        @media (max-width: 575.98px) {
+            .pdl-uang-total {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 8px;
+                font-size: .76rem;
+            }
+
+            .pdl-uang-total > * {
+                gap: 7px;
+                padding: 9px 10px;
+            }
+
+            /* Ikonnya tetap, tapi tidak boleh ikut menyusut — ia penanda
+               jenis angkanya, dan ikon yang terjepit jadi tidak terbaca. */
+            .pdl-uang-total > * > .fas {
+                flex: 0 0 auto;
+            }
+        }
+
         /* Ikonnya tidak ikut menyusut saat angkanya panjang. */
         .pdl-uang-total > * > i {
             flex: 0 0 auto;
@@ -1070,7 +1142,7 @@ Pendaftar Layanan | MIS Rumah Scopus
                  dirender, jadi sesudah penyaringan tanpa muat ulang ia masih
                  memegang alamat LAMA. Idnya disebut data-mis-saring-juga di
                  borang penyaring supaya ikut diperbarui. --}}
-            <div class="mis-kepala-aksi mis-kepala-aksi-pasangan" id="pdl-aksi">
+            <div class="mis-kepala-aksi mis-kepala-aksi-pasangan mis-kepala-aksi-trio" id="pdl-aksi">
                 {{-- Tombol UTAMA, diletakkan pertama dan berwarna penuh:
                      mendaftarkan orang itu tindakan, sementara kedua unduhan
                      adalah pelengkap. Sebelum ada ini, yang mendaftar lewat
@@ -1084,13 +1156,18 @@ Pendaftar Layanan | MIS Rumah Scopus
                      tabel: yang diunduh orang hampir selalu yang dilihatnya.
                      Dua bentuk, bukan satu — PDF untuk dibaca dan dilampirkan,
                      lembar kerja untuk diolah jadi daftar hadir dan sertifikat. --}}
-                <a class="mis-tombol mis-tombol-halus"
+                {{-- aria-label WAJIB: di lebar ponsel tulisannya disembunyikan
+                     supaya ketiga tombol muat sebaris, dan tombol ikon tanpa nama
+                     tidak menyebut apa pun ke pembaca layar. --}}
+                <a class="mis-tombol mis-tombol-halus" title="Unduh daftar ini sebagai lembar kerja Excel"
+                    aria-label="Unduh daftar ini sebagai lembar kerja Excel"
                     href="{{ route('account.pendaftaran-layanan.excel', $bawa + request()->only('urut', 'arah')) }}">
-                    <i class="fas fa-file-excel mis-ikon-hijau"></i> Unduh Excel
+                    <i class="fas fa-file-excel mis-ikon-hijau"></i> <span class="mis-tombol-teks">Unduh Excel</span>
                 </a>
-                <a class="mis-tombol mis-tombol-halus"
+                <a class="mis-tombol mis-tombol-halus" title="Unduh daftar ini sebagai PDF"
+                    aria-label="Unduh daftar ini sebagai PDF"
                     href="{{ route('account.pendaftaran-layanan.pdf', $bawa + request()->only('urut', 'arah')) }}">
-                    <i class="fas fa-file-pdf mis-ikon-merah"></i> Unduh PDF
+                    <i class="fas fa-file-pdf mis-ikon-merah"></i> <span class="mis-tombol-teks">Unduh PDF</span>
                 </a>
                 @if ($bolehMenghapus)
                     {{-- Hanya administrator, sama seperti yang boleh menghapus:
@@ -1103,8 +1180,9 @@ Pendaftar Layanan | MIS Rumah Scopus
                          mencari ke mana satu pendaftaran menghilang. --}}
                     <a class="mis-tombol mis-tombol-halus"
                         href="{{ route('account.pendaftaran-layanan.terhapus') }}"
+                        aria-label="Pendaftaran yang sudah dihapus"
                         title="Pendaftaran yang sudah dihapus, beserta uang yang ikut terhapus">
-                        <i class="fas fa-trash-alt mis-ikon-merah"></i> Yang dihapus
+                        <i class="fas fa-trash-alt mis-ikon-merah"></i> <span class="mis-tombol-teks">Yang dihapus</span>
                     </a>
                 @endif
             </div>
@@ -1123,6 +1201,27 @@ Pendaftar Layanan | MIS Rumah Scopus
              jadi ia WAJIB ikut diperbarui saat saringannya berubah tanpa muat
              ulang. Tanpa itu, layarnya berbunyi 189 sementara daftar di
              bawahnya cuma 3 baris — dan yang dipercaya orang angkanya. --}}
+        {{-- Ringkasan DILIPAT di ponsel, pola yang sama dengan penyaring di
+             bawahnya dan dengan alasan yang sama persis.
+
+             Terukur di 390x844 sebelum ini: kepala 226px + ubin 93px +
+             angka 176px + ringkasan penyaring 42px = 537px sebelum ada satu
+             pendaftar pun yang terlihat, dari layar setinggi 844px. Kartu
+             pertama mulai di 692px — praktis layar pertama tidak memuat
+             data sama sekali.
+
+             Isinya tidak hilang, cuma satu ketukan: angka utamanya tetap
+             tertulis di ringkasannya, jadi yang paling sering dicari terbaca
+             tanpa membukanya. Di >= 768px mis-ui.js memaksanya terbuka dan
+             CSS menyembunyikan ringkasannya, jadi layar lebar tidak berubah
+             sama sekali. --}}
+        <details class="mis-lipat pdl-lipat" id="pdl-lipat" data-mis-lipat>
+            <summary>
+                <i class="fas fa-chart-pie mis-ikon-ungu" aria-hidden="true"></i>
+                Ringkasan
+                <span class="pdl-lipat-angka">{{ number_format($ringkasan['semua'], 0, ',', '.') }} pendaftaran</span>
+            </summary>
+
         <div id="pdl-ringkas">
         <div class="mis-ringkas-geser" data-mis-geser>
         <div class="mis-ringkas mis-ringkas-5" aria-label="Ringkasan pendaftar">
@@ -1271,6 +1370,7 @@ Pendaftar Layanan | MIS Rumah Scopus
             </p>
         @endif
         </div>{{-- pdl-ringkas --}}
+        </details>
 
         {{-- ---------------------------------------------- penyaring --}}
         {{-- <details> membungkusnya: di ponsel empat kendali yang selalu

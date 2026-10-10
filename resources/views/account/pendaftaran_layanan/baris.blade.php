@@ -123,8 +123,18 @@
                     {{-- Rombongan ditandai di sebelah namanya, bukan di kolom
                          angka sendiri: yang penting bukan angkanya melainkan
                          bahwa pendaftaran ini mewakili beberapa orang.
-                         Terukur ada baris berisi 5, 6, dan 13 orang. --}}
-                    <span class="mis-pil mis-pil-ungu pdl-pil-orang">
+                         Terukur ada baris berisi 5, 6, dan 13 orang.
+
+                         TIDAK memakai .mis-pil, dan ini bukan kerewelan
+                         penamaan. mis-tabel-kartu menaikkan sel mana pun yang
+                         `:has(.mis-pil)` ke kaki kartu lewat `order: 2` —
+                         jadi sel Pendaftar, yang memuat nomor DAN nama,
+                         terdorong ke bawah Sesi, Total bayar, dan Daftar.
+                         Terukur di potret 390px: nama orangnya duduk di
+                         tengah kartu, di bawah tiga keterangan yang semuanya
+                         kurang penting. Alasan yang sama sudah lebih dulu
+                         membuat keping bukti tidak memakai .mis-pil. --}}
+                    <span class="pdl-pil-orang">
                         <i class="fas fa-users" aria-hidden="true"></i> {{ $jumlahOrang }} orang
                     </span>
                 @endif
