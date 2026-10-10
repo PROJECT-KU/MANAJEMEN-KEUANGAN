@@ -1673,6 +1673,55 @@ Rincian Pendaftaran | MIS Rumah Scopus
     }
 
     /*
+     * Apa saja yang ikut hilang, dihitung dengan cakupan yang SAMA PERSIS
+     * seperti yang dihapus HapusPendaftaran.
+     *
+     * Jenis 'pendaftaran', BUKAN $indukBayar: untuk pendaftaran yang
+     * menempel pada pesanan lembaga, $indukBayar menunjuk termin milik
+     * LEMBAGANYA — dan termin itu memang tidak ikut terhapus. Memakainya di
+     * sini membuat peringatannya menyebut angka yang tidak akan hilang, dan
+     * peringatan yang angkanya salah lebih buruk daripada tidak ada.
+     */
+    $bayarTerhapus = \App\PembayaranPendaftaran::milik(
+        \App\PembayaranPendaftaran::PENDAFTARAN, (string) $pendaftaran->getKey()
+    )->get();
+
+    $uangTerhapus = (int) $bayarTerhapus->sum('nominal');
+
+    $refundTerhapus = \App\PendaftaranPengembalian::milik(
+        $layanan, (string) $pendaftaran->getKey()
+    )->sum('nominal');
+
+    // Dirakit sebagai daftar, bukan satu kalimat panjang: yang dibaca orang
+    // sebelum menekan tombol merah adalah angkanya, dan angka di tengah
+    // paragraf tidak terbaca.
+    $hapusKehilangan = [];
+
+    if ($uangTerhapus > 0) {
+        $hapusKehilangan[] = [
+            'fa-money-bill-wave',
+            'Rp ' . number_format($uangTerhapus, 0, ',', '.') . ' pembayaran yang sudah tercatat',
+            $bayarTerhapus->count() . ' catatan pembayaran keluar dari pembukuan',
+        ];
+    }
+
+    if ($refundTerhapus > 0) {
+        $hapusKehilangan[] = [
+            'fa-undo',
+            'Rp ' . number_format((int) $refundTerhapus, 0, ',', '.') . ' catatan pengembalian dana',
+            null,
+        ];
+    }
+
+    if ($jejak->isNotEmpty()) {
+        $hapusKehilangan[] = [
+            'fa-history',
+            $jejak->count() . ' baris jejak perubahan',
+            'termasuk riwayat surat dan siapa mengubah apa',
+        ];
+    }
+
+    /*
      * Label dan pengelompokan medan — urusan tampilan, jadi di sini.
      *
      * Medan yang BOLEH disunting datang dari $medan, yaitu daftar putih di
@@ -3450,6 +3499,44 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                     Tidak bisa diurungkan, dan belum ada tong sampah.
                                 </span>
                             </p>
+
+                            @if ($hapusKehilangan !== [])
+                                {{-- Angkanya disebut SEBELUM tombolnya, bukan sesudah.
+
+                                     Yang paling mahal dari penghapusan bukan barisnya
+                                     melainkan uang yang menempel padanya: catatan
+                                     pembayaran atas nama pendaftaran ini ikut dibuang,
+                                     dan angkanya keluar dari pembukuan. Sebelum ini
+                                     tidak ada satu pun layar yang menyebutkannya, jadi
+                                     yang menekan tombol merah tidak pernah tahu berapa
+                                     yang ia hapus. --}}
+                                <div class="rin-hilang">
+                                    <p class="rin-hilang-judul">
+                                        <i class="fas fa-box-open" aria-hidden="true"></i>
+                                        Yang ikut hilang
+                                    </p>
+                                    <ul class="rin-hilang-daftar">
+                                        @foreach ($hapusKehilangan as [$ikonHilang, $pokokHilang, $ketHilang])
+                                            <li>
+                                                <span class="mis-medali mini mis-merah" aria-hidden="true">
+                                                    <i class="fas {{ $ikonHilang }}"></i>
+                                                </span>
+                                                <span>
+                                                    <strong>{{ $pokokHilang }}</strong>
+                                                    @if ($ketHilang)
+                                                        <span class="rin-hilang-ket">{{ $ketHilang }}</span>
+                                                    @endif
+                                                </span>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                    <p class="rin-hilang-kaki">
+                                        Potretnya tetap tersimpan di
+                                        <a href="{{ route('account.pendaftaran-layanan.terhapus') }}">catatan penghapusan</a>
+                                        — bisa dibaca, tetapi <strong>tidak bisa dikembalikan</strong>.
+                                    </p>
+                                </div>
+                            @endif
 
                             <p class="rin-nota rin-nota-biru">
                                 <i class="fas fa-undo" aria-hidden="true"></i>

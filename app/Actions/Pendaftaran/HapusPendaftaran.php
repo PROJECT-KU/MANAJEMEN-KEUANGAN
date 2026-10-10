@@ -3,7 +3,11 @@
 namespace App\Actions\Pendaftaran;
 
 use App\ClinikScopusTestimoni;
+use App\PendaftaranDihapus;
+use App\PendaftaranJejak;
+use App\PendaftaranPengembalian;
 use App\Support\PendaftaranSemuaLayanan as Pendaftaran;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -59,6 +63,16 @@ class HapusPendaftaran
 
         try {
             DB::transaction(function () use ($layanan, $pendaftaran) {
+                /*
+                 * POTRETNYA DIAMBIL DULU, di dalam transaksi yang sama.
+                 *
+                 * Di luar transaksi, arsipnya bisa tertulis untuk penghapusan
+                 * yang ternyata batal — dan arsip yang menyebut pendaftaran
+                 * yang sebenarnya masih ada lebih menyesatkan daripada tidak
+                 * ada arsip sama sekali.
+                 */
+                $this->arsipkan($layanan, $pendaftaran);
+
                 if (Pendaftaran::berangkatan($layanan)) {
                     $this->kembalikanKuota($layanan, $pendaftaran);
                 }
@@ -100,6 +114,15 @@ class HapusPendaftaran
                     \App\PembayaranPendaftaran::PENDAFTARAN,
                     (string) $pendaftaran->getKey()
                 )->delete();
+
+                /*
+                 * Catatan pengembalian dananya ikut, alasannya sama seperti
+                 * pesertanya: induknya ditunjuk pasangan (layanan,
+                 * pendaftaran_id) tanpa kunci asing, jadi basis datanya tidak
+                 * akan membersihkannya sendiri. Angkanya sudah masuk potret
+                 * arsip di atas, jadi yang hilang cuma barisnya.
+                 */
+                PendaftaranPengembalian::milik($layanan, (string) $pendaftaran->getKey())->delete();
 
                 $pendaftaran->delete();
             });
@@ -160,6 +183,63 @@ class HapusPendaftaran
                 (int) $angkatan->sisa_kuota + (int) $pendaftaran->jumlah_pendaftar
             ),
         ])->save();
+    }
+
+    /**
+     * Potret lengkap pendaftaran ini sebelum ia dibuang.
+     *
+     * Yang dijaga bukan kenangan melainkan PEMBUKUAN: baris pembayaran atas
+     * nama pendaftaran ini ikut dihapus beberapa baris di bawah, dan tanpa
+     * potret ini angka itu keluar dari pembukuan tanpa menyisakan apa pun.
+     * `uang_terhapus` menjumlahkan yang memang sudah diterima — berbeda dari
+     * `total`, yang cuma tagihan, dan tagihan yang belum dibayar sepeser pun
+     * tidak meninggalkan lubang.
+     *
+     * Jejaknya ikut dipotret, bukan cuma dihitung. Barisnya sendiri memang
+     * tetap tinggal di pendaftaran_jejak, tetapi tidak ada lagi halaman yang
+     * bisa membukanya begitu pendaftarannya hilang — jadi secara praktis ia
+     * lenyap. Di dalam potret, riwayatnya masih bisa dibaca.
+     */
+    private function arsipkan(string $layanan, $pendaftaran): void
+    {
+        $id = (string) $pendaftaran->getKey();
+
+        $pembayaran = \App\PembayaranPendaftaran::milik(
+            \App\PembayaranPendaftaran::PENDAFTARAN, $id
+        )->get();
+
+        $jejak = PendaftaranJejak::milik($layanan, $id)->terurut()->get();
+        $peserta = \App\PendaftaranPeserta::milik($layanan, $id)->get();
+        $pengembalian = PendaftaranPengembalian::milik($layanan, $id)->get();
+
+        $orang = Auth::user();
+
+        PendaftaranDihapus::create([
+            'layanan' => $layanan,
+            'pendaftaran_id' => $id,
+            'nomor' => (string) ($pendaftaran->id_transaksi ?? $pendaftaran->id_pemesanan ?? $id),
+            'nama' => (string) ($pendaftaran->nama ?? $pendaftaran->nama_pemesan ?? ''),
+            'email' => (string) ($pendaftaran->email ?? $pendaftaran->email_pemesan ?? ''),
+            'status' => (string) ($pendaftaran->status ?? ''),
+            'total' => (int) ($pendaftaran->total_pembayaran
+                ?? $pendaftaran->total_keseluruhan_pembayaran ?? 0),
+            'uang_terhapus' => (int) $pembayaran->sum('nominal'),
+            'jumlah_pembayaran' => $pembayaran->count(),
+            'jumlah_jejak' => $jejak->count(),
+            'potret' => [
+                'pendaftaran' => $pendaftaran->toArray(),
+                'pembayaran' => $pembayaran->toArray(),
+                'pengembalian' => $pengembalian->toArray(),
+                'peserta' => $peserta->toArray(),
+                'jejak' => $jejak->map(fn ($j) => [
+                    'aksi' => $j->aksi,
+                    'kalimat' => $j->kalimat,
+                    'waktu' => optional($j->created_at)->toDateTimeString(),
+                ])->all(),
+            ],
+            'oleh_id' => $orang?->getKey(),
+            'oleh_nama' => $orang?->full_name ?? $orang?->username,
+        ]);
     }
 
     /**

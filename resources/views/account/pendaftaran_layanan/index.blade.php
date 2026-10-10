@@ -1051,6 +1051,21 @@ Pendaftar Layanan | MIS Rumah Scopus
                     href="{{ route('account.pendaftaran-layanan.pdf', $bawa + request()->only('urut', 'arah')) }}">
                     <i class="fas fa-file-pdf mis-ikon-merah"></i> Unduh PDF
                 </a>
+                @if ($bolehMenghapus)
+                    {{-- Hanya administrator, sama seperti yang boleh menghapus:
+                         isinya potret lengkap termasuk email dan nominal
+                         pembayaran orang yang barisnya sudah tidak ada.
+
+                         Tautannya ada DI SINI, bukan cuma di tab Hapus: arsip
+                         yang hanya bisa dicapai lewat layar yang menghasilkan
+                         isinya tidak akan pernah dibuka orang yang justru
+                         mencari ke mana satu pendaftaran menghilang. --}}
+                    <a class="mis-tombol mis-tombol-halus"
+                        href="{{ route('account.pendaftaran-layanan.terhapus') }}"
+                        title="Pendaftaran yang sudah dihapus, beserta uang yang ikut terhapus">
+                        <i class="fas fa-trash-alt mis-ikon-merah"></i> Yang dihapus
+                    </a>
+                @endif
             </div>
         </div>
 
