@@ -169,6 +169,40 @@ class LayarPonselPendaftarTest extends TestCase
     }
 
     /**
+     * Tautan ke pendaftaran ganda juga >= 40px.
+     *
+     * Blok itu ditambahkan SESUDAH penyisiran sasaran ketuk pertama, jadi ia
+     * lolos — terukur 16px tinggi. Penjaga ini menyebut kelasnya, bukan
+     * sekadar "yang di layar rincian", supaya blok berikutnya tidak ikut
+     * lolos dengan cara yang sama.
+     */
+    #[Test]
+    public function tautan_pendaftaran_ganda_cukup_besar(): void
+    {
+        $this->assertMatchesRegularExpression(
+            '/\.rin-ganda-teks > a\s*\{[^}]*min-height:\s*40px/s', $this->rincian(),
+            'Tautan pendaftaran ganda kembali setinggi 16px.'
+        );
+    }
+
+    /**
+     * Ubin di layar arsip memakai pembungkus geser + petunjuknya, sama
+     * dengan layar daftar. Tanpa itu, di ponsel ubin keduanya meluber ke
+     * kanan tanpa satu tanda pun bahwa barisnya berlanjut.
+     */
+    #[Test]
+    public function ubin_arsip_punya_petunjuk_gesernya(): void
+    {
+        $isi = file_get_contents(
+            resource_path('views/account/pendaftaran_layanan/terhapus.blade.php')
+        );
+
+        $this->assertStringContainsString('mis-ringkas-geser', $isi);
+        $this->assertStringContainsString('mis-ringkas-petunjuk', $isi,
+            'Petunjuk gesernya hilang; ubin kedua meluber tanpa tanda apa pun.');
+    }
+
+    /**
      * Tab Hapus selalu di ujung kanan. Jumlah tabnya berayun 2 sampai 7
      * tergantung isi pendaftarannya, jadi "tab ke-sekian" bukan tempat yang
      * tetap — dan yang paling mahal kalau meleset justru tab itu.

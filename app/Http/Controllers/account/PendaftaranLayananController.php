@@ -50,6 +50,14 @@ class PendaftaranLayananController extends Controller
     private const PER_HALAMAN = 20;
 
     /**
+     * Angka sependek ini tidak dicocokkan ke nomor telepon.
+     *
+     * Lihat alasan dan angkanya di saring(); intinya "81" yang tersisa dari
+     * sebuah nomor pendaftaran mencocoki 72% tabel.
+     */
+    private const ANGKA_MINIMAL_CARI_TELP = 4;
+
+    /**
      * Folder bukti transfer termin, di bawah public/.
      *
      * Folder tersendiri, bukan folder bukti salah satu layanan: satu termin
@@ -871,6 +879,88 @@ class PendaftaranLayananController extends Controller
     }
 
     /**
+     * Membetulkan satu catatan pembayaran.
+     *
+     * Sebelum ini satu-satunya cara memperbaiki angka yang salah ketik
+     * adalah menghapusnya lalu mencatat ulang — dan penghapusannya
+     * meninggalkan jejak "Catatan pembayaran Rp X dihapus", yang terbaca
+     * seperti pembatalan, bukan koreksi. Yang membaca riwayatnya setengah
+     * tahun kemudian tidak bisa membedakan keduanya.
+     *
+     * Buktinya boleh ikut diganti, tetapi TIDAK boleh dikosongkan dari sini:
+     * membuang bukti transfer lewat borang yang niatnya membetulkan angka
+     * adalah kehilangan yang tidak disengaja siapa pun.
+     */
+    public function ubahPembayaran(Request $request, string $pembayaran)
+    {
+        if (! $this->bolehMelihat()) {
+            return $this->tolak();
+        }
+
+        $baris = \App\PembayaranPendaftaran::find($pembayaran);
+
+        if ($baris === null) {
+            abort(404);
+        }
+
+        $data = $request->validate([
+            'nominal' => ['required', 'string', 'max:20'],
+            'tanggal' => ['required', 'date', 'before_or_equal:today'],
+            'cara_bayar' => ['nullable', Rule::in(array_keys(Pendaftaran::caraBayarPilihan()))],
+            'bukti' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'catatan' => ['nullable', 'string', 'max:255'],
+        ], [
+            'nominal.required' => 'Nominalnya belum diisi.',
+            'tanggal.required' => 'Tanggal uang masuknya belum diisi.',
+            'tanggal.before_or_equal' => 'Tanggalnya tidak boleh di masa depan — '
+                . 'yang dicatat di sini uang yang SUDAH masuk.',
+            'bukti.max' => 'Bukti transfernya lebih dari 4 MB.',
+        ]);
+
+        $nominal = (int) preg_replace('/\D+/', '', $data['nominal']);
+
+        if ($nominal < 1) {
+            return back()->withErrors(['nominal' => 'Nominalnya harus lebih dari nol.'])
+                ->withInput()->with('tab', 'termin');
+        }
+
+        $lama = (int) $baris->nominal;
+
+        $baris->forceFill([
+            'nominal' => $nominal,
+            'tanggal' => $data['tanggal'],
+            'cara_bayar' => $data['cara_bayar'] ?? null,
+            'catatan' => trim((string) ($data['catatan'] ?? '')) ?: null,
+        ])->save();
+
+        $this->simpanBuktiTermin($baris, $request->file('bukti'));
+
+        /*
+         * Jejaknya hanya untuk termin yang induknya memang satu pendaftaran,
+         * alasan yang sama persis seperti pencatatan dan penghapusannya:
+         * termin pesanan lembaga menaungi beberapa pendaftaran sekaligus.
+         *
+         * Dicatat HANYA kalau nominalnya benar-benar berubah. Membetulkan
+         * tanggal atau catatan tidak mengubah uangnya, dan jejak "Rp 2.000.000
+         * -> Rp 2.000.000" cuma memanjangkan riwayat tanpa memberi tahu apa
+         * pun.
+         */
+        if ($lama !== $nominal
+            && $baris->jenis === \App\PembayaranPendaftaran::PENDAFTARAN
+            && $baris->layanan) {
+            $this->catatJejakBayar(
+                (string) $baris->layanan, (string) $baris->induk_id, 'ubah-bayar', $lama, $nominal
+            );
+        }
+
+        return back()->with('tab', 'termin')->with('sukses',
+            $lama === $nominal
+                ? 'Catatan pembayarannya dibetulkan.'
+                : 'Catatan pembayarannya dibetulkan: Rp ' . number_format($lama, 0, ',', '.')
+                    . ' jadi Rp ' . number_format($nominal, 0, ',', '.') . '.');
+    }
+
+    /**
      * Menghapus satu catatan pembayaran.
      *
      * Dihapus seutuhnya, bukan ditandai batal: yang dihapus adalah catatan
@@ -1611,18 +1701,30 @@ class PendaftaranLayananController extends Controller
         }
 
         /*
-         * Tidak boleh melebihi yang dibayar. Refund yang lebih besar daripada
-         * tagihannya membuat ringkasan uang masuk MINUS, dan tidak ada satu
-         * pun layar yang tahu harus berbuat apa dengan angka itu.
+         * Batasnya UANG YANG MASUK, bukan tagihannya.
+         *
+         * Versi pertama membandingkan dengan tagihan, dan itu membolehkan
+         * pendaftaran yang belum membayar sepeser pun dicatat dikembalikan
+         * dananya sampai sebesar tagihannya — uang yang tidak pernah ada
+         * keluar dari pembukuan. Ringkasannya pun tidak menunjukkan apa-apa:
+         * "uang bersih" dihitung max(0, …), jadi kelebihannya diam-diam
+         * terpotong tanpa satu angka minus pun yang bisa dilihat.
          */
-        $kolomTotal = Pendaftaran::sumber($layanan)['kolom']['total'];
-        $tagihan = (int) preg_replace('/\D+/', '', (string) $pendaftaran->{$kolomTotal});
+        $diterima = \App\Support\UangPendaftaran::diterima($layanan, $pendaftaran);
         $sudah = \App\PendaftaranPengembalian::totalMilik($layanan, (string) $pendaftaran->getKey());
 
-        if ($tagihan > 0 && $sudah + $nominal > $tagihan) {
+        if ($diterima <= 0) {
             return back()->withInput()->with('tab', 'termin')->with('error',
-                'Totalnya melebihi yang dibayar — sisa yang masih bisa dikembalikan Rp '
-                . number_format(max(0, $tagihan - $sudah), 0, ',', '.') . '.');
+                'Belum ada uang yang masuk untuk pendaftaran ini, jadi tidak ada '
+                . 'yang bisa dikembalikan. Catat pembayarannya dulu, atau pindahkan '
+                . 'statusnya ke dibatalkan kalau memang batal.');
+        }
+
+        if ($sudah + $nominal > $diterima) {
+            return back()->withInput()->with('tab', 'termin')->with('error',
+                'Totalnya melebihi uang yang masuk (Rp ' . number_format($diterima, 0, ',', '.')
+                . ') — sisa yang masih bisa dikembalikan Rp '
+                . number_format(max(0, $diterima - $sudah), 0, ',', '.') . '.');
         }
 
         DB::transaction(function () use ($layanan, $pendaftaran, $nominal, $data) {
@@ -1829,6 +1931,37 @@ class PendaftaranLayananController extends Controller
             'uangSemua' => (int) \App\PendaftaranDihapus::sum('uang_terhapus'),
             'jumlahSemua' => (int) \App\PendaftaranDihapus::count(),
         ]);
+    }
+
+    /**
+     * Catatan penghapusan sebagai lembar kerja.
+     *
+     * Saringannya ikut terbawa, sama seperti kedua unduhan di layar daftar:
+     * yang diunduh orang hampir selalu yang sedang dilihatnya.
+     */
+    public function terhapusExcel(Request $request)
+    {
+        if (! $this->bolehMenghapus()) {
+            return redirect()
+                ->route('account.pendaftaran-layanan.index')
+                ->with('error', 'Catatan penghapusan hanya bisa dibuka administrator.');
+        }
+
+        $cari = trim((string) $request->query('cari', ''));
+
+        $baris = \App\PendaftaranDihapus::query()
+            ->when($cari !== '', function ($q) use ($cari) {
+                $q->where(fn ($w) => $w->where('nomor', 'like', '%' . $cari . '%')
+                    ->orWhere('nama', 'like', '%' . $cari . '%')
+                    ->orWhere('email', 'like', '%' . $cari . '%'));
+            })
+            ->terbaru()
+            ->get();
+
+        return Excel::download(
+            new \App\Exports\PendaftaranDihapusExport($baris),
+            'catatan-penghapusan-' . now()->format('Y-m-d-Hi') . '.xlsx'
+        );
     }
 
     public function index(Request $request)
@@ -2199,6 +2332,31 @@ class PendaftaranLayananController extends Controller
                      */
                     $angka = preg_replace('/\D+/', '', $cari) ?? '';
 
+                    /*
+                     * ANGKANYA HARUS CUKUP PANJANG, kalau tidak pencarian
+                     * nomor justru membatalkan seluruh saringan.
+                     *
+                     * Angka diambil dari apa pun yang diketik, termasuk dari
+                     * nomor pendaftaran. Mencari "T-8AMjKk1P" menyisakan
+                     * "81", dan "81" ada di hampir setiap nomor telepon
+                     * Indonesia — hasilnya pencarian satu nomor pendaftaran
+                     * memulangkan hampir seluruh tabel.
+                     *
+                     * Terukur pada 268 baris yang ada:
+                     *   1 angka  "8"    -> 268 baris (100%)
+                     *   2 angka  "81"   -> 194 baris (72%)
+                     *   2 angka  "20"   ->  15 baris (6%)
+                     *   3 angka  "600"  ->   4 baris (1%)
+                     *   4 angka  "6000" ->   2 baris (1%)
+                     *
+                     * Ambangnya 4: itu cara orang mencari nomor telepon —
+                     * empat angka terakhir — dan di bawah itu yang tersaring
+                     * bukan nomor melainkan kebetulan.
+                     */
+                    if (strlen($angka) < self::ANGKA_MINIMAL_CARI_TELP) {
+                        return;
+                    }
+
                     if ($angka === '') {
                         // LIKE '%%' akan mencocokkan semuanya; tanpa angka,
                         // pencarian nomor tidak ada gunanya.
@@ -2351,7 +2509,18 @@ class PendaftaranLayananController extends Controller
             ->when($layanan !== '', fn ($q) => $q->where('layanan', $layanan))
             ->sum('nominal');
 
+        /*
+         * max(0, ...) DIPERTAHANKAN untuk angka yang ditampilkan — "uang
+         * masuk minus Rp 300.000" tidak berarti apa-apa bagi yang membacanya.
+         *
+         * Tetapi keadaannya DILAPORKAN, tidak lagi ditelan diam-diam.
+         * Sebelumnya clamp ini satu-satunya yang terjadi: refund yang
+         * melebihi uang masuk hilang dari layar tanpa satu tanda pun, dan
+         * pembukuan yang tidak imbang tampak imbang. Sekarang selisihnya
+         * disebut sendiri di layar daftar.
+         */
         $ringkasan['uang_bersih'] = max(0, $ringkasan['uang_lunas'] - $ringkasan['uang_refund']);
+        $ringkasan['uang_selisih'] = max(0, $ringkasan['uang_refund'] - $ringkasan['uang_lunas']);
 
         /*
          * Pendaftaran yang menunggu terlalu lama, dihitung terpisah.

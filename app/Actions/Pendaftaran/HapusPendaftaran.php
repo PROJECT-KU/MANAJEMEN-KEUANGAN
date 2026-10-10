@@ -223,7 +223,17 @@ class HapusPendaftaran
             'status' => (string) ($pendaftaran->status ?? ''),
             'total' => (int) ($pendaftaran->total_pembayaran
                 ?? $pendaftaran->total_keseluruhan_pembayaran ?? 0),
-            'uang_terhapus' => (int) $pembayaran->sum('nominal'),
+            /*
+             * Lewat UangPendaftaran, BUKAN jumlah baris termin.
+             *
+             * Terukur: nol baris termin di seluruh basis data ini, sementara
+             * 172 pendaftaran berstatus lunas. Dijumlahkan dari terminnya,
+             * angka ini selalu nol — jadi menghapus pendaftaran lunas tetap
+             * mengurangi ringkasan "uang masuk" sementara arsipnya mencatat
+             * "tanpa pembayaran", dan lubang yang hendak ditutup catatan ini
+             * cuma pindah tempat.
+             */
+            'uang_terhapus' => \App\Support\UangPendaftaran::diterima($layanan, $pendaftaran),
             'jumlah_pembayaran' => $pembayaran->count(),
             'jumlah_jejak' => $jejak->count(),
             'potret' => [

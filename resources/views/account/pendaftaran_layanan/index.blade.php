@@ -812,6 +812,21 @@ Pendaftar Layanan | MIS Rumah Scopus
             border-color: #c7d2fe;
         }
 
+        /* Pembukuan yang tidak imbang: merah, dan tidak boleh terbaca
+           seperti keterangan biasa di sebelahnya. */
+        .pdl-uang-selisih {
+            display: block;
+            margin-top: 3px;
+            font-size: .72rem;
+            font-weight: 700;
+            line-height: 1.4;
+            color: #be123c;
+        }
+
+        .pdl-uang-selisih .fas {
+            font-size: inherit !important;
+        }
+
         /*
          * Angka pokok di ringkasan lipatan: yang paling sering dicari tetap
          * terbaca tanpa membuka lipatannya.
@@ -1312,6 +1327,20 @@ Pendaftar Layanan | MIS Rumah Scopus
                     @if ($ringkasan['uang_refund'] > 0)
                         <span class="pdl-uang-refund">
                             sudah dikurangi Rp {{ number_format($ringkasan['uang_refund'], 0, ',', '.') }} yang dikembalikan
+                        </span>
+                    @endif
+                    @if ($ringkasan['uang_selisih'] > 0)
+                        {{-- Pembukuan yang tidak imbang WAJIB kelihatan.
+
+                             Angka di atas dihitung max(0, ...) supaya tidak
+                             terbaca "minus", dan sebelum ada baris ini
+                             clamp itulah satu-satunya yang terjadi: refund
+                             yang melebihi uang masuk hilang dari layar tanpa
+                             satu tanda pun, dan yang tidak imbang tampak
+                             imbang. --}}
+                        <span class="pdl-uang-selisih">
+                            <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+                            pengembalian melebihi uang masuk Rp {{ number_format($ringkasan['uang_selisih'], 0, ',', '.') }} — periksa catatannya
                         </span>
                     @endif
                 </span>
