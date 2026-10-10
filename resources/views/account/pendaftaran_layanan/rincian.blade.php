@@ -1365,37 +1365,124 @@ Rincian Pendaftaran | MIS Rumah Scopus
             color: #a16207;
         }
 
+        /*
+         * Keping berkisi, bukan enam baris penuh.
+         *
+         * Terukur sebelum ini: bloknya 488px di 1440px — 41% dari SELURUH
+         * tab Ringkasan (1180px) — dan 785px di ponsel. Peringatan yang
+         * memakan empat persepuluh layar mendorong isi utama tab ini, yaitu
+         * ringkasan pembayaran, ke bawah lipatan. Yang dibutuhkan panitia
+         * dari blok ini cuma menyadari bahwa ada yang ganda, lalu bisa
+         * menelusurinya; bukan membaca enam baris satu per satu.
+         *
+         * auto-fit + minmax: tiga lajur di kolom lebar, dua di tablet, satu
+         * di ponsel — tanpa titik putus yang harus dijaga satu per satu.
+         */
         .rin-ganda-daftar {
             display: grid;
-            gap: 8px;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 205px), 1fr));
+            gap: 7px;
             margin: 0;
             padding: 0;
             list-style: none;
         }
 
         .rin-ganda-daftar > li {
-            display: grid;
-            /* min-width: auto bawaan item kisi membuat lajur kedua menolak
-               menyusut; minmax(0,1fr) yang menahannya. */
-            grid-template-columns: 24px minmax(0, 1fr);
-            gap: 9px;
+            display: flex;
             align-items: center;
+            gap: 8px;
+            min-width: 0;
+            padding: 7px 10px;
+            border: 1px solid #fde68a;
+            border-radius: 11px;
+            /* Putih di atas latar kuning: tiap keping jadi satuan yang bisa
+               ditunjuk, bukan deret teks yang mengambang di satu kotak. */
+            background: #fff;
+        }
+
+        /* Medalinya dikecilkan jadi penanda layanan, bukan ubin: enam medali
+           46px untuk enam baris yang layanannya sama cuma pengulangan. */
+        .rin-ganda-daftar .mis-medali {
+            flex: 0 0 22px;
+            width: 22px;
+            height: 22px;
+            border-radius: 7px;
+            font-size: .62rem;
         }
 
         .rin-ganda-teks {
             min-width: 0;
-            font-size: .82rem;
+            font-size: .8rem;
+            line-height: 1.3;
         }
 
         .rin-ganda-teks > a {
+            display: block;
             font-weight: 700;
             color: #92400e;
+            /* Nomornya tidak boleh terpatah dua baris di keping selebar
+               205px; yang panjang dipotong dan tetap utuh di title. */
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
         }
 
+        /*
+         * Keterangannya MEMBUNGKUS, tidak dipotong.
+         *
+         * Versi pertama memotongnya dengan ellipsis dan menaruh teks
+         * penuhnya di `title` — dan title tidak bisa dibuka di ponsel sama
+         * sekali. Yang terbaca di sana tinggal "Menunggu baya…", jadi
+         * statusnya hilang permanen justru di layar yang paling sempit.
+         * Membungkus menambah satu baris; memotong menghilangkan isinya.
+         */
         .rin-ganda-ket {
             display: block;
-            font-size: .74rem;
+            font-size: .71rem;
+            line-height: 1.35;
             color: #a16207;
+        }
+
+        /* Tombolnya tidak ada di layar lebar: di sana keenam kepingnya muat
+           dalam dua baris kisi, jadi tidak ada yang ditahan untuk dibuka. */
+        .rin-ganda-lagi-tuas {
+            display: none;
+        }
+
+        @media (max-width: 575.98px) {
+            /*
+             * Pemilihnya menyebut `.rin-ganda-daftar > li` DAN kelasnya.
+             *
+             * `.rin-ganda-daftar > li` menyetel display: flex dan berbobot
+             * (0,1,1); kelas tunggal `.rin-ganda-lagi` berbobot (0,1,0) dan
+             * KALAH terhadapnya — kepingnya tetap tergambar tanpa ada galat
+             * apa pun yang menunjukkannya. Jebakan yang sama pernah terjadi
+             * pada daftar jejak.
+             */
+            .rin-ganda-daftar > li.rin-ganda-lagi {
+                display: none;
+            }
+
+            .rin-ganda-daftar.rin-ganda-penuh > li.rin-ganda-lagi {
+                display: flex;
+            }
+
+            .rin-ganda-lagi-tuas {
+                display: inline-flex;
+                align-items: center;
+                gap: 7px;
+                /* 40px: sasaran ketuk, sama dengan tombol ringkas lainnya. */
+                min-height: 40px;
+                margin-bottom: 7px;
+                padding: 0 12px;
+                border: 1px solid #fde68a;
+                border-radius: 10px;
+                background: #fff;
+                color: #92400e;
+                font-size: .76rem;
+                font-weight: 700;
+                cursor: pointer;
+            }
         }
 
         /* Borang pembetul catatan pembayaran: menempel di bawah barisnya,
@@ -2447,6 +2534,27 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                     sebelum menagih atau menandai lunas — satu transfer bisa saja
                                     dimaksudkan untuk dua pendaftaran.
                                 </p>
+                                @php
+                                    // Tiga dulu di ponsel; di layar lebar keenamnya muat
+                                    // dalam dua baris kisi dan tidak ada yang ditahan.
+                                    $gandaTampak = 3;
+                                    $gandaDitahan = max(0, $ganda->count() - $gandaTampak);
+                                @endphp
+                                @if ($gandaDitahan > 0)
+                                    {{-- Tombolnya HANYA tergambar di lebar ponsel lewat
+                                         CSS; di layar lebar tidak ada yang disembunyikan,
+                                         jadi tombol pembuka di sana cuma membuka yang
+                                         sudah terbuka. --}}
+                                    <button type="button" class="rin-ganda-lagi-tuas"
+                                        data-mis-ringkas=".rin-ganda-daftar" data-kelas-penuh="rin-ganda-penuh"
+                                        data-buka="Tampilkan {{ $gandaDitahan }} lainnya"
+                                        data-tutup="Sembunyikan yang lain"
+                                        aria-expanded="false">
+                                        <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                                        <span data-mis-ringkas-teks>Tampilkan {{ $gandaDitahan }} lainnya</span>
+                                    </button>
+                                @endif
+
                                 <ul class="rin-ganda-daftar">
                                     @foreach ($ganda as $lain)
                                         @php
@@ -2454,19 +2562,38 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                             $rupaLain = Pendaftaran::KEADAAN[Pendaftaran::keadaanDari($lain->status)] ?? null;
                                             $waktuLain = Pendaftaran::waktuBaris($lain);
                                         @endphp
-                                        <li>
+                                        <li @class(['rin-ganda-lagi' => $loop->index >= $gandaTampak])>
                                             <span class="mis-medali mini {{ $infoLain['warna'] ?? 'mis-abu' }}" aria-hidden="true">
                                                 <i class="fas {{ $infoLain['ikon'] ?? 'fa-tag' }}"></i>
                                             </span>
+                                            @php
+                                                /*
+                                                 * Dirakit di PHP supaya pemisah titiknya tidak
+                                                 * pernah menggantung saat salah satu bagiannya
+                                                 * kosong — sesi tanpa tanggal, misalnya.
+                                                 *
+                                                 * Nama layanan DIBUANG kalau sama dengan layanan
+                                                 * yang sedang dibuka. Yang ganda hampir selalu di
+                                                 * layanan yang sama, jadi "Scopus Camp" terulang
+                                                 * enam kali sambil mendesak status dan tanggalnya
+                                                 * keluar dari keping — dan medali di sebelah
+                                                 * kirinya sudah menyebutkan layanannya lewat
+                                                 * warna dan ikonnya.
+                                                 */
+                                                $ketLain = implode(' · ', array_filter([
+                                                    $lain->layanan === $layanan
+                                                        ? null
+                                                        : ($infoLain['nama'] ?? $lain->layanan),
+                                                    $rupaLain['label'] ?? null,
+                                                    $waktuLain?->translatedFormat('d M Y'),
+                                                ]));
+                                            @endphp
                                             <span class="rin-ganda-teks">
-                                                <a href="{{ Pendaftaran::tautanBaris($lain) }}">
+                                                <a href="{{ Pendaftaran::tautanBaris($lain) }}"
+                                                    title="{{ strtoupper((string) ($lain->nomor ?: 'tanpa nomor')) }} — {{ $ketLain }}">
                                                     {{ strtoupper((string) ($lain->nomor ?: 'tanpa nomor')) }}
                                                 </a>
-                                                <span class="rin-ganda-ket">
-                                                    {{ $infoLain['nama'] ?? $lain->layanan }}
-                                                    @if ($rupaLain) &middot; {{ $rupaLain['label'] }} @endif
-                                                    @if ($waktuLain) &middot; {{ $waktuLain->translatedFormat('d M Y') }} @endif
-                                                </span>
+                                                <span class="rin-ganda-ket" title="{{ $ketLain }}">{{ $ketLain }}</span>
                                             </span>
                                         </li>
                                     @endforeach
