@@ -1779,6 +1779,45 @@ class PendaftaranLayananController extends Controller
             ->with('sukses', $hasil['pesan']);
     }
 
+    /**
+     * Catatan pendaftaran yang sudah dihapus.
+     *
+     * Hanya administrator, sama seperti yang boleh menghapusnya: isinya
+     * potret lengkap termasuk email dan nominal pembayaran orang yang sudah
+     * tidak ada barisnya, dan tidak ada alasan membukanya lebih lebar
+     * daripada layar yang menghasilkannya.
+     */
+    public function terhapus(Request $request)
+    {
+        if (! $this->bolehMenghapus()) {
+            return redirect()
+                ->route('account.pendaftaran-layanan.index')
+                ->with('error', 'Catatan penghapusan hanya bisa dibuka administrator.');
+        }
+
+        $cari = trim((string) $request->query('cari', ''));
+
+        $daftar = \App\PendaftaranDihapus::query()
+            ->when($cari !== '', function ($q) use ($cari) {
+                $q->where(fn ($w) => $w->where('nomor', 'like', '%' . $cari . '%')
+                    ->orWhere('nama', 'like', '%' . $cari . '%')
+                    ->orWhere('email', 'like', '%' . $cari . '%'));
+            })
+            ->terbaru()
+            ->paginate(20)
+            ->withQueryString();
+
+        return view('account.pendaftaran_layanan.terhapus', [
+            'daftar' => $daftar,
+            'cari' => $cari,
+            // Dihitung dari SELURUH tabel, bukan dari halaman yang tampak:
+            // angka di kepala yang berubah tiap pindah halaman tidak menjawab
+            // "berapa yang sudah hilang".
+            'uangSemua' => (int) \App\PendaftaranDihapus::sum('uang_terhapus'),
+            'jumlahSemua' => (int) \App\PendaftaranDihapus::count(),
+        ]);
+    }
+
     public function index(Request $request)
     {
         if (! $this->bolehMelihat()) {
@@ -1816,6 +1855,7 @@ class PendaftaranLayananController extends Controller
             ->withQueryString();
 
         return view('account.pendaftaran_layanan.index', [
+            'bolehMenghapus' => $this->bolehMenghapus(),
             'baris' => $baris,
             'ringkasan' => $ringkasan,
             'katalog' => Pendaftaran::katalog(),

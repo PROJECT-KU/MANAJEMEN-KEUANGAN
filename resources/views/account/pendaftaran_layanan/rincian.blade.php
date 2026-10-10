@@ -1585,6 +1585,25 @@ Rincian Pendaftaran | MIS Rumah Scopus
     $kodeUnik = (int) ($pendaftaran->kode_unik ?: $pendaftaran->kode_unik_pembayaran);
 
     /*
+     * Tautan WhatsApp lewat api.whatsapp.com, BUKAN wa.me — lihat
+     * App\Support\TautanWa. Lewat wa.me emoji dan sebagian tanda baca
+     * sampai dalam keadaan rusak, dan pengirimnya tidak pernah tahu sebab
+     * di layarnya sendiri tampak benar.
+     *
+     * Barisnya dirakit di sini karena halaman ini memegang MODELNYA, bukan
+     * baris hasil union — dan perakit pesannya membaca nama seragam
+     * (nama_orang, nomor, total) yang hanya ada pada baris union.
+     */
+    $tautanWa = \App\Support\TautanWa::kirim($telpOrang, \App\Support\PesanWaPendaftaran::untuk((object) [
+        'nama_orang' => $namaOrang,
+        'nomor' => $nomor,
+        'total' => $totalBayar,
+        'kode_unik' => $kodeUnik,
+        'status' => $pendaftaran->status,
+        'layanan' => $layanan,
+    ]));
+
+    /*
      * Dibaca lewat katalog, bukan dari kolomnya langsung: baris lama dari
      * sebelum kolom `cara_bayar` ada bernilai kosong, dan nilai tak dikenal
      * tetap harus punya label — kolomnya varchar, jadi jalur pendaftaran mana
@@ -1651,6 +1670,55 @@ Rincian Pendaftaran | MIS Rumah Scopus
 
     if ($layanan === 'clinik_scopus') {
         $hapusTambahan .= ', beserta testimoni yang menempel padanya';
+    }
+
+    /*
+     * Apa saja yang ikut hilang, dihitung dengan cakupan yang SAMA PERSIS
+     * seperti yang dihapus HapusPendaftaran.
+     *
+     * Jenis 'pendaftaran', BUKAN $indukBayar: untuk pendaftaran yang
+     * menempel pada pesanan lembaga, $indukBayar menunjuk termin milik
+     * LEMBAGANYA — dan termin itu memang tidak ikut terhapus. Memakainya di
+     * sini membuat peringatannya menyebut angka yang tidak akan hilang, dan
+     * peringatan yang angkanya salah lebih buruk daripada tidak ada.
+     */
+    $bayarTerhapus = \App\PembayaranPendaftaran::milik(
+        \App\PembayaranPendaftaran::PENDAFTARAN, (string) $pendaftaran->getKey()
+    )->get();
+
+    $uangTerhapus = (int) $bayarTerhapus->sum('nominal');
+
+    $refundTerhapus = \App\PendaftaranPengembalian::milik(
+        $layanan, (string) $pendaftaran->getKey()
+    )->sum('nominal');
+
+    // Dirakit sebagai daftar, bukan satu kalimat panjang: yang dibaca orang
+    // sebelum menekan tombol merah adalah angkanya, dan angka di tengah
+    // paragraf tidak terbaca.
+    $hapusKehilangan = [];
+
+    if ($uangTerhapus > 0) {
+        $hapusKehilangan[] = [
+            'fa-money-bill-wave',
+            'Rp ' . number_format($uangTerhapus, 0, ',', '.') . ' pembayaran yang sudah tercatat',
+            $bayarTerhapus->count() . ' catatan pembayaran keluar dari pembukuan',
+        ];
+    }
+
+    if ($refundTerhapus > 0) {
+        $hapusKehilangan[] = [
+            'fa-undo',
+            'Rp ' . number_format((int) $refundTerhapus, 0, ',', '.') . ' catatan pengembalian dana',
+            null,
+        ];
+    }
+
+    if ($jejak->isNotEmpty()) {
+        $hapusKehilangan[] = [
+            'fa-history',
+            $jejak->count() . ' baris jejak perubahan',
+            'termasuk riwayat surat dan siapa mengubah apa',
+        ];
     }
 
     /*
@@ -2011,8 +2079,9 @@ Rincian Pendaftaran | MIS Rumah Scopus
                         </p>
                     </div>
                     @if ($wa)
-                        <a class="rin-aksi rin-warna-hijau" href="https://wa.me/{{ $wa }}"
-                            target="_blank" rel="noopener" title="Hubungi lewat WhatsApp"
+                        <a class="rin-aksi rin-warna-hijau" href="{{ $tautanWa }}"
+                            target="_blank" rel="noopener"
+                            title="Hubungi lewat WhatsApp — pesannya sudah terisi, masih bisa disunting"
                             aria-label="Hubungi lewat WhatsApp">
                             <i class="fab fa-whatsapp" aria-hidden="true"></i>
                         </a>
@@ -3295,7 +3364,7 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                                  per satu. --}}
                                             @if (! empty($orangKe['telp']))
                                                 <a class="rin-peserta-telp"
-                                                    href="https://wa.me/{{ \App\Support\NomorTelepon::rapikan($orangKe['telp']) }}"
+                                                    href="{{ \App\Support\TautanWa::kirim($orangKe['telp'], \App\Support\PesanWaPendaftaran::peserta($orangKe['nama'] ?? null, $layanan)) }}"
                                                     target="_blank" rel="noopener">
                                                     <i class="fab fa-whatsapp" aria-hidden="true"></i>
                                                     {{ \App\Support\DaftarPeserta::bentukLokal(\App\Support\NomorTelepon::rapikan($orangKe['telp'])) }}
@@ -3430,6 +3499,44 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                     Tidak bisa diurungkan, dan belum ada tong sampah.
                                 </span>
                             </p>
+
+                            @if ($hapusKehilangan !== [])
+                                {{-- Angkanya disebut SEBELUM tombolnya, bukan sesudah.
+
+                                     Yang paling mahal dari penghapusan bukan barisnya
+                                     melainkan uang yang menempel padanya: catatan
+                                     pembayaran atas nama pendaftaran ini ikut dibuang,
+                                     dan angkanya keluar dari pembukuan. Sebelum ini
+                                     tidak ada satu pun layar yang menyebutkannya, jadi
+                                     yang menekan tombol merah tidak pernah tahu berapa
+                                     yang ia hapus. --}}
+                                <div class="rin-hilang">
+                                    <p class="rin-hilang-judul">
+                                        <i class="fas fa-box-open" aria-hidden="true"></i>
+                                        Yang ikut hilang
+                                    </p>
+                                    <ul class="rin-hilang-daftar">
+                                        @foreach ($hapusKehilangan as [$ikonHilang, $pokokHilang, $ketHilang])
+                                            <li>
+                                                <span class="mis-medali mini mis-merah" aria-hidden="true">
+                                                    <i class="fas {{ $ikonHilang }}"></i>
+                                                </span>
+                                                <span>
+                                                    <strong>{{ $pokokHilang }}</strong>
+                                                    @if ($ketHilang)
+                                                        <span class="rin-hilang-ket">{{ $ketHilang }}</span>
+                                                    @endif
+                                                </span>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                    <p class="rin-hilang-kaki">
+                                        Potretnya tetap tersimpan di
+                                        <a href="{{ route('account.pendaftaran-layanan.terhapus') }}">catatan penghapusan</a>
+                                        — bisa dibaca, tetapi <strong>tidak bisa dikembalikan</strong>.
+                                    </p>
+                                </div>
+                            @endif
 
                             <p class="rin-nota rin-nota-biru">
                                 <i class="fas fa-undo" aria-hidden="true"></i>
