@@ -1268,6 +1268,69 @@ Rincian Pendaftaran | MIS Rumah Scopus
         /* Kotak pemberitahuan. Kuning untuk yang perlu diketahui, merah untuk
            yang tidak bisa diurungkan — warnanya mengikuti keluarga yang sama
            dengan lencana status, bukan warna sendiri. */
+        /*
+         * Peringatan pendaftaran ganda. Kuning, bukan merah: ini perlu
+         * diperiksa, bukan salah — mendaftar dua layanan sekaligus wajar,
+         * dan warna merah pada hal yang sering benar membuat seluruh warna
+         * merah di layar ini berhenti dipercaya.
+         */
+        /* Hanya warnanya yang ditimpa; bentuk, bantalan, dan jaraknya tetap
+           dari .rin-bagian supaya iramanya sama dengan kartu lain di tab ini. */
+        .rin-ganda {
+            border-color: #fde68a;
+            background: #fffbeb;
+        }
+
+        .rin-ganda-judul {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0;
+            font-size: .88rem;
+            font-weight: 700;
+            color: #92400e;
+        }
+
+        .rin-ganda-sub {
+            margin: 4px 0 10px;
+            font-size: .79rem;
+            line-height: 1.5;
+            color: #a16207;
+        }
+
+        .rin-ganda-daftar {
+            display: grid;
+            gap: 8px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .rin-ganda-daftar > li {
+            display: grid;
+            /* min-width: auto bawaan item kisi membuat lajur kedua menolak
+               menyusut; minmax(0,1fr) yang menahannya. */
+            grid-template-columns: 24px minmax(0, 1fr);
+            gap: 9px;
+            align-items: center;
+        }
+
+        .rin-ganda-teks {
+            min-width: 0;
+            font-size: .82rem;
+        }
+
+        .rin-ganda-teks > a {
+            font-weight: 700;
+            color: #92400e;
+        }
+
+        .rin-ganda-ket {
+            display: block;
+            font-size: .74rem;
+            color: #a16207;
+        }
+
         .rin-nota {
             display: flex;
             align-items: flex-start;
@@ -2264,6 +2327,62 @@ Rincian Pendaftaran | MIS Rumah Scopus
                     {{-- ======================================= ringkasan --}}
                     <div class="tab-pane fade {{ $tabSekarang === 'ringkasan' ? 'show active' : '' }}"
                         id="rin-panel-ringkasan" role="tabpanel" aria-labelledby="rin-tab-ringkasan" tabindex="0">
+
+                        @if ($ganda->isNotEmpty())
+                            {{-- Pendaftaran ganda, DI ATAS segalanya di tab ini.
+
+                                 Orang yang mengira borangnya gagal lalu mengisi
+                                 ulang meninggalkan dua baris yang tidak saling
+                                 tahu — dan dua kursi terpakai untuk satu orang.
+                                 Sebelum ini tidak ada satu layar pun yang
+                                 menyebutkannya, jadi yang ketahuan hanya kalau
+                                 panitia kebetulan ingat namanya.
+
+                                 Peringatan, bukan penghalang: mendaftar dua
+                                 layanan sekaligus itu wajar, dan layar yang
+                                 menolaknya akan salah lebih sering daripada
+                                 benar. Yang dikerjakan di sini cuma memberitahu. --}}
+                            {{-- Dibungkus .rin-bagian seperti isi tab ini yang
+                                 lain. Tanpa itu iramanya pecah: satu kotak
+                                 tanpa tepi kartu di antara kartu-kartu
+                                 terbaca seperti sisipan yang salah tempat.
+                                 Dijaga uji irama kartu di tab Ringkasan. --}}
+                            <div class="rin-bagian rin-ganda">
+                                <p class="rin-ganda-judul">
+                                    <i class="fas fa-clone" aria-hidden="true"></i>
+                                    Orang ini punya {{ $ganda->count() }} pendaftaran lain
+                                </p>
+                                <p class="rin-ganda-sub">
+                                    Dicocokkan dari email atau nomor WhatsApp-nya. Periksa dulu
+                                    sebelum menagih atau menandai lunas — satu transfer bisa saja
+                                    dimaksudkan untuk dua pendaftaran.
+                                </p>
+                                <ul class="rin-ganda-daftar">
+                                    @foreach ($ganda as $lain)
+                                        @php
+                                            $infoLain = Pendaftaran::katalog()[$lain->layanan] ?? null;
+                                            $rupaLain = Pendaftaran::KEADAAN[Pendaftaran::keadaanDari($lain->status)] ?? null;
+                                            $waktuLain = Pendaftaran::waktuBaris($lain);
+                                        @endphp
+                                        <li>
+                                            <span class="mis-medali mini {{ $infoLain['warna'] ?? 'mis-abu' }}" aria-hidden="true">
+                                                <i class="fas {{ $infoLain['ikon'] ?? 'fa-tag' }}"></i>
+                                            </span>
+                                            <span class="rin-ganda-teks">
+                                                <a href="{{ Pendaftaran::tautanBaris($lain) }}">
+                                                    {{ strtoupper((string) ($lain->nomor ?: 'tanpa nomor')) }}
+                                                </a>
+                                                <span class="rin-ganda-ket">
+                                                    {{ $infoLain['nama'] ?? $lain->layanan }}
+                                                    @if ($rupaLain) &middot; {{ $rupaLain['label'] }} @endif
+                                                    @if ($waktuLain) &middot; {{ $waktuLain->translatedFormat('d M Y') }} @endif
+                                                </span>
+                                            </span>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
 
                         {{-- Tiga angka yang paling sering ditanyakan panitia saat
                              mencocokkan transfer, berdampingan supaya terbaca

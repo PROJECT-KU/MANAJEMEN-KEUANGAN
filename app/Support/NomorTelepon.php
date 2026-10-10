@@ -75,6 +75,33 @@ class NomorTelepon
         return array_values(array_unique($bentuk));
     }
 
+    /**
+     * Ungkapan SQL yang membuang tanda baca dari satu kolom nomor.
+     *
+     * Dibutuhkan karena kolomnya menyimpan nomor APA ADANYA seperti diketik:
+     * terukur di basis data ini, 424 nomor memuat tanda hubung. Membandingkan
+     * kolomnya langsung dengan bentuk berangka-saja TIDAK PERNAH cocok, dan
+     * ketidakcocokan itu diam — pencariannya cuma memulangkan nol.
+     *
+     * REPLACE bersarang, bukan REGEXP_REPLACE: yang terakhir baru ada di
+     * MySQL 8 dan MariaDB 10.0, dan kegagalannya berupa galat SQL di
+     * produksi, bukan di sini.
+     *
+     * Yang dibuang enam tanda yang lazim diketik orang. Hanya '-' yang
+     * benar-benar ada di data sekarang; lima lainnya untuk yang masuk
+     * besok — borangnya tidak membatasi apa pun.
+     */
+    public static function tanpaTandaSql(string $kolom): string
+    {
+        $bersih = $kolom;
+
+        foreach ([' ', '-', '.', '(', ')', '+'] as $tanda) {
+            $bersih = "REPLACE({$bersih}, '{$tanda}', '')";
+        }
+
+        return $bersih;
+    }
+
     /** Sudah cukup panjang untuk dicari atau disimpan. */
     public static function masukAkal(?string $nomor): bool
     {
