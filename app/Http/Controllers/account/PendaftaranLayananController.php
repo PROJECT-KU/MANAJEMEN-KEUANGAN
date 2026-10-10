@@ -50,6 +50,14 @@ class PendaftaranLayananController extends Controller
     private const PER_HALAMAN = 20;
 
     /**
+     * Angka sependek ini tidak dicocokkan ke nomor telepon.
+     *
+     * Lihat alasan dan angkanya di saring(); intinya "81" yang tersisa dari
+     * sebuah nomor pendaftaran mencocoki 72% tabel.
+     */
+    private const ANGKA_MINIMAL_CARI_TELP = 4;
+
+    /**
      * Folder bukti transfer termin, di bawah public/.
      *
      * Folder tersendiri, bukan folder bukti salah satu layanan: satu termin
@@ -1611,18 +1619,30 @@ class PendaftaranLayananController extends Controller
         }
 
         /*
-         * Tidak boleh melebihi yang dibayar. Refund yang lebih besar daripada
-         * tagihannya membuat ringkasan uang masuk MINUS, dan tidak ada satu
-         * pun layar yang tahu harus berbuat apa dengan angka itu.
+         * Batasnya UANG YANG MASUK, bukan tagihannya.
+         *
+         * Versi pertama membandingkan dengan tagihan, dan itu membolehkan
+         * pendaftaran yang belum membayar sepeser pun dicatat dikembalikan
+         * dananya sampai sebesar tagihannya — uang yang tidak pernah ada
+         * keluar dari pembukuan. Ringkasannya pun tidak menunjukkan apa-apa:
+         * "uang bersih" dihitung max(0, …), jadi kelebihannya diam-diam
+         * terpotong tanpa satu angka minus pun yang bisa dilihat.
          */
-        $kolomTotal = Pendaftaran::sumber($layanan)['kolom']['total'];
-        $tagihan = (int) preg_replace('/\D+/', '', (string) $pendaftaran->{$kolomTotal});
+        $diterima = \App\Support\UangPendaftaran::diterima($layanan, $pendaftaran);
         $sudah = \App\PendaftaranPengembalian::totalMilik($layanan, (string) $pendaftaran->getKey());
 
-        if ($tagihan > 0 && $sudah + $nominal > $tagihan) {
+        if ($diterima <= 0) {
             return back()->withInput()->with('tab', 'termin')->with('error',
-                'Totalnya melebihi yang dibayar — sisa yang masih bisa dikembalikan Rp '
-                . number_format(max(0, $tagihan - $sudah), 0, ',', '.') . '.');
+                'Belum ada uang yang masuk untuk pendaftaran ini, jadi tidak ada '
+                . 'yang bisa dikembalikan. Catat pembayarannya dulu, atau pindahkan '
+                . 'statusnya ke dibatalkan kalau memang batal.');
+        }
+
+        if ($sudah + $nominal > $diterima) {
+            return back()->withInput()->with('tab', 'termin')->with('error',
+                'Totalnya melebihi uang yang masuk (Rp ' . number_format($diterima, 0, ',', '.')
+                . ') — sisa yang masih bisa dikembalikan Rp '
+                . number_format(max(0, $diterima - $sudah), 0, ',', '.') . '.');
         }
 
         DB::transaction(function () use ($layanan, $pendaftaran, $nominal, $data) {
@@ -2199,6 +2219,31 @@ class PendaftaranLayananController extends Controller
                      */
                     $angka = preg_replace('/\D+/', '', $cari) ?? '';
 
+                    /*
+                     * ANGKANYA HARUS CUKUP PANJANG, kalau tidak pencarian
+                     * nomor justru membatalkan seluruh saringan.
+                     *
+                     * Angka diambil dari apa pun yang diketik, termasuk dari
+                     * nomor pendaftaran. Mencari "T-8AMjKk1P" menyisakan
+                     * "81", dan "81" ada di hampir setiap nomor telepon
+                     * Indonesia — hasilnya pencarian satu nomor pendaftaran
+                     * memulangkan hampir seluruh tabel.
+                     *
+                     * Terukur pada 268 baris yang ada:
+                     *   1 angka  "8"    -> 268 baris (100%)
+                     *   2 angka  "81"   -> 194 baris (72%)
+                     *   2 angka  "20"   ->  15 baris (6%)
+                     *   3 angka  "600"  ->   4 baris (1%)
+                     *   4 angka  "6000" ->   2 baris (1%)
+                     *
+                     * Ambangnya 4: itu cara orang mencari nomor telepon —
+                     * empat angka terakhir — dan di bawah itu yang tersaring
+                     * bukan nomor melainkan kebetulan.
+                     */
+                    if (strlen($angka) < self::ANGKA_MINIMAL_CARI_TELP) {
+                        return;
+                    }
+
                     if ($angka === '') {
                         // LIKE '%%' akan mencocokkan semuanya; tanpa angka,
                         // pencarian nomor tidak ada gunanya.
@@ -2351,7 +2396,18 @@ class PendaftaranLayananController extends Controller
             ->when($layanan !== '', fn ($q) => $q->where('layanan', $layanan))
             ->sum('nominal');
 
+        /*
+         * max(0, ...) DIPERTAHANKAN untuk angka yang ditampilkan — "uang
+         * masuk minus Rp 300.000" tidak berarti apa-apa bagi yang membacanya.
+         *
+         * Tetapi keadaannya DILAPORKAN, tidak lagi ditelan diam-diam.
+         * Sebelumnya clamp ini satu-satunya yang terjadi: refund yang
+         * melebihi uang masuk hilang dari layar tanpa satu tanda pun, dan
+         * pembukuan yang tidak imbang tampak imbang. Sekarang selisihnya
+         * disebut sendiri di layar daftar.
+         */
         $ringkasan['uang_bersih'] = max(0, $ringkasan['uang_lunas'] - $ringkasan['uang_refund']);
+        $ringkasan['uang_selisih'] = max(0, $ringkasan['uang_refund'] - $ringkasan['uang_lunas']);
 
         /*
          * Pendaftaran yang menunggu terlalu lama, dihitung terpisah.

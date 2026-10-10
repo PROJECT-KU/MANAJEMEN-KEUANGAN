@@ -1803,7 +1803,14 @@ Rincian Pendaftaran | MIS Rumah Scopus
         \App\PembayaranPendaftaran::PENDAFTARAN, (string) $pendaftaran->getKey()
     )->get();
 
-    $uangTerhapus = (int) $bayarTerhapus->sum('nominal');
+    /*
+     * Lewat UangPendaftaran, bukan jumlah baris terminnya.
+     *
+     * Terukur nol baris termin di seluruh basis data ini melawan 172
+     * pendaftaran lunas: dijumlahkan dari terminnya, peringatan ini TIDAK
+     * AKAN PERNAH muncul untuk satu pun pendaftaran yang ada sekarang.
+     */
+    $uangTerhapus = \App\Support\UangPendaftaran::diterima($layanan, $pendaftaran);
 
     $refundTerhapus = \App\PendaftaranPengembalian::milik(
         $layanan, (string) $pendaftaran->getKey()
@@ -1817,8 +1824,13 @@ Rincian Pendaftaran | MIS Rumah Scopus
     if ($uangTerhapus > 0) {
         $hapusKehilangan[] = [
             'fa-money-bill-wave',
-            'Rp ' . number_format($uangTerhapus, 0, ',', '.') . ' pembayaran yang sudah tercatat',
-            $bayarTerhapus->count() . ' catatan pembayaran keluar dari pembukuan',
+            'Rp ' . number_format($uangTerhapus, 0, ',', '.') . ' pembayaran yang sudah masuk',
+            // Keterangannya mengikuti dari mana angkanya datang. Untuk
+            // pendaftaran tanpa termin, "0 catatan pembayaran" akan terbaca
+            // seolah angka di atasnya karangan.
+            $bayarTerhapus->isNotEmpty()
+                ? $bayarTerhapus->count() . ' catatan pembayaran keluar dari pembukuan'
+                : 'keluar dari ringkasan uang masuk di layar daftar',
         ];
     }
 

@@ -76,6 +76,53 @@ class CatatanPenghapusanTest extends TestCase
         $this->assertSame(5500000, $arsip->total, 'Tagihannya tetap dicatat sebagai keterangan.');
     }
 
+    /**
+     * INI yang paling mudah terlewat, dan sempat terlewat.
+     *
+     * Terukur di basis data ini: NOL baris termin untuk pendaftaran,
+     * sementara 172 pendaftaran berstatus lunas. Versi pertama catatan
+     * penghapusan menjumlahkan baris termin — jadi untuk SETIAP pendaftaran
+     * yang ada sekarang angkanya nol, dan peringatan "Yang ikut hilang"
+     * tidak akan pernah muncul sekali pun.
+     *
+     * Padahal menghapusnya betul-betul mengurangi ringkasan "uang masuk" di
+     * layar daftar, yang menghitung dari tagihan baris berstatus lunas.
+     */
+    #[Test]
+    public function lunas_tanpa_termin_tetap_terhitung_uangnya(): void
+    {
+        [$admin, $b] = $this->dengan();
+
+        $b->forceFill(['status' => Pendaftaran::statusLunas('scopus_camp')])->save();
+
+        $this->assertSame(0, PembayaranPendaftaran::milik(
+            PembayaranPendaftaran::PENDAFTARAN, (string) $b->getKey()
+        )->count(), 'prasyarat: memang tidak ada termin yang dicatat');
+
+        $this->actingAs($admin)->hapus($b->refresh());
+
+        $this->assertSame(5500000, $this->arsip($b)->uang_terhapus,
+            'Pendaftaran lunas tanpa termin tercatat hilang TANPA uang, padahal '
+            . 'ringkasan uang masuk ikut berkurang sebesar tagihannya.');
+    }
+
+    #[Test]
+    public function layarnya_memperingatkan_juga_untuk_lunas_tanpa_termin(): void
+    {
+        [$admin, $b] = $this->dengan();
+
+        $b->forceFill(['status' => Pendaftaran::statusLunas('scopus_camp')])->save();
+
+        $panel = $this->panelHapus($this->actingAs($admin)
+            ->get(route('account.pendaftaran-layanan.rincian', ['scopus_camp', $b->getKey()]))
+            ->assertOk()->getContent());
+
+        $this->assertStringContainsString('Yang ikut hilang', $panel,
+            'Peringatannya tidak muncul untuk pendaftaran lunas tanpa termin — '
+            . 'yaitu SELURUH pendaftaran lunas yang ada sekarang.');
+        $this->assertStringContainsString('Rp 5.500.000', $panel);
+    }
+
     #[Test]
     public function jejaknya_ikut_dipotret_supaya_masih_terbaca(): void
     {
