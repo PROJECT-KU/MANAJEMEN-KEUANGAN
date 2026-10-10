@@ -434,6 +434,33 @@ Rincian Pendaftaran | MIS Rumah Scopus
         }
 
         /* Borang daftar peserta, dipisahkan dari daftar bacanya oleh garis. */
+        /* Panel "sudah lengkap": hijau, dan tombol betulnya di ujung kanan
+           supaya ia tidak terbaca sebagai ajakan menambah orang. */
+        .rin-peserta-lengkap {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            flex-wrap: wrap;
+            margin-bottom: 13px;
+            padding: 12px 14px;
+            border: 1px solid #a7f3d0;
+            border-radius: 13px;
+            background: #ecfdf5;
+        }
+
+        .rin-peserta-lengkap-teks {
+            min-width: 0;
+            flex: 1 1 220px;
+            font-size: .82rem;
+            line-height: 1.45;
+            color: #065f46;
+        }
+
+        .rin-peserta-lengkap-teks > strong {
+            display: block;
+            color: #047857;
+        }
+
         .rin-peserta-borang {
             display: grid;
             gap: 9px;
@@ -3855,6 +3882,50 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                 </p>
                             @endif
 
+                            @php
+                                /*
+                                 * Daftarnya sudah penuh: borangnya DILIPAT.
+                                 *
+                                 * Borang yang tetap terbuka saat kursinya habis
+                                 * terbaca sebagai "masih boleh menambah" — dan yang
+                                 * mengetik nama kesekian baru tahu saat kirimannya
+                                 * ditolak. Yang paling jelas menyampaikan "sudah
+                                 * lengkap" adalah hilangnya tempat mengetik.
+                                 *
+                                 * DILIPAT, bukan dibuang. Kotak ini satu-satunya cara
+                                 * membetulkan nama yang salah ketik — simpanPeserta
+                                 * mengganti seluruh daftar, tidak ada penyunting per
+                                 * baris. Dibuang, daftar yang sudah lengkap jadi tidak
+                                 * bisa dikoreksi selamanya, dan satu huruf salah di
+                                 * nama berarti sertifikat yang salah cetak.
+                                 */
+                                $pesertaLengkap = $terdaftar >= $jumlahOrang;
+                            @endphp
+
+                            @if ($pesertaLengkap)
+                                <div class="rin-peserta-lengkap">
+                                    <span class="mis-medali mini mis-hijau" aria-hidden="true">
+                                        <i class="fas fa-check"></i>
+                                    </span>
+                                    <span class="rin-peserta-lengkap-teks">
+                                        <strong>Daftarnya sudah lengkap</strong>
+                                        <span>
+                                            {{ $terdaftar }} dari {{ $jumlahOrang }} orang yang dibayar
+                                            sudah punya nama. Tidak ada kursi tersisa untuk ditambah.
+                                        </span>
+                                    </span>
+                                    {{-- Jalan membetulkannya tetap ada, cuma tidak lagi
+                                         menganga. Yang hendak mengoreksi salah ketik
+                                         menekannya dengan sengaja; yang hendak menambah
+                                         orang melihat dulu bahwa tidak ada kursi. --}}
+                                    <button type="button" class="mis-tombol mis-tombol-halus"
+                                        data-rin-buka="rin-peserta-borang"
+                                        aria-expanded="false" aria-controls="rin-peserta-borang">
+                                        <i class="fas fa-pen" aria-hidden="true"></i> Betulkan daftarnya
+                                    </button>
+                                </div>
+                            @endif
+
                             {{--
                                 Panitia mengisikan nama pesertanya sendiri.
 
@@ -3871,7 +3942,9 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                 menempelkan daftar dari WhatsApp atau Excel jauh lebih
                                 cepat daripada mengetik ke sepuluh kotak.
                             --}}
-                            <form class="rin-peserta-borang" method="POST"
+                            <form class="rin-peserta-borang" id="rin-peserta-borang"
+                                @if ($pesertaLengkap && ! $errors->has('peserta')) hidden @endif
+                                method="POST"
                                 action="{{ route('account.pendaftaran-layanan.peserta', [$layanan, $pendaftaran->getKey()]) }}">
                                 @csrf
                                 @method('PUT')
