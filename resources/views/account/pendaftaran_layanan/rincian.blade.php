@@ -1689,8 +1689,23 @@ Rincian Pendaftaran | MIS Rumah Scopus
 
         /* Daftar peserta rombongan. Bernomor, sebab urutannya berarti: itu
            yang dipakai menerbitkan sertifikat. */
+        /*
+         * Kartu berkisi, bukan baris selebar kolomnya.
+         *
+         * Terukur sebelum ini: tiap baris 750px lebar dengan 154px isi —
+         * empat perlima kartunya petak kosong — dan 109px tinggi untuk satu
+         * orang. Rombongan 13 orang berarti 13 baris sepanjang itu, dan
+         * daftar hadir yang harus digulir tiga layar tidak bisa dipakai
+         * mencocokkan nama saat orangnya sudah berdiri di depan meja.
+         *
+         * auto-FILL, bukan auto-fit: dengan auto-fit lajur yang kosong
+         * diciutkan, jadi rombongan berisi SATU nama memanjang selebar 750px
+         * lagi — persis keadaan yang hendak diperbaiki. auto-fill
+         * mempertahankan lajurnya, jadi satu kartu tetap selebar kartu.
+         */
         .rin-peserta {
             display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(min(100%, 215px), 1fr));
             gap: 8px;
             margin: 0;
             padding: 0;
@@ -1700,13 +1715,17 @@ Rincian Pendaftaran | MIS Rumah Scopus
 
         .rin-peserta li {
             display: flex;
-            align-items: center;
-            gap: 11px;
-            padding: 10px 13px;
+            /* flex-start, bukan center: di kartu sempit namanya bisa dua
+               baris, dan nomor urut yang ikut turun ke tengah tidak lagi
+               sejajar dengan nama yang diberinya nomor. */
+            align-items: flex-start;
+            gap: 10px;
+            padding: 9px 11px;
             border: 1px solid var(--mis-garis);
             border-radius: var(--mis-radius-kecil);
             background: #fff;
-            font-size: .85rem;
+            font-size: .82rem;
+            line-height: 1.35;
             color: var(--mis-tinta);
         }
 
@@ -1734,14 +1753,24 @@ Rincian Pendaftaran | MIS Rumah Scopus
             content: counter(peserta);
             display: grid;
             place-items: center;
-            flex: 0 0 auto;
-            width: 26px;
-            height: 26px;
-            border-radius: 9px;
+            flex: 0 0 24px;
+            width: 24px;
+            height: 24px;
+            border-radius: 8px;
             background: #f1f5f9;
-            font-size: .72rem;
+            font-size: .7rem;
             font-weight: 800;
             color: var(--mis-tinta-3);
+        }
+
+        /*
+         * Lencana "pendaftar" mengalir bersama namanya, tidak lagi didorong
+         * ke tepi kanan dengan margin-left: auto. Dorongan itu yang membuat
+         * petak kosong di baris selebar 750px menganga.
+         */
+        .rin-peserta-pil {
+            margin-left: 5px;
+            vertical-align: middle;
         }
 
         .rin-peserta-nama {
@@ -1765,6 +1794,9 @@ Rincian Pendaftaran | MIS Rumah Scopus
             font-weight: 600;
             color: #15803d;
             text-decoration: none;
+            /* Tidak boleh terpatah: nomor yang pecah jadi "08110000000" lalu
+               "1" di baris berikutnya tidak bisa dibaca maupun disalin. */
+            white-space: nowrap;
         }
 
         .rin-peserta-telp:hover {
@@ -3774,6 +3806,16 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                     <li @class(['rin-peserta-lama' => $loop->index >= $batasPeserta])>
                                         <span class="rin-peserta-nama">
                                             {{ $orangKe['nama'] ?: 'Tanpa nama' }}
+                                            {{-- Lencananya DI DALAM nama, bukan saudara di
+                                                 sebelahnya. Sebagai saudara flex ia menghimpit
+                                                 kolom nama di kartu selebar 245px, dan nomor
+                                                 WhatsApp-nya terpatah jadi dua baris —
+                                                 terukur "08110000000" lalu "1" sendirian di
+                                                 baris berikutnya. Di dalam, ia mengalir
+                                                 bersama teksnya. --}}
+                                            @if ($orangKe['utama'])
+                                                <span class="mis-pil mis-pil-ungu rin-peserta-pil">pendaftar</span>
+                                            @endif
                                             @if (! empty($orangKe['email']))
                                                 <span class="rin-peserta-surel">{{ $orangKe['email'] }}</span>
                                             @endif
@@ -3790,9 +3832,6 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                                 </a>
                                             @endif
                                         </span>
-                                        @if ($orangKe['utama'])
-                                            <span class="mis-pil mis-pil-ungu" style="margin-left: auto;">pendaftar</span>
-                                        @endif
                                     </li>
                                 @endforeach
                             </ol>
@@ -3875,14 +3914,20 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                     <p class="mis-bantuan" style="color:#be123c">{{ $message }}</p>
                                 @enderror
 
-                                {{-- Batasnya disebut DI MUKA. Peladen memang memotong
-                                     daftarnya sebanyak kursi yang dibayar, tetapi memotong
-                                     diam-diam berarti nama yang hilang baru ketahuan di
-                                     hari acara. --}}
+                                {{-- Batasnya disebut DI MUKA, dan kalimatnya harus
+                                     sepakat dengan yang dikerjakan peladen.
+
+                                     Dulu berbunyi "tidak ikut tersimpan" — dan memang
+                                     begitu: kelebihannya dipotong diam-diam, lalu
+                                     layarnya menjawab "Daftar pesertanya lengkap".
+                                     Terukur tiga nama diketik, satu tersimpan, dan
+                                     sistemnya mengucapkan selamat. Sekarang kirimannya
+                                     DITOLAK, jadi kalimat ini ikut berubah. --}}
                                 <p class="mis-bantuan">
                                     Pendaftarnya sudah terhitung satu, jadi di sini paling banyak
-                                    <strong>{{ max(0, $jumlahOrang - 1) }}</strong> nama.
-                                    Yang lebih dari itu tidak ikut tersimpan.
+                                    <strong>{{ max(0, $jumlahOrang - 1) }}</strong> nama —
+                                    sebanyak kursi yang dibayar. Kalau lebih, kirimannya ditolak
+                                    dan tidak ada yang tersimpan.
                                 </p>
 
                                 <div class="rin-kaki">

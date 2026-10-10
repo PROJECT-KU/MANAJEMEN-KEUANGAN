@@ -1567,17 +1567,41 @@ class PendaftaranLayananController extends Controller
 
         $jumlah = max(1, (int) ($pendaftaran->jumlah_pendaftar ?? 1));
 
+        $semua = \App\Support\DaftarPeserta::dariTeks($request->input('peserta'));
+
+        // Kursi yang DIBAYAR, dikurangi pemesannya sendiri — aturan yang sama
+        // persis dengan borang tambah.
+        $muat = max(0, $jumlah - 1);
+
         /*
-         * Dipotong sebanyak kursi yang DIBAYAR, dikurangi pemesannya sendiri —
-         * aturan yang sama persis dengan borang tambah. Nama ke-enam pada
-         * rombongan berbayar lima adalah orang yang kursinya tidak pernah
-         * dibeli.
+         * DITOLAK, bukan dipotong diam-diam.
+         *
+         * Sebelum ini kelebihannya dibuang lewat array_slice dan layarnya
+         * tetap menjawab "Daftar pesertanya lengkap: 2 dari 2 orang" —
+         * terukur: tiga nama diketik, SATU tersimpan, dan sistemnya
+         * mengucapkan selamat. Dua nama hilang tanpa satu pun tanda, dan
+         * panitia baru tahu saat menerbitkan sertifikat.
+         *
+         * Jalan keluarnya ikut disebut. Kelebihan nama hampir selalu berarti
+         * salah satu dari dua hal — ada nama yang tidak seharusnya di situ,
+         * atau rombongannya memang bertambah dan jumlah orangnya belum
+         * dinaikkan — dan panitia yang tidak diberi tahu yang kedua akan
+         * menghapus nama orang yang sudah membayar.
          */
-        $orang = array_slice(
-            \App\Support\DaftarPeserta::dariTeks($request->input('peserta')),
-            0,
-            max(0, $jumlah - 1)
-        );
+        if (count($semua) > $muat) {
+            return back()->withInput()->with('tab', 'peserta')->withErrors(['peserta' => sprintf(
+                'Dibayar untuk %d orang, dan pendaftarnya sudah terhitung satu — '
+                . 'jadi di sini paling banyak %s. Anda mengisi %d nama. '
+                . 'Hapus kelebihannya, atau naikkan dulu "Jumlah orang" di tab %s '
+                . 'kalau rombongannya memang bertambah.',
+                $jumlah,
+                $muat === 0 ? 'tidak ada nama tambahan' : $muat . ' nama',
+                count($semua),
+                \App\Support\TabPendaftaran::namaTabUtama($layanan),
+            )]);
+        }
+
+        $orang = $semua;
 
         $lama = \App\PendaftaranPeserta::milik($layanan, (string) $pendaftaran->getKey())
             ->terurut()->get();
