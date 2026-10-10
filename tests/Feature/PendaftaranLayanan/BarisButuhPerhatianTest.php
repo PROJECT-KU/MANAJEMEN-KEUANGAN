@@ -181,7 +181,24 @@ class BarisButuhPerhatianTest extends TestCase
         $mulai = strrpos(substr($isi, 0, $awal), '<tr ');
         $akhir = strpos($isi, '</tr>', $awal);
 
-        return substr($isi, $mulai, $akhir - $mulai);
+        /*
+         * Potongannya diperiksa, bukan dipercaya.
+         *
+         * Nomor pendaftarannya juga muncul di tautan halaman di BAWAH tabel
+         * (pagination membawa ?cari=...). Kalau barisnya sendiri ternyata
+         * tidak tergambar, yang ketemu tautan itu — dan karena tidak ada
+         * </tr> sesudahnya, potongannya jadi untaian KOSONG. Penegasan
+         * apa pun atas untaian kosong lalu gagal dengan pesan yang
+         * menuding markah barisnya, padahal yang salah pemotong ini.
+         */
+        $this->assertNotFalse($mulai, 'Tidak ada <tr> sebelum nomor pendaftarannya.');
+        $this->assertNotFalse($akhir, 'Nomornya ketemu di luar tabel, bukan di barisnya.');
+
+        $potong = substr($isi, $mulai, $akhir - $mulai);
+
+        $this->assertNotSame('', $potong, 'Potongan barisnya kosong.');
+
+        return $potong;
     }
 
     /** @return array{0: User, 1: PendaftaranScopusCamp} */
