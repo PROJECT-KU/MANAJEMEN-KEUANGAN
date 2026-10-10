@@ -159,7 +159,14 @@ Catatan Penghapusan | MIS Rumah Scopus
                     Pendaftaran yang sudah dihapus, beserta uang yang ikut terhapus bersamanya.
                 </p>
             </div>
-            <div class="mis-kepala-aksi">
+            <div class="mis-kepala-aksi mis-kepala-aksi-pasangan">
+                {{-- Unduhannya membawa pencarian yang sedang dipakai, sama
+                     seperti kedua unduhan di layar daftar: yang diunduh orang
+                     hampir selalu yang sedang dilihatnya. --}}
+                <a class="mis-tombol mis-tombol-halus"
+                    href="{{ route('account.pendaftaran-layanan.terhapus.excel', array_filter(['cari' => $cari])) }}">
+                    <i class="fas fa-file-excel mis-ikon-hijau" aria-hidden="true"></i> Unduh Excel
+                </a>
                 <a class="mis-tombol mis-tombol-halus"
                     href="{{ route('account.pendaftaran-layanan.index') }}">
                     <i class="fas fa-arrow-left" aria-hidden="true"></i> Kembali ke daftar
@@ -184,6 +191,10 @@ Catatan Penghapusan | MIS Rumah Scopus
              tiap layar yang membuat ubinnya sendiri menambah satu dialek gaya
              lagi, dan sesudah belasan layar tidak ada satu tuas pun untuk
              mengubah semuanya sekaligus. --}}
+        {{-- Pembungkus geser + petunjuknya, sama dengan layar daftar.
+             Tanpa itu, di ponsel ubin keduanya meluber ke kanan tanpa satu
+             tanda pun bahwa barisnya masih berlanjut. --}}
+        <div class="mis-ringkas-geser" data-mis-geser>
         <div class="mis-ringkas mis-ringkas-2" aria-label="Ringkasan penghapusan">
             <div class="mis-ubin">
                 <span class="mis-medali kecil mis-merah" aria-hidden="true">
@@ -203,6 +214,10 @@ Catatan Penghapusan | MIS Rumah Scopus
                     <p class="mis-ubin-label">Uang tercatat yang ikut terhapus</p>
                 </div>
             </div>
+        </div>
+            <p class="mis-ringkas-petunjuk" aria-hidden="true">
+                <i class="fas fa-arrows-alt-h"></i> Geser untuk lihat semua
+            </p>
         </div>
 
         <div class="mis-kartu">

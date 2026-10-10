@@ -123,6 +123,14 @@ class PendaftaranJejak extends Model
             return 'Pembayaran Rp ' . number_format((int) $this->ke, 0, ',', '.') . ' dicatat' . $siapa;
         }
 
+        if ($this->aksi === 'ubah-bayar') {
+            // Dibedakan dari hapus-lalu-catat-ulang: yang membaca riwayatnya
+            // setengah tahun kemudian harus bisa tahu ini koreksi angka,
+            // bukan pembayaran yang dibatalkan lalu masuk lagi.
+            return 'Catatan pembayaran Rp ' . number_format((int) $this->dari, 0, ',', '.')
+                . ' dibetulkan jadi Rp ' . number_format((int) $this->ke, 0, ',', '.') . $siapa;
+        }
+
         if ($this->aksi === 'hapus-bayar') {
             return 'Catatan pembayaran Rp ' . number_format((int) $this->dari, 0, ',', '.')
                 . ' dihapus' . $siapa;

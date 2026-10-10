@@ -73,9 +73,10 @@ class PengembalianDanaTest extends TestCase
     public function tidak_boleh_melebihi_yang_dibayar(): void
     {
         /*
-         * Refund yang lebih besar daripada tagihannya membuat ringkasan uang
-         * masuk MINUS, dan tidak ada satu pun layar yang tahu harus berbuat
-         * apa dengan angka itu.
+         * Refund yang lebih besar daripada uang yang masuk membuat ringkasan
+         * uang masuk MINUS — dan ringkasannya menghitung max(0, ...), jadi
+         * kelebihannya diam-diam terpotong tanpa satu angka pun yang
+         * menunjukkan ada yang salah.
          */
         [$orang, $baris] = $this->pendaftaran(1000000);
 
@@ -91,7 +92,59 @@ class PengembalianDanaTest extends TestCase
 
         $this->assertSame(900000,
             PendaftaranPengembalian::totalMilik('scopus_camp', (string) $baris->getKey()),
-            'Pengembalian yang melebihi tagihannya tetap tersimpan.');
+            'Pengembalian yang melebihi uang masuknya tetap tersimpan.');
+    }
+
+    /**
+     * Yang belum membayar sepeser pun tidak punya apa-apa untuk dikembalikan.
+     *
+     * Versi pertama membandingkan dengan TAGIHAN, jadi pendaftaran yang masih
+     * menunggu bayar tetap bisa dicatat dikembalikan dananya sampai sebesar
+     * tagihannya — uang yang tidak pernah ada keluar dari pembukuan.
+     */
+    #[Test]
+    public function yang_belum_bayar_tidak_bisa_dikembalikan(): void
+    {
+        [$orang, $baris] = $this->pendaftaran(5500000, 'diproses');
+
+        $this->actingAs($orang)->post(
+            route('account.pendaftaran-layanan.pengembalian', ['scopus_camp', $baris->getKey()]),
+            ['nominal' => '1.000.000', 'tanggal' => now()->toDateString()]
+        )->assertRedirect()->assertSessionHas('error');
+
+        $this->assertSame(0,
+            PendaftaranPengembalian::milik('scopus_camp', (string) $baris->getKey())->count(),
+            'Uang yang tidak pernah masuk tetap bisa dicatat dikembalikan.');
+    }
+
+    /**
+     * Kalau terminnya dicatat, ITU batasnya — bukan tagihannya. Pendaftaran
+     * yang baru membayar DP tidak bisa direfund sebesar tagihan penuhnya.
+     */
+    #[Test]
+    public function batasnya_ikut_termin_kalau_terminnya_dicatat(): void
+    {
+        [$orang, $baris] = $this->pendaftaran(5500000, 'diproses');
+
+        \App\PembayaranPendaftaran::create([
+            'jenis' => \App\PembayaranPendaftaran::PENDAFTARAN,
+            'induk_id' => (string) $baris->getKey(),
+            'urutan' => 1, 'nominal' => 2000000, 'tanggal' => now()->toDateString(),
+        ]);
+
+        $this->actingAs($orang)->post(
+            route('account.pendaftaran-layanan.pengembalian', ['scopus_camp', $baris->getKey()]),
+            ['nominal' => '2.500.000', 'tanggal' => now()->toDateString()]
+        )->assertRedirect()->assertSessionHas('error');
+
+        $this->actingAs($orang)->post(
+            route('account.pendaftaran-layanan.pengembalian', ['scopus_camp', $baris->getKey()]),
+            ['nominal' => '2.000.000', 'tanggal' => now()->toDateString()]
+        )->assertRedirect();
+
+        $this->assertSame(2000000,
+            PendaftaranPengembalian::totalMilik('scopus_camp', (string) $baris->getKey()),
+            'DP yang sudah masuk tidak bisa dikembalikan utuh.');
     }
 
     #[Test]
@@ -252,7 +305,15 @@ class PengembalianDanaTest extends TestCase
     }
 
     /** @return array{0: User, 1: PendaftaranScopusCamp} */
-    private function pendaftaran(int $total, string $status = 'diproses'): array
+    /**
+     * Bawaannya LUNAS, bukan 'diproses'.
+     *
+     * Pengembalian dana kini dibatasi uang yang BENAR-BENAR masuk, bukan
+     * tagihannya — jadi pendaftaran yang belum membayar memang tidak punya
+     * apa pun untuk dikembalikan, dan memakainya sebagai dasar uji
+     * pengembalian berarti menguji keadaan yang tidak pernah terjadi.
+     */
+    private function pendaftaran(int $total, ?string $status = null): array
     {
         Pendaftaran::lupakan();
         KategoriLayanan::lupakanPendaftar();
@@ -269,7 +330,8 @@ class PengembalianDanaTest extends TestCase
             'id_transaksi' => 'T-' . $t, 'kategori_id' => $angkatan->id,
             'nama' => 'Peserta ' . $t, 'email' => $t . '@contoh.test',
             'telp' => '0811-0000-0001', 'jumlah_pendaftar' => '1',
-            'total_pembayaran' => (string) $total, 'status' => $status,
+            'total_pembayaran' => (string) $total,
+            'status' => $status ?? Pendaftaran::statusLunas('scopus_camp'),
         ]);
 
         return [$this->akun(User::PERAN_ADMINISTRATOR), $baris];
