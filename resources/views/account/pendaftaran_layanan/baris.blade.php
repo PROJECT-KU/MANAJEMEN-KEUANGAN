@@ -94,16 +94,6 @@
     $periksaTertunda = Pendaftaran::periksaTertunda($b);
     $hariPeriksa = $periksaTertunda && $waktuBaris ? (int) $waktuBaris->diffInDays(now()) : 0;
 
-    /*
-     * Status "lunas" milik layanan ini, untuk jalan pintas menandainya.
-     *
-     * Dibaca dari katalog, bukan ditulis di sini: kelima layanan memakai
-     * kata yang berbeda ('Pendaftaran Diterima', 'paid', 'pembayaran
-     * diterima'), dan nilai yang salah ditolak validator lalu berbalik jadi
-     * halaman galat tanpa menjelaskan apa-apa.
-     */
-    $statusLunas = Pendaftaran::statusLunas($b->layanan);
-    $bolehTandaiLunas = $statusLunas !== null && $keadaanBaris === 'menunggu';
 @endphp
 <tr @class([
     'pdl-baris',
@@ -377,29 +367,33 @@
                  disembunyikan supaya tabelnya tidak terklip, dan tombol ikon
                  tanpa nama tidak menyebut apa pun ke pembaca layar. --}}
             <div class="pdl-aksi-baris">
-                @if ($bolehTandaiLunas)
-                    {{-- Jalan pintas untuk tindakan yang PALING SERING
-                         dikerjakan.
+                @if ($tautanWa !== '')
+                    {{-- FOLLOW UP, bukan "Tandai lunas".
 
-                         Dari sini sebelumnya butuh dua klik dan satu muat
-                         halaman — buka rincian, cari satu dari enam tombol
-                         status yang rupanya sama persis — untuk pekerjaan
-                         yang isinya satu keputusan.
+                         Menandai lunas dari daftar dibuang karena pembayaran
+                         akan ditangani payment gateway: statusnya berpindah
+                         sendiri, dan tombol yang menandai lunas dengan tangan
+                         berhenti jadi pekerjaan harian — sementara satu salah
+                         tekan di sana memindahkan status SEKALIGUS mengirim
+                         surat ke pendaftarnya.
 
-                         Borangnya POST ke rute status yang sudah ada, jadi
-                         jejak, surat, dan kuota tetap lewat jalur yang sama;
-                         tidak ada jalur kedua yang harus ikut sepakat. --}}
-                    <form method="POST" class="pdl-lunas-borang"
-                        action="{{ route('account.pendaftaran-layanan.status', [$b->layanan, $b->id]) }}">
+                         Yang memang dikerjakan tiap hari justru menghubungi
+                         orangnya, dan isi pesannya mengikuti status
+                         pembayarannya masing-masing.
+
+                         Borangnya POST ke rute yang sama dengan tombol di
+                         layar rincian: peladen mencatat jejaknya dulu lalu
+                         meneruskan ke percakapannya. Sebagai tautan biasa,
+                         tidak ada yang mencatat bahwa pendaftar sudah
+                         dihubungi. --}}
+                    <form method="POST" class="pdl-lunas-borang" target="_blank"
+                        action="{{ route('account.pendaftaran-layanan.follow-up', [$b->layanan, $b->id]) }}">
                         @csrf
-                        <input type="hidden" name="status" value="{{ $statusLunas }}">
-                        <button type="submit" class="mis-tombol mis-tombol-hijau pdl-tombol-lunas"
-                            data-pdl-lunas data-nama="{{ $b->nama_orang ?: 'Tanpa nama' }}"
-                            data-nominal="Rp {{ number_format((int) $b->total, 0, ',', '.') }}"
-                            aria-label="Tandai lunas pendaftaran {{ $b->nama_orang }}"
-                            title="Tandai lunas tanpa membuka rinciannya">
-                            <i class="fas fa-check" aria-hidden="true"></i>
-                            <span class="pdl-tombol-teks">Tandai lunas</span>
+                        <button type="submit" class="mis-tombol mis-tombol-halus pdl-tombol-wa"
+                            aria-label="Follow up {{ $b->nama_orang }} lewat WhatsApp — {{ $rupa['label'] }}"
+                            title="Follow up lewat WhatsApp — pesannya sesuai status {{ strtolower($rupa['label']) }}, masih bisa disunting">
+                            <i class="fab fa-whatsapp" aria-hidden="true"></i>
+                            <span class="pdl-tombol-teks">Follow up</span>
                         </button>
                     </form>
                 @endif
