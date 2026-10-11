@@ -1273,7 +1273,8 @@ class PendaftaranSemuaLayanan
         }
 
         return self::$angkatan = KategoriLayanan::query()
-            ->get(['id', 'layanan', 'nama', 'nama_ke', 'mulai', 'total_kuota', 'sisa_kuota', 'group_wa'])
+            ->get(['id', 'layanan', 'nama', 'nama_ke', 'mulai', 'selesai', 'lokasi',
+                'total_kuota', 'sisa_kuota', 'group_wa'])
             ->mapWithKeys(fn ($a) => [$a->id => [
                 'layanan' => (string) $a->layanan,
                 'nama' => (string) $a->nama,
@@ -1292,6 +1293,8 @@ class PendaftaranSemuaLayanan
                 'total_kuota' => $a->total_kuota === null ? null : (int) $a->total_kuota,
                 'sisa_kuota' => $a->sisa_kuota === null ? null : (int) $a->sisa_kuota,
                 'grup' => (string) ($a->group_wa ?? ''),
+                'selesai' => $a->selesai,
+                'lokasi' => trim((string) ($a->lokasi ?? '')),
             ]])
             ->all();
     }
