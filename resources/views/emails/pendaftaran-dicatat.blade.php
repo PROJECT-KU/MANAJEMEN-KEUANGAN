@@ -213,8 +213,11 @@
 
                     <tr>
                         <td align="center" style="padding:22px 28px 26px;font-size:12px;line-height:1.6;color:#94a3b8">
-                            Email ini dikirim otomatis karena pendaftaran Anda dicatat oleh panitia.<br>
-                            Kalau Anda merasa tidak mendaftar, cukup balas email ini.
+                            Email ini dikirim otomatis karena pendaftaran Anda dicatat oleh panitia,
+                            dan tidak dibalas.<br>
+                            Apabila Anda merasa tidak mendaftar, mohon hubungi admin kami
+                            <a href="https://api.whatsapp.com/send?phone={{ config('panitia.whatsapp') }}"
+                                style="color:#16a34a;font-weight:bold;text-decoration:none">lewat WhatsApp</a>.
                         </td>
                     </tr>
                 </table>

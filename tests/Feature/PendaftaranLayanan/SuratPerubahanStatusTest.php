@@ -171,6 +171,83 @@ class SuratPerubahanStatusTest extends TestCase
         $this->assertSame(23, $terbit, 'Jumlah statusnya berubah; daftar kalimatnya perlu ditinjau.');
     }
 
+    /**
+     * Tidak ada surat yang menyuruh pendaftar MEMBALAS.
+     *
+     * Kotak masuk pengirimnya tidak dijaga siapa pun. Balasan pendaftar
+     * mengendap di sana tanpa ada yang membacanya, dan yang mengirimnya
+     * mengira pertanyaannya sudah sampai — lalu menunggu jawaban yang tidak
+     * akan pernah datang. Itu lebih buruk daripada tidak diberi jalan sama
+     * sekali.
+     *
+     * Dulu sembilan kalimat penutup berbunyi "mohon balas email ini".
+     */
+    #[Test]
+    public function surat_tidak_menyuruh_membalas_emailnya(): void
+    {
+        $tercela = [];
+
+        foreach (KabarStatusPendaftaran::semuaStatus() as $status) {
+            $kabar = KabarStatusPendaftaran::untuk($status);
+            $teks = $kabar['pembuka'] . ' ' . implode(' ', $kabar['penutup']);
+
+            /*
+             * "membalas" sengaja TIDAK dilarang: kalimat "mohon tidak
+             * membalas email ini" justru yang benar, dan melarang katanya
+             * akan merah pada kalimat yang tidak bersalah.
+             */
+            foreach (['balas email', 'balas surat', 'balasan email'] as $kata) {
+                if (str_contains(mb_strtolower($teks), $kata)) {
+                    $tercela[] = $status . ': "' . $kata . '"';
+                }
+            }
+        }
+
+        $this->assertSame([], $tercela,
+            "Kalimat surat berikut menyuruh membalas email yang tidak dibaca "
+            . "siapa pun:\n- " . implode("\n- ", $tercela) . "\n");
+    }
+
+    /**
+     * Gantinya memang ADA di suratnya, bukan cuma kalimatnya yang dibuang.
+     *
+     * Menghapus "balas email ini" tanpa memberi jalan lain meninggalkan
+     * pendaftar tanpa cara menghubungi siapa pun — lebih buruk daripada
+     * sebelumnya.
+     *
+     * Nomornya dibandingkan dengan config('panitia.whatsapp'), bukan dengan
+     * angka yang ditulis ulang di sini: ditulis ulang, penjaganya tetap
+     * hijau pada hari nomornya diganti dan tombolnya menunjuk orang yang
+     * sudah tidak memegangnya.
+     */
+    #[Test]
+    public function surat_memberi_jalan_menghubungi_admin(): void
+    {
+        $nomor = (string) config('panitia.whatsapp');
+
+        $this->assertNotSame('', $nomor, 'Nomor WhatsApp panitia tidak tersetel.');
+
+        foreach ($this->contohSemuaLayanan() as $layanan => $baris) {
+            $html = (new PerubahanStatusPendaftaranMail($layanan, $baris))->render();
+
+            $this->assertStringContainsString(
+                'https://api.whatsapp.com/send?phone=' . $nomor, $html,
+                "Surat {$layanan} tidak punya tombol menghubungi admin."
+            );
+
+            $this->assertStringContainsString('tidak dibalas', $html,
+                "Surat {$layanan} tidak memberi tahu bahwa emailnya tidak dibalas.");
+
+            /*
+             * wa.me DITOLAK. Ia mengacaukan tanda baca dan emoji pada teks
+             * yang sudah terisi — sebab yang sama tombol WhatsApp di layar
+             * panitia memakai api.whatsapp.com.
+             */
+            $this->assertStringNotContainsString('wa.me/', $html,
+                "Surat {$layanan} memakai wa.me, bukan api.whatsapp.com.");
+        }
+    }
+
     #[Test]
     public function suratnya_berlogo_yayasan_bukan_logo_alat(): void
     {

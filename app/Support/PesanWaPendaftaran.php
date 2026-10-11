@@ -39,11 +39,12 @@ class PesanWaPendaftaran
      * Kalimat penutup per KEADAAN, khusus WhatsApp.
      *
      * Penutup milik suratnya TIDAK dipakai ulang di sini. Isinya ditulis
-     * untuk email — "balas email ini", "lewat email yang sama" — dan
-     * menambalnya kata per kata dengan str_replace rapuh: sekali kalimatnya
-     * diubah di sana, tambalannya lolos dan pendaftar disuruh membalas email
-     * yang tidak sedang ia buka. Terbukti saat dicoba: dua kalimat lolos
-     * pada percobaan pertama.
+     * untuk email — "lewat email yang sama", "hubungi admin kami lewat
+     * WhatsApp" (yang di surat menunjuk tombolnya, sedangkan di sini
+     * pembacanya SUDAH di WhatsApp) — dan menambalnya kata per kata dengan
+     * str_replace rapuh: sekali kalimatnya diubah di sana, tambalannya
+     * lolos. Terbukti saat dicoba: dua kalimat lolos pada percobaan
+     * pertama.
      *
      * Enam keadaan, bukan lima belas status: yang perlu dikerjakan pendaftar
      * sesudah membaca pesan ini sama untuk semua status dalam satu keadaan.
