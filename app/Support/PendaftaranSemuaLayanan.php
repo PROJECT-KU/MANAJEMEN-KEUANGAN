@@ -95,6 +95,7 @@ class PendaftaranSemuaLayanan
                 'bukti' => 'gambar',
                 'cara_bayar' => 'cara_bayar',
                 'catatan' => 'note',
+                'grup' => 'group_wa',
             ],
         ],
         'bibliometrik' => [
@@ -140,6 +141,7 @@ class PendaftaranSemuaLayanan
                 'bukti' => 'gambar',
                 'cara_bayar' => 'cara_bayar',
                 'catatan' => 'note',
+                'grup' => 'group_wa',
             ],
         ],
         'webinar_eksklusif' => [
@@ -589,7 +591,7 @@ class PendaftaranSemuaLayanan
     private const KOLOM = [
         'nomor', 'nama_orang', 'email', 'telp', 'affiliasi', 'angkatan_id',
         'jumlah', 'total', 'kode_unik', 'kode_diskon', 'nominal_diskon',
-        'bukti', 'catatan', 'sesi', 'cara_bayar',
+        'bukti', 'catatan', 'sesi', 'cara_bayar', 'grup',
     ];
 
     /**
@@ -1271,7 +1273,7 @@ class PendaftaranSemuaLayanan
         }
 
         return self::$angkatan = KategoriLayanan::query()
-            ->get(['id', 'layanan', 'nama', 'nama_ke', 'mulai', 'total_kuota', 'sisa_kuota'])
+            ->get(['id', 'layanan', 'nama', 'nama_ke', 'mulai', 'total_kuota', 'sisa_kuota', 'group_wa'])
             ->mapWithKeys(fn ($a) => [$a->id => [
                 'layanan' => (string) $a->layanan,
                 'nama' => (string) $a->nama,
@@ -1289,6 +1291,7 @@ class PendaftaranSemuaLayanan
                 'mulai' => $a->mulai,
                 'total_kuota' => $a->total_kuota === null ? null : (int) $a->total_kuota,
                 'sisa_kuota' => $a->sisa_kuota === null ? null : (int) $a->sisa_kuota,
+                'grup' => (string) ($a->group_wa ?? ''),
             ]])
             ->all();
     }
@@ -1364,6 +1367,40 @@ class PendaftaranSemuaLayanan
      *
      * @return array<string, mixed>|null
      */
+    /**
+     * Tautan grup WhatsApp satu pendaftaran, HANYA kalau memang tautan.
+     *
+     * Kolomnya varchar bebas, dan terukur di basis data ia lebih sering
+     * berisi catatan panitia daripada alamat: 153 dari 228 isian berbunyi
+     * "menyusul" atau "link nyusul". Dicetak apa adanya ke pesan pendaftar,
+     * yang terkirim adalah "Silakan bergabung: menyusul".
+     *
+     * Dua sumber, yang khusus didahulukan: baris pendaftarannya sendiri,
+     * baru angkatannya. Keduanya nyata terpakai — ketujuh tautan di
+     * kategori_layanan semuanya bibliometrik, sementara 67 tautan lain
+     * tersimpan di baris analisis_bibliometrik-nya masing-masing.
+     */
+    public static function tautanGrup(object $baris): ?string
+    {
+        $angkatan = self::angkatanBaris($baris);
+
+        foreach ([$baris->grup ?? null, $angkatan['grup'] ?? null] as $nilai) {
+            $tautan = trim((string) $nilai);
+
+            /*
+             * Hanya alamat undangan grup WhatsApp yang diterima. Alamat lain
+             * — tangkapan layar, tautan Drive, nomor telepon — pernah
+             * tertulis di kolom yang sama, dan "Silakan bergabung" yang
+             * menunjuk berkas Drive membuat pendaftar menyangka salah klik.
+             */
+            if (preg_match('#^https://chat\\.whatsapp\\.com/[A-Za-z0-9_-]+$#', $tautan) === 1) {
+                return $tautan;
+            }
+        }
+
+        return null;
+    }
+
     public static function angkatanBaris(object $baris): ?array
     {
         if (empty($baris->angkatan_id)) {

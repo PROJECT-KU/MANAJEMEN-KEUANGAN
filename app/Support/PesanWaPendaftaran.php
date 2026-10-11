@@ -201,6 +201,32 @@ class PesanWaPendaftaran
          * menyuruh orang menjaga angkanya sendiri cuma menakuti.
          */
 
+        /*
+         * Ajakan masuk grup, HANYA untuk yang sudah jadi peserta.
+         *
+         * Dua keadaan: 'lunas' dan 'jadwal' — yang dijadwalkan ulang sudah
+         * membayar, cuma pindah tanggal. Yang belum bayar tidak diberi
+         * tautannya: grupnya akan terisi orang yang kursinya belum ada,
+         * dan mengeluarkan mereka kembali satu per satu pekerjaan panitia
+         * yang tidak perlu ada. Yang batal dan yang dananya dikembalikan
+         * jelas tidak diajak.
+         */
+        if (in_array($keadaan, ['lunas', 'jadwal'], true)) {
+            $grup = Pendaftaran::tautanGrup($b);
+
+            if ($grup !== null) {
+                $baris[] = '';
+                $baris[] = 'Silakan bergabung ke grup peserta melalui tautan berikut:';
+                /*
+                 * Alamatnya BERDIRI SENDIRI di barisnya, tanpa titik di
+                 * ujungnya. WhatsApp menebak batas tautan dari spasi, dan
+                 * tanda baca yang menempel ikut termakan ke dalam alamat —
+                 * yang ditekan pendaftar lalu alamat yang tidak ada.
+                 */
+                $baris[] = $grup;
+            }
+        }
+
         $baris[] = '';
         if ($menagih) {
             $baris[] = ($cara['kunci'] ?? '') === 'tunai'
