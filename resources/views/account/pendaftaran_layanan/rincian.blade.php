@@ -1717,7 +1717,8 @@ Rincian Pendaftaran | MIS Rumah Scopus
          * yang jadi anak flex. Pola yang sama dipakai borang "Tandai lunas"
          * di daftar.
          */
-        .rin-kirim-ulang {
+        .rin-kirim-ulang,
+        .rin-follow-up {
             display: contents;
         }
 
@@ -3135,11 +3136,26 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                              yang membuka percakapan dengan nomor yang tidak ada
                                              membuat panitia mengira pesannya terkirim. --}}
                                         @if ($adaFollowUp)
-                                            <a class="mis-tombol mis-tombol-halus rin-tombol-wa"
-                                                href="{{ $tautanWaStatus }}" target="_blank" rel="noopener">
-                                                <i class="fab fa-whatsapp" aria-hidden="true"></i>
-                                                <span>Follow up: {{ $rupa['label'] }}</span>
-                                            </a>
+                                            {{-- BORANG, bukan tautan langsung.
+
+                                                 Sebagai tautan, WhatsApp terbuka dan selesai —
+                                                 tidak ada satu baris pun yang mencatat bahwa
+                                                 pendaftar sudah dihubungi, sementara percobaan
+                                                 kirim email tercatat rapi. Riwayatnya jadi
+                                                 timpang, dan "sudah difollow-up belum?" tidak
+                                                 bisa dijawab dari layar mana pun.
+
+                                                 Peladen mencatat jejaknya dulu lalu meneruskan
+                                                 ke percakapannya; target _blank menjaga layar
+                                                 rinciannya tetap terbuka. --}}
+                                            <form method="POST" class="rin-follow-up" target="_blank"
+                                                action="{{ route('account.pendaftaran-layanan.follow-up', [$layanan, $pendaftaran->getKey()]) }}">
+                                                @csrf
+                                                <button type="submit" class="mis-tombol mis-tombol-halus rin-tombol-wa">
+                                                    <i class="fab fa-whatsapp" aria-hidden="true"></i>
+                                                    <span>Follow up: {{ $rupa['label'] }}</span>
+                                                </button>
+                                            </form>
                                         @endif
                                     </div>
 
@@ -3189,6 +3205,19 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                                         @if ($satu->catatan) &middot; {{ $satu->catatan }}@endif
                                                     </span>
                                                 </span>
+                                                {{-- Membetulkan, bukan menghapus lalu mencatat
+                                                     ulang: penghapusan meninggalkan jejak
+                                                     "Rp X dihapus" yang terbaca seperti refund
+                                                     yang dibatalkan, bukan koreksi salah ketik.
+                                                     Cermin dari catatan pembayaran. --}}
+                                                <button type="button" class="mis-tombol mis-tombol-halus"
+                                                    data-rin-buka="rin-betul-refund-{{ $satu->id }}"
+                                                    aria-expanded="false"
+                                                    aria-controls="rin-betul-refund-{{ $satu->id }}"
+                                                    aria-label="Betulkan catatan pengembalian {{ $satu->nominal_tulis }}"
+                                                    title="Betulkan catatan ini">
+                                                    <i class="fas fa-pen" aria-hidden="true"></i>
+                                                </button>
                                                 @if ($bolehMenghapus)
                                                     <form method="POST" class="rin-refund-hapus"
                                                         action="{{ route('account.pendaftaran-layanan.pengembalian.hapus', $satu->id) }}">
@@ -3200,6 +3229,52 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                                         </button>
                                                     </form>
                                                 @endif
+                                            
+                                                <form method="POST" class="rin-betul"
+                                                    id="rin-betul-refund-{{ $satu->id }}" hidden
+                                                    action="{{ route('account.pendaftaran-layanan.pengembalian.ubah', $satu->id) }}">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <div class="rin-isian-kisi rin-isian-kolom-2">
+                                                        <div class="mis-isian">
+                                                            <label class="mis-label" for="brf-nominal-{{ $satu->id }}">Nominal dikembalikan</label>
+                                                            <input type="text" class="form-control-modern" data-mis-rupiah
+                                                                id="brf-nominal-{{ $satu->id }}" name="nominal"
+                                                                value="{{ number_format((int) $satu->nominal, 0, ',', '.') }}">
+                                                        </div>
+                                                        <div class="mis-isian">
+                                                            <label class="mis-label" for="brf-tanggal-{{ $satu->id }}">Tanggal uang keluar</label>
+                                                            <input type="date" class="form-control-modern"
+                                                                id="brf-tanggal-{{ $satu->id }}" name="tanggal"
+                                                                max="{{ now()->toDateString() }}"
+                                                                value="{{ optional($satu->tanggal)->toDateString() }}">
+                                                        </div>
+                                                        <div class="mis-isian">
+                                                            <label class="mis-label" for="brf-cara-{{ $satu->id }}">Lewat apa</label>
+                                                            <select class="form-control-modern" id="brf-cara-{{ $satu->id }}" name="cara">
+                                                                <option value="">— tidak disebut —</option>
+                                                                @foreach (Pendaftaran::caraBayarPilihan() as $kodeRf => $caraRf)
+                                                                    <option value="{{ $kodeRf }}" @selected($satu->cara === $kodeRf)>
+                                                                        {{ $caraRf['label'] }}
+                                                                    </option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                        <div class="mis-isian">
+                                                            <label class="mis-label" for="brf-catatan-{{ $satu->id }}">Catatan</label>
+                                                            <input type="text" class="form-control-modern" maxlength="255"
+                                                                id="brf-catatan-{{ $satu->id }}" name="catatan"
+                                                                value="{{ $satu->catatan }}">
+                                                        </div>
+                                                    </div>
+                                                    <div class="rin-kaki">
+                                                        <button type="button" class="mis-tombol mis-tombol-halus"
+                                                            data-rin-tutup="rin-betul-refund-{{ $satu->id }}">Batal</button>
+                                                        <button type="submit" class="mis-tombol mis-tombol-ungu">
+                                                            <i class="fas fa-save" aria-hidden="true"></i> Simpan betulannya
+                                                        </button>
+                                                    </div>
+                                                </form>
                                             </li>
                                         @endforeach
                                     </ul>

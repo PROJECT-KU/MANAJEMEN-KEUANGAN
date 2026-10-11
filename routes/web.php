@@ -477,6 +477,10 @@ Route::prefix('account')
                 ->name('account.pendaftaran-layanan.pdf');
             Route::get('Pendaftaran-Layanan/unduh-excel', 'account\\PendaftaranLayananController@eksporExcel')
                 ->name('account.pendaftaran-layanan.excel');
+            // Satu baris per ORANG, bukan per pendaftaran — nama peserta
+            // rombongan tidak punya jalan keluar lain dari sistem.
+            Route::get('Pendaftaran-Layanan/unduh-hadir', 'account\\PendaftaranLayananController@eksporHadir')
+                ->name('account.pendaftaran-layanan.hadir');
 
             /*
              * Catatan penghapusan. Di ATAS rute {layanan}/{id} di bawahnya —
@@ -548,6 +552,17 @@ Route::prefix('account')
                 ->name('account.pendaftaran-layanan.slip');
             Route::get('Pendaftaran-Layanan/{layanan}/{id}', 'account\\PendaftaranLayananController@rincian')
                 ->name('account.pendaftaran-layanan.rincian');
+            /*
+             * DI ATAS {layanan}/{id} di bawahnya.
+             *
+             * Keduanya PUT berjalur dua ruas, jadi yang terdaftar lebih dulu
+             * yang menang: didaftarkan sesudahnya, 'pengembalian' tertangkap
+             * sebagai NAMA LAYANAN, tidak ketemu di katalog, lalu jawabannya
+             * 404 tanpa petunjuk apa pun. Jebakan yang sama pernah terjadi
+             * pada rute 'terhapus'.
+             */
+            Route::put('Pendaftaran-Layanan/pengembalian/{pengembalian}', 'account\\PendaftaranLayananController@ubahPengembalian')
+                ->name('account.pendaftaran-layanan.pengembalian.ubah');
             Route::put('Pendaftaran-Layanan/{layanan}/{id}', 'account\\PendaftaranLayananController@ubahData')
                 ->name('account.pendaftaran-layanan.ubah');
             Route::post('Pendaftaran-Layanan/{layanan}/{id}/status', 'account\\PendaftaranLayananController@ubahStatus')
@@ -568,6 +583,14 @@ Route::prefix('account')
             // Kirim ulang surat status yang sedang berlaku, tanpa menyentuh statusnya.
             Route::post('Pendaftaran-Layanan/{layanan}/{id}/kirim-ulang', 'account\\PendaftaranLayananController@kirimUlangSurat')
                 ->name('account.pendaftaran-layanan.kirim-ulang');
+            /*
+             * Follow up WhatsApp lewat POST, bukan tautan langsung: peladen
+             * mencatat jejaknya dulu baru meneruskan ke percakapannya.
+             * Sebagai tautan biasa, tidak ada satu baris pun yang mencatat
+             * bahwa pendaftar sudah dihubungi.
+             */
+            Route::post('Pendaftaran-Layanan/{layanan}/{id}/follow-up', 'account\\PendaftaranLayananController@catatFollowUp')
+                ->name('account.pendaftaran-layanan.follow-up');
             Route::delete('Pendaftaran-Layanan/{layanan}/{id}', 'account\\PendaftaranLayananController@hapus')
                 ->name('account.pendaftaran-layanan.hapus');
 
