@@ -501,6 +501,17 @@ Route::prefix('account')
                 ->name('account.pendaftaran-layanan.terhapus.excel');
 
             /*
+             * Mengembalikan satu pendaftaran dari catatan penghapusan.
+             *
+             * POST, bukan GET: ia menulis — barisnya kembali, kuota
+             * angkatannya diambil lagi, dan pembukuannya ikut berubah.
+             * Lewat GET, satu perayap atau satu tautan yang diteruskan di
+             * grup sudah cukup untuk menjalankannya.
+             */
+            Route::post('Pendaftaran-Layanan/terhapus/{arsip}/pulihkan', 'account\\PendaftaranLayananController@pulihkan')
+                ->name('account.pendaftaran-layanan.pulihkan');
+
+            /*
              * Mendaftarkan orang dari sisi panitia — untuk yang mendaftar
              * lewat WhatsApp atau datang langsung. Ditaruh SEBELUM rute
              * rincian yang berpola {layanan}/{id} supaya 'baru' tidak terbaca

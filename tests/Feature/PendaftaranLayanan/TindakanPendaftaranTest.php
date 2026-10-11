@@ -3091,8 +3091,18 @@ class TindakanPendaftaranTest extends TestCase
         $this->assertNull(PendaftaranScopusCamp::find($camp->getKey()));
     }
 
+    /**
+     * Namanya DULU "membuang berkas buktinya", dan itu memang yang terjadi:
+     * berkasnya di-unlink. Sekarang ia DIPARKIR supaya penghapusan bisa
+     * dikembalikan utuh — lihat PulihkanPendaftaranTest.
+     *
+     * Patokannya ikut berubah. Menuntut berkasnya lenyap dari tempat
+     * asalnya saja masih lulus walau ia hilang betulan, jadi parkirannya
+     * ikut dituntut: tanpa itu, unlink() yang kembali diam-diam tidak akan
+     * membuat apa pun merah.
+     */
     #[Test]
-    public function hapus_mengembalikan_kuota_dan_membuang_berkas_buktinya(): void
+    public function hapus_mengembalikan_kuota_dan_memarkir_berkas_buktinya(): void
     {
         $admin = $this->akun(User::PERAN_ADMINISTRATOR);
 
@@ -3115,7 +3125,26 @@ class TindakanPendaftaranTest extends TestCase
 
         $this->assertNull(PendaftaranScopusCamp::find($camp->getKey()));
         $this->assertSame(50, (int) $angkatan->refresh()->sisa_kuota, 'Kuotanya harus kembali.');
-        $this->assertFileDoesNotExist($berkas, 'Berkas buktinya harus ikut terbuang.');
+        $this->assertFileDoesNotExist($berkas, 'Berkas buktinya harus pindah dari tempat asalnya.');
+
+        $arsip = \App\PendaftaranDihapus::where('pendaftaran_id', (string) $camp->getKey())->first();
+
+        $this->assertNotNull($arsip);
+        $this->assertNotNull($arsip->bukti_parkir,
+            'Jalur parkirannya tidak dicatat, jadi buktinya tidak bisa dikembalikan.');
+
+        $diparkir = public_path('ScopusCamp/'
+            . \App\Actions\Pendaftaran\HapusPendaftaran::FOLDER_PARKIR
+            . '/' . $arsip->bukti_parkir);
+
+        /*
+         * Didaftarkan ke pembersih SEBELUM dituntut: tuntutan yang gagal
+         * melempar, dan berkasnya akan tertinggal di parkiran selamanya
+         * kalau baris ini ada di bawahnya.
+         */
+        $this->berkasUji[] = $diparkir;
+
+        $this->assertFileExists($diparkir, 'Buktinya tidak sampai ke parkiran.');
     }
 
     #[Test]
