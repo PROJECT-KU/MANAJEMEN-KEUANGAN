@@ -722,6 +722,94 @@ class TindakLanjutWaTest extends TestCase
         }
     }
 
+    /**
+     * Tautan grup dibaca dari ANGKATANNYA kalau barisnya tidak punya.
+     *
+     * Jalur inilah yang dipakai Scopus Camp dan Webinar Eksklusif: pintu
+     * masuk group_wa per pendaftaran sengaja dibuang untuk Scopus Camp
+     * (lihat UbahDataPendaftaran::MEDAN), jadi satu-satunya tempat
+     * panitia mengisinya di layar angkatan.
+     *
+     * Keempat penjaga sebelumnya memasang tautannya langsung di baris,
+     * jadi jalur angkatan — justru yang dipakai layanan terbesar — tidak
+     * teruji sama sekali.
+     */
+    #[Test]
+    public function tautan_grup_dibaca_dari_angkatannya(): void
+    {
+        [$orang, $b] = $this->dengan(['status' => 'Pendaftaran Diterima']);
+
+        KategoriLayanan::where('id', $b->kategori_id)->update(['group_wa' => 'https://chat.whatsapp.com/AngkatanUji99']);
+
+        Pendaftaran::lupakan();
+        KategoriLayanan::lupakanPendaftar();
+
+        $union = Pendaftaran::kueri()
+            ->where('layanan', 'scopus_camp')->where('id', $b->getKey())->first();
+
+        $this->assertSame('https://chat.whatsapp.com/AngkatanUji99',
+            Pendaftaran::tautanGrup($union),
+            'Tautan grup angkatannya tidak terbaca, padahal di sanalah '
+            . 'Scopus Camp menyimpannya.');
+
+        $this->assertStringContainsString('https://chat.whatsapp.com/AngkatanUji99',
+            PesanWaPendaftaran::tindakLanjut($union, Pendaftaran::sesiBaris($union)));
+    }
+
+    /**
+     * Tautan di BARISNYA mengalahkan tautan angkatannya.
+     *
+     * Bibliometrik memakai keduanya — 67 tautan tersimpan per pendaftaran,
+     * 7 lagi per angkatan — dan yang per pendaftaran dipasang justru ketika
+     * orang itu harus masuk grup yang berbeda dari seangkatannya.
+     */
+    #[Test]
+    public function tautan_di_barisnya_mengalahkan_angkatannya(): void
+    {
+        [$orang, $b] = $this->dengan(['status' => 'Pendaftaran Diterima']);
+
+        KategoriLayanan::where('id', $b->kategori_id)->update(['group_wa' => 'https://chat.whatsapp.com/MilikAngkatan']);
+
+        Pendaftaran::lupakan();
+        KategoriLayanan::lupakanPendaftar();
+
+        $union = Pendaftaran::kueri()
+            ->where('layanan', 'scopus_camp')->where('id', $b->getKey())->first();
+        $union->grup = 'https://chat.whatsapp.com/MilikBarisnya';
+
+        $this->assertSame('https://chat.whatsapp.com/MilikBarisnya',
+            Pendaftaran::tautanGrup($union));
+    }
+
+    /**
+     * Isian angkatan yang bukan tautan TIDAK menutupi tautan barisnya.
+     *
+     * Terukur: 51 angkatan berisi "menyusul". Kalau isian itu dianggap
+     * jawaban, pendaftar yang barisnya justru punya tautan sah tidak
+     * mendapat apa-apa.
+     */
+    #[Test]
+    public function isian_angkatan_yang_bukan_tautan_dilewati(): void
+    {
+        [$orang, $b] = $this->dengan(['status' => 'Pendaftaran Diterima']);
+
+        KategoriLayanan::where('id', $b->kategori_id)->update(['group_wa' => 'menyusul']);
+
+        Pendaftaran::lupakan();
+        KategoriLayanan::lupakanPendaftar();
+
+        $union = Pendaftaran::kueri()
+            ->where('layanan', 'scopus_camp')->where('id', $b->getKey())->first();
+
+        $this->assertNull(Pendaftaran::tautanGrup($union));
+
+        $union->grup = 'https://chat.whatsapp.com/MilikBarisnya';
+
+        $this->assertSame('https://chat.whatsapp.com/MilikBarisnya',
+            Pendaftaran::tautanGrup($union),
+            '"menyusul" di angkatannya menutupi tautan sah di barisnya.');
+    }
+
     private function baris(string $status, array $ubah = []): object
     {
         return (object) array_merge([
