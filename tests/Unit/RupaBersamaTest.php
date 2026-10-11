@@ -405,13 +405,129 @@ class RupaBersamaTest extends TestCase
         preg_match("/mis-ui\.css'\) \}\}\?v=(\d+)/", $layout, $cocok);
 
         $this->assertNotEmpty($cocok, 'penanda ?v= pada mis-ui.css tidak ketemu');
-        $this->assertGreaterThanOrEqual(89, (int) $cocok[1],
+        $this->assertGreaterThanOrEqual(91, (int) $cocok[1],
             'mis-ui.css berubah tetapi penanda ?v=-nya belum dinaikkan');
 
         preg_match("/mis-ui\.js'\) \}\}\?v=(\d+)/", $layout, $cocokJs);
 
         $this->assertNotEmpty($cocokJs, 'penanda ?v= pada mis-ui.js tidak ketemu');
-        $this->assertGreaterThanOrEqual(15, (int) $cocokJs[1],
+        $this->assertGreaterThanOrEqual(18, (int) $cocokJs[1],
             'mis-ui.js berubah tetapi penanda ?v=-nya belum dinaikkan');
+    }
+
+    /**
+     * Kelas berawalan layar harus PUNYA GAYANYA.
+     *
+     * Nama kelas yang dikarang saat menulis markah lalu tidak pernah
+     * didefinisikan tidak menimbulkan galat apa pun: peramban melewatinya
+     * dan yang tampil gaya bawaannya. Terjadi pada tab Hapus layar
+     * Pendaftar Layanan — kelima kelas .rin-hilang* tanpa satu aturan pun,
+     * sehingga daftar "Yang ikut hilang" tampil sebagai <ul> bertitik bulat
+     * dengan medali ikon yang mendorong tulisannya turun ke baris
+     * berikutnya. Terlihat rusak, tidak ada yang menandainya.
+     *
+     * Hanya awalan MILIK PROYEK yang diperiksa. Kelas utilitas Bootstrap
+     * dan AdminLTE (mb-3, col-md-6, text-center) memang tidak didefinisikan
+     * di berkas yang dipindai di sini, dan memindainya membuat uji ini
+     * menuduh 170-an kelas yang sebenarnya sehat.
+     */
+    private const AWALAN_LAYAR = [
+        'rin-', 'pdl-', 'brg-', 'prof-', 'tar-', 'fak-', 'kwi-', 'slip-', 'bar-',
+    ];
+
+    /**
+     * Kelas yang SUDAH terlanjur tanpa gaya, diukur 11 Okt 2026.
+     *
+     * Daftar tertutup, dan arahnya hanya boleh MENGECIL. Tanpa daftar ini
+     * penjaganya lahir merah lalu dimatikan orang berikutnya; dengan daftar
+     * ini utangnya terlihat sambil kelas baru tetap tertangkap sejak hari
+     * pertama.
+     *
+     * Belum ditangani di sini sebab masing-masing ada di layar lain, dan
+     * memperbaiki rupa enam layar sekaligus bukan perubahan yang bisa
+     * diperiksa dalam satu tinjauan.
+     */
+    private const BELUM_BERGAYA = [
+        'bar-pilihan-bayar', 'bar-wadah',       // pendaftaran_layanan/baru
+        'brg-harga-teks',                        // kategori_layanan/form
+        'pdl-lipat',                             // pendaftaran_layanan/index
+        'prof-lengkap',                          // profil/index
+        'tar-cetak', 'tar-jadwal-bagian', 'tar-jadwal-teks',
+        'tar-nonaktif', 'tar-nonaktif-teks',     // clinik_scopus_biaya_persesi
+    ];
+
+    public function test_kelas_berawalan_layar_punya_gayanya(): void
+    {
+        $blade = $this->berkasBlade();
+        $semua = file_get_contents(public_path('assets/css/mis-ui.css'))
+            . implode('', $blade);
+
+        $yatim = [];
+
+        foreach ($blade as $jalur => $isi) {
+            preg_match_all('/class="([^"$@{]*)"/', $isi, $cocok);
+
+            foreach ($cocok[1] as $daftar) {
+                foreach (preg_split('/\s+/', trim($daftar)) as $kelas) {
+                    if ($kelas === '' || ! preg_match('/^[a-z][a-z0-9-]*$/', $kelas)) {
+                        continue;
+                    }
+
+                    if (! \Illuminate\Support\Str::startsWith($kelas, self::AWALAN_LAYAR)) {
+                        continue;
+                    }
+
+                    if (in_array($kelas, self::BELUM_BERGAYA, true)) {
+                        continue;
+                    }
+
+                    /*
+                     * TANPA lookbehind sebelum titiknya. Pemilih gabungan
+                     * ".mis-medali.rin-besar" sah, dan di sana .rin-besar
+                     * didahului huruf — lookbehind \w membuat uji ini
+                     * menyatakan kelas yang jelas-jelas bergaya sebagai
+                     * yatim. Tertipu persis begitu saat menulisnya.
+                     */
+                    if (! preg_match('/\.' . preg_quote($kelas, '/') . '(?![\w-])/', $semua)) {
+                        $yatim[$kelas] = str_replace(resource_path('views/account/'), '', $jalur);
+                    }
+                }
+            }
+        }
+
+        $pesan = [];
+
+        foreach ($yatim as $kelas => $berkas) {
+            $pesan[] = $kelas . ' (' . $berkas . ')';
+        }
+
+        $this->assertSame([], $pesan,
+            "Kelas berikut dipakai tetapi tidak punya satu aturan gaya pun; "
+            . "yang tampil gaya bawaan peramban, tanpa galat:\n- "
+            . implode("\n- ", $pesan) . "\n");
+    }
+
+    /**
+     * Daftar utangnya hanya boleh MENGECIL.
+     *
+     * Kelas yang sudah diberi gaya harus dicoret dari daftarnya; dibiarkan,
+     * daftar itu perlahan jadi tempat menyembunyikan kelas baru.
+     */
+    public function test_daftar_belum_bergaya_tidak_menyimpan_yang_sudah_sehat(): void
+    {
+        $semua = file_get_contents(public_path('assets/css/mis-ui.css'))
+            . implode('', $this->berkasBlade());
+
+        $sehat = [];
+
+        foreach (self::BELUM_BERGAYA as $kelas) {
+            if (preg_match('/\.' . preg_quote($kelas, '/') . '(?![\w-])/', $semua)) {
+                $sehat[] = $kelas;
+            }
+        }
+
+        $this->assertSame([], $sehat,
+            'Kelas berikut sudah punya gayanya dan harus dicoret dari '
+            . "BELUM_BERGAYA:\n- " . implode("\n- ", $sehat) . "\n");
     }
 }
