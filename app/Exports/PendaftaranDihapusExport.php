@@ -47,6 +47,17 @@ class PendaftaranDihapusExport implements FromArray, ShouldAutoSize, WithEvents,
             'Uang yang ikut terhapus',
             'Catatan pembayaran',
             'Baris jejak',
+            /*
+             * Tiga kolom ini WAJIB ada sejak penghapusan bisa dikembalikan.
+             *
+             * Yang menutup buku menjumlahkan kolom "Uang yang ikut terhapus",
+             * dan tanpa penanda ini ia ikut menjumlahkan uang yang sudah
+             * kembali ke pembukuan — barisnya terbaca persis sama dengan yang
+             * memang masih hilang.
+             */
+            'Masih terhapus?',
+            'Dikembalikan pada',
+            'Dikembalikan oleh',
         ];
     }
 
@@ -70,6 +81,9 @@ class PendaftaranDihapusExport implements FromArray, ShouldAutoSize, WithEvents,
                 (int) $b->uang_terhapus,
                 (int) $b->jumlah_pembayaran,
                 (int) $b->jumlah_jejak,
+                $b->masih_hilang ? 'Ya' : 'Tidak',
+                optional($b->dipulihkan_at)->format('d/m/Y H:i') ?: '',
+                $b->dipulihkan_oleh ?: '',
             ];
         }
 
@@ -84,19 +98,33 @@ class PendaftaranDihapusExport implements FromArray, ShouldAutoSize, WithEvents,
 
                 $lembar->insertNewRowBefore(1, 3);
 
+                /*
+                 * Yang dijumlahkan HANYA yang masih terhapus.
+                 *
+                 * Dijumlahkan seluruhnya, uang yang sudah kembali ke
+                 * pembukuan ikut terhitung sebagai hilang — dan baris
+                 * ringkasan inilah yang paling sering disalin ke laporan
+                 * tanpa dibuka isinya.
+                 */
+                $masih = $this->baris->filter(fn ($b) => $b->masih_hilang);
+                $pulih = $this->baris->count() - $masih->count();
+
                 $lembar->setCellValue('A1', 'Catatan Penghapusan — MIS Rumah Scopus');
                 $lembar->setCellValue('A2', 'Diunduh ' . now()->format('d/m/Y H:i') . ' WIB'
-                    . ' · ' . number_format($this->baris->count(), 0, ',', '.') . ' penghapusan'
-                    . ' · uang terhapus Rp '
-                    . number_format((int) $this->baris->sum('uang_terhapus'), 0, ',', '.'));
+                    . ' · ' . number_format($this->baris->count(), 0, ',', '.') . ' catatan'
+                    . ' · ' . number_format($masih->count(), 0, ',', '.') . ' masih terhapus'
+                    . ($pulih > 0 ? ' · ' . number_format($pulih, 0, ',', '.') . ' sudah dikembalikan' : '')
+                    . ' · uang yang masih hilang Rp '
+                    . number_format((int) $masih->sum('uang_terhapus'), 0, ',', '.'));
                 /*
                  * Disebut di berkasnya sendiri, bukan cuma di layarnya.
                  * Lembar kerja justru berkas yang paling sering diteruskan,
                  * dan penerimanya tidak pernah melihat kalimat di layar asal.
                  */
-                $lembar->setCellValue('A3', 'Ini catatan, bukan tong sampah — '
-                    . 'pendaftarannya tidak bisa dikembalikan. Potret lengkap tiap baris '
-                    . 'ada di layar Catatan Penghapusan.');
+                $lembar->setCellValue('A3', 'Kolom "Uang yang ikut terhapus" memuat angka '
+                    . 'SELURUH baris, termasuk yang sudah dikembalikan — saring dulu lewat '
+                    . 'kolom "Masih terhapus?" sebelum menjumlahkannya. Potret lengkap tiap '
+                    . 'baris ada di layar Catatan Penghapusan.');
 
                 $lembar->getStyle('A1')->getFont()->setBold(true)->setSize(13);
                 $lembar->getStyle('A2:A3')->getFont()->setSize(10);

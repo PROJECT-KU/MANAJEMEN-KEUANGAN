@@ -168,6 +168,14 @@ class HapusPendaftaran
 
         return [
             'berhasil' => true,
+            /*
+             * Id arsipnya dibawa pulang supaya layarnya bisa menawarkan
+             * "Kembalikan" di tempat. Tanpa ini, mengurungkan satu salah klik
+             * berarti membuka catatan penghapusan lalu mencarinya di antara
+             * baris lain — dan yang baru saja salah klik tidak selalu tahu
+             * layar itu ada.
+             */
+            'arsip' => (string) $arsip->getKey(),
             'pesan' => 'Pendaftaran ' . $nomor . ($nama !== '' ? ' (' . $nama . ')' : '') . ' dihapus.',
         ];
     }
