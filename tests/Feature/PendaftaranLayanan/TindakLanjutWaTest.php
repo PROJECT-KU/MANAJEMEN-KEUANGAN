@@ -133,7 +133,7 @@ class TindakLanjutWaTest extends TestCase
             $this->assertNotSame('', $akhir,
                 "Pesan untuk keadaan {$keadaan} berakhir dengan baris kosong.");
 
-            $this->assertMatchesRegularExpression('/(balas pesan ini|kirimkan bukti|simpan pesan ini|ingin ditanyakan|mengabari melalui nomor ini)/', $akhir,
+            $this->assertMatchesRegularExpression('/(balas pesan ini|tautan pembayaran|simpan pesan ini|ingin ditanyakan|mengabari melalui nomor ini|kepada panitia)/', $akhir,
                 "Pesan untuk keadaan {$keadaan} tidak ditutup kalimat ajakan: {$akhir}");
         }
     }
@@ -400,10 +400,13 @@ class TindakLanjutWaTest extends TestCase
 
         $pesan = PesanWaPendaftaran::tindakLanjut($union);
 
-        $this->assertStringNotContainsString('kirimkan bukti transfernya', $pesan,
-            'Orang yang sudah mengirim bukti disuruh mengirimnya lagi.');
-        $this->assertStringNotContainsString('Mohon ditransfer', $pesan,
-            'Orang yang sudah membayar disuruh transfer lagi.');
+        /*
+         * Dipatok pada kalimat penagihan yang BERLAKU SEKARANG. Patokan
+         * lamanya menunjuk "kirimkan bukti transfernya" — kalimat yang
+         * sudah dibuang seluruhnya — jadi ia lulus tanpa menguji apa pun.
+         */
+        $this->assertStringNotContainsString('tautan pembayaran', $pesan,
+            'Orang yang sudah membayar masih ditagih.');
         $this->assertStringNotContainsString('Nominal yang ditunggu', $pesan,
             'Nominalnya masih disebut sebagai tagihan.');
         $this->assertStringContainsString('tidak perlu mengirimkan apa pun lagi', $pesan);
@@ -420,7 +423,7 @@ class TindakLanjutWaTest extends TestCase
         $union = Pendaftaran::kueri()
             ->where('layanan', 'scopus_camp')->where('id', $b->getKey())->first();
 
-        $this->assertStringContainsString('kirimkan bukti transfernya',
+        $this->assertStringContainsString('tautan pembayaran',
             PesanWaPendaftaran::tindakLanjut($union));
     }
 
@@ -442,11 +445,8 @@ class TindakLanjutWaTest extends TestCase
     {
         $pesan = PesanWaPendaftaran::tindakLanjut($this->baris('diproses', ['cara_bayar' => 'doku']));
 
-        $this->assertStringNotContainsString('kirimkan bukti transfernya', $pesan,
-            'Pendaftar daring disuruh mengirim bukti yang tidak pernah ada.');
-        $this->assertStringNotContainsString('Mohon ditransfer', $pesan,
-            'Pendaftar daring disuruh transfer manual.');
-        $this->assertStringContainsString('tautan pembayaran yang dikirimkan sistem', $pesan);
+        $this->assertStringContainsString('tautan pembayaran yang kami kirimkan', $pesan);
+        $this->assertStringContainsString('tidak perlu mengirimkan bukti pembayaran', $pesan);
     }
 
     /**
@@ -482,19 +482,60 @@ class TindakLanjutWaTest extends TestCase
     }
 
     /**
-     * Transfer manual TETAP ditagih dengan buktinya — penjaga di atas tidak
-     * boleh mematikan kalimat yang benar untuk cara bayar yang memang butuh
-     * bukti.
+     * Baris bercara bayar 'transfer' pun TIDAK lagi diminta bukti manual.
+     *
+     * Pembayarannya seluruhnya lewat gerbang pembayaran. Ketiga ratus tujuh
+     * baris yang ada hari ini masih bernilai 'transfer' — nilai bawaan dari
+     * zaman rekening — jadi justru nilai itulah yang diterima hampir semua
+     * orang. Dibiarkan menagih bukti transfer, perubahan ini tidak mengenai
+     * siapa pun.
      */
     #[Test]
-    public function transfer_manual_tetap_diminta_buktinya(): void
+    public function baris_transfer_lama_tidak_diminta_bukti_manual(): void
     {
         $pesan = PesanWaPendaftaran::tindakLanjut($this->baris('diproses', ['cara_bayar' => 'transfer']));
 
-        $this->assertStringContainsString('kirimkan bukti transfernya', $pesan);
-        $this->assertStringContainsString('Mohon ditransfer', $pesan,
-            'Peringatan kode unik hilang untuk transfer manual, padahal justru '
-            . 'di sanalah nominalnya dicocokkan dengan tangan.');
+        $this->assertStringContainsString('tautan pembayaran yang kami kirimkan', $pesan);
+        $this->assertStringNotContainsString('bukti transfer', $pesan);
+    }
+
+    /**
+     * TIDAK ADA satu pun pesan yang menyuruh transfer manual, apa pun
+     * statusnya dan apa pun cara bayarnya.
+     *
+     * Disapu seluruh kombinasinya, bukan satu contoh: kalimat penagihannya
+     * satu, tetapi kalimat keadaan dan peringatannya bercabang — dan cabang
+     * yang terlewat hanya terlihat pada status yang jarang dipakai panitia.
+     */
+    #[Test]
+    public function tidak_ada_pesan_yang_menyuruh_transfer_manual(): void
+    {
+        /*
+         * "rekening" dan "bukti transfer" adalah bahasa pencocokan mutasi
+         * dengan tangan. "angka terakhir" peringatan kode uniknya: lewat
+         * gerbang pembayaran nominalnya terpatok di tautannya, tidak ada
+         * yang bisa dibulatkan.
+         */
+        $manual = ['bukti transfer', 'rekening', 'angka terakhir', 'kode unik', 'ditransfer'];
+
+        $tercela = [];
+
+        foreach (KabarStatusPendaftaran::semuaStatus() as $status) {
+            foreach (['transfer', 'doku', 'tunai', ''] as $caraBayar) {
+                $pesan = PesanWaPendaftaran::tindakLanjut(
+                    $this->baris($status, ['cara_bayar' => $caraBayar])
+                );
+
+                foreach ($manual as $kata) {
+                    if (str_contains($pesan, $kata)) {
+                        $tercela[] = $status . ' / ' . ($caraBayar ?: '(kosong)') . ': "' . $kata . '"';
+                    }
+                }
+            }
+        }
+
+        $this->assertSame([], $tercela,
+            "Pesan berikut masih berbahasa transfer manual:\n- " . implode("\n- ", $tercela) . "\n");
     }
 
     // ------------------------------------------------------------- pembantu
