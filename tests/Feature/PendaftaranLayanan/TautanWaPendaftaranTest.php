@@ -85,7 +85,7 @@ class TautanWaPendaftaranTest extends TestCase
     }
 
     #[Test]
-    public function nominal_dan_kode_unik_ikut_di_pesannya(): void
+    public function nominal_dan_nomor_ikut_di_pesannya(): void
     {
         $pesan = PesanWaPendaftaran::untuk((object) [
             'nama_orang' => 'Budi Santoso', 'nomor' => 'camp-001', 'total' => 5500750,
@@ -94,26 +94,15 @@ class TautanWaPendaftaranTest extends TestCase
 
         $this->assertStringContainsString('Budi Santoso', $pesan);
         $this->assertStringContainsString('CAMP-001', $pesan, 'Nomor pendaftarannya tidak disebut.');
+
+        /*
+         * Nominalnya disebut UTUH sampai angka terakhir, termasuk kode
+         * uniknya. Peringatan "jangan dibulatkan" sendiri sudah dibuang —
+         * lewat gerbang pembayaran nominalnya terpatok di tautannya — tetapi
+         * angkanya tetap harus terbaca supaya pendaftar tahu berapa yang
+         * akan ditagih tautannya.
+         */
         $this->assertStringContainsString('Rp 5.500.750', $pesan);
-        $this->assertStringContainsString('*tepat*', $pesan,
-            'Peringatan jangan dibulatkan hilang, padahal justru kode unik '
-            . 'yang paling sering salah ketik.');
-    }
-
-    /**
-     * Nominal bulat TIDAK diberi peringatan pembulatan: tidak ada yang bisa
-     * dibulatkan, dan kalimatnya cuma membingungkan.
-     */
-    #[Test]
-    public function tanpa_kode_unik_tidak_ada_peringatan_pembulatan(): void
-    {
-        $pesan = PesanWaPendaftaran::untuk((object) [
-            'nama_orang' => 'Budi', 'nomor' => 'camp-002', 'total' => 5500000,
-            'kode_unik' => 0, 'status' => 'diproses', 'layanan' => 'scopus_camp',
-        ]);
-
-        $this->assertStringContainsString('Rp 5.500.000', $pesan);
-        $this->assertStringNotContainsString('*tepat*', $pesan);
     }
 
     #[Test]
