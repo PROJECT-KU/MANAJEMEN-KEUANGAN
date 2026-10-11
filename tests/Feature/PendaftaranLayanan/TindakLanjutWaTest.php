@@ -620,6 +620,108 @@ class TindakLanjutWaTest extends TestCase
         $this->assertStringStartsWith('Yth. Bapak/Ibu M. Rizki Al-Hakim, S.Si,', $pesan);
     }
 
+    /**
+     * Peserta yang sudah lunas diberi tautan grupnya.
+     *
+     * Sebelum ini panitia menempelkannya dengan tangan sesudah menekan
+     * Follow up — dan tautan grup yang salah tempel mengirim peserta satu
+     * angkatan ke grup angkatan lain.
+     */
+    #[Test]
+    public function peserta_lunas_diberi_tautan_grupnya(): void
+    {
+        $pesan = PesanWaPendaftaran::tindakLanjut($this->baris('Pendaftaran Diterima', [
+            'grup' => 'https://chat.whatsapp.com/AbCdEf123456',
+        ]));
+
+        $this->assertStringContainsString('https://chat.whatsapp.com/AbCdEf123456', $pesan);
+
+        /*
+         * Alamatnya BERDIRI SENDIRI di barisnya, tanpa titik di ujungnya.
+         * WhatsApp menebak batas tautan dari spasi, jadi tanda baca yang
+         * menempel ikut termakan ke dalam alamat — yang ditekan pendaftar
+         * lalu alamat yang tidak ada.
+         */
+        $this->assertContains('https://chat.whatsapp.com/AbCdEf123456',
+            explode("\n", $pesan),
+            'Tautannya tidak berdiri sendiri di satu baris; tanda baca di '
+            . 'sebelahnya akan ikut termakan ke dalam alamat.');
+    }
+
+    /** Yang dijadwalkan ulang sudah membayar — cuma pindah tanggal. */
+    #[Test]
+    public function yang_dijadwalkan_ulang_tetap_diberi_grupnya(): void
+    {
+        $pesan = PesanWaPendaftaran::tindakLanjut($this->baris('Pendaftaran Reschedule', [
+            'grup' => 'https://chat.whatsapp.com/AbCdEf123456',
+        ]));
+
+        $this->assertStringContainsString('https://chat.whatsapp.com/AbCdEf123456', $pesan);
+    }
+
+    /**
+     * Yang BELUM membayar, yang batal, dan yang dananya dikembalikan tidak
+     * diberi tautannya.
+     *
+     * Grupnya akan terisi orang yang kursinya belum ada, dan mengeluarkan
+     * mereka kembali satu per satu pekerjaan panitia yang tidak perlu ada.
+     */
+    #[Test]
+    public function yang_belum_jadi_peserta_tidak_diberi_grupnya(): void
+    {
+        foreach (['diproses', 'Pendaftaran Dibatalkan', 'Pendaftaran Refund',
+            'Pendaftaran Ditolak', 'expired'] as $status) {
+            $pesan = PesanWaPendaftaran::tindakLanjut($this->baris($status, [
+                'grup' => 'https://chat.whatsapp.com/AbCdEf123456',
+            ]));
+
+            $this->assertStringNotContainsString('chat.whatsapp.com', $pesan,
+                "Status {$status} diberi tautan grup padahal belum/bukan peserta.");
+        }
+    }
+
+    /**
+     * Isian yang BUKAN tautan tidak pernah tercetak.
+     *
+     * Kolomnya varchar bebas, dan terukur di basis data ia lebih sering
+     * berisi catatan panitia daripada alamat: 153 dari 228 isian berbunyi
+     * "menyusul" atau "link nyusul". Dicetak apa adanya, yang terkirim
+     * adalah "Silakan bergabung ke grup peserta melalui tautan berikut:
+     * menyusul".
+     */
+    #[Test]
+    public function isian_yang_bukan_tautan_tidak_pernah_tercetak(): void
+    {
+        $bukanTautan = [
+            'menyusul', 'Menyusul', 'link nyusul', '-', 'belum ada',
+            'https://drive.google.com/file/d/abc',
+            'wa.me/628123456789',
+            'chat.whatsapp.com/AbCdEf123456',
+            'http://chat.whatsapp.com/AbCdEf123456',
+        ];
+
+        foreach ($bukanTautan as $isi) {
+            $pesan = PesanWaPendaftaran::tindakLanjut(
+                $this->baris('Pendaftaran Diterima', ['grup' => $isi])
+            );
+
+            $this->assertStringNotContainsString('Silakan bergabung', $pesan,
+                "Isian \"{$isi}\" diperlakukan sebagai tautan grup.");
+
+            /*
+             * Isian pendek dilewati di tuntutan kedua. '-' satu huruf memang
+             * wajar muncul di pesan yang benar — "Angkatan ke-6" punya satu —
+             * jadi menuntutnya tidak ada berarti merah pada pesan yang tidak
+             * bersalah. Tuntutan pertama di atas sudah menutup keduanya:
+             * tanpa baris ajakannya, tidak ada tautan yang tercetak.
+             */
+            if (mb_strlen($isi) >= 5) {
+                $this->assertStringNotContainsString($isi, $pesan,
+                    "Isian \"{$isi}\" ikut tercetak di pesannya.");
+            }
+        }
+    }
+
     private function baris(string $status, array $ubah = []): object
     {
         return (object) array_merge([
