@@ -94,11 +94,31 @@ Pendaftar Layanan | MIS Rumah Scopus
         }
 
         /* Tombol aksi berdampingan; di mode kartu mereka turun sendiri. */
+        /*
+         * Kedua tombolnya SEJAJAR, tidak pernah bertumpuk.
+         *
+         * Dengan flex-wrap: wrap, susunannya bergantung pada sisa lebar
+         * kolom Aksi — dan lebar itu ditentukan isi baris LAIN di halaman
+         * yang sama. Terukur: kolomnya 233px di halaman 1 dan 186px di
+         * halaman 6 (nama sesinya lebih panjang di sana), sementara kedua
+         * tombolnya menuntut 255px. Akibatnya tombol yang sama tampil
+         * bersebelahan di satu halaman dan bertumpuk di halaman berikutnya,
+         * dan tangan yang sudah hafal letaknya meleset tiap ganti halaman.
+         *
+         * nowrap + white-space pada selnya membuat lebar minimum kolom ini
+         * menjadi lebar kedua tombolnya, jadi tabel menyediakan ruangnya.
+         * Yang menyusut kolom Sesi dan Pendaftar, dan keduanya memang sudah
+         * dipotong dua baris lewat CSS.
+         */
         .pdl-aksi-baris {
             display: flex;
             gap: 6px;
             justify-content: flex-end;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
+        }
+
+        .mis-tabel td[data-judul="Aksi"] {
+            white-space: nowrap;
         }
 
         /*
@@ -703,6 +723,24 @@ Pendaftar Layanan | MIS Rumah Scopus
             .pdl-tombol-buka,
             .pdl-tombol-lunas {
                 padding: 0 11px;
+            }
+
+            /*
+             * Dirapatkan 2px di rentang ini.
+             *
+             * Sejak kedua tombolnya tidak boleh bertumpuk, lebar minimum
+             * tabelnya naik jadi 772px — dan tepat di 768px itu 4px lebih
+             * lebar daripada ruang yang ada, jadi halamannya bisa digeser ke
+             * samping sejauh 2px. Terukur di 767px dan 769px bersih; hanya
+             * titik putusnya sendiri yang kena.
+             */
+            .pdl-aksi-baris {
+                gap: 4px;
+            }
+
+            .mis-tabel td[data-judul="Aksi"] {
+                padding-left: 6px;
+                padding-right: 6px;
             }
 
             /* Lencana keadaan boleh terpatah: "Menunggu bayar" menuntut
