@@ -1,7 +1,7 @@
 {{-- Gayanya sebaris, susunannya tabel, dan perataannya berganti-ganti —
      alasan ketiganya sama dengan email_pendaftaran. --}}
 @php
-    $logo = asset('assets/img/logo-rsc-email.png');
+    $logo = aset_surat('assets/img/logo-rsc-email.png');
 @endphp
 <!DOCTYPE html>
 <html lang="id">

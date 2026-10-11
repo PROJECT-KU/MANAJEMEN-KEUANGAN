@@ -100,7 +100,7 @@ class LogoSuratSeragamTest extends TestCase
      */
     private function logoTerpasang(string $isi): array
     {
-        preg_match_all("/asset\\('(assets\\/img\\/[^']+)'\\)/", $isi, $cocok);
+        preg_match_all("/aset_surat\\('(assets\\/img\\/[^']+)'\\)/", $isi, $cocok);
 
         return array_values(array_unique($cocok[1]));
     }
@@ -206,13 +206,13 @@ class LogoSuratSeragamTest extends TestCase
                 continue;
             }
 
-            if (! str_contains($isi, "asset('" . self::LOGO . "')")) {
+            if (! str_contains($isi, "aset_surat('" . self::LOGO . "')")) {
                 $melenceng[] = $relatif;
             }
         }
 
         $this->assertSame([], $melenceng,
-            "Templat surat berikut tidak memasang logonya lewat asset():\n- "
+            "Templat surat berikut tidak memasang logonya lewat aset_surat():\n- "
             . implode("\n- ", $melenceng) . "\n");
 
         // Alamatnya tidak ada gunanya kalau berkasnya sendiri tidak terbit.
@@ -220,6 +220,72 @@ class LogoSuratSeragamTest extends TestCase
             dirname(__DIR__, 2) . '/public/' . self::LOGO,
             'Berkas logonya tidak ada di public/, jadi alamatnya akan 404 di surat.'
         );
+    }
+
+    /**
+     * TIDAK ADA gambar surat yang alamatnya dirakit asset().
+     *
+     * asset() merakit alamatnya dari APP_URL. Di lingkungan lokal APP_URL
+     * berbunyi http://localhost, dan Gmail mengambil gambar lewat proksinya
+     * sendiri di peladen Google — tempat "localhost" berarti mesin Google.
+     * Permintaannya gagal, dan yang tergambar di kotak masuk ikon rusak.
+     *
+     * Terukur dua kali pada surat uji yang dikirim panitia untuk memeriksa
+     * rupanya: surat pendaftaran logonya rusak, lalu surat perubahan status
+     * logonya DAN ketiga ikon media sosialnya rusak. Peladennya sendiri
+     * tidak bermasalah — APP_URL di sana sudah alamat situsnya — tetapi
+     * surat uji justru yang dipakai memutuskan rupa suratnya.
+     *
+     * Dijaga per templat, bukan per logo: ikon media sosial di kaki surat
+     * pun gambar, dan ketiganya ikut rusak oleh sebab yang sama.
+     */
+    public function test_tidak_ada_gambar_surat_yang_memakai_asset(): void
+    {
+        $melenceng = [];
+
+        foreach ($this->templatSurat() as $relatif => $isi) {
+            if (preg_match_all("/asset\\('(assets\\/img\\/[^']+)'\\)/", $isi, $cocok) > 0) {
+                $melenceng[] = $relatif . ': ' . implode(', ', array_unique($cocok[1]));
+            }
+        }
+
+        $this->assertSame([], $melenceng,
+            "Templat surat berikut merakit alamat gambarnya dari APP_URL; di "
+            . "lokal alamatnya http://localhost dan gambarnya rusak di kotak "
+            . "masuk:\n- " . implode("\n- ", $melenceng) . "\n");
+    }
+
+    /**
+     * Alamat gambar suratnya alamat PUBLIK, bukan localhost.
+     *
+     * Pembantunya bisa saja dipasang tetapi config-nya menunjuk alamat yang
+     * tidak dapat dijangkau siapa pun — dan gejalanya persis sama dengan
+     * sebelum diperbaiki.
+     */
+    public function test_alamat_gambar_suratnya_dapat_dijangkau_umum(): void
+    {
+        /*
+         * Dibaca sebagai TEKS. Uji ini kelas PHPUnit polos tanpa wadah
+         * aplikasi: config() melempar BindingResolutionException, dan
+         * me-require berkasnya pun gagal sebab isinya memanggil
+         * resource_path(). Keduanya merah karena alasan yang sama sekali
+         * bukan alamatnya.
+         *
+         * Yang diperiksa NILAI BAWAANNYA — yang berlaku saat .env tidak
+         * menyetelnya, dan itulah keadaan di hampir semua mesin.
+         */
+        $isi = (string) file_get_contents(dirname(__DIR__, 2) . '/config/mail.php');
+
+        $this->assertSame(1,
+            preg_match("/'aset_url' => env\\('MAIL_ASSET_URL', '([^']+)'\\)/", $isi, $cocok),
+            'config/mail.php tidak punya aset_url berikut nilai bawaannya.');
+
+        $alamat = $cocok[1];
+
+        $this->assertMatchesRegularExpression('#^https://[a-z0-9.-]+\\.[a-z]{2,}#i', $alamat,
+            'Alamat gambar surat bukan alamat https publik: ' . $alamat);
+
+        $this->assertStringNotContainsString('localhost', $alamat);
     }
 
     public function test_berkas_logonya_memang_ada(): void
