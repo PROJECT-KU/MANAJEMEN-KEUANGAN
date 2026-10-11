@@ -95,7 +95,7 @@ class TautanWaPendaftaranTest extends TestCase
         $this->assertStringContainsString('Budi Santoso', $pesan);
         $this->assertStringContainsString('CAMP-001', $pesan, 'Nomor pendaftarannya tidak disebut.');
         $this->assertStringContainsString('Rp 5.500.750', $pesan);
-        $this->assertStringContainsString('persis', $pesan,
+        $this->assertStringContainsString('*tepat*', $pesan,
             'Peringatan jangan dibulatkan hilang, padahal justru kode unik '
             . 'yang paling sering salah ketik.');
     }
@@ -113,7 +113,7 @@ class TautanWaPendaftaranTest extends TestCase
         ]);
 
         $this->assertStringContainsString('Rp 5.500.000', $pesan);
-        $this->assertStringNotContainsString('persis', $pesan);
+        $this->assertStringNotContainsString('*tepat*', $pesan);
     }
 
     #[Test]
@@ -128,7 +128,7 @@ class TautanWaPendaftaranTest extends TestCase
 
         $this->assertStringNotContainsString('belum kami terima', $pesan,
             'Pendaftar yang sudah lunas ditagih lewat WhatsApp.');
-        $this->assertStringContainsString('sudah kami terima', $pesan);
+        $this->assertStringContainsString('telah kami terima', $pesan);
     }
 
     /**
