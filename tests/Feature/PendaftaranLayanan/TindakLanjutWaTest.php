@@ -426,7 +426,7 @@ class TindakLanjutWaTest extends TestCase
     }
 
     /**
-     * Lewat DOKU tidak ada bukti yang perlu dikirim.
+     * Lewat pembayaran daring tidak ada bukti yang perlu dikirim.
      *
      * Gatewaynya yang mengabari sistem. Menyuruh orang mengirim tangkapan
      * layar ke WhatsApp membuat ia mengira pembayarannya belum sah sampai
@@ -435,19 +435,40 @@ class TindakLanjutWaTest extends TestCase
      *
      * Hari ini ketiga ratus barisnya masih 'transfer', jadi kekeliruan ini
      * belum menggigit — tetapi ia akan mengenai SELURUH pendaftar di hari
-     * DOKU dinyalakan, dan hari itu tidak ada ujinya kalau aturannya cuma
-     * anggapan.
+     * pembayaran daring dinyalakan, dan hari itu tidak ada ujinya kalau
+     * aturannya cuma anggapan.
      */
     #[Test]
-    public function doku_tidak_disuruh_mengirim_bukti(): void
+    public function pembayaran_daring_tidak_disuruh_mengirim_bukti(): void
     {
         $pesan = PesanWaPendaftaran::tindakLanjut($this->baris('diproses', ['cara_bayar' => 'doku']));
 
         $this->assertStringNotContainsString('kirimkan bukti transfernya', $pesan,
-            'Pendaftar DOKU disuruh mengirim bukti yang tidak pernah ada.');
+            'Pendaftar daring disuruh mengirim bukti yang tidak pernah ada.');
         $this->assertStringNotContainsString('Mohon ditransfer', $pesan,
-            'Pendaftar DOKU disuruh transfer manual.');
-        $this->assertStringContainsString('DOKU', $pesan);
+            'Pendaftar daring disuruh transfer manual.');
+        $this->assertStringContainsString('tautan pembayaran yang dikirim sistem', $pesan);
+    }
+
+    /**
+     * NAMA GATEWAYNYA tidak pernah disebut ke pendaftar.
+     *
+     * Itu urusan internal: yang perlu ia tahu cuma bahwa pembayarannya
+     * diselesaikan lewat tautan yang dikirim sistem. Disebut namanya, pesan
+     * ini berbohong pada hari gatewaynya diganti — dan yang menerimanya
+     * akan mencari halaman yang sudah tidak dipakai lagi.
+     */
+    #[Test]
+    public function nama_gatewaynya_tidak_disebut(): void
+    {
+        foreach (['doku', 'transfer', 'tunai', ''] as $cara) {
+            $pesan = PesanWaPendaftaran::tindakLanjut(
+                $this->baris('diproses', ['cara_bayar' => $cara])
+            );
+
+            $this->assertStringNotContainsStringIgnoringCase('doku', $pesan,
+                "Nama gatewaynya bocor ke pesan untuk cara bayar '{$cara}'.");
+        }
     }
 
     /** Bayar di tempat: tidak ada yang perlu ditransfer sama sekali. */
