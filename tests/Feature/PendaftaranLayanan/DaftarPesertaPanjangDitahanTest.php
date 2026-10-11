@@ -315,6 +315,45 @@ class DaftarPesertaPanjangDitahanTest extends TestCase
     }
 
     /**
+     * Panel "sudah lengkap" berjarak SAMA dengan peringatan yang
+     * digantikannya.
+     *
+     * Terukur sebelum diperbaiki: jaraknya ke kartu peserta terakhir NOL,
+     * sementara judul ke kartu 13px dan antar kartu 8px — panelnya menempel
+     * dan terbaca seperti bagian dari kartu terakhir, bukan kesimpulan atas
+     * seluruh daftarnya.
+     *
+     * Dituntut SAMA dengan .rin-nota, bukan sekadar bukan-nol: keduanya
+     * bergantian menempati posisi yang sama — nota kuning saat daftarnya
+     * belum lengkap, panel hijau saat sudah — dan jarak yang berbeda membuat
+     * layarnya tampak bergeser sendiri begitu nama terakhir diisi.
+     */
+    #[Test]
+    public function panel_lengkap_tidak_menempel_ke_kartunya(): void
+    {
+        $isi = $this->gaya();
+
+        $atas = function (string $pemilih) use ($isi): string {
+            $cocok = [];
+            $ada = preg_match('/' . preg_quote($pemilih, '/') . '\s*\{[^}]*?\bmargin:\s*([^;]+);/s', $isi, $cocok);
+
+            $this->assertSame(1, $ada, "Pintasan margin {$pemilih} tidak ketemu.");
+
+            return trim(explode(' ', trim($cocok[1]))[0]);
+        };
+
+        $panel = $atas('.rin-peserta-lengkap');
+
+        $this->assertNotSame('0', $panel);
+        $this->assertNotSame('0px', $panel,
+            'Panel "sudah lengkap" menempel lagi ke kartu peserta terakhir.');
+
+        $this->assertSame($atas('.rin-nota'), $panel,
+            'Jaraknya berbeda dari nota kuning yang menempati posisi yang sama, '
+            . 'jadi layarnya bergeser sendiri begitu nama terakhir diisi.');
+    }
+
+    /**
      * Kalimat bantuannya harus sepakat dengan yang dikerjakan peladen.
      * Dulu berbunyi "tidak ikut tersimpan" — dan memang begitu: kelebihannya
      * dipotong diam-diam lalu layarnya menjawab "lengkap".

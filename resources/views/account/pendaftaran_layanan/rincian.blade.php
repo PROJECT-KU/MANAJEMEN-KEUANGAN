@@ -441,7 +441,20 @@ Rincian Pendaftaran | MIS Rumah Scopus
             align-items: center;
             gap: 10px;
             flex-wrap: wrap;
-            margin-bottom: 13px;
+            /*
+             * 13px DI ATASNYA juga, bukan cuma di bawah.
+             *
+             * Tanpa itu jaraknya ke kartu peserta terakhir NOL — terukur —
+             * sementara judul ke kartu 13px dan antar kartu 8px. Panelnya
+             * jadi menempel dan terbaca seperti bagian dari kartu terakhir,
+             * bukan kesimpulan atas seluruh daftarnya.
+             *
+             * 13px persis, sama dengan .rin-nota yang menempati tempat ini
+             * saat daftarnya BELUM lengkap. Dua pemberitahuan yang bergantian
+             * di posisi yang sama harus berjarak sama, kalau tidak layarnya
+             * tampak bergeser sendiri begitu nama terakhir diisi.
+             */
+            margin: 13px 0;
             padding: 9px 12px;
             border: 1px solid #a7f3d0;
             border-radius: 12px;
