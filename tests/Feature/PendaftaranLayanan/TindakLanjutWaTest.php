@@ -167,6 +167,84 @@ class TindakLanjutWaTest extends TestCase
             . 'akan mengira pesannya terkirim.');
     }
 
+    /**
+     * Kedua tombol SEJAJAR dalam satu baris, dengan satu keterangan di
+     * bawah keduanya.
+     *
+     * Keduanya pekerjaan yang sama — mengabari pendaftar tentang keadaannya
+     * sekarang, cuma lewat saluran berbeda. Bertumpuk, keduanya tampak
+     * tidak sejenis dan tiap tombol menuntut keterangan sendiri yang
+     * mengulang kalimat yang sama.
+     */
+    #[Test]
+    public function kedua_tombolnya_sebaris(): void
+    {
+        [$orang, $b] = $this->dengan();
+
+        $isi = $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.rincian', ['scopus_camp', $b->getKey()]))
+            ->assertOk()->getContent();
+
+        /*
+         * Dicari ATRIBUT class-nya, bukan nama kelasnya di mana saja.
+         *
+         * Kemunculan pertama 'rin-lanjutan-tombol' di halaman ini ada di
+         * blok <style>-nya sendiri — potongan yang diambil dari situ berisi
+         * CSS, bukan markah, dan penjaganya merah pada susunan yang justru
+         * benar. Jebakan yang sudah beberapa kali terjadi di berkas ini.
+         */
+        $awal = strpos($isi, 'class="rin-lanjutan-tombol"');
+
+        $this->assertNotFalse($awal, 'Baris tombol tindak lanjut tidak tergambar.');
+
+        $baris = substr($isi, $awal, strpos($isi, '</div>', $awal) - $awal);
+
+        $this->assertStringContainsString('Kirim ulang suratnya', $baris,
+            'Tombol kirim ulang tidak berada di baris yang sama.');
+        $this->assertStringContainsString('Follow up:', $baris,
+            'Tombol follow up tidak berada di baris yang sama.');
+    }
+
+    /**
+     * Borangnya display: contents.
+     *
+     * Sebagai blok, <form> jadi anak flex tersendiri dan tombolnya
+     * terbungkus satu lapis lagi — jaraknya dobel dan tingginya tidak
+     * sejajar dengan tautan di sebelahnya.
+     */
+    #[Test]
+    public function borang_kirim_ulang_tidak_memakan_slot_flex(): void
+    {
+        $this->assertMatchesRegularExpression(
+            '/\.rin-kirim-ulang\s*\{[^}]*display:\s*contents/s',
+            file_get_contents(resource_path('views/account/pendaftaran_layanan/rincian.blade.php')),
+            'Borang kirim ulang kembali jadi blok, jadi kedua tombolnya tidak sejajar.'
+        );
+    }
+
+    /**
+     * Keterangannya mengikuti tombol yang MEMANG ada.
+     *
+     * Satu kalimat tetap yang menyebut dua tombol akan menerangkan tombol
+     * yang tidak tergambar — surat tidak selalu ada untuk tiap status, dan
+     * nomor WhatsApp tidak selalu bisa dihubungi.
+     */
+    #[Test]
+    public function keterangannya_tidak_menyebut_tombol_yang_tidak_ada(): void
+    {
+        [$orang, $b] = $this->dengan(['telp' => '0812']);
+
+        $isi = $this->actingAs($orang)
+            ->get(route('account.pendaftaran-layanan.rincian', ['scopus_camp', $b->getKey()]))
+            ->assertOk()->getContent();
+
+        $this->assertStringContainsString('Mengirim lagi surat untuk status yang sekarang', $isi,
+            'Keterangan untuk tombol tunggalnya hilang.');
+
+        $this->assertStringNotContainsString('Keduanya memakai status', $isi,
+            'Keterangannya menyebut dua tombol padahal yang tergambar cuma satu.');
+    }
+
     // ------------------------------------------------------------- pembantu
 
     private function baris(string $status): object

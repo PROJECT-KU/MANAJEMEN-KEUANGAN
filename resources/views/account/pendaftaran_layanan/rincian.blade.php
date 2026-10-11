@@ -1685,20 +1685,43 @@ Rincian Pendaftaran | MIS Rumah Scopus
 
         /* Tombol kirim ulang surat, dipisah garis dari deret tombol status. */
         /*
-         * Tindak lanjut WhatsApp: hijau, sebab ia memang menuju ke sana.
+         * Dua tombol tindak lanjut, SEJAJAR, dengan satu keterangan di
+         * bawah keduanya.
          *
-         * Susunannya mengikuti .rin-kirim-ulang di atasnya — kisi menurun
-         * dengan justify-items: start. Sebagai blok biasa, keterangannya
-         * mengalir MENGITARI tombolnya: terukur satu kalimat pecah jadi dua
-         * baris yang mengapit tombol, dan dua tombol bersebelahan jadi
-         * tampak tidak sejenis padahal pekerjaannya sama.
+         * Pemisahnya dipindah ke pembungkus ini dari .rin-kirim-ulang: garis
+         * itu memisahkan "pindahkan status" dari "kabari pendaftar", dan
+         * begitu ada dua tombol, garis yang menempel pada salah satunya saja
+         * memotong di tempat yang keliru.
          */
-        .rin-tindak-lanjut {
+        .rin-lanjutan {
             display: grid;
-            gap: 6px;
+            gap: 7px;
             justify-items: start;
-            margin-top: 10px;
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px dashed var(--mis-garis);
         }
+
+        .rin-lanjutan-tombol {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        /*
+         * display: contents pada borangnya.
+         *
+         * Sebagai blok, <form> jadi anak flex tersendiri dan tombolnya
+         * terbungkus satu lapis lagi — jaraknya dobel dan tingginya tidak
+         * sejajar dengan tautan di sebelahnya. Dengan contents, tombolnyalah
+         * yang jadi anak flex. Pola yang sama dipakai borang "Tandai lunas"
+         * di daftar.
+         */
+        .rin-kirim-ulang {
+            display: contents;
+        }
+
+        /* Tindak lanjut WhatsApp: hijau, sebab ia memang menuju ke sana. */
 
         .rin-tombol-wa {
             color: #15803d;
@@ -1712,15 +1735,6 @@ Rincian Pendaftaran | MIS Rumah Scopus
 
         .rin-tombol-wa .fab {
             color: #16a34a;
-        }
-
-        .rin-kirim-ulang {
-            display: grid;
-            gap: 6px;
-            justify-items: start;
-            margin-top: 14px;
-            padding-top: 14px;
-            border-top: 1px dashed var(--mis-garis);
         }
 
         .rin-jejak-lagi {
@@ -3060,45 +3074,76 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                 palsu pada riwayat yang justru dipakai menelusuri
                                 perselisihan.
                             --}}
-                            @if (Pendaftaran::suratUntuk($layanan, $pendaftaran->status))
-                                <form method="POST" class="rin-kirim-ulang"
-                                    action="{{ route('account.pendaftaran-layanan.kirim-ulang', [$layanan, $pendaftaran->getKey()]) }}">
-                                    @csrf
-                                    <button type="submit" class="mis-tombol mis-tombol-halus" data-mis-kirim-ulang>
-                                        <i class="fas fa-paper-plane" aria-hidden="true"></i>
-                                        <span>Kirim ulang suratnya</span>
-                                    </button>
-                                    <span class="mis-bantuan">
-                                        Mengirim lagi surat untuk status yang sekarang. Statusnya tidak berubah.
-                                    </span>
-                                </form>
-                            @endif
+                            @php
+                                $adaKirimUlang = Pendaftaran::suratUntuk($layanan, $pendaftaran->status) !== null;
+                                $adaFollowUp = $tautanWaStatus !== '';
 
-                            {{-- Follow up lewat WhatsApp untuk STATUS yang sedang
-                                 berlaku.
+                                /*
+                                 * Keterangannya dirakit mengikuti tombol yang MEMANG
+                                 * ada. Satu kalimat tetap yang menyebut dua tombol
+                                 * akan menerangkan tombol yang tidak tergambar —
+                                 * surat tidak selalu ada untuk tiap status, dan
+                                 * nomor WhatsApp tidak selalu bisa dihubungi.
+                                 */
+                                $ketLanjutan = match (true) {
+                                    $adaKirimUlang && $adaFollowUp => 'Keduanya memakai status yang '
+                                        . 'sekarang dan tidak mengubahnya — yang kiri mengirim ulang '
+                                        . 'suratnya, yang kanan membuka WhatsApp dengan pesan yang '
+                                        . 'sudah terisi dan masih bisa disunting.',
+                                    $adaKirimUlang => 'Mengirim lagi surat untuk status yang sekarang. '
+                                        . 'Statusnya tidak berubah.',
+                                    $adaFollowUp => 'Membuka WhatsApp dengan pesan yang sudah terisi '
+                                        . 'sesuai statusnya — isinya sama dengan suratnya, dan masih '
+                                        . 'bisa disunting sebelum dikirim.',
+                                    default => null,
+                                };
+                            @endphp
 
-                                 Bersebelahan dengan "Kirim ulang suratnya" karena
-                                 keduanya pekerjaan yang sama — mengabari pendaftar
-                                 tentang keadaannya sekarang — cuma lewat saluran
-                                 berbeda. Dan kalimatnya dirakit dari sumber yang sama
-                                 dengan suratnya, jadi dua saluran itu tidak pernah
-                                 berbeda bunyi.
+                            @if ($ketLanjutan !== null)
+                                {{-- Kedua tombol SEJAJAR, bukan bertumpuk.
 
-                                 Hanya muncul kalau nomornya bisa dihubungi: tombol
-                                 yang membuka percakapan dengan nomor yang tidak ada
-                                 membuat panitia mengira pesannya terkirim. --}}
-                            @if ($tautanWaStatus !== '')
-                                <div class="rin-tindak-lanjut">
-                                    <a class="mis-tombol mis-tombol-halus rin-tombol-wa"
-                                        href="{{ $tautanWaStatus }}" target="_blank" rel="noopener">
-                                        <i class="fab fa-whatsapp" aria-hidden="true"></i>
-                                        <span>Follow up: {{ $rupa['label'] }}</span>
-                                    </a>
-                                    <span class="mis-bantuan">
-                                        Membuka WhatsApp dengan pesan yang sudah terisi sesuai
-                                        statusnya — isinya sama dengan suratnya, dan masih bisa
-                                        disunting sebelum dikirim.
-                                    </span>
+                                     Keduanya pekerjaan yang sama — mengabari pendaftar
+                                     tentang keadaannya sekarang — cuma lewat saluran
+                                     berbeda, jadi menumpuknya membuat keduanya tampak
+                                     tidak sejenis dan tiap tombol menuntut keterangan
+                                     sendiri yang mengulang kalimat yang sama. --}}
+                                <div class="rin-lanjutan">
+                                    <div class="rin-lanjutan-tombol">
+                                        @if ($adaKirimUlang)
+                                            {{-- Borang TERSENDIRI, di luar borang status di
+                                                 atasnya: borang bersarang bukan markah yang
+                                                 sah, dan tombol ini tidak boleh ikut mengirim
+                                                 nilai status apa pun — yang dikerjakannya
+                                                 justru TIDAK menyentuh status.
+
+                                                 Sebelum ini tidak ada jalannya sama sekali.
+                                                 Surat yang tidak sampai hanya bisa diulang
+                                                 dengan memindahkan statusnya bolak-balik, dan
+                                                 itu meninggalkan dua jejak palsu pada riwayat
+                                                 yang justru dipakai menelusuri perselisihan. --}}
+                                            <form method="POST" class="rin-kirim-ulang"
+                                                action="{{ route('account.pendaftaran-layanan.kirim-ulang', [$layanan, $pendaftaran->getKey()]) }}">
+                                                @csrf
+                                                <button type="submit" class="mis-tombol mis-tombol-halus" data-mis-kirim-ulang>
+                                                    <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                                                    <span>Kirim ulang suratnya</span>
+                                                </button>
+                                            </form>
+                                        @endif
+
+                                        {{-- Hanya muncul kalau nomornya bisa dihubungi: tombol
+                                             yang membuka percakapan dengan nomor yang tidak ada
+                                             membuat panitia mengira pesannya terkirim. --}}
+                                        @if ($adaFollowUp)
+                                            <a class="mis-tombol mis-tombol-halus rin-tombol-wa"
+                                                href="{{ $tautanWaStatus }}" target="_blank" rel="noopener">
+                                                <i class="fab fa-whatsapp" aria-hidden="true"></i>
+                                                <span>Follow up: {{ $rupa['label'] }}</span>
+                                            </a>
+                                        @endif
+                                    </div>
+
+                                    <span class="mis-bantuan">{{ $ketLanjutan }}</span>
                                 </div>
                             @endif
                         </div>
