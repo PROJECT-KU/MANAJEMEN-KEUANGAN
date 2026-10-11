@@ -477,10 +477,18 @@ Route::prefix('account')
                 ->name('account.pendaftaran-layanan.pdf');
             Route::get('Pendaftaran-Layanan/unduh-excel', 'account\\PendaftaranLayananController@eksporExcel')
                 ->name('account.pendaftaran-layanan.excel');
-            // Satu baris per ORANG, bukan per pendaftaran — nama peserta
-            // rombongan tidak punya jalan keluar lain dari sistem.
-            Route::get('Pendaftaran-Layanan/unduh-hadir', 'account\\PendaftaranLayananController@eksporHadir')
-                ->name('account.pendaftaran-layanan.hadir');
+            /*
+             * Lembar presensi satu angkatan, satu baris per ORANG.
+             *
+             * Nama peserta rombongan tidak punya jalan keluar lain dari
+             * sistem: ekspor di atasnya satu baris per PENDAFTARAN, jadi
+             * rombongan lima orang muncul sebagai satu nama.
+             *
+             * Angkatannya wajib, diperiksa di pengendalinya — alamat ini
+             * bisa diketik langsung walau tombolnya mati.
+             */
+            Route::get('Pendaftaran-Layanan/unduh-presensi', 'account\\PendaftaranLayananController@eksporPresensi')
+                ->name('account.pendaftaran-layanan.presensi');
 
             /*
              * Catatan penghapusan. Di ATAS rute {layanan}/{id} di bawahnya —

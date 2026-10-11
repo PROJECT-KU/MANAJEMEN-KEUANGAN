@@ -2332,6 +2332,39 @@ select.form-control-modern {
     transform: translateY(-2px);
 }
 
+/*
+ * Tombol yang BELUM bisa dipakai, bukan yang dilarang.
+ *
+ * Dipakai pada <span>, bukan <button> atau <a>: atribut disabled tidak
+ * berlaku pada tautan — peramban tetap membukanya, dan yang terlihat cuma
+ * tombol pudar yang ternyata bisa ditekan.
+ *
+ * Tetap berteks penuh dan tetap punya title: yang melihatnya perlu tahu
+ * APA yang kurang. Tombol pudar tanpa keterangan membuat orang menyimpulkan
+ * fiturnya rusak, lalu berhenti mencarinya.
+ */
+.mis-tombol-mati {
+    /* #f8fafc tertulis apa adanya: tidak ada token latar muram di :root,
+       dan var() yang menunjuk nama yang tidak pernah didefinisikan diam-diam
+       jatuh ke cadangannya — pembaca berikutnya mengira tokennya ada. */
+    background: #f8fafc;
+    border: 1px dashed var(--mis-garis);
+    color: var(--mis-tinta-4);
+    cursor: not-allowed;
+}
+
+.mis-tombol-mati:hover {
+    /* Tanpa ini ia terangkat seperti tombol hidup saat disentuh tetikus,
+       dan janji itu tidak ditepati saat diklik. */
+    transform: none;
+    background: #f8fafc;
+    color: var(--mis-tinta-4);
+}
+
+.mis-tombol-mati i {
+    color: #cbd5e1;
+}
+
 /* tombol garis untuk tindakan sekunder di dalam tabel */
 /* Ikonnya berwarna aksen, bukan abu-abu: abu-abu dipakai khusus untuk
    ketiadaan data, dan tombol ini justru tindakan yang bisa dipakai. */
