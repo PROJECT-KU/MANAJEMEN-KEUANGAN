@@ -54,7 +54,10 @@
      * pengirimnya tidak pernah tahu sebab di layarnya sendiri tampak benar.
      */
     $wa = PesananPelanggan::nomorWa($b->telp);
-    $tautanWa = \App\Support\TautanWa::kirim($b->telp, \App\Support\PesanWaPendaftaran::untuk($b));
+    $tautanWa = \App\Support\TautanWa::kirim(
+        $b->telp,
+        \App\Support\PesanWaPendaftaran::untuk($b, $sesiBaris)
+    );
     $jumlahOrang = max(1, (int) $b->jumlah);
     $diskon = (int) $b->nominal_diskon;
     $kodeUnik = (int) $b->kode_unik;
