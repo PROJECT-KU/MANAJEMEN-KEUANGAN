@@ -36,17 +36,6 @@ class PesanWaPendaftaran
     }
 
     /**
-     * Pesan tindak lanjut untuk STATUS yang sedang berlaku.
-     *
-     * Kalimatnya dirakit dari KabarStatusPendaftaran — sumber yang sama
-     * dengan surat emailnya. Ditulis ulang di sini, dua saluran yang
-     * mengabarkan hal yang sama akan berbeda bunyi perlahan, dan pendaftar
-     * yang membaca keduanya tidak tahu mana yang berlaku.
-     *
-     * Dipakai tombol "Follow up" di kartu status, dan juga tombol WhatsApp
-     * di daftar maupun kartu identitas lewat untuk().
-     */
-    /**
      * Kalimat penutup per KEADAAN, khusus WhatsApp.
      *
      * Penutup milik suratnya TIDAK dipakai ulang di sini. Isinya ditulis
@@ -65,7 +54,7 @@ class PesanWaPendaftaran
          * untuk yang belum bayar bergantung pada CARA BAYARNYA — lihat
          * PENUTUP_MENAGIH.
          */
-        'menunggu' => 'Kalau pembayarannya sudah selesai, kabari lewat pesan ini ya 🙏',
+        'menunggu' => 'Apabila pembayaran telah dilakukan, mohon kabari melalui pesan ini.',
         /*
          * Buktinya SUDAH masuk dan sedang diperiksa.
          *
@@ -77,16 +66,16 @@ class PesanWaPendaftaran
          * kirimkan buktinya" — dua kalimat yang saling membantah dalam satu
          * pesan.
          */
-        'diperiksa' => 'Anda tidak perlu mengirim apa pun lagi. Kami kabari lagi lewat '
-            . 'nomor ini begitu pemeriksaannya selesai 🙏',
-        'lunas' => 'Simpan pesan ini sebagai bukti ya. Sampai bertemu di acaranya 🙏',
-        'jadwal' => 'Kalau jadwal barunya ternyata tidak bisa Anda ikuti, balas pesan ini ya — '
-            . 'akan kami carikan jalan keluarnya.',
-        'refund' => 'Kalau sampai seminggu dananya belum juga masuk, balas pesan ini ya — '
-            . 'akan kami telusuri.',
-        'tidak_jadi' => 'Kalau menurut Anda ini keliru, balas pesan ini ya — '
-            . 'panitia akan memeriksanya lagi.',
-        'lain' => 'Kalau ada yang ingin ditanyakan, balas pesan ini ya.',
+        'diperiksa' => 'Anda tidak perlu mengirimkan apa pun lagi. Kami akan mengabari '
+            . 'melalui nomor ini setelah pemeriksaan selesai.',
+        'lunas' => 'Mohon simpan pesan ini sebagai bukti. Sampai berjumpa di acara.',
+        'jadwal' => 'Apabila jadwal baru tersebut tidak dapat Anda ikuti, mohon balas '
+            . 'pesan ini agar kami carikan solusinya.',
+        'refund' => 'Apabila dalam satu minggu dananya belum juga masuk, mohon balas '
+            . 'pesan ini agar kami telusuri.',
+        'tidak_jadi' => 'Apabila menurut Anda terdapat kekeliruan, mohon balas pesan '
+            . 'ini agar panitia memeriksanya kembali.',
+        'lain' => 'Apabila ada yang ingin ditanyakan, mohon balas pesan ini.',
     ];
 
     /**
@@ -110,10 +99,11 @@ class PesanWaPendaftaran
      * pendaftar di hari pembayaran daring dinyalakan.
      */
     private const PENUTUP_MENAGIH = [
-        'transfer' => 'Kalau sudah transfer, kirimkan bukti transfernya ke nomor ini ya 🙏',
-        'doku' => 'Pembayarannya diselesaikan lewat tautan pembayaran yang dikirim '
-            . 'sistem — tidak perlu mengirim bukti apa pun ke sini ya 🙏',
-        'tunai' => 'Pembayarannya diserahkan langsung ke panitia saat datang ya 🙏',
+        'transfer' => 'Apabila pembayaran telah dilakukan, mohon kirimkan bukti '
+            . 'transfernya ke nomor ini. Terima kasih.',
+        'doku' => 'Pembayaran diselesaikan melalui tautan pembayaran yang dikirimkan '
+            . 'sistem. Anda tidak perlu mengirimkan bukti apa pun ke nomor ini.',
+        'tunai' => 'Pembayaran diserahkan langsung kepada panitia pada hari acara.',
     ];
 
     /**
@@ -133,9 +123,34 @@ class PesanWaPendaftaran
         $keadaan = Pendaftaran::keadaanDari($status);
 
         $nama = trim((string) ($b->nama_orang ?? ''));
+
+        /*
+         * Nama yang SELURUHNYA huruf kecil dibesarkan awal katanya.
+         *
+         * Borang pendaftarannya tidak memaksa huruf besar, dan sebagian
+         * mengisinya apa adanya dari papan ketik ponsel. Hasilnya sapaan
+         * "Yth. Bapak/Ibu joko," — justru di kalimat yang paling resmi
+         * dari seluruh pesan ini.
+         *
+         * Hanya yang seluruhnya huruf kecil yang disentuh. Nama yang sudah
+         * memuat huruf besar dibiarkan utuh: di dalamnya ada singkatan
+         * ("M. Rizki", gelar, nama lembaga) yang akan rusak kalau
+         * dibesarkan-kecilkan ulang.
+         */
+        if ($nama !== '' && $nama === mb_strtolower($nama, 'UTF-8')) {
+            $nama = mb_convert_case($nama, MB_CASE_TITLE, 'UTF-8');
+        }
         $total = (int) ($b->total ?? 0);
 
-        $baris = [($nama === '' ? 'Halo' : 'Halo ' . $nama) . ' 👋'];
+        /*
+         * "Yth. Bapak/Ibu", bukan "Halo".
+         *
+         * Pesan ini mewakili lembaga, bukan percakapan pribadi — dan yang
+         * menerimanya sebagian dosen dan peneliti. Sapaan santai membuat
+         * tagihan di dalamnya terbaca seperti pesan asal, bukan pemberitahuan
+         * resmi yang perlu ditindaklanjuti.
+         */
+        $baris = ['Yth. Bapak/Ibu' . ($nama === '' ? '' : ' ' . $nama) . ','];
         $baris[] = '';
         /*
          * "Admin Rumah Scopus", bukan "panitia <nama layanan>".
@@ -146,7 +161,7 @@ class PesanWaPendaftaran
          * datang dari orang yang berbeda. Nama layanannya tetap disebut, di
          * rincian, tempat ia memang keterangan.
          */
-        $baris[] = 'Saya admin Rumah Scopus.';
+        $baris[] = 'Perkenalkan, saya admin Rumah Scopus.';
 
         /*
          * Status yang belum punya kalimat tidak menghasilkan pesan setengah
@@ -170,7 +185,7 @@ class PesanWaPendaftaran
 
         if ($rincian !== []) {
             $baris[] = '';
-            $baris[] = 'Rincian pendaftaran Anda:';
+            $baris[] = 'Berikut rincian pendaftaran Anda:';
 
             foreach ($rincian as $r) {
                 $baris[] = '• ' . $r;
@@ -189,9 +204,9 @@ class PesanWaPendaftaran
         if ($menagih && $total > 0 && (int) ($b->kode_unik ?? 0) > 0
             && ($cara['perlu_bukti'] ?? false) === true) {
             $baris[] = '';
-            $baris[] = 'Mohon ditransfer *persis* sampai angka terakhir — tiga angka di '
-                . 'belakang itu kode unik Anda, dan itu yang kami pakai untuk mencocokkan '
-                . 'pembayaran Anda.';
+            $baris[] = 'Mohon ditransfer *tepat* sampai angka terakhir. Tiga angka '
+                . 'terakhir merupakan kode unik Anda, dan angka itulah yang kami gunakan '
+                . 'untuk mencocokkan pembayaran.';
         }
 
         $baris[] = '';
@@ -262,7 +277,7 @@ class PesanWaPendaftaran
         $orang = (int) ($b->jumlah ?? 1);
 
         if ($orang > 1) {
-            $butir[] = 'Didaftarkan untuk: *' . $orang . ' orang*';
+            $butir[] = 'Jumlah peserta: *' . $orang . ' orang*';
         }
 
         $nomor = trim((string) ($b->nomor ?? ''));
@@ -275,7 +290,7 @@ class PesanWaPendaftaran
             // Disebut "total" untuk yang sudah lunas dan "nominal" untuk yang
             // belum: kata yang sama untuk dua keadaan membuat yang sudah
             // membayar mengira masih ditagih.
-            $butir[] = ($menagih ? 'Nominal yang ditunggu' : 'Total')
+            $butir[] = ($menagih ? 'Nominal yang harus dibayarkan' : 'Total pembayaran')
                 . ': *Rp ' . number_format($total, 0, ',', '.') . '*';
         }
 

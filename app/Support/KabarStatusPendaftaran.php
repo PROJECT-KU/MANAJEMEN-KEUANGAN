@@ -42,64 +42,64 @@ class KabarStatusPendaftaran
         'diproses' => [
             'judul' => 'Pendaftaran Anda sedang diproses',
             'lencana' => 'Menunggu pembayaran',
-            'pembuka' => 'Pendaftaran Anda sudah masuk dan sekarang menunggu pembayaran.',
-            'penutup' => ['Kalau sudah transfer, kirimkan bukti transfernya ke panitia supaya bisa segera kami cek.'],
+            'pembuka' => 'Pendaftaran Anda telah kami terima dan saat ini menunggu pembayaran.',
+            'penutup' => ['Apabila pembayaran telah dilakukan, mohon kirimkan bukti transfernya kepada panitia agar dapat segera kami periksa.'],
         ],
         'pending' => [
             'judul' => 'Pendaftaran Anda sedang diproses',
             'lencana' => 'Menunggu pembayaran',
-            'pembuka' => 'Pendaftaran Anda sudah masuk dan sekarang menunggu pembayaran.',
-            'penutup' => ['Kalau sudah transfer, kirimkan bukti transfernya ke panitia supaya bisa segera kami cek.'],
+            'pembuka' => 'Pendaftaran Anda telah kami terima dan saat ini menunggu pembayaran.',
+            'penutup' => ['Apabila pembayaran telah dilakukan, mohon kirimkan bukti transfernya kepada panitia agar dapat segera kami periksa.'],
         ],
         'menunggu verifikasi' => [
             'judul' => 'Bukti pembayaran Anda sedang kami periksa',
             'lencana' => 'Sedang diperiksa',
-            'pembuka' => 'Bukti pembayaran Anda sudah kami terima dan sedang diperiksa panitia.',
-            'penutup' => ['Anda tidak perlu mengirim apa pun lagi. Kami kabari lagi lewat email ini begitu pemeriksaannya selesai.'],
+            'pembuka' => 'Bukti pembayaran Anda telah kami terima dan saat ini sedang diperiksa panitia.',
+            'penutup' => ['Anda tidak perlu mengirimkan apa pun lagi. Kami akan mengabari melalui email ini setelah pemeriksaannya selesai.'],
         ],
 
         // ------------------------------------------------------------- lunas
         'Pendaftaran Diterima' => [
             'judul' => 'Pendaftaran Anda diterima',
             'lencana' => 'Diterima',
-            'pembuka' => 'Pembayaran Anda sudah kami terima dan pendaftaran Anda resmi diterima.',
-            'penutup' => ['Simpan email ini sebagai bukti. Kabar berikutnya soal acara akan kami kirim lewat email yang sama.'],
+            'pembuka' => 'Pembayaran Anda telah kami terima dan pendaftaran Anda resmi diterima.',
+            'penutup' => ['Mohon simpan email ini sebagai bukti. Pemberitahuan berikutnya mengenai acara akan kami kirimkan melalui email yang sama.'],
         ],
         'paid' => [
             'judul' => 'Pembayaran Anda sudah lunas',
             'lencana' => 'Lunas',
-            'pembuka' => 'Pembayaran Anda sudah kami terima. Kursi Anda sudah aman.',
-            'penutup' => ['Simpan email ini sebagai bukti. Kabar berikutnya soal acara akan kami kirim lewat email yang sama.'],
+            'pembuka' => 'Pembayaran Anda telah kami terima dan kursi Anda telah kami amankan.',
+            'penutup' => ['Mohon simpan email ini sebagai bukti. Pemberitahuan berikutnya mengenai acara akan kami kirimkan melalui email yang sama.'],
         ],
         'pembayaran diterima' => [
             'judul' => 'Pembayaran Anda sudah kami terima',
             'lencana' => 'Lunas',
-            'pembuka' => 'Pembayaran Anda sudah kami terima dan pemesanan Anda sudah terkunci.',
-            'penutup' => ['Simpan email ini sebagai bukti. Sampai bertemu di sesi Anda.'],
+            'pembuka' => 'Pembayaran Anda telah kami terima dan pemesanan Anda telah kami pastikan.',
+            'penutup' => ['Mohon simpan email ini sebagai bukti. Sampai berjumpa di sesi Anda.'],
         ],
         'completed' => [
             'judul' => 'Sesi Anda sudah selesai',
             'lencana' => 'Selesai',
-            'pembuka' => 'Sesi Anda sudah selesai dan tercatat lengkap di kami.',
-            'penutup' => ['Terima kasih sudah mengikutinya sampai tuntas. Kalau ada yang masih ingin ditanyakan, balas saja email ini.'],
+            'pembuka' => 'Sesi Anda telah selesai dan tercatat lengkap dalam catatan kami.',
+            'penutup' => ['Terima kasih telah mengikutinya sampai tuntas. Apabila ada yang ingin ditanyakan, mohon balas email ini.'],
         ],
 
         // ---------------------------------------------------- dijadwalkan ulang
         'Pendaftaran Reschedule' => [
             'judul' => 'Jadwal Anda dipindahkan',
             'lencana' => 'Dijadwalkan ulang',
-            'pembuka' => 'Pendaftaran Anda dipindahkan ke jadwal yang baru. Rinciannya ada di bawah ini.',
-            'penutup' => ['Kalau jadwal barunya ternyata tidak bisa Anda ikuti, segera balas email ini supaya bisa kami carikan jalan keluarnya.'],
+            'pembuka' => 'Pendaftaran Anda telah dipindahkan ke jadwal baru. Rinciannya tercantum di bawah ini.',
+            'penutup' => ['Apabila jadwal baru tersebut tidak dapat Anda ikuti, mohon segera balas email ini agar kami carikan solusinya.'],
         ],
 
         // ------------------------------------------------------------ refund
         'Pendaftaran Refund' => [
             'judul' => 'Dana Anda dikembalikan',
             'lencana' => 'Dana dikembalikan',
-            'pembuka' => 'Pendaftaran Anda dibatalkan dan dana yang sudah Anda bayarkan kami kembalikan.',
+            'pembuka' => 'Pendaftaran Anda dibatalkan dan dana yang telah Anda bayarkan kami kembalikan.',
             'penutup' => [
-                'Pengembaliannya diproses ke rekening yang Anda pakai membayar. Biasanya butuh beberapa hari kerja sampai dananya masuk.',
-                'Kalau sampai seminggu belum juga masuk, balas email ini dan akan kami telusuri.',
+                'Pengembaliannya diproses ke rekening yang Anda gunakan untuk membayar. Umumnya diperlukan beberapa hari kerja sampai dananya masuk.',
+                'Apabila dalam satu minggu dananya belum juga masuk, mohon balas email ini agar kami telusuri.',
             ],
         ],
 
@@ -107,43 +107,43 @@ class KabarStatusPendaftaran
         'Pendaftaran Ditolak' => [
             'judul' => 'Pendaftaran Anda belum bisa kami terima',
             'lencana' => 'Belum diterima',
-            'pembuka' => 'Mohon maaf, pendaftaran Anda belum bisa kami terima kali ini.',
-            'penutup' => ['Kalau Anda merasa ini keliru, balas email ini — panitia akan memeriksanya lagi.'],
+            'pembuka' => 'Dengan menyesal kami sampaikan bahwa pendaftaran Anda belum dapat kami terima kali ini.',
+            'penutup' => ['Apabila menurut Anda terdapat kekeliruan, mohon balas email ini agar panitia memeriksanya kembali.'],
         ],
         'pembayaran ditolak' => [
             'judul' => 'Bukti pembayaran Anda belum cocok',
             'lencana' => 'Perlu diperbaiki',
-            'pembuka' => 'Bukti pembayaran yang Anda kirim belum cocok dengan tagihannya, jadi belum bisa kami sahkan.',
+            'pembuka' => 'Bukti pembayaran yang Anda kirimkan belum sesuai dengan tagihannya sehingga belum dapat kami sahkan.',
             'penutup' => [
-                'Yang paling sering jadi sebabnya: nominalnya kurang atau lebih, atau bukti yang terkirim bukan bukti transfer yang dimaksud.',
-                'Balas email ini dengan bukti yang benar, atau hubungi panitia kalau Anda ragu nominalnya berapa.',
+                'Penyebab yang paling sering terjadi: nominalnya kurang atau lebih, atau berkas yang terkirim bukan bukti transfer yang dimaksud.',
+                'Mohon balas email ini dengan bukti yang benar, atau hubungi panitia apabila Anda ragu mengenai nominalnya.',
             ],
         ],
         'Pendaftaran Dibatalkan' => [
             'judul' => 'Pendaftaran Anda dibatalkan',
             'lencana' => 'Dibatalkan',
-            'pembuka' => 'Pendaftaran Anda sudah dibatalkan dan kursinya kami lepas.',
-            'penutup' => ['Kalau ini bukan permintaan Anda, segera balas email ini supaya bisa kami periksa.'],
+            'pembuka' => 'Pendaftaran Anda telah dibatalkan dan kursinya kami lepaskan.',
+            'penutup' => ['Apabila pembatalan ini bukan permintaan Anda, mohon segera balas email ini agar dapat kami periksa.'],
         ],
         'cancel' => [
             'judul' => 'Pendaftaran Anda dibatalkan',
             'lencana' => 'Dibatalkan',
-            'pembuka' => 'Pendaftaran Anda sudah dibatalkan dan kursinya kami lepas.',
-            'penutup' => ['Kalau ini bukan permintaan Anda, segera balas email ini supaya bisa kami periksa.'],
+            'pembuka' => 'Pendaftaran Anda telah dibatalkan dan kursinya kami lepaskan.',
+            'penutup' => ['Apabila pembatalan ini bukan permintaan Anda, mohon segera balas email ini agar dapat kami periksa.'],
         ],
         'canceled' => [
             'judul' => 'Pemesanan Anda dibatalkan',
             'lencana' => 'Dibatalkan',
-            'pembuka' => 'Pemesanan Anda sudah dibatalkan.',
-            'penutup' => ['Kalau ini bukan permintaan Anda, segera balas email ini supaya bisa kami periksa.'],
+            'pembuka' => 'Pemesanan Anda telah dibatalkan.',
+            'penutup' => ['Apabila pembatalan ini bukan permintaan Anda, mohon segera balas email ini agar dapat kami periksa.'],
         ],
         'expired' => [
             'judul' => 'Batas waktu pembayaran Anda sudah lewat',
             'lencana' => 'Kursi dilepas',
-            'pembuka' => 'Batas waktu pembayaran sudah lewat, jadi kursi Anda kami lepas untuk pendaftar lain.',
+            'pembuka' => 'Batas waktu pembayaran telah terlewati sehingga kursi Anda kami lepaskan untuk pendaftar lain.',
             'penutup' => [
-                'Kalau Anda sebenarnya sudah transfer tetapi belum sempat mengirim buktinya, balas email ini — masih bisa kami bantu.',
-                'Kalau masih ingin ikut, Anda bisa mendaftar lagi selama kuotanya masih ada.',
+                'Apabila Anda telah melakukan pembayaran tetapi belum sempat mengirimkan buktinya, mohon balas email ini — hal tersebut masih dapat kami bantu.',
+                'Apabila Anda masih berminat mengikutinya, Anda dapat mendaftar kembali selama kuotanya tersedia.',
             ],
         ],
     ];
