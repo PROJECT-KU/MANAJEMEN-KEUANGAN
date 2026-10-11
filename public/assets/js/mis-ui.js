@@ -844,6 +844,37 @@
             s.addEventListener('change', function () { jadwalkan(0); });
         });
 
+        /*
+         * Menu ber-Select2 TIDAK tertangkap pendengar di atas.
+         *
+         * Select2 mengabarkan pilihan barunya lewat trigger() milik jQuery,
+         * dan trigger() tidak membangunkan addEventListener bawaan. Diukur
+         * langsung di peramban, jQuery 3.7.1:
+         *
+         *     jQuery .trigger('change')  -> addEventListener jalan 0 kali
+         *     dispatchEvent bawaan       -> addEventListener jalan 1 kali
+         *
+         * Akibatnya menu angkatan di layar Pendaftar Layanan terlihat
+         * berubah tetapi daftarnya tidak ikut tersaring sama sekali — dan
+         * tidak ada galat apa pun yang menandainya.
+         *
+         * Didengar lewat peristiwa milik Select2, BUKAN 'change': pendengar
+         * jQuery juga menerima peristiwa bawaan, jadi menyahut 'change' lalu
+         * menyebarkan 'change' lagi akan berputar tanpa henti. Peristiwa ini
+         * juga tidak terpicu oleh trigger('change.select2') yang dipakai
+         * halaman untuk menyegarkan kotaknya sendiri.
+         *
+         * Didelegasikan dari borangnya supaya menu yang baru dipasang
+         * Select2 sesudah skrip ini jalan ikut tertangkap.
+         */
+        if (window.jQuery) {
+            window.jQuery(borang).on(
+                'select2:select select2:unselect select2:clear',
+                'select',
+                function () { jadwalkan(0); }
+            );
+        }
+
         // Enter tidak boleh memuat ulang halaman; hasilnya sudah tampil.
         borang.addEventListener('submit', function (e) {
             e.preventDefault();
