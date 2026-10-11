@@ -17,6 +17,20 @@ class LogoSuratSeragamTest extends TestCase
 {
     private const LOGO = 'assets/img/logo-email.png';
 
+    /** Logo yayasan ukuran surat — lihat SURAT_YAYASAN. */
+    private const LOGO_YAYASAN = 'assets/img/logo-rsc-email.png';
+
+    /**
+     * Logo yayasan ukuran SITUS. Tidak boleh dipakai surat mana pun.
+     *
+     * Mereknya sama dengan LOGO_YAYASAN — keduanya dibuka berdampingan,
+     * tata letaknya identik — tetapi berkasnya 1906 x 470 piksel dan di
+     * peladen 121.370 bita, sementara yang ukuran surat 440 x 108 piksel
+     * dan 15.735 bita. Dikirim untuk slot selebar 210 piksel, selisihnya
+     * hampir delapan kali berat surat tanpa satu piksel pun bedanya.
+     */
+    private const LOGO_SITUS = 'assets/img/LogoRSC.png';
+
     /**
      * Surat yang sengaja memakai logo YAYASAN, bukan logo alat.
      *
@@ -26,8 +40,14 @@ class LogoSuratSeragamTest extends TestCase
      *
      * Surat di daftar ini dibaca PENDAFTAR, bukan orang dalam. Mengirimi
      * calon peserta logo alat administrasi internal menyampaikan merek yang
-     * salah, jadi yang dipakai LogoRSC.png. Ditetapkan 3 Okt 2026 atas
-     * permintaan pemilik produk sesudah melihat suratnya di kotak masuk.
+     * salah. Ditetapkan 3 Okt 2026 atas permintaan pemilik produk sesudah
+     * melihat suratnya di kotak masuk.
+     *
+     * DAFTARNYA DULU BERISI SATU, padahal empat surat memakai logo yayasan.
+     * Ketiga yang lain lolos karena penjaganya mencari kata "LogoRSC" saja,
+     * dan ketiganya memakai berkas ukuran surat yang namanya tidak memuat
+     * kata itu — jadi daftar yang mengaku tertutup sebenarnya bocor, dan
+     * surat pendaftar baru bisa memakai logo apa pun tanpa tertangkap.
      *
      * Daftar ini sengaja berupa daftar tertutup, bukan pengecualian terbuka:
      * surat baru tetap memakai logo alat kecuali ada yang menuliskannya di
@@ -35,6 +55,9 @@ class LogoSuratSeragamTest extends TestCase
      */
     private const SURAT_YAYASAN = [
         'emails/pendaftaran-dicatat.blade.php',
+        'emails/pendaftaran/kerangka.blade.php',
+        'public/webinar_eksklusif/email_pendaftaran.blade.php',
+        'public/webinar_eksklusif/email_pengingat.blade.php',
     ];
 
     /** Berkas yang isinya surat, bukan halaman atau faktur. */
@@ -65,28 +88,67 @@ class LogoSuratSeragamTest extends TestCase
         return $hasil;
     }
 
+    /**
+     * Logo yang DIPASANG, bukan yang disebut.
+     *
+     * Dicocokkan pada pemanggilan asset()-nya, bukan pada ada-tidaknya nama
+     * berkasnya di dalam isi. Nama berkas muncul juga di komentar yang
+     * menerangkan mengapa berkas itu TIDAK dipakai — dan penjaga yang
+     * membaca kata apa adanya akan menyatakan surat itu memakainya.
+     *
+     * @return list<string>
+     */
+    private function logoTerpasang(string $isi): array
+    {
+        preg_match_all("/asset\\('(assets\\/img\\/[^']+)'\\)/", $isi, $cocok);
+
+        return array_values(array_unique($cocok[1]));
+    }
+
+    public function test_surat_pendaftar_memakai_logo_yayasan_ukuran_surat(): void
+    {
+        foreach (self::SURAT_YAYASAN as $relatif) {
+            $isi = $this->templatSurat()[$relatif] ?? null;
+
+            $this->assertNotNull($isi,
+                $relatif . ' terdaftar sebagai surat pendaftar tetapi berkasnya tidak ada.');
+
+            $this->assertContains(self::LOGO_YAYASAN, $this->logoTerpasang($isi),
+                $relatif . ' terdaftar sebagai surat untuk pendaftar, jadi logonya '
+                . 'logo yayasan ukuran surat.');
+        }
+    }
+
     public function test_tidak_ada_templat_surat_yang_memakai_logo_lama(): void
     {
         $melenceng = [];
+        $berat = [];
 
         foreach ($this->templatSurat() as $relatif => $isi) {
-            if (in_array($relatif, self::SURAT_YAYASAN, true)) {
-                // Justru HARUS memakai logo yayasan; dibalik pemeriksaannya.
-                $this->assertStringContainsString(
-                    'LogoRSC',
-                    $isi,
-                    $relatif . ' terdaftar sebagai surat untuk pendaftar, jadi logonya logo yayasan.'
-                );
+            $terpasang = $this->logoTerpasang($isi);
 
+            // Logo ukuran situs tidak pantas di surat mana pun, termasuk
+            // surat pendaftar yang memang berlogo yayasan.
+            if (in_array(self::LOGO_SITUS, $terpasang, true)) {
+                $berat[] = $relatif;
+            }
+
+            if (in_array($relatif, self::SURAT_YAYASAN, true)) {
                 continue;
             }
 
-            if (str_contains($isi, 'LogoRSC')) {
+            if (in_array(self::LOGO_YAYASAN, $terpasang, true)) {
                 $melenceng[] = $relatif;
             }
         }
 
-        $this->assertSame([], $melenceng, "Templat surat berikut masih memakai logo lama:\n- " . implode("\n- ", $melenceng) . "\n");
+        $this->assertSame([], $berat,
+            "Templat surat berikut memakai logo ukuran situs (121.370 bita untuk "
+            . "slot 210 piksel):\n- " . implode("\n- ", $berat) . "\n");
+
+        $this->assertSame([], $melenceng,
+            "Templat surat berikut memakai logo yayasan tanpa terdaftar di "
+            . "SURAT_YAYASAN:\n- " . implode("\n- ", $melenceng) . "\n");
     }
 
     /**
@@ -163,5 +225,6 @@ class LogoSuratSeragamTest extends TestCase
     public function test_berkas_logonya_memang_ada(): void
     {
         $this->assertFileExists(dirname(__DIR__, 2) . '/public/' . self::LOGO);
+        $this->assertFileExists(dirname(__DIR__, 2) . '/public/' . self::LOGO_YAYASAN);
     }
 }
