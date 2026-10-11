@@ -287,14 +287,25 @@
     <div class="kepala">
         <table width="100%">
             <tr>
+                {{-- Kedua lajur tepi SAMA LEBAR, dan judulnya terpusat di
+                     lajur tengah.
+
+                     Semula lajur logo 150px sementara lajur kanan tanpa lebar
+                     tetap, jadi judulnya terpusat pada SISA lebar — bukan pada
+                     lebar halaman. Terlihat jelas di hasil cetaknya: titik
+                     tengah judulnya jatuh sekitar sepertiga lebar kertas,
+                     bukan separuhnya.
+
+                     190px cukup memuat "MIS Rumah Scopus Foundation" pada
+                     8,5px tebal tanpa terpatah. --}}
                 @if ($logo)
-                    <td width="150"><img src="{{ $logo }}" alt="MIS Rumah Scopus" height="38"></td>
+                    <td width="190"><img src="{{ $logo }}" alt="MIS Rumah Scopus" height="38"></td>
                 @endif
-                <td>
+                <td align="center">
                     <p class="judul">Pendaftar Layanan</p>
                     <p class="anak-judul">Semua yang mendaftar layanan jasa Rumah Scopus.</p>
                 </td>
-                <td align="right">
+                <td width="190" align="right">
                     <span class="meta-label">DITERBITKAN OLEH</span><br>
                     <span class="meta-nilai">MIS Rumah Scopus Foundation</span><br>
                     <span class="anak-judul">Diunduh {{ now()->format('d/m/Y H:i') }} WIB</span>

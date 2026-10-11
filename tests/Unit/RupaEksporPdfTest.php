@@ -82,6 +82,54 @@ class RupaEksporPdfTest extends TestCase
     }
 
     /**
+     * Judul di kepala berkas cetak terpusat pada LEBAR KERTAS.
+     *
+     * Kedua lajur tepinya harus sama lebar. Timpang, judulnya terpusat pada
+     * SISA lebar — dan itu bukan tengah. Terukur pada hasil cetaknya saat
+     * lajur logo 190px sementara lajur kanan tanpa lebar tetap: titik tengah
+     * judulnya jatuh sekitar sepertiga lebar kertas.
+     *
+     * Dompdf tidak mengeluh; yang keluar berkas yang terbaca miring sebelah
+     * tanpa ada yang bisa menunjuk sebabnya.
+     */
+    public function test_judul_kepala_terpusat_pada_lebar_kertas(): void
+    {
+        foreach ($this->templat() as $relatif => $isi) {
+            $mulai = strpos($isi, '<div class="kepala">');
+
+            $this->assertNotFalse($mulai, $relatif . ' tidak punya kepala.');
+
+            // Hanya tabel PERTAMA di dalam kepalanya: berkas presensi punya
+            // tabel kedua berisi garisnya, dan lebarnya bukan lajur tepi.
+            $akhir = strpos($isi, '</table>', $mulai);
+            $kepala = substr($isi, $mulai, $akhir - $mulai);
+
+            preg_match_all('/width="(\d+)"/', $kepala, $lebar);
+
+            $this->assertGreaterThanOrEqual(2, count($lebar[1]),
+                $relatif . ': kepalanya tidak punya dua lajur tepi berlebar tetap.');
+
+            $this->assertSame($lebar[1][0], $lebar[1][count($lebar[1]) - 1],
+                $relatif . ': lajur tepi kepalanya tidak sama lebar ('
+                . $lebar[1][0] . ' vs ' . $lebar[1][count($lebar[1]) - 1]
+                . '), jadi judulnya terpusat pada sisa lebar — bukan pada '
+                . 'lebar kertasnya.');
+
+            /*
+             * Dua ejaan diterima: atribut align="center" dan kelas .tengah
+             * milik berkas presensi. Keduanya sungguh memusatkan, dan
+             * memaksa satu ejaan berarti menolak berkas yang sudah benar.
+             * Yang dijaga tetap sama: tanpa KEDUANYA, penjaga ini merah.
+             */
+            $this->assertTrue(
+                str_contains($kepala, 'align="center"')
+                    || str_contains($kepala, 'class="tengah"'),
+                $relatif . ': lajur judulnya tidak terpusat.'
+            );
+        }
+    }
+
+    /**
      * Kepala kolom angka DISEJAJARKAN dengan isinya.
      *
      * Semuanya rata kiri, kepala "Total bayar" berdiri jauh dari angka yang
