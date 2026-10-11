@@ -1575,6 +1575,86 @@ Rincian Pendaftaran | MIS Rumah Scopus
         }
 
         /*
+         * "Yang ikut hilang" — daftar apa saja yang ikut terhapus.
+         *
+         * KELIMA KELASNYA DULU TIDAK PUNYA GAYA SAMA SEKALI. Nama kelasnya
+         * dikarang saat markahnya ditulis dan tidak pernah didefinisikan di
+         * mana pun, jadi yang tampil gaya bawaan peramban: <ul> bertitik
+         * bulat dengan inden bawaan, dan medali ikonnya — yang memang
+         * sebuah kotak — mendorong tulisannya turun ke baris berikutnya.
+         * Terlihat seperti daftar yang rusak, dan tidak ada galat apa pun
+         * yang menandainya.
+         */
+        .rin-hilang {
+            margin-top: 14px;
+            padding: 14px 16px;
+            border: 1px solid #fecdd3;
+            border-radius: var(--mis-radius-kecil);
+            background: #fff7f7;
+        }
+
+        .rin-hilang-judul {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0 0 11px;
+            font-size: .74rem;
+            font-weight: 800;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: #9f1239;
+        }
+
+        .rin-hilang-judul i { font-size: 13px; }
+
+        /* list-style DIMATIKAN tegas. Titik bawaan peramban berdiri di
+           sebelah kiri medali ikonnya, jadi tiap baris punya DUA penanda. */
+        .rin-hilang-daftar {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: grid;
+            gap: 9px;
+        }
+
+        /* Grid dua lajur, bukan flex: lajur pertama dikunci selebar
+           medalinya, sehingga tulisan yang turun ke baris kedua tetap rata
+           dengan baris pertamanya dan tidak menyelip ke bawah ikon. */
+        .rin-hilang-daftar li {
+            display: grid;
+            grid-template-columns: 26px 1fr;
+            gap: 10px;
+            align-items: start;
+            font-size: .8rem;
+            line-height: 1.5;
+            color: #7f1d1d;
+        }
+
+        .rin-hilang-daftar li > span:last-child { min-width: 0; }
+
+        .rin-hilang-daftar strong { color: #881337; }
+
+        /* Keterangan di baris sendiri: disandingkan, ia menempel pada
+           pokoknya dan keduanya terbaca sebagai satu kalimat panjang. */
+        .rin-hilang-ket {
+            display: block;
+            margin-top: 1px;
+            font-size: .74rem;
+            color: #b45a63;
+        }
+
+        .rin-hilang-kaki {
+            margin: 12px 0 0;
+            padding-top: 11px;
+            border-top: 1px dashed #fecdd3;
+            font-size: .76rem;
+            line-height: 1.55;
+            color: #9f1239;
+        }
+
+        .rin-hilang-kaki a { color: #be123c; font-weight: 700; }
+
+        /*
          * Jejak & catatan: satu baris satu kejadian, berikon.
          *
          * Dulu seluruh catatannya dicetak sebagai satu paragraf. Kalau
