@@ -1379,6 +1379,16 @@ class PendaftaranSemuaLayanan
      * baru angkatannya. Keduanya nyata terpakai — ketujuh tautan di
      * kategori_layanan semuanya bibliometrik, sementara 67 tautan lain
      * tersimpan di baris analisis_bibliometrik-nya masing-masing.
+     *
+     * TIGA LAYANAN, BUKAN LIMA. Scopus Kafe dan Clinik Scopus tidak
+     * berangkatan dan tabelnya tidak punya kolom grup, jadi keduanya selalu
+     * mengembalikan null dan pesannya terkirim tanpa baris ajakan — utuh,
+     * bukan setengah jadi. Diputuskan pemilik produk 11 Okt 2026 sesudah
+     * ditawari dua jalan: satu grup per layanan, atau satu kolom per
+     * pemesanan. Keduanya ditolak; dua layanan itu memang tidak bergrup.
+     *
+     * Jadi kalau suatu hari Scopus Kafe perlu grup, yang kurang TEMPAT
+     * SIMPANNYA — bukan metode ini.
      */
     public static function tautanGrup(object $baris): ?string
     {
