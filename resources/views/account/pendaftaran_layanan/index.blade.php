@@ -58,6 +58,41 @@ Pendaftar Layanan | MIS Rumah Scopus
             box-shadow: inset 3px 0 0 #f59e0b;
         }
 
+        /*
+         * Bukti yang sudah lama menunggu diperiksa: MERAH, bukan kuning.
+         *
+         * Yang menggantung menunggu orang lain membayar; yang ini menunggu
+         * panitia membuka satu gambar — dan selama itu uangnya mungkin sudah
+         * masuk tanpa tercatat. Terukur enam bukti menunggu sampai 177 hari.
+         */
+        .pdl-periksa {
+            color: #9f1239;
+            background: #ffe4e6;
+            border-color: #fecdd3;
+            font-weight: 700;
+        }
+
+        .pdl-baris-periksa > td:first-child {
+            box-shadow: inset 3px 0 0 #e11d48;
+        }
+
+        /*
+         * Namanya SENGAJA tidak memuat "-ubin". RupaBersamaTest melarang
+         * kelas berawalan layar yang memuat `-ubin` atau `-ringkas`, sebab
+         * itu pertanda satu layar membuat salinan ubin ringkasannya
+         * sendiri. Ini cuma baris umur di dalam label ubin bersama — tetapi
+         * penjaganya tidak bisa tahu itu dari namanya, dan melonggarkan
+         * penjaga demi satu nama yang kebetulan mirip adalah menukar yang
+         * dijaga dengan yang nyaman.
+         */
+        .pdl-tertua {
+            display: block;
+            margin-top: 1px;
+            font-size: .7rem;
+            font-weight: 700;
+            color: #be123c;
+        }
+
         /* Tombol aksi berdampingan; di mode kartu mereka turun sendiri. */
         .pdl-aksi-baris {
             display: flex;
@@ -1179,6 +1214,16 @@ Pendaftar Layanan | MIS Rumah Scopus
                     href="{{ route('account.pendaftaran-layanan.excel', $bawa + request()->only('urut', 'arah')) }}">
                     <i class="fas fa-file-excel mis-ikon-hijau"></i> <span class="mis-tombol-teks">Unduh Excel</span>
                 </a>
+                {{-- Daftar hadir: satu baris per ORANG. Terpisah dari "Unduh
+                     Excel" yang satu baris per pendaftaran — rombongan lima
+                     orang di sana muncul sebagai satu nama, dan nama peserta
+                     lainnya tidak punya jalan keluar lain dari sistem. --}}
+                <a class="mis-tombol mis-tombol-halus"
+                    title="Unduh daftar hadir — satu baris per orang, termasuk peserta rombongan"
+                    aria-label="Unduh daftar hadir, satu baris per orang"
+                    href="{{ route('account.pendaftaran-layanan.hadir', $bawa + request()->only('urut', 'arah')) }}">
+                    <i class="fas fa-clipboard-check mis-ikon-biru"></i> <span class="mis-tombol-teks">Daftar hadir</span>
+                </a>
                 <a class="mis-tombol mis-tombol-halus" title="Unduh daftar ini sebagai PDF"
                     aria-label="Unduh daftar ini sebagai PDF"
                     href="{{ route('account.pendaftaran-layanan.pdf', $bawa + request()->only('urut', 'arah')) }}">
@@ -1259,7 +1304,17 @@ Pendaftar Layanan | MIS Rumah Scopus
                 <span class="mis-medali kecil mis-merah" aria-hidden="true"><i class="fas fa-receipt"></i></span>
                 <div>
                     <p class="mis-ubin-angka">{{ number_format($ringkasan['perlu_diperiksa'], 0, ',', '.') }}</p>
-                    <p class="mis-ubin-label">Bukti perlu diperiksa</p>
+                    {{-- UMURNYA disebut, bukan cuma jumlahnya. "6 bukti perlu
+                         diperiksa" terbaca seperti pekerjaan hari ini,
+                         sedangkan yang tertua sudah menunggu berbulan-bulan —
+                         dan selama itu orangnya sudah membayar tetapi tercatat
+                         belum. --}}
+                    <p class="mis-ubin-label">
+                        Bukti perlu diperiksa
+                        @if ($ringkasan['periksa_tertua'] > $ringkasan['hari_periksa'])
+                            <span class="pdl-tertua">tertua {{ $ringkasan['periksa_tertua'] }} hari</span>
+                        @endif
+                    </p>
                 </div>
             </a>
 

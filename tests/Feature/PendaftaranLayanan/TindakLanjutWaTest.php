@@ -39,11 +39,20 @@ class TindakLanjutWaTest extends TestCase
         $this->assertStringContainsString('Follow up: Menunggu bayar', $isi,
             'Tombol follow up tidak menyebut status yang sedang berlaku.');
 
+        /*
+         * Tombolnya BORANG, bukan tautan langsung: peladen mencatat jejaknya
+         * dulu baru meneruskan ke percakapannya. Dijaga keduanya — borangnya
+         * ada, dan ujungnya memang api.whatsapp.com.
+         */
         $this->assertMatchesRegularExpression(
-            '#<a[^>]*class="[^"]*rin-tombol-wa[^"]*"[^>]*href="https://api\.whatsapp\.com/send\?phone=#s',
+            '#<form[^>]*class="rin-follow-up"[^>]*action="[^"]*/follow-up"#s',
             $isi,
-            'Tombolnya tidak memakai endpoint api.whatsapp.com.'
+            'Tombol follow up bukan borang, jadi penekanannya tidak tercatat.'
         );
+
+        $this->actingAs($orang)
+            ->post(route('account.pendaftaran-layanan.follow-up', ['scopus_camp', $b->getKey()]))
+            ->assertRedirectContains('https://api.whatsapp.com/send?phone=');
     }
 
     /**
@@ -162,7 +171,7 @@ class TindakLanjutWaTest extends TestCase
          * sendiri memuat nama kelas itu. Pemindai yang menjaring gayanya
          * sendiri tidak menjaga apa pun.
          */
-        $this->assertSame(0, preg_match('/<a[^>]*class="[^"]*rin-tombol-wa/', $isi),
+        $this->assertSame(0, preg_match('/<button[^>]*class="[^"]*rin-tombol-wa/', $isi),
             'Tombolnya tergambar untuk nomor yang tidak bisa dihubungi; panitia '
             . 'akan mengira pesannya terkirim.');
     }
@@ -216,7 +225,7 @@ class TindakLanjutWaTest extends TestCase
     public function borang_kirim_ulang_tidak_memakan_slot_flex(): void
     {
         $this->assertMatchesRegularExpression(
-            '/\.rin-kirim-ulang\s*\{[^}]*display:\s*contents/s',
+            '/\.rin-kirim-ulang,\s*\.rin-follow-up\s*\{[^}]*display:\s*contents/s',
             file_get_contents(resource_path('views/account/pendaftaran_layanan/rincian.blade.php')),
             'Borang kirim ulang kembali jadi blok, jadi kedua tombolnya tidak sejajar.'
         );
@@ -243,6 +252,70 @@ class TindakLanjutWaTest extends TestCase
 
         $this->assertStringNotContainsString('Keduanya memakai status', $isi,
             'Keterangannya menyebut dua tombol padahal yang tergambar cuma satu.');
+    }
+
+    /**
+     * Menekan Follow up MENINGGALKAN JEJAK.
+     *
+     * Sebelum ini tombolnya tautan biasa: WhatsApp terbuka dan selesai.
+     * Percobaan kirim email tercatat rapi, jadi riwayatnya timpang — yang
+     * lewat surat terlihat, yang lewat WhatsApp tidak — dan pertanyaan
+     * "sudah difollow-up belum?" tidak bisa dijawab dari layar mana pun.
+     */
+    #[Test]
+    public function menekannya_meninggalkan_jejak(): void
+    {
+        [$orang, $b] = $this->dengan();
+
+        $this->actingAs($orang)
+            ->post(route('account.pendaftaran-layanan.follow-up', ['scopus_camp', $b->getKey()]))
+            ->assertRedirectContains('api.whatsapp.com');
+
+        $jejak = \App\PendaftaranJejak::milik('scopus_camp', (string) $b->getKey())
+            ->where('aksi', 'follow-up')->first();
+
+        $this->assertNotNull($jejak, 'Follow up tidak meninggalkan jejak apa pun.');
+        $this->assertSame('diproses', $jejak->dari,
+            'Status yang difollow-up tidak tercatat, jadi tidak ketahuan pesan mana yang dibuka.');
+        $this->assertNotEmpty($jejak->oleh_nama, 'Siapa yang menghubungi tidak tercatat.');
+    }
+
+    /**
+     * Kalimatnya berbunyi "DIBUKA", bukan "terkirim".
+     *
+     * Yang diketahui peladen hanyalah panitia menekan tombolnya;
+     * pengirimannya terjadi di aplikasi WhatsApp, di luar jangkauan sistem
+     * ini. Menuliskannya "terkirim" akan jadi catatan yang berbohong — dan
+     * jejak inilah yang dipakai menelusuri perselisihan.
+     */
+    #[Test]
+    public function jejaknya_tidak_mengaku_terkirim(): void
+    {
+        [$orang, $b] = $this->dengan();
+
+        $this->actingAs($orang)
+            ->post(route('account.pendaftaran-layanan.follow-up', ['scopus_camp', $b->getKey()]));
+
+        $kalimat = \App\PendaftaranJejak::milik('scopus_camp', (string) $b->getKey())
+            ->where('aksi', 'follow-up')->first()->kalimat;
+
+        $this->assertStringContainsString('dibuka', $kalimat);
+        $this->assertStringNotContainsString('terkirim', $kalimat,
+            'Jejaknya mengaku pesannya terkirim, padahal yang diketahui cuma tombolnya ditekan.');
+    }
+
+    #[Test]
+    public function nomor_yang_tidak_terpakai_tidak_dicatat(): void
+    {
+        [$orang, $b] = $this->dengan(['telp' => '0812']);
+
+        $this->actingAs($orang)
+            ->post(route('account.pendaftaran-layanan.follow-up', ['scopus_camp', $b->getKey()]))
+            ->assertSessionHas('error');
+
+        $this->assertSame(0, \App\PendaftaranJejak::milik('scopus_camp', (string) $b->getKey())
+            ->where('aksi', 'follow-up')->count(),
+            'Jejak follow up tertulis padahal percakapannya tidak pernah bisa dibuka.');
     }
 
     // ------------------------------------------------------------- pembantu

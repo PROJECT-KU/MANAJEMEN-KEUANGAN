@@ -279,6 +279,93 @@ class PengembalianDanaTest extends TestCase
             PendaftaranPengembalian::milik('scopus_camp', (string) $baris->getKey())->count());
     }
 
+    /**
+     * Catatan pengembalian bisa DIBETULKAN, bukan cuma dihapus.
+     *
+     * Penghapusan meninggalkan jejak "Catatan pengembalian Rp X dihapus",
+     * yang terbaca seperti refund yang dibatalkan, bukan koreksi salah
+     * ketik. Pembayaran sudah bisa dibetulkan; meninggalkan pengembalian di
+     * belakang membuat dua catatan uang yang berdampingan berperilaku
+     * berbeda tanpa alasan.
+     */
+    #[Test]
+    public function pengembaliannya_bisa_dibetulkan(): void
+    {
+        [$orang, $baris] = $this->pendaftaran(1000000);
+
+        $this->actingAs($orang)->post(
+            route('account.pendaftaran-layanan.pengembalian', ['scopus_camp', $baris->getKey()]),
+            ['nominal' => '400.000', 'tanggal' => now()->toDateString()]
+        )->assertRedirect();
+
+        $rf = PendaftaranPengembalian::milik('scopus_camp', (string) $baris->getKey())->first();
+
+        $this->actingAs($orang)->put(
+            route('account.pendaftaran-layanan.pengembalian.ubah', $rf->getKey()),
+            ['nominal' => '450.000', 'tanggal' => now()->toDateString()]
+        )->assertRedirect()->assertSessionHasNoErrors();
+
+        $this->assertSame(450000, (int) $rf->fresh()->nominal);
+
+        $jejak = \App\PendaftaranJejak::milik('scopus_camp', (string) $baris->getKey())
+            ->where('aksi', 'ubah-refund')->first();
+
+        $this->assertNotNull($jejak, 'Pembetulannya tidak tercatat di jejak.');
+        $this->assertStringContainsString('dibetulkan jadi Rp 450.000', $jejak->kalimat);
+
+        $this->assertSame(0, \App\PendaftaranJejak::milik('scopus_camp', (string) $baris->getKey())
+            ->where('aksi', 'hapus-refund')->count(),
+            'Pembetulan tercatat sebagai penghapusan — persis yang mau dihindari.');
+    }
+
+    /**
+     * Barisnya sendiri TIDAK ikut dihitung saat batasnya diperiksa.
+     *
+     * Tanpa pengurangan itu, membetulkan Rp 1.000.000 jadi Rp 1.000.001
+     * ditolak karena baris yang sedang disunting ikut terhitung sebagai
+     * pengembalian yang sudah ada.
+     */
+    #[Test]
+    public function membetulkan_tidak_menghitung_barisnya_sendiri(): void
+    {
+        [$orang, $baris] = $this->pendaftaran(1000000);
+
+        $this->actingAs($orang)->post(
+            route('account.pendaftaran-layanan.pengembalian', ['scopus_camp', $baris->getKey()]),
+            ['nominal' => '1.000.000', 'tanggal' => now()->toDateString()]
+        )->assertRedirect();
+
+        $rf = PendaftaranPengembalian::milik('scopus_camp', (string) $baris->getKey())->first();
+
+        $this->actingAs($orang)->put(
+            route('account.pendaftaran-layanan.pengembalian.ubah', $rf->getKey()),
+            ['nominal' => '900.000', 'tanggal' => now()->toDateString()]
+        )->assertRedirect()->assertSessionHasNoErrors();
+
+        $this->assertSame(900000, (int) $rf->fresh()->nominal);
+    }
+
+    /** Batasnya tetap berlaku: tidak boleh melebihi uang yang masuk. */
+    #[Test]
+    public function membetulkan_tetap_dibatasi_uang_yang_masuk(): void
+    {
+        [$orang, $baris] = $this->pendaftaran(1000000);
+
+        $this->actingAs($orang)->post(
+            route('account.pendaftaran-layanan.pengembalian', ['scopus_camp', $baris->getKey()]),
+            ['nominal' => '500.000', 'tanggal' => now()->toDateString()]
+        )->assertRedirect();
+
+        $rf = PendaftaranPengembalian::milik('scopus_camp', (string) $baris->getKey())->first();
+
+        $this->actingAs($orang)->put(
+            route('account.pendaftaran-layanan.pengembalian.ubah', $rf->getKey()),
+            ['nominal' => '1.500.000', 'tanggal' => now()->toDateString()]
+        )->assertRedirect()->assertSessionHas('error');
+
+        $this->assertSame(500000, (int) $rf->fresh()->nominal);
+    }
+
     // ------------------------------------------------------------- pembantu
 
     private function angkaUangMasuk(User $orang): int

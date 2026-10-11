@@ -2641,9 +2641,13 @@ class TindakanPendaftaranTest extends TestCase
                 ->assertOk()->getContent();
 
             $this->assertSame(1, preg_match(
-                '#<a[^>]*class="[^"]*rin-tombol-wa[^"]*"[^>]*href="https://api\.whatsapp\.com/send\?phone=#s',
+                '#<form[^>]*class="rin-follow-up"[^>]*action="[^"]*/follow-up"#s',
                 $isi
             ), "Tombol follow up tidak ada di layar rincian {$layanan}.");
+
+            // Dan ujungnya memang WhatsApp, bukan cuma borang yang mencatat.
+            $this->post(route('account.pendaftaran-layanan.follow-up', [$layanan, $baris->getKey()]))
+                ->assertRedirectContains('https://api.whatsapp.com/send?phone=');
 
             $keadaan = Pendaftaran::keadaanDari($baris->status);
             $label = Pendaftaran::KEADAAN[$keadaan]['label'] ?? null;
