@@ -8,12 +8,15 @@ use App\Actions\Pendaftaran\UbahDataPendaftaran;
 use App\Actions\Pendaftaran\UbahStatusPendaftaran;
 use App\Exports\PendaftaranLayananExport;
 use App\Http\Controllers\Controller;
+use App\Support\DaftarPresensi;
 use App\Support\PendaftaranSemuaLayanan as Pendaftaran;
 use App\Support\PesananPelanggan;
 use Dompdf\Dompdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -2892,7 +2895,21 @@ class PendaftaranLayananController extends Controller
      *
      * Saringannya ikut terbawa, sama seperti kedua unduhan lainnya.
      */
-    public function eksporHadir(Request $request)
+    /**
+     * Lembar presensi peserta SATU angkatan, siap ditandatangani.
+     *
+     * Dulu berupa lembar kerja Excel atas seluruh hasil saringan. Yang
+     * terunduh karena itu 496 orang dari 300 pendaftaran di belasan
+     * angkatan sekaligus — terukur pada berkas yang benar-benar dihasilkan
+     * layar ini — padahal presensi dipakai di meja registrasi SATU acara.
+     * Panitia harus memilahnya sendiri di Excel sebelum bisa dicetak.
+     *
+     * Angkatannya WAJIB, dan ditolak di sini walau tombolnya sudah mati
+     * tanpa saringan itu. Tombol mati cuma menutup satu jalan; alamatnya
+     * masih bisa diketik, dan yang keluar lembar presensi gabungan yang
+     * persis jadi sebab fitur ini ditulis ulang.
+     */
+    public function eksporPresensi(Request $request)
     {
         if (! $this->bolehMelihat()) {
             return $this->tolak();
@@ -2900,13 +2917,79 @@ class PendaftaranLayananController extends Controller
 
         $p = $this->bacaPilihan($request);
 
-        return Excel::download(
-            new \App\Exports\DaftarHadirExport(
-                $this->untukEkspor($p),
-                Pendaftaran::katalog(),
-                $this->ringkasanSaringan($p),
-            ),
-            'daftar-hadir-' . now()->format('Y-m-d-Hi') . '.xlsx'
+        if ($p['angkatan'] === '') {
+            return back()->with('error',
+                'Pilih dulu angkatannya. Lembar presensi dicetak per angkatan, '
+                . 'bukan untuk seluruh pendaftar sekaligus.');
+        }
+
+        $baris = $this->untukEkspor($p);
+
+        $html = view('account.pendaftaran_layanan.presensi-pdf', [
+            'orang' => DaftarPresensi::orang($baris),
+            'angkatan' => DaftarPresensi::angkatan($baris),
+            'saringan' => Arr::except($this->ringkasanSaringan($p), ['Angkatan', 'Urutan']),
+            'dicetak' => now()->format('d/m/Y H:i'),
+        ])->render();
+
+        $dompdf = new Dompdf(['isRemoteEnabled' => false]);
+        $dompdf->loadHtml($html);
+        // TEGAK, berbeda dengan ekspor sembilan kolom di sebelahnya: lembar
+        // presensi ditandatangani di atas meja, dan kertas mendatar tidak
+        // muat di papan jalan maupun map panitia.
+        $dompdf->setPaper('a4', 'portrait');
+        $dompdf->render();
+
+        /*
+         * Nomor halaman lewat page_text(), bukan counter(pages) milik CSS.
+         * Dompdf menjawab counter(pages) dengan 0 — terukur: kakinya
+         * berbunyi "Halaman 1 dari 0". {PAGE_NUM} dan {PAGE_COUNT} di sini
+         * memang disulih Dompdf setelah seluruh halaman selesai dirender.
+         *
+         * Totalnya penting, bukan hiasan: lembar presensi dicetak lalu
+         * dibawa ke meja registrasi, dan "Halaman 3" saja tidak memberi
+         * tahu bahwa halaman 4 tertinggal di printer.
+         */
+        $kanvas = $dompdf->getCanvas();
+        /*
+         * y = 820 menyejajarkannya dengan tulisan kaki milik CSS. Kertas A4
+         * tegak 842pt, tepi bawahnya 20mm (56,7pt), dan kakinya digeser
+         * -14mm dari sana. Dicoba lebih dulu pada 800: nomornya melayang
+         * sebaris di atas kakinya.
+         */
+        $kanvas->page_text(
+            452, 820, 'Halaman {PAGE_NUM} dari {PAGE_COUNT}',
+            $dompdf->getFontMetrics()->getFont('DejaVu Sans', 'normal'),
+            8, [0.39, 0.45, 0.55]
         );
+
+        $nama = $this->namaBerkas(DaftarPresensi::angkatan($baris));
+
+        /*
+         * Lewat response(), bukan $dompdf->stream(): stream memanggil header()
+         * dan echo sendiri, sehingga kepalanya lewat dari lapisan respons
+         * Laravel dan tidak bisa diuji.
+         */
+        return response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $nama . '"',
+        ]);
+    }
+
+    /**
+     * Nama berkasnya menyebut ANGKATANNYA, bukan cuma tanggal unduh.
+     *
+     * Panitia mengunduh lembar ini satu per angkatan menjelang acara, dan
+     * lima berkas bernama "presensi-2026-10-11" di satu folder unduhan
+     * tidak bisa dibedakan tanpa membukanya satu per satu.
+     */
+    private function namaBerkas(?array $angkatan): string
+    {
+        $bagian = $angkatan === null
+            ? 'presensi'
+            : 'presensi-' . Str::slug($angkatan['nama']
+                . ($angkatan['nomor'] !== null ? '-ke-' . $angkatan['nomor'] : ''));
+
+        return $bagian . '-' . now()->format('Y-m-d') . '.pdf';
     }
 }

@@ -1276,16 +1276,37 @@ Pendaftar Layanan | MIS Rumah Scopus
                     href="{{ route('account.pendaftaran-layanan.excel', $bawa + request()->only('urut', 'arah')) }}">
                     <i class="fas fa-file-excel mis-ikon-hijau"></i> <span class="mis-tombol-teks">Unduh Excel</span>
                 </a>
-                {{-- Daftar hadir: satu baris per ORANG. Terpisah dari "Unduh
-                     Excel" yang satu baris per pendaftaran — rombongan lima
-                     orang di sana muncul sebagai satu nama, dan nama peserta
-                     lainnya tidak punya jalan keluar lain dari sistem. --}}
-                <a class="mis-tombol mis-tombol-halus"
-                    title="Unduh daftar hadir — satu baris per orang, termasuk peserta rombongan"
-                    aria-label="Unduh daftar hadir, satu baris per orang"
-                    href="{{ route('account.pendaftaran-layanan.hadir', $bawa + request()->only('urut', 'arah')) }}">
-                    <i class="fas fa-clipboard-check mis-ikon-biru"></i> <span class="mis-tombol-teks">Daftar hadir</span>
-                </a>
+                {{-- Presensi: satu baris per ORANG, satu ANGKATAN. Terpisah
+                     dari "Unduh Excel" yang satu baris per pendaftaran —
+                     rombongan lima orang di sana muncul sebagai satu nama,
+                     dan nama peserta lainnya tidak punya jalan keluar lain
+                     dari sistem.
+
+                     MATI sampai angkatannya dipilih. Lembar presensi dipakai
+                     di meja registrasi SATU acara; tanpa saringan itu yang
+                     terunduh 496 orang dari belasan angkatan sekaligus, dan
+                     panitia harus memilahnya sendiri sebelum bisa dicetak.
+
+                     <span>, bukan <a> yang dilumpuhkan: atribut disabled
+                     tidak berlaku pada tautan — peramban tetap membukanya,
+                     dan yang terlihat cuma tombol pudar yang ternyata bisa
+                     ditekan. --}}
+                @if ($angkatan === '')
+                    <span class="mis-tombol mis-tombol-halus mis-tombol-mati"
+                        title="Pilih dulu angkatannya di Saringan lain — presensi dicetak per angkatan"
+                        aria-disabled="true">
+                        <i class="fas fa-clipboard-check"></i>
+                        <span class="mis-tombol-teks">Presensi peserta</span>
+                    </span>
+                @else
+                    <a class="mis-tombol mis-tombol-halus"
+                        title="Unduh lembar presensi angkatan ini sebagai PDF"
+                        aria-label="Unduh lembar presensi angkatan ini sebagai PDF"
+                        href="{{ route('account.pendaftaran-layanan.presensi', $bawa + request()->only('urut', 'arah')) }}">
+                        <i class="fas fa-clipboard-check mis-ikon-biru"></i>
+                        <span class="mis-tombol-teks">Presensi peserta</span>
+                    </a>
+                @endif
                 <a class="mis-tombol mis-tombol-halus" title="Unduh daftar ini sebagai PDF"
                     aria-label="Unduh daftar ini sebagai PDF"
                     href="{{ route('account.pendaftaran-layanan.pdf', $bawa + request()->only('urut', 'arah')) }}">
