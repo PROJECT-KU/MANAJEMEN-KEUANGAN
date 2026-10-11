@@ -110,6 +110,19 @@ class Kernel extends ConsoleKernel
          * syarat tidak perlu menunggu sampai minggu depan.
          */
         $tugas('pendaftaran:ingatkan-bayar')->dailyAt('09:30');
+
+        /*
+         * Bukti bayar yang menunggu di parkiran penghapusan.
+         *
+         * Dini hari, sesudah jam kerja: ia memindai folder unggahan kelima
+         * layanan, dan pemindaian folder pada jam sibuk bersaing dengan
+         * pengunggahan yang sedang berjalan.
+         *
+         * Mingguan, bukan harian: yang dibuangnya berumur minimal 90 hari,
+         * jadi terlambat enam hari tidak mengubah apa pun — sementara
+         * memindai lima folder berisi ribuan berkas tiap hari iya.
+         */
+        $tugas('pendaftaran:pangkas-parkiran')->weeklyOn(1, '03:20');
     }
 
     protected function commands()

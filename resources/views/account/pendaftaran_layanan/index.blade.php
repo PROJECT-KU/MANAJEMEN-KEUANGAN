@@ -121,6 +121,42 @@ Pendaftar Layanan | MIS Rumah Scopus
             white-space: nowrap;
         }
 
+        /*
+         * Pita "baru saja dihapus". Kuning, bukan merah: penghapusannya sudah
+         * terjadi dan tidak sedang memperingatkan apa-apa — ia menawarkan
+         * jalan pulang.
+         */
+        .pdl-urungkan {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: var(--mis-jarak);
+            padding: 11px 15px;
+            border: 1px solid #fde68a;
+            border-radius: var(--mis-radius-kecil);
+            background: #fffbeb;
+            font-size: .82rem;
+            color: #92400e;
+        }
+
+        /* Teksnya yang melar, bukan tombolnya — tombolnya tetap di ujung
+           kanan berapa pun panjang pesannya. */
+        .pdl-urungkan > span {
+            flex: 1 1 220px;
+            min-width: 0;
+        }
+
+        .pdl-urungkan-borang {
+            flex: 0 0 auto;
+        }
+
+        .pdl-tombol-urungkan {
+            height: 34px;
+            padding: 0 13px;
+            font-size: .76rem;
+        }
+
         /* Follow up WhatsApp di baris: hijau, sebab ia memang menuju ke sana. */
         .pdl-tombol-wa {
             color: #15803d;
@@ -1240,6 +1276,29 @@ Pendaftar Layanan | MIS Rumah Scopus
              ke halaman ini dengan pesan sukses, dan tanpa partial ini pesannya
              tidak pernah muncul — barisnya hilang tanpa satu kata pun. --}}
         @include('account.pendaftaran_layanan.partials.pesan')
+
+        {{-- Pita "baru saja dihapus", berikut tombol mengurungkannya.
+
+             Pesan suksesnya tampil sebagai toast, dan toast tidak bisa memuat
+             tombol. Tanpa pita ini, mengurungkan satu salah klik berarti
+             membuka catatan penghapusan lalu mencarinya di antara baris lain
+             — dan yang baru saja salah klik tidak selalu tahu layar itu ada.
+
+             Hanya muncul sekali, pada pemuatan tepat sesudah penghapusannya:
+             isinya dari sesi flash. --}}
+        @if (session('urungkanHapus.arsip'))
+            <div class="pdl-urungkan">
+                <i class="fas fa-trash-alt mis-ikon-merah" aria-hidden="true"></i>
+                <span>{{ session('urungkanHapus.pesan') }}</span>
+                <form method="POST" class="pdl-urungkan-borang"
+                    action="{{ route('account.pendaftaran-layanan.pulihkan', session('urungkanHapus.arsip')) }}">
+                    @csrf
+                    <button type="submit" class="mis-tombol mis-tombol-halus pdl-tombol-urungkan">
+                        <i class="fas fa-undo mis-ikon-hijau" aria-hidden="true"></i> Kembalikan
+                    </button>
+                </form>
+            </div>
+        @endif
 
         {{-- ------------------------------------------------ kepala --}}
         <div class="mis-kepala">

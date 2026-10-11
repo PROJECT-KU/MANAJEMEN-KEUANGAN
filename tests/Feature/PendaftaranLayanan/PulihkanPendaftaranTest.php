@@ -426,6 +426,226 @@ class PulihkanPendaftaranTest extends TestCase
             ->assertSee(route('account.pendaftaran-layanan.pulihkan', $arsipId), false);
     }
 
+    /**
+     * Angka ringkasan BERHENTI menghitung yang sudah dikembalikan.
+     *
+     * Terukur sebelum diperbaiki: sesudah satu pendaftaran dipulihkan,
+     * jumlah dan uangnya tidak bergerak sama sekali — uangnya terhitung dua
+     * kali, hidup di pembukuan sekaligus tercatat sebagai hilang.
+     */
+    #[Test]
+    public function ringkasannya_berhenti_menghitung_yang_sudah_kembali(): void
+    {
+        [$admin, $b] = $this->dengan();
+        $id = (string) $b->getKey();
+
+        /*
+         * Terminnya WAJIB ada. Tanpa pembayaran, uang_terhapus-nya nol dan
+         * tuntutan uang di bawah membandingkan nol dengan nol — hijau tanpa
+         * menguji apa pun.
+         */
+        PembayaranPendaftaran::create([
+            'jenis' => PembayaranPendaftaran::PENDAFTARAN, 'induk_id' => $id,
+            'urutan' => 1, 'nominal' => 400000, 'tanggal' => now()->toDateString(),
+        ]);
+
+        $this->actingAs($admin);
+        $this->hapus($b);
+
+        /*
+         * Dituntut pada ANGKA YANG SAMPAI KE LAYAR, bukan pada scope
+         * modelnya. Versi pertama penjaga ini memanggil
+         * PendaftaranDihapus::masihTerhapus() sendiri, jadi ia tetap hijau
+         * walau pengendalinya kembali menghitung seluruh tabel — dan di
+         * pengendalilah cacatnya berada.
+         */
+        $sebelum = $this->actingAs($admin)
+            ->get(route('account.pendaftaran-layanan.terhapus'))
+            ->assertOk();
+
+        $jumlahSebelum = $sebelum->viewData('jumlahSemua');
+        $uangSebelum = $sebelum->viewData('uangSemua');
+
+        (new PulihkanPendaftaran)->jalankan((string) $this->arsip($id)->getKey());
+
+        $sesudah = $this->actingAs($admin)
+            ->get(route('account.pendaftaran-layanan.terhapus'))
+            ->assertOk();
+
+        $this->assertSame($jumlahSebelum - 1, $sesudah->viewData('jumlahSemua'),
+            'Yang sudah dikembalikan masih terhitung sebagai terhapus di layarnya.');
+
+        $this->assertSame($uangSebelum - 400000, $sesudah->viewData('uangSemua'),
+            'Uangnya masih terhitung hilang padahal sudah kembali ke pembukuan.');
+
+        $this->assertSame(1, PendaftaranDihapus::sudahDipulihkan()
+            ->where('pendaftaran_id', $id)->count());
+    }
+
+    /** Saringan keadaan memisahkan yang masih hilang dari yang sudah kembali. */
+    #[Test]
+    public function saringan_keadaan_memisahkan_keduanya(): void
+    {
+        [$admin, $b] = $this->dengan();
+        $id = (string) $b->getKey();
+        $nomor = $b->id_transaksi;
+
+        $this->actingAs($admin);
+        $this->hapus($b);
+        (new PulihkanPendaftaran)->jalankan((string) $this->arsip($id)->getKey());
+
+        $this->actingAs($admin)
+            ->get(route('account.pendaftaran-layanan.terhapus',
+                ['cari' => $nomor, 'keadaan' => 'pulih']))
+            ->assertOk()->assertSee(strtoupper($nomor));
+
+        $this->actingAs($admin)
+            ->get(route('account.pendaftaran-layanan.terhapus',
+                ['cari' => $nomor, 'keadaan' => 'terhapus']))
+            ->assertOk()->assertDontSee(strtoupper($nomor));
+    }
+
+    /**
+     * Memulihkan ke angkatan yang sudah penuh DISEBUTKAN.
+     *
+     * Sisa kuotanya dijepit di nol, jadi layar angkatan menampilkan "sisa 0"
+     * yang terlihat pas — dan tidak ada tempat lain yang memberi tahu bahwa
+     * kursinya sebenarnya kelebihan.
+     */
+    #[Test]
+    public function kelebihan_kursi_disebutkan_di_pesannya(): void
+    {
+        [$admin, $b] = $this->dengan(['jumlah_pendaftar' => '3'], ['sisa_kuota' => '47']);
+        $id = (string) $b->getKey();
+
+        $this->actingAs($admin);
+        $this->hapus($b);
+
+        // Angkatannya diisi penuh selagi pendaftarannya terhapus.
+        KategoriLayanan::where('id', $b->kategori_id)->update(['sisa_kuota' => '1']);
+
+        $hasil = (new PulihkanPendaftaran)->jalankan((string) $this->arsip($id)->getKey());
+
+        $this->assertTrue($hasil['berhasil'], $hasil['pesan']);
+        $this->assertStringContainsString('kelebihan 2 kursi', $hasil['pesan']);
+        $this->assertSame(0, (int) KategoriLayanan::find($b->kategori_id)->sisa_kuota);
+    }
+
+    /** Cukup kuota: tidak ada peringatan yang mengganggu. */
+    #[Test]
+    public function kuota_cukup_tidak_memperingatkan_apa_pun(): void
+    {
+        [$admin, $b] = $this->dengan(['jumlah_pendaftar' => '2'], ['sisa_kuota' => '48']);
+        $id = (string) $b->getKey();
+
+        $this->actingAs($admin);
+        $this->hapus($b);
+
+        $hasil = (new PulihkanPendaftaran)->jalankan((string) $this->arsip($id)->getKey());
+
+        $this->assertStringNotContainsString('kelebihan', $hasil['pesan']);
+    }
+
+    /**
+     * Sesudah menghapus, layar daftar menawarkan "Kembalikan" di tempat.
+     *
+     * Tanpa itu, mengurungkan satu salah klik berarti membuka catatan
+     * penghapusan lalu mencarinya di antara baris lain — dan yang baru saja
+     * salah klik tidak selalu tahu layar itu ada.
+     */
+    #[Test]
+    public function sesudah_menghapus_daftarnya_menawarkan_urungkan(): void
+    {
+        [$admin, $b] = $this->dengan();
+        $id = (string) $b->getKey();
+
+        $this->actingAs($admin)
+            ->delete(route('account.pendaftaran-layanan.hapus', ['scopus_camp', $id]))
+            ->assertRedirect(route('account.pendaftaran-layanan.index'))
+            ->assertSessionHas('urungkanHapus');
+
+        $arsipId = (string) $this->arsip($id)->getKey();
+
+        $this->actingAs($admin)
+            ->withSession(['urungkanHapus' => ['arsip' => $arsipId, 'pesan' => 'dihapus']])
+            ->get(route('account.pendaftaran-layanan.index'))
+            ->assertOk()
+            ->assertSee(route('account.pendaftaran-layanan.pulihkan', $arsipId), false);
+    }
+
+    /** Catatannya bisa dibuang permanen, berikut bukti di parkirannya. */
+    #[Test]
+    public function catatannya_bisa_dibuang_permanen(): void
+    {
+        [$admin, $b] = $this->dengan();
+        $id = (string) $b->getKey();
+
+        $folder = Pendaftaran::sumber('scopus_camp')['bukti_folder'];
+        $nama = 'uji-buang-' . Str::random(8) . '.jpg';
+        $jalur = public_path($folder . '/' . $nama);
+
+        if (! is_dir(dirname($jalur))) {
+            mkdir(dirname($jalur), 0755, true);
+        }
+
+        file_put_contents($jalur, 'bukti-uji');
+        $b->forceFill(['gambar' => $nama])->save();
+
+        $this->actingAs($admin);
+        $this->hapus($b);
+
+        $arsip = $this->arsip($id);
+        $diparkir = public_path($folder . '/' . HapusPendaftaran::FOLDER_PARKIR
+            . '/' . $arsip->bukti_parkir);
+
+        try {
+            $this->assertFileExists($diparkir);
+
+            $this->actingAs($admin)
+                ->delete(route('account.pendaftaran-layanan.buang-catatan', $arsip->getKey()))
+                ->assertRedirect()
+                ->assertSessionHas('sukses');
+
+            $this->assertNull(PendaftaranDihapus::find($arsip->getKey()),
+                'Catatannya masih ada.');
+            $this->assertFileDoesNotExist($diparkir,
+                'Bukti di parkirannya tidak ikut dibuang; ia jadi yatim selamanya.');
+        } finally {
+            @unlink($jalur);
+            @unlink($diparkir);
+        }
+    }
+
+    /** Membuang catatan hanya untuk administrator. */
+    #[Test]
+    public function buang_catatan_hanya_untuk_administrator(): void
+    {
+        [$admin, $b] = $this->dengan();
+        $id = (string) $b->getKey();
+
+        $this->actingAs($admin);
+        $this->hapus($b);
+
+        $arsipId = (string) $this->arsip($id)->getKey();
+
+        $t = Str::random(8);
+        $pelanggan = User::create([
+            'full_name' => 'Pelanggan Uji', 'username' => 'bcg_' . $t,
+            'email' => $t . '@contoh.test', 'password' => Hash::make('RahasiaUji2026'),
+            'level' => 'user',
+        ]);
+        $pelanggan->forceFill(['status' => 'active', 'email_verified_at' => now(),
+            'peran' => User::PERAN_PELANGGAN])->save();
+
+        $this->flushSession();
+
+        $this->actingAs($pelanggan)
+            ->delete(route('account.pendaftaran-layanan.buang-catatan', $arsipId))
+            ->assertRedirect(route('account.dashboard.index'));
+
+        $this->assertNotNull(PendaftaranDihapus::find($arsipId));
+    }
+
     // ------------------------------------------------------------- pembantu
 
     private function hapus(PendaftaranScopusCamp $b): void
