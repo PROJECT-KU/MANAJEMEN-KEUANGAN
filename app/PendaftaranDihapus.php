@@ -20,6 +20,13 @@ class PendaftaranDihapus extends Model
 
     protected $casts = [
         'potret' => 'array',
+        /*
+         * WAJIB dicor. Tanpa ini nilainya untaian, dan layar catatan
+         * penghapusan memanggil translatedFormat() padanya — halamannya
+         * 500 begitu ada satu catatan yang sudah dikembalikan, sementara
+         * yang belum dipulihkan (null) lolos tanpa gejala apa pun.
+         */
+        'dipulihkan_at' => 'datetime',
         'total' => 'integer',
         'uang_terhapus' => 'integer',
         'jumlah_pembayaran' => 'integer',
