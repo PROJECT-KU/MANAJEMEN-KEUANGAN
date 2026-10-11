@@ -121,6 +121,21 @@ Pendaftar Layanan | MIS Rumah Scopus
             white-space: nowrap;
         }
 
+        /* Follow up WhatsApp di baris: hijau, sebab ia memang menuju ke sana. */
+        .pdl-tombol-wa {
+            color: #15803d;
+            border-color: #bbf7d0;
+        }
+
+        .pdl-tombol-wa:hover {
+            border-color: #86efac;
+            background: #f0fdf4;
+        }
+
+        .pdl-tombol-wa .fab {
+            color: #16a34a;
+        }
+
         /*
          * Borangnya display: contents.
          *
@@ -720,9 +735,18 @@ Pendaftar Layanan | MIS Rumah Scopus
                 white-space: nowrap;
             }
 
+            /*
+             * 9px, bukan 11px.
+             *
+             * Sejak kedua tombolnya tidak boleh bertumpuk, lebar minimum
+             * tabelnya naik — dan tepat di titik putus 768px itu 2px lebih
+             * lebar daripada ruang yang ada, jadi halamannya bisa digeser ke
+             * samping. Terukur bersih di 767px dan 769px; hanya titik
+             * putusnya sendiri yang kena, dan 4px inilah yang menutupnya.
+             */
             .pdl-tombol-buka,
-            .pdl-tombol-lunas {
-                padding: 0 11px;
+            .pdl-tombol-wa {
+                padding: 0 9px;
             }
 
             /*
@@ -1819,55 +1843,6 @@ Pendaftar Layanan | MIS Rumah Scopus
 
 @push('scripts')
 <script>
-    /*
-     * Konfirmasi "Tandai lunas".
-     *
-     * Lewat misKonfirmasi(), bukan Swal.fire langsung — pembungkus bersama
-     * itu yang menjaga rupanya seragam di semua layar. Nama orangnya lewat
-     * `sorot`, BUKAN dirangkai ke `pesan`: ia disisipkan sebagai teks, jadi
-     * tanda < di dalam nama tidak pernah tertafsir markah.
-     *
-     * Dialognya bukan pengaman — peladennya tetap memvalidasi statusnya.
-     * Yang dijaga di sini kekeliruan, bukan penyusup: tombol ini duduk
-     * persis di sebelah "Rincian" pada dua puluh baris sekaligus, dan satu
-     * salah tekan menandai lunas orang yang belum membayar sekaligus
-     * mengirimi dia surat pemberitahuan.
-     *
-     * Didengarkan di DOCUMENT, bukan di tiap tombol: daftarnya ditukar utuh
-     * tiap kali saringannya berubah tanpa muat ulang, dan pendengar yang
-     * dipasang per tombol ikut terbuang bersama baris lamanya — tombolnya
-     * lalu mengirim borangnya tanpa bertanya apa-apa.
-     */
-    document.addEventListener('click', function (e) {
-        var tombol = e.target.closest('[data-pdl-lunas]');
-
-        if (!tombol || typeof window.misKonfirmasi !== 'function') {
-            return;
-        }
-
-        e.preventDefault();
-
-        window.misKonfirmasi({
-            judul: 'Tandai lunas pendaftaran ini?',
-            /*
-             * %s diisi NAMA orangnya, bukan nominalnya: yang perlu diyakinkan
-             * sebelum menekan adalah "baris yang mana", sebab tombol ini
-             * duduk di antara dua puluh baris yang rupanya sama. Nominalnya
-             * menyusul sebagai keterangan — ia angka hasil number_format,
-             * bukan teks yang diketik orang.
-             */
-            pesan: 'Pendaftaran %s (' + tombol.dataset.nominal + ') ditandai lunas, '
-                + 'dan pemberitahuannya dikirim ke emailnya.',
-            sorot: tombol.dataset.nama,
-            tombol: 'Ya, tandai lunas',
-            jenis: 'tanya',
-        }).then(function (setuju) {
-            if (setuju) {
-                tombol.closest('form').submit();
-            }
-        });
-    });
-
     (function () {
         'use strict';
 
