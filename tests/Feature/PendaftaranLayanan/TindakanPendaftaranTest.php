@@ -2613,6 +2613,49 @@ class TindakanPendaftaranTest extends TestCase
         }
     }
 
+    /**
+     * Tombol "Follow up" ada di KELIMA layanan, bukan cuma yang kebetulan
+     * dicoba.
+     *
+     * Bagian-bagian layar rincian muncul bersyarat — tab Peserta hanya untuk
+     * rombongan, Termin hanya untuk pesanan berinduk — jadi "sudah terlihat
+     * di satu layanan" bukan bukti bahwa ia ada di semuanya. Diperiksa di
+     * basis data: kelima layanan memang punya baris bernomor telepon yang
+     * bisa dihubungi, jadi tombol yang hilang di salah satunya berarti ada
+     * pendaftar yang tidak bisa difollow-up dari layarnya sendiri.
+     *
+     * Dituntut juga LABELNYA menyebut keadaan barisnya: tombol yang sama
+     * bunyinya untuk semua status tidak memberi tahu pesan apa yang akan
+     * terbuka.
+     */
+    #[Test]
+    public function tombol_follow_up_ada_di_kelima_layanan(): void
+    {
+        $orang = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        foreach (array_keys(Pendaftaran::katalog()) as $layanan) {
+            [$baris] = $this->buat($layanan);
+
+            $isi = $this->actingAs($orang)
+                ->get(route('account.pendaftaran-layanan.rincian', [$layanan, $baris->getKey()]))
+                ->assertOk()->getContent();
+
+            $this->assertSame(1, preg_match(
+                '#<a[^>]*class="[^"]*rin-tombol-wa[^"]*"[^>]*href="https://api\.whatsapp\.com/send\?phone=#s',
+                $isi
+            ), "Tombol follow up tidak ada di layar rincian {$layanan}.");
+
+            $keadaan = Pendaftaran::keadaanDari($baris->status);
+            $label = Pendaftaran::KEADAAN[$keadaan]['label'] ?? null;
+
+            $this->assertNotNull($label, "Keadaan {$layanan} tidak punya label.");
+            $this->assertStringContainsString('Follow up: ' . $label, $isi,
+                "Tombol follow up {$layanan} tidak menyebut keadaan barisnya.");
+
+            $this->flushSession();
+        }
+    }
+
     #[Test]
     public function layanan_yang_tidak_dikenali_dan_id_asing_jadi_404(): void
     {
