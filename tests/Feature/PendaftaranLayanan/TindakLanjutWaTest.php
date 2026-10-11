@@ -425,14 +425,66 @@ class TindakLanjutWaTest extends TestCase
             PesanWaPendaftaran::tindakLanjut($union));
     }
 
+    /**
+     * Lewat DOKU tidak ada bukti yang perlu dikirim.
+     *
+     * Gatewaynya yang mengabari sistem. Menyuruh orang mengirim tangkapan
+     * layar ke WhatsApp membuat ia mengira pembayarannya belum sah sampai
+     * ia melakukannya — dan panitia menerima kiriman yang tidak pernah
+     * dipakai siapa pun.
+     *
+     * Hari ini ketiga ratus barisnya masih 'transfer', jadi kekeliruan ini
+     * belum menggigit — tetapi ia akan mengenai SELURUH pendaftar di hari
+     * DOKU dinyalakan, dan hari itu tidak ada ujinya kalau aturannya cuma
+     * anggapan.
+     */
+    #[Test]
+    public function doku_tidak_disuruh_mengirim_bukti(): void
+    {
+        $pesan = PesanWaPendaftaran::tindakLanjut($this->baris('diproses', ['cara_bayar' => 'doku']));
+
+        $this->assertStringNotContainsString('kirimkan bukti transfernya', $pesan,
+            'Pendaftar DOKU disuruh mengirim bukti yang tidak pernah ada.');
+        $this->assertStringNotContainsString('Mohon ditransfer', $pesan,
+            'Pendaftar DOKU disuruh transfer manual.');
+        $this->assertStringContainsString('DOKU', $pesan);
+    }
+
+    /** Bayar di tempat: tidak ada yang perlu ditransfer sama sekali. */
+    #[Test]
+    public function bayar_di_tempat_tidak_disuruh_transfer(): void
+    {
+        $pesan = PesanWaPendaftaran::tindakLanjut($this->baris('diproses', ['cara_bayar' => 'tunai']));
+
+        $this->assertStringNotContainsString('transfer', strtolower($pesan),
+            'Pembayar tunai disuruh transfer.');
+        $this->assertStringContainsString('diserahkan langsung ke panitia', $pesan);
+    }
+
+    /**
+     * Transfer manual TETAP ditagih dengan buktinya — penjaga di atas tidak
+     * boleh mematikan kalimat yang benar untuk cara bayar yang memang butuh
+     * bukti.
+     */
+    #[Test]
+    public function transfer_manual_tetap_diminta_buktinya(): void
+    {
+        $pesan = PesanWaPendaftaran::tindakLanjut($this->baris('diproses', ['cara_bayar' => 'transfer']));
+
+        $this->assertStringContainsString('kirimkan bukti transfernya', $pesan);
+        $this->assertStringContainsString('Mohon ditransfer', $pesan,
+            'Peringatan kode unik hilang untuk transfer manual, padahal justru '
+            . 'di sanalah nominalnya dicocokkan dengan tangan.');
+    }
+
     // ------------------------------------------------------------- pembantu
 
-    private function baris(string $status): object
+    private function baris(string $status, array $ubah = []): object
     {
-        return (object) [
+        return (object) array_merge([
             'nama_orang' => 'Budi Santoso', 'nomor' => 'camp-0007', 'total' => 5500750,
             'kode_unik' => 750, 'status' => $status, 'layanan' => 'scopus_camp',
-        ];
+        ], $ubah);
     }
 
     /** @return array{0: User, 1: PendaftaranScopusCamp} */
