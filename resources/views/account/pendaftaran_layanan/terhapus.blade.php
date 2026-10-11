@@ -51,17 +51,28 @@ Catatan Penghapusan | MIS Rumah Scopus
             min-width: 0;
         }
 
+        /*
+         * Tiap catatan satu KARTU, bukan baris bergaris bawah.
+         *
+         * Bergaris bawah, satu catatan yang isinya tiga baris (judul, deret
+         * keterangan, kaki) terbaca menyatu dengan catatan berikutnya — dan
+         * di layar yang isinya cuma satu catatan, yang tampak sekadar teks
+         * yang tercecer di ruang kosong.
+         */
         .thp-baris {
             display: grid;
             grid-template-columns: 38px minmax(0, 1fr) auto;
-            gap: 11px;
+            gap: 4px 11px;
             align-items: start;
-            padding: 13px 0;
-            border-bottom: 1px solid var(--mis-garis);
+            margin-bottom: 11px;
+            padding: 14px 16px;
+            border: 1px solid var(--mis-garis);
+            border-radius: var(--mis-radius-kecil);
+            background: #fff;
         }
 
         .thp-baris:last-child {
-            border-bottom: 0;
+            margin-bottom: 0;
         }
 
         .thp-nomor {
@@ -83,9 +94,32 @@ Catatan Penghapusan | MIS Rumah Scopus
         .thp-ket {
             display: flex;
             flex-wrap: wrap;
-            gap: 4px 12px;
-            font-size: .78rem;
+            gap: 5px;
+            font-size: .76rem;
             color: var(--mis-tinta-3);
+        }
+
+        /*
+         * Tiap keterangan jadi KEPING berlatar.
+         *
+         * Dulu cuma dipisah jarak, dan lima keterangan beruntun — layanan,
+         * status, siapa, kapan, berapa jejak — terbaca sebagai satu kalimat
+         * panjang yang tidak berarti apa-apa. Latar tipis memberi tiap
+         * keterangan batasnya sendiri tanpa menambah garis.
+         */
+        .thp-ket > span {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 3px 9px;
+            border-radius: 999px;
+            background: #f1f5f9;
+            white-space: nowrap;
+        }
+
+        .thp-ket > span > i {
+            font-size: 11px;
+            color: var(--mis-tinta-4);
         }
 
         .thp-uang {
@@ -103,18 +137,33 @@ Catatan Penghapusan | MIS Rumah Scopus
         /* Potretnya dilipat: isinya JSON penuh, dan dua belas baris terbuka
            sekaligus membuat halamannya tidak bisa dipindai sama sekali. */
         /*
-         * Borangnya ditempatkan TEGAS di kisinya.
+         * Kaki kartunya: pembuka potret di kiri, tombol di kanan.
          *
-         * .thp-baris berkisi tiga lajur (38px / isi / nominal) dan anak
-         * keempat jatuh sendiri ke lajur pertama yang cuma 38px — tombolnya
-         * terjepit jadi sepotong ikon tanpa tulisan. Ditaruh 2/-1 dan
-         * dirapatkan ke kanan, ia duduk di bawah nominalnya, sejajar
-         * tepi kanan barisnya.
+         * Ditaruh di lajur 2/-1 supaya sejajar dengan isinya, bukan dengan
+         * medali di lajur pertama. Membungkus di layar sempit — tombolnya
+         * turun ke bawah pembuka potret, bukan menyempit jadi ikon.
          */
-        .thp-pulih-borang {
+        .thp-kaki {
             grid-column: 2 / -1;
-            justify-self: end;
-            margin-top: 4px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 9px;
+            margin-top: 9px;
+            padding-top: 9px;
+            border-top: 1px dashed var(--mis-garis);
+        }
+
+        /* min-width 0 supaya <pre> potret yang lebar tidak memaksa kaki ini
+           melebar dan mendorong tombolnya keluar kartu. */
+        .thp-kaki > .thp-potret {
+            flex: 1 1 220px;
+            min-width: 0;
+        }
+
+        .thp-pulih-borang {
+            flex: 0 0 auto;
         }
 
         .thp-tombol-pulih {
@@ -135,8 +184,7 @@ Catatan Penghapusan | MIS Rumah Scopus
         }
 
         .thp-potret {
-            grid-column: 1 / -1;
-            margin-top: 6px;
+            margin: 0;
         }
 
         .thp-potret > summary {
@@ -176,9 +224,8 @@ Catatan Penghapusan | MIS Rumah Scopus
                 grid-column: 2;
             }
 
-            .thp-pulih-borang {
+            .thp-kaki {
                 grid-column: 2;
-                justify-self: start;
             }
         }
     </style>
@@ -403,33 +450,44 @@ Catatan Penghapusan | MIS Rumah Scopus
                             @endif
                         </span>
 
-                        @if (! $satu->dipulihkan_at)
-                            <form method="POST" class="thp-pulih-borang"
-                                action="{{ route('account.pendaftaran-layanan.pulihkan', $satu->getKey()) }}">
-                                @csrf
-                                {{-- Nama & nomor dititipkan ke tombolnya supaya
-                                     dialog penegasannya menyebut SIAPA yang akan
-                                     kembali. Penegasan yang cuma bertanya "yakin?"
-                                     dijawab ya tanpa dibaca. --}}
-                                <button type="submit" class="mis-tombol mis-tombol-halus thp-tombol-pulih"
-                                    data-nama="{{ $satu->nama ?: 'Tanpa nama' }}"
-                                    data-nomor="{{ strtoupper($satu->nomor ?: '') }}">
-                                    <i class="fas fa-undo mis-ikon-hijau" aria-hidden="true"></i>
-                                    Kembalikan
-                                </button>
-                            </form>
-                        @endif
+                        {{-- Kaki kartunya: pembuka potret di kiri, tombol di
+                             kanan, satu baris.
 
-                        <details class="thp-potret">
-                            <summary>
-                                <i class="fas fa-code" aria-hidden="true"></i>
-                                Lihat potret lengkapnya
-                            </summary>
-                            {{-- JSON_PRETTY_PRINT + UNESCAPED_UNICODE: tanpa yang
-                                 kedua, nama berhuruf non-ASCII tersimpan sebagai
-                                 \uXXXX dan potretnya tidak terbaca orang. --}}
-                            <pre>{{ json_encode($satu->potret, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) }}</pre>
-                        </details>
+                             Keduanya DULU jadi anak kisi tersendiri, jadi satu
+                             catatan memakan tiga baris longgar — nominalnya
+                             melayang di kanan atas, tombolnya sendirian di baris
+                             kedua, dan pembuka potretnya di baris ketiga paling
+                             kiri. Yang terbaca bukan satu catatan melainkan tiga
+                             potongan yang kebetulan berdekatan. --}}
+                        <div class="thp-kaki">
+                            <details class="thp-potret">
+                                <summary>
+                                    <i class="fas fa-code" aria-hidden="true"></i>
+                                    Lihat potret lengkapnya
+                                </summary>
+                                {{-- JSON_PRETTY_PRINT + UNESCAPED_UNICODE: tanpa yang
+                                     kedua, nama berhuruf non-ASCII tersimpan sebagai
+                                     \uXXXX dan potretnya tidak terbaca orang. --}}
+                                <pre>{{ json_encode($satu->potret, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) }}</pre>
+                            </details>
+
+                            @if (! $satu->dipulihkan_at)
+                                <form method="POST" class="thp-pulih-borang"
+                                    action="{{ route('account.pendaftaran-layanan.pulihkan', $satu->getKey()) }}">
+                                    @csrf
+                                    {{-- Nama & nomor dititipkan ke tombolnya supaya
+                                         dialog penegasannya menyebut SIAPA yang akan
+                                         kembali. Penegasan yang cuma bertanya "yakin?"
+                                         dijawab ya tanpa dibaca. --}}
+                                    <button type="submit" class="mis-tombol mis-tombol-halus thp-tombol-pulih"
+                                        data-nama="{{ $satu->nama ?: 'Tanpa nama' }}"
+                                        data-nomor="{{ strtoupper($satu->nomor ?: '') }}">
+                                        <i class="fas fa-undo mis-ikon-hijau" aria-hidden="true"></i>
+                                        Kembalikan
+                                    </button>
+                                </form>
+                            @endif
+                        </div>
                     </div>
                 @endforeach
 
