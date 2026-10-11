@@ -93,18 +93,25 @@ class PesanWaPendaftaran
      * Kalimat penagihan per CARA BAYAR.
      *
      * "Kirimkan bukti transfernya" hanya benar untuk transfer manual. Lewat
-     * DOKU tidak ada bukti yang perlu dikirim — gatewaynya yang mengabari
-     * sistem — dan menyuruh orang mengirim tangkapan layar ke WhatsApp
-     * membuat ia mengira pembayarannya belum sah sampai ia melakukannya.
-     * Untuk bayar di tempat, tidak ada yang perlu ditransfer sama sekali.
+     * pembayaran daring tidak ada bukti yang perlu dikirim — gatewaynya yang
+     * mengabari sistem — dan menyuruh orang mengirim tangkapan layar ke
+     * WhatsApp membuat ia mengira pembayarannya belum sah sampai ia
+     * melakukannya. Untuk bayar di tempat, tidak ada yang perlu ditransfer
+     * sama sekali.
+     *
+     * NAMA GATEWAYNYA TIDAK DISEBUT ke pendaftar. Itu urusan internal: yang
+     * perlu ia tahu cuma bahwa pembayarannya diselesaikan lewat tautan yang
+     * dikirim sistem. Disebut namanya, pesan ini berbohong pada hari
+     * gatewaynya diganti — dan yang menerimanya akan mencari halaman yang
+     * sudah tidak dipakai lagi.
      *
      * Terukur hari ini ketiga ratus barisnya masih 'transfer', jadi
      * kekeliruan ini belum menggigit — tetapi ia akan mengenai SELURUH
-     * pendaftar di hari DOKU dinyalakan.
+     * pendaftar di hari pembayaran daring dinyalakan.
      */
     private const PENUTUP_MENAGIH = [
         'transfer' => 'Kalau sudah transfer, kirimkan bukti transfernya ke nomor ini ya 🙏',
-        'doku' => 'Pembayarannya diselesaikan di halaman DOKU dari tautan yang dikirim '
+        'doku' => 'Pembayarannya diselesaikan lewat tautan pembayaran yang dikirim '
             . 'sistem — tidak perlu mengirim bukti apa pun ke sini ya 🙏',
         'tunai' => 'Pembayarannya diserahkan langsung ke panitia saat datang ya 🙏',
     ];
@@ -175,8 +182,9 @@ class PesanWaPendaftaran
         /*
          * Peringatan "jangan dibulatkan" hanya untuk cara bayar yang BUTUH
          * BUKTI, yaitu transfer manual. Kode unik gunanya mencocokkan mutasi
-         * rekening dengan tangan; lewat DOKU, gatewaynya yang mencocokkan,
-         * dan menyuruh orang menjaga tiga angka terakhir cuma membingungkan.
+         * rekening dengan tangan; lewat pembayaran daring, gatewaynya yang
+         * mencocokkan, dan menyuruh orang menjaga tiga angka terakhir cuma
+         * membingungkan.
          */
         if ($menagih && $total > 0 && (int) ($b->kode_unik ?? 0) > 0
             && ($cara['perlu_bukti'] ?? false) === true) {
@@ -189,7 +197,8 @@ class PesanWaPendaftaran
         $baris[] = '';
         if ($menagih) {
             // Cara bayar yang belum terdaftar jatuh ke kalimat 'menunggu'
-            // yang netral: ia tidak menyebut transfer maupun DOKU.
+            // yang netral: ia tidak menyebut transfer maupun pembayaran
+            // daring.
             $baris[] = self::PENUTUP_MENAGIH[$cara['kunci'] ?? ''] ?? self::PENUTUP['menunggu'];
         } else {
             $kunciPenutup = $keadaan === 'menunggu' ? 'diperiksa' : $keadaan;
