@@ -81,7 +81,7 @@ class KabarStatusPendaftaran
             'judul' => 'Sesi Anda sudah selesai',
             'lencana' => 'Selesai',
             'pembuka' => 'Sesi Anda telah selesai dan tercatat lengkap dalam catatan kami.',
-            'penutup' => ['Terima kasih telah mengikutinya sampai tuntas. Apabila ada yang ingin ditanyakan, mohon balas email ini.'],
+            'penutup' => ['Terima kasih telah mengikutinya sampai tuntas. Apabila ada yang ingin ditanyakan, mohon hubungi admin kami lewat WhatsApp.'],
         ],
 
         // ---------------------------------------------------- dijadwalkan ulang
@@ -89,7 +89,7 @@ class KabarStatusPendaftaran
             'judul' => 'Jadwal Anda dipindahkan',
             'lencana' => 'Dijadwalkan ulang',
             'pembuka' => 'Pendaftaran Anda telah dipindahkan ke jadwal baru. Rinciannya tercantum di bawah ini.',
-            'penutup' => ['Apabila jadwal baru tersebut tidak dapat Anda ikuti, mohon segera balas email ini agar kami carikan solusinya.'],
+            'penutup' => ['Apabila jadwal baru tersebut tidak dapat Anda ikuti, mohon segera hubungi admin kami lewat WhatsApp agar kami carikan solusinya.'],
         ],
 
         // ------------------------------------------------------------ refund
@@ -99,7 +99,7 @@ class KabarStatusPendaftaran
             'pembuka' => 'Pendaftaran Anda dibatalkan dan dana yang telah Anda bayarkan kami kembalikan.',
             'penutup' => [
                 'Pengembaliannya diproses ke rekening yang Anda gunakan untuk membayar. Umumnya diperlukan beberapa hari kerja sampai dananya masuk.',
-                'Apabila dalam satu minggu dananya belum juga masuk, mohon balas email ini agar kami telusuri.',
+                'Apabila dalam satu minggu dananya belum juga masuk, mohon hubungi admin kami lewat WhatsApp agar kami telusuri.',
             ],
         ],
 
@@ -108,7 +108,7 @@ class KabarStatusPendaftaran
             'judul' => 'Pendaftaran Anda belum bisa kami terima',
             'lencana' => 'Belum diterima',
             'pembuka' => 'Dengan menyesal kami sampaikan bahwa pendaftaran Anda belum dapat kami terima kali ini.',
-            'penutup' => ['Apabila menurut Anda terdapat kekeliruan, mohon balas email ini agar panitia memeriksanya kembali.'],
+            'penutup' => ['Apabila menurut Anda terdapat kekeliruan, mohon hubungi admin kami lewat WhatsApp agar panitia memeriksanya kembali.'],
         ],
         'pembayaran ditolak' => [
             'judul' => 'Bukti pembayaran Anda belum cocok',
@@ -116,33 +116,33 @@ class KabarStatusPendaftaran
             'pembuka' => 'Bukti pembayaran yang Anda kirimkan belum sesuai dengan tagihannya sehingga belum dapat kami sahkan.',
             'penutup' => [
                 'Penyebab yang paling sering terjadi: nominalnya kurang atau lebih, atau berkas yang terkirim bukan bukti transfer yang dimaksud.',
-                'Mohon balas email ini dengan bukti yang benar, atau hubungi panitia apabila Anda ragu mengenai nominalnya.',
+                'Mohon kirimkan bukti yang benar kepada admin kami lewat WhatsApp, atau tanyakan di sana apabila Anda ragu mengenai nominalnya.',
             ],
         ],
         'Pendaftaran Dibatalkan' => [
             'judul' => 'Pendaftaran Anda dibatalkan',
             'lencana' => 'Dibatalkan',
             'pembuka' => 'Pendaftaran Anda telah dibatalkan dan kursinya kami lepaskan.',
-            'penutup' => ['Apabila pembatalan ini bukan permintaan Anda, mohon segera balas email ini agar dapat kami periksa.'],
+            'penutup' => ['Apabila pembatalan ini bukan permintaan Anda, mohon segera hubungi admin kami lewat WhatsApp agar dapat kami periksa.'],
         ],
         'cancel' => [
             'judul' => 'Pendaftaran Anda dibatalkan',
             'lencana' => 'Dibatalkan',
             'pembuka' => 'Pendaftaran Anda telah dibatalkan dan kursinya kami lepaskan.',
-            'penutup' => ['Apabila pembatalan ini bukan permintaan Anda, mohon segera balas email ini agar dapat kami periksa.'],
+            'penutup' => ['Apabila pembatalan ini bukan permintaan Anda, mohon segera hubungi admin kami lewat WhatsApp agar dapat kami periksa.'],
         ],
         'canceled' => [
             'judul' => 'Pemesanan Anda dibatalkan',
             'lencana' => 'Dibatalkan',
             'pembuka' => 'Pemesanan Anda telah dibatalkan.',
-            'penutup' => ['Apabila pembatalan ini bukan permintaan Anda, mohon segera balas email ini agar dapat kami periksa.'],
+            'penutup' => ['Apabila pembatalan ini bukan permintaan Anda, mohon segera hubungi admin kami lewat WhatsApp agar dapat kami periksa.'],
         ],
         'expired' => [
             'judul' => 'Batas waktu pembayaran Anda sudah lewat',
             'lencana' => 'Kursi dilepas',
             'pembuka' => 'Batas waktu pembayaran telah terlewati sehingga kursi Anda kami lepaskan untuk pendaftar lain.',
             'penutup' => [
-                'Apabila Anda telah melakukan pembayaran tetapi belum sempat mengirimkan buktinya, mohon balas email ini — hal tersebut masih dapat kami bantu.',
+                'Apabila Anda telah melakukan pembayaran tetapi belum sempat mengirimkan buktinya, mohon hubungi admin kami lewat WhatsApp — hal tersebut masih dapat kami bantu.',
                 'Apabila Anda masih berminat mengikutinya, Anda dapat mendaftar kembali selama kuotanya tersedia.',
             ],
         ],
