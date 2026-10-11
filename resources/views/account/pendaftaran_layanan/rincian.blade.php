@@ -1379,7 +1379,7 @@ Rincian Pendaftaran | MIS Rumah Scopus
         .rin-warna-abu { --rin-muda: #f1f5f9; --rin-tua: #475569; }
 
         /* Kotak pemberitahuan. Kuning untuk yang perlu diketahui, merah untuk
-           yang tidak bisa diurungkan — warnanya mengikuti keluarga yang sama
+           yang berat diurungkan — warnanya mengikuti keluarga yang sama
            dengan lencana status, bukan warna sendiri. */
         /*
          * Peringatan pendaftaran ganda. Kuning, bukan merah: ini perlu
@@ -4388,8 +4388,8 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                          "...bukti bayarnya@if ($berangkatan), dan
                                          kursinya...". Dijaga
                                          DirektifBladeTerkompilasiTest. --}}
-                                    Barisnya hilang permanen beserta berkas bukti bayarnya{{ $hapusTambahan }}.
-                                    Tidak bisa diurungkan, dan belum ada tong sampah.
+                                    Barisnya hilang dari daftar beserta berkas bukti bayarnya{{ $hapusTambahan }}.
+                                    Masih bisa dikembalikan lewat catatan penghapusan.
                                 </span>
                             </p>
 
@@ -4426,7 +4426,8 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                     <p class="rin-hilang-kaki">
                                         Potretnya tetap tersimpan di
                                         <a href="{{ route('account.pendaftaran-layanan.terhapus') }}">catatan penghapusan</a>
-                                        — bisa dibaca, tetapi <strong>tidak bisa dikembalikan</strong>.
+                                        — dan dari sana <strong>bisa dikembalikan utuh</strong>,
+                                        termasuk bukti bayarnya.
                                     </p>
                                 </div>
                             @endif
@@ -4458,9 +4459,10 @@ Rincian Pendaftaran | MIS Rumah Scopus
                             <p class="rin-nota">
                                 <i class="fas fa-lock" aria-hidden="true"></i>
                                 <span>
-                                    Hanya administrator yang boleh menghapus pendaftaran.
-                                    Penghapusannya tidak bisa diurungkan dan belum ada tong
-                                    sampah, jadi haknya dipersempit.
+                                    Hanya administrator yang boleh menghapus pendaftaran, dan
+                                    hanya administrator pula yang boleh mengembalikannya dari
+                                    catatan penghapusan — keduanya mengubah pembukuan, cuma
+                                    berlawanan arah.
                                 </span>
                             </p>
 
@@ -5153,7 +5155,9 @@ Rincian Pendaftaran | MIS Rumah Scopus
         tombol.addEventListener('click', function () {
             window.misKonfirmasi({
                 judul: 'Hapus pendaftaran ini?',
-                pesan: 'Barisnya hilang permanen beserta bukti bayarnya. Tidak bisa diurungkan.',
+                pesan: 'Barisnya hilang dari daftar beserta bukti bayarnya, dan kursinya '
+                    + 'kembali ke kuota angkatan. Masih bisa dikembalikan lewat catatan '
+                    + 'penghapusan. %s',
                 sorot: tombol.dataset.nomor + ' — ' + tombol.dataset.nama,
                 tombol: 'Ya, hapus',
                 jenis: 'bahaya',

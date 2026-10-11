@@ -33,6 +33,9 @@ use Illuminate\Support\Facades\Log;
  */
 class HapusPendaftaran
 {
+    /** Subfolder tempat bukti bayar menunggu, di dalam folder layanannya. */
+    public const FOLDER_PARKIR = 'terhapus';
+
     /**
      * @return array{berhasil:bool, pesan:string}
      */
@@ -62,7 +65,7 @@ class HapusPendaftaran
         $berkas = $this->jalurBukti($layanan, $pendaftaran);
 
         try {
-            DB::transaction(function () use ($layanan, $pendaftaran) {
+            $arsip = DB::transaction(function () use ($layanan, $pendaftaran) {
                 /*
                  * POTRETNYA DIAMBIL DULU, di dalam transaksi yang sama.
                  *
@@ -71,7 +74,7 @@ class HapusPendaftaran
                  * yang sebenarnya masih ada lebih menyesatkan daripada tidak
                  * ada arsip sama sekali.
                  */
-                $this->arsipkan($layanan, $pendaftaran);
+                $arsip = $this->arsipkan($layanan, $pendaftaran);
 
                 if (Pendaftaran::berangkatan($layanan)) {
                     $this->kembalikanKuota($layanan, $pendaftaran);
@@ -125,6 +128,8 @@ class HapusPendaftaran
                 PendaftaranPengembalian::milik($layanan, (string) $pendaftaran->getKey())->delete();
 
                 $pendaftaran->delete();
+
+                return $arsip;
             });
         } catch (\Throwable $e) {
             Log::error('Pendaftaran gagal dihapus.', [
@@ -144,10 +149,21 @@ class HapusPendaftaran
             ];
         }
 
+        /*
+         * Buktinya DIPARKIR, bukan dibuang.
+         *
+         * Dibuang, penghapusan yang dikembalikan menyisakan pendaftaran
+         * tanpa bukti bayar — dan untuk yang sudah lunas, justru satu-satunya
+         * yang membuktikan uangnya pernah masuk. Namanya diawali id arsipnya
+         * supaya dua pendaftaran yang berkasnya kebetulan senama tidak saling
+         * menimpa di folder parkiran.
+         */
         if ($berkas !== null && is_file($berkas)) {
-            // @unlink: berkas yang sudah tidak ada bukan kegagalan, dan
-            // barisnya memang sudah terhapus — tidak ada yang bisa diurungkan.
-            @unlink($berkas);
+            $parkir = $this->parkirkanBukti($layanan, $berkas, (string) $arsip->getKey());
+
+            if ($parkir !== null) {
+                $arsip->forceFill(['bukti_parkir' => $parkir])->save();
+            }
         }
 
         return [
@@ -200,7 +216,7 @@ class HapusPendaftaran
      * bisa membukanya begitu pendaftarannya hilang — jadi secara praktis ia
      * lenyap. Di dalam potret, riwayatnya masih bisa dibaca.
      */
-    private function arsipkan(string $layanan, $pendaftaran): void
+    private function arsipkan(string $layanan, $pendaftaran): PendaftaranDihapus
     {
         $id = (string) $pendaftaran->getKey();
 
@@ -212,9 +228,22 @@ class HapusPendaftaran
         $peserta = \App\PendaftaranPeserta::milik($layanan, $id)->get();
         $pengembalian = PendaftaranPengembalian::milik($layanan, $id)->get();
 
+        /*
+         * Dua ini DIHAPUS beberapa baris di bawah tetapi dulu tidak ikut
+         * dipotret, jadi penghapusannya tidak pernah bisa dikembalikan utuh.
+         * Keduanya tidak punya kunci asing ke pendaftarannya, jadi tidak ada
+         * yang akan membangunkannya kembali selain potret ini.
+         */
+        $testimoni = $layanan === 'clinik_scopus'
+            ? ClinikScopusTestimoni::where('clinikscopus_pemesanan_id', $id)->get()
+            : collect();
+
+        $lembagaBaris = \App\PemesananLembagaBaris::where('layanan', $layanan)
+            ->where('pendaftaran_id', $id)->get();
+
         $orang = Auth::user();
 
-        PendaftaranDihapus::create([
+        return PendaftaranDihapus::create([
             'layanan' => $layanan,
             'pendaftaran_id' => $id,
             'nomor' => (string) ($pendaftaran->id_transaksi ?? $pendaftaran->id_pemesanan ?? $id),
@@ -241,6 +270,8 @@ class HapusPendaftaran
                 'pembayaran' => $pembayaran->toArray(),
                 'pengembalian' => $pengembalian->toArray(),
                 'peserta' => $peserta->toArray(),
+                'testimoni' => $testimoni->toArray(),
+                'lembaga_baris' => $lembagaBaris->toArray(),
                 'jejak' => $jejak->map(fn ($j) => [
                     'aksi' => $j->aksi,
                     'kalimat' => $j->kalimat,
@@ -250,6 +281,33 @@ class HapusPendaftaran
             'oleh_id' => $orang?->getKey(),
             'oleh_nama' => $orang?->full_name ?? $orang?->username,
         ]);
+    }
+
+    /**
+     * Memindahkan bukti bayarnya ke folder parkiran.
+     *
+     * Mengembalikan nama berkas di parkiran, atau null kalau pemindahannya
+     * gagal. Gagal dipindah BUKAN kegagalan penghapusan: barisnya sudah
+     * hilang dan tidak ada yang bisa diurungkan — yang hilang cuma
+     * kemampuan memulihkan buktinya nanti.
+     */
+    private function parkirkanBukti(string $layanan, string $berkas, string $arsipId): ?string
+    {
+        $folder = Pendaftaran::sumber($layanan)['bukti_folder'] ?? null;
+
+        if ($folder === null) {
+            return null;
+        }
+
+        $parkiran = public_path($folder . '/' . self::FOLDER_PARKIR);
+
+        if (! is_dir($parkiran) && ! @mkdir($parkiran, 0755, true) && ! is_dir($parkiran)) {
+            return null;
+        }
+
+        $nama = $arsipId . '__' . basename($berkas);
+
+        return @rename($berkas, $parkiran . '/' . $nama) ? $nama : null;
     }
 
     /**

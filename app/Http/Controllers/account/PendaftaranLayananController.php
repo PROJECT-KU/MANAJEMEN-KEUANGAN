@@ -2117,6 +2117,36 @@ class PendaftaranLayananController extends Controller
     }
 
     /**
+     * Mengembalikan satu pendaftaran dari catatan penghapusan.
+     *
+     * Hanya administrator, sama dengan yang boleh menghapus: mengembalikan
+     * baris berikut nominal pembayarannya mengubah pembukuan persis seperti
+     * menghapusnya, cuma berlawanan arah.
+     */
+    public function pulihkan(Request $request, string $arsip)
+    {
+        if (! $this->bolehMenghapus()) {
+            return $this->tolak();
+        }
+
+        $hasil = (new \App\Actions\Pendaftaran\PulihkanPendaftaran)->jalankan($arsip);
+
+        if (! $hasil['berhasil']) {
+            return back()->with('error', $hasil['pesan']);
+        }
+
+        /*
+         * Dibawa ke RINCIAN pendaftarannya, bukan dikembalikan ke catatan
+         * penghapusan. Yang baru saja mengembalikan hampir selalu ingin
+         * memeriksa hasilnya — dan dari catatan penghapusan barisnya sudah
+         * tidak bisa ditekan lagi.
+         */
+        return redirect()
+            ->route('account.pendaftaran-layanan.rincian', [$hasil['layanan'], $hasil['id']])
+            ->with('sukses', $hasil['pesan']);
+    }
+
+    /**
      * Catatan penghapusan sebagai lembar kerja.
      *
      * Saringannya ikut terbawa, sama seperti kedua unduhan di layar daftar:

@@ -102,6 +102,38 @@ Catatan Penghapusan | MIS Rumah Scopus
 
         /* Potretnya dilipat: isinya JSON penuh, dan dua belas baris terbuka
            sekaligus membuat halamannya tidak bisa dipindai sama sekali. */
+        /*
+         * Borangnya ditempatkan TEGAS di kisinya.
+         *
+         * .thp-baris berkisi tiga lajur (38px / isi / nominal) dan anak
+         * keempat jatuh sendiri ke lajur pertama yang cuma 38px — tombolnya
+         * terjepit jadi sepotong ikon tanpa tulisan. Ditaruh 2/-1 dan
+         * dirapatkan ke kanan, ia duduk di bawah nominalnya, sejajar
+         * tepi kanan barisnya.
+         */
+        .thp-pulih-borang {
+            grid-column: 2 / -1;
+            justify-self: end;
+            margin-top: 4px;
+        }
+
+        .thp-tombol-pulih {
+            height: 34px;
+            padding: 0 13px;
+            font-size: .76rem;
+        }
+
+        /* Hijau muda, bukan sekadar abu: barisnya sudah TIDAK hilang lagi,
+           dan itu kabar baik yang harus terbaca sekilas di antara baris
+           merah di sekitarnya. */
+        .thp-pulih {
+            padding: 1px 8px;
+            border-radius: 999px;
+            background: #ecfdf5;
+            color: #047857;
+            font-weight: 700;
+        }
+
         .thp-potret {
             grid-column: 1 / -1;
             margin-top: 6px;
@@ -143,8 +175,55 @@ Catatan Penghapusan | MIS Rumah Scopus
             .thp-uang {
                 grid-column: 2;
             }
+
+            .thp-pulih-borang {
+                grid-column: 2;
+                justify-self: start;
+            }
         }
     </style>
+@endpush
+
+@push('skrip')
+<script>
+    /*
+     * Penegasan sebelum mengembalikan.
+     *
+     * Bukan karena berbahaya — ia justru kebalikan dari menghapus — melainkan
+     * karena ia MENGUBAH PEMBUKUAN: nominal yang sudah diterima masuk lagi ke
+     * ringkasan, dan kuota angkatannya diambil lagi. Dialognya menyebut nama
+     * dan nomornya; penegasan yang cuma bertanya "yakin?" dijawab ya tanpa
+     * dibaca.
+     */
+    document.querySelectorAll('.thp-tombol-pulih').forEach(function (tombol) {
+        tombol.addEventListener('click', function (e) {
+            if (tombol.dataset.lanjut === '1') {
+                return;
+            }
+
+            e.preventDefault();
+
+            window.misKonfirmasi({
+                judul: 'Kembalikan pendaftaran ini?',
+                pesan: 'Barisnya muncul lagi di daftar pendaftar, kuota angkatannya '
+                    + 'diambil lagi, dan pembayarannya kembali terhitung. %s',
+                sorot: (tombol.dataset.nomor || '') + ' · ' + (tombol.dataset.nama || ''),
+                tombol: 'Ya, kembalikan',
+                jenis: 'tanya',
+            }).then(function (ya) {
+                if (! ya) {
+                    return;
+                }
+
+                // Penanda supaya klik kedua yang kita picu sendiri tidak
+                // membuka dialognya lagi — tanpa ini borangnya tidak pernah
+                // terkirim dan tombolnya terlihat mati.
+                tombol.dataset.lanjut = '1';
+                tombol.closest('form').submit();
+            });
+        });
+    });
+</script>
 @endpush
 
 @section('content')
@@ -174,15 +253,20 @@ Catatan Penghapusan | MIS Rumah Scopus
             </div>
         </div>
 
-        {{-- Disebut di muka, bukan di catatan kaki: orang yang membuka layar
-             bernama "catatan penghapusan" wajar mengira ini tong sampah, dan
-             mengetahuinya SESUDAH mencari tombol pulihkan lebih buruk. --}}
+        {{-- Disebut di muka, bukan di catatan kaki.
+
+             Kalimatnya DULU berbunyi "bukan tong sampah — pendaftarannya
+             sendiri tidak bisa dikembalikan", dan itu benar sampai tombol
+             Kembalikan ada. Dibiarkan, layarnya menyangkal tombol yang
+             terpampang di tiap barisnya sendiri. --}}
         <p class="thp-nota">
             <i class="fas fa-info-circle" aria-hidden="true"></i>
             <span>
-                Ini <strong>catatan</strong>, bukan tong sampah. Isinya potret keadaan
-                terakhir supaya angkanya bisa ditelusuri — pendaftarannya sendiri
-                tidak bisa dikembalikan.
+                Isinya potret keadaan terakhir tiap pendaftaran yang dihapus, supaya
+                angkanya tetap bisa ditelusuri — dan dari sini pendaftarannya
+                <strong>bisa dikembalikan</strong> berikut peserta, pembayaran, dan
+                bukti bayarnya. Catatannya sendiri tidak ikut hilang saat dikembalikan;
+                ia cuma ditandai.
             </span>
         </p>
 
@@ -289,6 +373,22 @@ Catatan Penghapusan | MIS Rumah Scopus
                                         {{ $satu->jumlah_jejak }} jejak
                                     </span>
                                 @endif
+                                {{-- Catatannya TIDAK dihapus saat dikembalikan,
+                                     melainkan ditandai. Catatan penghapusan
+                                     gunanya menjawab "ke mana perginya
+                                     pendaftaran itu", dan baris yang lenyap saat
+                                     dipulihkan membuat pertanyaan itu tidak
+                                     terjawab untuk kedua kalinya. --}}
+                                @if ($satu->dipulihkan_at)
+                                    <span class="thp-pulih">
+                                        <i class="fas fa-undo" aria-hidden="true"></i>
+                                        dikembalikan
+                                        {{ $satu->dipulihkan_at->translatedFormat('d M Y, H:i') }}
+                                        @if ($satu->dipulihkan_oleh)
+                                            oleh {{ $satu->dipulihkan_oleh }}
+                                        @endif
+                                    </span>
+                                @endif
                             </div>
                         </div>
 
@@ -302,6 +402,23 @@ Catatan Penghapusan | MIS Rumah Scopus
                                 tanpa pembayaran
                             @endif
                         </span>
+
+                        @if (! $satu->dipulihkan_at)
+                            <form method="POST" class="thp-pulih-borang"
+                                action="{{ route('account.pendaftaran-layanan.pulihkan', $satu->getKey()) }}">
+                                @csrf
+                                {{-- Nama & nomor dititipkan ke tombolnya supaya
+                                     dialog penegasannya menyebut SIAPA yang akan
+                                     kembali. Penegasan yang cuma bertanya "yakin?"
+                                     dijawab ya tanpa dibaca. --}}
+                                <button type="submit" class="mis-tombol mis-tombol-halus thp-tombol-pulih"
+                                    data-nama="{{ $satu->nama ?: 'Tanpa nama' }}"
+                                    data-nomor="{{ strtoupper($satu->nomor ?: '') }}">
+                                    <i class="fas fa-undo mis-ikon-hijau" aria-hidden="true"></i>
+                                    Kembalikan
+                                </button>
+                            </form>
+                        @endif
 
                         <details class="thp-potret">
                             <summary>
