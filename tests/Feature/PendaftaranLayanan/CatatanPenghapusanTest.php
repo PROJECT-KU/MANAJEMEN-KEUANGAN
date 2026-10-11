@@ -279,9 +279,16 @@ class CatatanPenghapusanTest extends TestCase
             ->assertSee('Catatan penghapusan')
             ->assertSee(strtoupper($nomor))
             ->assertSee('Rp 400.000')
-            // Disebut apa adanya: orang yang membuka layar bernama "catatan
-            // penghapusan" wajar mengira ini tong sampah.
-            ->assertSee('tidak bisa dikembalikan', false);
+            /*
+             * Dulu menuntut kalimat "tidak bisa dikembalikan" — benar sampai
+             * tombol Kembalikan ada. Yang dituntut sekarang kebalikannya,
+             * dan dituntut lewat TOMBOLNYA, bukan kalimatnya: kalimat bisa
+             * saja berubah sementara tombolnya tetap ada, dan sebaliknya
+             * kalimat yang menjanjikan pemulihan tanpa tombol adalah janji
+             * kosong.
+             */
+            ->assertSee('bisa dikembalikan', false)
+            ->assertSee('thp-tombol-pulih', false);
     }
 
     /**
