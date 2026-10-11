@@ -124,7 +124,8 @@ class DaftarPresensi
      * menyimpan id angkatan, sedangkan yang perlu tercetak nama, nomor,
      * tanggal, dan lokasinya.
      *
-     * @return array{nama:string, nomor:?string, layanan:string, mulai:?string}|null
+     * @return array{nama:string, nomor:?string, layanan:string, mulai:?string,
+     *               selesai:?string, lokasi:string}|null
      */
     public static function angkatan(Collection $baris): ?array
     {
@@ -144,9 +145,17 @@ class DaftarPresensi
             'nama' => (string) $a['nama'],
             'nomor' => $a['nomor'],
             'layanan' => Pendaftaran::katalog()[$pertama->layanan]['nama'] ?? (string) $pertama->layanan,
-            'mulai' => $a['mulai'] === null
-                ? null
-                : \Illuminate\Support\Carbon::parse($a['mulai'])->locale('id')->translatedFormat('d F Y'),
+            'mulai' => self::tanggal($a['mulai'] ?? null),
+            'selesai' => self::tanggal($a['selesai'] ?? null),
+            'lokasi' => (string) ($a['lokasi'] ?? ''),
         ];
+    }
+
+    /** Tanggal berbahasa Indonesia; APP_LOCALE masih en. */
+    private static function tanggal($nilai): ?string
+    {
+        return $nilai === null || $nilai === ''
+            ? null
+            : \Illuminate\Support\Carbon::parse($nilai)->locale('id')->translatedFormat('d F Y');
     }
 }
