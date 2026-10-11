@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Support\KabarStatusPendaftaran;
 use App\Support\PendaftaranSemuaLayanan as Pendaftaran;
+use Illuminate\Support\Carbon;
 
 /**
  * Teks siap pakai untuk tombol WhatsApp di layar pendaftaran.
@@ -60,6 +61,19 @@ class PesanWaPendaftaran
      */
     private const PENUTUP = [
         'menunggu' => 'Kalau sudah transfer, kirimkan bukti transfernya ke nomor ini ya 🙏',
+        /*
+         * Buktinya SUDAH masuk dan sedang diperiksa.
+         *
+         * Keadaannya tetap 'menunggu' di katalog — statusnya memang belum
+         * lunas — tetapi menagih orang yang sudah mengirim uang DAN bukti
+         * adalah kesalahan yang paling menyinggung dari seluruh pesan ini.
+         * Terukur saat mencobanya: pesan Scopus Kafe berbunyi "bukti Anda
+         * sedang diperiksa" lalu menutup dengan "kalau sudah transfer,
+         * kirimkan buktinya" — dua kalimat yang saling membantah dalam satu
+         * pesan.
+         */
+        'diperiksa' => 'Anda tidak perlu mengirim apa pun lagi. Kami kabari lagi lewat '
+            . 'nomor ini begitu pemeriksaannya selesai 🙏',
         'lunas' => 'Simpan pesan ini sebagai bukti ya. Sampai bertemu di acaranya 🙏',
         'jadwal' => 'Kalau jadwal barunya ternyata tidak bisa Anda ikuti, balas pesan ini ya — '
             . 'akan kami carikan jalan keluarnya.',
@@ -87,47 +101,51 @@ class PesanWaPendaftaran
         $keadaan = Pendaftaran::keadaanDari($status);
 
         $nama = trim((string) ($b->nama_orang ?? ''));
-        $layanan = Pendaftaran::katalog()[$b->layanan]['nama'] ?? 'Rumah Scopus Foundation';
-        $nomor = trim((string) ($b->nomor ?? ''));
         $total = (int) ($b->total ?? 0);
 
         $baris = [($nama === '' ? 'Halo' : 'Halo ' . $nama) . ' 👋'];
         $baris[] = '';
-        $baris[] = 'Saya panitia ' . $layanan . ' Rumah Scopus Foundation.';
+        /*
+         * "Admin Rumah Scopus", bukan "panitia <nama layanan>".
+         *
+         * Satu orang memegang kelima layanan, dan memperkenalkan diri sebagai
+         * panitia satu layanan membuat percakapan berikutnya — yang sering
+         * soal pendaftaran lain milik orang yang sama — terbaca seperti
+         * datang dari orang yang berbeda. Nama layanannya tetap disebut, di
+         * rincian, tempat ia memang keterangan.
+         */
+        $baris[] = 'Saya admin Rumah Scopus.';
 
         /*
          * Status yang belum punya kalimat tidak menghasilkan pesan setengah
-         * jadi: kalimat keadaannya dilewati, sapaan dan rinciannya tetap
-         * terkirim. Panitia masih bisa mengetik sisanya sendiri — jauh lebih
-         * baik daripada tombol yang mati.
+         * jadi: kalimat keadaannya dilewati, rinciannya tetap terkirim.
+         * Panitia masih bisa mengetik sisanya sendiri — jauh lebih baik
+         * daripada tombol yang mati.
          */
         if ($kabar !== null) {
             $baris[] = '';
-            /*
-             * Kalimat pembuka milik status 'Pendaftaran Reschedule' berbunyi
-             * "Rinciannya ada di bawah ini" — benar di surat yang memang
-             * punya tabel di bawahnya. Di sini rinciannya menyusul sebagai
-             * baris Nomor dan Sesi, jadi janjinya tetap ditepati.
-             */
             $baris[] = $kabar['pembuka'];
         }
 
-        $rincian = array_filter([
-            $nomor === '' ? null : 'Nomor pendaftaran: *' . strtoupper($nomor) . '*',
-            ($sesi === null || trim($sesi) === '') ? null : 'Sesi: ' . trim($sesi),
-            ($keadaan === 'menunggu' && $total > 0)
-                ? 'Nominal: *Rp ' . number_format($total, 0, ',', '.') . '*'
-                : null,
-        ]);
+        /*
+         * Menagih atau tidak. Yang buktinya sudah diunggah TIDAK ditagih:
+         * keadaannya memang masih 'menunggu', tetapi uangnya sudah dikirim
+         * dan yang ditunggu panitia, bukan dia.
+         */
+        $menagih = $keadaan === 'menunggu' && ! Pendaftaran::perluDiperiksa($b);
+
+        $rincian = self::rincian($b, $sesi, $menagih, $total);
 
         if ($rincian !== []) {
             $baris[] = '';
+            $baris[] = 'Rincian pendaftaran Anda:';
+
             foreach ($rincian as $r) {
-                $baris[] = $r;
+                $baris[] = '• ' . $r;
             }
         }
 
-        if ($keadaan === 'menunggu' && $total > 0 && (int) ($b->kode_unik ?? 0) > 0) {
+        if ($menagih && $total > 0 && (int) ($b->kode_unik ?? 0) > 0) {
             $baris[] = '';
             $baris[] = 'Mohon ditransfer *persis* sampai angka terakhir — tiga angka di '
                 . 'belakang itu kode unik Anda, dan itu yang kami pakai untuk mencocokkan '
@@ -135,9 +153,84 @@ class PesanWaPendaftaran
         }
 
         $baris[] = '';
-        $baris[] = self::PENUTUP[$keadaan] ?? self::PENUTUP['lain'];
+        $kunciPenutup = ($keadaan === 'menunggu' && ! $menagih) ? 'diperiksa' : $keadaan;
+
+        $baris[] = self::PENUTUP[$kunciPenutup] ?? self::PENUTUP['lain'];
 
         return implode("\n", $baris);
+    }
+
+    /**
+     * Butir rincian pendaftaran, diambil dari BARISNYA — tidak ada yang
+     * dikarang.
+     *
+     * Tiap butir dilewati kalau nilainya memang tidak ada: Scopus Kafe dan
+     * Clinik Scopus tidak berangkatan sama sekali, dan pendaftaran satu
+     * orang tidak perlu diberi tahu bahwa ia satu orang.
+     *
+     * @return list<string>
+     */
+    private static function rincian(object $b, ?string $sesi, bool $menagih, int $total): array
+    {
+        $butir = [];
+
+        $layanan = Pendaftaran::katalog()[$b->layanan ?? '']['nama'] ?? null;
+
+        if ($layanan !== null) {
+            $butir[] = 'Layanan: *' . $layanan . '*';
+        }
+
+        /*
+         * Angkatan KE-BERAPA, bukan cuma namanya.
+         *
+         * "Angkatan Penuh YMO7ZY" tidak menunjuk apa pun bagi yang
+         * menerimanya — nama itu dipakai panitia, sedangkan yang diingat
+         * pendaftar nomor angkatannya. Keduanya disebut kalau dua-duanya ada.
+         *
+         * Dibaca lewat helper hanya kalau barisnya memang punya angkatan_id;
+         * pemanggil yang menyerahkan baris rakitan sendiri tidak punya kolom
+         * itu, dan membacanya akan melempar galat atas properti yang tidak
+         * ada.
+         */
+        $angkatan = isset($b->angkatan_id) ? Pendaftaran::angkatanBaris($b) : null;
+
+        if ($angkatan !== null) {
+            $sebut = $angkatan['nomor'] !== null
+                ? 'Angkatan ke-' . $angkatan['nomor']
+                : 'Angkatan';
+
+            $butir[] = $sebut . ': ' . $angkatan['nama'];
+
+            if (! empty($angkatan['mulai'])) {
+                $butir[] = 'Mulai: ' . Carbon::parse($angkatan['mulai'])
+                    ->locale('id')->translatedFormat('j F Y');
+            }
+        } elseif ($sesi !== null && trim($sesi) !== '') {
+            // Layanan tanpa angkatan: sesinya teks bebas, itu saja yang ada.
+            $butir[] = 'Sesi: ' . trim($sesi);
+        }
+
+        $orang = (int) ($b->jumlah ?? 1);
+
+        if ($orang > 1) {
+            $butir[] = 'Didaftarkan untuk: *' . $orang . ' orang*';
+        }
+
+        $nomor = trim((string) ($b->nomor ?? ''));
+
+        if ($nomor !== '') {
+            $butir[] = 'Nomor pendaftaran: *' . strtoupper($nomor) . '*';
+        }
+
+        if ($total > 0) {
+            // Disebut "total" untuk yang sudah lunas dan "nominal" untuk yang
+            // belum: kata yang sama untuk dua keadaan membuat yang sudah
+            // membayar mengira masih ditagih.
+            $butir[] = ($menagih ? 'Nominal yang ditunggu' : 'Total')
+                . ': *Rp ' . number_format($total, 0, ',', '.') . '*';
+        }
+
+        return $butir;
     }
 
     /** Sapaan singkat untuk peserta rombongan, yang bukan pendaftarnya. */

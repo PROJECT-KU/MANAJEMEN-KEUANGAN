@@ -1995,12 +1995,22 @@ Rincian Pendaftaran | MIS Rumah Scopus
      */
     $sesiUntukWa = $sesiBaris ?: ($nomorAngkatan ? 'angkatan ke-' . $nomorAngkatan : null);
 
+    /*
+     * Baris UNION-nya yang dipakai kalau ada, bukan baris rakitan di atas.
+     *
+     * Hanya baris union yang membawa angkatan_id, dan dari situlah nomor
+     * angkatan serta tanggal mulainya dibaca. Dengan baris rakitan, pesannya
+     * kehilangan justru keterangan yang paling dicari pendaftar: angkatan
+     * ke berapa dan mulai kapan.
+     */
+    $sumberWa = $baris ?: $barisWa;
+
     $tautanWa = \App\Support\TautanWa::kirim(
-        $telpOrang, \App\Support\PesanWaPendaftaran::untuk($barisWa, $sesiUntukWa)
+        $telpOrang, \App\Support\PesanWaPendaftaran::untuk($sumberWa, $sesiUntukWa)
     );
 
     $tautanWaStatus = \App\Support\TautanWa::kirim(
-        $telpOrang, \App\Support\PesanWaPendaftaran::tindakLanjut($barisWa, $sesiUntukWa)
+        $telpOrang, \App\Support\PesanWaPendaftaran::tindakLanjut($sumberWa, $sesiUntukWa)
     );
 
     /*

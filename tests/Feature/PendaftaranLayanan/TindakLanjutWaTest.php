@@ -318,6 +318,113 @@ class TindakLanjutWaTest extends TestCase
             'Jejak follow up tertulis padahal percakapannya tidak pernah bisa dibuka.');
     }
 
+    /**
+     * Pengirimnya "admin Rumah Scopus", bukan panitia satu layanan.
+     *
+     * Satu orang memegang kelima layanan, dan memperkenalkan diri sebagai
+     * panitia satu layanan membuat percakapan berikutnya — yang sering soal
+     * pendaftaran lain milik orang yang sama — terbaca seperti datang dari
+     * orang yang berbeda.
+     */
+    #[Test]
+    public function memperkenalkan_diri_sebagai_admin_rumah_scopus(): void
+    {
+        $pesan = PesanWaPendaftaran::tindakLanjut($this->baris('diproses'));
+
+        $this->assertStringContainsString('Saya admin Rumah Scopus.', $pesan);
+        $this->assertStringNotContainsString('panitia Scopus Camp', $pesan,
+            'Masih memperkenalkan diri sebagai panitia satu layanan.');
+    }
+
+    /**
+     * Rincian lengkap: layanan, angkatan KE-BERAPA, tanggal mulai, jumlah
+     * orang, nomor, dan nominalnya.
+     *
+     * "Angkatan Penuh YMO7ZY" tidak menunjuk apa pun bagi yang menerimanya —
+     * nama itu dipakai panitia, sedangkan yang diingat pendaftar nomor
+     * angkatannya.
+     */
+    #[Test]
+    public function rinciannya_menyebut_angkatan_dan_jumlah_orangnya(): void
+    {
+        [$orang, $b] = $this->dengan(['jumlah_pendaftar' => '3']);
+
+        Pendaftaran::lupakan();
+        $union = Pendaftaran::kueri()
+            ->where('layanan', 'scopus_camp')->where('id', $b->getKey())->first();
+
+        $pesan = PesanWaPendaftaran::tindakLanjut($union, Pendaftaran::sesiBaris($union));
+
+        $this->assertStringContainsString('Layanan: *Scopus Camp*', $pesan);
+        $this->assertStringContainsString('Angkatan ke-77: Angkatan Uji', $pesan,
+            'Angkatan ke-berapa tidak disebut; namanya saja tidak menunjuk apa pun '
+            . 'bagi yang menerimanya.');
+        $this->assertStringContainsString('Mulai: ', $pesan, 'Tanggal mulainya tidak disebut.');
+        $this->assertStringContainsString('Didaftarkan untuk: *3 orang*', $pesan,
+            'Jumlah orang yang didaftarkan tidak disebut.');
+        // Nomornya dicetak huruf besar supaya mudah dibacakan lewat telepon;
+        // dibandingkan apa adanya, penjaganya merah pada pesan yang benar.
+        $this->assertStringContainsString(strtoupper($b->id_transaksi), $pesan);
+    }
+
+    /** Pendaftaran satu orang tidak perlu diberi tahu bahwa ia satu orang. */
+    #[Test]
+    public function satu_orang_tidak_disebut_jumlahnya(): void
+    {
+        [$orang, $b] = $this->dengan(['jumlah_pendaftar' => '1']);
+
+        Pendaftaran::lupakan();
+        $union = Pendaftaran::kueri()
+            ->where('layanan', 'scopus_camp')->where('id', $b->getKey())->first();
+
+        $this->assertStringNotContainsString('Didaftarkan untuk',
+            PesanWaPendaftaran::tindakLanjut($union));
+    }
+
+    /**
+     * Yang buktinya SUDAH diunggah tidak ditagih lagi.
+     *
+     * Keadaannya memang masih 'menunggu' — statusnya belum lunas — tetapi
+     * uangnya sudah dikirim dan yang ditunggu panitia, bukan dia. Terukur
+     * saat mencobanya: pesan berbunyi "bukti Anda sedang diperiksa" lalu
+     * menutup dengan "kalau sudah transfer, kirimkan buktinya" — dua
+     * kalimat yang saling membantah dalam satu pesan.
+     */
+    #[Test]
+    public function yang_buktinya_sudah_masuk_tidak_ditagih_lagi(): void
+    {
+        [$orang, $b] = $this->dengan(['gambar' => 'bukti/scopus_camp/ada.webp']);
+
+        Pendaftaran::lupakan();
+        $union = Pendaftaran::kueri()
+            ->where('layanan', 'scopus_camp')->where('id', $b->getKey())->first();
+
+        $pesan = PesanWaPendaftaran::tindakLanjut($union);
+
+        $this->assertStringNotContainsString('kirimkan bukti transfernya', $pesan,
+            'Orang yang sudah mengirim bukti disuruh mengirimnya lagi.');
+        $this->assertStringNotContainsString('Mohon ditransfer', $pesan,
+            'Orang yang sudah membayar disuruh transfer lagi.');
+        $this->assertStringNotContainsString('Nominal yang ditunggu', $pesan,
+            'Nominalnya masih disebut sebagai tagihan.');
+        $this->assertStringContainsString('tidak perlu mengirim apa pun lagi', $pesan);
+    }
+
+    /** Yang belum mengunggah bukti TETAP ditagih — penjaga di atas tidak boleh
+     *  mematikan tagihan untuk semua orang. */
+    #[Test]
+    public function yang_belum_mengunggah_bukti_tetap_ditagih(): void
+    {
+        [$orang, $b] = $this->dengan();
+
+        Pendaftaran::lupakan();
+        $union = Pendaftaran::kueri()
+            ->where('layanan', 'scopus_camp')->where('id', $b->getKey())->first();
+
+        $this->assertStringContainsString('kirimkan bukti transfernya',
+            PesanWaPendaftaran::tindakLanjut($union));
+    }
+
     // ------------------------------------------------------------- pembantu
 
     private function baris(string $status): object
@@ -346,6 +453,9 @@ class TindakLanjutWaTest extends TestCase
 
         $angkatan = KategoriLayanan::create([
             'layanan' => 'scopus_camp', 'nama' => 'Angkatan Uji ' . $t,
+            // nama_ke WAJIB diisi: dari sinilah "angkatan ke-berapa" dibaca,
+            // dan angkatan sungguhan selalu punya nomornya.
+            'nama_ke' => '77',
             'mulai' => now()->addMonth()->toDateString(),
             'total_kuota' => '50', 'sisa_kuota' => '50', 'status' => 'active',
         ]);
