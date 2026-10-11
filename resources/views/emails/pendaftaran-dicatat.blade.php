@@ -48,10 +48,19 @@
                          di atas ungu tulisan "RUMAH SCOPUS" hampir tidak
                          terbaca. Surat ini juga dibaca PENDAFTAR, bukan orang
                          dalam — jadi yang pantas tampil merek yayasannya,
-                         bukan logo alat internalnya. --}}
+                         bukan logo alat internalnya.
+
+                         Yang dipakai berkas UKURAN SURAT-nya, bukan LogoRSC.png
+                         milik situsnya. Mereknya sama persis — keduanya dibuka
+                         berdampingan — tetapi LogoRSC.png 1906 x 470 piksel dan
+                         di peladen 121.370 bita, dikirim untuk slot selebar 210
+                         piksel. logo-rsc-email.png 440 x 108 piksel dan 15.735
+                         bita: masih dua kali kerapatan yang dipakai, dengan
+                         surat hampir delapan kali lebih ringan. Ketiga surat
+                         pendaftar lainnya memang sudah memakai berkas ini. --}}
                     <tr>
                         <td align="center" style="padding:26px 28px 18px;background:#ffffff">
-                            <img src="{{ asset('assets/img/LogoRSC.png') }}"
+                            <img src="{{ asset('assets/img/logo-rsc-email.png') }}"
                                 alt="Rumah Scopus Foundation" width="210"
                                 style="display:block;border:0;width:210px;max-width:72%;height:auto">
                         </td>
