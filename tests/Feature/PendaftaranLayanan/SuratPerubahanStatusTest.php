@@ -90,6 +90,51 @@ class SuratPerubahanStatusTest extends TestCase
             'Kalimat ini tidak dipakai status mana pun: ' . implode(', ', $menganggur));
     }
 
+    /**
+     * Ragam bahasa suratnya RESMI, pembuka sampai penutupnya.
+     *
+     * Dijaga SEPASANG, bukan pembukanya saja. Terukur saat memformalkannya:
+     * pembukanya sudah "telah kami terima dan saat ini menunggu pembayaran"
+     * sementara penutup surat yang sama masih "Kalau sudah transfer,
+     * kirimkan buktinya ke panitia supaya bisa segera kami cek" — satu
+     * surat bernada dua, dan yang paling janggal justru terbaca di surat
+     * yang menagih uang.
+     *
+     * Kalimat pembukanya dipakai bersama pesan WhatsApp (lihat
+     * PesanWaPendaftaran), jadi satu kalimat santai di sini ikut terkirim
+     * lewat dua saluran sekaligus.
+     */
+    #[Test]
+    public function ragam_bahasa_suratnya_resmi(): void
+    {
+        /*
+         * Penanda santai, masing-masing punya pasangan resminya yang sudah
+         * dipakai: "Kalau" -> "Apabila", ", jadi" -> "sehingga",
+         * "bisa" -> "dapat", "kami cek" -> "kami periksa".
+         *
+         * Halaman status publiknya TIDAK ikut dijaga penjaga ini. Suaranya
+         * sengaja lebih awam — yang membacanya pendaftar di tengah
+         * membayar, bukan penerima surat resmi.
+         */
+        $santai = ['Halo', 'Kalau ', ', jadi ', 'kami cek', 'balas saja', 'nggak', '!'];
+
+        $tercela = [];
+
+        foreach (KabarStatusPendaftaran::semuaStatus() as $status) {
+            $kabar = KabarStatusPendaftaran::untuk($status);
+            $teks = $kabar['pembuka'] . ' ' . implode(' ', $kabar['penutup']);
+
+            foreach ($santai as $kata) {
+                if (str_contains($teks, $kata)) {
+                    $tercela[] = $status . ': "' . $kata . '"';
+                }
+            }
+        }
+
+        $this->assertSame([], $tercela,
+            "Kalimat surat berikut masih bernada santai:\n- " . implode("\n- ", $tercela) . "\n");
+    }
+
     #[Test]
     public function kedua_puluh_tiga_suratnya_benar_benar_terbit(): void
     {

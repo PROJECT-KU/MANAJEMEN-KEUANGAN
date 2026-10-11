@@ -97,7 +97,7 @@ class TindakLanjutWaTest extends TestCase
     }
 
     /**
-     * Status "Dijadwalkan ulang" berjanji "Rinciannya ada di bawah ini", dan
+     * Status "Dijadwalkan ulang" berjanji rinciannya tercantum di bawah, dan
      * janji itu hanya ditepati kalau sesinya memang ikut terkirim.
      */
     #[Test]
@@ -127,14 +127,13 @@ class TindakLanjutWaTest extends TestCase
 
             /*
              * Yang dituntut: baris terakhirnya KALIMAT AJAKAN, bukan baris
-             * kosong atau potongan rincian. Versi pertama menuntut diakhiri
-             * titik, dan itu merah pada kalimat yang justru benar —
-             * penutupnya memang ditutup emoji, bukan titik.
+             * kosong atau potongan rincian. Menuntut diakhiri titik saja
+             * terlalu lemah — potongan rincian pun berakhir titik.
              */
             $this->assertNotSame('', $akhir,
                 "Pesan untuk keadaan {$keadaan} berakhir dengan baris kosong.");
 
-            $this->assertMatchesRegularExpression('/(balas pesan ini|kirimkan bukti|Simpan pesan ini|ditanyakan)/', $akhir,
+            $this->assertMatchesRegularExpression('/(balas pesan ini|kirimkan bukti|simpan pesan ini|ingin ditanyakan|mengabari melalui nomor ini)/', $akhir,
                 "Pesan untuk keadaan {$keadaan} tidak ditutup kalimat ajakan: {$akhir}");
         }
     }
@@ -149,7 +148,7 @@ class TindakLanjutWaTest extends TestCase
     {
         $pesan = PesanWaPendaftaran::tindakLanjut($this->baris('status-karangan'));
 
-        $this->assertStringContainsString('Halo Budi Santoso', $pesan);
+        $this->assertStringContainsString('Yth. Bapak/Ibu Budi Santoso,', $pesan);
         $this->assertStringContainsString('CAMP-0007', $pesan,
             'Nomor pendaftarannya hilang, jadi pesannya tidak menunjuk pendaftaran mana pun.');
     }
@@ -331,7 +330,7 @@ class TindakLanjutWaTest extends TestCase
     {
         $pesan = PesanWaPendaftaran::tindakLanjut($this->baris('diproses'));
 
-        $this->assertStringContainsString('Saya admin Rumah Scopus.', $pesan);
+        $this->assertStringContainsString('Perkenalkan, saya admin Rumah Scopus.', $pesan);
         $this->assertStringNotContainsString('panitia Scopus Camp', $pesan,
             'Masih memperkenalkan diri sebagai panitia satu layanan.');
     }
@@ -360,7 +359,7 @@ class TindakLanjutWaTest extends TestCase
             'Angkatan ke-berapa tidak disebut; namanya saja tidak menunjuk apa pun '
             . 'bagi yang menerimanya.');
         $this->assertStringContainsString('Mulai: ', $pesan, 'Tanggal mulainya tidak disebut.');
-        $this->assertStringContainsString('Didaftarkan untuk: *3 orang*', $pesan,
+        $this->assertStringContainsString('Jumlah peserta: *3 orang*', $pesan,
             'Jumlah orang yang didaftarkan tidak disebut.');
         // Nomornya dicetak huruf besar supaya mudah dibacakan lewat telepon;
         // dibandingkan apa adanya, penjaganya merah pada pesan yang benar.
@@ -377,7 +376,7 @@ class TindakLanjutWaTest extends TestCase
         $union = Pendaftaran::kueri()
             ->where('layanan', 'scopus_camp')->where('id', $b->getKey())->first();
 
-        $this->assertStringNotContainsString('Didaftarkan untuk',
+        $this->assertStringNotContainsString('Jumlah peserta',
             PesanWaPendaftaran::tindakLanjut($union));
     }
 
@@ -407,7 +406,7 @@ class TindakLanjutWaTest extends TestCase
             'Orang yang sudah membayar disuruh transfer lagi.');
         $this->assertStringNotContainsString('Nominal yang ditunggu', $pesan,
             'Nominalnya masih disebut sebagai tagihan.');
-        $this->assertStringContainsString('tidak perlu mengirim apa pun lagi', $pesan);
+        $this->assertStringContainsString('tidak perlu mengirimkan apa pun lagi', $pesan);
     }
 
     /** Yang belum mengunggah bukti TETAP ditagih — penjaga di atas tidak boleh
@@ -447,7 +446,7 @@ class TindakLanjutWaTest extends TestCase
             'Pendaftar daring disuruh mengirim bukti yang tidak pernah ada.');
         $this->assertStringNotContainsString('Mohon ditransfer', $pesan,
             'Pendaftar daring disuruh transfer manual.');
-        $this->assertStringContainsString('tautan pembayaran yang dikirim sistem', $pesan);
+        $this->assertStringContainsString('tautan pembayaran yang dikirimkan sistem', $pesan);
     }
 
     /**
@@ -479,7 +478,7 @@ class TindakLanjutWaTest extends TestCase
 
         $this->assertStringNotContainsString('transfer', strtolower($pesan),
             'Pembayar tunai disuruh transfer.');
-        $this->assertStringContainsString('diserahkan langsung ke panitia', $pesan);
+        $this->assertStringContainsString('diserahkan langsung kepada panitia', $pesan);
     }
 
     /**
@@ -499,6 +498,86 @@ class TindakLanjutWaTest extends TestCase
     }
 
     // ------------------------------------------------------------- pembantu
+
+    /**
+     * Ragam bahasanya RESMI di seluruh lima belas statusnya.
+     *
+     * Yang menerima pesan ini sebagian dosen dan peneliti, dan isinya
+     * menagih uang. Ditulis santai, tagihannya terbaca seperti pesan asal —
+     * bukan pemberitahuan lembaga yang perlu ditindaklanjuti.
+     *
+     * Disapu seluruh statusnya, bukan satu contoh: kalimat keadaannya datang
+     * dari katalog yang dipakai bersama suratnya, dan satu kalimat santai
+     * yang terselip di sana ikut terkirim lewat WhatsApp tanpa ada yang
+     * melihatnya. Terukur sebelum ini: sapaan dan penutupnya sudah resmi,
+     * tetapi kalimat tengahnya masih "sudah masuk dan sekarang menunggu".
+     */
+    #[Test]
+    public function ragam_bahasanya_resmi_di_semua_status(): void
+    {
+        /*
+         * Penanda santai, masing-masing punya pasangan resminya:
+         * "Halo" -> "Yth. Bapak/Ibu", "Kalau" -> "Apabila",
+         * ", jadi" -> "sehingga", "bisa" -> "dapat".
+         */
+        $santai = ['Halo', 'Kalau ', ', jadi ', 'nggak', 'Oke', '!'];
+
+        foreach (KabarStatusPendaftaran::semuaStatus() as $status) {
+            $pesan = PesanWaPendaftaran::tindakLanjut($this->baris($status));
+
+            $this->assertStringStartsWith('Yth. Bapak/Ibu', $pesan,
+                "Pesan status {$status} tidak dibuka sapaan resmi.");
+
+            foreach ($santai as $kata) {
+                $this->assertStringNotContainsString($kata, $pesan,
+                    "Pesan status {$status} memuat ragam santai \"{$kata}\".");
+            }
+
+            /*
+             * Emoji dibuang seluruhnya. Dulu penutupnya ditutup emoji, dan
+             * itu satu-satunya alasan tombol ini dulu memakai api.whatsapp.com
+             * — sekarang alasannya tinggal tanda baca, tetapi emojinya tidak
+             * boleh kembali lewat kalimat baru yang ditambahkan nanti.
+             */
+            $this->assertSame(0,
+                preg_match('/[\x{1F300}-\x{1FAFF}\x{2600}-\x{27BF}]/u', $pesan),
+                "Pesan status {$status} masih memuat emoji.");
+        }
+    }
+
+    /**
+     * Nama yang diisi seluruhnya huruf kecil dibesarkan awal katanya.
+     *
+     * Borang pendaftarannya tidak memaksa huruf besar. Hasilnya sapaan
+     * "Yth. Bapak/Ibu joko," — justru di kalimat yang paling resmi dari
+     * seluruh pesan ini.
+     */
+    #[Test]
+    public function nama_huruf_kecil_dibesarkan_di_sapaannya(): void
+    {
+        $pesan = PesanWaPendaftaran::tindakLanjut(
+            $this->baris('diproses', ['nama_orang' => 'joko susilo'])
+        );
+
+        $this->assertStringStartsWith('Yth. Bapak/Ibu Joko Susilo,', $pesan);
+    }
+
+    /**
+     * Nama yang SUDAH memuat huruf besar dibiarkan utuh.
+     *
+     * Di dalamnya ada singkatan dan gelar — "M. Rizki", "Prof. H." — yang
+     * rusak kalau dibesarkan-kecilkan ulang. Penjaga ini yang membatasi
+     * perbaikan di atas supaya tidak menyapu semua nama.
+     */
+    #[Test]
+    public function nama_bergelar_tidak_diubah_hurufnya(): void
+    {
+        $pesan = PesanWaPendaftaran::tindakLanjut(
+            $this->baris('diproses', ['nama_orang' => 'M. Rizki Al-Hakim, S.Si'])
+        );
+
+        $this->assertStringStartsWith('Yth. Bapak/Ibu M. Rizki Al-Hakim, S.Si,', $pesan);
+    }
 
     private function baris(string $status, array $ubah = []): object
     {
