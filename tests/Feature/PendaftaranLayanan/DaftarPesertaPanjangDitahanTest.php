@@ -242,6 +242,79 @@ class DaftarPesertaPanjangDitahanTest extends TestCase
     }
 
     /**
+     * Tiap kartu peserta punya bentuk yang SAMA: nama, lalu nomornya di
+     * barisnya sendiri.
+     *
+     * Nomor pernah memakai inline-flex dan ikut mengalir di belakang apa pun
+     * yang mendahuluinya — jadi pada kartu beremail ia jatuh ke baris
+     * ketiga, pada kartu tanpa email ia menempel di sebelah nama. Terukur:
+     * nomor yang sama duduk di y=66 pada kartu pertama dan y=12 pada kartu
+     * sebelahnya. Dua kartu bersebelahan jadi tidak terbaca sebagai satu
+     * bentuk.
+     */
+    #[Test]
+    public function nomor_peserta_selalu_barisnya_sendiri(): void
+    {
+        $aturan = preg_match('/\.rin-peserta-telp\s*\{([^}]*)\}/s', $this->gaya(), $cocok)
+            ? $cocok[1] : '';
+
+        $this->assertNotSame('', $aturan, 'Aturan .rin-peserta-telp tidak ketemu.');
+
+        $this->assertMatchesRegularExpression('/display:\s*flex\s*;/', $aturan,
+            'Nomor peserta kembali mengalir di belakang teks sebelumnya, jadi '
+            . 'letaknya berbeda-beda antar kartu.');
+
+        $this->assertSame(0, preg_match('/display:\s*inline-flex/', $aturan),
+            'inline-flex lagi — itu persis yang membuat letaknya tidak tetap.');
+    }
+
+    /**
+     * Email pendaftar TIDAK diulang di kartunya.
+     *
+     * Email itu sudah tergambar utuh di kartu identitas di sebelah kiri, dan
+     * pengulangannya yang membuat kartu pendaftar tiga baris sementara kartu
+     * peserta lain satu. Untuk peserta LAIN ia tetap digambar: kalau suatu
+     * hari kolomnya terisi, itu keterangan yang tidak ada di mana pun.
+     */
+    #[Test]
+    public function email_pendaftar_tidak_diulang_di_kartunya(): void
+    {
+        /*
+         * Untaian biasa, BUKAN regex berisi $orangKe.
+         *
+         * Versi pertama memakainya di dalam untaian berkutip ganda, dan PHP
+         * menafsirkannya sebagai variabel: ujinya pecah dengan "Undefined
+         * variable $orangKe" — galat yang menuding ujinya sendiri, bukan
+         * markah yang hendak dijaganya.
+         */
+        $this->assertStringContainsString(
+            "@if (! empty(\$orangKe['email']) && ! \$orangKe['utama'])",
+            $this->gaya(),
+            'Email pendaftar diulang lagi di kartu peserta, dan kartunya kembali '
+            . 'berbeda tinggi dari kartu sebelahnya.'
+        );
+    }
+
+    /**
+     * Lencana "pendaftar" di pojok kanan atas, bukan di dalam nama.
+     *
+     * Di dalam nama ia jatuh ke barisnya sendiri di antara nama dan nomor —
+     * kartu pendaftar jadi tiga baris sementara kartu sebelahnya dua.
+     */
+    #[Test]
+    public function lencana_pendaftar_sejajar_namanya(): void
+    {
+        $aturan = preg_match('/\.rin-peserta-pil\s*\{([^}]*)\}/s', $this->gaya(), $cocok)
+            ? $cocok[1] : '';
+
+        $this->assertStringContainsString('margin-left: auto', $aturan,
+            'Lencananya tidak lagi didorong ke pojok kanan.');
+
+        $this->assertStringContainsString('align-self: flex-start', $aturan,
+            'Tanpa ini lencananya mengambang di tengah kartu yang namanya dua baris.');
+    }
+
+    /**
      * Kalimat bantuannya harus sepakat dengan yang dikerjakan peladen.
      * Dulu berbunyi "tidak ikut tersimpan" — dan memang begitu: kelebihannya
      * dipotong diam-diam lalu layarnya menjawab "lengkap".
