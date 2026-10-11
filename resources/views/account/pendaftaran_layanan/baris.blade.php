@@ -87,6 +87,14 @@
     $hariMenunggu = $menggantung && $waktuBaris ? (int) $waktuBaris->diffInDays(now()) : 0;
 
     /*
+     * Buktinya sudah diunggah tetapi belum diperiksa, dan sudah lewat
+     * ambangnya. Aturannya dari Pendaftaran, bukan disalin: ubin ringkasan
+     * menghitung yang sama, dan dua salinan akan berselisih tanpa suara.
+     */
+    $periksaTertunda = Pendaftaran::periksaTertunda($b);
+    $hariPeriksa = $periksaTertunda && $waktuBaris ? (int) $waktuBaris->diffInDays(now()) : 0;
+
+    /*
      * Status "lunas" milik layanan ini, untuk jalan pintas menandainya.
      *
      * Dibaca dari katalog, bukan ditulis di sini: kelima layanan memakai
@@ -97,7 +105,12 @@
     $statusLunas = Pendaftaran::statusLunas($b->layanan);
     $bolehTandaiLunas = $statusLunas !== null && $keadaanBaris === 'menunggu';
 @endphp
-<tr @class(['pdl-baris', $layananBaris['warna'], 'pdl-baris-lama' => $menggantung])>
+<tr @class([
+    'pdl-baris',
+    $layananBaris['warna'],
+    'pdl-baris-lama' => $menggantung,
+    'pdl-baris-periksa' => $periksaTertunda,
+])>
     <td class="mis-td-utama">
         <div class="pdl-layanan">
             <span class="mis-medali kecil {{ $layananBaris['warna'] }}" aria-hidden="true">
@@ -317,6 +330,17 @@
 
                  Angkanya disebut, bukan cuma "sudah lama": yang menentukan
                  siapa dihubungi lebih dulu adalah berapa lamanya. --}}
+            {{-- Didahulukan dari penanda menggantung: keduanya tidak pernah
+                 muncul bersamaan — yang satu berbukti, yang satu tidak —
+                 tetapi kalau suatu hari bisa, yang ini yang lebih mendesak. --}}
+            @if ($periksaTertunda)
+                <span class="pdl-bukti pdl-periksa"
+                    title="Bukti sudah diunggah tetapi belum ditandai lunas selama lebih dari {{ \App\Support\PendaftaranSemuaLayanan::HARI_PERIKSA }} hari">
+                    <i class="fas fa-receipt" aria-hidden="true"></i>
+                    belum diperiksa {{ $hariPeriksa }} hari
+                </span>
+            @endif
+
             @if ($menggantung)
                 <span class="pdl-bukti pdl-lama"
                     title="Menunggu bayar lebih dari {{ \App\Support\PendaftaranSemuaLayanan::HARI_MENGGANTUNG }} hari tanpa kabar">

@@ -100,6 +100,81 @@ class BarisButuhPerhatianTest extends TestCase
             'Barisnya menghitung sendiri siapa yang menggantung.');
     }
 
+    /**
+     * Bukti yang sudah lama menunggu DIPERIKSA ditandai juga.
+     *
+     * Beda dari penanda "menggantung": yang itu menunggu orang lain
+     * membayar, yang ini menunggu panitia membuka satu gambar — dan selama
+     * itu uangnya mungkin sudah masuk tanpa tercatat. Terukur di basis
+     * data: enam bukti menunggu diperiksa selama 177, 127, 74, 28, 17, dan
+     * 6 hari.
+     */
+    #[Test]
+    public function bukti_yang_lama_menunggu_diperiksa_ditandai(): void
+    {
+        [$orang, $b] = $this->dengan([
+            'gambar' => 'bukti/scopus_camp/ada.webp',
+            'waktu' => now()->subDays(Pendaftaran::HARI_PERIKSA + 9),
+        ]);
+
+        $baris = $this->baris($orang, $b);
+
+        $this->assertStringContainsString('pdl-baris-periksa', $baris,
+            'Bukti yang menunggu diperiksa berbulan-bulan tampil sama dengan yang '
+            . 'baru diunggah tadi pagi.');
+        $this->assertStringContainsString('belum diperiksa 12 hari', $baris,
+            'Lamanya tidak disebut — padahal itu yang membedakan antrean biasa '
+            . 'dari yang terlupakan.');
+    }
+
+    #[Test]
+    public function bukti_yang_baru_diunggah_tidak_ditandai(): void
+    {
+        [$orang, $b] = $this->dengan([
+            'gambar' => 'bukti/scopus_camp/ada.webp',
+            'waktu' => now()->subDay(),
+        ]);
+
+        $this->assertStringNotContainsString('pdl-baris-periksa', $this->baris($orang, $b));
+    }
+
+    /** Tanpa bukti, tidak ada yang perlu diperiksa — itu urusan penanda lain. */
+    #[Test]
+    public function tanpa_bukti_tidak_ditandai_perlu_diperiksa(): void
+    {
+        [$orang, $b] = $this->dengan(['waktu' => now()->subDays(40)]);
+
+        $this->assertStringNotContainsString('pdl-baris-periksa', $this->baris($orang, $b));
+    }
+
+    #[Test]
+    public function yang_sudah_lunas_tidak_ditandai_perlu_diperiksa(): void
+    {
+        [$orang, $b] = $this->dengan([
+            'gambar' => 'bukti/scopus_camp/ada.webp',
+            'waktu' => now()->subDays(40),
+            'status' => Pendaftaran::statusLunas('scopus_camp'),
+        ]);
+
+        $this->assertStringNotContainsString('pdl-baris-periksa', $this->baris($orang, $b));
+    }
+
+    /**
+     * Aturan umurnya SATU untuk ubin dan penanda baris. Dua salinan akan
+     * berselisih tanpa suara.
+     */
+    #[Test]
+    public function aturan_periksanya_satu(): void
+    {
+        $this->assertStringContainsString('Pendaftaran::periksaTertunda($b)',
+            file_get_contents(resource_path('views/account/pendaftaran_layanan/baris.blade.php')),
+            'Barisnya menghitung sendiri siapa yang terlambat diperiksa.');
+
+        $this->assertStringContainsString("\$ringkasan['periksa_tertua']",
+            file_get_contents(resource_path('views/account/pendaftaran_layanan/index.blade.php')),
+            'Umur bukti tertua tidak disebut di ubinnya.');
+    }
+
     // ------------------------------------------------------ tandai lunas
 
     #[Test]

@@ -1777,6 +1777,101 @@ class PendaftaranLayananController extends Controller
             'Pengembalian Rp ' . number_format($nominal, 0, ',', '.') . ' tercatat.');
     }
 
+    /**
+     * Membetulkan satu catatan pengembalian dana.
+     *
+     * Cermin dari ubahPembayaran, dan alasannya sama: tanpa ini satu angka
+     * salah ketik hanya bisa dibereskan dengan menghapus lalu mencatat
+     * ulang — dan penghapusannya meninggalkan jejak "Catatan pengembalian
+     * Rp X dihapus", yang terbaca seperti refund yang dibatalkan, bukan
+     * koreksi. Pembayaran sudah bisa dibetulkan; meninggalkan pengembalian
+     * di belakang membuat dua catatan uang yang berdampingan berperilaku
+     * berbeda tanpa alasan.
+     */
+    public function ubahPengembalian(Request $request, string $pengembalian)
+    {
+        if (! $this->bolehMelihat()) {
+            return $this->tolak();
+        }
+
+        $baris = \App\PendaftaranPengembalian::find($pengembalian);
+
+        if ($baris === null) {
+            abort(404);
+        }
+
+        $data = $request->validate([
+            'nominal' => ['required', 'string', 'max:20'],
+            'tanggal' => ['required', 'date', 'before_or_equal:today'],
+            'cara' => ['nullable', Rule::in(array_keys(Pendaftaran::caraBayarPilihan()))],
+            'catatan' => ['nullable', 'string', 'max:255'],
+        ], [
+            'nominal.required' => 'Nominal yang dikembalikan belum diisi.',
+            'tanggal.required' => 'Tanggal uang keluarnya belum diisi.',
+            'tanggal.before_or_equal' => 'Tanggalnya tidak boleh di masa depan — '
+                . 'yang dicatat di sini uang yang SUDAH keluar.',
+        ]);
+
+        $nominal = (int) preg_replace('/\D+/', '', $data['nominal']);
+
+        if ($nominal < 1) {
+            return back()->withErrors(['nominal' => 'Nominalnya harus lebih dari nol.'])
+                ->withInput()->with('tab', 'ringkasan');
+        }
+
+        $pendaftaran = Pendaftaran::temukan((string) $baris->layanan, (string) $baris->pendaftaran_id);
+
+        if ($pendaftaran === null) {
+            abort(404);
+        }
+
+        /*
+         * Batas yang sama persis dengan pencatatannya, DIKURANGI baris ini
+         * sendiri. Tanpa pengurangan itu, membetulkan Rp 1.000.000 jadi
+         * Rp 1.000.001 ditolak sebab barisnya sendiri ikut dihitung sebagai
+         * pengembalian yang sudah ada.
+         */
+        $diterima = \App\Support\UangPendaftaran::diterima((string) $baris->layanan, $pendaftaran);
+        $lain = (int) \App\PendaftaranPengembalian::milik((string) $baris->layanan, (string) $baris->pendaftaran_id)
+            ->where('id', '<>', $baris->getKey())->sum('nominal');
+
+        if ($lain + $nominal > $diterima) {
+            return back()->withInput()->with('tab', 'ringkasan')->with('error',
+                'Totalnya melebihi uang yang masuk (Rp ' . number_format($diterima, 0, ',', '.')
+                . ') — sisa yang masih bisa dikembalikan Rp '
+                . number_format(max(0, $diterima - $lain), 0, ',', '.') . '.');
+        }
+
+        $lama = (int) $baris->nominal;
+
+        $baris->forceFill([
+            'nominal' => $nominal,
+            'tanggal' => $data['tanggal'],
+            'cara' => $data['cara'] ?? null,
+            'catatan' => trim((string) ($data['catatan'] ?? '')) ?: null,
+        ])->save();
+
+        // Dicatat hanya kalau nominalnya benar-benar berubah; membetulkan
+        // tanggal tidak mengubah uangnya.
+        if ($lama !== $nominal) {
+            \App\PendaftaranJejak::create([
+                'layanan' => (string) $baris->layanan,
+                'pendaftaran_id' => (string) $baris->pendaftaran_id,
+                'aksi' => 'ubah-refund',
+                'dari' => (string) $lama,
+                'ke' => (string) $nominal,
+                'oleh_id' => Auth::id(),
+                'oleh_nama' => $this->siapa(),
+            ]);
+        }
+
+        return back()->with('tab', 'ringkasan')->with('sukses',
+            $lama === $nominal
+                ? 'Catatan pengembaliannya dibetulkan.'
+                : 'Catatan pengembaliannya dibetulkan: Rp ' . number_format($lama, 0, ',', '.')
+                    . ' jadi Rp ' . number_format($nominal, 0, ',', '.') . '.');
+    }
+
     /** Menghapus satu catatan pengembalian yang salah ketik. */
     public function hapusPengembalian(string $pengembalian)
     {
@@ -1888,6 +1983,67 @@ class PendaftaranLayananController extends Controller
         // yang sudah berhasil, melainkan menghubungi pendaftarnya sendiri.
         return back()->with('error', $hasil['pesan']
             . ' Statusnya tersimpan, TETAPI emailnya gagal dikirim — beri tahu pendaftarnya sendiri.');
+    }
+
+    /**
+     * Mencatat follow up WhatsApp, lalu meneruskan ke percakapannya.
+     *
+     * Tombolnya dulu tautan biasa: WhatsApp terbuka dan selesai, tanpa satu
+     * baris pun yang mencatat bahwa pendaftar sudah dihubungi. Percobaan
+     * kirim email tercatat rapi di jejak, jadi riwayatnya timpang — yang
+     * lewat surat terlihat, yang lewat WhatsApp tidak — dan pertanyaan
+     * "sudah difollow-up belum?" tidak bisa dijawab dari layar mana pun.
+     *
+     * Dicatat "DIBUKA", bukan "terkirim": yang diketahui peladen hanyalah
+     * panitia menekan tombolnya. Apakah pesannya benar-benar dikirim
+     * terjadi di aplikasi WhatsApp, di luar jangkauan sistem ini, dan
+     * menuliskannya sebagai "terkirim" akan jadi catatan yang berbohong.
+     */
+    public function catatFollowUp(Request $request, string $layanan, string $id)
+    {
+        if (! $this->bolehMelihat()) {
+            return $this->tolak();
+        }
+
+        if (! array_key_exists($layanan, Pendaftaran::katalog())) {
+            abort(404);
+        }
+
+        $pendaftaran = Pendaftaran::temukan($layanan, $id);
+
+        if ($pendaftaran === null) {
+            abort(404);
+        }
+
+        $telp = $pendaftaran->telp ?? $pendaftaran->telp_pemesan ?? null;
+        $nomorWa = \App\Support\PesananPelanggan::nomorWa($telp);
+
+        if ($nomorWa === '') {
+            return back()->with('error',
+                'Nomor WhatsApp-nya tidak bisa dipakai, jadi percakapannya tidak bisa dibuka.');
+        }
+
+        $baris = Pendaftaran::kueri()->where('layanan', $layanan)->where('id', $id)->first();
+
+        $tautan = \App\Support\TautanWa::kirim($telp, \App\Support\PesanWaPendaftaran::tindakLanjut(
+            $baris ?? $pendaftaran,
+            $baris === null ? null : Pendaftaran::sesiBaris($baris)
+        ));
+
+        \App\PendaftaranJejak::create([
+            'layanan' => $layanan,
+            'pendaftaran_id' => (string) $pendaftaran->getKey(),
+            'aksi' => 'follow-up',
+            // Status yang difollow-up disimpan supaya jejaknya bisa
+            // menyebutkan pesan MANA yang dibuka, bukan sekadar "ada
+            // follow up".
+            'dari' => (string) $pendaftaran->status,
+            'ke' => $nomorWa,
+            'oleh_id' => Auth::id(),
+            'oleh_nama' => $this->siapa(),
+        ]);
+
+        return redirect()->away($tautan);
     }
 
     /** Menghapus satu pendaftaran beserta ekornya. */
@@ -2564,6 +2720,27 @@ class PendaftaranLayananController extends Controller
 
         $ringkasan['hari_menggantung'] = Pendaftaran::HARI_MENGGANTUNG;
 
+        /*
+         * Bukti TERTUA yang masih menunggu diperiksa, dalam hari.
+         *
+         * Angka jumlahnya saja tidak menyampaikan apa pun: "6 bukti perlu
+         * diperiksa" terbaca seperti pekerjaan hari ini, sedangkan yang
+         * tertua sudah menunggu 177 hari. Yang menentukan mendesak atau
+         * tidaknya justru umurnya.
+         */
+        $tertua = Pendaftaran::kueri()
+            ->when($layanan !== '', fn ($q) => $q->where('layanan', $layanan))
+            ->when($angkatan !== '', fn ($q) => $q->where('angkatan_id', $angkatan))
+            ->whereIn('status', Pendaftaran::KEADAAN['menunggu']['nilai'])
+            ->whereNotNull('bukti')->where('bukti', '<>', '')
+            ->min('waktu');
+
+        $ringkasan['periksa_tertua'] = $tertua === null
+            ? 0
+            : (int) \Illuminate\Support\Carbon::parse($tertua)->diffInDays(now());
+
+        $ringkasan['hari_periksa'] = Pendaftaran::HARI_PERIKSA;
+
         return $ringkasan + $hitung;
     }
 
@@ -2701,6 +2878,35 @@ class PendaftaranLayananController extends Controller
                 $this->ringkasanSaringan($p),
             ),
             'pendaftar-layanan-' . now()->format('Y-m-d-Hi') . '.xlsx'
+        );
+    }
+
+    /**
+     * Daftar hadir: satu baris per ORANG, bukan per pendaftaran.
+     *
+     * Ekspor di atas membawa satu baris per pendaftaran, jadi rombongan
+     * lima orang muncul sebagai satu nama. Terukur: 109 pendaftaran
+     * rombongan mewakili 296 orang, sementara berkasnya cuma memuat 109
+     * nama — padahal nama-nama itulah yang dipakai menerbitkan sertifikat
+     * dan memasukkan orang ke grup.
+     *
+     * Saringannya ikut terbawa, sama seperti kedua unduhan lainnya.
+     */
+    public function eksporHadir(Request $request)
+    {
+        if (! $this->bolehMelihat()) {
+            return $this->tolak();
+        }
+
+        $p = $this->bacaPilihan($request);
+
+        return Excel::download(
+            new \App\Exports\DaftarHadirExport(
+                $this->untukEkspor($p),
+                Pendaftaran::katalog(),
+                $this->ringkasanSaringan($p),
+            ),
+            'daftar-hadir-' . now()->format('Y-m-d-Hi') . '.xlsx'
         );
     }
 }

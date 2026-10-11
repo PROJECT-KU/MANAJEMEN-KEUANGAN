@@ -687,6 +687,45 @@ class PendaftaranSemuaLayanan
         return $waktu !== null && $waktu->lt(Carbon::now()->subDays(self::HARI_MENGGANTUNG));
     }
 
+    /**
+     * Berapa hari bukti bayar boleh menunggu diperiksa.
+     *
+     * 3, bukan 7 seperti HARI_MENGGANTUNG: yang menggantung menunggu ORANG
+     * LAIN membayar, sedangkan yang ini menunggu PANITIA membuka satu
+     * gambar. Terukur di basis data, enam bukti menunggu diperiksa selama
+     * 177, 127, 74, 28, 17, dan 6 hari — orang-orang itu sudah mengirim
+     * uangnya dan masih tercatat belum bayar.
+     */
+    public const HARI_PERIKSA = 3;
+
+    /** Buktinya sudah diunggah tetapi statusnya masih menunggu. */
+    public static function perluDiperiksa(object $b): bool
+    {
+        if (! in_array((string) ($b->status ?? ''), self::KEADAAN['menunggu']['nilai'], true)) {
+            return false;
+        }
+
+        return trim((string) ($b->bukti ?? '')) !== '';
+    }
+
+    /**
+     * Sudah menunggu diperiksa lebih lama daripada ambangnya.
+     *
+     * Dipisah dari penanda "menggantung": keduanya sama-sama menunggu,
+     * tetapi yang ditunggu berbeda orang — dan yang ini jauh lebih mahal
+     * kalau terlewat, sebab uangnya mungkin sudah masuk tanpa tercatat.
+     */
+    public static function periksaTertunda(object $b): bool
+    {
+        if (! self::perluDiperiksa($b)) {
+            return false;
+        }
+
+        $waktu = self::waktuBaris($b);
+
+        return $waktu !== null && $waktu->lt(Carbon::now()->subDays(self::HARI_PERIKSA));
+    }
+
     /** Kolom yang boleh dipakai mengurutkan, beserta ungkapan SQL-nya. */
     public const URUTAN = [
         'waktu' => 'waktu',

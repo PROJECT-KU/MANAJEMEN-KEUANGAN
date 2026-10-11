@@ -141,6 +141,11 @@ class PendaftaranJejak extends Model
                 . ' dicatat' . $siapa;
         }
 
+        if ($this->aksi === 'ubah-refund') {
+            return 'Catatan pengembalian Rp ' . number_format((int) $this->dari, 0, ',', '.')
+                . ' dibetulkan jadi Rp ' . number_format((int) $this->ke, 0, ',', '.') . $siapa;
+        }
+
         if ($this->aksi === 'hapus-refund') {
             return 'Catatan pengembalian Rp ' . number_format((int) $this->dari, 0, ',', '.')
                 . ' dihapus' . $siapa;
@@ -166,6 +171,17 @@ class PendaftaranJejak extends Model
          * riwayat ini biasanya "sudah berapa kali orang ini ditagih" — dan
          * itu tidak terbaca kalau pengingat tercampur dengan surat status.
          */
+        if ($this->aksi === 'follow-up') {
+            /*
+             * "DIBUKA", bukan "terkirim". Yang diketahui peladen hanyalah
+             * panitia menekan tombolnya; pengirimannya terjadi di aplikasi
+             * WhatsApp, di luar jangkauan sistem ini. Menuliskannya
+             * "terkirim" akan jadi catatan yang berbohong — dan jejak inilah
+             * yang dipakai menelusuri perselisihan.
+             */
+            return 'Follow up WhatsApp dibuka untuk status "' . $this->dari . '"' . $siapa;
+        }
+
         if ($this->aksi === 'ingat-bayar') {
             return 'Pengingat pembayaran terkirim ke ' . $this->ke;
         }
