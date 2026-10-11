@@ -367,6 +367,65 @@ class PulihkanPendaftaranTest extends TestCase
         $this->assertNotNull(PendaftaranScopusCamp::find($id));
     }
 
+    /**
+     * Layar catatan penghapusan tetap terbuka SESUDAH ada yang dipulihkan.
+     *
+     * Terjadi sungguhan saat membangun ini: `dipulihkan_at` tidak dicor jadi
+     * tanggal, jadi nilainya untaian — dan layarnya memanggil
+     * translatedFormat() padanya. Halamannya 500 begitu ada SATU catatan
+     * yang dikembalikan, sementara yang belum dipulihkan (null) lolos tanpa
+     * gejala apa pun. Sepuluh uji pemulihan yang sudah ada tidak
+     * menangkapnya karena tak satu pun membuka layarnya.
+     */
+    #[Test]
+    public function layar_catatannya_tetap_terbuka_sesudah_dipulihkan(): void
+    {
+        [$admin, $b] = $this->dengan();
+        $id = (string) $b->getKey();
+        $nomor = $b->id_transaksi;
+
+        $this->actingAs($admin);
+        $this->hapus($b);
+
+        $arsipId = (string) $this->arsip($id)->getKey();
+
+        (new PulihkanPendaftaran)->jalankan($arsipId);
+
+        $this->actingAs($admin)
+            ->get(route('account.pendaftaran-layanan.terhapus', ['cari' => $nomor]))
+            ->assertOk()
+            ->assertSee(strtoupper($nomor))
+            ->assertSee('dikembalikan')
+            /*
+             * Dipatok pada ALAMAT BORANGNYA, bukan nama kelas tombolnya.
+             * Nama kelas muncul juga di blok <style> dan <script> halaman
+             * yang sama, jadi "tidak memuat .thp-tombol-pulih" mustahil
+             * lulus — dan penjaganya akan merah selamanya tanpa ada yang
+             * salah pada halamannya.
+             *
+             * Tombolnya HARUS hilang untuk yang sudah dipulihkan: masih ada,
+             * menekannya cuma menghasilkan pesan galat.
+             */
+            ->assertDontSee(route('account.pendaftaran-layanan.pulihkan', $arsipId), false);
+    }
+
+    /** Yang BELUM dipulihkan tetap punya tombolnya. */
+    #[Test]
+    public function yang_belum_dipulihkan_masih_punya_tombolnya(): void
+    {
+        [$admin, $b] = $this->dengan();
+
+        $this->actingAs($admin);
+        $this->hapus($b);
+
+        $arsipId = (string) $this->arsip((string) $b->getKey())->getKey();
+
+        $this->actingAs($admin)
+            ->get(route('account.pendaftaran-layanan.terhapus', ['cari' => $b->id_transaksi]))
+            ->assertOk()
+            ->assertSee(route('account.pendaftaran-layanan.pulihkan', $arsipId), false);
+    }
+
     // ------------------------------------------------------------- pembantu
 
     private function hapus(PendaftaranScopusCamp $b): void
