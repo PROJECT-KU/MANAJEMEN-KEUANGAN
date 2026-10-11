@@ -1684,6 +1684,36 @@ Rincian Pendaftaran | MIS Rumah Scopus
         }
 
         /* Tombol kirim ulang surat, dipisah garis dari deret tombol status. */
+        /*
+         * Tindak lanjut WhatsApp: hijau, sebab ia memang menuju ke sana.
+         *
+         * Susunannya mengikuti .rin-kirim-ulang di atasnya — kisi menurun
+         * dengan justify-items: start. Sebagai blok biasa, keterangannya
+         * mengalir MENGITARI tombolnya: terukur satu kalimat pecah jadi dua
+         * baris yang mengapit tombol, dan dua tombol bersebelahan jadi
+         * tampak tidak sejenis padahal pekerjaannya sama.
+         */
+        .rin-tindak-lanjut {
+            display: grid;
+            gap: 6px;
+            justify-items: start;
+            margin-top: 10px;
+        }
+
+        .rin-tombol-wa {
+            color: #15803d;
+            border-color: #bbf7d0;
+        }
+
+        .rin-tombol-wa:hover {
+            border-color: #86efac;
+            background: #f0fdf4;
+        }
+
+        .rin-tombol-wa .fab {
+            color: #16a34a;
+        }
+
         .rin-kirim-ulang {
             display: grid;
             gap: 6px;
@@ -1929,14 +1959,34 @@ Rincian Pendaftaran | MIS Rumah Scopus
      * baris hasil union — dan perakit pesannya membaca nama seragam
      * (nama_orang, nomor, total) yang hanya ada pada baris union.
      */
-    $tautanWa = \App\Support\TautanWa::kirim($telpOrang, \App\Support\PesanWaPendaftaran::untuk((object) [
+    /*
+     * Satu baris ringkas dipakai dua tombol WhatsApp di halaman ini —
+     * yang di kartu identitas dan yang di kartu status. Dirakit sekali:
+     * dua salinan akan berbeda begitu salah satunya diperbaiki.
+     */
+    $barisWa = (object) [
         'nama_orang' => $namaOrang,
         'nomor' => $nomor,
         'total' => $totalBayar,
         'kode_unik' => $kodeUnik,
         'status' => $pendaftaran->status,
         'layanan' => $layanan,
-    ]));
+    ];
+
+    /*
+     * Sesinya ikut dikirim. Kalimat status "Dijadwalkan ulang" berbunyi
+     * "Rinciannya ada di bawah ini" — benar di surat yang punya tabel di
+     * bawahnya, dan baru benar di sini kalau sesinya memang ikut.
+     */
+    $sesiUntukWa = $sesiBaris ?: ($nomorAngkatan ? 'angkatan ke-' . $nomorAngkatan : null);
+
+    $tautanWa = \App\Support\TautanWa::kirim(
+        $telpOrang, \App\Support\PesanWaPendaftaran::untuk($barisWa, $sesiUntukWa)
+    );
+
+    $tautanWaStatus = \App\Support\TautanWa::kirim(
+        $telpOrang, \App\Support\PesanWaPendaftaran::tindakLanjut($barisWa, $sesiUntukWa)
+    );
 
     /*
      * Dibaca lewat katalog, bukan dari kolomnya langsung: baris lama dari
@@ -3022,6 +3072,34 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                         Mengirim lagi surat untuk status yang sekarang. Statusnya tidak berubah.
                                     </span>
                                 </form>
+                            @endif
+
+                            {{-- Follow up lewat WhatsApp untuk STATUS yang sedang
+                                 berlaku.
+
+                                 Bersebelahan dengan "Kirim ulang suratnya" karena
+                                 keduanya pekerjaan yang sama — mengabari pendaftar
+                                 tentang keadaannya sekarang — cuma lewat saluran
+                                 berbeda. Dan kalimatnya dirakit dari sumber yang sama
+                                 dengan suratnya, jadi dua saluran itu tidak pernah
+                                 berbeda bunyi.
+
+                                 Hanya muncul kalau nomornya bisa dihubungi: tombol
+                                 yang membuka percakapan dengan nomor yang tidak ada
+                                 membuat panitia mengira pesannya terkirim. --}}
+                            @if ($tautanWaStatus !== '')
+                                <div class="rin-tindak-lanjut">
+                                    <a class="mis-tombol mis-tombol-halus rin-tombol-wa"
+                                        href="{{ $tautanWaStatus }}" target="_blank" rel="noopener">
+                                        <i class="fab fa-whatsapp" aria-hidden="true"></i>
+                                        <span>Follow up: {{ $rupa['label'] }}</span>
+                                    </a>
+                                    <span class="mis-bantuan">
+                                        Membuka WhatsApp dengan pesan yang sudah terisi sesuai
+                                        statusnya — isinya sama dengan suratnya, dan masih bisa
+                                        disunting sebelum dikirim.
+                                    </span>
+                                </div>
                             @endif
                         </div>
 
