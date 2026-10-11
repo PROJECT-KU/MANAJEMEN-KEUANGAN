@@ -175,51 +175,76 @@ class BarisButuhPerhatianTest extends TestCase
             'Umur bukti tertua tidak disebut di ubinnya.');
     }
 
-    // ------------------------------------------------------ tandai lunas
+    // --------------------------------------------------------- follow up
 
+    /**
+     * Di barisnya ada FOLLOW UP, bukan "Tandai lunas".
+     *
+     * Menandai lunas dari daftar dibuang karena pembayaran akan ditangani
+     * payment gateway: statusnya berpindah sendiri, dan tombol yang
+     * menandainya dengan tangan berhenti jadi pekerjaan harian — sementara
+     * satu salah tekan di sana memindahkan status SEKALIGUS mengirim surat
+     * ke pendaftarnya. Yang memang dikerjakan tiap hari justru menghubungi
+     * orangnya.
+     */
     #[Test]
-    public function tombol_tandai_lunas_ada_di_barisnya(): void
+    public function barisnya_menawarkan_follow_up(): void
     {
         [$orang, $b] = $this->dengan();
 
         $baris = $this->baris($orang, $b);
 
-        $this->assertStringContainsString('Tandai lunas', $baris);
-        $this->assertStringContainsString('data-pdl-lunas', $baris,
-            'Tombolnya tidak punya penanda konfirmasi; ia akan mengirim borangnya '
-            . 'tanpa bertanya apa-apa.');
-        $this->assertStringContainsString('value="Pendaftaran Diterima"', $baris,
-            'Status lunasnya tidak diambil dari katalog layanan itu.');
+        $this->assertStringContainsString('Follow up', $baris);
+        $this->assertStringContainsString('/follow-up"', $baris,
+            'Tombolnya tidak menuju rute yang mencatat jejaknya.');
+
+        $this->assertStringNotContainsString('Tandai lunas', $baris,
+            'Tombol tandai lunas masih ada di daftar; satu salah tekan di sana '
+            . 'memindahkan status sekaligus mengirim surat.');
     }
 
+    /**
+     * Follow up ada untuk SEMUA keadaan, bukan cuma yang menunggu bayar.
+     *
+     * Pesannya memang menyesuaikan statusnya — yang sudah lunas diberi
+     * ucapan terima kasih, yang direfund diberi keterangan dananya — jadi
+     * membatasinya ke satu keadaan membuang gunanya.
+     */
     #[Test]
-    public function yang_sudah_lunas_tidak_punya_tombolnya(): void
+    public function follow_up_ada_juga_untuk_yang_sudah_lunas(): void
     {
         [$orang, $b] = $this->dengan(['status' => Pendaftaran::statusLunas('scopus_camp')]);
 
-        $this->assertStringNotContainsString('Tandai lunas', $this->baris($orang, $b));
+        $this->assertStringContainsString('Follow up', $this->baris($orang, $b));
     }
 
+    /**
+     * Tanpa nomor yang bisa dihubungi, tombolnya tidak digambar: tombol
+     * yang membuka percakapan dengan nomor yang tidak ada membuat panitia
+     * mengira pesannya terkirim.
+     */
     #[Test]
-    public function menekannya_memindahkan_status_lewat_jalur_yang_sama(): void
+    public function tanpa_nomor_tidak_ada_tombol_follow_up(): void
+    {
+        [$orang, $b] = $this->dengan(['telp' => '0812']);
+
+        $this->assertStringNotContainsString('Follow up', $this->baris($orang, $b));
+    }
+
+    /** Menekannya meninggalkan jejak, sama seperti dari layar rincian. */
+    #[Test]
+    public function menekannya_meninggalkan_jejak(): void
     {
         [$orang, $b] = $this->dengan();
 
         $this->actingAs($orang)
-            ->post(route('account.pendaftaran-layanan.status', ['scopus_camp', $b->getKey()]),
-                ['status' => Pendaftaran::statusLunas('scopus_camp')])
-            ->assertRedirect();
+            ->post(route('account.pendaftaran-layanan.follow-up', ['scopus_camp', $b->getKey()]))
+            ->assertRedirectContains('api.whatsapp.com');
 
-        $this->assertSame('Pendaftaran Diterima', $b->fresh()->status);
-
-        /*
-         * Lewat rute yang sudah ada, jadi jejaknya tetap tertulis. Jalur
-         * kedua yang menyimpan statusnya sendiri akan melewatkan jejak,
-         * surat, dan kuota sekaligus — dan tidak ada yang menunjukkannya
-         * sampai ada yang mencari riwayat yang tidak pernah ditulis.
-         */
         $this->assertSame(1, PendaftaranJejak::milik('scopus_camp', (string) $b->getKey())
-            ->where('aksi', 'status')->count());
+            ->where('aksi', 'follow-up')->count(),
+            'Follow up dari daftar tidak tercatat, jadi riwayatnya timpang dengan '
+            . 'yang ditekan dari layar rincian.');
     }
 
     /**
