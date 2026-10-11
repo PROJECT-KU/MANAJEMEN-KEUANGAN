@@ -222,6 +222,44 @@ class BarisButuhPerhatianTest extends TestCase
             ->where('aksi', 'status')->count());
     }
 
+    /**
+     * Kedua tombol aksi SEJAJAR, tidak pernah bertumpuk.
+     *
+     * Dengan flex-wrap: wrap, susunannya bergantung pada sisa lebar kolom
+     * Aksi — dan lebar itu ditentukan isi baris LAIN di halaman yang sama.
+     * Terukur: kolomnya 233px di halaman 1 dan 186px di halaman 6 (nama
+     * sesinya lebih panjang di sana), sementara kedua tombolnya menuntut
+     * 255px. Akibatnya tombol yang sama tampil bersebelahan di satu halaman
+     * dan bertumpuk di halaman berikutnya, dan tangan yang sudah hafal
+     * letaknya meleset tiap ganti halaman.
+     */
+    #[Test]
+    public function kedua_tombol_aksinya_tidak_pernah_bertumpuk(): void
+    {
+        $gaya = file_get_contents(
+            resource_path('views/account/pendaftaran_layanan/index.blade.php')
+        );
+
+        $this->assertMatchesRegularExpression(
+            '/\.pdl-aksi-baris\s*\{[^}]*flex-wrap:\s*nowrap/s', $gaya,
+            'Tombol aksinya boleh membungkus lagi, jadi letaknya berubah-ubah '
+            . 'antar halaman.'
+        );
+
+        $this->assertSame(0, preg_match('/\.pdl-aksi-baris\s*\{[^}]*flex-wrap:\s*wrap/s', $gaya),
+            'flex-wrap: wrap kembali — itu persis yang membuat letaknya tidak tetap.');
+
+        /*
+         * Dan selnya tidak boleh menyusut di bawah lebar kedua tombolnya:
+         * tanpa white-space: nowrap, tabel memberi kolom ini lebar
+         * seadanya dan tombolnya terpotong, bukan sejajar.
+         */
+        $this->assertMatchesRegularExpression(
+            '/td\[data-judul="Aksi"\]\s*\{[^}]*white-space:\s*nowrap/s', $gaya,
+            'Kolom Aksi boleh menyusut lagi di bawah lebar tombolnya.'
+        );
+    }
+
     // ------------------------------------------------------------- pembantu
 
     private function baris(User $orang, PendaftaranScopusCamp $b): string
