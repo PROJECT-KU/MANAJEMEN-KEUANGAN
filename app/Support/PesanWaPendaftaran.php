@@ -50,12 +50,6 @@ class PesanWaPendaftaran
      */
     private const PENUTUP = [
         /*
-         * 'menunggu' dipakai hanya sebagai cadangan. Kalimat yang benar
-         * untuk yang belum bayar bergantung pada CARA BAYARNYA — lihat
-         * PENUTUP_MENAGIH.
-         */
-        'menunggu' => 'Apabila pembayaran telah dilakukan, mohon kabari melalui pesan ini.',
-        /*
          * Buktinya SUDAH masuk dan sedang diperiksa.
          *
          * Keadaannya tetap 'menunggu' di katalog — statusnya memang belum
@@ -79,32 +73,36 @@ class PesanWaPendaftaran
     ];
 
     /**
-     * Kalimat penagihan per CARA BAYAR.
+     * Kalimat penagihan.
      *
-     * "Kirimkan bukti transfernya" hanya benar untuk transfer manual. Lewat
-     * pembayaran daring tidak ada bukti yang perlu dikirim — gatewaynya yang
-     * mengabari sistem — dan menyuruh orang mengirim tangkapan layar ke
-     * WhatsApp membuat ia mengira pembayarannya belum sah sampai ia
-     * melakukannya. Untuk bayar di tempat, tidak ada yang perlu ditransfer
-     * sama sekali.
+     * Pembayarannya SELURUHNYA lewat gerbang pembayaran — tidak ada lagi
+     * transfer manual ke rekening. Karena itu tidak ada bukti yang perlu
+     * dikirim: gerbangnya yang mengabari sistem begitu uangnya masuk.
      *
-     * NAMA GATEWAYNYA TIDAK DISEBUT ke pendaftar. Itu urusan internal: yang
+     * Dulu di sini ada kalimat "mohon kirimkan bukti transfernya ke nomor
+     * ini", dan kalimat itulah yang membuat orang mengira pembayarannya
+     * belum sah sampai ia mengirim tangkapan layar ke WhatsApp — padahal
+     * tidak ada yang menunggu tangkapan layar itu.
+     *
+     * NAMA GERBANGNYA TIDAK DISEBUT ke pendaftar. Itu urusan internal: yang
      * perlu ia tahu cuma bahwa pembayarannya diselesaikan lewat tautan yang
-     * dikirim sistem. Disebut namanya, pesan ini berbohong pada hari
-     * gatewaynya diganti — dan yang menerimanya akan mencari halaman yang
+     * kami kirimkan. Disebut namanya, pesan ini berbohong pada hari
+     * gerbangnya diganti — dan yang menerimanya akan mencari halaman yang
      * sudah tidak dipakai lagi.
-     *
-     * Terukur hari ini ketiga ratus barisnya masih 'transfer', jadi
-     * kekeliruan ini belum menggigit — tetapi ia akan mengenai SELURUH
-     * pendaftar di hari pembayaran daring dinyalakan.
      */
-    private const PENUTUP_MENAGIH = [
-        'transfer' => 'Apabila pembayaran telah dilakukan, mohon kirimkan bukti '
-            . 'transfernya ke nomor ini. Terima kasih.',
-        'doku' => 'Pembayaran diselesaikan melalui tautan pembayaran yang dikirimkan '
-            . 'sistem. Anda tidak perlu mengirimkan bukti apa pun ke nomor ini.',
-        'tunai' => 'Pembayaran diserahkan langsung kepada panitia pada hari acara.',
-    ];
+    private const MENAGIH = 'Pembayaran diselesaikan melalui tautan pembayaran '
+        . 'yang kami kirimkan. Anda tidak perlu mengirimkan bukti pembayaran ke '
+        . 'nomor ini.';
+
+    /**
+     * Bayar di tempat satu-satunya kekecualian.
+     *
+     * Uangnya memang tidak lewat gerbang mana pun, dan menyuruh orang yang
+     * akan membayar di meja panitia membuka tautan pembayaran mengirimnya
+     * membayar dua kali.
+     */
+    private const MENAGIH_TUNAI = 'Pembayaran diserahkan langsung kepada panitia '
+        . 'pada hari acara.';
 
     /**
      * Pesan tindak lanjut untuk STATUS yang sedang berlaku.
@@ -195,26 +193,19 @@ class PesanWaPendaftaran
         $cara = Pendaftaran::caraBayar($b->cara_bayar ?? null);
 
         /*
-         * Peringatan "jangan dibulatkan" hanya untuk cara bayar yang BUTUH
-         * BUKTI, yaitu transfer manual. Kode unik gunanya mencocokkan mutasi
-         * rekening dengan tangan; lewat pembayaran daring, gatewaynya yang
-         * mencocokkan, dan menyuruh orang menjaga tiga angka terakhir cuma
-         * membingungkan.
+         * Peringatan "jangan dibulatkan sampai angka terakhir" DIBUANG.
+         *
+         * Tiga angka terakhir itu kode unik, gunanya mencocokkan mutasi
+         * rekening dengan tangan. Lewat gerbang pembayaran nominalnya sudah
+         * terpatok di tautannya — tidak ada yang bisa dibulatkan — dan
+         * menyuruh orang menjaga angkanya sendiri cuma menakuti.
          */
-        if ($menagih && $total > 0 && (int) ($b->kode_unik ?? 0) > 0
-            && ($cara['perlu_bukti'] ?? false) === true) {
-            $baris[] = '';
-            $baris[] = 'Mohon ditransfer *tepat* sampai angka terakhir. Tiga angka '
-                . 'terakhir merupakan kode unik Anda, dan angka itulah yang kami gunakan '
-                . 'untuk mencocokkan pembayaran.';
-        }
 
         $baris[] = '';
         if ($menagih) {
-            // Cara bayar yang belum terdaftar jatuh ke kalimat 'menunggu'
-            // yang netral: ia tidak menyebut transfer maupun pembayaran
-            // daring.
-            $baris[] = self::PENUTUP_MENAGIH[$cara['kunci'] ?? ''] ?? self::PENUTUP['menunggu'];
+            $baris[] = ($cara['kunci'] ?? '') === 'tunai'
+                ? self::MENAGIH_TUNAI
+                : self::MENAGIH;
         } else {
             $kunciPenutup = $keadaan === 'menunggu' ? 'diperiksa' : $keadaan;
 
