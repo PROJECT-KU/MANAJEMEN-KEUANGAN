@@ -13,5 +13,5 @@
     'sorot' => $analisisbibliometrik->group_wa
         ? ['judul' => 'Grup WhatsApp peserta', 'isi' => $analisisbibliometrik->group_wa]
         : null,
-    'penutup' => ['Kalau jadwal baru ini berhalangan, balas email ini supaya kami carikan jalan keluarnya.'],
+    'penutup' => ['Apabila jadwal baru ini berhalangan, mohon hubungi admin kami lewat WhatsApp agar kami carikan solusinya.'],
 ])
