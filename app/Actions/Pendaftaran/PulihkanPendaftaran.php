@@ -36,6 +36,9 @@ use Illuminate\Support\Facades\Log;
  */
 class PulihkanPendaftaran
 {
+    /** Kursi yang diambil melebihi sisa kuota angkatannya; 0 kalau cukup. */
+    private int $kuotaKurang = 0;
+
     /**
      * @return array{berhasil:bool, pesan:string, layanan?:string, id?:string}
      */
@@ -96,7 +99,7 @@ class PulihkanPendaftaran
                 $this->kembalikanAnak($arsip, $potret);
 
                 if (Pendaftaran::berangkatan($arsip->layanan)) {
-                    $this->ambilKuota($arsip->layanan, $baris);
+                    $this->kuotaKurang = $this->ambilKuota($arsip->layanan, $baris);
                 }
 
                 $orang = Auth::user();
@@ -140,7 +143,17 @@ class PulihkanPendaftaran
             'id' => (string) $arsip->pendaftaran_id,
             'pesan' => 'Pendaftaran ' . $arsip->nomor . ' dikembalikan.'
                 . ($buktiKembali ? '' : ' Bukti bayarnya tidak ikut kembali — berkasnya '
-                    . 'tidak ada lagi di server.'),
+                    . 'tidak ada lagi di server.')
+                /*
+                 * Disebut, bukan didiamkan. Kuotanya terlanjur dijepit di nol,
+                 * jadi layar angkatan akan menampilkan "sisa 0" yang terlihat
+                 * pas — dan tidak ada tempat lain yang memberi tahu bahwa
+                 * kursinya sebenarnya kelebihan.
+                 */
+                . ($this->kuotaKurang > 0
+                    ? ' Angkatannya kelebihan ' . $this->kuotaKurang . ' kursi; '
+                        . 'periksa kuotanya.'
+                    : ''),
         ];
     }
 
@@ -237,27 +250,36 @@ class PulihkanPendaftaran
      * penghapusan bisa membuat hasilnya minus, dan sisa kuota minus tidak
      * berarti apa-apa di layar mana pun.
      */
-    private function ambilKuota(string $layanan, array $baris): void
+    private function ambilKuota(string $layanan, array $baris): int
     {
         $angkatanModel = Pendaftaran::angkatanModel($layanan);
 
         if ($angkatanModel === null) {
-            return;
+            return 0;
         }
 
         $angkatan = $angkatanModel::whereKey($baris['kategori_id'] ?? null)
             ->lockForUpdate()->first();
 
         if ($angkatan === null || $angkatan->total_kuota === null) {
-            return;
+            return 0;
         }
 
-        $angkatan->forceFill([
-            'sisa_kuota' => (string) max(
-                0,
-                (int) $angkatan->sisa_kuota - (int) ($baris['jumlah_pendaftar'] ?? 1)
-            ),
-        ])->save();
+        $perlu = (int) ($baris['jumlah_pendaftar'] ?? 1);
+        $sisa = (int) $angkatan->sisa_kuota;
+
+        $angkatan->forceFill(['sisa_kuota' => (string) max(0, $sisa - $perlu)])->save();
+
+        /*
+         * Berapa kursi yang DIAMBIL MELEBIHI yang tersedia.
+         *
+         * Sisanya dijepit di nol — sisa kuota minus tidak berarti apa-apa di
+         * layar mana pun — tetapi penjepitan itu menyembunyikan kelebihan
+         * pesanannya. Angkatan yang sudah penuh lalu dipulihi dua kursi
+         * tampak pas-pasan, padahal dua orang tidak punya tempat. Dikembalikan
+         * supaya pemanggilnya bisa mengatakannya.
+         */
+        return max(0, $perlu - $sisa);
     }
 
     /**

@@ -162,8 +162,31 @@ Catatan Penghapusan | MIS Rumah Scopus
             min-width: 0;
         }
 
-        .thp-pulih-borang {
+        /* Dua tombol berdampingan di ujung kanan kaki kartunya. */
+        .thp-aksi {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
             flex: 0 0 auto;
+        }
+
+        .thp-pulih-borang,
+        .thp-buang-borang {
+            flex: 0 0 auto;
+        }
+
+        .thp-tombol-buang {
+            height: 34px;
+            padding: 0 13px;
+            font-size: .76rem;
+        }
+
+        /* Merahnya terlihat TANPA hover: tombol yang tidak bisa diurungkan
+           tidak boleh baru mengaku berbahaya saat disentuh. */
+        .thp-tombol-buang:hover {
+            border-color: #fecdd3;
+            background: #fff1f2;
+            color: #9f1239;
         }
 
         .thp-tombol-pulih {
@@ -242,6 +265,41 @@ Catatan Penghapusan | MIS Rumah Scopus
      * dan nomornya; penegasan yang cuma bertanya "yakin?" dijawab ya tanpa
      * dibaca.
      */
+    /*
+     * Penegasan sebelum membuang catatannya.
+     *
+     * Jenis 'bahaya', berbeda dari tombol Kembalikan di sebelahnya: INI yang
+     * benar-benar tidak bisa diurungkan. Kalimatnya menyebut bukti bayarnya
+     * hanya kalau memang masih ada yang menunggu di parkiran — menjanjikan
+     * sesuatu yang sudah tidak ada membuat penegasannya berhenti dipercaya.
+     */
+    document.querySelectorAll('.thp-tombol-buang').forEach(function (tombol) {
+        tombol.addEventListener('click', function (e) {
+            if (tombol.dataset.lanjut === '1') {
+                return;
+            }
+
+            e.preventDefault();
+
+            window.misKonfirmasi({
+                judul: 'Buang catatan ini permanen?',
+                pesan: 'Potretnya hilang dan pendaftarannya tidak bisa dikembalikan lagi'
+                    + (tombol.dataset.bukti === '1' ? ', termasuk bukti bayarnya' : '')
+                    + '. %s',
+                sorot: (tombol.dataset.nomor || '') + ' \u00b7 ' + (tombol.dataset.nama || ''),
+                tombol: 'Ya, buang',
+                jenis: 'bahaya',
+            }).then(function (ya) {
+                if (! ya) {
+                    return;
+                }
+
+                tombol.dataset.lanjut = '1';
+                tombol.closest('form').submit();
+            });
+        });
+    });
+
     document.querySelectorAll('.thp-tombol-pulih').forEach(function (tombol) {
         tombol.addEventListener('click', function (e) {
             if (tombol.dataset.lanjut === '1') {
@@ -290,7 +348,7 @@ Catatan Penghapusan | MIS Rumah Scopus
                      seperti kedua unduhan di layar daftar: yang diunduh orang
                      hampir selalu yang sedang dilihatnya. --}}
                 <a class="mis-tombol mis-tombol-halus"
-                    href="{{ route('account.pendaftaran-layanan.terhapus.excel', array_filter(['cari' => $cari])) }}">
+                    href="{{ route('account.pendaftaran-layanan.terhapus.excel', array_filter(['cari' => $cari, 'keadaan' => $keadaan !== 'semua' ? $keadaan : ''])) }}">
                     <i class="fas fa-file-excel mis-ikon-hijau" aria-hidden="true"></i> Unduh Excel
                 </a>
                 <a class="mis-tombol mis-tombol-halus"
@@ -342,9 +400,24 @@ Catatan Penghapusan | MIS Rumah Scopus
                 </span>
                 <div>
                     <p class="mis-ubin-angka">Rp {{ number_format($uangSemua, 0, ',', '.') }}</p>
-                    <p class="mis-ubin-label">Uang tercatat yang ikut terhapus</p>
+                    <p class="mis-ubin-label">Uang yang masih hilang</p>
                 </div>
             </div>
+            {{-- Ubin ketiga hanya muncul kalau memang ada yang dikembalikan.
+                 Selalu tampil, "0 dikembalikan" jadi angka ketiga yang tidak
+                 pernah berarti apa-apa di layar yang cuma punya dua angka
+                 sungguhan. --}}
+            @if ($jumlahPulih > 0)
+                <div class="mis-ubin">
+                    <span class="mis-medali kecil mis-hijau" aria-hidden="true">
+                        <i class="fas fa-undo"></i>
+                    </span>
+                    <div>
+                        <p class="mis-ubin-angka">{{ number_format($jumlahPulih, 0, ',', '.') }}</p>
+                        <p class="mis-ubin-label">Sudah dikembalikan</p>
+                    </div>
+                </div>
+            @endif
         </div>
             <p class="mis-ringkas-petunjuk" aria-hidden="true">
                 <i class="fas fa-arrows-alt-h"></i> Geser untuk lihat semua
@@ -362,10 +435,22 @@ Catatan Penghapusan | MIS Rumah Scopus
                     <input type="search" class="form-control-modern" id="thp-cari" name="cari"
                         value="{{ $cari }}" placeholder="Nomor, nama, atau email" autocomplete="off">
                 </div>
+                {{-- Saringan keadaan. Tanpa ini, yang masih terhapus dan yang
+                     sudah dikembalikan tercampur dalam satu daftar — dan
+                     satu-satunya pembedanya keping kecil di deret
+                     keterangannya. --}}
+                <div class="mis-isian">
+                    <label class="mis-label" for="thp-keadaan">Keadaan</label>
+                    <select class="form-control-modern" id="thp-keadaan" name="keadaan">
+                        <option value="semua" @selected($keadaan === 'semua')>Semua catatan</option>
+                        <option value="terhapus" @selected($keadaan === 'terhapus')>Masih terhapus</option>
+                        <option value="pulih" @selected($keadaan === 'pulih')>Sudah dikembalikan</option>
+                    </select>
+                </div>
                 <button class="mis-tombol mis-tombol-ungu" type="submit">
                     <i class="fas fa-search" aria-hidden="true"></i> Cari
                 </button>
-                @if ($cari !== '')
+                @if ($cari !== '' || $keadaan !== 'semua')
                     <a class="mis-tombol mis-tombol-halus"
                         href="{{ route('account.pendaftaran-layanan.terhapus') }}">
                         <i class="fas fa-times" aria-hidden="true"></i> Reset
@@ -471,6 +556,24 @@ Catatan Penghapusan | MIS Rumah Scopus
                                 <pre>{{ json_encode($satu->potret, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) }}</pre>
                             </details>
 
+                            <div class="thp-aksi">
+                                {{-- Buang permanen. Merah, dan di sebelah kiri
+                                     tombol hijau: INI yang benar-benar tidak bisa
+                                     diurungkan, bukan tombol Hapus di layar
+                                     pendaftaran. --}}
+                                <form method="POST" class="thp-buang-borang"
+                                    action="{{ route('account.pendaftaran-layanan.buang-catatan', $satu->getKey()) }}">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="mis-tombol mis-tombol-halus thp-tombol-buang"
+                                        data-nama="{{ $satu->nama ?: 'Tanpa nama' }}"
+                                        data-nomor="{{ strtoupper($satu->nomor ?: '') }}"
+                                        data-bukti="{{ $satu->bukti_parkir ? '1' : '0' }}">
+                                        <i class="fas fa-trash-alt mis-ikon-merah" aria-hidden="true"></i>
+                                        Buang catatan
+                                    </button>
+                                </form>
+
                             @if (! $satu->dipulihkan_at)
                                 <form method="POST" class="thp-pulih-borang"
                                     action="{{ route('account.pendaftaran-layanan.pulihkan', $satu->getKey()) }}">
@@ -487,6 +590,7 @@ Catatan Penghapusan | MIS Rumah Scopus
                                     </button>
                                 </form>
                             @endif
+                            </div>
                         </div>
                     </div>
                 @endforeach

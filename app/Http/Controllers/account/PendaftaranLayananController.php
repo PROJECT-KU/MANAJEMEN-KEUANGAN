@@ -2074,7 +2074,16 @@ class PendaftaranLayananController extends Controller
 
         return redirect()
             ->route('account.pendaftaran-layanan.index')
-            ->with('sukses', $hasil['pesan']);
+            ->with('sukses', $hasil['pesan'])
+            /*
+             * Dititipkan terpisah dari pesannya: pesan suksesnya tampil
+             * sebagai toast, dan toast tidak bisa memuat tombol. Layar daftar
+             * yang merakitnya jadi pita "baru saja dihapus — Kembalikan".
+             */
+            ->with('urungkanHapus', [
+                'arsip' => $hasil['arsip'] ?? null,
+                'pesan' => $hasil['pesan'],
+            ]);
     }
 
     /**
@@ -2094,26 +2103,60 @@ class PendaftaranLayananController extends Controller
         }
 
         $cari = trim((string) $request->query('cari', ''));
+        $keadaan = $this->keadaanArsip($request);
 
-        $daftar = \App\PendaftaranDihapus::query()
-            ->when($cari !== '', function ($q) use ($cari) {
-                $q->where(fn ($w) => $w->where('nomor', 'like', '%' . $cari . '%')
-                    ->orWhere('nama', 'like', '%' . $cari . '%')
-                    ->orWhere('email', 'like', '%' . $cari . '%'));
-            })
-            ->terbaru()
+        $daftar = $this->kueriArsip($cari, $keadaan)
             ->paginate(20)
             ->withQueryString();
 
         return view('account.pendaftaran_layanan.terhapus', [
             'daftar' => $daftar,
             'cari' => $cari,
-            // Dihitung dari SELURUH tabel, bukan dari halaman yang tampak:
-            // angka di kepala yang berubah tiap pindah halaman tidak menjawab
-            // "berapa yang sudah hilang".
-            'uangSemua' => (int) \App\PendaftaranDihapus::sum('uang_terhapus'),
-            'jumlahSemua' => (int) \App\PendaftaranDihapus::count(),
+            'keadaan' => $keadaan,
+            /*
+             * Dihitung dari SELURUH tabel, bukan dari halaman yang tampak:
+             * angka di kepala yang berubah tiap pindah halaman tidak menjawab
+             * "berapa yang sudah hilang".
+             *
+             * Dan hanya yang MASIH terhapus. Terukur sebelum pembatas ini
+             * dipasang: sesudah satu pendaftaran dikembalikan, kedua angkanya
+             * tidak bergerak sama sekali — uangnya terhitung dua kali, hidup
+             * di pembukuan sekaligus tercatat sebagai hilang.
+             */
+            'uangSemua' => (int) \App\PendaftaranDihapus::masihTerhapus()->sum('uang_terhapus'),
+            'jumlahSemua' => (int) \App\PendaftaranDihapus::masihTerhapus()->count(),
+            'jumlahPulih' => (int) \App\PendaftaranDihapus::sudahDipulihkan()->count(),
         ]);
+    }
+
+    /** Pilihan saringan keadaan yang sah di layar catatan penghapusan. */
+    private const KEADAAN_ARSIP = ['semua', 'terhapus', 'pulih'];
+
+    private function keadaanArsip(Request $request): string
+    {
+        $nilai = (string) $request->query('keadaan', 'semua');
+
+        return in_array($nilai, self::KEADAAN_ARSIP, true) ? $nilai : 'semua';
+    }
+
+    /**
+     * Kueri catatan penghapusan, dipakai bersama layarnya dan unduhannya.
+     *
+     * Dirakit di SATU tempat: dua daftar putih yang harus sepakat tanpa ada
+     * yang memaksanya adalah persis bagaimana unduhan berhenti menghormati
+     * saringan yang sedang terpasang di layar.
+     */
+    private function kueriArsip(string $cari, string $keadaan)
+    {
+        return \App\PendaftaranDihapus::query()
+            ->when($cari !== '', function ($q) use ($cari) {
+                $q->where(fn ($w) => $w->where('nomor', 'like', '%' . $cari . '%')
+                    ->orWhere('nama', 'like', '%' . $cari . '%')
+                    ->orWhere('email', 'like', '%' . $cari . '%'));
+            })
+            ->when($keadaan === 'terhapus', fn ($q) => $q->masihTerhapus())
+            ->when($keadaan === 'pulih', fn ($q) => $q->sudahDipulihkan())
+            ->terbaru();
     }
 
     /**
@@ -2147,6 +2190,24 @@ class PendaftaranLayananController extends Controller
     }
 
     /**
+     * Membuang satu catatan penghapusan untuk selamanya.
+     *
+     * INILAH yang benar-benar tidak bisa diurungkan — bukan tombol Hapus di
+     * layar pendaftaran, yang sejak ada tombol Kembalikan cuma memindahkan
+     * barisnya ke catatan ini.
+     */
+    public function buangCatatan(Request $request, string $arsip)
+    {
+        if (! $this->bolehMenghapus()) {
+            return $this->tolak();
+        }
+
+        $hasil = (new \App\Actions\Pendaftaran\BuangCatatanPenghapusan)->jalankan($arsip);
+
+        return back()->with($hasil['berhasil'] ? 'sukses' : 'error', $hasil['pesan']);
+    }
+
+    /**
      * Catatan penghapusan sebagai lembar kerja.
      *
      * Saringannya ikut terbawa, sama seperti kedua unduhan di layar daftar:
@@ -2162,14 +2223,8 @@ class PendaftaranLayananController extends Controller
 
         $cari = trim((string) $request->query('cari', ''));
 
-        $baris = \App\PendaftaranDihapus::query()
-            ->when($cari !== '', function ($q) use ($cari) {
-                $q->where(fn ($w) => $w->where('nomor', 'like', '%' . $cari . '%')
-                    ->orWhere('nama', 'like', '%' . $cari . '%')
-                    ->orWhere('email', 'like', '%' . $cari . '%'));
-            })
-            ->terbaru()
-            ->get();
+        // Kueri yang SAMA dengan layarnya, termasuk saringan keadaannya.
+        $baris = $this->kueriArsip($cari, $this->keadaanArsip($request))->get();
 
         return Excel::download(
             new \App\Exports\PendaftaranDihapusExport($baris),

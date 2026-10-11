@@ -38,6 +38,30 @@ class PendaftaranDihapus extends Model
         return $kueri->orderByDesc('created_at')->orderByDesc('id');
     }
 
+    /**
+     * Yang BENAR-BENAR masih terhapus.
+     *
+     * Dipakai seluruh angka ringkasan. Tanpa pembatas ini, pendaftaran yang
+     * sudah dikembalikan tetap terhitung sebagai hilang — dan uangnya
+     * terhitung dua kali: hidup di pembukuan, sekaligus tercatat sebagai
+     * uang yang ikut terhapus.
+     */
+    public function scopeMasihTerhapus($kueri)
+    {
+        return $kueri->whereNull('dipulihkan_at');
+    }
+
+    public function scopeSudahDipulihkan($kueri)
+    {
+        return $kueri->whereNotNull('dipulihkan_at');
+    }
+
+    /** Benar selama catatannya belum dipulihkan. */
+    public function getMasihHilangAttribute(): bool
+    {
+        return $this->dipulihkan_at === null;
+    }
+
     /** Nama layanannya seperti tertulis di katalog, bukan kuncinya. */
     public function getLayananNamaAttribute(): string
     {

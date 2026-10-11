@@ -512,6 +512,13 @@ Route::prefix('account')
                 ->name('account.pendaftaran-layanan.pulihkan');
 
             /*
+             * Membuang catatannya untuk selamanya, berikut bukti bayar yang
+             * menunggu di parkiran. DELETE, dan hanya administrator.
+             */
+            Route::delete('Pendaftaran-Layanan/terhapus/{arsip}', 'account\\PendaftaranLayananController@buangCatatan')
+                ->name('account.pendaftaran-layanan.buang-catatan');
+
+            /*
              * Mendaftarkan orang dari sisi panitia — untuk yang mendaftar
              * lewat WhatsApp atau datang langsung. Ditaruh SEBELUM rute
              * rincian yang berpola {layanan}/{id} supaya 'baru' tidak terbaca
