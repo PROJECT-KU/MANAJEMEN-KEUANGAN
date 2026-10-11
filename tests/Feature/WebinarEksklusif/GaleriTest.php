@@ -884,6 +884,22 @@ class GaleriTest extends TestCase
     #[Test]
     public function galeri_ikut_dikirim_api(): void
     {
+        /*
+         * Sesi sungguhan ditutup dulu.
+         *
+         * API ini memulangkan SATU sesi — yang terdekat — dan galerinya ikut
+         * sesi itu. Dengan sesi nyata yang masih terbuka di basis data,
+         * yang terpilih kadang bukan sesi uji ini, dan fotonya tidak ikut
+         * terkirim sama sekali: terukur gagal-lulus-gagal pada tiga kali
+         * jalan berturut dengan kode yang sama.
+         *
+         * DITUTUP, bukan dihapus: tabel pendaftarannya berkunci asing ke
+         * sini, dan menghapusnya merah dengan galat 1451 yang tidak menyebut
+         * apa pun tentang yang sedang diuji.
+         */
+        KategoriLayanan::where('layanan', 'webinar_eksklusif')
+            ->update(['status' => 'non active']);
+
         $sesi = $this->sesi();
         $jalur = app(Gambar::class)->simpan($this->berkasPng(600, 400), 'uji/galeri');
         $this->sampah[] = $jalur;
@@ -896,8 +912,22 @@ class GaleriTest extends TestCase
         $galeri = $this->getJson('/api/webinar-eksklusif')->assertOk()->json('sesi.galeri');
 
         $this->assertNotEmpty($galeri);
-        $this->assertSame('Foto uji API', $galeri[0]['keterangan']);
-        $this->assertStringContainsString('.webp', $galeri[0]['gambar']);
+
+        /*
+         * FOTONYA SENDIRI yang dicari, bukan isi larik ke-0.
+         *
+         * Galeri sungguhan ikut terkirim di jawaban yang sama, dan urutannya
+         * tidak dijamin menaruh foto uji ini di depan: tiga kali jalan
+         * berturut dengan kode yang sama memberi gagal, lulus, gagal — yang
+         * di indeks nol kadang "Dokumentasi kegiatan Rumah Scopus" milik
+         * data nyata. Penjaga yang merahnya bergantung pada data orang lain
+         * tidak menunjuk apa pun.
+         */
+        $punyaKita = collect($galeri)->firstWhere('keterangan', 'Foto uji API');
+
+        $this->assertNotNull($punyaKita,
+            'Foto yang baru diunggah tidak ikut terkirim di API.');
+        $this->assertStringContainsString('.webp', $punyaKita['gambar']);
     }
 
     #[Test]

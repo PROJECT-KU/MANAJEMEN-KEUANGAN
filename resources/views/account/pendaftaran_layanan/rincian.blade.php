@@ -439,26 +439,32 @@ Rincian Pendaftaran | MIS Rumah Scopus
         .rin-peserta-lengkap {
             display: flex;
             align-items: center;
-            gap: 11px;
+            gap: 10px;
             flex-wrap: wrap;
             margin-bottom: 13px;
-            padding: 12px 14px;
+            padding: 9px 12px;
             border: 1px solid #a7f3d0;
-            border-radius: 13px;
+            border-radius: 12px;
             background: #ecfdf5;
         }
 
         .rin-peserta-lengkap-teks {
             min-width: 0;
-            flex: 1 1 220px;
-            font-size: .82rem;
+            flex: 1 1 240px;
+            font-size: .8rem;
             line-height: 1.45;
             color: #065f46;
         }
 
         .rin-peserta-lengkap-teks > strong {
-            display: block;
             color: #047857;
+        }
+
+        /* Tombolnya tidak boleh setinggi tombol utama: ia jalan keluar yang
+           jarang dipakai, bukan tindakan yang ditawarkan. */
+        .rin-peserta-lengkap .mis-tombol {
+            height: 36px;
+            font-size: .78rem;
         }
 
         .rin-peserta-borang {
@@ -1732,7 +1738,7 @@ Rincian Pendaftaran | MIS Rumah Scopus
          */
         .rin-peserta {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(min(100%, 215px), 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(min(100%, 265px), 1fr));
             gap: 8px;
             margin: 0;
             padding: 0;
@@ -1796,24 +1802,53 @@ Rincian Pendaftaran | MIS Rumah Scopus
          * petak kosong di baris selebar 750px menganga.
          */
         .rin-peserta-pil {
-            margin-left: 5px;
-            vertical-align: middle;
+            flex: 0 0 auto;
+            margin-left: auto;
+            /* Sejajar baris pertama nama, bukan di tengah kartu: kartu yang
+               namanya dua baris akan menaruhnya mengambang di tengah. */
+            align-self: flex-start;
+            margin-top: 1px;
         }
 
+        /*
+         * Tubuh kartu jadi tumpukan menurun yang SAMA untuk semua peserta:
+         * nama (dengan lencananya), lalu email kalau ada, lalu nomor.
+         *
+         * Sebelumnya nomor memakai inline-flex dan ikut mengalir di belakang
+         * apa pun yang mendahuluinya — jadi pada kartu beremail ia jatuh ke
+         * baris ketiga, pada kartu tanpa email ia menempel di sebelah nama.
+         * Dua kartu bersebelahan jadi tidak terbaca sebagai satu bentuk.
+         */
         .rin-peserta-nama {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 2px;
             min-width: 0;
             overflow-wrap: anywhere;
+        }
+
+        /* Baris pertama: nama boleh dua baris, lalu dipotong. Nama sepanjang
+           empat baris membuat kartu sebarisnya ikut memanjang semua. */
+        .rin-peserta-judul {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            font-weight: 600;
         }
 
         .rin-peserta-surel {
             display: block;
             font-size: .74rem;
             color: var(--mis-tinta-4);
+            overflow-wrap: anywhere;
         }
 
         /* Nomor peserta: hijau WhatsApp, sebab ia memang tautan ke sana. */
         .rin-peserta-telp {
-            display: inline-flex;
+            /* flex, bukan inline-flex: ia selalu barisnya sendiri. */
+            display: flex;
             align-items: center;
             gap: 5px;
             margin-top: 2px;
@@ -3832,18 +3867,22 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                          harus pindah ke PHP. --}}
                                     <li @class(['rin-peserta-lama' => $loop->index >= $batasPeserta])>
                                         <span class="rin-peserta-nama">
-                                            {{ $orangKe['nama'] ?: 'Tanpa nama' }}
-                                            {{-- Lencananya DI DALAM nama, bukan saudara di
-                                                 sebelahnya. Sebagai saudara flex ia menghimpit
-                                                 kolom nama di kartu selebar 245px, dan nomor
-                                                 WhatsApp-nya terpatah jadi dua baris —
-                                                 terukur "08110000000" lalu "1" sendirian di
-                                                 baris berikutnya. Di dalam, ia mengalir
-                                                 bersama teksnya. --}}
-                                            @if ($orangKe['utama'])
-                                                <span class="mis-pil mis-pil-ungu rin-peserta-pil">pendaftar</span>
-                                            @endif
-                                            @if (! empty($orangKe['email']))
+                                            <span class="rin-peserta-judul" title="{{ $orangKe['nama'] ?: 'Tanpa nama' }}">{{ $orangKe['nama'] ?: 'Tanpa nama' }}</span>
+                                            {{-- Email HANYA untuk peserta selain pendaftarnya.
+
+                                                 Email pendaftar sudah tergambar utuh di kartu
+                                                 identitas di sebelah kiri, jadi di sini ia
+                                                 pengulangan — dan pengulangan itulah yang
+                                                 membuat kartunya tiga baris sementara kartu
+                                                 peserta lain cuma satu. Terukur: nomor
+                                                 WhatsApp duduk di y=66 pada kartu pendaftar
+                                                 dan y=12 pada kartu sebelahnya, elemen yang
+                                                 sama di tempat yang sama sekali berbeda.
+
+                                                 Untuk peserta lain ia TETAP digambar: kalau
+                                                 suatu hari kolomnya terisi, itu keterangan
+                                                 baru yang tidak ada di mana pun. --}}
+                                            @if (! empty($orangKe['email']) && ! $orangKe['utama'])
                                                 <span class="rin-peserta-surel">{{ $orangKe['email'] }}</span>
                                             @endif
                                             {{-- Nomornya jadi TAUTAN WhatsApp, bukan teks
@@ -3859,6 +3898,17 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                                 </a>
                                             @endif
                                         </span>
+                                        @if ($orangKe['utama'])
+                                            {{-- Lencananya di pojok kanan atas, sejajar nama.
+
+                                                 Pernah ditaruh DI DALAM nama supaya tidak
+                                                 menghimpit kolomnya — tetapi di sana ia jatuh
+                                                 ke barisnya sendiri di antara nama dan nomor,
+                                                 dan kartu pendaftar jadi tiga baris sementara
+                                                 kartu sebelahnya dua. Kartunya kini 265px,
+                                                 cukup untuk keduanya sebaris. --}}
+                                            <span class="mis-pil mis-pil-ungu rin-peserta-pil">pendaftar</span>
+                                        @endif
                                     </li>
                                 @endforeach
                             </ol>
@@ -3907,12 +3957,17 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                     <span class="mis-medali mini mis-hijau" aria-hidden="true">
                                         <i class="fas fa-check"></i>
                                     </span>
+                                    {{-- Satu baris, bukan dua kalimat.
+
+                                         Dua kalimat membuat panel ini 100px — lebih berat
+                                         daripada dua kartu peserta yang diterangkannya, dan
+                                         kalimat keduanya ("tidak ada kursi tersisa") cuma
+                                         mengulang arti "sudah lengkap". Yang perlu dibaca
+                                         sekali lihat tinggal angkanya. --}}
                                     <span class="rin-peserta-lengkap-teks">
-                                        <strong>Daftarnya sudah lengkap</strong>
-                                        <span>
-                                            {{ $terdaftar }} dari {{ $jumlahOrang }} orang yang dibayar
-                                            sudah punya nama. Tidak ada kursi tersisa untuk ditambah.
-                                        </span>
+                                        <strong>Daftarnya sudah lengkap</strong> —
+                                        {{ $terdaftar }} dari {{ $jumlahOrang }} orang yang dibayar
+                                        sudah punya nama.
                                     </span>
                                     {{-- Jalan membetulkannya tetap ada, cuma tidak lagi
                                          menganga. Yang hendak mengoreksi salah ketik
