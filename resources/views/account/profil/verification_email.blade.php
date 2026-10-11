@@ -64,7 +64,7 @@
                     <tr>
                         <td align="center" style="padding: 40px 20px 20px 20px;">
                             <a href="https://rumahscopusfoundation.com/" target="_blank">
-                                <img src="{{ asset('assets/img/logo-email.png') }}"
+                                <img src="{{ aset_surat('assets/img/logo-email.png') }}"
                                     alt="MIS — Management Integration System by Rumah Scopus" width="190"
                                     style="display:block;border:0;width:190px;max-width:60%;height:auto">
                             </a>
@@ -121,17 +121,17 @@
                                 <tr>
                                     <td style="padding: 0 8px;">
                                         <a href="https://www.instagram.com/rumah_scopus/" target="_blank">
-                                            <img src="{{ asset('assets/img/instagram.png') }}" alt="IG" width="30" height="30" style="display: block;">
+                                            <img src="{{ aset_surat('assets/img/instagram.png') }}" alt="IG" width="30" height="30" style="display: block;">
                                         </a>
                                     </td>
                                     <td style="padding: 0 8px;">
                                         <a href="https://www.youtube.com/@rumahscopus" target="_blank">
-                                            <img src="{{ asset('assets/img/youtube.png') }}" alt="YT" width="30" height="30" style="display: block;">
+                                            <img src="{{ aset_surat('assets/img/youtube.png') }}" alt="YT" width="30" height="30" style="display: block;">
                                         </a>
                                     </td>
                                     <td style="padding: 0 8px;">
                                         <a href="https://www.facebook.com/RumahScopusAkademi" target="_blank">
-                                            <img src="{{ asset('assets/img/facebook.png') }}" alt="FB" width="30" height="30" style="display: block;">
+                                            <img src="{{ aset_surat('assets/img/facebook.png') }}" alt="FB" width="30" height="30" style="display: block;">
                                         </a>
                                     </td>
                                 </tr>

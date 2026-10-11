@@ -60,7 +60,7 @@
                          pendaftar lainnya memang sudah memakai berkas ini. --}}
                     <tr>
                         <td align="center" style="padding:26px 28px 18px;background:#ffffff">
-                            <img src="{{ asset('assets/img/logo-rsc-email.png') }}"
+                            <img src="{{ aset_surat('assets/img/logo-rsc-email.png') }}"
                                 alt="Rumah Scopus Foundation" width="210"
                                 style="display:block;border:0;width:210px;max-width:72%;height:auto">
                         </td>
