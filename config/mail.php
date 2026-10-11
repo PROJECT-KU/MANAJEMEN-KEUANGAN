@@ -126,6 +126,25 @@ return [
     |
     */
 
+    /*
+    |--------------------------------------------------------------------------
+    | Alamat gambar di dalam surat
+    |--------------------------------------------------------------------------
+    |
+    | Gambar surat TIDAK boleh ikut APP_URL. Surat dibaca di luar aplikasi,
+    | dan di lingkungan lokal APP_URL berbunyi http://localhost — Gmail
+    | mengambil gambar lewat proksinya sendiri di peladen Google, tempat
+    | "localhost" berarti mesin Google. Permintaannya gagal dan yang
+    | tergambar ikon rusak, termasuk pada surat uji yang dikirim panitia
+    | untuk memeriksa rupanya.
+    |
+    | Nilainya alamat situs yayasan, bukan alamat aplikasi: di sanalah
+    | berkas gambarnya terbit, dan alamat itu sama di lingkungan mana pun.
+    |
+    */
+
+    'aset_url' => env('MAIL_ASSET_URL', 'https://rumahscopusfoundation.com'),
+
     'markdown' => [
         'theme' => env('MAIL_MARKDOWN_THEME', 'default'),
 
