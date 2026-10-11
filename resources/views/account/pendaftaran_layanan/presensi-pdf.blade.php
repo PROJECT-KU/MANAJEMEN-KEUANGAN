@@ -2,14 +2,14 @@
   Lembar presensi peserta satu angkatan, dicetak lewat Dompdf.
 
   DITULIS DENGAN TABEL DAN GAYA SEBARIS seperti berkas ekspor-pdf di
-  sebelahnya: Dompdf tidak mengenal flexbox maupun grid, dan tata letak
-  yang memakainya runtuh jadi satu lajur tanpa galat apa pun.
+  sebelahnya: Dompdf tidak mengenal flexbox maupun grid, dan tata letak yang
+  memakainya runtuh jadi satu lajur tanpa galat apa pun. Jarak antar kotak
+  karena itu dibuat dengan sel pemisah berlebar tetap, bukan dengan gap.
 
   Logonya LOGO YAYASAN, bukan logo MIS. Lembar ini dipegang peserta di meja
-  registrasi — bukan orang dalam — jadi yang pantas tampil merek
-  yayasannya. Berkas ukuran situs (1906 px) yang dipakai, bukan ukuran
-  surat: ini cetakan, bukan email, dan di kertas kerapatan piksel justru
-  yang menentukan.
+  registrasi — bukan orang dalam — jadi yang pantas tampil merek yayasannya.
+  Berkas ukuran situs (1906 px) yang dipakai, bukan ukuran surat: ini
+  cetakan, dan di kertas kerapatan piksel justru yang menentukan.
 
   Disisipkan sebagai data URI, bukan ditautkan: Dompdf dijalankan dengan
   isRemoteEnabled = false, jadi alamat http apa pun tidak akan diambil dan
@@ -22,6 +22,14 @@
         : null;
 
     $belum = count(array_filter($orang, fn ($o) => ! $o['terisi']));
+
+    // Rentang tanggal dirakit di sini supaya markahnya tidak bercabang tiga.
+    $rentang = $angkatan['mulai'] ?? null;
+
+    if ($rentang !== null && ($angkatan['selesai'] ?? null) !== null
+        && $angkatan['selesai'] !== $angkatan['mulai']) {
+        $rentang .= ' – ' . $angkatan['selesai'];
+    }
 @endphp
 <!DOCTYPE html>
 <html lang="id">
@@ -29,7 +37,7 @@
     <meta charset="utf-8">
     <title>Daftar Presensi Peserta</title>
     <style>
-        @page { margin: 26mm 14mm 20mm 14mm; }
+        @page { margin: 30mm 13mm 18mm 13mm; }
 
         body {
             font-family: "DejaVu Sans", sans-serif;
@@ -39,68 +47,116 @@
         }
 
         /* Kepala dan kaki diulang di SETIAP halaman lewat posisi tetap.
-           Lembar presensi hampir selalu lebih dari satu halaman, dan
-           halaman kedua tanpa kepala tidak menunjuk angkatan mana pun. */
-        .kepala { position: fixed; top: -20mm; left: 0; right: 0; }
-        .kaki   { position: fixed; bottom: -14mm; left: 0; right: 0; }
+           Lembar presensi hampir selalu lebih dari satu halaman, dan halaman
+           kedua tanpa kepala tidak menunjuk angkatan mana pun. */
+        .kepala { position: fixed; top: -24mm; left: 0; right: 0; }
+        .kaki   { position: fixed; bottom: -12mm; left: 0; right: 0; }
 
         .judul {
             font-size: 15px;
             font-weight: bold;
-            letter-spacing: 1.2px;
+            letter-spacing: 1.4px;
             color: #0f172a;
             margin: 0;
+            /* Dicoba lebih dulu pada 16px/2px dengan logo 142px: judulnya
+               terpatah jadi "DAFTAR PRESENSI" / "PESERTA" dua baris, dan
+               kepalanya tidak lagi terbaca sebagai satu judul. */
+            white-space: nowrap;
         }
 
-        .anak-judul { font-size: 10.5px; color: #475569; margin: 3px 0 0 0; }
+        .anak-judul {
+            font-size: 10px;
+            color: #ea580c;
+            letter-spacing: .6px;
+            margin: 4px 0 0 0;
+        }
 
-        .garis-merek { height: 3px; background: #ea580c; margin-top: 7px; }
+        /* Dua garis beda tebal: yang tebal pendek berwarna merek, yang tipis
+           penuh berwarna muda. Satu garis saja terbaca seperti pembatas
+           seadanya; dua membuat kepalanya terbaca sebagai kop. */
+        .garis-tebal { height: 2.5px; background: #ea580c; width: 72px; }
+        .garis-tipis { height: 1px; background: #e2e8f0; }
 
-        .pita {
-            background: #f8fafc;
+        /* ---------------------------------------------- pita keterangan */
+        .kotak {
             border: 1px solid #e2e8f0;
-            border-radius: 4px;
-            padding: 7px 10px;
-            margin: 0 0 9px 0;
+            border-left: 3px solid #cbd5e1;
+            background: #f8fafc;
+            padding: 7px 9px;
         }
 
-        .pita td { font-size: 9px; color: #475569; padding: 1px 0; }
-        .pita .label { color: #94a3b8; }
-        .pita .nilai { font-weight: bold; color: #0f172a; }
+        .kotak-utama { border-left-color: #ea580c; background: #fff7ed; }
+        .kotak-angka { border-left-color: #6366f1; background: #eef2ff; }
 
-        table.daftar { width: 100%; border-collapse: collapse; }
+        .kotak .label {
+            display: block;
+            font-size: 7px;
+            letter-spacing: 1px;
+            color: #94a3b8;
+            margin-bottom: 2px;
+        }
+
+        .kotak .nilai { font-size: 10px; font-weight: bold; color: #0f172a; }
+
+        .catatan-kurang {
+            margin: 7px 0 0 0;
+            padding: 5px 9px;
+            border: 1px solid #fde68a;
+            background: #fffbeb;
+            color: #92400e;
+            font-size: 8.5px;
+        }
+
+        /* ------------------------------------------------------- tabel */
+        table.daftar { width: 100%; border-collapse: collapse; margin-top: 11px; }
 
         table.daftar th {
-            background: #0f172a;
+            background: #1e293b;
             color: #ffffff;
-            font-size: 8.5px;
-            letter-spacing: .4px;
-            padding: 6px 5px;
-            border: 1px solid #0f172a;
+            font-size: 8px;
+            letter-spacing: .8px;
+            padding: 7px 5px;
+            border: 1px solid #1e293b;
         }
 
         table.daftar td {
-            border: 1px solid #cbd5e1;
-            padding: 5px;
+            border: 1px solid #e2e8f0;
+            padding: 6px 5px;
             vertical-align: middle;
         }
 
-        /* Baris berselang-seling: di lembar yang dibaca sambil berdiri,
-           mata kehilangan barisnya tanpa pembeda apa pun. */
+        /* Baris berselang-seling: di lembar yang dibaca sambil berdiri, mata
+           kehilangan barisnya tanpa pembeda apa pun. */
         table.daftar tr.selang td { background: #f8fafc; }
+
+        /* Lajur nomor diberi warna sendiri supaya ujung kiri tabel punya
+           jangkar — tanpa itu barisnya terbaca melayang. */
+        td.no {
+            background: #f1f5f9 !important;
+            text-align: center;
+            font-weight: bold;
+            color: #475569;
+            font-size: 9px;
+        }
 
         .tengah { text-align: center; }
         .kanan  { text-align: right; }
 
-        .nama { font-weight: bold; color: #0f172a; }
+        .nama { font-weight: bold; color: #0f172a; font-size: 10px; }
         .samar { color: #94a3b8; font-style: italic; font-weight: normal; }
         .kecil { font-size: 8px; color: #64748b; }
 
-        /* Penanda rombongan, HANYA untuk yang bukan pendaftarnya.
-           Dicetak pada setiap baris, lencananya muncul di hampir semua
-           baris — terukur pada angkatan nyata: 11 dari 11 — lalu memecah
-           nama panjang ke baris kedua tanpa menerangkan apa pun. Yang
-           perlu dibedakan justru yang sedikit. */
+        .nomor-daftar {
+            font-family: "DejaVu Sans Mono", monospace;
+            font-size: 8px;
+            color: #475569;
+            letter-spacing: .5px;
+        }
+
+        /* Penanda rombongan, HANYA untuk yang bukan pendaftarnya. Dicetak di
+           setiap baris, lencananya muncul di hampir semua baris — terukur
+           pada angkatan nyata: 11 dari 11 — lalu memecah nama panjang ke
+           baris kedua tanpa menerangkan apa pun. */
         .rombongan {
             display: block;
             font-size: 7.5px;
@@ -109,13 +165,30 @@
         }
 
         /* Kotak tanda tangan: tingginya yang membuat lembar ini bisa
-           ditandatangani di atas meja, bukan lebarnya. */
-        /* 34px, bukan 26px. Dicoba di atas kertas, tanda tangan dewasa
-           tidak muat di 26px dan meluber ke baris tetangganya. */
+           ditandatangani di atas meja, bukan lebarnya. Dicoba di atas
+           kertas, tanda tangan dewasa tidak muat di 26px. */
         .ttd { height: 34px; }
 
-        .tandatangan-panitia { margin-top: 18px; }
-        .tandatangan-panitia td { font-size: 9px; color: #475569; padding: 0; }
+        /* --------------------------------------------------- tanda tangan */
+        .blok-ttd { margin-top: 20px; }
+        .blok-ttd td { font-size: 9px; color: #475569; }
+
+        .ttd-peran {
+            font-size: 8px;
+            letter-spacing: 1px;
+            color: #94a3b8;
+            margin: 0 0 2px 0;
+        }
+
+        .ttd-lembaga { font-weight: bold; color: #0f172a; margin: 0 0 46px 0; }
+
+        .ttd-garis {
+            border-top: 1px solid #94a3b8;
+            padding-top: 5px;
+            margin: 0;
+            color: #94a3b8;
+            font-size: 8.5px;
+        }
     </style>
 </head>
 <body>
@@ -124,94 +197,106 @@
     <table width="100%" cellpadding="0" cellspacing="0">
         <tr>
             @if ($logo)
-                <td width="150" valign="middle">
-                    <img src="{{ $logo }}" alt="Rumah Scopus Foundation" width="140">
+                <td width="132" valign="middle">
+                    <img src="{{ $logo }}" alt="Rumah Scopus Foundation" width="124">
                 </td>
             @endif
             <td valign="middle" class="tengah">
                 <p class="judul">DAFTAR PRESENSI PESERTA</p>
                 <p class="anak-judul">
-                    {{ $angkatan['layanan'] ?? 'Layanan Rumah Scopus' }}
+                    {{ strtoupper($angkatan['layanan'] ?? 'LAYANAN RUMAH SCOPUS') }}
                     @if (($angkatan['nomor'] ?? null) !== null)
-                        &middot; Angkatan ke-{{ $angkatan['nomor'] }}
+                        &middot; ANGKATAN KE-{{ $angkatan['nomor'] }}
                     @endif
                 </p>
             </td>
-            {{-- Lajur kosong selebar logonya: tanpa ini judulnya terpusat
-                 pada sisa lebar, bukan pada lebar kertasnya. --}}
+            {{-- Lajur kosong selebar logonya: tanpa ini judulnya terpusat pada
+                 sisa lebar, bukan pada lebar kertasnya. --}}
             @if ($logo)
-                <td width="150"></td>
+                <td width="132"></td>
             @endif
         </tr>
     </table>
-    <div class="garis-merek"></div>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:8px">
+        <tr>
+            <td width="72"><div class="garis-tebal"></div></td>
+            <td><div class="garis-tipis"></div></td>
+        </tr>
+    </table>
 </div>
 
 <div class="kaki">
     <table width="100%" cellpadding="0" cellspacing="0">
         <tr>
             <td class="kecil">Rumah Scopus Foundation &middot; dicetak {{ $dicetak }} WIB</td>
-            {{-- Nomor halaman TIDAK dicetak di sini melainkan lewat
-                 page_text() di pengendalinya. counter(pages) milik CSS
-                 dijawab 0 oleh Dompdf — terukur: kakinya berbunyi "Halaman
-                 1 dari 0". --}}
+            {{-- Nomor halaman TIDAK dicetak di sini melainkan lewat page_text()
+                 di pengendalinya. counter(pages) milik CSS dijawab 0 oleh
+                 Dompdf — terukur: kakinya berbunyi "Halaman 1 dari 0". --}}
             <td></td>
         </tr>
     </table>
 </div>
 
-<table class="pita" width="100%" cellpadding="0" cellspacing="0">
-    <tr>
-        <td width="50%">
-            <span class="label">Angkatan</span>
+{{-- Pita keterangan: kotak terpisah, bukan satu baris panjang. Satu baris
+     membuat empat keterangan berbeda terbaca seperti satu kalimat, dan yang
+     paling dicari di meja registrasi — nama angkatannya — tidak menonjol
+     dari sisanya. --}}
+<table width="100%" cellpadding="0" cellspacing="0">
+    <tr valign="top">
+        <td width="40%" class="kotak kotak-utama">
+            <span class="label">ANGKATAN</span>
             <span class="nilai">{{ $angkatan['nama'] ?? '—' }}</span>
         </td>
-        <td width="25%">
-            <span class="label">Mulai</span>
-            <span class="nilai">{{ $angkatan['mulai'] ?? '—' }}</span>
+        <td width="7"></td>
+        <td class="kotak">
+            <span class="label">PELAKSANAAN</span>
+            <span class="nilai">{{ $rentang ?? '—' }}</span>
         </td>
-        <td width="25%" class="kanan">
-            <span class="label">Jumlah peserta</span>
+        <td width="7"></td>
+        <td class="kotak">
+            <span class="label">LOKASI</span>
+            <span class="nilai">{{ ($angkatan['lokasi'] ?? '') !== '' ? $angkatan['lokasi'] : '—' }}</span>
+        </td>
+        <td width="7"></td>
+        <td width="15%" class="kotak kotak-angka tengah">
+            <span class="label">PESERTA</span>
             <span class="nilai">{{ count($orang) }} orang</span>
         </td>
     </tr>
-    @if ($belum > 0 || $saringan !== [])
-        <tr>
-            <td colspan="3" style="padding-top:4px">
-                @if ($belum > 0)
-                    {{-- Disebut di MUKA, bukan disembunyikan: yang memegang
-                         lembar ini perlu tahu ada kursi yang namanya memang
-                         belum pernah ditanyakan, bukan salah cetak. --}}
-                    <span class="label">Belum berisi nama</span>
-                    <span class="nilai">{{ $belum }} kursi</span>
-                    @if ($saringan !== []) <span class="label">&middot;</span> @endif
-                @endif
-                @if ($saringan !== [])
-                    <span class="label">Saringan</span>
-                    <span>{{ implode(' · ', array_map(
-                        fn ($nama, $nilai) => $nama . ': ' . $nilai,
-                        array_keys($saringan), $saringan)) }}</span>
-                @endif
-            </td>
-        </tr>
-    @endif
 </table>
+
+@if ($belum > 0 || $saringan !== [])
+    <p class="catatan-kurang">
+        @if ($belum > 0)
+            {{-- Disebut di MUKA, bukan disembunyikan: yang memegang lembar ini
+                 perlu tahu ada kursi yang namanya memang belum pernah
+                 ditanyakan, bukan salah cetak. --}}
+            <strong>{{ $belum }} kursi</strong> sudah dibayar tetapi namanya belum diisi.
+        @endif
+        @if ($saringan !== [])
+            Saringan: {{ implode(' · ', array_map(
+                fn ($nama, $nilai) => $nama . ': ' . $nilai,
+                array_keys($saringan), $saringan)) }}.
+        @endif
+    </p>
+@endif
 
 <table class="daftar">
     <thead>
         <tr>
-            <th width="4%">NO</th>
-            <th width="26%" style="text-align:left">NAMA PESERTA</th>
-            <th width="20%" style="text-align:left">ASAL / AFILIASI</th>
-            <th width="13%">NOMOR DAFTAR</th>
+            <th width="5%">NO</th>
+            <th width="27%" style="text-align:left">NAMA PESERTA</th>
+            <th width="21%" style="text-align:left">ASAL / AFILIASI</th>
+            <th width="12%">NO. DAFTAR</th>
             <th width="14%">TELEPON</th>
-            <th width="23%">TANDA TANGAN</th>
+            <th width="21%">TANDA TANGAN</th>
         </tr>
     </thead>
     <tbody>
         @forelse ($orang as $i => $o)
             <tr class="{{ $i % 2 === 1 ? 'selang' : '' }}">
-                <td class="tengah">{{ $i + 1 }}</td>
+                <td class="no">{{ $i + 1 }}</td>
                 <td>
                     <span class="nama {{ $o['terisi'] ? '' : 'samar' }}">{{ $o['nama'] }}</span>
                     @if ($o['peran'] !== 'Pendaftar')
@@ -219,7 +304,7 @@
                     @endif
                 </td>
                 <td>{{ $o['afiliasi'] !== '' ? $o['afiliasi'] : '—' }}</td>
-                <td class="tengah kecil">{{ strtoupper($o['nomor']) }}</td>
+                <td class="tengah nomor-daftar">{{ strtoupper($o['nomor']) }}</td>
                 <td class="tengah">{{ $o['telp'] !== '' ? $o['telp'] : '—' }}</td>
                 {{-- Nomor barisnya diulang di kotak tanda tangan. Lembar
                      presensi dibaca menyamping sambil berdiri, dan tanpa
@@ -229,7 +314,7 @@
             </tr>
         @empty
             <tr>
-                <td colspan="6" class="tengah samar" style="padding:22px">
+                <td colspan="6" class="tengah samar" style="padding:24px">
                     Tidak ada peserta pada angkatan ini.
                 </td>
             </tr>
@@ -237,12 +322,17 @@
     </tbody>
 </table>
 
-<table class="tandatangan-panitia" width="100%" cellpadding="0" cellspacing="0">
+<table class="blok-ttd" width="100%" cellpadding="0" cellspacing="0">
     <tr>
-        <td width="60%"></td>
-        <td width="40%" class="tengah">
-            <p style="margin:0 0 42px 0">Panitia Rumah Scopus Foundation</p>
-            <p style="margin:0; border-top:1px solid #94a3b8; padding-top:4px">(&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)</p>
+        <td width="58%"></td>
+        <td width="42%" class="tengah">
+            {{-- "Penanggung jawab angkatan", bukan "Panitia Rumah Scopus
+                 Foundation". Nama lembaga tidak menunjuk siapa pun, sehingga
+                 tidak ada yang bisa dituju kalau lembarnya dipersoalkan
+                 kemudian. Namanya ditulis tangan di atas garis. --}}
+            <p class="ttd-peran">PENANGGUNG JAWAB ANGKATAN</p>
+            <p class="ttd-lembaga">Rumah Scopus Foundation</p>
+            <p class="ttd-garis">nama terang &amp; tanda tangan</p>
         </td>
     </tr>
 </table>

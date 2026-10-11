@@ -193,6 +193,56 @@ class PresensiPesertaTest extends TestCase
             'Logonya dirakit asset(); alamat http tidak diambil Dompdf.');
     }
 
+    /**
+     * Yang menandatangani PENANGGUNG JAWAB ANGKATAN, bukan nama lembaga.
+     *
+     * Semula lembarnya ditutup "Panitia Rumah Scopus Foundation" saja —
+     * nama lembaga tidak menunjuk siapa pun, sehingga tidak ada yang bisa
+     * dituju kalau lembarnya dipersoalkan kemudian.
+     */
+    #[Test]
+    public function yang_menandatangani_penanggung_jawab_angkatan(): void
+    {
+        [$orang, $b] = $this->rombongan(2, []);
+
+        $isi = $this->render($b);
+
+        $this->assertStringContainsString('PENANGGUNG JAWAB ANGKATAN', $isi,
+            'Blok tanda tangannya tidak menyebut penanggung jawab angkatan.');
+
+        // Ada garis dan keterangan untuk nama terangnya; tanpa itu yang
+        // menandatangani tidak tahu di mana menulis namanya.
+        $this->assertStringContainsString('nama terang', $isi);
+    }
+
+    /**
+     * Kepalanya menyebut tempat dan rentang tanggalnya, bukan tanggal mulai
+     * saja.
+     *
+     * Lembar presensi acara tiga hari dipakai di ketiga harinya. Tanpa
+     * rentangnya, lembar hari kedua terbaca seperti lembar yang salah.
+     */
+    #[Test]
+    public function kepalanya_menyebut_tempat_dan_rentang_tanggalnya(): void
+    {
+        [$orang, $b] = $this->rombongan(2, []);
+
+        KategoriLayanan::where('id', $b->kategori_id)->update([
+            'lokasi' => 'Hotel Uji Yogyakarta',
+            'selesai' => now()->addMonth()->addDays(2)->toDateString(),
+        ]);
+
+        Pendaftaran::lupakan();
+        KategoriLayanan::lupakanPendaftar();
+
+        $isi = $this->render($b);
+
+        $this->assertStringContainsString('Hotel Uji Yogyakarta', $isi,
+            'Lokasi angkatannya tidak tercetak di kepalanya.');
+        $this->assertStringContainsString('LOKASI', $isi);
+        $this->assertStringContainsString('PELAKSANAAN', $isi);
+    }
+
     /** Tertutup untuk pelanggan, diperiksa TERPISAH dari layarnya. */
     #[Test]
     public function tertutup_untuk_pelanggan(): void
@@ -273,6 +323,22 @@ class PresensiPesertaTest extends TestCase
     }
 
     // ------------------------------------------------------------- pembantu
+
+    /** Markah lembarnya, sebelum dijadikan PDF — isinya yang diperiksa. */
+    private function render(PendaftaranScopusCamp $b): string
+    {
+        Pendaftaran::lupakan();
+
+        $baris = Pendaftaran::kueri()
+            ->where('layanan', 'scopus_camp')->where('id', $b->getKey())->get();
+
+        return view('account.pendaftaran_layanan.presensi-pdf', [
+            'orang' => DaftarPresensi::orang($baris),
+            'angkatan' => DaftarPresensi::angkatan($baris),
+            'saringan' => [],
+            'dicetak' => now()->format('d/m/Y H:i'),
+        ])->render();
+    }
 
     /** @return list<array<string, mixed>> */
     private function isi(PendaftaranScopusCamp $b): array
