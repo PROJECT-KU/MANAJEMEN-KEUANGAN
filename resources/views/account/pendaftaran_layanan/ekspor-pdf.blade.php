@@ -85,23 +85,52 @@
 
         .judul {
             margin: 0;
-            font-size: 15px;
+            font-size: 16px;
             font-weight: bold;
+            letter-spacing: .6px;
             color: #0f172a;
         }
 
         .anak-judul {
-            margin: 2px 0 0;
+            margin: 3px 0 0;
             font-size: 8.5px;
             color: #64748b;
         }
 
+        /* Baris kanan kepala: label kecil di atas nilainya, bukan dua baris
+           sejajar. Dua baris sejajar membuat "MIS Rumah Scopus Foundation"
+           dan waktu unduhnya terbaca sebagai satu kalimat. */
+        .meta-label {
+            font-size: 6.5px;
+            letter-spacing: 1px;
+            /* #a5b4fc dicoba lebih dulu dan nyaris tak terbaca di atas
+               putih saat dicetak; #818cf8 tetap beraksen tanpa memudar. */
+            color: #818cf8;
+        }
+
+        .meta-nilai { font-size: 8.5px; color: #475569; font-weight: bold; }
+
+        /*
+         * Dua garis beda tebal, bukan satu.
+         *
+         * Satu garis penuh terbaca seperti pembatas seadanya; potongan tebal
+         * berwarna merek di ujung kiri membuat kepalanya terbaca sebagai kop.
+         * Keduanya fixed supaya ikut terulang di tiap halaman.
+         */
         .garis-kepala {
             position: fixed;
             top: -14px;
             left: 0;
             width: 794pt;
-            border-top: 2px solid #6366f1;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .garis-kepala-tebal {
+            position: fixed;
+            top: -16px;
+            left: 0;
+            width: 84pt;
+            border-top: 3px solid #6366f1;
         }
 
         .kaki {
@@ -115,30 +144,61 @@
             color: #94a3b8;
         }
 
+        /*
+         * Ringkasan jadi kartu TERPISAH, bukan satu baris sel bersambung.
+         *
+         * Bersambung, kelima angka berbeda terbaca seperti satu baris tabel
+         * dan tidak ada yang menonjol. Jaraknya dibuat dengan sel pemisah
+         * berlebar tetap: Dompdf tidak mengenal gap maupun border-spacing
+         * yang hanya mendatar.
+         */
         .keterangan-berkas {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 12px;
+            margin-bottom: 13px;
         }
 
-        .keterangan-berkas td {
-            padding: 5px 8px;
+        .keterangan-berkas td.kartu {
+            padding: 6px 9px;
             background: #f8fafc;
             border: 1px solid #e2e8f0;
+            border-left: 3px solid #cbd5e1;
             font-size: 8px;
         }
 
+        /*
+         * Warnanya membawa arti, bukan hiasan: nila untuk jumlah yang
+         * tercetak, kuning hanya saat memang ada yang belum bayar, hijau
+         * untuk uang yang sudah masuk.
+         *
+         * Pemilihnya SELENGKAP pemilih dasarnya. Ditulis ".kartu-pokok"
+         * saja, bobotnya (0,1,0) kalah dari ".keterangan-berkas td.kartu"
+         * (0,2,1) di atas — dan yang tercetak kelima kartu abu-abu seragam
+         * tanpa galat apa pun. Terjadi persis begitu saat dicoba, dan sempat
+         * disangka batasan Dompdf pada border-collapse.
+         */
+        .keterangan-berkas td.kartu-pokok { border-left-color: #6366f1; background: #eef2ff; }
+        .keterangan-berkas td.kartu-awas  { border-left-color: #f59e0b; background: #fffbeb; }
+        .keterangan-berkas td.kartu-uang  { border-left-color: #10b981; background: #ecfdf5; }
+
+        .keterangan-berkas td.sela { padding: 0; border: 0; width: 7px; }
+
         .label {
             color: #94a3b8;
-            font-size: 7px;
+            font-size: 6.5px;
             text-transform: uppercase;
-            letter-spacing: .04em;
+            letter-spacing: .08em;
         }
 
         .nilai {
             color: #0f172a;
             font-weight: bold;
+            font-size: 11px;
         }
+
+        /* Saringan tetap berukuran teks: isinya kalimat, bukan angka, dan
+           pada 11px ia memakan dua baris lalu menaikkan tinggi seluruh pita. */
+        .nilai-teks { color: #0f172a; font-weight: bold; font-size: 8px; }
 
         table.daftar {
             width: 100%;
@@ -146,24 +206,33 @@
         }
 
         table.daftar thead th {
-            padding: 6px 6px;
-            background: #6366f1;
+            padding: 7px 6px;
+            background: #4f46e5;
             color: #ffffff;
-            font-size: 7.5px;
+            font-size: 7px;
             text-transform: uppercase;
-            letter-spacing: .04em;
+            letter-spacing: .09em;
             text-align: left;
-            border: 1px solid #6366f1;
+            border: 1px solid #4f46e5;
         }
 
         table.daftar tbody td {
-            padding: 5px 6px;
+            padding: 6px;
             border: 1px solid #e8edf3;
             vertical-align: top;
         }
 
         table.daftar tbody tr.selang td {
             background: #fafbfd;
+        }
+
+        /* Lajur nomor diberi latar sendiri supaya ujung kiri tabel punya
+           jangkar — tanpa itu barisnya terbaca melayang di halaman lebar. */
+        table.daftar tbody td.no {
+            background: #f1f5f9;
+            text-align: center;
+            font-weight: bold;
+            color: #64748b;
         }
 
         .tebal {
@@ -225,15 +294,17 @@
                     <p class="judul">Pendaftar Layanan</p>
                     <p class="anak-judul">Semua yang mendaftar layanan jasa Rumah Scopus.</p>
                 </td>
-                <td align="right" class="anak-judul">
-                    MIS Rumah Scopus Foundation<br>
-                    Diunduh {{ now()->format('d/m/Y H:i') }} WIB
+                <td align="right">
+                    <span class="meta-label">DITERBITKAN OLEH</span><br>
+                    <span class="meta-nilai">MIS Rumah Scopus Foundation</span><br>
+                    <span class="anak-judul">Diunduh {{ now()->format('d/m/Y H:i') }} WIB</span>
                 </td>
             </tr>
         </table>
     </div>
 
     <div class="garis-kepala"></div>
+    <div class="garis-kepala-tebal"></div>
 
     <div class="kaki">
         <table width="100%">
@@ -250,26 +321,33 @@
     </div>
 
     <table class="keterangan-berkas">
-        <tr>
-            <td width="18%">
+        <tr valign="top">
+            <td width="14%" class="kartu kartu-pokok">
                 <span class="label">Pendaftaran tercetak</span><br>
                 <span class="nilai">{{ number_format($baris->count(), 0, ',', '.') }}</span>
             </td>
-            <td width="15%">
+            <td class="sela"></td>
+            <td width="11%" class="kartu">
                 <span class="label">Jumlah orang</span><br>
                 <span class="nilai">{{ number_format($jumlahOrang, 0, ',', '.') }}</span>
             </td>
-            <td width="15%">
+            <td class="sela"></td>
+            {{-- Kuning HANYA saat memang ada yang belum bayar. Selalu kuning,
+                 warnanya berhenti berarti apa-apa dan "Belum bayar 0" ikut
+                 terbaca seperti peringatan. --}}
+            <td width="11%" class="kartu {{ $belumBayar > 0 ? 'kartu-awas' : '' }}">
                 <span class="label">Belum bayar</span><br>
                 <span class="nilai">{{ number_format($belumBayar, 0, ',', '.') }}</span>
             </td>
-            <td width="22%">
+            <td class="sela"></td>
+            <td width="19%" class="kartu kartu-uang">
                 <span class="label">Uang masuk dari yang lunas</span><br>
                 <span class="nilai">Rp {{ number_format($uangLunas, 0, ',', '.') }}</span>
             </td>
-            <td width="30%">
+            <td class="sela"></td>
+            <td class="kartu">
                 <span class="label">Saringan</span><br>
-                <span class="nilai">
+                <span class="nilai-teks">
                     {{-- Saringan yang sedang dipakai ikut dicetak: tanpa itu,
                          berkas berisi 12 baris tidak bisa dibedakan dari daftar
                          yang memang cuma punya 12 pendaftar. --}}
@@ -291,14 +369,18 @@
         <table class="daftar">
             <thead>
                 <tr>
-                    <th width="3%">No.</th>
+                    {{-- Kepala kolom DISEJAJARKAN dengan isinya: nomor dan
+                         jumlah orang di tengah, nominal di kanan. Semuanya
+                         rata kiri, kepala "Total bayar" berdiri jauh dari
+                         angka yang diwakilinya. --}}
+                    <th width="3%" class="tengah">No.</th>
                     <th width="12%">Layanan</th>
-                    <th width="11%">Nomor</th>
+                    <th width="10%">Nomor</th>
                     <th width="17%">Pendaftar</th>
                     <th width="13%">Kontak</th>
-                    <th width="14%">Sesi</th>
-                    <th width="5%">Org</th>
-                    <th width="11%">Total bayar</th>
+                    <th width="15%">Sesi</th>
+                    <th width="5%" class="tengah">Orang</th>
+                    <th width="11%" class="kanan">Total bayar</th>
                     <th width="14%">Keadaan</th>
                 </tr>
             </thead>
@@ -314,7 +396,7 @@
                         $kodeUnik = (int) $b->kode_unik;
                     @endphp
                     <tr class="{{ $i % 2 ? 'selang' : '' }}">
-                        <td class="samar">{{ $i + 1 }}</td>
+                        <td class="no">{{ $i + 1 }}</td>
                         <td>{{ $layananBaris }}</td>
                         <td class="samar">{{ $b->nomor ?: '—' }}</td>
                         <td>
