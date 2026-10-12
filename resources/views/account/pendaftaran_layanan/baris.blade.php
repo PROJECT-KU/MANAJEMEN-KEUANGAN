@@ -109,6 +109,10 @@
             <div style="min-width: 0;">
                 <p class="pdl-layanan-nama" title="{{ $layananBaris['nama'] }}">{{ $layananBaris['nama'] }}</p>
             </div>
+
+            {{-- Nomor pendaftaran untuk MODUS KARTU: penanda kartu, di
+                 seberang nama layanannya. Lihat partials/nomor. --}}
+            @include('account.pendaftaran_layanan.partials.nomor', ['tempat' => 'kartu'])
         </div>
     </td>
 
@@ -119,7 +123,7 @@
                  tiga baris di tanda hubungnya. Di sini 229px, dan ia memang
                  keterangan tentang orangnya — itu yang disebut saat
                  menghubungi panitia lewat WhatsApp. --}}
-            <span class="pdl-nomor">{{ $b->nomor ?: 'Tanpa nomor' }}</span>
+            @include('account.pendaftaran_layanan.partials.nomor', ['tempat' => 'tabel'])
 
             <p class="pdl-nama">
                 {{-- title: namanya dipotong dua baris lewat CSS, jadi yang

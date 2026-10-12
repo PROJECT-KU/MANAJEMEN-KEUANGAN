@@ -96,7 +96,20 @@ class CariNomorTeleponTest extends TestCase
             ->get(route('account.pendaftaran-layanan.index', ['cari' => $kata]))
             ->assertOk()->getContent();
 
-        preg_match_all('/<span class="pdl-nomor">([^<]*)</', $isi, $cocok);
+        /*
+         * Dipanen dari salinan TABEL saja.
+         *
+         * Nomornya dirender dua kali — satu untuk tabel lebar, satu untuk
+         * modus kartu — dan yang tidak berlaku disembunyikan lewat CSS,
+         * yang tidak terbaca dari isi halaman. Memanen keduanya membuat tiap
+         * pendaftaran terhitung dua kali.
+         *
+         * Dicocokkan pada kelasnya yang lengkap, bukan pada `class="pdl-nomor"`
+         * persis: penjaga versi pertama memakai pola itu dan jadi merah
+         * seluruhnya begitu kelas penandanya ditambahkan — merah oleh sebab
+         * yang bukan cacat pencariannya.
+         */
+        preg_match_all('/<span class="pdl-nomor pdl-nomor-tabel"[^>]*>([^<]*)</', $isi, $cocok);
 
         return array_map('trim', $cocok[1] ?? []);
     }
