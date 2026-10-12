@@ -338,6 +338,14 @@ Rincian Pendaftaran | MIS Rumah Scopus
                 align-items: center;
                 min-height: 40px;
             }
+
+            /* 9px: setengah selisih tinggi baris nomor (40px) dengan
+               medalinya (22px), jadi titik tengah keduanya bertemu. Ditulis
+               di sini, berdampingan dengan aturan yang membuat barisnya
+               40px — keduanya hanya masuk akal bersama-sama. */
+            .rin-ganda-daftar .mis-medali {
+                margin-top: 9px;
+            }
         }
 
         .rin-aksi i {
@@ -1483,10 +1491,48 @@ Rincian Pendaftaran | MIS Rumah Scopus
          * Membungkus menambah satu baris; memotong menghilangkan isinya.
          */
         .rin-ganda-ket {
-            display: block;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 4px 6px;
             font-size: .71rem;
             line-height: 1.35;
             color: #a16207;
+        }
+
+        /* Lencana keadaan di dalam keping: sekecil keterangannya, supaya ia
+           menandai tanpa mendominasi nomor di atasnya. */
+        .rin-ganda-ket .mis-pil {
+            padding: 1px 7px;
+            font-size: .66rem;
+        }
+
+        .rin-ganda-ket .mis-pil i {
+            font-size: 9px !important;
+        }
+
+        .rin-ganda-ket-teks {
+            min-width: 0;
+            overflow-wrap: anywhere;
+        }
+
+        /*
+         * Medalinya SEJAJAR dengan nomornya, bukan dipusatkan.
+         *
+         * Keping ini dua tingkat — nomor lalu keterangannya — jadi
+         * align-items: center menaruh medalinya di antara keduanya.
+         * Terukur di 390px: medali mulai 25px dari atas keping sementara
+         * nomornya 8px, dan yang terlihat ikon yang mengambang sendirian di
+         * kiri tanpa menempel pada apa pun.
+         *
+         * Offsetnya HANYA di ponsel, dan itu bukan kerapian berlebihan:
+         * baris nomornya dibuat setinggi 40px hanya di sana, sebagai sasaran
+         * ketuk. Dipasang juga di layar lebar, barisnya tinggal 17px dan
+         * medalinya justru turun 11,5px di bawah titik tengah nomornya —
+         * terukur di 1440px pada versi pertama perbaikan ini.
+         */
+        .rin-ganda-daftar > li {
+            align-items: flex-start;
         }
 
         /* Tombolnya tidak ada di layar lebar: di sana keenam kepingnya muat
@@ -2875,7 +2921,31 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                                     title="{{ strtoupper((string) ($lain->nomor ?: 'tanpa nomor')) }} — {{ $ketLain }}">
                                                     {{ strtoupper((string) ($lain->nomor ?: 'tanpa nomor')) }}
                                                 </a>
-                                                <span class="rin-ganda-ket" title="{{ $ketLain }}">{{ $ketLain }}</span>
+                                                {{-- Keadaannya jadi LENCANA berwarna, tidak lagi
+                                                     menyatu dalam satu kalimat berpemisah titik.
+
+                                                     Yang dicari panitia di daftar ini cuma satu:
+                                                     mana di antara pendaftaran lainnya yang juga
+                                                     belum lunas. Sebagai teks sewarna tanggalnya,
+                                                     itu harus dibaca satu per satu; sebagai
+                                                     lencana, keenamnya terbaca sekali lihat.
+
+                                                     $ketLain tetap dipakai untuk title — di sana
+                                                     kalimat utuh justru yang paling berguna. --}}
+                                                <span class="rin-ganda-ket" title="{{ $ketLain }}">
+                                                    @if ($rupaLain)
+                                                        <span class="mis-pil mis-pil-{{ $rupaLain['warna'] }}">
+                                                            <i class="fas {{ $rupaLain['ikon'] }}" aria-hidden="true"></i>
+                                                            {{ $rupaLain['label'] }}
+                                                        </span>
+                                                    @endif
+                                                    @if ($lain->layanan !== $layanan)
+                                                        <span class="rin-ganda-ket-teks">{{ $infoLain['nama'] ?? $lain->layanan }}</span>
+                                                    @endif
+                                                    @if ($waktuLain)
+                                                        <span class="rin-ganda-ket-teks">{{ $waktuLain->translatedFormat('d M Y') }}</span>
+                                                    @endif
+                                                </span>
                                             </span>
                                         </li>
                                     @endforeach

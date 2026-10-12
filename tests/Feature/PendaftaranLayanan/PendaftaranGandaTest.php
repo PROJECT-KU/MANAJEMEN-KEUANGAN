@@ -311,4 +311,117 @@ class PendaftaranGandaTest extends TestCase
             'total_pembayaran' => '3500000', 'status' => 'diproses',
         ], $ubah));
     }
+    /**
+     * Keadaan tiap pendaftaran lain jadi LENCANA berwarna.
+     *
+     * Yang dicari panitia di daftar ini cuma satu: mana di antara
+     * pendaftaran lainnya yang juga belum lunas. Sebagai teks sewarna
+     * tanggalnya — "Menunggu bayar · 12 Okt 2026" — keenamnya harus dibaca
+     * satu per satu; sebagai lencana, keenamnya terbaca sekali lihat.
+     */
+    #[Test]
+    public function keadaan_pendaftaran_lain_jadi_lencana(): void
+    {
+        $blok = preg_match('/<ul class="rin-ganda-daftar">(.*?)<\/ul>/s', $this->gaya(), $cocok)
+            ? $cocok[1] : '';
+
+        $this->assertNotSame('', $blok, 'Daftar pendaftaran lain tidak ketemu.');
+
+        $this->assertMatchesRegularExpression(
+            '/<span class="mis-pil mis-pil-\{\{ \$rupaLain\[.warna.\] \}\}">/', $blok,
+            'Keadaannya kembali jadi teks biasa; mana yang belum lunas harus '
+            . 'dibaca satu per satu.'
+        );
+
+        /*
+         * Kalimat utuhnya TETAP di title.
+         *
+         * Lencananya memisah status dari tanggal dan nama layanannya; yang
+         * membaca lewat pembaca layar, atau yang menahan kursor di atasnya,
+         * tetap mendapat kalimat lengkapnya.
+         */
+        $this->assertStringContainsString('title="{{ $ketLain }}"', $blok,
+            'Kalimat utuhnya hilang dari title saat keadaannya dipecah jadi '
+            . 'lencana.');
+    }
+
+    /**
+     * Medali layanannya SEJAJAR dengan nomor, dan offsetnya hanya di ponsel.
+     *
+     * Keping ini dua tingkat — nomor lalu keterangannya — jadi
+     * align-items: center menaruh medalinya di antara keduanya: terukur di
+     * 390px medali mulai 25px dari atas keping sementara nomornya 8px, dan
+     * yang terlihat ikon yang mengambang sendirian di kiri.
+     *
+     * Offsetnya 9px karena baris nomornya dibuat 40px sebagai sasaran ketuk
+     * — dan itu HANYA berlaku di ponsel. Dipasang juga di layar lebar,
+     * barisnya tinggal 17px dan medalinya justru turun 11,5px di bawah titik
+     * tengah nomornya; terukur di 1440px pada versi pertama perbaikan ini.
+     */
+    #[Test]
+    public function medali_sejajar_nomor_dan_offsetnya_hanya_di_ponsel(): void
+    {
+        $isi = $this->gaya();
+
+        $this->assertMatchesRegularExpression(
+            '/\.rin-ganda-daftar > li\s*\{[^}]*align-items:\s*flex-start/s', $isi,
+            'Kepingnya kembali memusatkan isinya, jadi medalinya mengambang di '
+            . 'antara nomor dan keterangannya.'
+        );
+
+        /*
+         * Offsetnya dicari DI DALAM blok ponselnya, bukan di seluruh berkas:
+         * yang hendak dijaga justru bahwa ia tidak bocor ke layar lebar.
+         */
+        $this->assertSame(1, preg_match('/@media \(max-width: 575\.98px\) \{(.*)/s', $isi, $blok),
+            'Blok gaya ponsel layar rincian tidak ada.');
+
+        $this->assertMatchesRegularExpression(
+            '/\.rin-ganda-daftar \.mis-medali\s*\{[^}]*margin-top:\s*9px/s', $blok[1],
+            'Offset medalinya tidak ada di blok ponsel; di sana baris nomornya '
+            . '40px dan medalinya duduk 9px terlalu tinggi.'
+        );
+
+        /*
+         * Blok ponselnya DIPOTONG dengan menghitung kurung, bukan dengan
+         * memotong berkas di kemunculan pertamanya.
+         *
+         * Versi pertama penjaga ini memakai substr() sampai "@media
+         * (max-width: 575.98px)" yang pertama — dan berkas ini punya
+         * beberapa blok seperti itu, yang pertama jauh di atas. Aturan yang
+         * bocor ke layar lebar di bawahnya tidak pernah ikut terbaca, jadi
+         * penjaganya tetap hijau justru untuk cacat yang hendak dijaganya.
+         * Dibuktikan: offsetnya dipasang kembali di luar media query dan
+         * penjaganya diam saja.
+         */
+        $diLuarPonsel = $isi;
+
+        while (($mulai = strpos($diLuarPonsel, '@media (max-width: 575.98px)')) !== false) {
+            $kurung = strpos($diLuarPonsel, '{', $mulai);
+            $dalam = 0;
+            $akhir = $kurung;
+
+            for ($i = $kurung; $i < strlen($diLuarPonsel); $i++) {
+                if ($diLuarPonsel[$i] === '{') {
+                    $dalam++;
+                } elseif ($diLuarPonsel[$i] === '}') {
+                    $dalam--;
+
+                    if ($dalam === 0) {
+                        $akhir = $i;
+                        break;
+                    }
+                }
+            }
+
+            $diLuarPonsel = substr($diLuarPonsel, 0, $mulai) . substr($diLuarPonsel, $akhir + 1);
+        }
+
+        $this->assertDoesNotMatchRegularExpression(
+            '/\.rin-ganda-daftar \.mis-medali\s*\{[^}]*margin-top:/s', $diLuarPonsel,
+            'Offset medalinya bocor ke layar lebar, tempat baris nomornya cuma '
+            . '17px — medalinya turun 11,5px di bawah titik tengah nomornya.'
+        );
+    }
+
 }
