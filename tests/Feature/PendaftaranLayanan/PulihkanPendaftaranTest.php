@@ -646,6 +646,81 @@ class PulihkanPendaftaranTest extends TestCase
         $this->assertNotNull(PendaftaranDihapus::find($arsipId));
     }
 
+    /**
+     * Saringan catatan penghapusan MENYARING HIDUP, sama dengan layar
+     * Pendaftar Layanan.
+     *
+     * Dulu borang biasa: memilih "Sudah dikembalikan" mengubah isi menunya
+     * tetapi daftarnya diam sampai tombol Cari ditekan — sementara di layar
+     * sebelah memilih saringan langsung menyaring. Dua layar bersebelahan
+     * yang berperilaku berbeda membuat yang memakainya menyangka
+     * saringannya rusak.
+     *
+     * Yang dijaga KONTRAK MARKAHNYA, bukan perilakunya: penyaringnya
+     * JavaScript, dan uji PHP tidak menjalankannya. Satu id yang salah ketik
+     * membuat skripnya diam total tanpa galat apa pun.
+     */
+    #[Test]
+    public function saringannya_memenuhi_kontrak_penyaring_hidup(): void
+    {
+        [$admin, $b] = $this->dengan();
+
+        $isi = $this->actingAs($admin)
+            ->get(route('account.pendaftaran-layanan.terhapus'))
+            ->assertOk()->getContent();
+
+        $this->assertSame(1, preg_match('/data-mis-saring="([a-z-]+)"/', $isi, $cocok),
+            'Borangnya tidak memakai penyaring hidup bersama.');
+
+        /*
+         * Wadah hasilnya harus BENAR-BENAR ADA dengan id itu. Tidak ada,
+         * mis-ui.js berhenti di baris pertamanya (`if (!hasil) return`) dan
+         * seluruh penyaringnya mati diam-diam — termasuk kotak carinya.
+         */
+        $this->assertStringContainsString('id="' . $cocok[1] . '"', $isi,
+            'Wadah hasil yang disebut data-mis-saring tidak ada di halamannya.');
+
+        $this->assertSame(1, preg_match('/data-mis-saring-juga="([a-z-]+)"/', $isi, $juga));
+
+        $this->assertStringContainsString('id="' . $juga[1] . '"', $isi,
+            'Ringkasan yang disebut data-mis-saring-juga tidak ada; angkanya '
+            . 'akan tertinggal pada nilai sebelum disaring.');
+
+        // Kotak cari dan tombol cadangannya ikut dituntut: tanpa data-mis-cari
+        // penyaringnya hidup tetapi tidak pernah menyahut ketikan.
+        $this->assertStringContainsString('data-mis-cari', $isi);
+        $this->assertStringContainsString('data-mis-terapkan', $isi);
+    }
+
+    /**
+     * Jumlah lajur ubin mengikuti JUMLAH ubinnya.
+     *
+     * Dipatok dua sementara ubin ketiga muncul saat ada yang dikembalikan,
+     * ubin itu jatuh sendirian ke baris kedua dan menyisakan lubang selebar
+     * separuh layar.
+     */
+    #[Test]
+    public function lajur_ubinnya_mengikuti_jumlahnya(): void
+    {
+        [$admin, $b] = $this->dengan();
+        $id = (string) $b->getKey();
+
+        $this->actingAs($admin);
+        $this->hapus($b);
+
+        $this->actingAs($admin)
+            ->get(route('account.pendaftaran-layanan.terhapus'))
+            ->assertOk()
+            ->assertSee('mis-ringkas-2', false);
+
+        (new PulihkanPendaftaran)->jalankan((string) $this->arsip($id)->getKey());
+
+        $this->actingAs($admin)
+            ->get(route('account.pendaftaran-layanan.terhapus'))
+            ->assertOk()
+            ->assertSee('mis-ringkas-3', false);
+    }
+
     // ------------------------------------------------------------- pembantu
 
     private function hapus(PendaftaranScopusCamp $b): void
