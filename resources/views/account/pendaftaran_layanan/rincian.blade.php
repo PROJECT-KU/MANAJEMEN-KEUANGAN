@@ -326,25 +326,10 @@ Rincian Pendaftaran | MIS Rumah Scopus
                 min-height: 40px;
             }
 
-            /*
-             * Tautan ke pendaftaran ganda: terukur 16px tinggi, di bawah
-             * ambang yang bisa dikenai jempol dengan andal. Blok ini
-             * ditambahkan SESUDAH penyisiran sasaran ketuk sebelumnya, jadi
-             * ia lolos — dan itu sebabnya penjaganya sekarang menyebut
-             * kelasnya, bukan sekadar "yang di layar rincian".
-             */
-            .rin-ganda-teks > a {
-                display: inline-flex;
-                align-items: center;
-                min-height: 40px;
-            }
-
-            /* 9px: setengah selisih tinggi baris nomor (40px) dengan
-               medalinya (22px), jadi titik tengah keduanya bertemu. Ditulis
-               di sini, berdampingan dengan aturan yang membuat barisnya
-               40px — keduanya hanya masuk akal bersama-sama. */
+            /* Medalinya sejajar dengan baris nomor, yang di sini setinggi
+               satu baris teks biasa. */
             .rin-ganda-daftar .mis-medali {
-                margin-top: 9px;
+                margin-top: 1px;
             }
         }
 
@@ -1533,6 +1518,30 @@ Rincian Pendaftaran | MIS Rumah Scopus
          */
         .rin-ganda-daftar > li {
             align-items: flex-start;
+            /* Jangkar untuk tautan yang membentang di bawah ini. */
+            position: relative;
+        }
+
+        /*
+         * SELURUH kepingnya yang jadi sasaran ketuk, bukan baris nomornya.
+         *
+         * Sebelumnya baris nomornya dipatok setinggi 40px supaya bisa
+         * dikenai jempol. Itu bekerja, tetapi ongkosnya terbaca: teks
+         * nomornya sendiri cuma 15px, jadi 25px ruang mati menganga antara
+         * nomor dan lencana keadaannya — terukur di 390px, dan itu yang
+         * membuat keping ini terasa renggang.
+         *
+         * Dibentangkan, keduanya didapat sekaligus: jaraknya kembali jadi
+         * jarak baris biasa, dan sasaran ketuknya justru membesar dari
+         * 186x40 jadi seluas kepingnya. Berlaku di semua lebar — di layar
+         * lebar pun keping yang bisa ditekan seluruhnya lebih mudah
+         * dikenai daripada satu baris teks setinggi 17px.
+         */
+        .rin-ganda-teks > a::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 11px;
         }
 
         /* Tombolnya tidak ada di layar lebar: di sana keenam kepingnya muat
@@ -1852,6 +1861,53 @@ Rincian Pendaftaran | MIS Rumah Scopus
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
+        }
+
+        /* Nama pendek tombol lanjutan hanya ada di ponsel; di lebar lain
+           nama panjangnya yang dipakai, dan keduanya tampil bersamaan
+           berarti tombolnya berbunyi "Kirim ulang suratnya Kirim ulang". */
+        .rin-tombol-pendek {
+            display: none;
+        }
+
+        @media (max-width: 575.98px) {
+            /*
+             * Keduanya BERDAMPINGAN, bukan bertumpuk.
+             *
+             * Terukur di 390px: "Kirim ulang suratnya" 197px dan "Follow up:
+             * Menunggu bayar" 242px dalam wadah selebar 270px, jadi
+             * keduanya turun ke barisnya masing-masing dan blok ini memakan
+             * 92px. Berdampingan, 42px — dan keduanya tetap satu baris
+             * karena namanya ikut dipendekkan.
+             */
+            /*
+             * Barisnya DILEBARKAN penuh lebih dulu.
+             *
+             * .rin-lanjutan memakai justify-items: start, jadi barisnya cuma
+             * selebar isinya — dan begitu tombolnya dibuat menyusut, barisnya
+             * ikut menyusut bersamanya. Terukur: 232px di dalam kartu selebar
+             * 270px, menyisakan 38px menganggur di kanan.
+             */
+            .rin-lanjutan-tombol {
+                width: 100%;
+            }
+
+            .rin-lanjutan-tombol > .mis-tombol,
+            .rin-lanjutan-tombol > form > .mis-tombol {
+                flex: 1 1 0;
+                /* Anak flex tidak pernah menyusut di bawah min-content-nya,
+                   dan tulisan tombol ber-nowrap. */
+                min-width: 0;
+                padding: 0 10px;
+            }
+
+            .rin-tombol-panjang {
+                display: none;
+            }
+
+            .rin-tombol-pendek {
+                display: inline;
+            }
         }
 
         /*
@@ -3305,9 +3361,14 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                             <form method="POST" class="rin-kirim-ulang"
                                                 action="{{ route('account.pendaftaran-layanan.kirim-ulang', [$layanan, $pendaftaran->getKey()]) }}">
                                                 @csrf
+                                                {{-- Dua nama: yang panjang untuk layar lebar,
+                                                     yang pendek untuk ponsel. Berdampingan di
+                                                     270px tiap tombol cuma kebagian 131px, dan
+                                                     "Kirim ulang suratnya" menuntut 197px. --}}
                                                 <button type="submit" class="mis-tombol mis-tombol-halus" data-mis-kirim-ulang>
                                                     <i class="fas fa-paper-plane" aria-hidden="true"></i>
-                                                    <span>Kirim ulang suratnya</span>
+                                                    <span class="rin-tombol-panjang">Kirim ulang suratnya</span>
+                                                    <span class="rin-tombol-pendek" aria-hidden="true">Kirim ulang</span>
                                                 </button>
                                             </form>
                                         @endif
@@ -3331,9 +3392,15 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                             <form method="POST" class="rin-follow-up" target="_blank"
                                                 action="{{ route('account.pendaftaran-layanan.follow-up', [$layanan, $pendaftaran->getKey()]) }}">
                                                 @csrf
+                                                {{-- Keadaannya dibuang dari nama pendeknya,
+                                                     bukan dipotong: "Menunggu bayar" sudah
+                                                     tertulis sebagai lencana di kartu profil
+                                                     layar yang sama, jadi di ponsel ia
+                                                     pengulangan yang memakan satu baris penuh. --}}
                                                 <button type="submit" class="mis-tombol mis-tombol-halus rin-tombol-wa">
                                                     <i class="fab fa-whatsapp" aria-hidden="true"></i>
-                                                    <span>Follow up: {{ $rupa['label'] }}</span>
+                                                    <span class="rin-tombol-panjang">Follow up: {{ $rupa['label'] }}</span>
+                                                    <span class="rin-tombol-pendek" aria-hidden="true">Follow up</span>
                                                 </button>
                                             </form>
                                         @endif

@@ -397,19 +397,42 @@ class LayarPonselPendaftarTest extends TestCase
     }
 
     /**
-     * Tautan ke pendaftaran ganda juga >= 40px.
+    /**
+     * SELURUH keping pendaftaran ganda bisa dikenai jempol.
      *
-     * Blok itu ditambahkan SESUDAH penyisiran sasaran ketuk pertama, jadi ia
-     * lolos — terukur 16px tinggi. Penjaga ini menyebut kelasnya, bukan
-     * sekadar "yang di layar rincian", supaya blok berikutnya tidak ikut
-     * lolos dengan cara yang sama.
+     * Dulu dijaga lewat tinggi baris nomornya: dipatok 40px supaya tautan
+     * yang cuma 16px tidak lagi meleset saat ditekan. Itu bekerja, tetapi
+     * ongkosnya terbaca — teks nomornya sendiri 15px, jadi 25px ruang mati
+     * menganga antara nomor dan lencana keadaannya, dan kepingnya terasa
+     * renggang.
+     *
+     * Diganti tautan yang MEMBENTANG menutupi kepingnya. Keduanya didapat
+     * sekaligus: jaraknya kembali 2px, dan sasaran ketuknya justru membesar
+     * dari 186x40 jadi 270x49. Diperiksa di peramban dengan
+     * elementFromPoint pada sembilan titik di dalam keping — keempat sudut,
+     * keempat sisi, dan tengahnya — kesembilannya sampai ke tautannya, di
+     * 390px maupun 1440px.
+     *
+     * Jangkarnya ikut dijaga: tanpa `position: relative` pada kepingnya,
+     * `inset: 0` mengukur diri terhadap leluhur berposisi yang entah di
+     * mana, dan lapisannya membentang ke tempat yang salah — tanpa satu
+     * galat pun.
      */
     #[Test]
-    public function tautan_pendaftaran_ganda_cukup_besar(): void
+    public function keping_pendaftaran_ganda_bisa_ditekan_seluruhnya(): void
     {
+        $isi = $this->rincian();
+
         $this->assertMatchesRegularExpression(
-            '/\.rin-ganda-teks > a\s*\{[^}]*min-height:\s*40px/s', $this->rincian(),
-            'Tautan pendaftaran ganda kembali setinggi 16px.'
+            '/\.rin-ganda-teks > a::after\s*\{[^}]*position:\s*absolute[^}]*inset:\s*0/s', $isi,
+            'Tautan kepingnya tidak lagi membentang; yang bisa ditekan tinggal '
+            . 'baris teks setinggi 17px.'
+        );
+
+        $this->assertMatchesRegularExpression(
+            '/\.rin-ganda-daftar > li\s*\{[^}]*position:\s*relative/s', $isi,
+            'Kepingnya bukan jangkar posisi, jadi lapisan tautannya membentang '
+            . 'terhadap leluhur yang entah di mana.'
         );
     }
 
@@ -905,6 +928,86 @@ class LayarPonselPendaftarTest extends TestCase
             '/td\.mis-td-utama\s*\{[^}]*min-width:\s*0/s', $isi,
             'Sel kepala kartu tidak boleh menyusut, jadi elipsis pada '
             . 'kepingnya tidak pernah terpakai dan isinya meluber keluar kartu.'
+        );
+    }
+
+    /**
+     * Tombol lanjutan BERDAMPINGAN di ponsel, dan namanya ikut dipendekkan.
+     *
+     * Terukur di 390px: "Kirim ulang suratnya" 197px dan "Follow up:
+     * Menunggu bayar" 242px dalam wadah selebar 270px, jadi keduanya turun
+     * ke barisnya masing-masing dan bloknya memakan 92px. Berdampingan
+     * dengan nama pendek, 42px — dan keduanya tetap satu baris.
+     *
+     * Barisnya ikut dilebarkan penuh: .rin-lanjutan memakai justify-items:
+     * start, jadi begitu tombolnya dibuat menyusut, barisnya menyusut
+     * bersamanya — terukur 232px di dalam kartu selebar 270px.
+     */
+    #[Test]
+    public function tombol_lanjutan_berdampingan_di_ponsel(): void
+    {
+        $isi = $this->rincian();
+
+        $this->assertSame(1, preg_match('/@media \(max-width: 575\.98px\) \{(.*)/s', $isi, $blok),
+            'Blok gaya ponsel layar rincian tidak ada.');
+
+        $this->assertMatchesRegularExpression(
+            '/\.rin-lanjutan-tombol > form > \.mis-tombol\s*\{[^}]*flex:\s*1 1 0/s', $blok[1],
+            'Tombol lanjutan tidak berbagi barisnya; keduanya bertumpuk dan '
+            . 'bloknya memakan 92px.'
+        );
+
+        /*
+         * Anak BORANGNYA ikut disebut. Keduanya dibungkus <form>
+         * ber-`display: contents`, jadi yang jadi item lentur barisnya
+         * tombolnya, bukan borangnya — aturan yang cuma menyebut anak
+         * langsung mendarat di borang yang tidak punya kotak sama sekali.
+         * Cacat yang sama sudah pernah terjadi di barisan tombol kartu
+         * daftar.
+         */
+        $this->assertStringContainsString('.rin-lanjutan-tombol > form > .mis-tombol', $blok[1],
+            'Pembagi lebarnya tidak menyebut anak borangnya, jadi ia mendarat '
+            . 'di <form display:contents> yang tidak punya kotak.');
+
+        $this->assertMatchesRegularExpression(
+            '/\.rin-lanjutan-tombol\s*\{\s*width:\s*100%/s', $blok[1],
+            'Baris tombolnya tidak dilebarkan penuh, jadi ia ikut menyusut '
+            . 'bersama tombolnya dan menyisakan ruang menganggur di kanan.'
+        );
+    }
+
+    /**
+     * Nama pendek tombol lanjutan HANYA di ponsel.
+     *
+     * Keduanya tampil bersamaan berarti tombolnya berbunyi "Kirim ulang
+     * suratnya Kirim ulang".
+     *
+     * Keadaan pada tombol follow-up dibuang dari nama pendeknya, bukan
+     * dipotong: "Menunggu bayar" sudah tertulis sebagai lencana di kartu
+     * profil layar yang sama, jadi di ponsel ia pengulangan yang memakan
+     * satu baris penuh.
+     */
+    #[Test]
+    public function nama_pendek_tombol_lanjutan_hanya_di_ponsel(): void
+    {
+        $isi = $this->rincian();
+
+        $this->assertSame(2, substr_count($isi, 'class="rin-tombol-pendek"'),
+            'Kedua tombol lanjutan tidak punya nama pendeknya.');
+
+        $this->assertMatchesRegularExpression(
+            '/\.rin-tombol-pendek\s*\{\s*display:\s*none/s', $isi,
+            'Nama pendeknya tidak dipadamkan di lebar biasa, jadi tombolnya '
+            . 'menyebutkan dirinya dua kali di desktop.'
+        );
+
+        $this->assertSame(1, preg_match('/@media \(max-width: 575\.98px\) \{(.*)/s', $isi, $blok),
+            'Blok gaya ponsel layar rincian tidak ada.');
+
+        $this->assertMatchesRegularExpression(
+            '/\.rin-tombol-panjang\s*\{\s*display:\s*none/s', $blok[1],
+            'Nama panjangnya tidak dipadamkan di ponsel, jadi tombolnya tetap '
+            . 'menuntut 242px dan keduanya kembali bertumpuk.'
         );
     }
 
