@@ -38,6 +38,22 @@ Catatan Penghapusan | MIS Rumah Scopus
             color: #2563eb;
         }
 
+        /* Kuning: ia perlu diketahui, bukan salah. */
+        .thp-nota-awas {
+            border-color: #fde68a;
+            background: #fffbeb;
+            color: #92400e;
+        }
+
+        .thp-nota-awas > i { color: #d97706; }
+
+        .thp-nota code {
+            padding: 1px 6px;
+            border-radius: 6px;
+            background: rgba(146, 64, 14, .1);
+            font-size: .78rem;
+        }
+
         .thp-borang {
             display: flex;
             flex-wrap: wrap;
@@ -49,6 +65,19 @@ Catatan Penghapusan | MIS Rumah Scopus
         .thp-borang .mis-isian {
             flex: 1 1 240px;
             min-width: 0;
+        }
+
+        /* Lipatan saringan: selebar penuh di bawah baris pertamanya, supaya
+           membukanya tidak menggeser kotak cari. */
+        .thp-lipat {
+            flex: 1 1 100%;
+        }
+
+        .thp-lipat-isi {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+            gap: 11px;
+            margin-top: 10px;
         }
 
         /*
@@ -135,6 +164,50 @@ Catatan Penghapusan | MIS Rumah Scopus
          * medali di lajur pertama. Membungkus di layar sempit — tombolnya
          * turun ke bawah pembuka potret, bukan menyempit jadi ikon.
          */
+        .thp-borongan {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            padding: 10px 14px;
+            border: 1px solid #fecdd3;
+            border-radius: var(--mis-radius-kecil);
+            background: #fff7f7;
+            font-size: .8rem;
+            color: #9f1239;
+        }
+
+        .thp-borongan > span { flex: 1 1 200px; min-width: 0; }
+        .thp-borongan > i { color: #e11d48; }
+
+        .thp-tombol-borongan {
+            height: 34px;
+            padding: 0 13px;
+            font-size: .76rem;
+            flex: 0 0 auto;
+        }
+
+        /* Alasannya dikutip, bukan dikepingkan: ia kalimat, bukan label. */
+        .thp-alasan {
+            grid-column: 2 / -1;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            margin: 7px 0 0;
+            font-size: .8rem;
+            line-height: 1.5;
+            color: var(--mis-tinta-2);
+            font-style: italic;
+        }
+
+        .thp-alasan > i {
+            margin-top: 3px;
+            font-size: 10px;
+            color: var(--mis-tinta-4);
+            font-style: normal;
+        }
+
         .thp-kaki {
             grid-column: 2 / -1;
             display: flex;
@@ -326,8 +399,26 @@ Catatan Penghapusan | MIS Rumah Scopus
                 grid-column: 2;
             }
 
-            .thp-kaki {
+            .thp-kaki,
+            .thp-alasan {
                 grid-column: 2;
+            }
+
+            /*
+             * Kepingnya BOLEH MEMBUNGKUS di layar sempit.
+             *
+             * .mis-lencana bersama menyetel white-space: nowrap — benar untuk
+             * lencana pendek seperti "Lunas", tetapi keping "dikembalikan
+             * 12 Okt 2026, 07:19 oleh tesss" selebar 302px tidak muat di
+             * 390px dan menembus tepi kartunya. Terukur lewat iframe 390px:
+             * lebar gulir badan 431px, dan keping itu berujung di 414.
+             *
+             * Dibungkuskan, bukan dipendekkan kalimatnya: siapa yang
+             * mengembalikan dan kapan sama pentingnya dengan fakta bahwa ia
+             * dikembalikan.
+             */
+            .thp-ket > span {
+                white-space: normal;
             }
         }
     </style>
@@ -352,6 +443,38 @@ Catatan Penghapusan | MIS Rumah Scopus
      * hanya kalau memang masih ada yang menunggu di parkiran — menjanjikan
      * sesuatu yang sudah tidak ada membuat penegasannya berhenti dipercaya.
      */
+    /*
+     * Penegasan borongan menyebut JUMLAHNYA, bukan "yakin?".
+     *
+     * Yang akan terbuang bisa ratusan baris sekaligus dan tidak ada yang bisa
+     * mengurungkannya — angkanya harus terbaca sebelum, bukan sesudah.
+     */
+    document.querySelectorAll('.thp-tombol-borongan').forEach(function (tombol) {
+        tombol.addEventListener('click', function (e) {
+            if (tombol.dataset.lanjut === '1') {
+                return;
+            }
+
+            e.preventDefault();
+
+            window.misKonfirmasi({
+                judul: 'Buang semua yang cocok?',
+                pesan: 'Potretnya hilang permanen dan pendaftarannya tidak bisa '
+                    + 'dikembalikan lagi. %s',
+                sorot: tombol.dataset.jumlah + ' catatan',
+                tombol: 'Ya, buang semuanya',
+                jenis: 'bahaya',
+            }).then(function (ya) {
+                if (! ya) {
+                    return;
+                }
+
+                tombol.dataset.lanjut = '1';
+                tombol.closest('form').submit();
+            });
+        });
+    });
+
     document.querySelectorAll('.thp-tombol-buang').forEach(function (tombol) {
         tombol.addEventListener('click', function (e) {
             if (tombol.dataset.lanjut === '1') {
@@ -427,7 +550,7 @@ Catatan Penghapusan | MIS Rumah Scopus
                      seperti kedua unduhan di layar daftar: yang diunduh orang
                      hampir selalu yang sedang dilihatnya. --}}
                 <a class="mis-tombol mis-tombol-halus"
-                    href="{{ route('account.pendaftaran-layanan.terhapus.excel', array_filter(['cari' => $cari, 'keadaan' => $keadaan !== 'semua' ? $keadaan : ''])) }}">
+                    href="{{ route('account.pendaftaran-layanan.terhapus.excel', array_filter(request()->only('cari', 'keadaan', 'layanan', 'oleh', 'dari', 'sampai', 'urut', 'arah'))) }}">
                     <i class="fas fa-file-excel mis-ikon-hijau" aria-hidden="true"></i> Unduh Excel
                 </a>
                 <a class="mis-tombol mis-tombol-halus"
@@ -513,6 +636,25 @@ Catatan Penghapusan | MIS Rumah Scopus
             </p>
         </div>
 
+        @if ($buktiMenunggu > 0)
+            {{-- Jendela ke parkiran bukti bayar.
+
+                 Sejak penghapusan bisa dikembalikan, buktinya tidak dibuang
+                 melainkan diparkir di folder yang DILAYANI WEB. Pemangkasnya
+                 ada dan terjadwal, tetapi tanpa angka ini tidak ada seorang
+                 pun yang tahu berapa yang menunggu — dan jadwalnya sendiri
+                 bergantung cron yang belum terpasang di peladen. --}}
+            <p class="thp-nota thp-nota-awas">
+                <i class="fas fa-box-open" aria-hidden="true"></i>
+                <span>
+                    <strong>{{ $buktiMenunggu }} bukti bayar</strong> masih menunggu di
+                    parkiran penghapusan. Berkasnya ikut kembali kalau
+                    pendaftarannya dipulihkan, dan dipangkas sendiri sesudah 90 hari
+                    lewat <code>pendaftaran:pangkas-parkiran</code>.
+                </span>
+            </p>
+        @endif
+
         <div class="mis-kartu">
             {{-- form-control-modern, bukan kelas karangan sendiri: itu yang
                  dipakai kotak cari di layar daftarnya, dan isian yang
@@ -554,13 +696,118 @@ Catatan Penghapusan | MIS Rumah Scopus
                 <button class="mis-tombol mis-tombol-ungu" type="submit" data-mis-terapkan>
                     <i class="fas fa-search" aria-hidden="true"></i> Cari
                 </button>
-                @if ($cari !== '' || $keadaan !== 'semua')
+
+                {{-- Empat saringan sisanya DILIPAT.
+
+                     Terbuka semua, baris pertamanya jadi enam kendali dan yang
+                     paling sering dipakai — kotak cari — menyempit jadi
+                     sepertiga lebarnya. Lipatannya terbuka sendiri kalau salah
+                     satunya sedang terpasang, sebab saringan aktif yang
+                     tersembunyi membuat daftar terlihat kurang isinya tanpa ada
+                     yang bisa menjelaskan kenapa. --}}
+                {{-- Ternary biasa, BUKAN @open: direktif itu tidak ada di Blade
+                     (yang ada checked/selected/disabled/readonly/required), dan
+                     direktif tak dikenal tercetak mentah ke dalam tagnya tanpa
+                     galat apa pun. --}}
+                <details class="mis-lipat thp-lipat"
+                    {{ ($layananArsip !== '' || $olehArsip !== '' || $dariArsip !== '' || $sampaiArsip !== '') ? 'open' : '' }}>
+                    <summary>
+                        <i class="fas fa-sliders-h" aria-hidden="true"></i>
+                        Saringan lain
+                    </summary>
+
+                    <div class="thp-lipat-isi">
+                        <div class="mis-isian">
+                            <label class="mis-label" for="thp-layanan">Layanan</label>
+                            <select class="form-control-modern" id="thp-layanan" name="layanan">
+                                <option value="">Semua layanan</option>
+                                @foreach (\App\Support\PendaftaranSemuaLayanan::katalog() as $kunciL => $rupaL)
+                                    <option value="{{ $kunciL }}" @selected($layananArsip === $kunciL)>
+                                        {{ $rupaL['nama'] }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        {{-- Siapa yang menghapus. Pertanyaan pertama saat satu
+                             pendaftaran raib hampir selalu ini, dan kolomnya
+                             sudah tersimpan sejak awal — cuma tidak pernah bisa
+                             disaring. --}}
+                        <div class="mis-isian">
+                            <label class="mis-label" for="thp-oleh">Dihapus oleh</label>
+                            <select class="form-control-modern" id="thp-oleh" name="oleh">
+                                <option value="">Siapa saja</option>
+                                @foreach ($olehPilihan as $namaOleh)
+                                    <option value="{{ $namaOleh }}" @selected($olehArsip === $namaOleh)>
+                                        {{ $namaOleh }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="mis-isian">
+                            <label class="mis-label" for="thp-dari">Dihapus sejak</label>
+                            <input type="date" class="form-control-modern" id="thp-dari"
+                                name="dari" value="{{ $dariArsip }}">
+                        </div>
+
+                        <div class="mis-isian">
+                            <label class="mis-label" for="thp-sampai">Sampai</label>
+                            <input type="date" class="form-control-modern" id="thp-sampai"
+                                name="sampai" value="{{ $sampaiArsip }}">
+                        </div>
+
+                        <div class="mis-isian">
+                            <label class="mis-label" for="thp-urut">Urutkan</label>
+                            <select class="form-control-modern" id="thp-urut" name="urut">
+                                <option value="waktu" @selected($urutArsip === 'waktu')>Waktu dihapus</option>
+                                <option value="uang" @selected($urutArsip === 'uang')>Uang yang terhapus</option>
+                                <option value="nama" @selected($urutArsip === 'nama')>Nama</option>
+                                <option value="layanan" @selected($urutArsip === 'layanan')>Layanan</option>
+                            </select>
+                        </div>
+
+                        <div class="mis-isian">
+                            <label class="mis-label" for="thp-arah">Arah</label>
+                            <select class="form-control-modern" id="thp-arah" name="arah">
+                                <option value="turun" @selected($arahArsip === 'desc')>Menurun</option>
+                                <option value="naik" @selected($arahArsip === 'asc')>Menaik</option>
+                            </select>
+                        </div>
+                    </div>
+                </details>
+                @if ($adaSaringanArsip)
                     <a class="mis-tombol mis-tombol-halus"
                         href="{{ route('account.pendaftaran-layanan.terhapus') }}">
                         <i class="fas fa-times" aria-hidden="true"></i> Reset
                     </a>
                 @endif
             </form>
+
+            {{-- Membuang seluruh hasil saringan sekaligus.
+
+                 Muncul HANYA saat sedang menyaring dan ada hasilnya. Tanpa
+                 saringan, "buang semua" yang mengosongkan seluruh catatan
+                 penghapusan cuma satu salah klik jauhnya — dan tidak ada yang
+                 bisa mengurungkannya. Pengendalinya menolak lagi kalau
+                 saringannya kosong; pita ini cuma menutup jalan pertamanya. --}}
+            @if ($adaSaringanArsip && $daftar->total() > 0)
+                <form method="POST" class="thp-borongan"
+                    action="{{ route('account.pendaftaran-layanan.buang-borongan', request()->only('cari', 'keadaan', 'layanan', 'oleh', 'dari', 'sampai')) }}">
+                    @csrf
+                    @method('DELETE')
+                    <i class="fas fa-layer-group" aria-hidden="true"></i>
+                    <span>
+                        <strong>{{ number_format($daftar->total(), 0, ',', '.') }} catatan</strong>
+                        cocok dengan saringan ini.
+                    </span>
+                    <button type="submit" class="mis-tombol mis-tombol-halus thp-tombol-borongan"
+                        data-jumlah="{{ $daftar->total() }}">
+                        <i class="fas fa-trash-alt mis-ikon-merah" aria-hidden="true"></i>
+                        Buang semuanya
+                    </button>
+                </form>
+            @endif
 
             {{-- Wadah yang ditukar penyaring hidup. Isinya HANYA daftar dan
                  penomorannya: kepala, ubin, dan borangnya tinggal di luar
@@ -573,17 +820,25 @@ Catatan Penghapusan | MIS Rumah Scopus
                      .mis-kosong-ikon dan .mis-kosong-teks. Sempat ditulis
                      .mis-kosong-sub dari ingatan, dan kelas yang tidak ada
                      tidak menimbulkan galat — ia cuma tampil tanpa gaya. --}}
-                <div class="mis-kosong {{ $cari === '' ? '' : 'mis-kosong-cari' }}">
+                {{-- Kalimatnya dipilih dari ADA-TIDAKNYA SARINGAN, bukan dari
+                     kotak cari saja.
+
+                     Terukur sebelum dibetulkan: menyaring Keadaan ke "sudah
+                     dikembalikan" tanpa mengetik apa pun menampilkan "Belum ada
+                     pendaftaran yang dihapus — setiap penghapusan akan tercatat
+                     di sini", padahal ada tujuh. Layar yang menyangkal datanya
+                     sendiri membuat yang membacanya berhenti mencari. --}}
+                <div class="mis-kosong {{ $adaSaringanArsip ? 'mis-kosong-cari' : '' }}">
                     <span class="mis-kosong-ikon" aria-hidden="true">
-                        <i class="fas {{ $cari === '' ? 'fa-check' : 'fa-search' }}"></i>
+                        <i class="fas {{ $adaSaringanArsip ? 'fa-search' : 'fa-check' }}"></i>
                     </span>
                     <p class="mis-kosong-judul">
-                        {{ $cari === '' ? 'Belum ada pendaftaran yang dihapus' : 'Tidak ada yang cocok' }}
+                        {{ $adaSaringanArsip ? 'Tidak ada yang cocok' : 'Belum ada pendaftaran yang dihapus' }}
                     </p>
                     <p class="mis-kosong-teks">
-                        {{ $cari === ''
-                            ? 'Setiap penghapusan akan tercatat di sini beserta potretnya.'
-                            : 'Coba kata kunci lain, atau reset pencariannya.' }}
+                        {{ $adaSaringanArsip
+                            ? 'Saringannya tidak menemukan apa pun. Longgarkan salah satunya, atau reset.'
+                            : 'Setiap penghapusan akan tercatat di sini beserta potretnya.' }}
                     </p>
                 </div>
             @else
@@ -646,6 +901,17 @@ Catatan Penghapusan | MIS Rumah Scopus
                                         {{ $satu->jumlah_jejak }} jejak
                                     </span>
                                 @endif
+                                {{-- Pendaftaran yang pernah dihapus lebih dari
+                                     sekali. Tanpa penanda ini, kedua catatannya
+                                     tampil persis sama dan terbaca seperti dua
+                                     pendaftaran berbeda yang kebetulan senama. --}}
+                                @if (($ulangArsip[$satu->pendaftaran_id] ?? 0) > 1)
+                                    <span class="mis-lencana mis-lencana-merah"
+                                        title="Pendaftaran ini pernah dihapus lebih dari sekali">
+                                        <i class="fas fa-redo" aria-hidden="true"></i>
+                                        dihapus {{ $ulangArsip[$satu->pendaftaran_id] }}&times;
+                                    </span>
+                                @endif
                                 {{-- Catatannya TIDAK dihapus saat dikembalikan,
                                      melainkan ditandai. Catatan penghapusan
                                      gunanya menjawab "ke mana perginya
@@ -675,6 +941,19 @@ Catatan Penghapusan | MIS Rumah Scopus
                                 tanpa pembayaran
                             @endif
                         </span>
+
+                        {{-- Alasannya, kalau panitia menuliskannya.
+
+                             Anak kisi tersendiri di lajur 2/-1, bukan keping
+                             keenam di deret di atasnya: kalimat bebas sepanjang
+                             255 huruf di dalam keping membuat barisnya
+                             membungkus dan deret keping lain ikut terdorong. --}}
+                        @if ($satu->alasan_rapi)
+                            <p class="thp-alasan">
+                                <i class="fas fa-quote-left" aria-hidden="true"></i>
+                                <span>{{ $satu->alasan_rapi }}</span>
+                            </p>
+                        @endif
 
                         {{-- Kaki kartunya: pembuka potret di kiri, tombol di
                              kanan, satu baris.

@@ -1585,6 +1585,26 @@ Rincian Pendaftaran | MIS Rumah Scopus
          * Terlihat seperti daftar yang rusak, dan tidak ada galat apa pun
          * yang menandainya.
          */
+        .rin-isian-alasan {
+            margin-top: 15px;
+        }
+
+        .rin-label-opsional {
+            margin-left: 6px;
+            font-size: .67rem;
+            font-weight: 600;
+            letter-spacing: .04em;
+            text-transform: none;
+            color: var(--mis-tinta-4);
+        }
+
+        .rin-bantuan {
+            margin: 5px 0 0;
+            font-size: .73rem;
+            line-height: 1.5;
+            color: var(--mis-tinta-4);
+        }
+
         .rin-hilang {
             margin-top: 14px;
             padding: 14px 16px;
@@ -4445,6 +4465,34 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                 action="{{ route('account.pendaftaran-layanan.hapus', [$layanan, $pendaftaran->getKey()]) }}">
                                 @csrf
                                 @method('DELETE')
+
+                                {{-- Alasannya TIDAK diwajibkan.
+
+                                     Dipaksa, yang terisi bukan alasan jujur
+                                     melainkan satu huruf asal supaya tombolnya
+                                     mau jalan — dan kolom berisi "x" lebih buruk
+                                     daripada kolom kosong, sebab yang membacanya
+                                     mengira itu alasan sungguhan.
+
+                                     Ditaruh DI ATAS tombolnya, bukan di dalam
+                                     dialog penegasan: yang sudah menekan tombol
+                                     merah sedang bersiap menutup dialog, bukan
+                                     mengarang kalimat. --}}
+                                <div class="mis-isian rin-isian-alasan">
+                                    <label class="mis-label" for="rin-alasan">
+                                        Alasan menghapus
+                                        <span class="rin-label-opsional">boleh dikosongkan</span>
+                                    </label>
+                                    <input type="text" class="form-control-modern" id="rin-alasan"
+                                        name="alasan" maxlength="255" autocomplete="off"
+                                        placeholder="Salah input, pendaftaran ganda, diminta pendaftarnya …">
+                                    <p class="rin-bantuan">
+                                        Tercatat di catatan penghapusan. Yang membukanya
+                                        bulan depan hanya punya kalimat ini untuk tahu
+                                        kenapa barisnya hilang.
+                                    </p>
+                                </div>
+
                                 <div class="rin-kaki">
                                     <button type="button" class="mis-tombol mis-tombol-hapus" id="rin-tombol-hapus"
                                         data-nama="{{ $namaOrang }}" data-nomor="{{ $nomor }}">
