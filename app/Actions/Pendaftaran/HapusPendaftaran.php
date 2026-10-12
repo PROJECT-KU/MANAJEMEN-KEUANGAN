@@ -39,7 +39,7 @@ class HapusPendaftaran
     /**
      * @return array{berhasil:bool, pesan:string}
      */
-    public function jalankan(string $layanan, string $id): array
+    public function jalankan(string $layanan, string $id, string $alasan = ''): array
     {
         $sumber = Pendaftaran::sumber($layanan);
 
@@ -65,7 +65,7 @@ class HapusPendaftaran
         $berkas = $this->jalurBukti($layanan, $pendaftaran);
 
         try {
-            $arsip = DB::transaction(function () use ($layanan, $pendaftaran) {
+            $arsip = DB::transaction(function () use ($layanan, $pendaftaran, $alasan) {
                 /*
                  * POTRETNYA DIAMBIL DULU, di dalam transaksi yang sama.
                  *
@@ -74,7 +74,7 @@ class HapusPendaftaran
                  * yang sebenarnya masih ada lebih menyesatkan daripada tidak
                  * ada arsip sama sekali.
                  */
-                $arsip = $this->arsipkan($layanan, $pendaftaran);
+                $arsip = $this->arsipkan($layanan, $pendaftaran, $alasan);
 
                 if (Pendaftaran::berangkatan($layanan)) {
                     $this->kembalikanKuota($layanan, $pendaftaran);
@@ -224,7 +224,7 @@ class HapusPendaftaran
      * bisa membukanya begitu pendaftarannya hilang — jadi secara praktis ia
      * lenyap. Di dalam potret, riwayatnya masih bisa dibaca.
      */
-    private function arsipkan(string $layanan, $pendaftaran): PendaftaranDihapus
+    private function arsipkan(string $layanan, $pendaftaran, string $alasan = ''): PendaftaranDihapus
     {
         $id = (string) $pendaftaran->getKey();
 
@@ -258,6 +258,13 @@ class HapusPendaftaran
             'nama' => (string) ($pendaftaran->nama ?? $pendaftaran->nama_pemesan ?? ''),
             'email' => (string) ($pendaftaran->email ?? $pendaftaran->email_pemesan ?? ''),
             'status' => (string) ($pendaftaran->status ?? ''),
+            /*
+             * Alasannya DIPOTONG di sini, bukan diserahkan ke basis data.
+             * Kolomnya varchar(255), dan nilai yang lebih panjang membuat
+             * MySQL menolak SELURUH penyimpanan arsip — penghapusan batal
+             * karena panjang kalimat, bukan karena datanya.
+             */
+            'alasan' => mb_substr(trim($alasan), 0, 255) ?: null,
             'total' => (int) ($pendaftaran->total_pembayaran
                 ?? $pendaftaran->total_keseluruhan_pembayaran ?? 0),
             /*

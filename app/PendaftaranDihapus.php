@@ -56,6 +56,14 @@ class PendaftaranDihapus extends Model
         return $kueri->whereNotNull('dipulihkan_at');
     }
 
+    /** Alasan yang ditulis panitia, atau null kalau ia melewatinya. */
+    public function getAlasanRapiAttribute(): ?string
+    {
+        $rapi = trim((string) $this->alasan);
+
+        return $rapi === '' ? null : $rapi;
+    }
+
     /** Benar selama catatannya belum dipulihkan. */
     public function getMasihHilangAttribute(): bool
     {

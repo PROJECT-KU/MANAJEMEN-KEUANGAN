@@ -515,6 +515,14 @@ Route::prefix('account')
              * Membuang catatannya untuk selamanya, berikut bukti bayar yang
              * menunggu di parkiran. DELETE, dan hanya administrator.
              */
+            /*
+             * Borongan DI ATAS rute {arsip} di bawahnya — 'borongan' akan
+             * tertangkap sebagai id arsip kalau urutannya terbalik, dan
+             * jawabannya "catatan tidak ditemukan" tanpa petunjuk apa pun.
+             */
+            Route::delete('Pendaftaran-Layanan/terhapus/borongan', 'account\\PendaftaranLayananController@buangBorongan')
+                ->name('account.pendaftaran-layanan.buang-borongan');
+
             Route::delete('Pendaftaran-Layanan/terhapus/{arsip}', 'account\\PendaftaranLayananController@buangCatatan')
                 ->name('account.pendaftaran-layanan.buang-catatan');
 
