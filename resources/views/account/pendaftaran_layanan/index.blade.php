@@ -941,8 +941,44 @@ Pendaftar Layanan | MIS Rumah Scopus
             text-decoration: none;
         }
 
-        .pdl-uang-total a:hover {
+        /*
+         * Kotak yang BISA DITEKAN dibuat seperti tombol, bukan seperti tautan.
+         *
+         * Dua dari kotak baris ini <a> — "menunggu lebih dari 7 hari" dan
+         * "status belum dikenali" — dan Bootstrap menyetel
+         * "a:hover { color: #0056b3; text-decoration: underline }". Bobotnya
+         * (0,1,1), sementara ".pdl-uang-total > *" yang mematikan garisnya
+         * cuma (0,1,0): disentuh kursor, kotaknya berubah jadi tulisan biru
+         * bergaris bawah di tengah deretan kotak yang tidak. Diperiksa di
+         * berkas Bootstrap yang benar-benar dimuat halaman ini.
+         *
+         * Dilawan di tingkat pseudo-kelasnya sendiri (0,2,1), bukan dengan
+         * !important: yang salah bukan nilainya, melainkan bobot aturan yang
+         * dipakai menuliskannya.
+         *
+         * Rupa tekannya disamakan dengan ubin ringkasan di atasnya — tepi
+         * nila, bayangan terangkat, naik satu piksel — sebab keduanya sama
+         * saja: angka yang kalau ditekan menyaring daftarnya.
+         */
+        .pdl-uang-total a,
+        .pdl-uang-total a:hover,
+        .pdl-uang-total a:focus,
+        .pdl-uang-total a:focus-visible,
+        .pdl-uang-total a:active,
+        .pdl-uang-total a:visited {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .pdl-uang-total a {
+            transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+        }
+
+        .pdl-uang-total a:hover,
+        .pdl-uang-total a:focus-visible {
             border-color: #c7d2fe;
+            box-shadow: 0 6px 16px -10px rgba(79, 70, 229, .7);
+            transform: translateY(-1px);
         }
 
         /* Pembukuan yang tidak imbang: merah, dan tidak boleh terbaca
