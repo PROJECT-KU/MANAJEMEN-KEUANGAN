@@ -2050,7 +2050,7 @@ class PendaftaranLayananController extends Controller
     }
 
     /** Menghapus satu pendaftaran beserta ekornya. */
-    public function hapus(string $layanan, string $id)
+    public function hapus(Request $request, string $layanan, string $id)
     {
         if (! $this->bolehMelihat()) {
             return $this->tolak();
@@ -2066,7 +2066,15 @@ class PendaftaranLayananController extends Controller
             abort(404);
         }
 
-        $hasil = (new HapusPendaftaran)->jalankan($layanan, $id);
+        /*
+         * Alasannya TIDAK diwajibkan. Dipaksa, yang terjadi bukan alasan yang
+         * jujur melainkan satu huruf asal supaya tombolnya mau jalan — dan
+         * kolom berisi "x" lebih buruk daripada kolom kosong, sebab yang
+         * membacanya mengira itu alasan sungguhan.
+         */
+        $hasil = (new HapusPendaftaran)->jalankan(
+            $layanan, $id, (string) $request->input('alasan', '')
+        );
 
         if (! $hasil['berhasil']) {
             return back()->with('error', $hasil['pesan']);
@@ -2102,17 +2110,69 @@ class PendaftaranLayananController extends Controller
                 ->with('error', 'Catatan penghapusan hanya bisa dibuka administrator.');
         }
 
-        $cari = trim((string) $request->query('cari', ''));
-        $keadaan = $this->keadaanArsip($request);
+        $p = $this->pilihanArsip($request);
 
-        $daftar = $this->kueriArsip($cari, $keadaan)
-            ->paginate(20)
-            ->withQueryString();
+        $daftar = $this->kueriArsip($p)->paginate(20)->withQueryString();
+
+        /*
+         * Berapa kali tiap pendaftaran pernah dihapus.
+         *
+         * Satu pendaftaran bisa dihapus, dikembalikan, lalu dihapus lagi —
+         * terukur sudah terjadi sekali di basis data ini. Tanpa penanda,
+         * kedua catatannya tampil persis sama dan terbaca seperti dua
+         * pendaftaran berbeda yang kebetulan senama.
+         *
+         * Dihitung HANYA untuk baris yang tampak di halaman ini: menghitung
+         * seluruh tabel berarti satu kueri agregat atas ribuan baris demi
+         * dua puluh kartu.
+         */
+        $ulang = \App\PendaftaranDihapus::query()
+            ->whereIn('pendaftaran_id', $daftar->pluck('pendaftaran_id')->all())
+            ->selectRaw('pendaftaran_id, count(*) n')
+            ->groupBy('pendaftaran_id')
+            ->having('n', '>', 1)
+            ->pluck('n', 'pendaftaran_id');
 
         return view('account.pendaftaran_layanan.terhapus', [
             'daftar' => $daftar,
-            'cari' => $cari,
-            'keadaan' => $keadaan,
+            'cari' => $p['cari'],
+            'keadaan' => $p['keadaan'],
+            'layananArsip' => $p['layanan'],
+            'olehArsip' => $p['oleh'],
+            'dariArsip' => $p['dari'],
+            'sampaiArsip' => $p['sampai'],
+            'urutArsip' => $p['urut'],
+            'arahArsip' => $p['arah'],
+            /*
+             * SATU penanda "sedang menyaring", bukan syarat yang diulang.
+             * Tanpa itu, kalimat kosongnya memilih kata berdasarkan kotak
+             * cari saja — dan saringan menu yang tidak menghasilkan apa-apa
+             * membuat layarnya berkata "belum ada pendaftaran yang dihapus"
+             * padahal ada tujuh.
+             */
+            'adaSaringanArsip' => $p['adaSaringan'],
+            'ulangArsip' => $ulang,
+            /*
+             * Berapa bukti bayar yang masih menunggu di parkiran.
+             *
+             * Satu-satunya hal pada fitur ini yang menumpuk diam-diam, dan
+             * folder yang menampungnya dilayani web. Tanpa angka ini tidak
+             * ada seorang pun yang tahu ia bertambah sampai cakramnya penuh.
+             */
+            'buktiMenunggu' => (int) \App\PendaftaranDihapus::query()
+                ->masihTerhapus()->whereNotNull('bukti_parkir')->count(),
+            /*
+             * Berapa bukti bayar yang masih menunggu di parkiran.
+             *
+             * Satu-satunya hal pada fitur ini yang menumpuk diam-diam, dan
+             * folder yang menampungnya dilayani web. Tanpa angka ini tidak
+             * ada seorang pun yang tahu ia bertambah sampai cakramnya penuh.
+             */
+            'buktiMenunggu' => (int) \App\PendaftaranDihapus::query()
+                ->masihTerhapus()->whereNotNull('bukti_parkir')->count(),
+            'olehPilihan' => \App\PendaftaranDihapus::query()
+                ->whereNotNull('oleh_nama')->where('oleh_nama', '!=', '')
+                ->distinct()->orderBy('oleh_nama')->pluck('oleh_nama'),
             /*
              * Dihitung dari SELURUH tabel, bukan dari halaman yang tampak:
              * angka di kepala yang berubah tiap pindah halaman tidak menjawab
@@ -2132,11 +2192,61 @@ class PendaftaranLayananController extends Controller
     /** Pilihan saringan keadaan yang sah di layar catatan penghapusan. */
     private const KEADAAN_ARSIP = ['semua', 'terhapus', 'pulih'];
 
-    private function keadaanArsip(Request $request): string
-    {
-        $nilai = (string) $request->query('keadaan', 'semua');
+    /** Kolom yang boleh dipakai mengurut; daftar putih, bukan nilai mentah. */
+    private const URUT_ARSIP = [
+        'waktu' => 'created_at',
+        'uang' => 'uang_terhapus',
+        'nama' => 'nama',
+        'layanan' => 'layanan',
+    ];
 
-        return in_array($nilai, self::KEADAAN_ARSIP, true) ? $nilai : 'semua';
+    /**
+     * Seluruh pilihan saringan layar catatan penghapusan.
+     *
+     * Dibaca di SATU tempat dan diserahkan utuh ke kuerinya. Dulu cuma dua
+     * medan yang dibaca terpisah, dan unduhannya memanggil kueri yang sama
+     * dengan dua argumen — tiap saringan baru berarti satu argumen lagi di
+     * dua tempat yang harus sepakat tanpa ada yang memaksanya.
+     *
+     * @return array<string, mixed>
+     */
+    private function pilihanArsip(Request $request): array
+    {
+        $cari = trim((string) $request->query('cari', ''));
+
+        $keadaan = in_array($request->query('keadaan'), self::KEADAAN_ARSIP, true)
+            ? (string) $request->query('keadaan')
+            : 'semua';
+
+        // Daftar putih dari katalog: tanpa itu nama layanan karangan masuk
+        // ke `where` dan hasilnya nol baris tanpa ada yang keliru di layar.
+        $layanan = array_key_exists((string) $request->query('layanan'), Pendaftaran::katalog())
+            ? (string) $request->query('layanan')
+            : '';
+
+        $oleh = trim((string) $request->query('oleh', ''));
+
+        $dari = $this->tanggal($request->query('dari'));
+        $sampai = $this->tanggal($request->query('sampai'));
+
+        $urut = array_key_exists((string) $request->query('urut'), self::URUT_ARSIP)
+            ? (string) $request->query('urut')
+            : 'waktu';
+
+        $arah = $request->query('arah') === 'naik' ? 'asc' : 'desc';
+
+        return [
+            'cari' => $cari,
+            'keadaan' => $keadaan,
+            'layanan' => $layanan,
+            'oleh' => $oleh,
+            'dari' => $dari,
+            'sampai' => $sampai,
+            'urut' => $urut,
+            'arah' => $arah,
+            'adaSaringan' => $cari !== '' || $keadaan !== 'semua' || $layanan !== ''
+                || $oleh !== '' || $dari !== '' || $sampai !== '',
+        ];
     }
 
     /**
@@ -2146,17 +2256,27 @@ class PendaftaranLayananController extends Controller
      * yang memaksanya adalah persis bagaimana unduhan berhenti menghormati
      * saringan yang sedang terpasang di layar.
      */
-    private function kueriArsip(string $cari, string $keadaan)
+    private function kueriArsip(array $p)
     {
         return \App\PendaftaranDihapus::query()
-            ->when($cari !== '', function ($q) use ($cari) {
+            ->when($p['cari'] !== '', function ($q) use ($p) {
+                $cari = $p['cari'];
+
                 $q->where(fn ($w) => $w->where('nomor', 'like', '%' . $cari . '%')
                     ->orWhere('nama', 'like', '%' . $cari . '%')
-                    ->orWhere('email', 'like', '%' . $cari . '%'));
+                    ->orWhere('email', 'like', '%' . $cari . '%')
+                    ->orWhere('alasan', 'like', '%' . $cari . '%'));
             })
-            ->when($keadaan === 'terhapus', fn ($q) => $q->masihTerhapus())
-            ->when($keadaan === 'pulih', fn ($q) => $q->sudahDipulihkan())
-            ->terbaru();
+            ->when($p['keadaan'] === 'terhapus', fn ($q) => $q->masihTerhapus())
+            ->when($p['keadaan'] === 'pulih', fn ($q) => $q->sudahDipulihkan())
+            ->when($p['layanan'] !== '', fn ($q) => $q->where('layanan', $p['layanan']))
+            ->when($p['oleh'] !== '', fn ($q) => $q->where('oleh_nama', $p['oleh']))
+            ->when($p['dari'] !== '', fn ($q) => $q->whereDate('created_at', '>=', $p['dari']))
+            ->when($p['sampai'] !== '', fn ($q) => $q->whereDate('created_at', '<=', $p['sampai']))
+            ->orderBy(self::URUT_ARSIP[$p['urut']], $p['arah'])
+            // Pengurut kedua yang TETAP: tanpa itu urutan baris bernilai sama
+            // berubah-ubah antar halaman dan satu baris bisa muncul dua kali.
+            ->orderByDesc('id');
     }
 
     /**
@@ -2208,6 +2328,59 @@ class PendaftaranLayananController extends Controller
     }
 
     /**
+     * Membuang SELURUH catatan yang cocok dengan saringan yang sedang
+     * terpasang.
+     *
+     * Membuang lima puluh catatan lama satu per satu berarti lima puluh klik
+     * dan lima puluh dialog penegasan — dan yang begitu akhirnya tidak
+     * dikerjakan sama sekali, sehingga arsipnya hanya bertambah.
+     *
+     * Sasarannya SARINGAN, bukan centang per baris: yang membuang massal
+     * hampir selalu sudah menyaring dulu ("semua Scopus Kafe sebelum 2025"),
+     * dan centang per baris cuma menambah dua puluh klik di depan satu klik
+     * yang sebenarnya.
+     */
+    public function buangBorongan(Request $request)
+    {
+        if (! $this->bolehMenghapus()) {
+            return $this->tolak();
+        }
+
+        $p = $this->pilihanArsip($request);
+
+        /*
+         * TANPA saringan ditolak. "Buang semua" yang mengosongkan seluruh
+         * catatan penghapusan hanya satu salah klik jauhnya, dan tidak ada
+         * yang bisa mengurungkannya.
+         */
+        if (! $p['adaSaringan']) {
+            return back()->with('error',
+                'Pasang dulu saringannya. Membuang seluruh catatan sekaligus '
+                . 'tidak bisa diurungkan, jadi jalurnya sengaja tidak ada.');
+        }
+
+        $aksi = new \App\Actions\Pendaftaran\BuangCatatanPenghapusan;
+        $jumlah = 0;
+
+        /*
+         * cursor(), bukan get(): saringan longgar bisa mengenai ribuan baris,
+         * dan memuat semuanya ke memori hanya untuk menghapusnya satu per
+         * satu adalah cara paling mahal mengerjakannya.
+         */
+        foreach ($this->kueriArsip($p)->cursor() as $satu) {
+            if ($aksi->jalankan((string) $satu->getKey())['berhasil']) {
+                $jumlah++;
+            }
+        }
+
+        if ($jumlah === 0) {
+            return back()->with('error', 'Tidak ada catatan yang cocok dengan saringannya.');
+        }
+
+        return back()->with('sukses', $jumlah . ' catatan penghapusan dibuang permanen.');
+    }
+
+    /**
      * Catatan penghapusan sebagai lembar kerja.
      *
      * Saringannya ikut terbawa, sama seperti kedua unduhan di layar daftar:
@@ -2221,10 +2394,8 @@ class PendaftaranLayananController extends Controller
                 ->with('error', 'Catatan penghapusan hanya bisa dibuka administrator.');
         }
 
-        $cari = trim((string) $request->query('cari', ''));
-
-        // Kueri yang SAMA dengan layarnya, termasuk saringan keadaannya.
-        $baris = $this->kueriArsip($cari, $this->keadaanArsip($request))->get();
+        // Kueri yang SAMA dengan layarnya, termasuk seluruh saringannya.
+        $baris = $this->kueriArsip($this->pilihanArsip($request))->get();
 
         return Excel::download(
             new \App\Exports\PendaftaranDihapusExport($baris),
