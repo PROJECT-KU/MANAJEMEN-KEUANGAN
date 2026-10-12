@@ -1126,6 +1126,145 @@ Pendaftar Layanan | MIS Rumah Scopus
         }
 
         /*
+         * ------------------------------------------------------------------
+         * Pemilih angkatan di dalam SweetAlert
+         * ------------------------------------------------------------------
+         *
+         * Gayanya di sini, bukan di mis-ui.css: pemilih ini milik satu layar,
+         * dan kelas bersama yang cuma dipakai sekali membuat daftar gaya
+         * bersama berisi hal yang bukan bersama.
+         */
+        .pdl-pilih-popup {
+            padding: 0 0 6px;
+        }
+
+        .pdl-pilih-popup .swal2-title {
+            padding: 18px 20px 10px;
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--mis-tinta-1);
+        }
+
+        .pdl-pilih-popup .swal2-html-container {
+            margin: 0;
+            padding: 0 14px 10px;
+            text-align: left;
+        }
+
+        .pdl-pilih-cari {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            margin: 0 0 10px;
+            padding: 0 13px;
+            border: 1px solid var(--mis-garis);
+            border-radius: 12px;
+            background: #fff;
+        }
+
+        .pdl-pilih-cari:focus-within {
+            border-color: #a5b4fc;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, .14);
+        }
+
+        .pdl-pilih-cari .fas {
+            font-size: 13px !important;
+            color: var(--mis-tinta-4);
+        }
+
+        .pdl-pilih-cari input {
+            flex: 1 1 auto;
+            min-width: 0;
+            height: 42px;
+            border: 0;
+            background: none;
+            font-size: .88rem;
+            color: var(--mis-tinta-1);
+        }
+
+        .pdl-pilih-cari input:focus { outline: none; }
+
+        /*
+         * Tingginya dipatok supaya daftarnya yang bergulung, bukan seluruh
+         * kotaknya. Kotak yang ikut memanjang membuat kotak carinya tergulung
+         * keluar layar justru saat orang hendak mengetik ulang.
+         */
+        .pdl-pilih-daftar {
+            max-height: min(56vh, 420px);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .pdl-pilih-kelompok {
+            margin: 12px 0 5px;
+            padding: 0 4px;
+            font-size: .68rem;
+            font-weight: 800;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: var(--mis-tinta-4);
+        }
+
+        .pdl-pilih-kelompok:first-child { margin-top: 2px; }
+
+        .pdl-pilih-baris {
+            display: block;
+            width: 100%;
+            margin: 0 0 5px;
+            /*
+             * Tingginya tidak kurang dari 44px — sasaran ketuk yang bisa
+             * dikenai jempol. Daftar ini justru yang paling sering dipakai
+             * di ponsel.
+             */
+            min-height: 46px;
+            padding: 9px 13px;
+            border: 1px solid var(--mis-garis);
+            border-radius: 12px;
+            background: #fff;
+            text-align: left;
+            cursor: pointer;
+            transition: border-color .15s ease, background .15s ease;
+        }
+
+        .pdl-pilih-baris:hover,
+        .pdl-pilih-baris:focus-visible {
+            border-color: #c7d2fe;
+            background: #f8faff;
+        }
+
+        .pdl-pilih-baris.terpilih {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 1px #6366f1 inset;
+        }
+
+        .pdl-pilih-baris[hidden] { display: none; }
+
+        .pdl-pilih-judul {
+            display: block;
+            font-size: .85rem;
+            font-weight: 700;
+            line-height: 1.35;
+            color: var(--mis-tinta-1);
+        }
+
+        /* Nama layanannya ikut tertulis di tiap baris, bukan cuma di kepala
+           kelompoknya: begitu daftarnya disaring, kepala kelompok yang
+           tersisa bisa jauh di atas baris yang sedang dibaca. */
+        .pdl-pilih-ket {
+            display: block;
+            margin-top: 2px;
+            font-size: .72rem;
+            font-weight: 600;
+            color: var(--mis-tinta-4);
+        }
+
+        .pdl-pilih-nihil {
+            margin: 14px 4px 6px;
+            font-size: .8rem;
+            color: var(--mis-tinta-3);
+        }
+
+        /*
          * Lipatan saringan lain. Sebaris penuh di dalam .mis-saring yang
          * flex, jadi isinya menata diri persis seperti saat ia belum dilipat.
          */
@@ -2133,8 +2272,223 @@ Pendaftar Layanan | MIS Rumah Scopus
                 });
 
                 select2Siap = true;
+
+                /*
+                 * Menu Select2-nya DIGANTI pemilih layar penuh.
+                 *
+                 * Select2 memberi pencarian, dan itu yang dibutuhkan — 39
+                 * angkatan, belasan di antaranya bernama sama persis. Yang
+                 * tidak diberikannya ruang: menunya terbuka sebagai daftar
+                 * sempit menempel di bawah kotaknya, dan di ponsel tiap
+                 * barisnya terpatah dua sementara daftarnya menutupi isian
+                 * di bawahnya. Memilih di sana berarti membaca potongan
+                 * kalimat di celah selebar 160px.
+                 *
+                 * Dicegat lewat 'select2:opening' — peristiwa resmi Select2
+                 * yang memang bisa dibatalkan — bukan dengan menyadap klik.
+                 * Lewat sini papan ketik ikut tertangkap: membuka menunya
+                 * dengan Enter atau panah pun sampai ke pemilih yang sama.
+                 */
+                window.jQuery(menuAngkatan).on('select2:opening', function (acara) {
+                    if (typeof window.Swal !== 'function' && typeof window.Swal !== 'object') {
+                        return;
+                    }
+
+                    /*
+                     * Cukup dibatalkan. Memanggil select2('close') di sini
+                     * tidak melakukan apa-apa — 'opening' terbit SEBELUM
+                     * menunya terbuka, dan close() langsung keluar saat
+                     * isOpen() masih false. Diperiksa di sumber Select2
+                     * yang dimuat halaman ini.
+                     */
+                    acara.preventDefault();
+                    bukaPemilihAngkatan();
+                });
             });
         }
+
+        /*
+         * Pemilih angkatan: satu kotak cari dan daftar yang bisa diketuk.
+         *
+         * Dirakit dari <select>-nya sendiri setiap kali dibuka, bukan dari
+         * salinan yang disimpan: sempitkan() mencopot dan memasang kembali
+         * kelompok <optgroup> mengikuti layanan yang sedang disaring, jadi
+         * salinan yang dibuat sekali akan menawarkan angkatan layanan lain
+         * — pilihan yang pasti mengembalikan nol baris.
+         */
+        var bukaPemilihAngkatan = function () {
+            var kosong = menuAngkatan.querySelector('option[value=""]');
+
+            /*
+             * Isinya dipasang lewat textContent sesudah dirakit, BUKAN
+             * disisipkan sebagai HTML.
+             *
+             * Nama angkatan datang dari isian panitia dan boleh memuat
+             * apa saja; dirangkai jadi untaian HTML ia jadi jalan masuk
+             * skrip asing ke halaman admin.
+             */
+            var isi = document.createElement('div');
+            isi.className = 'pdl-pilih';
+            isi.innerHTML =
+                '<label class="pdl-pilih-cari">'
+                + '<i class="fas fa-search" aria-hidden="true"></i>'
+                + '<input type="search" autocomplete="off" placeholder="Ketik nama atau nomor angkatan">'
+                + '</label>'
+                + '<div class="pdl-pilih-daftar" role="listbox"></div>'
+                + '<p class="pdl-pilih-nihil" hidden>Tidak ada angkatan yang cocok.</p>';
+
+            var daftar = isi.querySelector('.pdl-pilih-daftar');
+            var kotakCari = isi.querySelector('input');
+            var nihil = isi.querySelector('.pdl-pilih-nihil');
+
+            var tambah = function (opsi, labelKelompok) {
+                var tombol = document.createElement('button');
+                tombol.type = 'button';
+                tombol.className = 'pdl-pilih-baris'
+                    + (opsi.value === menuAngkatan.value ? ' terpilih' : '');
+                tombol.dataset.nilai = opsi.value;
+
+                var judul = document.createElement('span');
+                judul.className = 'pdl-pilih-judul';
+                judul.textContent = opsi.textContent.trim();
+                tombol.appendChild(judul);
+
+                /*
+                 * Nama layanannya DITAHAN kalau judulnya sudah memuatnya.
+                 *
+                 * Angkatan Analisis Bibliometrik dinamai dengan nama
+                 * layanannya di depan, jadi barisnya terbaca "Analisis
+                 * Bibliometrik · angkatan ke-10 · Okt 2026" dengan "Analisis
+                 * Bibliometrik" sekali lagi di bawahnya. Yang kedua tidak
+                 * menambah apa pun dan membuat baris yang sudah panjang jadi
+                 * dua baris lagi.
+                 */
+                var judulKecil = judul.textContent.toLowerCase();
+
+                if (labelKelompok && judulKecil.indexOf(labelKelompok.toLowerCase()) !== 0) {
+                    var ket = document.createElement('span');
+                    ket.className = 'pdl-pilih-ket';
+                    ket.textContent = labelKelompok;
+                    tombol.appendChild(ket);
+                }
+
+                tombol.dataset.cari =
+                    (opsi.textContent + ' ' + (labelKelompok || '')).toLowerCase();
+
+                daftar.appendChild(tombol);
+            };
+
+            if (kosong) {
+                tambah(kosong, '');
+            }
+
+            Array.prototype.forEach.call(
+                menuAngkatan.querySelectorAll('optgroup'),
+                function (g) {
+                    var kepala = document.createElement('p');
+                    kepala.className = 'pdl-pilih-kelompok';
+                    kepala.textContent = g.label;
+                    daftar.appendChild(kepala);
+
+                    Array.prototype.forEach.call(g.querySelectorAll('option'), function (o) {
+                        tambah(o, g.label);
+                    });
+                }
+            );
+
+            var saring = function () {
+                var kata = kotakCari.value.trim().toLowerCase();
+                var ketemu = 0;
+
+                Array.prototype.forEach.call(
+                    daftar.querySelectorAll('.pdl-pilih-baris'),
+                    function (b) {
+                        var cocok = !kata || b.dataset.cari.indexOf(kata) !== -1;
+                        b.hidden = !cocok;
+                        if (cocok) ketemu++;
+                    }
+                );
+
+                /*
+                 * Kepala kelompok ikut disembunyikan saat seluruh isinya
+                 * tersaring habis. Dibiarkan, yang tersisa deretan nama
+                 * layanan tanpa satu angkatan pun di bawahnya — terbaca
+                 * seperti layanan yang kosong, padahal cuma tidak cocok
+                 * dengan yang diketik.
+                 */
+                Array.prototype.forEach.call(
+                    daftar.querySelectorAll('.pdl-pilih-kelompok'),
+                    function (k) {
+                        var punyaIsi = false;
+                        var n = k.nextElementSibling;
+
+                        while (n && n.classList.contains('pdl-pilih-baris')) {
+                            if (!n.hidden) { punyaIsi = true; break; }
+                            n = n.nextElementSibling;
+                        }
+
+                        k.hidden = !punyaIsi;
+                    }
+                );
+
+                nihil.hidden = ketemu > 0;
+            };
+
+            kotakCari.addEventListener('input', saring);
+
+            window.Swal.fire({
+                title: 'Pilih angkatan',
+                html: isi,
+                width: 520,
+                showConfirmButton: false,
+                showCloseButton: true,
+                customClass: { popup: 'pdl-pilih-popup' },
+                /*
+                 * Fokus TIDAK dilempar ke kotak carinya di ponsel.
+                 *
+                 * Papan ketik yang terbuka sendiri memakan separuh layar,
+                 * dan yang hendak dikerjakan orang di sana justru menggulung
+                 * daftarnya. Di layar lebar sebaliknya: tidak ada papan ketik
+                 * yang menutupi apa pun, dan mengetik langsung itu yang
+                 * paling cepat.
+                 */
+                didOpen: function () {
+                    if (window.matchMedia('(min-width: 576px)').matches) {
+                        kotakCari.focus();
+                    }
+
+                    var terpilih = daftar.querySelector('.pdl-pilih-baris.terpilih');
+
+                    if (terpilih) {
+                        terpilih.scrollIntoView({ block: 'center' });
+                    }
+                },
+            });
+
+            daftar.addEventListener('click', function (acara) {
+                var tombol = acara.target.closest('.pdl-pilih-baris');
+
+                if (!tombol) {
+                    return;
+                }
+
+                menuAngkatan.value = tombol.dataset.nilai;
+
+                /*
+                 * DUA peristiwa, dan keduanya perlu.
+                 *
+                 * 'change.select2' menyegarkan kotak Select2-nya saja;
+                 * 'select2:select' yang membangunkan penyaring hidup.
+                 * Peristiwa 'change' bawaan tidak dipakai: pendengar jQuery
+                 * ikut menerimanya, dan menyahut 'change' lalu menyebarkan
+                 * 'change' lagi berputar tanpa henti.
+                 */
+                window.jQuery(menuAngkatan).trigger('change.select2');
+                window.jQuery(menuAngkatan).trigger('select2:select');
+
+                window.Swal.close();
+            });
+        };
 
         var sempitkan = function (bersihkanPilihan) {
             var layanan = menuLayanan.value;
