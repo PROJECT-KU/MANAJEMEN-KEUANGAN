@@ -364,14 +364,19 @@ Catatan Penghapusan | MIS Rumah Scopus
              sendiri tidak bisa dikembalikan", dan itu benar sampai tombol
              Kembalikan ada. Dibiarkan, layarnya menyangkal tombol yang
              terpampang di tiap barisnya sendiri. --}}
+        {{-- SATU kalimat, bukan empat.
+
+             Versi sebelumnya menerangkan potret, penelusuran angka, apa saja
+             yang ikut kembali, dan nasib catatannya sendiri — empat hal
+             dalam satu paragraf selebar layar, di atas daftar yang sering
+             cuma berisi satu baris. Yang perlu diketahui sebelum menekan
+             apa pun cuma satu: dari sini barisnya bisa kembali. Sisanya
+             sudah terbaca dari tombol dan lencananya sendiri. --}}
         <p class="thp-nota">
             <i class="fas fa-info-circle" aria-hidden="true"></i>
             <span>
-                Isinya potret keadaan terakhir tiap pendaftaran yang dihapus, supaya
-                angkanya tetap bisa ditelusuri — dan dari sini pendaftarannya
-                <strong>bisa dikembalikan</strong> berikut peserta, pembayaran, dan
-                bukti bayarnya. Catatannya sendiri tidak ikut hilang saat dikembalikan;
-                ia cuma ditandai.
+                Dari sini pendaftaran yang dihapus <strong>bisa dikembalikan</strong>
+                berikut peserta, pembayaran, dan bukti bayarnya.
             </span>
         </p>
 
@@ -383,8 +388,13 @@ Catatan Penghapusan | MIS Rumah Scopus
         {{-- Pembungkus geser + petunjuknya, sama dengan layar daftar.
              Tanpa itu, di ponsel ubin keduanya meluber ke kanan tanpa satu
              tanda pun bahwa barisnya masih berlanjut. --}}
+        {{-- Lajurnya mengikuti JUMLAH ubinnya.
+             Dipatok dua sementara ubin ketiga muncul saat ada yang
+             dikembalikan, ubin itu jatuh sendirian ke baris kedua dan
+             menyisakan lubang selebar separuh layar. --}}
         <div class="mis-ringkas-geser" data-mis-geser>
-        <div class="mis-ringkas mis-ringkas-2" aria-label="Ringkasan penghapusan">
+        <div id="thp-ringkas" class="mis-ringkas mis-ringkas-{{ $jumlahPulih > 0 ? '3' : '2' }}"
+            aria-label="Ringkasan penghapusan">
             <div class="mis-ubin">
                 <span class="mis-medali kecil mis-merah" aria-hidden="true">
                     <i class="fas fa-trash-alt"></i>
@@ -429,10 +439,23 @@ Catatan Penghapusan | MIS Rumah Scopus
                  dipakai kotak cari di layar daftarnya, dan isian yang
                  memanggil kelas yang tidak ada tampil sebagai kotak telanjang
                  tanpa galat apa pun. --}}
-            <form method="GET" class="thp-borang">
+            {{-- Saringan HIDUP, sama dengan layar Pendaftar Layanan.
+
+                 Dulu borang biasa: memilih "Sudah dikembalikan" mengubah isi
+                 menunya tetapi daftarnya diam sampai tombol Cari ditekan —
+                 dan di layar sebelah, memilih saringan langsung menyaring.
+                 Dua layar bersebelahan yang berperilaku berbeda membuat yang
+                 memakainya menyangka saringannya rusak.
+
+                 Ringkasannya ikut diperbarui lewat data-mis-saring-juga:
+                 angkanya berubah mengikuti saringan, dan ubin yang tertinggal
+                 pada angka lama lebih menyesatkan daripada tidak ada. --}}
+            <form method="GET" class="thp-borang" id="thp-borang"
+                data-mis-saring="thp-hasil" data-mis-saring-juga="thp-ringkas">
                 <div class="mis-isian">
                     <label class="mis-label" for="thp-cari">Cari</label>
                     <input type="search" class="form-control-modern" id="thp-cari" name="cari"
+                        data-mis-cari
                         value="{{ $cari }}" placeholder="Nomor, nama, atau email" autocomplete="off">
                 </div>
                 {{-- Saringan keadaan. Tanpa ini, yang masih terhapus dan yang
@@ -447,7 +470,9 @@ Catatan Penghapusan | MIS Rumah Scopus
                         <option value="pulih" @selected($keadaan === 'pulih')>Sudah dikembalikan</option>
                     </select>
                 </div>
-                <button class="mis-tombol mis-tombol-ungu" type="submit">
+                {{-- Tetap ada sebagai cadangan tanpa JavaScript; penyaring
+                     hidup menyembunyikannya sendiri saat skripnya jalan. --}}
+                <button class="mis-tombol mis-tombol-ungu" type="submit" data-mis-terapkan>
                     <i class="fas fa-search" aria-hidden="true"></i> Cari
                 </button>
                 @if ($cari !== '' || $keadaan !== 'semua')
@@ -457,6 +482,12 @@ Catatan Penghapusan | MIS Rumah Scopus
                     </a>
                 @endif
             </form>
+
+            {{-- Wadah yang ditukar penyaring hidup. Isinya HANYA daftar dan
+                 penomorannya: kepala, ubin, dan borangnya tinggal di luar
+                 supaya kotak pencariannya tidak kehilangan fokus tiap huruf
+                 yang diketik. --}}
+            <div id="thp-hasil">
 
             @if ($daftar->isEmpty())
                 {{-- Nama kelasnya mengikuti mis-ui.css apa adanya:
@@ -597,6 +628,8 @@ Catatan Penghapusan | MIS Rumah Scopus
 
                 {{ $daftar->links('vendor.pagination.bootstrap-4') }}
             @endif
+
+            </div>
         </div>
 
     </section>
