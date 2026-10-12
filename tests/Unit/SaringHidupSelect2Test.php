@@ -205,4 +205,90 @@ class SaringHidupSelect2Test extends TestCase
             . 'menawarkan angkatan layanan yang sedang tidak disaring.');
     }
 
+    /**
+     * Tombol Reset BERWARNA BAHAYA, dan merahnya terlihat tanpa disentuh.
+     *
+     * Reset membuang seluruh saringan yang sedang dipasang sekaligus — di
+     * ponsel itu bisa berarti tujuh kendali yang baru saja diisi satu per
+     * satu di dalam panel yang terlipat. Berupa tombol halus seperti
+     * "Saringan lain" di sebelahnya, tidak ada apa pun yang membedakan
+     * keduanya sampai salah satunya tertekan.
+     *
+     * Merahnya pada keadaan DIAM, bukan cuma saat disentuh: di ponsel tidak
+     * ada kursor yang bisa berhenti di atas tombol, jadi merah yang baru
+     * muncul saat disentuh tidak memperingatkan siapa pun di sana.
+     *
+     * Terukur di peramban pada 390px dan 1440px — latar rgb(255,241,242),
+     * tulisan rgb(225,29,72), tepi rgb(254,205,211) — dan sama di keduanya.
+     */
+    public function test_tombol_reset_berwarna_bahaya(): void
+    {
+        $this->assertSame(1, preg_match(
+            '/<span id="pdl-reset".*?<\/span>/s', $this->layar(), $cocok
+        ), 'Pembungkus tombol Reset tidak ditemukan.');
+
+        $this->assertStringContainsString('mis-tombol-bahaya-halus', $cocok[0],
+            'Tombol Reset tidak berwarna bahaya; ia terbaca sama dengan tombol '
+            . 'biasa di sebelahnya padahal ia membuang seluruh saringan.');
+
+        /*
+         * BUKAN .mis-tombol-hapus. Yang itu berlatar merah penuh dan sengaja
+         * dibuat sebagai tombol terberat di layar, untuk yang menghapus data
+         * selamanya. Reset cuma membersihkan saringan — dipakaikan merah
+         * terberat, isyarat itu kehilangan artinya di tempat yang benar-benar
+         * membutuhkannya.
+         */
+        $this->assertStringNotContainsString('mis-tombol-hapus', $cocok[0],
+            'Reset memakai merah terberat yang disediakan untuk penghapusan '
+            . 'permanen; isyaratnya jadi tidak berarti apa-apa lagi.');
+    }
+
+    /**
+     * Merah halusnya memang punya aturan, dan terlihat saat DIAM.
+     *
+     * Kelas yang namanya benar tetapi tidak punya aturan apa pun akan
+     * tergambar seperti tombol biasa — tanpa galat, dan markahnya terbaca
+     * seolah sudah benar.
+     */
+    public function test_merah_halus_terlihat_tanpa_disentuh(): void
+    {
+        $css = (string) file_get_contents(
+            dirname(__DIR__, 2) . '/public/assets/css/mis-ui.css'
+        );
+
+        $this->assertSame(1, preg_match(
+            '/\n\.mis-tombol-bahaya-halus\s*\{([^}]*)\}/s', $css, $cocok
+        ), 'Kelas .mis-tombol-bahaya-halus tidak punya aturan apa pun.');
+
+        foreach (['border', 'background', 'color'] as $sifat) {
+            $this->assertMatchesRegularExpression('/\b' . $sifat . ':/', $cocok[1],
+                'Keadaan diamnya tidak menyetel ' . $sifat . ', jadi merahnya '
+                . 'belum tentu terlihat sebelum disentuh.');
+        }
+
+        $this->assertMatchesRegularExpression(
+            '/\.mis-tombol-bahaya-halus:hover,\s*\.mis-tombol-bahaya-halus:focus-visible\s*\{[^}]*background:/s',
+            $css,
+            'Tidak ada keadaan tersentuhnya, jadi tombolnya diam saja saat '
+            . 'kursor di atasnya.'
+        );
+
+        /*
+         * Penanda versi CSS-nya wajib ikut naik. Tanpa itu peramban yang
+         * sudah pernah membuka layar ini memakai mis-ui.css lamanya, dan
+         * kelas barunya tidak punya aturan apa pun di sana — tombolnya
+         * tergambar polos tanpa satu tanda pun bahwa ada yang salah.
+         */
+        $tataLetak = (string) file_get_contents(
+            dirname(__DIR__, 2) . '/resources/views/layouts/account.blade.php'
+        );
+
+        $this->assertSame(1, preg_match("/mis-ui\.css'\) \}\}\?v=(\d+)/", $tataLetak, $v),
+            'Penanda versi mis-ui.css tidak ditemukan.');
+
+        $this->assertGreaterThanOrEqual(94, (int) $v[1],
+            'Penanda versi mis-ui.css belum dinaikkan sesudah kelas barunya '
+            . 'ditambahkan.');
+    }
+
 }
