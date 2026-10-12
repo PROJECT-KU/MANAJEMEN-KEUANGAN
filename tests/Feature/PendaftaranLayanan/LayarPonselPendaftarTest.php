@@ -150,6 +150,61 @@ class LayarPonselPendaftarTest extends TestCase
     }
 
     /**
+     * Kotak angka yang bisa ditekan TIDAK bergaris bawah saat disentuh.
+     *
+     * Dua di antaranya <a> — "menunggu lebih dari 7 hari" dan "status belum
+     * dikenali" — dan Bootstrap, yang ikut dimuat halaman ini, menyetel
+     * "a:hover { color: #0056b3; text-decoration: underline }". Bobotnya
+     * (0,1,1) melawan ".pdl-uang-total > *" yang (0,1,0), jadi disentuh
+     * kursor kotaknya berubah jadi tulisan biru bergaris bawah di tengah
+     * deretan kotak yang tidak.
+     *
+     * Terukur lewat DevTools Protocol dengan :hover dipaksa, sebelum dan
+     * sesudah: garis "underline" warna rgb(23,86,156) jadi garis "none"
+     * dengan warna tetap rgb(71,85,105).
+     *
+     * Berlaku di SEMUA lebar: aturannya sengaja di luar media query, sebab
+     * kursor justru ada di layar lebar.
+     */
+    #[Test]
+    public function kotak_angka_tidak_bergaris_bawah_saat_disentuh(): void
+    {
+        $isi = $this->gaya();
+
+        $this->assertSame(1, preg_match(
+            '/((?:\.pdl-uang-total a(?::[a-z-]+)?,\s*)+\.pdl-uang-total a:[a-z-]+)\s*\{([^}]*)\}/s',
+            $isi, $cocok
+        ), 'Tidak ada aturan yang mematikan garis bawah kotak angka.');
+
+        $this->assertStringContainsString('text-decoration: none', $cocok[2]);
+
+        /*
+         * Keadaan :hover WAJIB ikut disebut namanya.
+         *
+         * Mematikannya pada ".pdl-uang-total a" saja berbobot (0,1,1) —
+         * SERI dengan "a:hover" milik Bootstrap, dan yang seri dimenangkan
+         * yang terbaca belakangan. Bootstrap dimuat lebih dulu di halaman
+         * ini, tetapi urutan itu bukan sesuatu yang dijaga siapa pun.
+         */
+        $this->assertStringContainsString('.pdl-uang-total a:hover', $cocok[1],
+            'Garis bawahnya tidak dimatikan pada keadaan :hover, jadi bobotnya '
+            . 'cuma seri dengan aturan Bootstrap dan bergantung pada urutan muat.');
+
+        // Warnanya ikut dijaga: Bootstrap mengubahnya jadi biru di aturan
+        // yang sama, dan kotak yang berubah warna tetap terbaca seperti
+        // tautan walau garisnya sudah hilang.
+        $this->assertStringContainsString('color: inherit', $cocok[2]);
+
+        // Rupa tekannya tetap ada, kalau tidak kotaknya jadi tidak memberi
+        // tanda apa pun bahwa ia bisa ditekan.
+        $this->assertMatchesRegularExpression(
+            '/\.pdl-uang-total a:hover,\s*\.pdl-uang-total a:focus-visible\s*\{[^}]*(box-shadow|transform)/s',
+            $isi,
+            'Kotaknya tidak lagi memberi tanda apa pun saat disentuh.'
+        );
+    }
+
+    /**
      * Kotak angka yang ganjil terakhir MEMBENTANG dua lajur.
      *
      * Jumlahnya dua sampai empat tergantung isi pembukuannya. Ganjil, yang
