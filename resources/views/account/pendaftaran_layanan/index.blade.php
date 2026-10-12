@@ -1435,6 +1435,114 @@ Pendaftar Layanan | MIS Rumah Scopus
             .pdl-status-asli {
                 overflow-wrap: anywhere;
             }
+
+            /*
+             * ----------------------------------------------------------
+             * Tiap pendaftaran jadi KARTU yang berdiri sendiri
+             * ----------------------------------------------------------
+             *
+             * Mode kartu bersama memisahkan barisnya dengan satu garis
+             * 1px #f1f5f9 dan tidak lebih. Terukur di 390px: jarak antar
+             * kartu 0px, latarnya tembus pandang, sudutnya 0 — dua puluh
+             * pendaftaran terbaca sebagai satu blok panjang, dan batas
+             * antara pesanan satu dengan berikutnya harus dicari sendiri.
+             *
+             * Dipasang HANYA di layar ini: enam layar lain memakai mode
+             * kartu yang sama, dan tidak satu pun sudah diukur di sini.
+             */
+            .mis-tabel.mis-tabel-kartu.pdl-tabel tbody tr {
+                margin-bottom: 12px;
+                padding: 14px;
+                border: 1px solid var(--mis-garis);
+                border-radius: 16px;
+                background: #fff;
+                box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+            }
+
+            .mis-tabel.mis-tabel-kartu.pdl-tabel tbody tr:last-child {
+                margin-bottom: 0;
+            }
+
+            /*
+             * Pita warna layanan DIPASANG ULANG bersama bayangan kartunya.
+             *
+             * Pitanya berupa box-shadow inset, dan bayangan kartu di atas
+             * memakai sifat yang sama — jadi yang belakangan menang dan
+             * pitanya hilang sama sekali. Terlihat langsung di potret:
+             * kartunya rapi, tetapi warna yang membedakan Scopus Camp dari
+             * Webinar Eksklusif lenyap. Keduanya ditulis dalam satu nilai.
+             */
+            .mis-tabel.mis-tabel-kartu.pdl-tabel tbody tr.pdl-baris {
+                box-shadow:
+                    inset 4px 0 0 0 var(--warna-aksen, #e2e8f0),
+                    0 1px 2px rgba(15, 23, 42, .04);
+                /* Isinya diberi ruang supaya tidak menempel di pitanya. */
+                padding-left: 16px;
+            }
+
+            /*
+             * Label dan nilai jadi DUA LAJUR yang lurus.
+             *
+             * Lebar label menentukan di mana nilainya mulai, dan labelnya
+             * tidak sama panjang: terukur nilai "Sesi" mulai di 96px,
+             * "Total bayar" di 172px, "Daftar" di 164px. Mata tidak punya
+             * satu pun garis tegak untuk diikuti, dan itu yang terbaca
+             * sebagai "belum rapi" — bukan rata kanannya.
+             *
+             * 88px: cukup untuk "TOTAL BAYAR" yang terpanjang, pada 0,66rem
+             * tebal berjarak huruf 0,05em.
+             */
+            .mis-tabel.mis-tabel-kartu.pdl-tabel tbody td[data-judul]::before {
+                flex: 0 0 88px;
+                align-self: flex-start;
+                padding-top: 2px;
+            }
+
+            /*
+             * Keterangan tambahan BERTUMPUK di bawah nilai pokoknya, rata
+             * kanan — bukan berjejer di sampingnya.
+             *
+             * Sebaris, ketiganya berebut ruang nilai yang tinggal 234px dan
+             * membungkus di tempat yang tidak dipilih siapa pun; bertumpuk,
+             * tiap keterangan dapat barisnya sendiri dan tepi kanannya
+             * membentuk garis lurus dengan nilai di atas dan di bawahnya.
+             */
+            .pdl-sesi-blok,
+            .pdl-uang-blok,
+            .pdl-daftar-blok {
+                display: flex;
+                flex: 1 1 auto;
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 2px;
+                min-width: 0;
+                text-align: right;
+            }
+
+            /*
+             * Keterangan uang kembali jadi blok DI SINI.
+             *
+             * Aturan di atas blok ini membuatnya `display: inline` dengan
+             * margin kiri — itu untuk saat ketiganya masih sebaris. Di
+             * dalam kolom rata kanan, inline membuat ketiganya menyambung
+             * jadi satu kalimat panjang yang membungkus sendiri.
+             */
+            .pdl-uang-blok > .pdl-uang-ket {
+                display: block;
+                margin-left: 0;
+            }
+
+            /* Nomor angkatan ikut rata kanan di dalam kolomnya. */
+            .pdl-tabel .pdl-angkatan-no {
+                margin-top: 0;
+                text-align: right;
+            }
+
+            /* Jamnya tidak lagi menempel di samping tanggalnya. */
+            .pdl-daftar-blok .pdl-jam {
+                font-size: .72rem;
+                color: var(--mis-tinta-4);
+            }
         }
 
         /*

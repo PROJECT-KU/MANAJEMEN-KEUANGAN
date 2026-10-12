@@ -444,4 +444,113 @@ class LayarPonselPendaftarTest extends TestCase
             . 'berpindah-pindah antar pendaftaran.'
         );
     }
+    /** Markah satu baris pendaftaran. */
+    private function baris(): string
+    {
+        return (string) file_get_contents(
+            resource_path('views/account/pendaftaran_layanan/baris.blade.php')
+        );
+    }
+
+    /**
+     * Tiap pendaftaran berdiri sebagai KARTU sendiri di ponsel.
+     *
+     * Mode kartu bersama memisahkan barisnya dengan satu garis 1px #f1f5f9
+     * dan tidak lebih. Terukur di 390px sebelum ini dipasang: jarak antar
+     * kartu 0px, latarnya tembus pandang, sudutnya 0 — dua puluh
+     * pendaftaran terbaca sebagai satu blok panjang, dan batas antara satu
+     * pesanan dengan berikutnya harus dicari sendiri.
+     */
+    #[Test]
+    public function tiap_pendaftaran_jadi_kartu_terpisah_di_ponsel(): void
+    {
+        $this->assertSame(1, preg_match(
+            '/\.mis-tabel\.mis-tabel-kartu\.pdl-tabel tbody tr\s*\{([^}]*)\}/s',
+            $this->gaya(), $cocok
+        ), 'Baris pendaftaran tidak dijadikan kartu sendiri di ponsel.');
+
+        foreach (['margin-bottom', 'border-radius', 'background'] as $sifat) {
+            $this->assertMatchesRegularExpression('/\b' . $sifat . ':/', $cocok[1],
+                'Kartunya tidak menyetel ' . $sifat . '; tanpa itu batas antar '
+                . 'pesanan tidak terlihat.');
+        }
+    }
+
+    /**
+     * Pita warna layanan SELAMAT dari bayangan kartunya.
+     *
+     * Pitanya berupa box-shadow inset, dan bayangan kartu memakai sifat yang
+     * sama — ditulis terpisah, yang belakangan menang dan pitanya hilang
+     * sama sekali. Terjadi betulan dan terlihat di potret: kartunya rapi,
+     * tetapi warna yang membedakan Scopus Camp dari Webinar Eksklusif lenyap.
+     */
+    #[Test]
+    public function pita_warna_layanan_tidak_tertimpa_bayangan_kartu(): void
+    {
+        $this->assertSame(1, preg_match(
+            '/\.mis-tabel\.mis-tabel-kartu\.pdl-tabel tbody tr\.pdl-baris\s*\{([^}]*)\}/s',
+            $this->gaya(), $cocok
+        ), 'Aturan pita warna kartu tidak ditemukan.');
+
+        $this->assertSame(1, preg_match('/box-shadow:([^;]*);/s', $cocok[1], $bayang),
+            'Kartunya tidak menyetel box-shadow sama sekali.');
+
+        $this->assertStringContainsString('inset', $bayang[1],
+            'Pita warna layanannya hilang; satu-satunya tanda yang membedakan '
+            . 'kelima layanan sekali lihat.');
+
+        $this->assertStringContainsString('--warna-aksen', $bayang[1],
+            'Pitanya tidak lagi mengikuti warna layanannya.');
+    }
+
+    /**
+     * Label dan nilai berdiri di DUA LAJUR yang lurus.
+     *
+     * Lebar label menentukan di mana nilainya mulai, dan labelnya tidak sama
+     * panjang: terukur di 390px nilai "Sesi" mulai di 96px, "Total bayar" di
+     * 172px, "Daftar" di 164px. Mata tidak punya satu pun garis tegak untuk
+     * diikuti — dan itu yang terbaca sebagai "belum rapi", bukan rata
+     * kanannya. Sesudah dipatok, ketiganya mulai di 159px.
+     */
+    #[Test]
+    public function label_kartu_selebar_sama_supaya_nilainya_lurus(): void
+    {
+        $this->assertMatchesRegularExpression(
+            '/\.mis-tabel\.mis-tabel-kartu\.pdl-tabel tbody td\[data-judul\]::before\s*\{[^}]*flex:\s*0 0 \d+px/s',
+            $this->gaya(),
+            'Lebar label tidak dipatok, jadi nilainya mulai di tempat yang '
+            . 'berbeda-beda pada tiap baris.'
+        );
+    }
+
+    /**
+     * Keterangan tambahan BERTUMPUK rata kanan, bukan berjejer.
+     *
+     * Di mode kartu selnya flex dengan label ::before sebagai anak pertama,
+     * jadi tiap <span> jadi anak flex tersendiri dan berebut satu baris:
+     * terukur di 390px nama angkatan, tanggal, dan lencana "penuh" menuntut
+     * 250px dalam ruang nilai selebar 234px.
+     */
+    #[Test]
+    public function keterangan_tambahan_bertumpuk_rata_kanan(): void
+    {
+        $markah = $this->baris();
+
+        foreach (['pdl-sesi-blok', 'pdl-daftar-blok'] as $pembungkus) {
+            $this->assertStringContainsString('class="' . $pembungkus . '"', $markah,
+                'Isi selnya tidak dibungkus jadi satu anak flex, jadi tiap '
+                . 'keterangan berebut baris yang sama.');
+        }
+
+        $this->assertSame(1, preg_match(
+            '/\.pdl-sesi-blok,\s*\.pdl-uang-blok,\s*\.pdl-daftar-blok\s*\{([^}]*)\}/s',
+            $this->gaya(), $cocok
+        ), 'Ketiga pembungkusnya tidak diberi aturan bersama.');
+
+        $this->assertStringContainsString('flex-direction: column', $cocok[1]);
+        $this->assertStringContainsString('align-items: flex-end', $cocok[1],
+            'Keterangannya tidak dirapatkan ke kanan, jadi tepi kanannya tidak '
+            . 'membentuk garis lurus dengan nilai di atas dan di bawahnya.');
+    }
+
 }
