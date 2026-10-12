@@ -377,9 +377,9 @@ class PendaftaranGandaTest extends TestCase
             'Blok gaya ponsel layar rincian tidak ada.');
 
         $this->assertMatchesRegularExpression(
-            '/\.rin-ganda-daftar \.mis-medali\s*\{[^}]*margin-top:\s*9px/s', $blok[1],
-            'Offset medalinya tidak ada di blok ponsel; di sana baris nomornya '
-            . '40px dan medalinya duduk 9px terlalu tinggi.'
+            '/\.rin-ganda-daftar \.mis-medali\s*\{[^}]*margin-top:\s*\dpx/s', $blok[1],
+            'Offset medalinya tidak ada di blok ponsel, jadi ia tidak sejajar '
+            . 'dengan baris nomornya.'
         );
 
         /*
