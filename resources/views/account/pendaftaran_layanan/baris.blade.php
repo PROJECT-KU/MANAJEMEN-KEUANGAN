@@ -291,10 +291,19 @@
                         @endif
                     </span>
                 @elseif ($buktiBaris['ada'])
+                    {{-- Tetap <a> ber-href, bukan tombol.
+
+                         Skripnya yang mencegat kliknya dan membuka
+                         pratinjau; tanpa skrip, tanpa JavaScript, atau saat
+                         diklik-tengah, tautannya tetap bekerja seperti
+                         semula dan membuka berkasnya di tab baru. --}}
                     <a class="pdl-bukti pdl-bukti-ada" href="{{ $buktiBaris['url'] }}"
                         target="_blank" rel="noopener"
-                        aria-label="Buka bukti bayar {{ $b->nama_orang }}"
-                        title="Buka bukti bayar di tab baru">
+                        data-pdl-bukti
+                        data-pdl-nama="{{ $b->nama_orang ?: 'Tanpa nama' }}"
+                        data-pdl-nomor="{{ $b->nomor ?: '' }}"
+                        aria-label="Lihat bukti bayar {{ $b->nama_orang }}"
+                        title="Lihat bukti bayarnya">
                         <i class="fas fa-image" aria-hidden="true"></i> lihat bukti
                     </a>
                 @else
