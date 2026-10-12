@@ -208,11 +208,49 @@ class PendaftaranLayananExport implements FromArray, ShouldAutoSize, WithEvents,
                     $lembar->mergeCells('A' . $n . ':' . $akhirLajur . $n);
                 }
 
-                $lembar->getStyle('A1')->getFont()->setBold(true)->setSize(14)
-                    ->getColor()->setRGB('0F172A');
-                $lembar->getStyle('A2:A3')->getFont()->setSize(10)
+                /*
+                 * Kepala berkas DIPUSATKAN, bukan rata kiri.
+                 *
+                 * Gabungannya selebar A–Q, jadi rata kiri judulnya menempel
+                 * di pojok sementara sisa pitanya kosong membentang — terlihat
+                 * seperti sel yang kelupaan diisi, bukan judul berkas.
+                 * Dipusatkan ia berdiri di atas tabelnya.
+                 */
+                $pita = 'A1:' . $akhirLajur . '3';
+
+                $lembar->getStyle($pita)->applyFromArray([
+                    'fill' => [
+                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => 'EEF2FF'],
+                    ],
+                    'alignment' => [
+                        'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                        'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                    ],
+                ]);
+
+                $lembar->getStyle('A1')->getFont()->setBold(true)->setSize(16)
+                    ->getColor()->setRGB('312E81');
+                $lembar->getStyle('A2')->getFont()->setSize(10)->setBold(true)
+                    ->getColor()->setRGB('4F46E5');
+                $lembar->getStyle('A3')->getFont()->setSize(10)->setItalic(true)
                     ->getColor()->setRGB('64748B');
-                $lembar->getRowDimension(1)->setRowHeight(22);
+
+                /*
+                 * Garis penutup pita, sewarna kepala kolom.
+                 *
+                 * Latar pita dan latar lembar sama-sama terang; tanpa garis
+                 * ini batas bawahnya tidak kelihatan dan ketiga baris
+                 * keterangan mengambang di atas tabel.
+                 */
+                $lembar->getStyle('A3:' . $akhirLajur . '3')
+                    ->getBorders()->getBottom()
+                    ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM)
+                    ->getColor()->setRGB('4F46E5');
+
+                $lembar->getRowDimension(1)->setRowHeight(30);
+                $lembar->getRowDimension(2)->setRowHeight(18);
+                $lembar->getRowDimension(3)->setRowHeight(20);
 
                 // ------------------------------------------------ kepala kolom
                 $kepala = 'A4:' . $akhirLajur . '4';
