@@ -182,6 +182,15 @@
     </td>
 
     <td data-judul="Sesi">
+        {{-- Dibungkus jadi SATU anak, sepola dengan .pdl-uang-blok di bawah.
+
+             Di mode kartu selnya `display: flex` dengan label `::before`
+             sebagai anak pertama, jadi ketiga <span> di sini jadi tiga anak
+             flex tersendiri dan berebut satu baris: terukur di 390px nama
+             angkatan, tanggal, dan lencana "penuh" berjejer menuntut 250px
+             dalam ruang nilai selebar 234px. Dibungkus, ketiganya menata
+             diri sendiri di dalam satu kolom rata kanan. --}}
+        <span class="pdl-sesi-blok">
         @if ($angkatanBaris)
             {{-- Nama angkatan TANPA awalan nama layanannya: terukur 56 dari 59
                  angkatan namanya memuat nama layanannya sendiri, jadi kolom
@@ -222,6 +231,7 @@
                  penuhnya tetap sampai ke cetakan dan pembaca layar. --}}
             <span class="pdl-sesi" @if ($sesiBaris) title="{{ $sesiBaris }}" @endif>{{ $sesiBaris ?: '—' }}</span>
         @endif
+        </span>
     </td>
 
     <td data-judul="Total bayar" class="text-right">
@@ -350,12 +360,14 @@
     </td>
 
     <td data-judul="Daftar">
+        <span class="pdl-daftar-blok">
         @if ($waktuBaris)
             <span class="pdl-tanggal">{{ $waktuBaris->translatedFormat('d M Y') }}</span>
             <span class="pdl-jam">{{ $waktuBaris->format('H:i') }}</span>
         @else
             <span class="rin-samar">—</span>
         @endif
+        </span>
     </td>
 
     <td data-judul="Aksi" class="text-right">
