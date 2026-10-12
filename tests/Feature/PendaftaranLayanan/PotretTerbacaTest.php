@@ -122,6 +122,34 @@ class PotretTerbacaTest extends TestCase
         $this->assertStringContainsString('thp-mentah', $isi);
     }
 
+    /**
+     * Sel keterangannya DIBATASI lebarnya, tidak melar mengikuti panel.
+     *
+     * Dengan 1fr, tiga lajur di layar lebar membuat tiap sel selebar 357px
+     * sementara isinya cuma sekitar 150px — label dan nilainya jadi
+     * pulau-pulau yang terpisah lautan kosong, dan mata harus melompat jauh
+     * untuk membaca satu pasangan.
+     *
+     * Dijaga dari sumbernya: uji PHP tidak menjalankan CSS, dan 1fr yang
+     * kembali tidak akan membuat apa pun merah selain mata yang membacanya.
+     */
+    #[Test]
+    public function sel_keterangan_tidak_melar_mengikuti_lebar_panel(): void
+    {
+        $isi = file_get_contents(resource_path(
+            'views/account/pendaftaran_layanan/terhapus.blade.php'
+        ));
+
+        $this->assertSame(1, preg_match(
+            '/\.thp-pokok\s*\{[^}]*grid-template-columns:\s*repeat\(auto-fill,\s*minmax\(\d+px,\s*(\d+px|1fr)\)\)/s',
+            $isi, $cocok
+        ), 'Kisi keterangannya tidak ditemukan.');
+
+        $this->assertNotSame('1fr', $cocok[1],
+            'Sel keterangannya memakai 1fr, jadi ia melar memenuhi lebar panel '
+            . 'berapa pun — label dan nilainya terpisah lautan kosong.');
+    }
+
     // ------------------------------------------------------------- pembantu
 
     private function admin(): User
