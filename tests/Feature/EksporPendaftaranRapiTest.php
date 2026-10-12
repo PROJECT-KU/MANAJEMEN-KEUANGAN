@@ -162,6 +162,52 @@ class EksporPendaftaranRapiTest extends TestCase
     }
 
     /**
+     * Kepala berkasnya DIPUSATKAN di atas tabel, sebagai satu pita.
+     *
+     * Gabungannya selebar A–Q. Rata kiri, judulnya menempel di pojok
+     * sementara sisa pitanya membentang kosong — terbaca seperti sel yang
+     * kelupaan diisi, bukan judul berkas. Terlihat begitu di Excel yang
+     * sebenarnya sebelum ini dipasang.
+     */
+    public function test_kepala_berkas_terpusat_dan_berpita(): void
+    {
+        [$lembar, $akhir] = $this->lembar(collect([$this->baris()]));
+
+        foreach (['A1', 'A2', 'A3'] as $sel) {
+            $gaya = $lembar->getStyle($sel);
+
+            $this->assertSame(
+                \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                $gaya->getAlignment()->getHorizontal(),
+                $sel . ' tidak terpusat; judulnya menempel di pojok kiri pita '
+                . 'yang membentang selebar tabel.'
+            );
+
+            $this->assertSame('FFEEF2FF', $gaya->getFill()->getStartColor()->getARGB(),
+                $sel . ' tidak berlatar pita, jadi kepala berkasnya tidak '
+                . 'terbaca sebagai satu blok.');
+        }
+
+        // Judulnya harus lebih besar daripada kedua baris keterangannya;
+        // seukuran, ketiganya terbaca sederajat.
+        $this->assertGreaterThan(
+            $lembar->getStyle('A2')->getFont()->getSize(),
+            $lembar->getStyle('A1')->getFont()->getSize()
+        );
+
+        /*
+         * Latar pita dan latar lembar sama-sama terang. Tanpa garis
+         * penutupnya batas bawah pita tidak kelihatan sama sekali dan
+         * ketiga baris keterangan mengambang di atas tabel.
+         */
+        $this->assertSame(
+            \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM,
+            $lembar->getStyle($akhir . '3')->getBorders()->getBottom()->getBorderStyle(),
+            'Pita kepalanya tidak ditutup garis sampai lajur terakhir.'
+        );
+    }
+
+    /**
      * Keterangan berkasnya menyebutkan saringan yang sedang berlaku.
      *
      * Lembar kerja justru berkas yang paling sering diteruskan ke orang
