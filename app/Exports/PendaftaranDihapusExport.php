@@ -43,6 +43,13 @@ class PendaftaranDihapusExport implements FromArray, ShouldAutoSize, WithEvents,
             'Nama',
             'Email',
             'Status terakhir',
+            /*
+             * Alasannya ikut diunduh. Ia medan paling berharga di catatan ini
+             * — satu-satunya yang menjawab KENAPA, bukan cuma ke mana — dan
+             * berkas unduhan justru yang paling sering diteruskan ke orang
+             * yang tidak pernah membuka layarnya.
+             */
+            'Alasan',
             'Tagihan',
             'Uang yang ikut terhapus',
             'Catatan pembayaran',
@@ -75,6 +82,7 @@ class PendaftaranDihapusExport implements FromArray, ShouldAutoSize, WithEvents,
                 $b->nama,
                 $b->email,
                 $b->status,
+                $b->alasan_rapi ?: '',
                 // Angka, bukan untaian berformat: kolom inilah yang dijumlahkan
                 // penerimanya.
                 (int) $b->total,

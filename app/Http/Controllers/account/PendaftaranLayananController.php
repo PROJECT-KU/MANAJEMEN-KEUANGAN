@@ -2112,7 +2112,9 @@ class PendaftaranLayananController extends Controller
 
         $p = $this->pilihanArsip($request);
 
-        $daftar = $this->kueriArsip($p)->paginate(20)->withQueryString();
+        // Tetapan bersama, bukan 20 yang ditulis tangan: dua sumber untuk
+        // satu angka yang harus sepakat tanpa ada yang memaksanya.
+        $daftar = $this->kueriArsip($p)->paginate(self::PER_HALAMAN)->withQueryString();
 
         /*
          * Berapa kali tiap pendaftaran pernah dihapus.
@@ -2133,6 +2135,8 @@ class PendaftaranLayananController extends Controller
             ->having('n', '>', 1)
             ->pluck('n', 'pendaftaran_id');
 
+        $ringkas = $this->ringkasanArsip();
+
         return view('account.pendaftaran_layanan.terhapus', [
             'daftar' => $daftar,
             'cari' => $p['cari'],
@@ -2152,41 +2156,47 @@ class PendaftaranLayananController extends Controller
              */
             'adaSaringanArsip' => $p['adaSaringan'],
             'ulangArsip' => $ulang,
-            /*
-             * Berapa bukti bayar yang masih menunggu di parkiran.
-             *
-             * Satu-satunya hal pada fitur ini yang menumpuk diam-diam, dan
-             * folder yang menampungnya dilayani web. Tanpa angka ini tidak
-             * ada seorang pun yang tahu ia bertambah sampai cakramnya penuh.
-             */
-            'buktiMenunggu' => (int) \App\PendaftaranDihapus::query()
-                ->masihTerhapus()->whereNotNull('bukti_parkir')->count(),
-            /*
-             * Berapa bukti bayar yang masih menunggu di parkiran.
-             *
-             * Satu-satunya hal pada fitur ini yang menumpuk diam-diam, dan
-             * folder yang menampungnya dilayani web. Tanpa angka ini tidak
-             * ada seorang pun yang tahu ia bertambah sampai cakramnya penuh.
-             */
-            'buktiMenunggu' => (int) \App\PendaftaranDihapus::query()
-                ->masihTerhapus()->whereNotNull('bukti_parkir')->count(),
             'olehPilihan' => \App\PendaftaranDihapus::query()
                 ->whereNotNull('oleh_nama')->where('oleh_nama', '!=', '')
                 ->distinct()->orderBy('oleh_nama')->pluck('oleh_nama'),
-            /*
-             * Dihitung dari SELURUH tabel, bukan dari halaman yang tampak:
-             * angka di kepala yang berubah tiap pindah halaman tidak menjawab
-             * "berapa yang sudah hilang".
-             *
-             * Dan hanya yang MASIH terhapus. Terukur sebelum pembatas ini
-             * dipasang: sesudah satu pendaftaran dikembalikan, kedua angkanya
-             * tidak bergerak sama sekali — uangnya terhitung dua kali, hidup
-             * di pembukuan sekaligus tercatat sebagai hilang.
-             */
-            'uangSemua' => (int) \App\PendaftaranDihapus::masihTerhapus()->sum('uang_terhapus'),
-            'jumlahSemua' => (int) \App\PendaftaranDihapus::masihTerhapus()->count(),
-            'jumlahPulih' => (int) \App\PendaftaranDihapus::sudahDipulihkan()->count(),
+            'uangSemua' => $ringkas['uang'],
+            'jumlahSemua' => $ringkas['terhapus'],
+            'jumlahPulih' => $ringkas['pulih'],
+            'buktiMenunggu' => $ringkas['bukti'],
         ]);
+    }
+
+    /**
+     * Keempat angka ringkasannya dalam SATU kueri.
+     *
+     * Dulu empat kueri agregat terpisah — dan satu di antaranya terdaftar
+     * DUA KALI sebagai kunci larik yang sama, jadi PHP diam saja, yang
+     * kedua menang, dan yang pertama tetap dijalankan lalu dibuang.
+     * Terukur: sembilan kueri ke satu tabel tiap kali layarnya dibuka.
+     *
+     * Dihitung dari SELURUH tabel, bukan dari halaman yang tampak: angka di
+     * kepala yang berubah tiap pindah halaman tidak menjawab "berapa yang
+     * sudah hilang". Dan hanya yang MASIH terhapus — sesudah satu
+     * pendaftaran dikembalikan, uangnya tidak boleh terhitung dua kali:
+     * hidup di pembukuan sekaligus tercatat sebagai hilang.
+     *
+     * @return array{terhapus:int, pulih:int, uang:int, bukti:int}
+     */
+    private function ringkasanArsip(): array
+    {
+        $r = \App\PendaftaranDihapus::query()
+            ->selectRaw('sum(dipulihkan_at is null) terhapus')
+            ->selectRaw('sum(dipulihkan_at is not null) pulih')
+            ->selectRaw('sum(case when dipulihkan_at is null then uang_terhapus else 0 end) uang')
+            ->selectRaw('sum(dipulihkan_at is null and bukti_parkir is not null) bukti')
+            ->first();
+
+        return [
+            'terhapus' => (int) ($r->terhapus ?? 0),
+            'pulih' => (int) ($r->pulih ?? 0),
+            'uang' => (int) ($r->uang ?? 0),
+            'bukti' => (int) ($r->bukti ?? 0),
+        ];
     }
 
     /** Pilihan saringan keadaan yang sah di layar catatan penghapusan. */

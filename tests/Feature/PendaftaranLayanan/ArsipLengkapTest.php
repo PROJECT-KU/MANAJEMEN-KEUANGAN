@@ -369,6 +369,115 @@ class ArsipLengkapTest extends TestCase
         );
     }
 
+    /**
+     * Alasannya IKUT DIUNDUH.
+     *
+     * Ia medan yang menjawab KENAPA, bukan cuma ke mana — dan berkas
+     * unduhan justru yang paling sering diteruskan ke orang yang tidak
+     * pernah membuka layarnya. Ditinggalkan, satu-satunya jawabannya cuma
+     * ada di layar.
+     */
+    #[Test]
+    public function alasannya_ikut_di_unduhan(): void
+    {
+        $isi = file_get_contents(app_path('Exports/PendaftaranDihapusExport.php'));
+
+        $this->assertStringContainsString("'Alasan',", $isi,
+            'Kolom Alasan tidak ada di kepala unduhan.');
+        $this->assertStringContainsString('alasan_rapi', $isi,
+            'Kepalanya ada tetapi barisnya tidak pernah diisi.');
+    }
+
+    /**
+     * Jumlah kolom kepala SAMA dengan jumlah sel tiap barisnya.
+     *
+     * Satu kolom yang ditambahkan ke kepala tanpa pasangannya di baris
+     * menggeser SELURUH kolom sesudahnya satu langkah — tanpa galat, tanpa
+     * berkas rusak. Yang menerimanya membaca "Tagihan" di bawah judul
+     * "Alasan" dan tidak punya alasan untuk curiga.
+     */
+    #[Test]
+    public function kolom_unduhan_sejajar_dengan_kepalanya(): void
+    {
+        [$admin, $b] = $this->dengan();
+
+        $this->actingAs($admin);
+        $this->hapus($b);
+
+        $ekspor = new \App\Exports\PendaftaranDihapusExport(
+            PendaftaranDihapus::query()->terbaru()->get()
+        );
+
+        $isi = $ekspor->array();
+
+        $this->assertNotEmpty($isi, 'Unduhannya tidak memuat satu baris pun.');
+
+        foreach ($isi as $i => $baris) {
+            $this->assertCount(count($ekspor->headings()), $baris,
+                'Baris ke-' . ($i + 1) . ' tidak sejajar dengan kepala kolomnya; '
+                . 'seluruh kolom sesudah yang hilang akan bergeser.');
+        }
+    }
+
+    /**
+     * Catatan yang sudah dipulihkan BISA DITEKAN menuju pendaftarannya.
+     *
+     * Dulu kepingnya berhenti di "dikembalikan <waktu>" — dan untuk
+     * membukanya orang harus menyalin nomornya lalu mencarinya di layar
+     * daftar. Barisnya sudah ada lagi; tautannya cuma belum pernah
+     * dipasang.
+     */
+    #[Test]
+    public function catatan_yang_pulih_menautkan_pendaftarannya(): void
+    {
+        [$admin, $b] = $this->dengan();
+        $id = (string) $b->getKey();
+
+        $this->actingAs($admin);
+        $this->hapus($b);
+
+        (new \App\Actions\Pendaftaran\PulihkanPendaftaran)
+            ->jalankan((string) $this->arsip($b)->getKey());
+
+        $this->actingAs($admin)
+            ->get(route('account.pendaftaran-layanan.terhapus', ['cari' => $b->id_transaksi]))
+            ->assertOk()
+            ->assertSee(
+                route('account.pendaftaran-layanan.rincian', ['scopus_camp', $id]),
+                false
+            );
+    }
+
+    /**
+     * Keempat angka ringkasannya datang dari SATU kueri.
+     *
+     * Dulu empat kueri agregat terpisah, dan satu di antaranya terdaftar
+     * dua kali sebagai kunci larik yang sama — PHP diam, yang kedua menang,
+     * yang pertama tetap dijalankan lalu dibuang. Terukur sembilan kueri ke
+     * satu tabel tiap kali layarnya dibuka.
+     */
+    #[Test]
+    public function ringkasannya_tidak_memborong_kueri(): void
+    {
+        [$admin, $b] = $this->dengan();
+
+        $this->actingAs($admin);
+        $this->hapus($b);
+
+        \Illuminate\Support\Facades\DB::enableQueryLog();
+        \Illuminate\Support\Facades\DB::flushQueryLog();
+
+        $this->actingAs($admin)
+            ->get(route('account.pendaftaran-layanan.terhapus'))->assertOk();
+
+        $jumlah = collect(\Illuminate\Support\Facades\DB::getQueryLog())
+            ->filter(fn ($q) => str_contains($q['query'], 'pendaftaran_dihapus'))
+            ->count();
+
+        $this->assertLessThanOrEqual(6, $jumlah,
+            'Layar catatan penghapusan menembak ' . $jumlah . ' kueri ke satu tabel.');
+    }
+
     // ------------------------------------------------------------- pembantu
 
     private function hapus(PendaftaranScopusCamp $b): void
