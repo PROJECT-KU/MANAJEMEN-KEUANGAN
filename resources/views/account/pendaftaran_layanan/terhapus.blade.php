@@ -297,13 +297,50 @@ Catatan Penghapusan | MIS Rumah Scopus
          * kartunya. Garis tepi kiri berwarna memberi ia pangkal yang jelas
          * tanpa menambah kotak lagi.
          */
+        /*
+         * Panelnya PUTIH bergaris tepi, bukan abu di atas putih.
+         *
+         * Garis tepi kirinya mengambil WARNA LAYANANNYA, sama dengan keping
+         * di atasnya — panel yang terbuka tetap tersambung ke kartu yang
+         * membukanya, bukan kotak asing yang muncul di bawahnya.
+         */
         .thp-potret-isi {
             margin-top: 9px;
-            padding: 14px 16px;
+            padding: 0;
             border: 1px solid var(--mis-garis);
-            border-left: 3px solid #cbd5e1;
+            border-left: 3px solid var(--thp-aksen, #cbd5e1);
             border-radius: var(--mis-radius-kecil);
             background: #fff;
+            overflow: hidden;
+        }
+
+        .thp-potret-hijau  { --thp-aksen: #10b981; }
+        .thp-potret-ungu   { --thp-aksen: #8b5cf6; }
+        .thp-potret-kuning { --thp-aksen: #f59e0b; }
+        .thp-potret-jingga { --thp-aksen: #f97316; }
+        .thp-potret-biru   { --thp-aksen: #0ea5e9; }
+
+        /* Kepala panel: menyatakan APA isinya dan kapan direkam. */
+        .thp-potret-kepala {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 15px;
+            border-bottom: 1px solid var(--mis-garis);
+            background: #f8fafc;
+        }
+
+        .thp-potret-nama {
+            margin: 0;
+            font-size: .8rem;
+            font-weight: 800;
+            color: var(--mis-tinta);
+        }
+
+        .thp-potret-waktu {
+            margin: 1px 0 0;
+            font-size: .72rem;
+            color: var(--mis-tinta-4);
         }
 
         /*
@@ -328,6 +365,7 @@ Catatan Penghapusan | MIS Rumah Scopus
          * bukan dibagi rata jadi jarak antar lajur yang menganga.
          */
         .thp-pokok {
+            padding: 14px 16px;
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(176px, 216px));
             justify-content: start;
@@ -362,8 +400,8 @@ Catatan Penghapusan | MIS Rumah Scopus
         }
 
         .thp-potret-bagian {
-            margin-top: 14px;
-            padding-top: 12px;
+            margin: 0;
+            padding: 12px 16px;
             border-top: 1px dashed var(--mis-garis);
         }
 
@@ -377,14 +415,22 @@ Catatan Penghapusan | MIS Rumah Scopus
         .thp-potret-judul {
             display: flex;
             align-items: center;
-            gap: 7px;
-            margin: 0 0 7px;
+            gap: 9px;
+            margin: 0 0 9px;
             font-size: .72rem;
             font-weight: 800;
             letter-spacing: .05em;
             text-transform: uppercase;
             color: var(--mis-tinta-3);
         }
+
+        /* Isi daftarnya sejajar dengan tulisan judulnya, bukan dengan
+           medalinya — kalau tidak, judul dan isinya terbaca dua blok. */
+        .thp-potret-bagian .thp-potret-daftar { padding-left: 31px; }
+
+        /* Nominal yang ikut terhapus: merah, sama dengan angka di kepala
+           kartunya. Uang yang hilang tidak boleh terbaca netral. */
+        .thp-nominal { color: #be123c !important; }
 
         .thp-potret-daftar {
             list-style: none;
@@ -407,7 +453,12 @@ Catatan Penghapusan | MIS Rumah Scopus
 
         /* Data mentahnya satu lapis lebih dalam: yang membutuhkannya
            pengembang, bukan panitia. */
-        .thp-mentah { margin-top: 13px; }
+        .thp-mentah {
+            margin: 0;
+            padding: 10px 16px 12px;
+            border-top: 1px dashed var(--mis-garis);
+            background: #f8fafc;
+        }
 
         .thp-mentah > summary {
             cursor: pointer;
@@ -1031,7 +1082,24 @@ Catatan Penghapusan | MIS Rumah Scopus
                                     $jejakPotret = \App\Support\PotretPendaftaran::jejak($satu);
                                 @endphp
 
-                                <div class="thp-potret-isi">
+                                <div class="thp-potret-isi thp-potret-{{ $warnaLayanan }}">
+                                    {{-- Kepala panel. Tanpa ini panelnya mulai
+                                         dingin: deretan label tanpa yang
+                                         mengatakan apa isinya dan kapan
+                                         direkam. --}}
+                                    <div class="thp-potret-kepala">
+                                        <span class="mis-medali mini mis-{{ $warnaLayanan }}" aria-hidden="true">
+                                            <i class="fas fa-camera-retro"></i>
+                                        </span>
+                                        <div>
+                                            <p class="thp-potret-nama">Potret saat dihapus</p>
+                                            <p class="thp-potret-waktu">
+                                                direkam {{ optional($satu->created_at)->translatedFormat('d M Y, H:i') }}
+                                                @if ($satu->oleh_nama) &middot; oleh {{ $satu->oleh_nama }} @endif
+                                            </p>
+                                        </div>
+                                    </div>
+
                                     <dl class="thp-pokok">
                                         @foreach ($pokok as $label => $nilai)
                                             <div>
@@ -1044,7 +1112,9 @@ Catatan Penghapusan | MIS Rumah Scopus
                                     @if ($pesertaPotret !== [])
                                         <div class="thp-potret-bagian">
                                             <p class="thp-potret-judul">
-                                                <i class="fas fa-users" aria-hidden="true"></i>
+                                                <span class="mis-medali mini mis-biru" aria-hidden="true">
+                                                    <i class="fas fa-users"></i>
+                                                </span>
                                                 Peserta rombongan
                                             </p>
                                             <ul class="thp-potret-daftar">
@@ -1063,13 +1133,15 @@ Catatan Penghapusan | MIS Rumah Scopus
                                     @if ($terminPotret !== [])
                                         <div class="thp-potret-bagian">
                                             <p class="thp-potret-judul">
-                                                <i class="fas fa-receipt" aria-hidden="true"></i>
+                                                <span class="mis-medali mini mis-merah" aria-hidden="true">
+                                                    <i class="fas fa-receipt"></i>
+                                                </span>
                                                 Pembayaran yang ikut terhapus
                                             </p>
                                             <ul class="thp-potret-daftar">
                                                 @foreach ($terminPotret as $terminSatu)
                                                     <li>
-                                                        <strong>{{ $terminSatu['nominal'] }}</strong>
+                                                        <strong class="thp-nominal">{{ $terminSatu['nominal'] }}</strong>
                                                         <span>{{ $terminSatu['label'] }}</span>
                                                     </li>
                                                 @endforeach
@@ -1080,7 +1152,9 @@ Catatan Penghapusan | MIS Rumah Scopus
                                     @if ($jejakPotret !== [])
                                         <div class="thp-potret-bagian">
                                             <p class="thp-potret-judul">
-                                                <i class="fas fa-history" aria-hidden="true"></i>
+                                                <span class="mis-medali mini mis-ungu" aria-hidden="true">
+                                                    <i class="fas fa-history"></i>
+                                                </span>
                                                 Riwayat perubahannya
                                             </p>
                                             <ul class="thp-potret-daftar">

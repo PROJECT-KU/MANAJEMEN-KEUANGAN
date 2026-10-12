@@ -150,6 +150,43 @@ class PotretTerbacaTest extends TestCase
             . 'berapa pun — label dan nilainya terpisah lautan kosong.');
     }
 
+    /**
+     * Panelnya punya KEPALA dan aksen warna layanannya.
+     *
+     * Tanpa kepala, panelnya mulai dingin: deretan label tanpa yang
+     * mengatakan apa isinya dan kapan direkam. Aksennya mengambil warna
+     * layanan yang sama dengan keping di atasnya, supaya panel yang terbuka
+     * tetap tersambung ke kartu yang membukanya alih-alih terbaca sebagai
+     * kotak asing yang muncul di bawahnya.
+     */
+    #[Test]
+    public function panelnya_berkepala_dan_beraksen_warna_layanannya(): void
+    {
+        $admin = $this->admin();
+        $arsip = $this->arsip('scopus_camp', ['nama' => 'Uji Kepala']);
+
+        $isi = $this->actingAs($admin)
+            ->get(route('account.pendaftaran-layanan.terhapus', ['cari' => $arsip->nomor]))
+            ->assertOk()->getContent();
+
+        $this->assertStringContainsString('Potret saat dihapus', $isi,
+            'Panelnya tidak punya kepala.');
+        $this->assertStringContainsString('direkam', $isi);
+
+        /*
+         * Dipatok pada ATRIBUT class-nya, bukan nama kelas apa adanya.
+         *
+         * Nama itu muncul juga di blok <style> halaman yang sama sebagai
+         * definisi .thp-potret-hijau, jadi "halaman memuat thp-potret-hijau"
+         * lulus walau markahnya tidak memakainya sama sekali — versi pertama
+         * penjaga ini tetap hijau saat kelasnya dicabut dari markah.
+         *
+         * Scopus Camp berwarna hijau di katalognya.
+         */
+        $this->assertStringContainsString('class="thp-potret-isi thp-potret-hijau"', $isi,
+            'Aksen panelnya tidak mengambil warna layanannya.');
+    }
+
     // ------------------------------------------------------------- pembantu
 
     private function admin(): User
