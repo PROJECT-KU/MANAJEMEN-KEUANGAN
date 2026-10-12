@@ -1334,6 +1334,7 @@ Pendaftar Layanan | MIS Rumah Scopus
                     aria-label="Unduh daftar ini sebagai lembar kerja Excel"
                     href="{{ route('account.pendaftaran-layanan.excel', $bawa + request()->only('urut', 'arah')) }}">
                     <i class="fas fa-file-excel mis-ikon-hijau"></i> <span class="mis-tombol-teks">Unduh Excel</span>
+                    <span class="mis-tombol-ringkas" aria-hidden="true">Excel</span>
                 </a>
                 {{-- Presensi: satu baris per ORANG, satu ANGKATAN. Terpisah
                      dari "Unduh Excel" yang satu baris per pendaftaran —
@@ -1356,6 +1357,7 @@ Pendaftar Layanan | MIS Rumah Scopus
                         aria-disabled="true">
                         <i class="fas fa-clipboard-check"></i>
                         <span class="mis-tombol-teks">Presensi peserta</span>
+                        <span class="mis-tombol-ringkas" aria-hidden="true">Presensi</span>
                     </span>
                 @else
                     <a class="mis-tombol mis-tombol-halus"
@@ -1364,12 +1366,14 @@ Pendaftar Layanan | MIS Rumah Scopus
                         href="{{ route('account.pendaftaran-layanan.presensi', $bawa + request()->only('urut', 'arah')) }}">
                         <i class="fas fa-clipboard-check mis-ikon-biru"></i>
                         <span class="mis-tombol-teks">Presensi peserta</span>
+                        <span class="mis-tombol-ringkas" aria-hidden="true">Presensi</span>
                     </a>
                 @endif
                 <a class="mis-tombol mis-tombol-halus" title="Unduh daftar ini sebagai PDF"
                     aria-label="Unduh daftar ini sebagai PDF"
                     href="{{ route('account.pendaftaran-layanan.pdf', $bawa + request()->only('urut', 'arah')) }}">
                     <i class="fas fa-file-pdf mis-ikon-merah"></i> <span class="mis-tombol-teks">Unduh PDF</span>
+                    <span class="mis-tombol-ringkas" aria-hidden="true">PDF</span>
                 </a>
                 @if ($bolehMenghapus)
                     {{-- Hanya administrator, sama seperti yang boleh menghapus:
@@ -1385,6 +1389,7 @@ Pendaftar Layanan | MIS Rumah Scopus
                         aria-label="Pendaftaran yang sudah dihapus"
                         title="Pendaftaran yang sudah dihapus, beserta uang yang ikut terhapus">
                         <i class="fas fa-trash-alt mis-ikon-merah"></i> <span class="mis-tombol-teks">Yang dihapus</span>
+                        <span class="mis-tombol-ringkas" aria-hidden="true">Dihapus</span>
                     </a>
                 @endif
             </div>

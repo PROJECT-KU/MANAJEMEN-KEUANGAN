@@ -49,7 +49,7 @@ $agent = new Agent();
     <!-- end -->
 
     {{-- Lapis penyeragam tampilan: dimuat terakhir supaya menimpa Stisla. --}}
-    <link rel="stylesheet" href="{{ asset('assets/css/mis-ui.css') }}?v=92">
+    <link rel="stylesheet" href="{{ asset('assets/css/mis-ui.css') }}?v=93">
 
     <style>
         .fas,

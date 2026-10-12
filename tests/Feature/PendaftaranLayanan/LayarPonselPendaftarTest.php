@@ -84,6 +84,94 @@ class LayarPonselPendaftarTest extends TestCase
     }
 
     /**
+     * Keempat tombol sekunder MENYEBUT dirinya di ponsel.
+     *
+     * Nama panjangnya memang disembunyikan supaya keempatnya muat sebaris,
+     * tetapi sempat disembunyikan tanpa pengganti — dan yang tersisa empat
+     * kotak berisi ikon saja. Admin layar ini bukan orang teknis: berkas
+     * hijau, papan jepit, berkas merah, dan tong sampah tidak menyebut
+     * Excel, presensi, PDF, atau arsip kepada siapa pun yang belum pernah
+     * menekannya.
+     *
+     * aria-label tidak menutup lubang ini — itu hanya terbaca pembaca
+     * layar — dan title tidak pernah muncul di ponsel, sebab di sana tidak
+     * ada kursor yang bisa berhenti di atas tombol.
+     */
+    #[Test]
+    public function tombol_kepala_menyebut_namanya_di_ponsel(): void
+    {
+        $isi = $this->gaya();
+
+        /*
+         * Dicocokkan pada BLOK AKSINYA, bukan seluruh halaman: kelas yang
+         * sama muncul juga di gaya dan skrip halaman ini, dan penjaga yang
+         * membaca seluruh berkas tetap hijau walau tombolnya sendiri sudah
+         * kehilangan namanya.
+         */
+        $this->assertSame(1, preg_match('/<div class="mis-kepala-aksi[^"]*" id="pdl-aksi">(.*?)<\/div>\s*<\/div>/s',
+            $isi, $cocok), 'Blok aksi kepala halaman tidak ditemukan.');
+
+        $blok = $cocok[1];
+
+        preg_match_all('/class="mis-tombol mis-tombol-halus[^"]*"/', $blok, $tombol);
+        preg_match_all('/class="mis-tombol-ringkas"[^>]*>([^<]+)</', $blok, $nama);
+
+        /*
+         * Dipadankan satu lawan satu, BUKAN dihitung ke angka tetap.
+         *
+         * Tombol presensi ditulis dua kali — bentuk hidup dan bentuk mati
+         * — jadi markahnya memuat lima tombol untuk empat yang terender.
+         * Angka tetap di sini berarti penjaganya merah setiap kali ada
+         * tombol bersyarat baru, dan itu bukan cacat yang mau dijaga.
+         */
+        $this->assertGreaterThanOrEqual(4, count($tombol[0]),
+            'Tombol sekunder di kepala halaman hilang.');
+
+        $this->assertCount(count($tombol[0]), $nama[1],
+            'Ada tombol sekunder tanpa nama pendek; di ponsel ia jadi kotak '
+            . 'berisi ikon saja.');
+
+        foreach ($nama[1] as $teks) {
+            $this->assertLessThanOrEqual(9, mb_strlen(trim($teks)),
+                'Nama pendek "' . trim($teks) . '" terlalu panjang; di 390px '
+                . 'tiap tombol cuma selebar 75px.');
+        }
+    }
+
+    /**
+     * Nama pendeknya HANYA di ponsel, dan nama panjangnya tetap di lebar lain.
+     *
+     * Keduanya tampil bersamaan berarti tombolnya berbunyi "Unduh Excel
+     * Excel" — persis yang terlihat saat gayanya belum dipasang.
+     */
+    #[Test]
+    public function nama_pendek_tombol_hanya_muncul_di_ponsel(): void
+    {
+        $css = $this->bersama();
+
+        $this->assertMatchesRegularExpression(
+            '/\.mis-tombol-ringkas\s*\{[^}]*display:\s*none/s', $css,
+            'Nama pendeknya tidak disembunyikan di lebar biasa, jadi tombolnya '
+            . 'berbunyi "Unduh Excel Excel" di desktop.'
+        );
+
+        $this->assertMatchesRegularExpression(
+            '/@media \(max-width: 575\.98px\)[^@]*\.mis-kepala-aksi-trio \.mis-tombol-halus \.mis-tombol-ringkas\s*\{[^}]*display:\s*block/s',
+            $css,
+            'Nama pendeknya tidak dimunculkan di lebar ponsel, jadi tombolnya '
+            . 'tetap ikon telanjang di sana.'
+        );
+
+        // Ikon di atas, nama di bawahnya. Berdampingan, nama 75px tidak muat
+        // di sebelah ikonnya dan tombolnya meluber.
+        $this->assertMatchesRegularExpression(
+            '/\.mis-kepala-aksi-trio \.mis-tombol-halus\s*\{[^}]*flex-direction:\s*column/s',
+            $css,
+            'Ikon dan namanya kembali berdampingan; di 75px keduanya tidak muat.'
+        );
+    }
+
+    /**
      * Tombol yang tulisannya disembunyikan WAJIB punya aria-label: tanpa
      * itu ia jadi tombol tanpa nama bagi pembaca layar.
      */
