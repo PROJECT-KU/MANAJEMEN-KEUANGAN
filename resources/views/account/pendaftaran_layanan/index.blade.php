@@ -1007,6 +1007,81 @@ Pendaftar Layanan | MIS Rumah Scopus
             .pdl-uang-total > * > .fas {
                 flex: 0 0 auto;
             }
+
+            /*
+             * Kotak ganjil terakhir MEMBENTANG dua lajur.
+             *
+             * Kotaknya dua sampai empat tergantung isi pembukuannya. Berjumlah
+             * ganjil, yang terakhir berdiri sendiri di lajur kiri dan separuh
+             * barisnya menganga — terukur: kotak "7 menunggu lebih dari 7
+             * hari" selebar 177px dengan 177px kosong di sebelahnya.
+             */
+            .pdl-uang-total > *:last-child:nth-child(odd) {
+                grid-column: 1 / -1;
+            }
+
+            /*
+             * Jarak ke kartu di bawahnya.
+             *
+             * Terukur 0px saat tertutup — bilah "Ringkasan" dan bilah "Cari
+             * & saring" benar-benar bersentuhan, terbaca seperti satu kotak
+             * terbelah — dan 12px saat terbuka, yang datang dari margin
+             * baris angkanya, bukan dari kartunya sendiri.
+             */
+            .pdl-lipat {
+                margin-bottom: 12px;
+            }
+
+            /*
+             * Ubin ringkasan jadi KISI DUA LAJUR, bukan barisan yang digeser.
+             *
+             * Barisan geser masuk akal untuk ringkasan yang selalu terpampang:
+             * ia menahan tinggi layar, dan yang tidak terlihat memang boleh
+             * tidak terlihat. Di dalam lipatan aturannya terbalik — orang
+             * baru saja MENEKAN "Ringkasan" untuk melihat angkanya, lalu yang
+             * terbuka cuma satu ubin penuh dengan empat lainnya di luar layar
+             * (terukur: lebar tampak 362px, lebar isi 1145px). Menggeser
+             * menyamping untuk melihat yang sudah sengaja dibuka itu satu
+             * tuntutan yang tidak perlu ada.
+             *
+             * Ongkosnya tinggi panel, dan itu memang yang diminta: panel ini
+             * tertutup sampai dibuka sendiri.
+             */
+            .pdl-lipat .mis-ringkas {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 8px;
+                overflow-x: visible;
+                padding: 0;
+            }
+
+            .pdl-lipat .mis-ringkas > .mis-ubin {
+                /* flex-basis dari aturan barisan tidak berlaku lagi di kisi,
+                   tetapi lebar jepitannya ikut terbawa kalau tidak dinolkan. */
+                flex: none;
+                width: auto;
+                min-width: 0;
+            }
+
+            /* Angka pokoknya sebaris penuh: ia yang paling sering dicari, dan
+               ubin ganjil pertama membuat keempat sisanya berpasangan rapi. */
+            .pdl-lipat .mis-ringkas > .mis-ubin:first-child {
+                grid-column: 1 / -1;
+            }
+
+            /*
+             * Petunjuk geser dipadamkan DI SINI, dengan bobot yang cukup.
+             *
+             * Penandanya dipasang mis-ui.js saat isinya lebih lebar daripada
+             * wadahnya, dan aturan yang memunculkannya berbobot (0,3,0):
+             * ".mis-ringkas-geser.bisa-geser .mis-ringkas-petunjuk". Ditulis
+             * dengan bobot lebih rendah, baris "Geser untuk lihat semua"
+             * tetap terpampang di bawah kisi yang tidak bisa digeser ke mana
+             * pun.
+             */
+            .pdl-lipat .mis-ringkas-geser.bisa-geser .mis-ringkas-petunjuk {
+                display: none;
+            }
         }
 
         /* Ikonnya tidak ikut menyusut saat angkanya panjang. */
