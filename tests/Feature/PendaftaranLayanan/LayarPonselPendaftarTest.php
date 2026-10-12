@@ -553,4 +553,70 @@ class LayarPonselPendaftarTest extends TestCase
             . 'membentuk garis lurus dengan nilai di atas dan di bawahnya.');
     }
 
+    /**
+     * Baris data dipisah garis, dan kaki kartunya lebih tegas lagi.
+     *
+     * Tiap baris kini dua tingkat — nilai pokok lalu keterangannya di bawah.
+     * Tanpa garis, enam tingkat itu mengalir jadi satu tumpukan: terukur
+     * jarak antar baris 6px, persis sama dengan jarak antara satu nilai dan
+     * keterangannya sendiri, jadi mata tidak punya cara tahu mana yang
+     * sepasang.
+     */
+    #[Test]
+    public function baris_data_kartu_dipisah_garis(): void
+    {
+        $isi = $this->gaya();
+
+        $this->assertMatchesRegularExpression(
+            '/td\[data-judul="Total bayar"\],\s*\.mis-tabel\.mis-tabel-kartu\.pdl-tabel tbody '
+            . 'td\[data-judul="Daftar"\]\s*\{[^}]*border-top:/s',
+            $isi,
+            'Baris datanya tidak dipisah garis; keenam tingkatnya mengalir jadi '
+            . 'satu tumpukan.'
+        );
+
+        $this->assertMatchesRegularExpression(
+            '/\.mis-tabel\.mis-tabel-kartu\.pdl-tabel tbody td:has\(\.mis-pil\)\s*\{[^}]*border-top:/s',
+            $isi,
+            'Kaki kartu tidak dipisah dari datanya; keadaan dan tindakan '
+            . 'terbaca sebagai baris data berikutnya.'
+        );
+    }
+
+    /**
+     * Tombol aksi selebar kartu dan sama besar.
+     *
+     * Sel keadaan mengambil baris penuh, jadi sel aksi turun ke barisnya
+     * sendiri — tetapi lebarnya mengikuti isinya dan didorong kanan oleh
+     * margin otomatis. Terukur: kartunya mulai di 47px sementara barisan
+     * tombolnya mulai di 75px, bertakik 28px tepat di baris terakhir.
+     *
+     * Anak BORANGNYA ikut disebut dalam aturannya. Tombol Follow up
+     * dibungkus <form> ber-`display: contents`, jadi yang jadi item lentur
+     * barisnya tombolnya, bukan borangnya; aturan yang cuma menyebut anak
+     * langsung mendarat di borang yang tidak punya kotak sama sekali, dan
+     * terukur Rincian 145px melawan Follow up 133px padahal aturannya
+     * mengaku membagi rata. Sesudah diperbaiki keduanya 133px.
+     */
+    #[Test]
+    public function tombol_aksi_kartu_selebar_kartu_dan_sama_besar(): void
+    {
+        $isi = $this->gaya();
+
+        $this->assertMatchesRegularExpression(
+            '/\.mis-tabel\.mis-tabel-kartu\.pdl-tabel tbody td\[data-judul="Aksi"\]\s*\{[^}]*flex:\s*1 1 100%/s',
+            $isi,
+            'Sel aksinya tidak selebar kartu, jadi barisan tombolnya bertakik '
+            . 'dari tepi kiri kartu.'
+        );
+
+        $this->assertSame(1, preg_match(
+            '/(\.pdl-aksi-baris > \*,\s*[^{]*\.pdl-aksi-baris > form > \*)\s*\{([^}]*)\}/s',
+            $isi, $cocok
+        ), 'Pembagi lebar tombolnya tidak menyebut anak borangnya, jadi ia '
+            . 'mendarat di <form display:contents> yang tidak punya kotak.');
+
+        $this->assertStringContainsString('flex: 1 1 0', $cocok[2]);
+    }
+
 }

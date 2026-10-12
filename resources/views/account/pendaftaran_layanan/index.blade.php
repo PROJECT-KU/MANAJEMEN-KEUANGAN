@@ -1543,6 +1543,73 @@ Pendaftar Layanan | MIS Rumah Scopus
                 font-size: .72rem;
                 color: var(--mis-tinta-4);
             }
+
+            /*
+             * Garis tipis DI ANTARA ketiga baris data.
+             *
+             * Tiap baris kini dua tingkat — nilai pokok lalu keterangannya di
+             * bawah — dan tanpa garis, enam tingkat itu mengalir jadi satu
+             * tumpukan: terukur baris Sesi, Total bayar, dan Daftar berjarak
+             * 6px satu sama lain, jarak yang sama dengan jarak antara nilai
+             * dan keterangannya sendiri. Mata tidak punya cara tahu mana yang
+             * sepasang dan mana yang bukan.
+             *
+             * Dipasang sebagai border-top, bukan border-bottom: yang terakhir
+             * tidak perlu garis, dan menggarisnya berarti satu garis mubazir
+             * tepat di atas kaki kartu yang sudah punya garisnya sendiri.
+             */
+            .mis-tabel.mis-tabel-kartu.pdl-tabel tbody td[data-judul="Total bayar"],
+            .mis-tabel.mis-tabel-kartu.pdl-tabel tbody td[data-judul="Daftar"] {
+                padding-top: 7px;
+                border-top: 1px solid #f1f5f9;
+            }
+
+            /*
+             * Kaki kartu dipisah lebih tegas: ia bukan data, melainkan
+             * keadaan dan tindakan.
+             */
+            .mis-tabel.mis-tabel-kartu.pdl-tabel tbody td:has(.mis-pil) {
+                padding-top: 9px;
+                border-top: 1px solid var(--mis-garis);
+            }
+
+            /*
+             * Tombol aksinya SELEBAR KARTU, dibagi rata.
+             *
+             * Sel keadaan sudah mengambil baris penuh, jadi sel aksi turun ke
+             * barisnya sendiri — tetapi lebarnya mengikuti isinya dan
+             * didorong kanan oleh margin otomatis. Terukur: kartunya mulai di
+             * 47px sementara barisan tombolnya mulai di 75px, jadi tepi kiri
+             * kartu bertakik 28px tepat di baris terakhir.
+             */
+            .mis-tabel.mis-tabel-kartu.pdl-tabel tbody td[data-judul="Aksi"] {
+                flex: 1 1 100%;
+                margin-left: 0;
+                padding-top: 2px;
+            }
+
+            .mis-tabel.mis-tabel-kartu.pdl-tabel tbody .pdl-aksi-baris {
+                width: 100%;
+                gap: 8px;
+            }
+
+            /*
+             * Keduanya selebar sama; tombol yang lebarnya mengikuti panjang
+             * tulisannya membuat "Follow up" dan "Rincian" tidak pernah
+             * sejajar.
+             *
+             * Anak borangnya ikut disebut. Tombol Follow up dibungkus <form>
+             * ber-`display: contents`, jadi yang jadi item lentur barisnya
+             * TOMBOLNYA, bukan borangnya — aturan yang cuma menyebut anak
+             * langsung mendarat di borang yang tidak punya kotak sama sekali.
+             * Terukur: Rincian 145px sementara Follow up 133px, padahal
+             * aturannya mengaku membagi rata.
+             */
+            .mis-tabel.mis-tabel-kartu.pdl-tabel tbody .pdl-aksi-baris > *,
+            .mis-tabel.mis-tabel-kartu.pdl-tabel tbody .pdl-aksi-baris > form > * {
+                flex: 1 1 0;
+                min-width: 0;
+            }
         }
 
         /*
