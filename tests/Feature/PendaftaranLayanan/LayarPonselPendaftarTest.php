@@ -815,4 +815,97 @@ class LayarPonselPendaftarTest extends TestCase
         );
     }
 
+    /**
+     * Nomor transaksi jadi KEPING penanda, sewarna layanannya.
+     *
+     * Di kepala kartu ia berdiri sendiri di seberang nama layanan; sebagai
+     * teks abu-abu polos ia terbaca seperti keterangan yang kelupaan
+     * dirapikan. Warnanya mengambil --warna-aksen — variabel yang sama
+     * dengan pita di tepi kartu — jadi kepala kartu menyebut layanannya
+     * tiga kali dengan cara yang sama: medali, pita, dan keping ini.
+     * Terukur: Scopus Camp #10b981, Webinar #f59e0b, Clinik #0ea5e9.
+     */
+    #[Test]
+    public function nomor_transaksi_jadi_keping_sewarna_layanan(): void
+    {
+        /*
+         * Diambil aturan yang MENYALAKANNYA, bukan yang pertama ketemu.
+         *
+         * Kelas ini punya dua aturan: satu memadamkannya di lebar tabel,
+         * satu lagi merupakannya di lebar kartu. Pola yang cuma mencari
+         * kemunculan pertama mendarat di yang memadamkan, lalu merah sambil
+         * mengeluh "display: none tidak ber-border-radius" — keluhan yang
+         * benar tentang aturan yang salah.
+         */
+        preg_match_all('/\.pdl-nomor\.pdl-nomor-kartu[^{]*\{([^}]*)\}/s',
+            $this->gaya(), $semua, PREG_SET_ORDER);
+
+        $aturan = '';
+
+        foreach ($semua as $satu) {
+            if (str_contains($satu[1], 'display: block')) {
+                $aturan = $satu[1];
+            }
+        }
+
+        $this->assertNotSame('', $aturan,
+            'Aturan yang merupakan keping nomor di modus kartu tidak ditemukan.');
+
+        $this->assertMatchesRegularExpression('/border-radius:\s*999px/', $aturan,
+            'Kepingnya tidak bersudut penuh, jadi ia tidak terbaca sebagai '
+            . 'penanda melainkan sebagai kotak teks.');
+
+        $this->assertStringContainsString('--warna-aksen', $aturan,
+            'Kepingnya tidak mengambil warna layanannya.');
+
+        /*
+         * Latar dan tulisannya WAJIB punya nilai cadangan yang ditulis
+         * lebih dulu.
+         *
+         * color-mix() belum dikenal setiap peramban; yang belum mengenalnya
+         * mengabaikan deklarasinya. Tanpa baris cadangan di atasnya, yang
+         * tersisa latar transparan dan tulisan warna bawaan — kepingnya
+         * hilang sama sekali tanpa satu galat pun.
+         */
+        foreach (['background', 'color'] as $sifat) {
+            $this->assertSame(2, preg_match_all('/\b' . $sifat . ':/', $aturan),
+                'Sifat ' . $sifat . ' pada kepingnya tidak punya nilai cadangan '
+                . 'sebelum color-mix(); di peramban yang belum mengenalnya '
+                . 'kepingnya hilang tanpa tanda apa pun.');
+        }
+    }
+
+    /**
+     * Keping nomor MENGALAH pada nama layanannya.
+     *
+     * Dibiarkan menyusut sebebasnya ia tetap mengambil seluruh ruang yang
+     * dimintanya lebih dulu. Terukur di 320px pada Clinik Scopus, yang
+     * nomornya "BOOK-05072026111623-ZRWIJ": nama layanannya terpotong jadi
+     * "Clinik Scopu" sementara kepingnya memanjang 111px. Nomor penuhnya
+     * tetap ada di title dan di halaman rincian; nama layanan yang terpotong
+     * tidak punya cadangan apa pun.
+     *
+     * Dan sel kepalanya sendiri harus boleh menyusut: anak flex tidak pernah
+     * mengecil di bawah min-content-nya, dan nomor itu satu kata panjang
+     * ber-nowrap — terukur SELNYA 361px di dalam kartu selebar 290px, jadi
+     * elipsisnya tidak pernah terpakai sebab tidak ada yang memaksanya sempit.
+     */
+    #[Test]
+    public function keping_nomor_mengalah_pada_nama_layanan(): void
+    {
+        $isi = $this->gaya();
+
+        $this->assertMatchesRegularExpression(
+            '/\.pdl-nomor\.pdl-nomor-kartu\s*\{[^}]*max-width:\s*\d+%/s', $isi,
+            'Lebar kepingnya tidak dibatasi; pada nomor panjang nama '
+            . 'layanannya yang terpotong.'
+        );
+
+        $this->assertMatchesRegularExpression(
+            '/td\.mis-td-utama\s*\{[^}]*min-width:\s*0/s', $isi,
+            'Sel kepala kartu tidak boleh menyusut, jadi elipsis pada '
+            . 'kepingnya tidak pernah terpakai dan isinya meluber keluar kartu.'
+        );
+    }
+
 }
