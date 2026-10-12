@@ -52,6 +52,13 @@ Catatan Penghapusan | MIS Rumah Scopus
             border-radius: 6px;
             background: rgba(146, 64, 14, .1);
             font-size: .78rem;
+            /*
+             * Nama perintahnya TIDAK boleh terpecah dua baris: latar kepingnya
+             * ikut terpotong di tengah kata dan yang tersalin ke terminal jadi
+             * perintah yang tidak ada. 28 huruf pada .78rem sekitar 150px,
+             * masih muat di layar 390px dikurangi paddingnya.
+             */
+            white-space: nowrap;
         }
 
         .thp-borang {
@@ -282,12 +289,21 @@ Catatan Penghapusan | MIS Rumah Scopus
             gap: 7px;
         }
 
+        /*
+         * Panelnya PUTIH bergaris tepi, bukan abu di atas putih.
+         *
+         * Abu di dalam kartu putih memberi kontras yang nyaris tidak terlihat,
+         * jadi batas panelnya kabur dan isinya terbaca seperti tumpahan dari
+         * kartunya. Garis tepi kiri berwarna memberi ia pangkal yang jelas
+         * tanpa menambah kotak lagi.
+         */
         .thp-potret-isi {
             margin-top: 9px;
-            padding: 13px 15px;
+            padding: 14px 16px;
             border: 1px solid var(--mis-garis);
+            border-left: 3px solid #cbd5e1;
             border-radius: var(--mis-radius-kecil);
-            background: #f8fafc;
+            background: #fff;
         }
 
         /*
@@ -298,11 +314,32 @@ Catatan Penghapusan | MIS Rumah Scopus
          * auto-fill, BUKAN auto-fit: dengan auto-fit satu pasangan terakhir
          * melar memenuhi seluruh baris dan terbaca seperti judul.
          */
+        /*
+         * Lebar selnya DIBATASI, tidak melar mengikuti lebar panel.
+         *
+         * Dengan 1fr, tiga lajur di layar 1440px membuat tiap sel selebar
+         * 357px sementara isinya cuma sekitar 150px — label dan nilainya
+         * jadi pulau-pulau yang terpisah lautan kosong, dan mata harus
+         * melompat jauh untuk membaca satu pasangan. Terukur di peramban:
+         * panel 1067px menghasilkan lajur 194px, tetapi pada lebar lain
+         * selnya ikut melar tanpa batas.
+         *
+         * justify-content: start supaya sisa ruangnya menumpuk di kanan,
+         * bukan dibagi rata jadi jarak antar lajur yang menganga.
+         */
         .thp-pokok {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-            gap: 10px 16px;
+            grid-template-columns: repeat(auto-fill, minmax(176px, 216px));
+            justify-content: start;
+            gap: 13px 18px;
             margin: 0;
+        }
+
+        /* Garis tepi kiri tipis per sel: pemisah yang tidak menambah baris,
+           dan yang membuat pasangan label-nilai terbaca sebagai satu blok. */
+        .thp-pokok > div {
+            padding-left: 9px;
+            border-left: 2px solid #eef2f7;
         }
 
         .thp-pokok dt {
@@ -315,8 +352,9 @@ Catatan Penghapusan | MIS Rumah Scopus
         }
 
         .thp-pokok dd {
-            margin: 1px 0 0;
+            margin: 2px 0 0;
             font-size: .82rem;
+            font-weight: 600;
             color: var(--mis-tinta);
             /* Email dan afiliasi panjang memecah kisinya kalau tidak
                diizinkan membungkus di tengah kata. */
@@ -324,9 +362,16 @@ Catatan Penghapusan | MIS Rumah Scopus
         }
 
         .thp-potret-bagian {
-            margin-top: 13px;
-            padding-top: 11px;
+            margin-top: 14px;
+            padding-top: 12px;
             border-top: 1px dashed var(--mis-garis);
+        }
+
+        /* Nominal diberi tekanan: di daftar termin, angkanyalah yang dicari
+           — keterangan terminnya cuma penjelas. */
+        .thp-potret-daftar strong {
+            color: var(--mis-tinta);
+            font-variant-numeric: tabular-nums;
         }
 
         .thp-potret-judul {
@@ -346,7 +391,7 @@ Catatan Penghapusan | MIS Rumah Scopus
             margin: 0;
             padding: 0;
             display: grid;
-            gap: 6px;
+            gap: 7px;
         }
 
         .thp-potret-daftar li {
@@ -358,7 +403,6 @@ Catatan Penghapusan | MIS Rumah Scopus
             color: var(--mis-tinta-2);
         }
 
-        .thp-potret-daftar strong { color: var(--mis-tinta); }
         .thp-potret-daftar span { font-size: .74rem; color: var(--mis-tinta-4); }
 
         /* Data mentahnya satu lapis lebih dalam: yang membutuhkannya
