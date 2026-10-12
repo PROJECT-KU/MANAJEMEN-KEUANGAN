@@ -91,6 +91,22 @@ body {
 .mis-lencana-merah { --warna-lencana: #f43f5e; --tinta-lencana: #be123c; }
 .mis-lencana-abu { --warna-lencana: #94a3b8; --tinta-lencana: #475569; }
 
+/*
+ * Ungu dan jingga MELENGKAPI kosakata warnanya.
+ *
+ * Katalog layanan memakai lima warna — hijau, ungu, kuning, jingga, biru —
+ * sementara lencana lembut ini cuma punya empat di antaranya. Akibatnya
+ * Analisis Bibliometrik dan Scopus Kafe tidak bisa memakai warnanya sendiri
+ * dan terpaksa jatuh ke abu, dua layanan yang justru paling sering tertukar
+ * di layar rekap.
+ *
+ * Nilainya disamakan dengan gradien medali yang sudah ada, bukan dikarang
+ * baru: satu layanan harus berwarna sama di mana pun ia muncul.
+ */
+.mis-lencana-ungu { --warna-lencana: #8b5cf6; --tinta-lencana: #6d28d9; }
+
+.mis-lencana-jingga { --warna-lencana: #f97316; --tinta-lencana: #c2410c; }
+
 .mis-lencana-titik {
     position: relative;
     flex: 0 0 8px;

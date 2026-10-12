@@ -708,17 +708,93 @@ class PulihkanPendaftaranTest extends TestCase
         $this->actingAs($admin);
         $this->hapus($b);
 
-        $this->actingAs($admin)
-            ->get(route('account.pendaftaran-layanan.terhapus'))
-            ->assertOk()
-            ->assertSee('mis-ringkas-2', false);
+        /*
+         * Dituntut sebagai HUBUNGAN, bukan angka mutlak.
+         *
+         * Versi pertama menuntut 'mis-ringkas-2' apa adanya sebelum
+         * memulihkan — dan itu mengandaikan SELURUH tabel belum punya satu
+         * pun catatan yang dikembalikan. Basis data pengembangan ini punya
+         * satu, dari pemilik produk yang mencoba tombolnya sendiri, jadi
+         * ujinya merah oleh data yang justru benar.
+         */
+        $sebelum = $this->actingAs($admin)
+            ->get(route('account.pendaftaran-layanan.terhapus'))->assertOk();
+
+        $sebelum->assertSee(
+            $sebelum->viewData('jumlahPulih') > 0 ? 'mis-ringkas-3' : 'mis-ringkas-2',
+            false
+        );
 
         (new PulihkanPendaftaran)->jalankan((string) $this->arsip($id)->getKey());
 
-        $this->actingAs($admin)
-            ->get(route('account.pendaftaran-layanan.terhapus'))
-            ->assertOk()
-            ->assertSee('mis-ringkas-3', false);
+        /*
+         * Sesudah memulihkan, jumlahnya PASTI di atas nol berapa pun isi
+         * tabelnya — jadi lajurnya wajib tiga. Dipatok dua lagi di
+         * markahnya, tuntutan ini merah.
+         */
+        $sesudah = $this->actingAs($admin)
+            ->get(route('account.pendaftaran-layanan.terhapus'))->assertOk();
+
+        $this->assertGreaterThan(0, $sesudah->viewData('jumlahPulih'));
+        $sesudah->assertSee('mis-ringkas-3', false);
+    }
+
+    /**
+     * Keping layanan memakai WARNA KATALOGNYA, bukan warna karangan.
+     *
+     * Satu layanan harus berwarna sama di layar mana pun. Dikarang sendiri
+     * di sini, Scopus Camp hijau di layar daftar tetapi abu di catatan
+     * penghapusan — dan warnanya berhenti berarti apa-apa.
+     *
+     * Diperiksa untuk KELIMA layanan lewat katalognya, bukan satu contoh:
+     * dua di antaranya (ungu dan jingga) sebelumnya tidak punya padanan
+     * lencana sama sekali dan diam-diam jatuh ke abu.
+     */
+    #[Test]
+    public function keping_layanan_memakai_warna_katalognya(): void
+    {
+        $css = file_get_contents(public_path('assets/css/mis-ui.css'));
+
+        foreach (Pendaftaran::katalog() as $layanan => $rupa) {
+            $warna = str_replace('mis-', '', $rupa['warna'] ?? '');
+
+            $this->assertNotSame('', $warna, $layanan . ' tidak punya warna di katalog.');
+
+            /*
+             * Padanan lencananya harus BENAR-BENAR ADA di mis-ui.css. Tidak
+             * ada, kelasnya tetap tertulis di markah dan kepingnya tampil
+             * tanpa warna — tanpa galat apa pun.
+             */
+            $this->assertMatchesRegularExpression(
+                '/\.mis-lencana-' . preg_quote($warna, '/') . '(?![\w-])/',
+                $css,
+                'Warna "' . $warna . '" dipakai katalog layanan ' . $layanan
+                . ' tetapi .mis-lencana-' . $warna . ' tidak ada di mis-ui.css.'
+            );
+        }
+    }
+
+    /** Markahnya benar-benar memasang kelas warna itu, bukan abu seragam. */
+    #[Test]
+    public function kepingnya_benar_benar_berwarna_di_markahnya(): void
+    {
+        [$admin, $b] = $this->dengan();
+
+        $this->actingAs($admin);
+        $this->hapus($b);
+
+        $isi = $this->actingAs($admin)
+            ->get(route('account.pendaftaran-layanan.terhapus',
+                ['cari' => $b->id_transaksi]))
+            ->assertOk()->getContent();
+
+        // Scopus Camp berwarna hijau di katalognya.
+        $this->assertStringContainsString('mis-lencana mis-lencana-hijau', $isi,
+            'Keping layanan tidak memakai warna katalognya.');
+
+        // Status 'diproses' masuk keadaan 'menunggu' yang berwarna kuning.
+        $this->assertStringContainsString('mis-lencana mis-lencana-kuning', $isi,
+            'Keping status tidak memakai warna keadaannya.');
     }
 
     // ------------------------------------------------------------- pembantu
