@@ -116,7 +116,8 @@ Pendaftar Layanan | MIS Rumah Scopus
          * Di sana nomornya sudah ada di kolom Pendaftar; dibiarkan, kaki
          * barisnya memuat nomor yang sama untuk kedua kalinya.
          */
-        .pdl-kontak.pdl-kontak-kartu {
+        .pdl-kontak.pdl-kontak-kartu,
+        .pdl-nomor.pdl-nomor-kartu {
             display: none;
         }
 
@@ -1592,8 +1593,59 @@ Pendaftar Layanan | MIS Rumah Scopus
              * kehilangan satu baris dan nomornya berdiri tepat di atas
              * tombol Follow up yang memakainya.
              */
-            .pdl-kontak.pdl-kontak-tabel {
+            .pdl-kontak.pdl-kontak-tabel,
+            .pdl-nomor.pdl-nomor-tabel {
                 display: none;
+            }
+
+            /*
+             * Nomor pendaftaran NAIK ke kepala kartu, rapat ke kanan.
+             *
+             * Di kolom Pendaftar ia baris tersendiri di atas nama. Di kartu
+             * ia lebih berguna sebagai penanda kartu — di seberang nama
+             * layanannya, tempat mata mencari "ini pendaftaran yang mana"
+             * — dan blok nama kehilangan satu baris lagi.
+             *
+             * .pdl-layanan sudah flex, jadi margin otomatis cukup untuk
+             * mendorongnya ke tepi.
+             */
+            /*
+             * Pembungkus kepala kartu DILEBARKAN penuh.
+             *
+             * .mis-td-utama flex, dan .pdl-layanan di dalamnya cuma selebar
+             * isinya — jadi margin otomatis di dalam blok itu mendorong
+             * nomornya ke tepi BLOKNYA, bukan ke tepi kartu. Terukur:
+             * nomornya berhenti di 262px sementara tepi isi kartunya 333px.
+             */
+            .mis-tabel.mis-tabel-kartu.pdl-tabel tbody td.mis-td-utama .pdl-layanan {
+                width: 100%;
+            }
+
+            .pdl-nomor.pdl-nomor-kartu {
+                display: block;
+                flex: 0 1 auto;
+                margin-bottom: 0;
+                margin-left: auto;
+                padding-left: 10px;
+                text-align: right;
+                /* Tidak boleh terpatah di tanda hubungnya; dipotong elipsis
+                   kalau memang tidak muat, dan nilai penuhnya tetap di
+                   title. */
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            /*
+             * Keping rombongan dirapatkan ke KANAN.
+             *
+             * .pdl-nama flex dan membungkus; kepingnya duduk tepat di
+             * samping nama, jadi pada nama pendek ia berhenti di tengah
+             * baris dan tidak sejajar dengan apa pun. Didorong ke tepi, ia
+             * berdiri segaris dengan nilai kolom kanan di bawahnya.
+             */
+            .pdl-nama .pdl-pil-orang {
+                margin-left: auto;
             }
 
             /*

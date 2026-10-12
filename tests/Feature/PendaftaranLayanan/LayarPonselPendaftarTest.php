@@ -676,26 +676,142 @@ class LayarPonselPendaftarTest extends TestCase
          * diturunkan jadi satu kelas — sebab aturan bawaannya masih memakai
          * bentuk dua-kelas. Persis cacat yang hendak dijaga, lolos.
          */
-        preg_match_all('/([^{};\n]*\.pdl-kontak-(?:kartu|tabel))\s*\{([^}]*)\}/s',
-            $isi, $semua, PREG_SET_ORDER);
+        /*
+         * Tiap PEMILIH diperiksa sendiri, dan daftar pemilih berkoma pun
+         * dipecah dulu.
+         *
+         * Dua versi penjaga ini sudah keliru sebelumnya. Yang pertama cuma
+         * mencari bentuk dua-kelas di seluruh berkas dan tetap hijau saat
+         * aturan di dalam media ponsel diturunkan jadi satu kelas. Yang
+         * kedua membaca pemilihnya sebagai satu baris, lalu merah sendiri
+         * begitu aturannya digabung dengan .pdl-nomor jadi daftar dua baris
+         * — merah oleh sebab yang bukan cacatnya.
+         */
+        /*
+         * Komentar DIBUANG dulu.
+         *
+         * Berkas ini menerangkan tiap aturannya panjang-panjang, dan
+         * komentar yang menyebut "pdl-kontak-kartu" terbaca oleh pemindai
+         * sebagai pemilih — penjaganya lalu merah sambil mengutip kalimat
+         * penjelasan, bukan kode.
+         */
+        $bersih = preg_replace('#/\*.*?\*/#s', '', $isi);
 
-        $this->assertGreaterThanOrEqual(3, count($semua),
-            'Ketiga aturan salinan nomor tidak lengkap: satu memadamkan '
+        preg_match_all('/([^{}]*?)\{([^}]*)\}/s', $bersih, $semua, PREG_SET_ORDER);
+
+        $diperiksa = 0;
+
+        foreach ($semua as $aturan) {
+            foreach (explode(',', $aturan[1]) as $pemilih) {
+                $pemilih = trim($pemilih);
+
+                /*
+                 * Kedua varian disebut PERSIS. Awalan "pdl-kontak-" saja
+                 * ikut menangkap .pdl-kontak-kosong — kelas untuk "nomor
+                 * belum diisi", yang tidak ada urusannya dengan bobot ini.
+                 */
+                if (! preg_match('/\.pdl-kontak-(kartu|tabel)\b/', $pemilih)) {
+                    continue;
+                }
+
+                $diperiksa++;
+
+                $this->assertStringContainsString('.pdl-kontak.', $pemilih,
+                    'Pemilih "' . $pemilih . '" ditulis dengan satu kelas saja; '
+                    . 'bobotnya cuma seri dengan .pdl-kontak dan hasilnya '
+                    . 'bergantung pada urutan tulis.');
+            }
+        }
+
+        $this->assertGreaterThanOrEqual(3, $diperiksa,
+            'Ketiga pemilih salinan nomor tidak lengkap: satu memadamkan '
             . 'salinan kartu di lebar tabel, dua lagi menukar keduanya di '
             . 'lebar ponsel.');
 
+        /*
+         * Di lebar tabel salinan kartunya harus benar-benar padam.
+         *
+         * Dicari lewat aturan yang sudah dipecah di atas, bukan dengan pola
+         * yang mengandaikan pemilihnya berdiri sendiri: aturannya kini satu
+         * daftar bersama .pdl-nomor, jadi sesudah ".pdl-kontak-kartu" yang
+         * menyusul koma, bukan kurung.
+         */
+        $padam = false;
+
         foreach ($semua as $aturan) {
-            $this->assertStringContainsString('.pdl-kontak.', $aturan[1],
-                'Aturan "' . trim($aturan[1]) . '" ditulis dengan satu kelas '
-                . 'saja; bobotnya cuma seri dengan .pdl-kontak dan hasilnya '
-                . 'bergantung pada urutan tulis.');
+            if (! str_contains($aturan[1], '.pdl-kontak.pdl-kontak-kartu')) {
+                continue;
+            }
+
+            if (preg_match('/display:\s*none/', $aturan[2])) {
+                $padam = true;
+            }
         }
 
-        // Di lebar tabel salinan kartunya harus benar-benar padam.
-        $this->assertMatchesRegularExpression(
-            '/\.pdl-kontak\.pdl-kontak-kartu\s*\{\s*display:\s*none/s', $isi,
+        $this->assertTrue($padam,
             'Salinan kartunya tidak dipadamkan di lebar tabel; nomornya '
-            . 'tergambar dua kali dalam satu baris.'
+            . 'tergambar dua kali dalam satu baris.');
+    }
+
+    /**
+     * Nomor pendaftaran naik ke KEPALA kartu, rapat ke kanan.
+     *
+     * Di kolom Pendaftar ia baris tersendiri di atas nama. Di kartu ia lebih
+     * berguna sebagai penanda kartu — di seberang nama layanannya, tempat
+     * mata mencari "ini pendaftaran yang mana" — dan blok nama kehilangan
+     * satu baris lagi. Terukur: tinggi kartu 383px jadi 365px.
+     */
+    #[Test]
+    public function nomor_pendaftaran_naik_ke_kepala_kartu(): void
+    {
+        $markah = $this->baris();
+
+        $this->assertSame(2, substr_count($markah, 'partials.nomor'),
+            'Nomornya tidak dirakit dari satu partial untuk kedua tempatnya.');
+
+        foreach (['tabel', 'kartu'] as $tempat) {
+            $this->assertStringContainsString("partials.nomor', ['tempat' => '" . $tempat . "'",
+                $markah, 'Salinan nomor untuk ' . $tempat . ' tidak dipasang.');
+        }
+
+        $isi = $this->gaya();
+
+        /*
+         * Pembungkus kepalanya WAJIB selebar kartu.
+         *
+         * .mis-td-utama flex, dan .pdl-layanan di dalamnya cuma selebar
+         * isinya — margin otomatis lalu mendorong nomornya ke tepi BLOK
+         * itu, bukan ke tepi kartu. Terukur: berhenti di 262px sementara
+         * tepi isi kartunya 333px, jadi ia menggantung di tengah.
+         */
+        $this->assertMatchesRegularExpression(
+            '/td\.mis-td-utama \.pdl-layanan\s*\{[^}]*width:\s*100%/s', $isi,
+            'Pembungkus kepala kartu tidak selebar kartu, jadi nomornya '
+            . 'berhenti di tengah, bukan di tepi kanan.'
+        );
+
+        $this->assertMatchesRegularExpression(
+            '/\.pdl-nomor\.pdl-nomor-kartu\s*\{[^}]*margin-left:\s*auto/s', $isi,
+            'Nomornya tidak didorong ke kanan di kepala kartu.'
+        );
+    }
+
+    /**
+     * Keping rombongan dirapatkan ke kanan di kartu.
+     *
+     * .pdl-nama flex dan membungkus; kepingnya duduk tepat di samping nama,
+     * jadi pada nama pendek ia berhenti di tengah baris dan tidak sejajar
+     * dengan apa pun. Didorong ke tepi, ia segaris dengan nomor di atasnya
+     * dan dengan nilai kolom kanan di bawahnya — terukur ketiganya berakhir
+     * di 333px pada lebar 390px.
+     */
+    #[Test]
+    public function keping_rombongan_rapat_ke_kanan_di_kartu(): void
+    {
+        $this->assertMatchesRegularExpression(
+            '/\.pdl-nama \.pdl-pil-orang\s*\{[^}]*margin-left:\s*auto/s', $this->gaya(),
+            'Keping rombongan tidak dirapatkan ke kanan; pada nama pendek ia '
+            . 'berhenti di tengah baris.'
         );
     }
 
