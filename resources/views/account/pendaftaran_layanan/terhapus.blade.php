@@ -145,10 +145,23 @@ Catatan Penghapusan | MIS Rumah Scopus
          * dengan lencana di layar daftar, jadi satu status berwarna sama di
          * kedua layar.
          */
-        .thp-ket > span > i {
+        .thp-ket > span > i,
+        .thp-ket > a > i {
             font-size: 11px;
             opacity: .85;
         }
+
+        /* Kepingnya jadi tautan: digarisbawahi hanya saat disentuh, supaya
+           deret keping tidak terbaca seperti deretan pranala. */
+        .thp-tautan-pulih { text-decoration: none; }
+
+        .thp-tautan-pulih:hover { text-decoration: underline; }
+
+        /* Panahnya muncul saat disentuh: penanda bahwa keping ini bisa
+           ditekan, tanpa menambah berat pada keadaan diam. */
+        .thp-panah { opacity: 0 !important; transition: opacity .2s ease; }
+
+        .thp-tautan-pulih:hover .thp-panah { opacity: .9 !important; }
 
         .thp-uang {
             font-size: .9rem;
@@ -1014,14 +1027,25 @@ Catatan Penghapusan | MIS Rumah Scopus
                                      dipulihkan membuat pertanyaan itu tidak
                                      terjawab untuk kedua kalinya. --}}
                                 @if ($satu->dipulihkan_at)
-                                    <span class="mis-lencana mis-lencana-hijau">
+                                    {{-- Kepingnya jadi TAUTAN ke pendaftarannya yang
+                                         hidup lagi.
+
+                                         Dulu ia berhenti di "dikembalikan 12 Okt,
+                                         11:28" — dan untuk membukanya orang harus
+                                         menyalin nomornya lalu mencarinya di layar
+                                         daftar. Barisnya sudah ada lagi; tautannya
+                                         cuma belum pernah dipasang. --}}
+                                    <a class="mis-lencana mis-lencana-hijau thp-tautan-pulih"
+                                        href="{{ route('account.pendaftaran-layanan.rincian', [$satu->layanan, $satu->pendaftaran_id]) }}"
+                                        title="Buka pendaftaran yang sudah dikembalikan">
                                         <i class="fas fa-undo" aria-hidden="true"></i>
                                         dikembalikan
                                         {{ $satu->dipulihkan_at->translatedFormat('d M Y, H:i') }}
                                         @if ($satu->dipulihkan_oleh)
                                             oleh {{ $satu->dipulihkan_oleh }}
                                         @endif
-                                    </span>
+                                        <i class="fas fa-arrow-right thp-panah" aria-hidden="true"></i>
+                                    </a>
                                 @endif
                             </div>
                         </div>
