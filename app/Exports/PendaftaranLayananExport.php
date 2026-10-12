@@ -73,15 +73,16 @@ class PendaftaranLayananExport implements FromArray, ShouldAutoSize, WithEvents,
                 $b->nama_orang,
                 $b->email,
                 /*
-                 * Diawali kutip tunggal supaya tetap untaian.
+                 * TANPA kutip tunggal di depannya.
                  *
-                 * Tanpa itu spreadsheet membaca '082220906000' sebagai
-                 * bilangan, membuang nol depannya, lalu menampilkannya sebagai
-                 * 8,22221E+10 pada nomor yang cukup panjang. Nomor telepon yang
-                 * kehilangan nol depannya tidak bisa dipakai menghubungi
-                 * siapa pun.
+                 * Kutip itu trik mengetik di Excel, bukan nilai: diserahkan
+                 * lewat PhpSpreadsheet ia tertulis apa adanya dan yang
+                 * tampil di sel "'0812-2017-7011" — ikut tersalin saat
+                 * nomornya di-copy. Nol depannya dijaga dengan cara yang
+                 * benar: selnya ditulis ulang sebagai untaian tegas di
+                 * registerEvents(), dan lajurnya diberi format teks.
                  */
-                $b->telp ? "'" . $b->telp : '',
+                (string) ($b->telp ?? ''),
                 $b->affiliasi ?? '',
                 Pendaftaran::sesiBaris($b) ?? '',
                 /*
@@ -133,6 +134,22 @@ class PendaftaranLayananExport implements FromArray, ShouldAutoSize, WithEvents,
         return $bukti['ada'] ? 'Ada' : 'Berkasnya hilang';
     }
 
+    /**
+     * Lajur mana yang memuat apa, dihitung dari headings().
+     *
+     * Ditulis sebagai tetapan huruf, satu kolom yang disisipkan di tengah
+     * membuat seluruh gaya menunjuk lajur yang keliru — dan gaya yang
+     * meleset tidak pernah menimbulkan galat, cuma berkas yang salah warna.
+     */
+    private function lajur(string $kepala): string
+    {
+        $i = array_search($kepala, $this->headings(), true);
+
+        return $i === false
+            ? 'A'
+            : \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($i + 1);
+    }
+
     public function registerEvents(): array
     {
         return [
@@ -160,6 +177,11 @@ class PendaftaranLayananExport implements FromArray, ShouldAutoSize, WithEvents,
                     }
                 }
 
+                $akhirLajur = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(
+                    count($this->headings())
+                );
+                $barisTerakhir = 4 + $this->baris->count();
+
                 $lembar->setCellValue('A1', 'Pendaftar Layanan — MIS Rumah Scopus');
                 $lembar->setCellValue('A2', 'Diunduh ' . now()->format('d/m/Y H:i') . ' WIB'
                     . ' · ' . number_format($this->baris->count(), 0, ',', '.') . ' pendaftaran'
@@ -173,9 +195,154 @@ class PendaftaranLayananExport implements FromArray, ShouldAutoSize, WithEvents,
                         $this->saringan
                     ))));
 
-                $lembar->getStyle('A1')->getFont()->setBold(true)->setSize(13);
-                $lembar->getStyle('A2:A3')->getFont()->setSize(10);
-                $lembar->getStyle('A4:Q4')->getFont()->setBold(true);
+                /*
+                 * Ketiga baris kepala DIGABUNG selebar tabelnya.
+                 *
+                 * Tanpa itu ShouldAutoSize mengukur lajur A dari kalimat
+                 * terpanjang di A1–A3 — terukur pada berkas yang benar-benar
+                 * terunduh: lajur A selebar 90 huruf, berisi angka "No." yang
+                 * cuma butuh tiga, sementara seluruh kolom lain terdorong jauh
+                 * ke kanan.
+                 */
+                foreach (['1', '2', '3'] as $n) {
+                    $lembar->mergeCells('A' . $n . ':' . $akhirLajur . $n);
+                }
+
+                $lembar->getStyle('A1')->getFont()->setBold(true)->setSize(14)
+                    ->getColor()->setRGB('0F172A');
+                $lembar->getStyle('A2:A3')->getFont()->setSize(10)
+                    ->getColor()->setRGB('64748B');
+                $lembar->getRowDimension(1)->setRowHeight(22);
+
+                // ------------------------------------------------ kepala kolom
+                $kepala = 'A4:' . $akhirLajur . '4';
+
+                $lembar->getStyle($kepala)->applyFromArray([
+                    'font' => ['bold' => true, 'size' => 10, 'color' => ['rgb' => 'FFFFFF']],
+                    'fill' => [
+                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => '4F46E5'],
+                    ],
+                    'alignment' => [
+                        'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                        'wrapText' => true,
+                    ],
+                ]);
+
+                $lembar->getRowDimension(4)->setRowHeight(26);
+
+                // ------------------------------------------------------- isi
+                if ($this->baris->count() > 0) {
+                    $isi = 'A5:' . $akhirLajur . $barisTerakhir;
+
+                    $lembar->getStyle($isi)->applyFromArray([
+                        'borders' => [
+                            'allBorders' => [
+                                'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                                'color' => ['rgb' => 'E2E8F0'],
+                            ],
+                        ],
+                        'alignment' => [
+                            'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                        ],
+                    ]);
+
+                    /*
+                     * Baris berselang-seling. Lembar berisi ratusan baris
+                     * dibaca dengan jari di layar, dan mata kehilangan
+                     * barisnya tanpa pembeda apa pun.
+                     */
+                    for ($r = 6; $r <= $barisTerakhir; $r += 2) {
+                        $lembar->getStyle('A' . $r . ':' . $akhirLajur . $r)
+                            ->getFill()
+                            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                            ->getStartColor()->setRGB('F8FAFC');
+                    }
+
+                    /*
+                     * Nomor telepon ditulis ULANG sebagai untaian tegas.
+                     *
+                     * fromArray() melewatkan nilainya ke penilai bawaan, yang
+                     * membaca "081100000001" sebagai bilangan lalu membuang
+                     * nol depannya. Nomor yang kehilangan nol depannya tidak
+                     * bisa dipakai menghubungi siapa pun — dan yang
+                     * membacanya tidak punya cara tahu nomor itu pernah utuh.
+                     */
+                    $lajurTelp = $this->lajur('Telepon');
+
+                    foreach ($this->baris->values() as $i => $b) {
+                        $lembar->setCellValueExplicit(
+                            $lajurTelp . (5 + $i),
+                            (string) ($b->telp ?? ''),
+                            \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
+                        );
+                    }
+
+                    $lembar->getStyle($lajurTelp . '5:' . $lajurTelp . $barisTerakhir)
+                        ->getNumberFormat()->setFormatCode('@');
+
+                    // Nominal dibaca sebagai uang, bukan deret angka telanjang.
+                    $lajurTotal = $this->lajur('Total bayar');
+                    $lembar->getStyle($lajurTotal . '5:' . $lajurTotal . $barisTerakhir)
+                        ->getNumberFormat()->setFormatCode('#,##0');
+
+                    foreach (['No.', 'Jumlah orang', 'Angkatan ke-', 'Kode unik'] as $tengah) {
+                        $l = $this->lajur($tengah);
+                        $lembar->getStyle($l . '5:' . $l . $barisTerakhir)
+                            ->getAlignment()
+                            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                    }
+
+                    /*
+                     * Penyaring bawaan Excel. Lembar ini memang diunduh untuk
+                     * disaring dan dikelompokkan — memasangnya sendiri satu
+                     * langkah yang hampir selalu dikerjakan penerimanya.
+                     */
+                    /*
+                     * Dirakit dari 'A4', BUKAN dari $kepala.
+                     *
+                     * $kepala sudah berupa rentang ("A4:Q4"), jadi
+                     * menyambungnya menghasilkan "A4:Q4:Q9" — rentang rusak
+                     * yang diterima PhpSpreadsheet tanpa mengeluh dan
+                     * membuat penyaringnya tidak pernah muncul di Excel.
+                     * Terukur pada berkas yang benar-benar dihasilkan.
+                     */
+                    $lembar->setAutoFilter('A4:' . $akhirLajur . $barisTerakhir);
+                }
+
+                /*
+                 * Lajur "No." dipatok sempit SESUDAH autosize.
+                 *
+                 * Isinya paling banyak tiga angka; dibiarkan dihitung
+                 * otomatis ia mengikuti lebar tulisan "No." berikut kepala
+                 * kolomnya yang tebal.
+                 */
+                $lembar->getColumnDimension($this->lajur('No.'))
+                    ->setAutoSize(false)->setWidth(6);
+
+                /*
+                 * Lajur teks panjang DIBATASI lebarnya.
+                 *
+                 * Autosize mengikuti isi terpanjang: terukur pada berkas yang
+                 * dihasilkan, lajur Nama selebar 52 huruf karena satu gelar
+                 * panjang, dan seluruh kolom sesudahnya terdorong keluar
+                 * layar. Dibatasi, isinya tetap utuh — cuma perlu dilebarkan
+                 * sendiri kalau memang mau dibaca penuh.
+                 */
+                foreach (['Nama' => 32, 'Afiliasi' => 30, 'Sesi / angkatan' => 26,
+                    'Email' => 26, 'Status asli' => 20] as $kolom => $lebar) {
+                    /*
+                     * Dipatok TANPA SYARAT, bukan "hanya kalau lebih lebar".
+                     *
+                     * Saat AfterSheet berjalan, autosize BELUM dihitung —
+                     * getWidth() masih mengembalikan -1, jadi syarat
+                     * "lebih lebar dari 32" tidak pernah benar dan
+                     * pembatasnya diam. Terukur: lajur Nama tetap 51,8
+                     * sesudah pembatas bersyarat dipasang.
+                     */
+                    $lembar->getColumnDimension($this->lajur($kolom))
+                        ->setAutoSize(false)->setWidth($lebar);
+                }
 
                 // Dibekukan di bawah kepala kolom supaya ia tetap terlihat saat
                 // digulung — 187 baris tidak bisa dibaca tanpa itu.
