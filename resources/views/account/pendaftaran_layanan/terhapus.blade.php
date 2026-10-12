@@ -139,7 +139,12 @@ Catatan Penghapusan | MIS Rumah Scopus
             grid-column: 2 / -1;
             display: flex;
             flex-wrap: wrap;
-            align-items: center;
+            /*
+             * flex-start, BUKAN center. Panel rinciannya tumbuh ke bawah saat
+             * dibuka, dan dengan center tombolnya ikut melorot ke tengah
+             * panel — jauh dari baris pembuka yang baru saja ditekan.
+             */
+            align-items: flex-start;
             justify-content: space-between;
             gap: 9px;
             margin-top: 9px;
@@ -204,10 +209,103 @@ Catatan Penghapusan | MIS Rumah Scopus
             gap: 7px;
         }
 
-        .thp-potret pre {
+        .thp-potret-isi {
+            margin-top: 9px;
+            padding: 13px 15px;
+            border: 1px solid var(--mis-garis);
+            border-radius: var(--mis-radius-kecil);
+            background: #f8fafc;
+        }
+
+        /*
+         * Pasangan label-nilai berkisi, bukan daftar menurun.
+         *
+         * Sepuluh keterangan yang ditumpuk satu per baris membuat panelnya
+         * sepanjang dua layar; berkisi, semuanya terbaca sekali pandang.
+         * auto-fill, BUKAN auto-fit: dengan auto-fit satu pasangan terakhir
+         * melar memenuhi seluruh baris dan terbaca seperti judul.
+         */
+        .thp-pokok {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+            gap: 10px 16px;
+            margin: 0;
+        }
+
+        .thp-pokok dt {
+            margin: 0;
+            font-size: .67rem;
+            font-weight: 700;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: var(--mis-tinta-4);
+        }
+
+        .thp-pokok dd {
+            margin: 1px 0 0;
+            font-size: .82rem;
+            color: var(--mis-tinta);
+            /* Email dan afiliasi panjang memecah kisinya kalau tidak
+               diizinkan membungkus di tengah kata. */
+            overflow-wrap: anywhere;
+        }
+
+        .thp-potret-bagian {
+            margin-top: 13px;
+            padding-top: 11px;
+            border-top: 1px dashed var(--mis-garis);
+        }
+
+        .thp-potret-judul {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin: 0 0 7px;
+            font-size: .72rem;
+            font-weight: 800;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            color: var(--mis-tinta-3);
+        }
+
+        .thp-potret-daftar {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: grid;
+            gap: 6px;
+        }
+
+        .thp-potret-daftar li {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 4px 10px;
+            font-size: .8rem;
+            color: var(--mis-tinta-2);
+        }
+
+        .thp-potret-daftar strong { color: var(--mis-tinta); }
+        .thp-potret-daftar span { font-size: .74rem; color: var(--mis-tinta-4); }
+
+        /* Data mentahnya satu lapis lebih dalam: yang membutuhkannya
+           pengembang, bukan panitia. */
+        .thp-mentah { margin-top: 13px; }
+
+        .thp-mentah > summary {
+            cursor: pointer;
+            font-size: .72rem;
+            color: var(--mis-tinta-4);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            min-height: 32px;
+        }
+
+        .thp-mentah pre {
             max-height: 320px;
             overflow: auto;
-            margin: 0;
+            margin: 6px 0 0;
             padding: 11px 13px;
             border-radius: 11px;
             background: #0f172a;
@@ -588,15 +686,107 @@ Catatan Penghapusan | MIS Rumah Scopus
                              kiri. Yang terbaca bukan satu catatan melainkan tiga
                              potongan yang kebetulan berdekatan. --}}
                         <div class="thp-kaki">
+                            {{-- Potretnya DIBACAKAN, bukan dicetak mentah.
+
+                                 Dulu isinya JSON apa adanya di kotak hitam: 22
+                                 kolom berisi token, UUID, dan created_at — format
+                                 untuk pengembang, sementara yang membukanya panitia
+                                 yang sedang menelusuri ke mana perginya satu
+                                 pendaftaran. Datanya sendiri tidak diubah sedikit
+                                 pun; PulihkanPendaftaran tetap membaca potret yang
+                                 sama. --}}
                             <details class="thp-potret">
                                 <summary>
-                                    <i class="fas fa-code" aria-hidden="true"></i>
-                                    Lihat potret lengkapnya
+                                    <i class="fas fa-file-alt" aria-hidden="true"></i>
+                                    Lihat rincian yang tersimpan
                                 </summary>
-                                {{-- JSON_PRETTY_PRINT + UNESCAPED_UNICODE: tanpa yang
-                                     kedua, nama berhuruf non-ASCII tersimpan sebagai
-                                     \uXXXX dan potretnya tidak terbaca orang. --}}
-                                <pre>{{ json_encode($satu->potret, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) }}</pre>
+
+                                @php
+                                    $pokok = \App\Support\PotretPendaftaran::pokok($satu);
+                                    $pesertaPotret = \App\Support\PotretPendaftaran::peserta($satu);
+                                    $terminPotret = \App\Support\PotretPendaftaran::pembayaran($satu);
+                                    $jejakPotret = \App\Support\PotretPendaftaran::jejak($satu);
+                                @endphp
+
+                                <div class="thp-potret-isi">
+                                    <dl class="thp-pokok">
+                                        @foreach ($pokok as $label => $nilai)
+                                            <div>
+                                                <dt>{{ $label }}</dt>
+                                                <dd>{{ $nilai }}</dd>
+                                            </div>
+                                        @endforeach
+                                    </dl>
+
+                                    @if ($pesertaPotret !== [])
+                                        <div class="thp-potret-bagian">
+                                            <p class="thp-potret-judul">
+                                                <i class="fas fa-users" aria-hidden="true"></i>
+                                                Peserta rombongan
+                                            </p>
+                                            <ul class="thp-potret-daftar">
+                                                @foreach ($pesertaPotret as $orangPotret)
+                                                    <li>
+                                                        <strong>{{ $orangPotret['nama'] }}</strong>
+                                                        @if ($orangPotret['kontak'] !== '')
+                                                            <span>{{ $orangPotret['kontak'] }}</span>
+                                                        @endif
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                    @endif
+
+                                    @if ($terminPotret !== [])
+                                        <div class="thp-potret-bagian">
+                                            <p class="thp-potret-judul">
+                                                <i class="fas fa-receipt" aria-hidden="true"></i>
+                                                Pembayaran yang ikut terhapus
+                                            </p>
+                                            <ul class="thp-potret-daftar">
+                                                @foreach ($terminPotret as $terminSatu)
+                                                    <li>
+                                                        <strong>{{ $terminSatu['nominal'] }}</strong>
+                                                        <span>{{ $terminSatu['label'] }}</span>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                    @endif
+
+                                    @if ($jejakPotret !== [])
+                                        <div class="thp-potret-bagian">
+                                            <p class="thp-potret-judul">
+                                                <i class="fas fa-history" aria-hidden="true"></i>
+                                                Riwayat perubahannya
+                                            </p>
+                                            <ul class="thp-potret-daftar">
+                                                @foreach ($jejakPotret as $jejakSatu)
+                                                    <li>
+                                                        <strong>{{ $jejakSatu['kalimat'] }}</strong>
+                                                        <span>{{ $jejakSatu['waktu'] }}</span>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                    @endif
+
+                                    {{-- Data mentahnya TETAP ADA, satu lapis lebih
+                                         dalam. Yang membutuhkannya pengembang saat
+                                         pemulihan bermasalah, dan membuangnya berarti
+                                         menutup satu-satunya jendela ke isi potret
+                                         yang sebenarnya. --}}
+                                    <details class="thp-mentah">
+                                        <summary>
+                                            <i class="fas fa-code" aria-hidden="true"></i>
+                                            Data mentahnya
+                                        </summary>
+                                        {{-- JSON_PRETTY_PRINT + UNESCAPED_UNICODE: tanpa yang
+                                             kedua, nama berhuruf non-ASCII tersimpan sebagai
+                                             \uXXXX dan potretnya tidak terbaca orang. --}}
+                                        <pre>{{ json_encode($satu->potret, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) }}</pre>
+                                    </details>
+                                </div>
                             </details>
 
                             <div class="thp-aksi">
