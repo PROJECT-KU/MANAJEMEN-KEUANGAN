@@ -84,6 +84,91 @@ class LayarPonselPendaftarTest extends TestCase
     }
 
     /**
+     * Ringkasan yang DIBUKA tidak menuntut geser menyamping lagi.
+     *
+     * Barisan geser masuk akal untuk ringkasan yang selalu terpampang — ia
+     * menahan tinggi layar. Di dalam lipatan aturannya terbalik: orang baru
+     * saja menekan "Ringkasan" untuk melihat angkanya, lalu yang terbuka
+     * cuma satu ubin penuh dengan empat lainnya di luar layar. Terukur di
+     * 390px sebelum ini dipasang: lebar tampak 362px, lebar isi 1145px —
+     * empat dari lima ubin terpotong.
+     */
+    #[Test]
+    public function ringkasan_terbuka_tidak_perlu_digeser_di_ponsel(): void
+    {
+        $isi = $this->gaya();
+
+        $this->assertMatchesRegularExpression(
+            '/\.pdl-lipat \.mis-ringkas\s*\{[^}]*display:\s*grid/s', $isi,
+            'Ubin di dalam lipatan kembali jadi barisan geser; empat dari lima '
+            . 'angkanya di luar layar padahal panelnya sengaja dibuka.'
+        );
+
+        /*
+         * Penjaga bobotnya, bukan cuma ada-tidaknya aturannya.
+         *
+         * Penanda .bisa-geser dipasang mis-ui.js, dan aturan yang
+         * memunculkan petunjuknya berbobot (0,3,0). Ditulis lebih rendah,
+         * baris "Geser untuk lihat semua" tetap terpampang di bawah kisi
+         * yang tidak bisa digeser ke mana pun — dan tidak ada galat apa pun
+         * yang menandainya.
+         */
+        $this->assertMatchesRegularExpression(
+            '/\.pdl-lipat \.mis-ringkas-geser\.bisa-geser \.mis-ringkas-petunjuk\s*\{[^}]*display:\s*none/s',
+            $isi,
+            'Petunjuk geser dipadamkan dengan bobot yang lebih rendah daripada '
+            . 'aturan yang memunculkannya, jadi ia tetap terbaca.'
+        );
+    }
+
+    /**
+     * Kartu Ringkasan dan kartu Cari & saring tidak bersentuhan.
+     *
+     * Terukur di 390px: 0px saat tertutup — kedua bilahnya benar-benar
+     * menempel dan terbaca seperti satu kotak yang terbelah — dan 12px saat
+     * terbuka, yang itu pun datang dari margin baris angkanya, bukan dari
+     * kartunya sendiri.
+     */
+    #[Test]
+    public function kartu_ringkasan_punya_jarak_ke_kartu_berikutnya(): void
+    {
+        /*
+         * Diambil dari blok ponselnya saja. Di lebar lain kedua kartu ini
+         * tidak berdempetan sama sekali, dan aturan yang dicari memang
+         * hanya berlaku di sana.
+         */
+        $this->assertSame(1, preg_match('/@media \(max-width: 575\.98px\) \{(.*)/s',
+            $this->gaya(), $blok), 'Blok gaya ponsel halaman ini tidak ada.');
+
+        $this->assertSame(1,
+            preg_match('/\.pdl-lipat\s*\{[^}]*margin-bottom:\s*(\d+)px/s', $blok[1], $cocok),
+            'Kartu Ringkasan tidak punya jarak ke kartu di bawahnya; keduanya '
+            . 'bersentuhan di ponsel — terukur 0px saat tertutup.');
+
+        $this->assertGreaterThanOrEqual(10, (int) $cocok[1],
+            'Jaraknya terlalu rapat untuk membedakan kedua kartu.');
+    }
+
+    /**
+     * Kotak angka yang ganjil terakhir MEMBENTANG dua lajur.
+     *
+     * Jumlahnya dua sampai empat tergantung isi pembukuannya. Ganjil, yang
+     * terakhir berdiri sendiri di lajur kiri dan separuh barisnya menganga —
+     * terukur: kotak "menunggu lebih dari 7 hari" selebar 177px dengan 177px
+     * kosong di sebelahnya.
+     */
+    #[Test]
+    public function kotak_angka_ganjil_terakhir_membentang_penuh(): void
+    {
+        $this->assertMatchesRegularExpression(
+            '/\.pdl-uang-total > \*:last-child:nth-child\(odd\)\s*\{[^}]*grid-column:\s*1 \/ -1/s',
+            $this->gaya(),
+            'Kotak angka terakhir kembali menyisakan petak kosong di sebelahnya '
+            . 'saat jumlahnya ganjil.'
+        );
+    }
+
+    /**
      * Keempat tombol sekunder MENYEBUT dirinya di ponsel.
      *
      * Nama panjangnya memang disembunyikan supaya keempatnya muat sebaris,
