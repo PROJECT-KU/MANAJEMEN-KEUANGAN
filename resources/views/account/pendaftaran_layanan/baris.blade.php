@@ -161,23 +161,7 @@
                  panitia yang menagih tidak perlu mengetik ulang nominal dan
                  kode unik yang sudah tergambar di baris ini — dan kode unik
                  itulah yang paling sering salah ketik. --}}
-            <div class="pdl-kontak">
-                @if ($wa)
-                    <a href="{{ $tautanWa }}" target="_blank" rel="noopener"
-                        title="Hubungi {{ $b->nama_orang }} lewat WhatsApp — pesannya sudah terisi, masih bisa disunting">
-                        <i class="fab fa-whatsapp mis-ikon-hijau" aria-hidden="true"></i> {{ $b->telp }}
-                    </a>
-                @elseif ($b->telp)
-                    {{-- Ditandai, bukan dijadikan tautan yang menuntun ke
-                         halaman galat WhatsApp. Nomor yang kurang dari sembilan
-                         angka bukan nomor telepon melainkan sisa isian. --}}
-                    <span title="Nomor ini tidak bisa dipakai menghubungi lewat WhatsApp.">
-                        <i class="fas fa-phone-slash mis-ikon-kuning" aria-hidden="true"></i> {{ $b->telp }}
-                    </span>
-                @else
-                    <span class="pdl-kontak-kosong">nomor belum diisi</span>
-                @endif
-            </div>
+            @include('account.pendaftaran_layanan.partials.kontak', ['tempat' => 'tabel'])
         </div>
     </td>
 
@@ -357,6 +341,19 @@
                 <span class="pdl-status-asli" title="Status asli yang tersimpan di basis data, belum punya keadaan di katalog">{{ $b->status }}</span>
             @endif
         </span>
+
+        {{-- Salinan nomor untuk MODUS KARTU, dan hanya tampil di sana.
+
+             Di kartu, nomor di bawah nama menambah baris ketiga pada blok
+             nama sementara kaki kartunya menyisakan separuh baris kosong di
+             kanan lencana keadaan. Dipindah ke sini ia mengisi ruang yang
+             memang menganggur, dan berdiri tepat di atas tombol Follow up
+             yang justru memakainya.
+
+             Yang di kolom Pendaftar di-display:none pada lebar ini dan yang
+             ini di-display:none pada lebar tabel, jadi hanya satu yang
+             pernah ada di pohon aksesibilitas. --}}
+        @include('account.pendaftaran_layanan.partials.kontak', ['tempat' => 'kartu'])
     </td>
 
     <td data-judul="Daftar">

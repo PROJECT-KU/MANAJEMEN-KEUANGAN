@@ -110,6 +110,16 @@ Pendaftar Layanan | MIS Rumah Scopus
          * Yang menyusut kolom Sesi dan Pendaftar, dan keduanya memang sudah
          * dipotong dua baris lewat CSS.
          */
+        /*
+         * Salinan nomor untuk kartu tidak pernah tampil di lebar tabel.
+         *
+         * Di sana nomornya sudah ada di kolom Pendaftar; dibiarkan, kaki
+         * barisnya memuat nomor yang sama untuk kedua kalinya.
+         */
+        .pdl-kontak.pdl-kontak-kartu {
+            display: none;
+        }
+
         .pdl-aksi-baris {
             display: flex;
             gap: 6px;
@@ -1571,6 +1581,66 @@ Pendaftar Layanan | MIS Rumah Scopus
             .mis-tabel.mis-tabel-kartu.pdl-tabel tbody td:has(.mis-pil) {
                 padding-top: 9px;
                 border-top: 1px solid var(--mis-garis);
+            }
+
+            /*
+             * Nomor WA PINDAH ke kaki kartu, rapat ke kanan.
+             *
+             * Di kolom Pendaftar ia jadi baris ketiga di bawah nama dan
+             * nomor pendaftaran, sementara kaki kartunya menyisakan separuh
+             * baris menganggur di kanan lencana keadaan. Dipindah, kartunya
+             * kehilangan satu baris dan nomornya berdiri tepat di atas
+             * tombol Follow up yang memakainya.
+             */
+            .pdl-kontak.pdl-kontak-tabel {
+                display: none;
+            }
+
+            /*
+             * Keduanya ditulis dengan DUA kelas, bukan satu.
+             *
+             * `.pdl-kontak` sendiri menyetel display: flex, dan bobotnya
+             * (0,1,0) — sama persis dengan `.pdl-kontak-kartu`. Yang seri
+             * dimenangkan yang terbaca belakangan, dan `.pdl-kontak` ditulis
+             * lebih bawah: terukur di 1440px salinan kartunya ikut tampil
+             * dan menimpa kolom keadaan, nomor yang sama tergambar dua kali
+             * dalam satu baris tabel.
+             */
+            .pdl-kontak.pdl-kontak-kartu {
+                display: block;
+                /* Rapat ke kanan, dan TIDAK ikut melar: margin otomatis
+                   mendorongnya ke tepi sementara lencana keadaan tetap
+                   memegang kirinya. */
+                flex: 0 0 auto;
+                margin-left: auto;
+                padding-left: 10px;
+                /*
+                 * Sejajar dengan LENCANANYA, bukan di tengah tumpukannya.
+                 *
+                 * Blok keadaan dua baris — lencana lalu keping bukti — jadi
+                 * dipusatkan, nomornya berhenti tepat di celah antara
+                 * keduanya dan terbaca seperti tidak menempel pada apa pun.
+                 * Disejajarkan ke atas, ia sebaris dengan lencana keadaan,
+                 * yang memang pasangannya.
+                 */
+                align-self: flex-start;
+                /* 1px, bukan 4: terukur pada 4px titik tengah nomornya 3px
+                   di bawah titik tengah lencananya. */
+                padding-top: 1px;
+                text-align: right;
+            }
+
+            /* Lencana dan nomor sebaris; tidak boleh dibungkus turun. */
+            .mis-tabel.mis-tabel-kartu.pdl-tabel tbody td:has(.mis-pil) {
+                flex-wrap: nowrap;
+                align-items: flex-start;
+            }
+
+            /* Blok keadaan tidak boleh ikut melar sampai mendesak nomornya
+               keluar; ia cukup selebar isinya. */
+            .mis-tabel.mis-tabel-kartu.pdl-tabel tbody .pdl-keadaan-blok {
+                flex: 0 1 auto;
+                min-width: 0;
             }
 
             /*
