@@ -619,4 +619,84 @@ class LayarPonselPendaftarTest extends TestCase
         $this->assertStringContainsString('flex: 1 1 0', $cocok[2]);
     }
 
+    /**
+     * Nomor WA pindah ke kaki kartu di ponsel, dan HANYA di ponsel.
+     *
+     * Di kolom Pendaftar ia jadi baris ketiga di bawah nama dan nomor
+     * pendaftaran, sementara kaki kartunya menyisakan separuh baris
+     * menganggur di kanan lencana keadaan. Dipindah, sel Pendaftar menyusut
+     * dari 61px jadi 40px dan nomornya berdiri tepat di atas tombol Follow
+     * up yang memakainya.
+     */
+    #[Test]
+    public function nomor_wa_pindah_ke_kaki_kartu_di_ponsel(): void
+    {
+        $markah = $this->baris();
+
+        foreach (['tabel', 'kartu'] as $tempat) {
+            $this->assertStringContainsString("'tempat' => '" . $tempat . "'", $markah,
+                'Salinan nomor untuk ' . $tempat . ' tidak dipasang.');
+        }
+
+        /*
+         * Satu SUMBER, dua tempat — bukan dua salinan markah.
+         *
+         * Dua salinan yang menyimpang satu sama lain adalah persoalan yang
+         * baru ketahuan sesudah salah satunya lama salah.
+         */
+        $this->assertSame(2, substr_count($markah, 'partials.kontak'),
+            'Nomornya tidak dirakit dari satu partial yang sama untuk kedua '
+            . 'tempatnya.');
+
+        $this->assertStringNotContainsString('fab fa-whatsapp mis-ikon-hijau', $markah,
+            'Markah nomornya disalin langsung di baris, bukan di-include; dua '
+            . 'salinan akan menyimpang tanpa ada yang tahu.');
+    }
+
+    /**
+     * Keduanya dipilih dengan DUA kelas, supaya bobotnya menang.
+     *
+     * `.pdl-kontak` sendiri menyetel display: flex dan bobotnya (0,1,0) —
+     * sama persis dengan `.pdl-kontak-kartu`. Yang seri dimenangkan yang
+     * terbaca belakangan, dan `.pdl-kontak` ditulis lebih bawah: terukur di
+     * 1440px salinan kartunya ikut tampil dan menimpa kolom keadaan, jadi
+     * nomor yang sama tergambar dua kali dalam satu baris tabel. Tidak ada
+     * galat apa pun yang menandainya.
+     */
+    #[Test]
+    public function salinan_nomor_dipilih_dengan_bobot_yang_menang(): void
+    {
+        $isi = $this->gaya();
+
+        /*
+         * Diperiksa per ATURAN, bukan "ada di suatu tempat".
+         *
+         * Versi pertama penjaga ini cuma mencari bentuk dua-kelas di seluruh
+         * berkas, dan TETAP HIJAU saat aturan di dalam media ponsel
+         * diturunkan jadi satu kelas — sebab aturan bawaannya masih memakai
+         * bentuk dua-kelas. Persis cacat yang hendak dijaga, lolos.
+         */
+        preg_match_all('/([^{};\n]*\.pdl-kontak-(?:kartu|tabel))\s*\{([^}]*)\}/s',
+            $isi, $semua, PREG_SET_ORDER);
+
+        $this->assertGreaterThanOrEqual(3, count($semua),
+            'Ketiga aturan salinan nomor tidak lengkap: satu memadamkan '
+            . 'salinan kartu di lebar tabel, dua lagi menukar keduanya di '
+            . 'lebar ponsel.');
+
+        foreach ($semua as $aturan) {
+            $this->assertStringContainsString('.pdl-kontak.', $aturan[1],
+                'Aturan "' . trim($aturan[1]) . '" ditulis dengan satu kelas '
+                . 'saja; bobotnya cuma seri dengan .pdl-kontak dan hasilnya '
+                . 'bergantung pada urutan tulis.');
+        }
+
+        // Di lebar tabel salinan kartunya harus benar-benar padam.
+        $this->assertMatchesRegularExpression(
+            '/\.pdl-kontak\.pdl-kontak-kartu\s*\{\s*display:\s*none/s', $isi,
+            'Salinan kartunya tidak dipadamkan di lebar tabel; nomornya '
+            . 'tergambar dua kali dalam satu baris.'
+        );
+    }
+
 }
