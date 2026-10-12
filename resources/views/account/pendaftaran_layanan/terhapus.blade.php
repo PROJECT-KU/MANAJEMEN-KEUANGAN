@@ -100,26 +100,18 @@ Catatan Penghapusan | MIS Rumah Scopus
         }
 
         /*
-         * Tiap keterangan jadi KEPING berlatar.
+         * Kepingnya memakai .mis-lencana BERSAMA, bukan salinan berawalan
+         * layar ini.
          *
-         * Dulu cuma dipisah jarak, dan lima keterangan beruntun — layanan,
-         * status, siapa, kapan, berapa jejak — terbaca sebagai satu kalimat
-         * panjang yang tidak berarti apa-apa. Latar tipis memberi tiap
-         * keterangan batasnya sendiri tanpa menambah garis.
+         * Versi pertama membuat kepingnya sendiri — latar abu seragam untuk
+         * kelimanya — dan warnanya karena itu tidak mengatakan apa-apa.
+         * Kelas bersamanya sudah punya warna per keadaan yang sama persis
+         * dengan lencana di layar daftar, jadi satu status berwarna sama di
+         * kedua layar.
          */
-        .thp-ket > span {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 3px 9px;
-            border-radius: 999px;
-            background: #f1f5f9;
-            white-space: nowrap;
-        }
-
         .thp-ket > span > i {
             font-size: 11px;
-            color: var(--mis-tinta-4);
+            opacity: .85;
         }
 
         .thp-uang {
@@ -193,17 +185,6 @@ Catatan Penghapusan | MIS Rumah Scopus
             height: 34px;
             padding: 0 13px;
             font-size: .76rem;
-        }
-
-        /* Hijau muda, bukan sekadar abu: barisnya sudah TIDAK hilang lagi,
-           dan itu kabar baik yang harus terbaca sekilas di antara baris
-           merah di sekitarnya. */
-        .thp-pulih {
-            padding: 1px 8px;
-            border-radius: 999px;
-            background: #ecfdf5;
-            color: #047857;
-            font-weight: 700;
         }
 
         .thp-potret {
@@ -517,21 +498,52 @@ Catatan Penghapusan | MIS Rumah Scopus
                         <div style="min-width: 0;">
                             <span class="thp-nomor">{{ strtoupper($satu->nomor ?: '—') }}</span>
                             <p class="thp-nama">{{ $satu->nama ?: 'Tanpa nama' }}</p>
+                            @php
+                                /*
+                                 * Warna tiap keping diambil dari KOSAKATA YANG
+                                 * SUDAH ADA, bukan dikarang per keping.
+                                 *
+                                 * Layanan memakai warnanya sendiri di katalog
+                                 * — Scopus Camp hijau, Bibliometrik ungu —
+                                 * sehingga layanan yang sama berwarna sama di
+                                 * layar mana pun. Statusnya memakai warna
+                                 * keadaan yang dipakai lencana di layar daftar.
+                                 * Dikarang sendiri di sini, satu layanan akan
+                                 * punya dua warna di dua layar dan warnanya
+                                 * berhenti berarti apa-apa.
+                                 */
+                                $warnaLayanan = str_replace(
+                                    'mis-', '',
+                                    \App\Support\PendaftaranSemuaLayanan::katalog()[$satu->layanan]['warna'] ?? 'abu'
+                                );
+
+                                $keadaanBaris = \App\Support\PendaftaranSemuaLayanan::keadaanDari($satu->status);
+                                $warnaKeadaan = \App\Support\PendaftaranSemuaLayanan::KEADAAN[$keadaanBaris]['warna'] ?? 'abu';
+                            @endphp
+
                             <div class="thp-ket">
-                                <span><i class="fas fa-tag" aria-hidden="true"></i> {{ $satu->layanan_nama }}</span>
+                                <span class="mis-lencana mis-lencana-{{ $warnaLayanan }}">
+                                    <i class="fas fa-tag" aria-hidden="true"></i> {{ $satu->layanan_nama }}
+                                </span>
                                 @if ($satu->status)
-                                    <span><i class="fas fa-circle-notch" aria-hidden="true"></i> {{ $satu->status }}</span>
+                                    <span class="mis-lencana mis-lencana-{{ $warnaKeadaan }}">
+                                        <i class="fas fa-circle-notch" aria-hidden="true"></i> {{ $satu->status }}
+                                    </span>
                                 @endif
-                                <span>
+                                {{-- Siapa dan kapan tetap ABU. Keduanya keterangan,
+                                     bukan keadaan — diberi warna sendiri, kepingnya
+                                     ikut berebut mata dengan dua keping di
+                                     sebelahnya yang warnanya memang berarti. --}}
+                                <span class="mis-lencana mis-lencana-abu">
                                     <i class="fas fa-user-shield" aria-hidden="true"></i>
                                     {{ $satu->oleh_nama ?: 'tidak tercatat' }}
                                 </span>
-                                <span>
+                                <span class="mis-lencana mis-lencana-abu">
                                     <i class="fas fa-clock" aria-hidden="true"></i>
                                     {{ optional($satu->created_at)->translatedFormat('d M Y, H:i') }}
                                 </span>
                                 @if ($satu->jumlah_jejak > 0)
-                                    <span>
+                                    <span class="mis-lencana mis-lencana-ungu">
                                         <i class="fas fa-history" aria-hidden="true"></i>
                                         {{ $satu->jumlah_jejak }} jejak
                                     </span>
@@ -543,7 +555,7 @@ Catatan Penghapusan | MIS Rumah Scopus
                                      dipulihkan membuat pertanyaan itu tidak
                                      terjawab untuk kedua kalinya. --}}
                                 @if ($satu->dipulihkan_at)
-                                    <span class="thp-pulih">
+                                    <span class="mis-lencana mis-lencana-hijau">
                                         <i class="fas fa-undo" aria-hidden="true"></i>
                                         dikembalikan
                                         {{ $satu->dipulihkan_at->translatedFormat('d M Y, H:i') }}

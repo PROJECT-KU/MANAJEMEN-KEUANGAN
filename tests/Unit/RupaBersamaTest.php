@@ -405,7 +405,7 @@ class RupaBersamaTest extends TestCase
         preg_match("/mis-ui\.css'\) \}\}\?v=(\d+)/", $layout, $cocok);
 
         $this->assertNotEmpty($cocok, 'penanda ?v= pada mis-ui.css tidak ketemu');
-        $this->assertGreaterThanOrEqual(91, (int) $cocok[1],
+        $this->assertGreaterThanOrEqual(92, (int) $cocok[1],
             'mis-ui.css berubah tetapi penanda ?v=-nya belum dinaikkan');
 
         preg_match("/mis-ui\.js'\) \}\}\?v=(\d+)/", $layout, $cocokJs);
