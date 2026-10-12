@@ -1138,6 +1138,66 @@ Pendaftar Layanan | MIS Rumah Scopus
 
         /*
          * ------------------------------------------------------------------
+         * Pratinjau bukti bayar
+         * ------------------------------------------------------------------
+         */
+        .pdl-bukti-popup .swal2-title {
+            padding: 16px 20px 2px;
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--mis-tinta-1);
+        }
+
+        .pdl-bukti-popup .swal2-actions {
+            gap: 8px;
+            margin-top: 6px;
+        }
+
+        .pdl-bukti-nomor {
+            margin: 0 0 8px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: .74rem;
+            color: var(--mis-tinta-4);
+            text-align: center;
+        }
+
+        .pdl-bukti-pratinjau {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 120px;
+            padding: 4px;
+            border-radius: 14px;
+            background: #0f172a;
+        }
+
+        /*
+         * Gambarnya DIBATASI tingginya, bukan cuma lebarnya.
+         *
+         * Tangkapan layar transfer dari ponsel bentuknya tegak dan tinggi —
+         * terukur 1080x1350. Dibatasi lebarnya saja, dialognya jadi 1509px
+         * di layar setinggi 860px dan tombol Tutup terdorong jauh keluar;
+         * orang harus menggulung dialog hanya untuk menutupnya.
+         */
+        .pdl-bukti-pratinjau img {
+            max-width: 100%;
+            max-height: 58vh;
+            border-radius: 10px;
+            object-fit: contain;
+        }
+
+        .pdl-bukti-gagal {
+            margin: 0;
+            padding: 24px 16px;
+            font-size: .84rem;
+            line-height: 1.5;
+            color: #fda4af;
+            text-align: center;
+        }
+
+
+        /*
+         * ------------------------------------------------------------------
          * Pemilih angkatan di dalam SweetAlert
          * ------------------------------------------------------------------
          *
@@ -2937,6 +2997,128 @@ Pendaftar Layanan | MIS Rumah Scopus
         });
 
         sempitkan(false);
+    })();
+
+    /*
+     * Pratinjau bukti bayar di tempat.
+     *
+     * Sebelumnya tiap "lihat bukti" membuka tab baru. Untuk memeriksa
+     * selembar tangkapan layar transfer itu terlalu mahal: panitia
+     * kehilangan tempatnya di daftar, dan sesudah memeriksa harus menutup
+     * tab lalu mencari kembali baris yang tadi dilihatnya — pada daftar
+     * 350 baris yang baru saja disaring.
+     *
+     * Didelegasikan dari #pdl-hasil, BUKAN dipasang pada tiap tautannya.
+     * Isi bagian itu ditukar seluruhnya oleh penyaring hidup setiap kali
+     * saringannya berubah; pemasangan langsung hilang begitu isinya diganti
+     * pertama kali, dan yang tersisa tautan yang kembali membuka tab baru
+     * tanpa ada yang keliru kelihatan.
+     */
+    (function () {
+        var hasil = document.getElementById('pdl-hasil');
+
+        if (!hasil || typeof window.Swal === 'undefined') {
+            return;
+        }
+
+        hasil.addEventListener('click', function (acara) {
+            var tautan = acara.target.closest('a[data-pdl-bukti]');
+
+            if (!tautan) {
+                return;
+            }
+
+            /*
+             * Klik tengah, Ctrl, Cmd, dan Shift DIBIARKAN lewat.
+             *
+             * Ketiganya cara orang membuka sesuatu di tab atau jendela
+             * sendiri, dan mencegatnya berarti merampas kebiasaan yang
+             * tidak kita sediakan penggantinya.
+             */
+            if (acara.metaKey || acara.ctrlKey || acara.shiftKey || acara.button !== 0) {
+                return;
+            }
+
+            acara.preventDefault();
+
+            var alamat = tautan.getAttribute('href');
+            var nama = tautan.dataset.pdlNama || 'Bukti bayar';
+            var nomor = tautan.dataset.pdlNomor || '';
+
+            /*
+             * Gambarnya dipasang lewat DOM, bukan dirangkai jadi untaian
+             * HTML: nama pendaftar ikut tercetak di sini dan isinya datang
+             * dari isian orang luar.
+             */
+            var bungkus = document.createElement('div');
+
+            /*
+             * Nomornya ditulis DI SINI, bukan lewat opsi `text`.
+             *
+             * SweetAlert mengabaikan `text` begitu `html` dipakai — terukur:
+             * nomornya tidak pernah tergambar sama sekali, dan tidak ada
+             * galat apa pun yang menandainya. Ia perlu ada: satu orang bisa
+             * punya lebih dari satu pendaftaran, dan yang membedakan
+             * keduanya cuma nomor ini.
+             */
+            if (nomor !== '') {
+                var ket = document.createElement('p');
+                ket.className = 'pdl-bukti-nomor';
+                ket.textContent = nomor;
+                bungkus.appendChild(ket);
+            }
+
+            var kotak = document.createElement('div');
+            kotak.className = 'pdl-bukti-pratinjau';
+
+            var gambar = document.createElement('img');
+            gambar.src = alamat;
+            gambar.alt = 'Bukti bayar ' + nama;
+
+            var gagal = document.createElement('p');
+            gagal.className = 'pdl-bukti-gagal';
+            gagal.textContent = 'Berkasnya tidak bisa dimuat. Mungkin sudah '
+                + 'terhapus dari penyimpanan.';
+            gagal.hidden = true;
+
+            /*
+             * Kalau berkasnya hilang, yang tergambar ikon rusak bawaan
+             * peramban — dan itu tidak menyebutkan apa pun tentang apa yang
+             * terjadi. Terukur ada 72 dari 183 nilai bukti yang menunjuk
+             * berkas yang sudah tidak ada di cakram.
+             */
+            gambar.addEventListener('error', function () {
+                gambar.hidden = true;
+                gagal.hidden = false;
+            });
+
+            kotak.appendChild(gambar);
+            kotak.appendChild(gagal);
+            bungkus.appendChild(kotak);
+
+            window.Swal.fire({
+                title: nama,
+                html: bungkus,
+                width: 640,
+                showCloseButton: true,
+                showConfirmButton: true,
+                confirmButtonText: 'Buka berkasnya',
+                showCancelButton: true,
+                cancelButtonText: 'Tutup',
+                customClass: {
+                    popup: 'pdl-bukti-popup',
+                    confirmButton: 'mis-tombol mis-tombol-ungu',
+                    cancelButton: 'mis-tombol mis-tombol-halus',
+                },
+                buttonsStyling: false,
+            }).then(function (hasilnya) {
+                // Jalan lama tetap disediakan: ada yang mau memperbesar,
+                // memutar, atau mengunduhnya.
+                if (hasilnya.isConfirmed) {
+                    window.open(alamat, '_blank', 'noopener');
+                }
+            });
+        });
     })();
 </script>
 @endpush

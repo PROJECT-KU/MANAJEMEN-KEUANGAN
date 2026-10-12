@@ -291,4 +291,114 @@ class SaringHidupSelect2Test extends TestCase
             . 'ditambahkan.');
     }
 
+    /** Markah satu baris pendaftaran. */
+    private function barisPendaftaran(): string
+    {
+        return (string) file_get_contents(
+            dirname(__DIR__, 2)
+            . '/resources/views/account/pendaftaran_layanan/baris.blade.php'
+        );
+    }
+
+    /**
+     * "lihat bukti" membuka pratinjau di tempat, bukan tab baru.
+     *
+     * Untuk memeriksa selembar tangkapan layar transfer, tab baru terlalu
+     * mahal: panitia kehilangan tempatnya di daftar, dan sesudah memeriksa
+     * harus menutup tab lalu mencari kembali baris yang tadi dilihatnya —
+     * pada daftar 350 baris yang baru saja disaring.
+     *
+     * Tautannya TETAP <a> ber-href: tanpa JavaScript, atau saat diklik
+     * tengah, ia bekerja seperti semula.
+     */
+    public function test_lihat_bukti_membuka_pratinjau_di_tempat(): void
+    {
+        $markah = $this->barisPendaftaran();
+
+        $this->assertMatchesRegularExpression(
+            '/<a class="pdl-bukti pdl-bukti-ada" href="[^"]*"[\s\S]{0,200}?data-pdl-bukti/',
+            $markah,
+            'Tautan bukti tidak lagi ditandai untuk dicegat, jadi ia kembali '
+            . 'membuka tab baru.'
+        );
+
+        $this->assertStringContainsString('target="_blank"', $markah,
+            'Tautannya kehilangan jalan cadangannya; tanpa JavaScript bukti '
+            . 'bayar tidak bisa dibuka sama sekali.');
+
+        $isi = $this->layar();
+
+        /*
+         * Didelegasikan dari #pdl-hasil, BUKAN dipasang pada tiap tautannya.
+         *
+         * Isi bagian itu ditukar seluruhnya oleh penyaring hidup setiap kali
+         * saringannya berubah. Pemasangan langsung hilang begitu isinya
+         * diganti pertama kali, dan yang tersisa tautan yang kembali membuka
+         * tab baru — tanpa ada yang keliru kelihatan. Diperiksa di peramban:
+         * sesudah saringannya diubah dua kali, kliknya tetap sampai ke
+         * pratinjaunya.
+         */
+        $this->assertSame(1, preg_match(
+            "/getElementById\('pdl-hasil'\)([\s\S]*?)\}\)\(\);/", $isi, $cocok
+        ), 'Pencegat kliknya tidak didelegasikan dari #pdl-hasil.');
+
+        $this->assertStringContainsString("closest('a[data-pdl-bukti]')", $cocok[1],
+            'Pencegatnya tidak mencari tautan bukti lewat closest(), jadi klik '
+            . 'pada ikon di dalamnya tidak tertangkap.');
+
+        // Klik tengah, Ctrl, Cmd, dan Shift dibiarkan lewat: ketiganya cara
+        // orang membuka sesuatu di tab sendiri.
+        foreach (['metaKey', 'ctrlKey', 'shiftKey'] as $tombol) {
+            $this->assertStringContainsString($tombol, $cocok[1],
+                'Pencegatnya merampas ' . $tombol . ', padahal itu cara orang '
+                . 'membuka sesuatu di tab sendiri.');
+        }
+    }
+
+    /**
+     * Pratinjaunya dirakit lewat DOM, dan tahu kalau berkasnya hilang.
+     *
+     * Nama pendaftar ikut tercetak di dialog ini dan isinya datang dari
+     * isian orang luar, jadi ia tidak boleh dirangkai jadi untaian HTML.
+     *
+     * Dan berkasnya memang bisa tidak ada: terukur 72 dari 183 nilai bukti
+     * menunjuk berkas yang sudah tidak ada di cakram. Tanpa penangan galat,
+     * yang tergambar ikon rusak bawaan peramban — yang tidak menyebutkan
+     * apa pun tentang apa yang terjadi.
+     */
+    public function test_pratinjau_bukti_dirakit_aman_dan_punya_jalan_gagal(): void
+    {
+        $isi = $this->layar();
+
+        $this->assertSame(1, preg_match(
+            "/closest\('a\[data-pdl-bukti\]'\)([\s\S]*?)\}\)\(\);/", $isi, $cocok
+        ), 'Blok pratinjau bukti tidak ditemukan.');
+
+        $blok = $cocok[1];
+
+        $this->assertStringNotContainsString('innerHTML', $blok,
+            'Pratinjaunya dirangkai dari untaian HTML; nama pendaftar yang '
+            . 'memuat markah akan ikut dieksekusi.');
+
+        $this->assertStringContainsString("addEventListener('error'", $blok,
+            'Tidak ada penangan saat berkasnya gagal dimuat; yang tergambar '
+            . 'ikon rusak bawaan peramban.');
+
+        /*
+         * Opsi `text` tidak boleh dipakai bersama `html`.
+         *
+         * SweetAlert mengabaikannya begitu `html` ada — terukur: nomor
+         * pendaftarannya tidak pernah tergambar sama sekali, tanpa satu
+         * galat pun. Satu orang bisa punya lebih dari satu pendaftaran, dan
+         * yang membedakan keduanya cuma nomor itu.
+         */
+        $this->assertStringNotContainsString('text: nomor', $blok,
+            "Nomornya diserahkan lewat opsi `text`, yang diabaikan SweetAlert "
+            . 'begitu `html` dipakai.');
+
+        $this->assertStringContainsString('pdl-bukti-nomor', $blok,
+            'Nomor pendaftarannya tidak ditulis di dialognya, jadi dua '
+            . 'pendaftaran milik orang yang sama tidak bisa dibedakan.');
+    }
+
 }
