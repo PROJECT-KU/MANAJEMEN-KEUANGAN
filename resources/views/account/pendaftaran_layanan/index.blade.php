@@ -1954,7 +1954,7 @@ Pendaftar Layanan | MIS Rumah Scopus
             --}}
             <span id="pdl-reset" class="pdl-reset">
                 @if ($adaSaringan)
-                    <a href="{{ route($rute) }}" class="mis-tombol mis-tombol-halus pdl-lain-tuas"
+                    <a href="{{ route($rute) }}" class="mis-tombol mis-tombol-bahaya-halus pdl-lain-tuas"
                         title="Hapus semua saringan">
                         <i class="fas fa-times" aria-hidden="true"></i> Reset
                     </a>

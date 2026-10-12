@@ -2448,6 +2448,37 @@ select.form-control-modern {
     color: #fff;
 }
 
+/*
+ * Tombol BERBAHAYA yang ringan, dan berteks.
+ *
+ * Sistem ini sudah punya dua merah dan keduanya tidak muat di sini:
+ * .mis-tombol-bahaya dipatok 34x34 untuk tombol berisi ikon saja — dipakai
+ * untuk tombol berteks, tulisannya menembus keluar kotaknya — sementara
+ * .mis-tombol-hapus berlatar merah penuh dan sengaja dibuat sebagai tombol
+ * terberat di layar, untuk yang menghapus data selamanya.
+ *
+ * Yang ini untuk tindakan yang MEMBUANG tanpa menghancurkan: membersihkan
+ * saringan, membatalkan pilihan. Merahnya terlihat tanpa perlu disentuh —
+ * merah yang baru muncul saat disentuh tidak memperingatkan siapa pun di
+ * ponsel, tempat tidak ada kursor yang bisa berhenti di atas tombol.
+ */
+.mis-tombol-bahaya-halus {
+    border: 1px solid #fecdd3;
+    background: #fff1f2;
+    color: #e11d48;
+}
+
+.mis-tombol-bahaya-halus:hover,
+.mis-tombol-bahaya-halus:focus-visible {
+    border-color: #e11d48;
+    background: #e11d48;
+    color: #fff;
+}
+
+/* Ikonnya ikut berganti warna; dibiarkan, ia tetap merah di atas latar merah
+   dan praktis hilang. */
+.mis-tombol-bahaya-halus i { color: inherit; }
+
 /* --------------------------------------------- dialog konfirmasi bersama */
 
 /*
