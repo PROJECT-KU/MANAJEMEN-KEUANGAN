@@ -3683,6 +3683,16 @@ a.mis-ubin.terpilih {
 }
 
 /*
+ * Nama pendek tombol: HANYA di lebar ponsel.
+ *
+ * Di lebar lain nama panjangnya yang terpasang ("Unduh Excel"), dan
+ * keduanya tampil bersamaan berarti tombolnya berbunyi "Unduh Excel Excel".
+ */
+.mis-tombol-ringkas {
+    display: none;
+}
+
+/*
  * ---------------------------------------------------------------------------
  * Dua tombol sekunder berbagi satu baris di ponsel
  * ---------------------------------------------------------------------------
@@ -3714,17 +3724,34 @@ a.mis-ubin.terpilih {
  * di 773px dari 844px layar. Praktis tidak ada satu pendaftar pun yang
  * terlihat sebelum menggulir.
  *
- * Tulisannya disembunyikan untuk MATA saja; aria-label dan title tetap di
- * markahnya, jadi pembaca layar dan tooltip tetap menyebut tujuannya.
+ * Namanya DIPENDEKKAN, bukan dibuang.
+ *
+ * Sebelumnya tulisannya disembunyikan seluruhnya dan yang tersisa empat
+ * kotak berisi ikon saja. Itu cukup untuk yang sudah hafal letaknya, dan
+ * tidak cukup untuk siapa pun yang lain: admin layar ini bukan orang
+ * teknis, dan ikon berkas hijau, papan jepit, berkas merah, serta tong
+ * sampah tidak menyebut Excel, presensi, PDF, atau arsip kepada orang yang
+ * belum pernah menekannya. aria-label memang tetap terpasang, tetapi itu
+ * hanya terbaca pembaca layar — dan title tidak pernah muncul di ponsel,
+ * sebab di sana tidak ada kursor yang bisa berhenti di atas tombol.
+ *
+ * Ikonnya naik ke atas dan nama pendeknya duduk di bawahnya, jadi keempatnya
+ * tetap sebaris. Ongkosnya tinggi kepala halaman: 42px jadi 54px — 12px
+ * untuk empat tombol yang menyebut dirinya sendiri.
  */
 @media (max-width: 575.98px) {
     .mis-kepala-aksi-trio .mis-tombol-halus {
         flex: 1 1 0;
         width: auto;
         min-width: 0;
-        padding: 0 10px;
+        flex-direction: column;
+        gap: 3px;
+        height: auto;
+        min-height: 54px;
+        padding: 8px 4px;
     }
 
+    /* Nama panjangnya yang disembunyikan, digantikan yang pendek. */
     .mis-kepala-aksi-trio .mis-tombol-halus .mis-tombol-teks {
         position: absolute;
         width: 1px;
@@ -3732,6 +3759,18 @@ a.mis-ubin.terpilih {
         overflow: hidden;
         clip: rect(0 0 0 0);
         white-space: nowrap;
+    }
+
+    .mis-kepala-aksi-trio .mis-tombol-halus .mis-tombol-ringkas {
+        display: block;
+        font-size: .68rem;
+        font-weight: 600;
+        line-height: 1.1;
+        letter-spacing: -.01em;
+    }
+
+    .mis-kepala-aksi-trio .mis-tombol-halus > i {
+        font-size: 1.02rem;
     }
 }
 
