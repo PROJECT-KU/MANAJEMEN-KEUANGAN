@@ -450,7 +450,6 @@ class RupaBersamaTest extends TestCase
     private const BELUM_BERGAYA = [
         'bar-pilihan-bayar', 'bar-wadah',       // pendaftaran_layanan/baru
         'brg-harga-teks',                        // kategori_layanan/form
-        'pdl-lipat',                             // pendaftaran_layanan/index
         'prof-lengkap',                          // profil/index
         'tar-cetak', 'tar-jadwal-bagian', 'tar-jadwal-teks',
         'tar-nonaktif', 'tar-nonaktif-teks',     // clinik_scopus_biaya_persesi
