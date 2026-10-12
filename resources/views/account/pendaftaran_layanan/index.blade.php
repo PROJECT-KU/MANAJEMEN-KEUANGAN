@@ -1617,16 +1617,86 @@ Pendaftar Layanan | MIS Rumah Scopus
              * nomornya ke tepi BLOKNYA, bukan ke tepi kartu. Terukur:
              * nomornya berhenti di 262px sementara tepi isi kartunya 333px.
              */
-            .mis-tabel.mis-tabel-kartu.pdl-tabel tbody td.mis-td-utama .pdl-layanan {
-                width: 100%;
+            .mis-tabel.mis-tabel-kartu.pdl-tabel tbody td.mis-td-utama {
+                /*
+                 * Anak flex TIDAK pernah menyusut di bawah min-content-nya,
+                 * dan nomor Clinik Scopus ("BOOK-05072026111623-ZRWIJ") satu
+                 * kata panjang yang ber-nowrap. Terukur di 320px: SELNYA
+                 * sendiri 361px di dalam kartu selebar 290px — jadi
+                 * elipsis pada kepingnya tidak pernah terpakai, sebab tidak
+                 * ada satu pun yang memaksanya sempit.
+                 *
+                 * Alasan yang sama sudah lebih dulu dipasang di sel
+                 * Pendaftar, untuk alamat email yang juga satu kata panjang.
+                 */
+                min-width: 0;
             }
 
+            .mis-tabel.mis-tabel-kartu.pdl-tabel tbody td.mis-td-utama .pdl-layanan {
+                width: 100%;
+                min-width: 0;
+            }
+
+            /*
+             * Nomornya jadi KEPING PENANDA, bukan teks abu-abu.
+             *
+             * Di kepala kartu ia berdiri sendiri di seberang nama layanan,
+             * dan sebagai teks polos ia terbaca seperti keterangan yang
+             * kelupaan dirapikan. Sebagai keping ia jelas sebuah penanda —
+             * hal yang disebut saat menanyakan satu pendaftaran lewat
+             * WhatsApp.
+             *
+             * Warnanya MENGIKUTI layanannya, sewarna pita di tepi kartu:
+             * --warna-aksen sudah disetel per layanan di .pdl-baris. Jadi
+             * kepala kartu menyebut layanannya tiga kali dengan cara yang
+             * sama — medali, pita, dan keping ini — dan sekilas pandang
+             * sudah cukup untuk tahu kartu ini milik layanan yang mana.
+             */
             .pdl-nomor.pdl-nomor-kartu {
                 display: block;
                 flex: 0 1 auto;
+                /*
+                 * Tanpa ini kepingnya TIDAK pernah menyusut.
+                 *
+                 * Anak flex berbasis min-content, dan isinya ber-nowrap —
+                 * jadi min-content-nya seluruh nomor. Terukur di 320px pada
+                 * Clinik Scopus, yang nomornya "BOOK-05072026111623-ZRWIJ":
+                 * kepingnya 168px dan berakhir di 349px, sementara tepi isi
+                 * kartunya 263px. Elipsisnya pun tidak pernah terpakai sebab
+                 * tidak ada yang memaksanya sempit.
+                 */
+                min-width: 0;
+                /*
+                 * Dan dibatasi 45%: nama layanannya yang lebih penting.
+                 *
+                 * Dibiarkan menyusut sebebasnya, kepingnya tetap mengambil
+                 * seluruh ruang yang dimintanya sebelum nama layanan dapat
+                 * giliran. Terukur di 320px pada Clinik Scopus: namanya
+                 * terpatah dua baris lalu terpotong jadi "Clinik Scopu",
+                 * sementara kepingnya memanjang 111px. Nomor penuhnya tetap
+                 * ada di title dan di halaman rincian; nama layanan yang
+                 * terpotong tidak punya cadangan apa pun.
+                 */
+                max-width: 45%;
                 margin-bottom: 0;
                 margin-left: auto;
-                padding-left: 10px;
+                padding: 3px 10px;
+                border-radius: 999px;
+                /*
+                 * Dua latar, dan urutannya penting.
+                 *
+                 * Yang pertama latar netral yang pasti jalan di mana saja.
+                 * Yang kedua mencampur warna layanannya; peramban yang belum
+                 * mengenal color-mix() mengabaikan baris itu dan tetap
+                 * mendapat kepingnya, cuma abu-abu.
+                 */
+                background: #f1f5f9;
+                background: color-mix(in srgb, var(--warna-aksen, #64748b) 12%, #fff);
+                font-size: .7rem;
+                font-weight: 600;
+                letter-spacing: .02em;
+                color: #475569;
+                color: color-mix(in srgb, var(--warna-aksen, #475569) 75%, #0f172a);
                 text-align: right;
                 /* Tidak boleh terpatah di tanda hubungnya; dipotong elipsis
                    kalau memang tidak muat, dan nilai penuhnya tetap di
