@@ -1018,16 +1018,49 @@
 (function () {
     'use strict';
 
+    /*
+     * Label dipecah jadi NAMA dan kepingan keterangannya.
+     *
+     * Kedua layar merangkai labelnya dengan pemisah yang sama: titik tengah
+     * untuk keterangan tambahan, tanda pisah untuk sisa kuota — misalnya
+     * "Angkatan Penuh wHDHUL · 12 Nov 2026 — sisa 0/2". Sebagai satu untaian
+     * ia terpatah dua baris dan ketiga bagiannya terbaca sederajat, padahal
+     * yang dicari orang namanya; tanggal dan kuotanya cuma pembeda.
+     *
+     * Ini pemecahan UNTUK RUPA saja: tanpa pemisah, seluruh labelnya jadi
+     * nama dan tidak ada yang hilang. Nilai yang dipakai tetap opsi.value.
+     */
+    function pecahLabel(teks) {
+        var bagian = teks.split(/\s+[\u00b7\u2014]\s+/);
+
+        return { nama: bagian.shift().trim(), keping: bagian };
+    }
+
     function rakitBaris(opsi, labelKelompok, nilaiTerpilih) {
         var tombol = document.createElement('button');
         tombol.type = 'button';
         tombol.className = 'mis-pilih-baris' + (opsi.value === nilaiTerpilih ? ' terpilih' : '');
         tombol.dataset.nilai = opsi.value;
 
+        var pecahan = pecahLabel(opsi.textContent.trim());
+
         var judul = document.createElement('span');
         judul.className = 'mis-pilih-judul';
-        judul.textContent = opsi.textContent.trim();
+        judul.textContent = pecahan.nama;
         tombol.appendChild(judul);
+
+        if (pecahan.keping.length > 0) {
+            var baris = document.createElement('span');
+            baris.className = 'mis-pilih-keping';
+
+            pecahan.keping.forEach(function (k) {
+                var keping = document.createElement('span');
+                keping.textContent = k.trim();
+                baris.appendChild(keping);
+            });
+
+            tombol.appendChild(baris);
+        }
 
         /*
          * Nama kelompok DITAHAN kalau judulnya sudah memuatnya di depan.
