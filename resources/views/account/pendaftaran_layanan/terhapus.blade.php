@@ -82,6 +82,133 @@ Catatan Penghapusan | MIS Rumah Scopus
          */
         @media (max-width: 575.98px) {
             /*
+             * ---------------------------------------------------------
+             * Kartu catatan: diberi irama, tidak semuanya rata kiri
+             * ---------------------------------------------------------
+             *
+             * Terukur di 390px sebelum ini: kartunya 348px tinggi berisi
+             * satu tumpukan rata kiri — nomor, nama, enam keping dalam tiga
+             * baris, nominal, tautan rincian, dua tombol. Tidak ada satu
+             * pun garis tegak atau pemisah yang membedakan mana kepala,
+             * mana isi, dan mana kaki.
+             */
+
+            /* Nomornya naik ke KANAN kepala kartu, di seberang medalinya —
+               di sana ia jadi penanda kartu, bukan baris pertama yang
+               mendesak namanya turun. */
+            .thp-isi {
+                display: grid;
+                /*
+                 * Nama di kiri, nomor di kanan — SEBARIS.
+                 *
+                 * Lajur nomornya dipatok minmax(0, 40%), bukan `auto`:
+                 * max-width pada kepingnya TIDAK membatasi lajurnya, dan
+                 * lajur `auto` tetap mengikuti lebar penuh nomornya.
+                 * Terukur dengan nomor "BOOK-05072026111623-ZRWIJ" di 320px:
+                 * lajur nama menciut sampai 0px dan namanya jadi pita tegak
+                 * setinggi 196px — padahal kepingnya sendiri sudah dipotong
+                 * elipsis jadi 67px.
+                 *
+                 * Yang dipakai fit-content(40%), bukan minmax: ia berarti
+                 * "seukuran isinya, tetapi tidak lebih dari 40%". minmax
+                 * membiarkan lajurnya mengambil 40% penuh walau isinya tidak
+                 * membutuhkannya — terukur di 390px lajur nomornya 99px
+                 * padahal nomornya cuma 62px, dan 37px yang dirampasnya
+                 * membuat NAMA membungkus jadi dua baris.
+                 *
+                 * Angkanya: nama butuh 168px, nomor 62px, sela 10px — 240px
+                 * dalam lebar isi 247px. Keduanya memang muat sebaris, asal
+                 * lajurnya tidak mengambil lebih dari yang dibutuhkan.
+                 */
+                grid-template-columns: minmax(0, 1fr) fit-content(40%);
+                align-items: baseline;
+                column-gap: 10px;
+            }
+
+            /*
+             * Sisanya membentang dua lajur.
+             *
+             * Tanpa ini keping, lencana, dan keterangan lain ikut terbagi ke
+             * kedua lajur kepala — dan lebar lajur kanannya ditentukan nomor
+             * yang sudah terlanjur sempit.
+             */
+            .thp-isi > *:not(.thp-nomor):not(.thp-nama) {
+                grid-column: 1 / -1;
+            }
+
+            /*
+             * Rata kanan saja — TANPA margin negatif.
+             *
+             * Versi pertama mengangkatnya 26px supaya sejajar titik tengah
+             * medalinya. Itu melebihi bantalan atas kartunya yang 14px, jadi
+             * nomornya tergambar DI LUAR kartu, menggantung di atas tepinya.
+             * Terlihat langsung di layar; tidak ada galat apa pun.
+             *
+             * Tidak perlu diangkat: .thp-isi sudah menempati lajur kedua
+             * baris pertama, jadi anak pertamanya memang sebaris dengan
+             * medalinya.
+             */
+            /*
+             * Nomor di lajur KANAN baris pertama, namanya di kiri.
+             *
+             * Keduanya ditempatkan tegas ke baris 1: nomornya anak pertama
+             * di markah, jadi dibiarkan mengalir ia mengambil baris sendiri
+             * dan mendorong namanya turun — persis yang terjadi sebelum ini.
+             *
+             * TANPA margin negatif. Versi sebelumnya mengangkatnya 26px
+             * supaya sejajar medali; itu melebihi bantalan atas kartunya yang
+             * 14px dan nomornya tergambar DI LUAR kartu.
+             */
+            .thp-isi > .thp-nomor {
+                grid-column: 2;
+                grid-row: 1;
+                justify-self: end;
+                /*
+                 * TANPA max-width di kepingnya — lajurnya yang membatasi.
+                 *
+                 * Persen pada anak kisi dihitung terhadap LAJURNYA, bukan
+                 * terhadap kisinya: dengan lantai lajur 64px, `max-width: 40%`
+                 * berarti 40% dari 64px, dan terukur nomornya menciut jadi
+                 * 28px — tinggal elipsis. Pembatas 40% sudah dikerjakan
+                 * lajurnya sendiri.
+                 *
+                 * Yang dipakai 100%: itu berarti selebar LAJURNYA, bukan
+                 * selebar kisinya. Tanpa itu `justify-self: end` membuat
+                 * kepingnya seukuran isinya dan menembus lajurnya — terukur
+                 * 188px menimpa namanya, elipsisnya tidak pernah terpakai.
+                 *
+                 * Nomor penuhnya tetap ada di title; nama yang terpotong
+                 * tidak punya cadangan apa pun, jadi namanya yang
+                 * didahulukan.
+                 */
+                max-width: 100%;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .thp-isi > .thp-nama {
+                grid-column: 1;
+                grid-row: 1;
+            }
+
+            /*
+             * Nominalnya rata KANAN dengan garis pemisah di atasnya.
+             *
+             * Ia jawaban atas satu pertanyaan — berapa uang yang ikut
+             * terhapus — dan sebagai teks kecil rata kiri di tengah
+             * tumpukan, ia terbaca seperti keterangan lain yang kebetulan
+             * lewat.
+             */
+            .thp-uang {
+                display: block;
+                margin-top: 9px;
+                padding-top: 9px;
+                border-top: 1px dashed var(--mis-garis);
+                text-align: right;
+            }
+
+            /*
              * Jarak ke kartu hasil di bawahnya.
              *
              * Saat terlipat, yang terlihat cuma bilah ringkasannya — dan
@@ -562,6 +689,30 @@ Catatan Penghapusan | MIS Rumah Scopus
             .thp-kaki > .thp-aksi {
                 flex: 1 1 100%;
                 min-width: 0;
+            }
+
+            /*
+             * Tiap tombol SELEBAR barisnya.
+             *
+             * Berdampingan keduanya menuntut 258px — "Buang catatan" 133px,
+             * "Kembalikan" 118px, sela 7px — di dalam kolom isi yang 247px,
+             * jadi mereka membungkus. Dibiarkan selebar isinya, yang tersisa
+             * dua tombol bertumpuk dengan lebar berbeda dan tepi kanan yang
+             * ragged.
+             *
+             * Borangnya yang disebut, bukan tombolnya: keduanya <form>
+             * ber-display:block, jadi BORANG yang jadi item lentur barisnya.
+             * Aturan yang cuma menyebut tombolnya mendarat di dalam kotak
+             * yang lebarnya sudah terlanjur mengikuti isinya.
+             */
+            .thp-aksi > form {
+                flex: 1 1 100%;
+                min-width: 0;
+            }
+
+            .thp-aksi > form > .mis-tombol,
+            .thp-aksi > .mis-tombol {
+                width: 100%;
             }
 
             /*
@@ -1050,8 +1201,15 @@ Catatan Penghapusan | MIS Rumah Scopus
                             <i class="fas fa-trash-alt"></i>
                         </span>
 
-                        <div style="min-width: 0;">
-                            <span class="thp-nomor">{{ strtoupper($satu->nomor ?: '—') }}</span>
+                        {{-- Berkelas, bukan cuma gaya sebaris: di ponsel isinya
+                             ditata ulang jadi kepala + badan, dan itu tidak bisa
+                             ditulis di atribut style satu baris. --}}
+                        <div class="thp-isi" style="min-width: 0;">
+                            {{-- title: di ponsel nomornya berbagi baris dengan nama
+                                 dan dipotong kalau panjang — nilai penuhnya tetap
+                                 harus bisa dibaca. --}}
+                            <span class="thp-nomor"
+                                title="{{ strtoupper($satu->nomor ?: '—') }}">{{ strtoupper($satu->nomor ?: '—') }}</span>
                             <p class="thp-nama">{{ $satu->nama ?: 'Tanpa nama' }}</p>
                             @php
                                 /*
