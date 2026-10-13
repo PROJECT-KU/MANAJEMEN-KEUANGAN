@@ -747,12 +747,55 @@ Rincian Pendaftaran | MIS Rumah Scopus
         }
 
         /* Kisi isian: tiga kolom di layar lebar, dua di tablet, satu di
-           ponsel — tanpa titik putus yang harus dijaga satu per satu. */
+           ponsel. */
         .rin-isian-kisi {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(min(100%, 215px), 1fr));
             gap: 14px;
             align-content: start;
+        }
+
+        /*
+         * Satu kolom di ponsel, DIPATOK — bukan diserahkan ke auto-fit.
+         *
+         * auto-fit di atas seharusnya menumpuk isiannya satu per baris saat
+         * ruangnya tidak cukup untuk dua. Terukur, ia tidak:
+         *
+         *     320px  ->  200px 0px      kolom kedua NOL
+         *     390px  ->  215px 41px     kolom kedua 41px
+         *     576px  ->  221px 221px
+         *
+         * Jadi di ponsel ada kolom kedua yang tidak pernah muat: "Kode unik"
+         * dan "Nominal potongan" mendapat kotak selebar 41px dengan labelnya
+         * terpatah dua baris, dan di 320px kotaknya hilang sama sekali.
+         * Isian di kedua kolom juga tidak sejajar — terukur selisih 7px.
+         */
+        @media (max-width: 575.98px) {
+            .rin-isian-kisi {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            /*
+             * Rentang antar-lajur DIBATALKAN, dan harus pakai !important.
+             *
+             * Memaksa satu lajur saja TIDAK cukup. Isian "Total bayar"
+             * membawa `style="grid-column: span 2"` — dirakit peladen dari
+             * jumlah isian per bagian, jadi ia gaya sebaris — dan satu
+             * rentang itu melahirkan lajur TERSIRAT kedua untuk seluruh
+             * kisinya. Terukur sesudah lajurnya dipatok satu: masih
+             * "38px 218px" di 390px dan "0px 186px" di 320px.
+             *
+             * !important dipakai justru karena lawannya gaya sebaris, yang
+             * tidak bisa dikalahkan dengan bobot pemilih berapa pun. Ini
+             * sebabnya memaksa satu lajur saja terlihat berhasil di sumber
+             * tetapi tidak mengubah apa pun di layar.
+             *
+             * .rin-isian-penuh dikecualikan: ia memang 1 / -1, dan dengan
+             * satu lajur itu tetap berarti selebar kisinya.
+             */
+            .rin-isian-kisi > .mis-isian:not(.rin-isian-penuh) {
+                grid-column: auto !important;
+            }
         }
 
         .rin-isian-penuh {
