@@ -437,6 +437,69 @@ class LayarPromoLayananTest extends TestCase
     }
 
     #[Test]
+    public function borang_memakai_dua_lajur_di_layar_lebar(): void
+    {
+        /*
+         * Dibatasi 880px, kartunya berhenti di tengah dan sisa kanannya
+         * menganga — terukur ~380px kosong pada layar 1960px.
+         *
+         * Dua hal dijaga sekaligus, dan keduanya pernah salah:
+         *
+         * 1. Tidak ada lagi batas lebar pada .prf-tumpuk.
+         * 2. Langkah 1-3 dibungkus SATU unsur kisi, bukan tiga unsur yang
+         *    direntang grid-row: span 3. Unsur yang membentang beberapa baris
+         *    menarik baris-baris itu setinggi dirinya, jadi ketiga kartu di
+         *    kiri terpisah jarak yang tidak diminta siapa pun — terukur 68px
+         *    dan 72px pada jarak baku 16px.
+         */
+        $berkas = file_get_contents(
+            base_path('resources/views/account/promo_layanan/form.blade.php')
+        );
+
+        preg_match('/\.prf-tumpuk\s*\{([^}]*)\}/', $berkas, $dasar);
+
+        $this->assertNotEmpty($dasar, 'Aturan .prf-tumpuk tidak ketemu.');
+        $this->assertStringNotContainsString('max-width', $dasar[1],
+            'Batas lebar kembali dipasang; sisi kanan layar lebar akan menganga lagi.');
+
+        $this->assertMatchesRegularExpression(
+            '/@media \(min-width: 992px\)\s*\{\s*\.prf-tumpuk\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\) minmax\(0, 1fr\)/',
+            $berkas,
+            'Dua lajurnya hilang; borangnya kembali menurun satu lajur di layar lebar.'
+        );
+
+        $this->assertStringNotContainsString('grid-row: 1 / span 3', $berkas,
+            'Langkah 4 kembali direntang beberapa baris; jarak antar kartu di kiri akan melar sendiri.');
+
+        // Pembungkus lajur kirinya memang ada, dan memuat TIGA kartu.
+        $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        $isi = $this->actingAs($admin)
+            ->get(route('account.promo-layanan.create'))->assertOk()->getContent();
+
+        $this->assertSame(1, substr_count($isi, 'class="prf-lajur"'));
+
+        /*
+         * Batasnya nomor langkah 4, bukan komentar Blade penutupnya: komentar
+         * Blade dibuang saat dirender, jadi mencarinya di halaman selalu gagal
+         * — penjaga yang merah untuk alasan yang salah. Bukan pula JUDUL
+         * langkah 4: judulnya berada DI DALAM blok .prf-langkah miliknya, jadi
+         * potongannya ikut membawa satu .prf-langkah yang bukan haknya.
+         */
+        preg_match('/class="prf-lajur">(.*?)class="prf-nomor" aria-hidden="true">4</s', $isi, $kiri);
+
+        $this->assertNotEmpty($kiri, 'Pembungkus lajur kiri tidak ketemu di markahnya.');
+        /*
+         * Yang dihitung NOMOR langkahnya, bukan blok .prf-langkah-nya.
+         * Penanda batas di atas berada DI DALAM blok .prf-langkah milik
+         * langkah 4, jadi potongannya selalu ikut membawa satu blok yang
+         * bukan haknya — terukur 4, bukan 3.
+         */
+        $this->assertSame(3, substr_count($kiri[1], 'class="prf-nomor"'),
+            'Lajur kiri tidak lagi memuat tepat tiga langkah.');
+    }
+
+    #[Test]
     public function tanda_satuan_ditambat_ke_pembungkus_kotaknya(): void
     {
         /*
