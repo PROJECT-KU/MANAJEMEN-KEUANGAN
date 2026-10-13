@@ -49,6 +49,49 @@
     .prf-kisi > .mis-isian { align-self: stretch; }
     .prf-penuh { grid-column: 1 / -1; }
 
+    /*
+     * Awalan "Rp" dan akhiran "%" menempel DI DALAM kotaknya.
+     *
+     * Pola yang sama dengan Tarif Layanan (.tar-tanda), bukan pola baru:
+     * keduanya satuan, bukan keterangan yang perlu labelnya sendiri. Ditulis
+     * di bawah kotaknya sebagai bantuan, satuannya baru terbaca SESUDAH
+     * angkanya diketik — padahal justru sebelum mengetik orang perlu tahu
+     * kotak ini minta rupiah atau persen.
+     *
+     * aria-hidden: ia hiasan. Yang dibacakan pembaca layar label medannya,
+     * yang sudah menyebut "potongan persen" / "potongan rupiah".
+     */
+    /*
+     * Tandanya ditambat ke PEMBUNGKUS KOTAKNYA, bukan ke .mis-isian.
+     *
+     * Tarif Layanan bisa memakai `bottom: 0` pada .mis-isian karena di sana
+     * kotaknya anak terakhir. Di borang ini tiap kotak punya teks bantuan di
+     * bawahnya, jadi dasar .mis-isian bukan lagi dasar kotaknya — terukur
+     * tandanya 409-451 sementara kotaknya 402-442, meleset 7px ke bawah pada
+     * KETIGA medan.
+     *
+     * Dibetulkan dengan angka tetap (`top: 20px`), ia akan meleset lagi begitu
+     * ukuran label berubah. Pembungkus setinggi kotaknya membuat `inset: 0`
+     * selalu tepat tanpa ada yang perlu diukur ulang.
+     */
+    .prf-kotak { position: relative; display: block; }
+    .prf-isian .form-control-modern { padding-left: 40px; }
+    .prf-isian.persen .form-control-modern { padding-left: 14px; padding-right: 36px; }
+
+    .prf-tanda {
+        position: absolute;
+        top: 0; bottom: 0;
+        display: grid; place-items: center;
+        width: 30px;
+        font-size: .82rem; font-weight: 700; color: var(--mis-tinta-4);
+        /* Tanpa ini, menekan tepat di atas "Rp" tidak memfokuskan kotaknya —
+           dan titik itu justru sasaran yang wajar untuk ditekan. */
+        pointer-events: none;
+    }
+
+    .prf-tanda.kiri { left: 8px; }
+    .prf-tanda.kanan { right: 6px; }
+
     /* ------------------------------------------------------- pilihan tipe */
 
     /*
@@ -330,32 +373,54 @@
                              bukan dihapus dari markah: nilainya tetap ada saat
                              tipenya diganti bolak-balik, dan validator tetap
                              menerima kiriman dari peramban tanpa JavaScript. --}}
-                        <div class="mis-isian" id="prf-bungkus-persen">
+                        <div class="mis-isian prf-isian persen" id="prf-bungkus-persen">
                             <label class="mis-label" for="prf-persen">
                                 Potongan persen <span class="prf-wajib" title="Wajib diisi" aria-hidden="true">*</span>
                             </label>
-                            <input type="number" class="form-control-modern" id="prf-persen" name="persen"
-                                min="1" max="100" step="1" data-prf-hitung
-                                value="{{ old('persen', $promo->persen) }}" placeholder="40">
+                            <span class="prf-kotak">
+                                <span class="prf-tanda kanan" aria-hidden="true">%</span>
+                                {{-- Tetap type=number: nilainya 1-100 dan tidak pernah
+                                     bertitik, jadi tidak ada yang perlu diformat — dan
+                                     panah naik-turun bawaan peramban justru berguna di
+                                     rentang sependek itu. --}}
+                                <input type="number" class="form-control-modern" id="prf-persen" name="persen"
+                                    min="1" max="100" step="1" inputmode="numeric" data-prf-hitung
+                                    value="{{ old('persen', $promo->persen) }}" placeholder="40">
+                            </span>
                             <p class="mis-bantuan">Antara 1 dan 100.</p>
                         </div>
 
-                        <div class="mis-isian" id="prf-bungkus-batas">
+                        {{-- Kedua kotak rupiah type=text, BUKAN type=number.
+
+                             type=number menolak memuat "75.000": peramban
+                             mengosongkan kotaknya diam-diam begitu titiknya
+                             diketik, dan yang terlihat cuma angka yang hilang.
+                             inputmode=numeric tetap memunculkan papan tik angka
+                             di ponsel. --}}
+                        <div class="mis-isian prf-isian" id="prf-bungkus-batas">
                             <label class="mis-label" for="prf-batas">Maksimal potongan</label>
-                            <input type="number" class="form-control-modern" id="prf-batas" name="batas_potongan"
-                                min="1" step="1000" data-prf-hitung
-                                value="{{ old('batas_potongan', $promo->batas_potongan) }}" placeholder="Boleh dikosongkan">
+                            <span class="prf-kotak">
+                                <span class="prf-tanda kiri" aria-hidden="true">Rp</span>
+                                <input type="text" class="form-control-modern" id="prf-batas" name="batas_potongan"
+                                    inputmode="numeric" autocomplete="off" data-prf-hitung data-prf-rupiah
+                                    value="{{ old('batas_potongan', $promo->batas_potongan) ? number_format((int) old('batas_potongan', $promo->batas_potongan), 0, ',', '.') : '' }}"
+                                    placeholder="Boleh dikosongkan">
+                            </span>
                             <p class="mis-bantuan">Pengaman untuk harga besar: 40% dari Rp 6.500.000 memotong Rp 2.600.000.</p>
                         </div>
 
-                        <div class="mis-isian" id="prf-bungkus-nominal">
+                        <div class="mis-isian prf-isian" id="prf-bungkus-nominal">
                             <label class="mis-label" for="prf-nominal">
                                 Potongan rupiah <span class="prf-wajib" title="Wajib diisi" aria-hidden="true">*</span>
                             </label>
-                            <input type="number" class="form-control-modern" id="prf-nominal" name="nominal"
-                                min="1" step="1000" data-prf-hitung
-                                value="{{ old('nominal', $promo->nominal) }}" placeholder="75000">
-                            <p class="mis-bantuan">Diketik angkanya saja, tanpa titik.</p>
+                            <span class="prf-kotak">
+                                <span class="prf-tanda kiri" aria-hidden="true">Rp</span>
+                                <input type="text" class="form-control-modern" id="prf-nominal" name="nominal"
+                                    inputmode="numeric" autocomplete="off" data-prf-hitung data-prf-rupiah
+                                    value="{{ old('nominal', $promo->nominal) ? number_format((int) old('nominal', $promo->nominal), 0, ',', '.') : '' }}"
+                                    placeholder="75.000">
+                            </span>
+                            <p class="mis-bantuan">Titik ribuannya dipasang sendiri sambil mengetik.</p>
                         </div>
                     </div>
 
@@ -623,6 +688,19 @@
             return 'Rp ' + Math.round(angka).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
         }
 
+        /*
+         * Membaca angka dari kotak yang isinya BERTITIK.
+         *
+         * parseInt('75.000') memulangkan 75, bukan 75000 — ia berhenti di
+         * titik pertama tanpa galat apa pun. Jadi yang dibuang semua yang
+         * BUKAN angka, bukan cuma tanda titiknya: koma, spasi, dan "Rp" yang
+         * ikut tertempel saat orang menyalin dari tempat lain sama-sama
+         * harus hilang.
+         */
+        function angka(nilai) {
+            return parseInt(String(nilai).replace(/\D+/g, ''), 10) || 0;
+        }
+
         /** Rumusnya menyalin PromoLayanan::potonganUntuk, termasuk batasnya. */
         function potongan(harga) {
             if (!(harga > 0)) {
@@ -632,7 +710,7 @@
             var hasil;
 
             if (tipeTerpilih() === 'persen') {
-                var persen = parseInt(isiPersen.value, 10);
+                var persen = angka(isiPersen.value);
 
                 if (!(persen > 0)) {
                     return 0;
@@ -640,13 +718,13 @@
 
                 hasil = Math.round(harga * Math.min(100, persen) / 100);
 
-                var batas = parseInt(isiBatas.value, 10);
+                var batas = angka(isiBatas.value);
 
                 if (batas > 0) {
                     hasil = Math.min(hasil, batas);
                 }
             } else {
-                hasil = parseInt(isiNominal.value, 10);
+                hasil = angka(isiNominal.value);
 
                 if (!(hasil > 0)) {
                     return 0;
@@ -674,7 +752,7 @@
 
             for (var i = 0; i < terpilih.length; i++) {
                 var sel = terpilih[i].closest('[data-prf-baris]').querySelector('[data-prf-harga]');
-                var harga = parseInt(sel.dataset.prfHarga, 10);
+                var harga = angka(sel.dataset.prfHarga);
 
                 if (harga > 0) {
                     return { harga: harga, nyata: true };
@@ -732,7 +810,7 @@
             var sel = borang.querySelectorAll('[data-prf-harga]');
 
             for (var i = 0; i < sel.length; i++) {
-                var harga = parseInt(sel[i].dataset.prfHarga, 10);
+                var harga = angka(sel[i].dataset.prfHarga);
 
                 if (!(harga > 0)) {
                     continue;
@@ -754,6 +832,29 @@
                 baru.textContent = rupiah(harga - potong);
                 sel[i].appendChild(baru);
             }
+        }
+
+        /*
+         * Titik ribuan dipasang sambil mengetik pada kotak rupiah.
+         *
+         * Kursornya dikembalikan ke UJUNG, bukan dibiarkan di tempatnya:
+         * memasang satu titik menggeser seluruh teks di kanannya satu huruf,
+         * jadi kursor yang tidak dipindahkan akan melompat mundur satu angka
+         * tiap kali ribuan baru terbentuk. Menyunting di tengah angka jarang
+         * terjadi; melompatnya kursor saat mengetik terjadi setiap kali.
+         */
+        var kotakRupiah = borang.querySelectorAll('[data-prf-rupiah]');
+
+        for (var u = 0; u < kotakRupiah.length; u++) {
+            kotakRupiah[u].addEventListener('input', function () {
+                var n = angka(this.value);
+
+                this.value = n > 0 ? n.toLocaleString('id-ID') : '';
+
+                if (this === document.activeElement) {
+                    this.setSelectionRange(this.value.length, this.value.length);
+                }
+            });
         }
 
         var kotakHitung = borang.querySelectorAll('[data-prf-hitung]');
