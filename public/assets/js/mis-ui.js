@@ -996,3 +996,191 @@
         periksa();
     });
 })();
+
+/**
+ * Pemilih layar penuh untuk <select> yang pilihannya banyak.
+ *
+ *   misPemilih(select, { judul: 'Pilih angkatan', cariPlaceholder: '...' })
+ *
+ * Menu bawaan peramban — dan menu Select2 sekalipun — terbuka sebagai daftar
+ * sempit menempel di bawah kotaknya. Di ponsel tiap barisnya terpatah dua
+ * sementara daftarnya menutupi isian di bawahnya, jadi memilih di sana
+ * berarti membaca potongan kalimat di celah selebar 160px.
+ *
+ * Dirakit ULANG tiap kali dibuka, dibaca dari <select>-nya sendiri: layar
+ * yang menyempitkan pilihannya mengikuti saringan lain mencopot dan memasang
+ * kembali <optgroup>-nya, jadi salinan yang dibuat sekali akan menawarkan
+ * pilihan yang sudah tidak berlaku.
+ *
+ * Dipakai bersama layar Pendaftar Layanan (saringan angkatan) dan layar
+ * rincian (pemindahan angkatan). Satu perilaku, satu tempat memperbaikinya.
+ */
+(function () {
+    'use strict';
+
+    function rakitBaris(opsi, labelKelompok, nilaiTerpilih) {
+        var tombol = document.createElement('button');
+        tombol.type = 'button';
+        tombol.className = 'mis-pilih-baris' + (opsi.value === nilaiTerpilih ? ' terpilih' : '');
+        tombol.dataset.nilai = opsi.value;
+
+        var judul = document.createElement('span');
+        judul.className = 'mis-pilih-judul';
+        judul.textContent = opsi.textContent.trim();
+        tombol.appendChild(judul);
+
+        /*
+         * Nama kelompok DITAHAN kalau judulnya sudah memuatnya di depan.
+         *
+         * Sebagian pilihan dinamai dengan nama kelompoknya sendiri, jadi
+         * barisnya terbaca "Analisis Bibliometrik · angkatan ke-10" dengan
+         * "Analisis Bibliometrik" sekali lagi di bawahnya.
+         */
+        if (labelKelompok
+            && judul.textContent.toLowerCase().indexOf(labelKelompok.toLowerCase()) !== 0) {
+            var ket = document.createElement('span');
+            ket.className = 'mis-pilih-ket';
+            ket.textContent = labelKelompok;
+            tombol.appendChild(ket);
+        }
+
+        tombol.dataset.cari = (opsi.textContent + ' ' + (labelKelompok || '')).toLowerCase();
+
+        return tombol;
+    }
+
+    function misPemilih(menu, pilihan) {
+        pilihan = pilihan || {};
+
+        if (!menu || typeof window.Swal === 'undefined') {
+            return false;
+        }
+
+        /*
+         * Isinya dipasang lewat textContent sesudah dirakit, BUKAN
+         * disisipkan sebagai HTML: nama pilihannya datang dari isian orang
+         * dan boleh memuat apa saja.
+         */
+        var isi = document.createElement('div');
+        isi.className = 'mis-pilih';
+        isi.innerHTML =
+            '<label class="mis-pilih-cari">'
+            + '<i class="fas fa-search" aria-hidden="true"></i>'
+            + '<input type="search" autocomplete="off">'
+            + '</label>'
+            + '<div class="mis-pilih-daftar" role="listbox"></div>'
+            + '<p class="mis-pilih-nihil" hidden></p>';
+
+        var daftar = isi.querySelector('.mis-pilih-daftar');
+        var kotakCari = isi.querySelector('input');
+        var nihil = isi.querySelector('.mis-pilih-nihil');
+
+        kotakCari.placeholder = pilihan.cariPlaceholder || 'Ketik untuk mencari';
+        nihil.textContent = pilihan.nihil || 'Tidak ada yang cocok.';
+
+        var kelompok = menu.querySelectorAll('optgroup');
+
+        if (kelompok.length === 0) {
+            Array.prototype.forEach.call(menu.options, function (o) {
+                daftar.appendChild(rakitBaris(o, '', menu.value));
+            });
+        } else {
+            var lepas = menu.querySelectorAll(':scope > option');
+
+            Array.prototype.forEach.call(lepas, function (o) {
+                daftar.appendChild(rakitBaris(o, '', menu.value));
+            });
+
+            Array.prototype.forEach.call(kelompok, function (g) {
+                var kepala = document.createElement('p');
+                kepala.className = 'mis-pilih-kelompok';
+                kepala.textContent = g.label;
+                daftar.appendChild(kepala);
+
+                Array.prototype.forEach.call(g.querySelectorAll('option'), function (o) {
+                    daftar.appendChild(rakitBaris(o, g.label, menu.value));
+                });
+            });
+        }
+
+        var saring = function () {
+            var kata = kotakCari.value.trim().toLowerCase();
+            var ketemu = 0;
+
+            Array.prototype.forEach.call(daftar.querySelectorAll('.mis-pilih-baris'), function (b) {
+                var cocok = !kata || b.dataset.cari.indexOf(kata) !== -1;
+                b.hidden = !cocok;
+                if (cocok) ketemu++;
+            });
+
+            /*
+             * Kepala kelompok ikut disembunyikan saat seluruh isinya tersaring
+             * habis. Dibiarkan, yang tersisa deretan nama kelompok tanpa satu
+             * pilihan pun di bawahnya — terbaca seperti kelompok yang kosong,
+             * padahal cuma tidak cocok dengan yang diketik.
+             */
+            Array.prototype.forEach.call(daftar.querySelectorAll('.mis-pilih-kelompok'), function (k) {
+                var punyaIsi = false;
+                var n = k.nextElementSibling;
+
+                while (n && n.classList.contains('mis-pilih-baris')) {
+                    if (!n.hidden) { punyaIsi = true; break; }
+                    n = n.nextElementSibling;
+                }
+
+                k.hidden = !punyaIsi;
+            });
+
+            nihil.hidden = ketemu > 0;
+        };
+
+        kotakCari.addEventListener('input', saring);
+
+        window.Swal.fire({
+            title: pilihan.judul || 'Pilih',
+            html: isi,
+            width: 520,
+            showConfirmButton: false,
+            showCloseButton: true,
+            customClass: { popup: 'mis-pilih-popup' },
+            /*
+             * Fokus TIDAK dilempar ke kotak carinya di ponsel: papan ketik
+             * yang terbuka sendiri memakan separuh layar, dan yang hendak
+             * dikerjakan orang di sana justru menggulung daftarnya.
+             */
+            didOpen: function () {
+                if (window.matchMedia('(min-width: 576px)').matches) {
+                    kotakCari.focus();
+                }
+
+                var terpilih = daftar.querySelector('.mis-pilih-baris.terpilih');
+
+                if (terpilih) {
+                    terpilih.scrollIntoView({ block: 'center' });
+                }
+            },
+        });
+
+        daftar.addEventListener('click', function (acara) {
+            var tombol = acara.target.closest('.mis-pilih-baris');
+
+            if (!tombol) {
+                return;
+            }
+
+            menu.value = tombol.dataset.nilai;
+
+            if (typeof pilihan.sesudahPilih === 'function') {
+                pilihan.sesudahPilih(menu);
+            } else {
+                menu.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+
+            window.Swal.close();
+        });
+
+        return true;
+    }
+
+    window.misPemilih = misPemilih;
+})();
