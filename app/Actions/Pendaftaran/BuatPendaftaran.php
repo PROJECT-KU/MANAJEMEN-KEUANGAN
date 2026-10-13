@@ -252,7 +252,11 @@ class BuatPendaftaran
 
             $baris = $this->rakitKolom(
                 $layanan, $sumber, $isian, $jumlah, $total, $kodeUnik, $olehSiapa,
-                $potongan, $kodePotongan, $lewatKuota
+                $potongan, $kodePotongan, $lewatKuota,
+                // Hanya kalau promonya yang MENANG. Dikirim apa adanya,
+                // pendaftaran yang potongannya datang dari alumni tetap
+                // tertali ke promo dan ikut terhitung di layar dampaknya.
+                $kodePotongan === 'PROMO' || str_starts_with($kodePotongan, 'PROMO:') ? $promo : null
             );
 
             $model = $sumber['model'];
@@ -640,7 +644,8 @@ class BuatPendaftaran
         ?string $olehSiapa,
         int $potongan = 0,
         string $kodePotongan = 'KHUSUS',
-        int $lewatKuota = 0
+        int $lewatKuota = 0,
+        ?\App\PromoLayanan $promo = null
     ): array {
         $kolom = $sumber['kolom'];
 
@@ -777,6 +782,19 @@ class BuatPendaftaran
 
             if (isset($kolom['kode_diskon'])) {
                 $baris[$kolom['kode_diskon']] = $kodePotongan;
+            }
+
+            /*
+             * Tali ke promonya disimpan DI SAMPING namanya, bukan
+             * menggantikannya.
+             *
+             * Namanya untuk dibaca orang; idnya untuk dihitung. Dihitung dari
+             * untaian nama, layar dampak promo akan berbohong begitu promonya
+             * diganti nama — seluruh pendaftaran lama berhenti terhitung,
+             * tanpa galat dan tanpa ada yang curiga.
+             */
+            if ($promo !== null && isset($kolom['promo'])) {
+                $baris[$kolom['promo']] = $promo->getKey();
             }
         }
 

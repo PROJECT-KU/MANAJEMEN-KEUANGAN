@@ -117,13 +117,31 @@ class PromoLayananController extends Controller
 
         $ringkas = $this->ringkasan(clone $kueriDasar);
 
-        $kueri = (clone $kueriDasar)->keadaan($keadaan);
+        $kueri = clone $kueriDasar;
+
+        /*
+         * Saringan keadaan dikerjakan lewat DAFTAR ID, bukan syarat SQL.
+         *
+         * Dua dari enam keadaan tidak bisa dinyatakan di SQL sama sekali
+         * (lihat keadaanSemua). Separuh di SQL separuh di PHP berarti
+         * lencana di baris dan saringan di menu bisa tidak sepakat; disaring
+         * di PHP SESUDAH halamannya diambil, penomoran halamannya langsung
+         * salah — halaman pertama berisi 10 baris lalu tersaring jadi 3, dan
+         * jumlah totalnya ikut berbohong.
+         *
+         * Lewat whereIn, penyaringannya tetap dikerjakan basis data dan
+         * penomoran halamannya tetap benar.
+         */
+        if ($keadaan !== null) {
+            $kueri->whereIn('id', $this->idBerkeadaan($kueriDasar, $keadaan));
+        }
 
         // 'dibuat' bukan nama kolom; ia created_at. Dipetakan di sini supaya
         // nama kolom asli tidak pernah muncul di alamat halaman.
         $kolomUrut = $urut === 'dibuat' ? 'created_at' : $urut;
 
         $daftar = $kueri
+            ->with('penginput')
             ->withCount('angkatan')
             ->orderBy($kolomUrut, $arah)
             // Pengurut kedua yang pasti unik: tanpa itu, dua promo bertanggal
@@ -153,49 +171,338 @@ class PromoLayananController extends Controller
     /** Keadaan yang bisa disaring, beserta namanya di layar. */
     private const KEADAAN = [
         'berjalan' => 'Sedang berjalan',
+        'hampir-habis' => 'Hampir habis (≤ 7 hari)',
         'belum-mulai' => 'Belum mulai',
+        'kuota-habis' => 'Kuota habis',
         'selesai' => 'Sudah selesai',
         'nonaktif' => 'Dimatikan',
     ];
 
     /**
-     * Empat angka ubin ringkasan, dalam SATU kueri.
+     * Keadaan tiap promo, DIHITUNG DI PHP lewat accessor-nya.
      *
-     * Dihitung terpisah, layarnya menjalankan empat `count(*)` yang
-     * bentuknya sama persis — dan jumlahnya tumbuh tiap kali satu keadaan
-     * ditambahkan.
+     * Bukan di SQL, dan itu disengaja. Dua dari enam keadaan tidak bisa
+     * dinyatakan sebagai syarat SQL sama sekali: "kuota habis" menuntut
+     * menghitung pendaftaran di tiga tabel lain, dan "hampir habis" menuntut
+     * keduanya sekaligus. Separuh di SQL separuh di PHP berarti ubin
+     * ringkasannya dan lencana di barisnya bisa menyebut keadaan yang
+     * berbeda untuk promo yang sama — dan tidak ada galat yang memberi tahu.
+     *
+     * Boleh dikerjakan begini karena tabelnya memang kecil: promo dihitung
+     * puluhan, bukan ribuan, dan DampakPromo sudah mengambil seluruh angka
+     * pemakaian dalam tiga kueri untuk SEMUA promo sekaligus. Kalau suatu
+     * saat promonya mencapai ribuan, yang harus diubah bagian ini — bukan
+     * dengan memecahnya ke SQL, melainkan dengan menyimpan hitungannya.
+     *
+     * @return list<array{keadaan: string, hampir: bool}>
+     */
+    private function keadaanSemua($kueri): array
+    {
+        return (clone $kueri)->reorder()
+            ->get(['id', 'aktif', 'mulai', 'selesai', 'kuota'])
+            ->map(fn (PromoLayanan $p) => [
+                'keadaan' => $p->keadaan,
+                // Dihitung di sini juga, dari model yang SUDAH dimuat.
+                // Dicari ulang lewat find() per promo, ubin ringkasannya
+                // sendiri jadi satu kueri per baris.
+                'hampir' => $p->sisa_hari !== null && $p->sisa_hari <= 7,
+            ])
+            ->all();
+    }
+
+    /**
+     * Angka ubin ringkasan, dari keadaan yang sama persis dengan lencananya.
      */
     private function ringkasan($kueri): array
     {
-        $hari = now()->toDateString();
+        $jumlah = array_fill_keys(array_keys(self::KEADAAN), 0);
+        $jumlah['semua'] = 0;
 
         /*
-         * Alias hitungannya DIBERI AWALAN, dan hasilnya dibaca lewat toBase().
-         *
-         * Alias `selesai` bertabrakan dengan nama kolom `selesai`. Dibaca
-         * lewat Eloquent, cast 'selesai' => 'date' menang atas alias itu:
-         * yang kembali objek Carbon, bukan angka, dan halamannya 500 dengan
-         * "Object of class Illuminate\Support\Carbon could not be converted
-         * to int" — pesan yang tidak menyebut tabrakan nama sama sekali.
-         *
-         * toBase() memulangkan baris mentah tanpa cast apa pun, jadi tabrakan
-         * seperti ini tidak bisa terjadi lagi walau nanti ada yang menambah
-         * alias bernama sama dengan kolomnya.
+         * "Hampir habis" BAGIAN DARI "sedang berjalan", bukan keadaan yang
+         * meniadakannya: promo yang tinggal tiga hari tetap sedang berjalan.
+         * Karena itu ia dihitung di samping, dan jumlah seluruh ubin lain
+         * tetap menjumlah ke totalnya.
          */
-        $baris = $kueri->toBase()->selectRaw(
-            'sum(case when aktif = 1 and mulai <= ? and selesai >= ? then 1 else 0 end) as j_berjalan,'
-            . ' sum(case when aktif = 1 and mulai > ? then 1 else 0 end) as j_belum,'
-            . ' sum(case when aktif = 1 and selesai < ? then 1 else 0 end) as j_selesai,'
-            . ' sum(case when aktif = 0 then 1 else 0 end) as j_nonaktif',
-            [$hari, $hari, $hari, $hari]
-        )->first();
+        foreach ($this->keadaanSemua($kueri) as $satu) {
+            $jumlah['semua']++;
 
-        return [
-            'berjalan' => (int) ($baris->j_berjalan ?? 0),
-            'belum-mulai' => (int) ($baris->j_belum ?? 0),
-            'selesai' => (int) ($baris->j_selesai ?? 0),
-            'nonaktif' => (int) ($baris->j_nonaktif ?? 0),
-        ];
+            if (isset($jumlah[$satu['keadaan']])) {
+                $jumlah[$satu['keadaan']]++;
+            }
+
+            if ($satu['keadaan'] === 'berjalan' && $satu['hampir']) {
+                $jumlah['hampir-habis']++;
+            }
+        }
+
+        return $jumlah;
+    }
+
+    /**
+     * Id promo yang keadaannya cocok.
+     *
+     * @return array<int, string>
+     */
+    private function idBerkeadaan($kueriDasar, string $keadaan): array
+    {
+        $cocok = [];
+
+        $daftar = (clone $kueriDasar)->reorder()
+            ->get(['id', 'aktif', 'mulai', 'selesai', 'kuota']);
+
+        foreach ($daftar as $p) {
+            $hampir = $p->sisa_hari !== null && $p->sisa_hari <= 7;
+
+            $sesuai = $keadaan === 'hampir-habis'
+                ? ($p->keadaan === 'berjalan' && $hampir)
+                : $p->keadaan === $keadaan;
+
+            if ($sesuai) {
+                $cocok[] = (string) $p->getKey();
+            }
+        }
+
+        return $cocok;
+    }
+
+    /**
+     * Daftar promo untuk diunduh: saringan dan urutannya SAMA dengan layarnya.
+     *
+     * Tanpa halaman. Berkas berisi 10 dari 60 promo tidak boleh terbaca
+     * seperti daftar yang lengkap, dan itulah yang terjadi kalau paginator
+     * layarnya dipakai ulang begitu saja.
+     */
+    private function untukEkspor(Request $request)
+    {
+        $cari = trim((string) $request->query('cari'));
+
+        $keadaan = array_key_exists((string) $request->query('keadaan'), self::KEADAAN)
+            ? (string) $request->query('keadaan') : null;
+
+        $layanan = array_key_exists((string) $request->query('layanan'), Layanan::katalog())
+            ? (string) $request->query('layanan') : null;
+
+        $urut = array_key_exists((string) $request->query('urut'), self::BOLEH_URUT)
+            ? (string) $request->query('urut') : 'mulai';
+
+        $arah = $request->query('arah') === 'naik' ? 'asc' : 'desc';
+
+        $dasar = PromoLayanan::query()->cari($cari);
+
+        if ($layanan !== null) {
+            $dasar->whereHas('angkatan', fn ($q) => $q->where('layanan', $layanan));
+        }
+
+        $kueri = clone $dasar;
+
+        if ($keadaan !== null) {
+            $kueri->whereIn('id', $this->idBerkeadaan($dasar, $keadaan));
+        }
+
+        return $kueri->with('penginput')->withCount('angkatan')
+            ->orderBy($urut === 'dibuat' ? 'created_at' : $urut, $arah)
+            ->orderBy('id')
+            ->get();
+    }
+
+    /**
+     * Saringan yang sedang dipakai, dalam kalimat.
+     *
+     * Dicetak di kepala berkas unduhan. Berkas berisi 29 dari 101 baris tidak
+     * boleh terbaca seperti daftar yang lengkap, dan satu-satunya cara
+     * menyatakannya adalah menyebutkan saringannya.
+     */
+    private function ringkasanSaringan(Request $request): string
+    {
+        $bagian = [];
+
+        if (($cari = trim((string) $request->query('cari'))) !== '') {
+            $bagian[] = 'kata kunci "' . $cari . '"';
+        }
+
+        if (array_key_exists((string) $request->query('keadaan'), self::KEADAAN)) {
+            $bagian[] = 'keadaan ' . mb_strtolower(self::KEADAAN[$request->query('keadaan')]);
+        }
+
+        if (array_key_exists((string) $request->query('layanan'), Layanan::katalog())) {
+            $bagian[] = 'layanan ' . Layanan::katalog()[$request->query('layanan')]['nama'];
+        }
+
+        return $bagian === [] ? 'Seluruh promo, tanpa saringan.' : 'Disaring: ' . implode(', ', $bagian) . '.';
+    }
+
+    // -------------------------------------------------------------- unduhan
+
+    public function eksporExcel(Request $request)
+    {
+        if (! $this->bolehMelihat()) {
+            return $this->tolak();
+        }
+
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\PromoLayananExport($this->untukEkspor($request)),
+            'promo-layanan-' . now()->format('Ymd-His') . '.xlsx'
+        );
+    }
+
+    public function cetakPdf(Request $request)
+    {
+        if (! $this->bolehMelihat()) {
+            return $this->tolak();
+        }
+
+        $html = view('account.promo_layanan.cetak-pdf', [
+            'daftar' => $this->untukEkspor($request),
+            'saringan' => $this->ringkasanSaringan($request),
+        ])->render();
+
+        $dompdf = new \Dompdf\Dompdf();
+        $pengaturan = $dompdf->getOptions();
+        $pengaturan->setIsPhpEnabled(true);
+        $pengaturan->setIsRemoteEnabled(false);
+        $dompdf->setOptions($pengaturan);
+        $dompdf->loadHtml($html);
+        // Mendatar: sebelas kolom tidak muat tegak tanpa dimampatkan.
+        $dompdf->setPaper('A4', 'landscape');
+        $dompdf->render();
+
+        return response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="promo-layanan-' . now()->format('Ymd-His') . '.pdf"',
+        ]);
+    }
+
+    // -------------------------------------------------------------- rincian
+
+    /**
+     * Rincian satu promo: hasilnya, angkatannya, dan jejak perubahannya.
+     *
+     * Terpisah dari borang ubah, dan itu disengaja. Sebelumnya menekan nama
+     * promo langsung membuka borangnya — jadi MELIHAT promo berarti membuka
+     * layar yang setiap isiannya bisa tersenggol.
+     */
+    public function detail(string $id)
+    {
+        if (! $this->bolehMelihat()) {
+            return $this->tolak();
+        }
+
+        $promo = PromoLayanan::with(['penginput', 'angkatan'])->findOrFail($id);
+
+        return view('account.promo_layanan.detail', [
+            'promo' => $promo,
+            'dampak' => \App\Support\DampakPromo::untuk((string) $promo->getKey()),
+            'perAngkatan' => \App\Support\DampakPromo::perAngkatan($promo),
+            'jejak' => $promo->jejak()->limit(50)->get(),
+            'katalog' => Layanan::katalog(),
+            'bolehUbah' => $this->bolehMengubah(),
+        ]);
+    }
+
+    // ------------------------------------------- dipasang dari sisi angkatan
+
+    /**
+     * Memasang atau melepas promo pada satu angkatan, dari layar angkatannya.
+     *
+     * Sebelumnya hubungannya cuma satu arah: promo menunjuk angkatan, dan
+     * satu-satunya tempat mengaturnya borang promo. Jadi admin yang sedang
+     * membuka sebuah angkatan dan ingin memberinya promo harus mengingat nama
+     * promonya, pindah layar, mencari angkatan itu di antara 241 baris, lalu
+     * mencentangnya.
+     *
+     * Dua arah, satu tabel sambungan yang sama — jadi tidak ada keadaan yang
+     * bisa berbeda tergantung dari layar mana diaturnya.
+     */
+    public function tempel(Request $request, string $kategoriId)
+    {
+        if (! $this->bolehMengubah()) {
+            return $this->tolak();
+        }
+
+        $angkatan = KategoriLayanan::findOrFail($kategoriId);
+
+        $isian = $request->validate([
+            'promo_id' => ['required', 'string', 'exists:promo_layanan,id'],
+            'lepas' => ['nullable', 'boolean'],
+        ], [], ['promo_id' => 'promo']);
+
+        $promo = PromoLayanan::findOrFail($isian['promo_id']);
+
+        if (! empty($isian['lepas'])) {
+            $promo->angkatan()->detach($angkatan->getKey());
+            $pesan = 'Promo "' . $promo->nama . '" dilepas dari angkatan ini.';
+        } else {
+            // syncWithoutDetaching, bukan attach: menekan tombolnya dua kali
+            // akan ditolak kunci unik pivotnya dengan galat yang menyebut nama
+            // constraint, bukan apa yang salah.
+            $promo->angkatan()->syncWithoutDetaching([$angkatan->getKey()]);
+            $pesan = 'Promo "' . $promo->nama . '" dipasang di angkatan ini.';
+        }
+
+        /*
+         * Dicatat di jejak PROMO-nya, bukan jejak angkatan: yang berubah
+         * cakupan promo, dan di situlah orang mencarinya kalau harga sebuah
+         * angkatan tiba-tiba berbeda.
+         */
+        \App\PromoJejak::catat(
+            $promo,
+            'diubah',
+            (empty($isian['lepas']) ? 'dipasang di' : 'dilepas dari') . ' angkatan "' . $angkatan->nama . '"'
+        );
+
+        \App\Support\PromoAngkatan::lupakan();
+
+        return back()->with('success', $pesan);
+    }
+
+    // ------------------------------------------------------------- gandakan
+
+    /**
+     * Menyalin promo beserta angkatan yang dicentangnya.
+     *
+     * Promo tahunan — ulang tahun, akhir tahun — isinya hampir sama persis
+     * tiap kali; tanpa ini seluruhnya diketik ulang, termasuk mencentang
+     * belasan angkatan satu per satu.
+     *
+     * Salinannya LAHIR MATI dan tanpa tanggal yang disalin. Tanggal lama
+     * berarti promo yang sudah lewat, dan salinan yang langsung menyala
+     * dengan tanggal tahun lalu adalah dua kekeliruan sekaligus yang tidak
+     * akan terlihat sampai ada yang memeriksa harganya.
+     */
+    public function gandakan(string $id)
+    {
+        if (! $this->bolehMengubah()) {
+            return $this->tolak();
+        }
+
+        $asal = PromoLayanan::with('angkatan:id')->findOrFail($id);
+
+        $salinan = DB::transaction(function () use ($asal) {
+            $baru = PromoLayanan::create([
+                'nama' => \Illuminate\Support\Str::limit($asal->nama . ' (salinan)', 120, ''),
+                'tipe' => $asal->tipe,
+                'persen' => $asal->persen,
+                'nominal' => $asal->nominal,
+                'batas_potongan' => $asal->batas_potongan,
+                'kuota' => $asal->kuota,
+                'mulai' => now()->toDateString(),
+                'selesai' => now()->addDays(14)->toDateString(),
+                'aktif' => false,
+                'catatan' => $asal->catatan,
+            ]);
+
+            $baru->angkatan()->sync($asal->angkatan->pluck('id')->all());
+
+            return $baru;
+        });
+
+        \App\PromoJejak::catat($salinan, 'digandakan', 'disalin dari "' . $asal->nama . '"');
+
+        \App\Support\PromoAngkatan::lupakan();
+
+        return redirect()->route('account.promo-layanan.edit', $salinan->id)
+            ->with('success', 'Salinan dibuat dan masih dimatikan — periksa tanggalnya dulu, lalu nyalakan.');
     }
 
     // --------------------------------------------------------------- borang
@@ -238,7 +545,7 @@ class PromoLayananController extends Controller
             'promo' => $promo,
             'isEdit' => $promo->exists,
             'terpilih' => $terpilih,
-            'kelompok' => $this->angkatanPerLayanan($terpilih),
+            'kelompok' => $this->angkatanPerLayanan($terpilih, $promo),
             'tipe' => PromoLayanan::TIPE,
         ];
     }
@@ -260,7 +567,7 @@ class PromoLayananController extends Controller
      * @param  array<int, string>  $terpilih
      * @return array<string, array<string, mixed>>
      */
-    private function angkatanPerLayanan(array $terpilih): array
+    private function angkatanPerLayanan(array $terpilih, ?PromoLayanan $promoIni = null): array
     {
         $katalog = Layanan::katalog();
         $hariIni = now()->startOfDay();
@@ -268,6 +575,19 @@ class PromoLayananController extends Controller
         $semua = KategoriLayanan::query()
             ->orderByDesc('mulai')->orderBy('nama')
             ->get(['id', 'layanan', 'varian', 'nama', 'nama_ke', 'mulai', 'status', 'biaya', 'total_biaya']);
+
+        /*
+         * Angkatan yang SUDAH kena promo lain ditandai.
+         *
+         * Mencentangnya tetap boleh — dua promo pada satu angkatan sah, dan
+         * yang menang dipilih menurut besar potongannya. Tetapi admin yang
+         * tidak diberi tahu akan mengira promonya pasti berlaku, lalu heran
+         * kenapa harganya bukan yang ia setel.
+         *
+         * Dimuat berkelompok: satu kueri untuk seluruh daftar, bukan satu per
+         * baris.
+         */
+        \App\Support\PromoAngkatan::muat($semua);
 
         $kelompok = [];
 
@@ -295,8 +615,17 @@ class PromoLayananController extends Controller
              */
             $mulai = $a->mulai ? \Carbon\Carbon::parse($a->mulai) : null;
 
+            // Promo lain yang sedang berjalan di angkatan ini; promo yang
+            // sedang disunting sendiri tidak dihitung sebagai "promo lain".
+            $lain = \App\Support\PromoAngkatan::untuk($a);
+
+            if ($promoIni !== null && $lain !== null && $lain->getKey() === $promoIni->getKey()) {
+                $lain = null;
+            }
+
             $kelompok[$kunci]['baris'][] = [
                 'id' => (string) $a->id,
+                'promo_lain' => $lain?->nama,
                 'nama' => trim((string) ($a->nama ?: 'Angkatan tanpa nama')),
                 'ke' => trim((string) $a->nama_ke),
                 'varian' => $katalog[$kunci]['varian'][$a->varian] ?? null,
@@ -385,7 +714,7 @@ class PromoLayananController extends Controller
          * `nullable`, dan 0 akan ditolak `min:1` dengan galat pada medan yang
          * memang boleh dikosongkan.
          */
-        foreach (['nominal', 'batas_potongan'] as $medan) {
+        foreach (['nominal', 'batas_potongan', 'kuota'] as $medan) {
             if (! $request->exists($medan)) {
                 continue;
             }
@@ -409,6 +738,13 @@ class PromoLayananController extends Controller
             'nominal' => ['nullable', 'required_if:tipe,rupiah', 'integer', 'min:1', 'max:1000000000'],
             'batas_potongan' => ['nullable', 'integer', 'min:1', 'max:1000000000'],
 
+            /*
+             * Kuota boleh kosong (tanpa batas) tetapi TIDAK boleh nol: nol
+             * berarti promo yang habis sejak detik pertama, dan itu hampir
+             * selalu salah ketik, bukan maksud.
+             */
+            'kuota' => ['nullable', 'integer', 'min:1', 'max:1000000'],
+
             'mulai' => ['required', 'date'],
 
             /*
@@ -427,6 +763,7 @@ class PromoLayananController extends Controller
             'persen' => 'potongan persen',
             'nominal' => 'potongan rupiah',
             'batas_potongan' => 'batas potongan',
+            'kuota' => 'kuota pendaftaran',
             'mulai' => 'tanggal mulai',
             'selesai' => 'tanggal selesai',
             'angkatan' => 'angkatan',
@@ -454,6 +791,8 @@ class PromoLayananController extends Controller
                 'batas_potongan' => $persenan && ! empty($isian['batas_potongan'])
                     ? (int) $isian['batas_potongan']
                     : null,
+
+                'kuota' => ! empty($isian['kuota']) ? (int) $isian['kuota'] : null,
 
                 'mulai' => $isian['mulai'],
                 'selesai' => $isian['selesai'],

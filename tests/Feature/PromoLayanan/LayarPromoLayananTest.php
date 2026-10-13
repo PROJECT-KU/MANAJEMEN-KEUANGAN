@@ -532,8 +532,11 @@ class LayarPromoLayananTest extends TestCase
         $this->assertStringContainsString('pointer-events: none', $aturan[1],
             'Tanpa ini, menekan tepat di atas "Rp" tidak memfokuskan kotaknya.');
 
-        // Ketiga kotaknya memang dibungkus, bukan cuma gayanya yang ada.
-        $this->assertSame(3, substr_count($berkas, '<span class="prf-kotak">'));
+        /*
+         * Keempat kotak berangka memang dibungkus, bukan cuma gayanya yang
+         * ada: persen, maksimal potongan, potongan rupiah, dan kuota.
+         */
+        $this->assertSame(4, substr_count($berkas, '<span class="prf-kotak">'));
     }
 
     #[Test]
@@ -811,7 +814,9 @@ class LayarPromoLayananTest extends TestCase
             ->get(route('account.kategori-layanan.detail', $angkatan->getKey()))
             ->assertOk()
             ->assertSee($promo->nama)
-            ->assertSee(route('account.promo-layanan.edit', $promo->id))
+            // Menunjuk RINCIAN promo, bukan borang ubahnya: dari layar
+            // angkatan orang ingin MELIHAT promonya, bukan menyuntingnya.
+            ->assertSee(route('account.promo-layanan.detail', $promo->id))
             ->assertSee('jadi Rp 1.750.000');
     }
 

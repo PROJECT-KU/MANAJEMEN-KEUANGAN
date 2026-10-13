@@ -40,6 +40,7 @@ class PromoLayanan extends Model
         'persen',
         'nominal',
         'batas_potongan',
+        'kuota',
         'mulai',
         'selesai',
         'aktif',
@@ -54,6 +55,7 @@ class PromoLayanan extends Model
         'persen' => 'integer',
         'nominal' => 'integer',
         'batas_potongan' => 'integer',
+        'kuota' => 'integer',
     ];
 
     /** Potongan sekian persen dari harga. */
@@ -83,6 +85,147 @@ class PromoLayanan extends Model
                 $model->penginput_id = auth()->id();
             }
         });
+
+        /*
+         * Jejak ditulis dari kait model, BUKAN dari pengendali.
+         *
+         * Promo diubah dari borang, dari saklar di layar daftar, dan dari
+         * tombol Gandakan — mencatat di pengendali berarti tiga tempat yang
+         * harus diingat, dan yang keempat pasti terlewat.
+         */
+        static::created(fn ($m) => PromoJejak::catat($m, 'dibuat', $m->ringkasIsi()));
+
+        static::updated(function ($m) {
+            $berubah = $m->ringkasPerubahan();
+
+            // Penyimpanan yang tidak mengubah apa pun tidak dicatat; kalau
+            // tidak, jejaknya penuh baris "diubah" tanpa isi.
+            if ($berubah === '') {
+                return;
+            }
+
+            /*
+             * Menyalakan dan mematikan dapat aksinya sendiri.
+             *
+             * Keduanya peristiwa yang paling sering dicari di jejak — "sejak
+             * kapan promo ini mati?" — dan terkubur di antara baris "diubah"
+             * ia harus dicari dengan membaca ringkasan satu per satu.
+             */
+            $kunci = array_keys($m->getChanges());
+            $hanyaSaklar = array_diff($kunci, ['aktif', 'updated_at']) === [];
+
+            PromoJejak::catat(
+                $m,
+                $hanyaSaklar ? ($m->aktif ? 'dinyalakan' : 'dimatikan') : 'diubah',
+                $berubah
+            );
+        });
+
+        /*
+         * Salinan utuh barisnya ikut disimpan. Dicatat di `deleted`, bukan
+         * `deleting`: kalau penghapusannya gagal, tidak boleh ada jejak yang
+         * mengaku sudah terhapus.
+         */
+        static::deleted(fn ($m) => PromoJejak::catat(
+            $m, 'dihapus', $m->ringkasIsi(), $m->getOriginal()
+        ));
+    }
+
+    /** Jejak perubahan promo ini, terbaru dulu. */
+    public function jejak()
+    {
+        /*
+         * Diurutkan dari kunci berurutnya, BUKAN dari created_at.
+         *
+         * Dua peristiwa bisa jatuh di milidetik yang sama — dibuat lalu
+         * langsung dimatikan oleh kode yang sama — dan saat itu urutan menurut
+         * waktu ditentukan apa pun yang kebetulan dikembalikan MySQL.
+         * Terukur: ujinya hijau sendirian, merah di rangkaian penuh.
+         */
+        return $this->hasMany(PromoJejak::class, 'promo_id')->orderByDesc('id');
+    }
+
+    /**
+     * Isi promo dalam satu kalimat, untuk jejak "dibuat" dan "dihapus".
+     *
+     * Tanpa ini, baris "dibuat" di jejak tidak menyatakan promo seperti apa
+     * yang dibuat — dan itu justru baris yang paling sering dibaca saat
+     * menelusuri harga yang tidak terduga.
+     */
+    public function ringkasIsi(): string
+    {
+        return 'potongan ' . $this->potongan_ringkas
+            . ', ' . $this->periode_terbaca
+            . ($this->kuota ? ', kuota ' . $this->kuota . ' pendaftaran' : '');
+    }
+
+    /**
+     * Kalimat pendek berisi apa saja yang berubah pada penyimpanan terakhir.
+     *
+     * Hanya kolom yang BERARTI bagi orang. `updated_at` selalu berubah dan
+     * menyebutkannya cuma membuat tiap jejak berbunyi sama.
+     */
+    public function ringkasPerubahan(): string
+    {
+        $nama = [
+            'nama' => 'nama',
+            'tipe' => 'jenis potongan',
+            'persen' => 'potongan persen',
+            'nominal' => 'potongan rupiah',
+            'batas_potongan' => 'maksimal potongan',
+            'kuota' => 'kuota',
+            'mulai' => 'tanggal mulai',
+            'selesai' => 'tanggal selesai',
+            'aktif' => 'keadaan',
+            'catatan' => 'catatan',
+        ];
+
+        $bagian = [];
+
+        foreach ($this->getChanges() as $kolom => $baru) {
+            if (! array_key_exists($kolom, $nama)) {
+                continue;
+            }
+
+            $lama = $this->getOriginal($kolom);
+
+            // Catatan bisa ratusan huruf; yang berguna cuma "berubah".
+            if ($kolom === 'catatan') {
+                $bagian[] = 'catatan diganti';
+
+                continue;
+            }
+
+            if ($kolom === 'aktif') {
+                $bagian[] = 'keadaan: ' . ($lama ? 'menyala' : 'mati') . ' → ' . ($baru ? 'menyala' : 'mati');
+
+                continue;
+            }
+
+            $bagian[] = $nama[$kolom] . ': ' . self::terbaca($kolom, $lama) . ' → ' . self::terbaca($kolom, $baru);
+        }
+
+        return implode(', ', $bagian);
+    }
+
+    /** @param mixed $nilai */
+    private static function terbaca(string $kolom, $nilai): string
+    {
+        if ($nilai === null || $nilai === '') {
+            return '(kosong)';
+        }
+
+        // Tanggal disimpan sebagai objek sesudah cast; yang dibaca orang
+        // harinya saja, bukan "2026-10-13 00:00:00".
+        if (in_array($kolom, ['mulai', 'selesai'], true)) {
+            return \Carbon\Carbon::parse((string) $nilai)->format('d/m/Y');
+        }
+
+        if (in_array($kolom, ['nominal', 'batas_potongan'], true)) {
+            return 'Rp ' . number_format((int) $nilai, 0, ',', '.');
+        }
+
+        return (string) $nilai;
     }
 
     // --------------------------------------------------------------- tautan
@@ -228,7 +371,46 @@ class PromoLayanan extends Model
             return 'selesai';
         }
 
+        /*
+         * Kuota habis diperiksa PALING AKHIR, dan sengaja.
+         *
+         * Ia satu-satunya keadaan yang menuntut membaca tabel pendaftaran.
+         * Diperiksa lebih dulu, tiap promo yang sudah mati atau belum mulai
+         * pun ikut menghitung pendaftaran — pekerjaan yang hasilnya pasti
+         * dibuang.
+         */
+        if ($this->kuotaHabis()) {
+            return 'kuota-habis';
+        }
+
         return 'berjalan';
+    }
+
+    /**
+     * Apakah jatah pendaftarannya sudah terpakai semua.
+     *
+     * null berarti tanpa batas; 0 berarti habis sejak detik pertama, dan itu
+     * memang dua hal yang berbeda.
+     */
+    public function kuotaHabis(): bool
+    {
+        if ($this->kuota === null) {
+            return false;
+        }
+
+        return \App\Support\DampakPromo::terpakai((string) $this->getKey()) >= (int) $this->kuota;
+    }
+
+    /** Berapa pendaftaran yang sudah memakai promo ini. */
+    public function getTerpakaiAttribute(): int
+    {
+        return \App\Support\DampakPromo::terpakai((string) $this->getKey());
+    }
+
+    /** Sisa jatah, atau null kalau promonya memang tanpa batas. */
+    public function getSisaKuotaAttribute(): ?int
+    {
+        return $this->kuota === null ? null : max(0, (int) $this->kuota - $this->terpakai);
     }
 
     /** Kalimat keadaan yang dibaca orang. */
@@ -238,6 +420,7 @@ class PromoLayanan extends Model
             'berjalan' => 'Sedang berjalan',
             'belum-mulai' => 'Belum mulai',
             'selesai' => 'Sudah selesai',
+            'kuota-habis' => 'Kuota habis',
             'nonaktif' => 'Dimatikan',
         ][$this->keadaan] ?? 'Dimatikan';
     }
@@ -255,6 +438,7 @@ class PromoLayanan extends Model
             'berjalan' => 'hijau',
             'belum-mulai' => 'biru',
             'selesai' => 'abu',
+            'kuota-habis' => 'kuning',
             'nonaktif' => 'merah',
         ][$this->keadaan] ?? 'abu';
     }
