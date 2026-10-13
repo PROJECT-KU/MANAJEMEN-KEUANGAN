@@ -274,9 +274,13 @@
                         <span class="det-nilai">
                             @if ((int) $angkatan->biaya > 0)
                                 Rp {{ number_format((int) $angkatan->biaya, 0, ',', '.') }}
+                                {{-- "diskon", bukan "promo": sejak promo jadi fiturnya
+                                     sendiri, kata itu menunjuk hal yang berbeda, dan dua
+                                     arti untuk satu kata di layar yang sama membuat admin
+                                     mencari promonya di tempat yang salah. --}}
                                 @if ((int) $angkatan->total_biaya > 0 && (int) $angkatan->total_biaya !== (int) $angkatan->biaya)
                                     <span class="det-nilai samar">
-                                        &middot; promo Rp {{ number_format((int) $angkatan->total_biaya, 0, ',', '.') }}
+                                        &middot; diskon Rp {{ number_format((int) $angkatan->total_biaya, 0, ',', '.') }}
                                         @if ($angkatan->kode_diskon) ({{ $angkatan->kode_diskon }}) @endif
                                     </span>
                                 @endif
@@ -285,6 +289,26 @@
                             @endif
                         </span>
                     </div>
+
+                    {{-- Promo yang sedang berjalan pada angkatan ini.
+
+                         Barisnya sendiri, bukan diselipkan ke baris Biaya: promo
+                         punya nama DAN periode, dan menempelkan ketiganya ke satu
+                         baris membuat nominalnya tidak lagi terbaca sekilas. --}}
+                    @if ($angkatan->promo_berjalan)
+                        <div class="det-baris">
+                            <span class="det-label">Promo</span>
+                            <span class="det-nilai">
+                                <a href="{{ route('account.promo-layanan.edit', $angkatan->promo_berjalan->id) }}"
+                                    title="Buka promo ini">{{ $angkatan->promo_berjalan->nama }}</a>
+                                <span class="det-nilai samar">
+                                    &middot; {{ $angkatan->promo_berjalan->potongan_ringkas }} per peserta
+                                    &middot; jadi Rp {{ number_format($angkatan->harga_setelah_promo, 0, ',', '.') }}
+                                    &middot; sampai {{ $angkatan->promo_berjalan->selesai->locale('id')->translatedFormat('j M Y') }}
+                                </span>
+                            </span>
+                        </div>
+                    @endif
 
                     <div class="det-baris">
                         <span class="det-label">Grup WhatsApp</span>

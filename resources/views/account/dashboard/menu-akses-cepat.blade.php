@@ -228,9 +228,9 @@
                 <div class="icon-circle" style="background: #f43f5e;"><i class="fas fa-hand-holding-usd"></i></div>
                 <span class="menu-label">Biaya Clinik Scopus</span>
             </a>
-            <a href="{{ route('account.Clinik-Scopus-Promo.index') }}" class="menu-item hidden">
+            <a href="{{ route('account.promo-layanan.index') }}" class="menu-item hidden">
                 <div class="icon-circle" style="background: #ec4899;"><i class="fas fa-percentage"></i></div>
-                <span class="menu-label">Pro. Clinik Scopus</span>
+                <span class="menu-label">Promo Layanan</span>
             </a>
             <a href="{{ route('account.Artikel.index') }}" class="menu-item hidden">
                 <div class="icon-circle bg-dark"><i class="fas fa-file-alt"></i></div>
