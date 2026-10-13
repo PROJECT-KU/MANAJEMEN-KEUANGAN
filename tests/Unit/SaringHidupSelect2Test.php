@@ -193,7 +193,18 @@ class SaringHidupSelect2Test extends TestCase
             $this->pemilih(), $cocok
         ), 'Perakit baris pemilihnya tidak ditemukan.');
 
-        $this->assertStringContainsString('judul.textContent = opsi.textContent', $cocok[1]);
+        /*
+         * Tiap bagiannya dipasang lewat textContent.
+         *
+         * Labelnya kini dipecah jadi nama dan kepingan keterangannya —
+         * nama, tanggal, sisa kuota — dan masing-masing tetap harus lewat
+         * textContent. Satu saja yang dirangkai jadi HTML sudah cukup.
+         */
+        $this->assertStringContainsString('judul.textContent = pecahan.nama', $cocok[1],
+            'Nama pilihannya tidak dipasang lewat textContent.');
+
+        $this->assertStringContainsString('keping.textContent = k.trim()', $cocok[1],
+            'Kepingan keterangannya tidak dipasang lewat textContent.');
 
         $this->assertStringNotContainsString('innerHTML', $cocok[1],
             'Baris pemilihnya dirakit dari untaian HTML; nama angkatan yang '
@@ -507,6 +518,102 @@ class SaringHidupSelect2Test extends TestCase
         $this->assertStringContainsString('window.misPemilih = misPemilih;', $this->pemilih(),
             'misPemilih() tidak dipasang ke window, jadi layar lain tidak bisa '
             . 'memanggilnya.');
+    }
+
+    private function gayaBersama(): string
+    {
+        return (string) file_get_contents(
+            dirname(__DIR__, 2) . '/public/assets/css/mis-ui.css'
+        );
+    }
+
+    /**
+     * Label pilihan DIPECAH jadi nama dan kepingan keterangannya.
+     *
+     * Kedua layar merangkai labelnya dengan pemisah yang sama — "Angkatan
+     * Penuh wHDHUL · 12 Nov 2026 — sisa 0/2". Sebagai satu untaian ia
+     * terpatah dua baris dan ketiga bagiannya terbaca sederajat, padahal
+     * yang dicari orang namanya; tanggal dan kuotanya cuma pembeda.
+     * Terukur sesudah dipecah: nama tidak lagi terpatah, dan tingginya
+     * tetap 62px.
+     *
+     * Pemecahan untuk RUPA saja: tanpa pemisah, seluruh labelnya jadi nama
+     * dan tidak ada yang hilang. Nilai yang dipakai tetap opsi.value.
+     */
+    public function test_label_pilihan_dipecah_jadi_nama_dan_keping(): void
+    {
+        $js = $this->pemilih();
+
+        $this->assertSame(1, preg_match(
+            '/function pecahLabel\(teks\) \{([\s\S]*?)\n    \}/', $js, $cocok
+        ), 'Pemecah labelnya tidak ada.');
+
+        $this->assertStringContainsString('split(', $cocok[1]);
+
+        /*
+         * Kedua pemisahnya WAJIB dikenali: titik tengah untuk keterangan
+         * tambahan, tanda pisah untuk sisa kuota. Yang satu saja berarti
+         * "12 Nov 2026 — sisa 0/2" tetap menyatu jadi satu keping panjang.
+         */
+        foreach (['\u00b7', '\u2014'] as $pemisah) {
+            $this->assertStringContainsString($pemisah, $cocok[1],
+                'Pemisah ' . $pemisah . ' tidak dikenali, jadi keterangannya '
+                . 'tidak terpecah seluruhnya.');
+        }
+
+        // Tanpa pemisah, seluruh labelnya tetap jadi nama.
+        $this->assertStringContainsString('bagian.shift()', $cocok[1],
+            'Bagian pertamanya tidak dijadikan nama; pilihan tanpa pemisah '
+            . 'akan kehilangan labelnya.');
+    }
+
+    /**
+     * Pilihan yang sedang berlaku DITANDAI, tidak cuma dicincin.
+     *
+     * Daftar ini berisi puluhan baris yang namanya hampir sama — terukur
+     * 174 di layar rincian dan 209 di layar daftar. Cincin tipis di tepinya
+     * harus dicari sendiri; latar bernada dan tanda centang di ujungnya
+     * terbaca sekali lihat.
+     */
+    public function test_pilihan_yang_berlaku_ditandai(): void
+    {
+        $css = $this->gayaBersama();
+
+        $this->assertSame(1, preg_match(
+            '/\.mis-pilih-baris\.terpilih\s*\{([^}]*)\}/s', $css, $cocok
+        ), 'Aturan baris terpilih tidak ada.');
+
+        $this->assertMatchesRegularExpression('/\bbackground:/', $cocok[1],
+            'Baris yang berlaku tidak berlatar bernada, jadi ia harus dicari '
+            . 'sendiri di antara puluhan baris yang namanya hampir sama.');
+
+        $this->assertMatchesRegularExpression(
+            '/\.mis-pilih-baris\.terpilih::after\s*\{[^}]*content:/s', $css,
+            'Tidak ada tanda centang pada baris yang berlaku.'
+        );
+
+        /*
+         * Ruang untuk tandanya WAJIB disediakan. Tanpa padding kanan,
+         * tandanya duduk di atas tulisan barisnya sendiri — dan nama
+         * angkatan di sini memang panjang.
+         */
+        $this->assertMatchesRegularExpression('/padding-right:\s*\d+px/', $cocok[1],
+            'Tidak ada ruang untuk tandanya; ia menimpa tulisan barisnya.');
+    }
+
+    /**
+     * Kotak cari MENEMPEL di atas daftarnya.
+     *
+     * Daftarnya yang bergulung, bukan kotaknya — tetapi begitu orang
+     * menggulung jauh ke bawah lalu hendak mengetik ulang, kotaknya sudah
+     * lewat di atas.
+     */
+    public function test_kotak_cari_menempel_saat_daftarnya_tergulung(): void
+    {
+        $this->assertMatchesRegularExpression(
+            '/\.mis-pilih-cari\s*\{[^}]*position:\s*sticky/s', $this->gayaBersama(),
+            'Kotak carinya ikut tergulung hilang saat daftarnya digulung.'
+        );
     }
 
 }
