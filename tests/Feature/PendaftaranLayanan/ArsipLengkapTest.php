@@ -350,9 +350,15 @@ class ArsipLengkapTest extends TestCase
      * Diukur di peramban lewat iframe berlebar 390px, bukan ditaksir:
      *
      *     tanpa aturan ini  gulir badan 414px
+     *     tanpa aturan ini  gulir badan 414px
      *     dengan aturan     gulir badan 390px
      *
-     * Dijaga dari sumbernya sebab uji PHP tidak menjalankan CSS.
+     * Pemilihnya menyebut SEMUA anak, bukan `span` saja. Versi pertama
+     * penjaga ini mematok `.thp-ket > span` — dan aturan produk yang
+     * dijaganya pun begitu. Keping "dikembalikan …" lalu ditulis sebagai
+     * <a> agar bisa ditekan, keluar dari aturan itu tanpa satu tanda pun,
+     * dan penjaganya tetap hijau: terukur ulang di 390px, lebar gulir
+     * badan 411px melawan layar 390px dengan penjaga ini menyala.
      */
     #[Test]
     public function keping_boleh_membungkus_di_layar_sempit(): void
@@ -362,7 +368,7 @@ class ArsipLengkapTest extends TestCase
         ));
 
         $this->assertMatchesRegularExpression(
-            '/@media[^{]*max-width[^{]*\{(?:[^{}]|\{[^{}]*\})*\.thp-ket > span\s*\{[^}]*white-space:\s*normal/s',
+            '/@media[^{]*max-width[^{]*\{(?:[^{}]|\{[^{}]*\})*\.thp-ket > \*\s*\{[^}]*white-space:\s*normal/s',
             $isi,
             'Keping keterangan tidak diizinkan membungkus di layar sempit; '
             . 'keping "dikembalikan … oleh …" akan menembus tepi kartunya.'
