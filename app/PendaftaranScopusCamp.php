@@ -29,6 +29,8 @@ class PendaftaranScopusCamp extends Model
         'jumlah_pendaftar',
         'kode_diskon',
         'nominal_diskon',
+        // Tali ke promo yang memotong harganya; dibaca layar dampak promo.
+        'promo_id',
         'total_pembayaran',
         'status',
         'tanggal_reschedule',

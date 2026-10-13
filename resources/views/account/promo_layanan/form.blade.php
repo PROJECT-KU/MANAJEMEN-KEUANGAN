@@ -261,6 +261,11 @@
        promo lama yang sudah mencentangnya harus tetap bisa dibuka. */
     .prf-lewat { display: inline-block; margin-left: 5px; padding: 1px 7px; border-radius: 999px; background: #f1f5f9; font-size: .66rem; font-weight: 700; color: #64748b; }
 
+    /* Kuning, bukan merah: bentrok promo bukan kesalahan — ia sah, dan yang
+       menang dipilih menurut besar potongannya. Merah menyuruh orang
+       membatalkan sesuatu yang tidak perlu dibatalkan. */
+    .prf-bentrok { display: inline-block; margin-left: 5px; padding: 1px 7px; border-radius: 999px; background: #fef3c7; font-size: .66rem; font-weight: 700; color: #92400e; }
+
     /*
      * Kotak centang di dalam kisi isian dirapatkan ke KIRI.
      *
@@ -506,6 +511,20 @@
                             <p class="mis-bantuan">Hari ini ikut dihitung penuh sampai tengah malam.</p>
                         </div>
 
+                        <div class="mis-isian prf-isian">
+                            <label class="mis-label" for="prf-kuota">Batas jumlah pendaftaran</label>
+                            <span class="prf-kotak">
+                                <input type="text" class="form-control-modern" id="prf-kuota" name="kuota"
+                                    inputmode="numeric" autocomplete="off" data-prf-rupiah
+                                    value="{{ old('kuota', $promo->kuota) ? number_format((int) old('kuota', $promo->kuota), 0, ',', '.') : '' }}"
+                                    placeholder="Boleh dikosongkan">
+                            </span>
+                            <p class="mis-bantuan">
+                                Promonya berhenti sendiri sesudah sebanyak ini pendaftaran.
+                                Kosongkan kalau tanpa batas.
+                            </p>
+                        </div>
+
                         <div class="mis-isian prf-penuh">
                             <label class="mis-centang-bungkus" style="gap: 9px; font-size: .82rem;">
                                 {{-- Nilai 0 di depan: kotak centang yang tidak
@@ -548,6 +567,13 @@
                             <span>Sembunyikan yang sudah lewat</span>
                         </label>
 
+                        {{-- Memeriksa 12 centang di antara 241 baris berarti
+                             menggulung seluruh daftar dan menghitung sendiri. --}}
+                        <label class="mis-centang-bungkus" style="gap: 8px; font-size: .78rem; padding-bottom: 10px;">
+                            <input type="checkbox" class="mis-centang" id="prf-hanya-terpilih">
+                            <span>Hanya yang dipilih</span>
+                        </label>
+
                         <p class="prf-hitung" id="prf-hitung" role="status" aria-live="polite" style="margin: 0 0 8px auto;">
                             <i class="fas fa-check-circle" aria-hidden="true"></i>
                             <span id="prf-hitung-teks">0 angkatan dipilih</span>
@@ -588,6 +614,16 @@
                                                     {{ $baris['nama'] }}
                                                     @if ($baris['lewat'])
                                                         <span class="prf-lewat">sudah lewat</span>
+                                                    @endif
+                                                    {{-- Mencentangnya tetap boleh: dua promo
+                                                         pada satu angkatan sah, dan yang menang
+                                                         dipilih menurut besar potongannya. Yang
+                                                         tidak boleh adalah admin tidak tahu. --}}
+                                                    @if ($baris['promo_lain'])
+                                                        <span class="prf-bentrok"
+                                                            title="Angkatan ini sudah kena promo &ldquo;{{ $baris['promo_lain'] }}&rdquo;. Yang berlaku nanti yang potongannya paling besar.">
+                                                            sudah ada promo
+                                                        </span>
                                                     @endif
                                                 </span>
                                                 <span class="prf-baris-ket">
@@ -638,7 +674,7 @@
                     <div class="mis-kosong mis-kosong-cari" id="prf-tidak-ketemu" hidden>
                         <span class="mis-kosong-ikon" aria-hidden="true"><i class="fas fa-search"></i></span>
                         <p class="mis-kosong-judul">Tidak ada angkatan yang cocok</p>
-                        <p class="mis-kosong-teks">
+                        <p class="mis-kosong-teks" id="prf-tidak-ketemu-teks">
                             Coba kata kunci lain, atau hilangkan centang
                             &ldquo;Sembunyikan yang sudah lewat&rdquo;.
                         </p>
@@ -918,6 +954,7 @@
 
         var kotakCari = document.getElementById('prf-cari');
         var sembunyiLewat = document.getElementById('prf-sembunyi-lewat');
+        var hanyaTerpilih = document.getElementById('prf-hanya-terpilih');
         var tidakKetemu = document.getElementById('prf-tidak-ketemu');
         var hitungTeks = document.getElementById('prf-hitung-teks');
         var lencanaHitung = document.getElementById('prf-hitung');
@@ -934,6 +971,7 @@
         function saring() {
             var kata = (kotakCari ? kotakCari.value : '').trim().toLowerCase();
             var sembunyi = sembunyiLewat ? sembunyiLewat.checked : false;
+            var hanyaPilih = hanyaTerpilih ? hanyaTerpilih.checked : false;
             var adaYangTampak = false;
 
             for (var k = 0; k < kelompok.length; k++) {
@@ -947,7 +985,16 @@
                     var cocokKata = kata === '' || baris[b].dataset.prfKata.indexOf(kata) !== -1;
                     var bolehLewat = !sembunyi || baris[b].dataset.prfLewat !== '1';
 
-                    var terlihat = tercentang || (cocokKata && bolehLewat);
+                    /*
+                     * "Hanya yang dipilih" MEMBALIK aturan di atas: biasanya
+                     * yang tercentang selalu terlihat apa pun saringannya,
+                     * tetapi di mode ini justru yang TIDAK tercentang yang
+                     * harus hilang. Ditumpuk tanpa membalik, saringannya
+                     * tidak mengubah apa pun sama sekali.
+                     */
+                    var terlihat = hanyaPilih
+                        ? (tercentang && cocokKata)
+                        : (tercentang || (cocokKata && bolehLewat));
 
                     baris[b].hidden = !terlihat;
 
@@ -974,6 +1021,17 @@
 
             if (tidakKetemu) {
                 tidakKetemu.hidden = adaYangTampak || kelompok.length === 0;
+
+                // Kalimatnya menyesuaikan mode: menyuruh melepas centang
+                // "sembunyikan yang sudah lewat" saat yang menyaring justru
+                // "hanya yang dipilih" adalah petunjuk yang menyesatkan.
+                var teks = document.getElementById('prf-tidak-ketemu-teks');
+
+                if (teks) {
+                    teks.textContent = hanyaPilih
+                        ? 'Belum ada angkatan yang dicentang. Hilangkan centang "Hanya yang dipilih" untuk memilihnya.'
+                        : 'Coba kata kunci lain, atau hilangkan centang "Sembunyikan yang sudah lewat".';
+                }
             }
         }
 
@@ -1078,6 +1136,10 @@
 
         if (sembunyiLewat) {
             sembunyiLewat.addEventListener('change', saring);
+        }
+
+        if (hanyaTerpilih) {
+            hanyaTerpilih.addEventListener('change', saring);
         }
 
         // ---------------------------------------------------------- hapus

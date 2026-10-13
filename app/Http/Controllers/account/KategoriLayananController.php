@@ -1078,6 +1078,20 @@ class KategoriLayananController extends Controller
             'angkatan' => $angkatan,
             'tarif' => $angkatan->tarif(),
             'bolehUbah' => $this->bolehMengubah(),
+            /*
+             * Promo yang BOLEH dipasang dari sini: yang masih punya masa
+             * depan, dan belum menunjuk angkatan ini.
+             *
+             * Promo yang sudah selesai sengaja tidak ditawarkan — memasangnya
+             * tidak mengubah harga apa pun, jadi menu yang memuatnya cuma
+             * menawarkan pilihan yang tidak melakukan apa-apa.
+             */
+            'promoTersedia' => \App\PromoLayanan::query()
+                ->where('aktif', true)
+                ->whereDate('selesai', '>=', now()->toDateString())
+                ->whereDoesntHave('angkatan', fn ($q) => $q->whereKey($angkatan->getKey()))
+                ->orderBy('nama')
+                ->get(['id', 'nama', 'tipe', 'persen', 'nominal', 'mulai', 'selesai']),
             // Dua belas terakhir: yang ditanyakan orang selalu "siapa yang
             // baru saja mengubah ini", bukan riwayat setahun penuh.
             'jejak' => $angkatan->jejak()->limit(12)->get(),

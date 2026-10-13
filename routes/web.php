@@ -641,10 +641,37 @@ Route::prefix('account')
                 ->name('account.promo-layanan.index');
             Route::get('/Promo-Layanan/tambah', 'account\PromoLayananController@create')
                 ->name('account.promo-layanan.create');
+
+            /*
+             * Unduhan DI ATAS rute /{id}, bukan di bawahnya. Laravel memilih
+             * rute pertama yang cocok: ditaruh belakangan, "unduh-excel"
+             * terbaca sebagai sebuah {id} dan unduhannya memulangkan 404
+             * "promo tidak ketemu".
+             */
+            Route::get('/Promo-Layanan/unduh-excel', 'account\PromoLayananController@eksporExcel')
+                ->name('account.promo-layanan.excel');
+            Route::get('/Promo-Layanan/cetak', 'account\PromoLayananController@cetakPdf')
+                ->name('account.promo-layanan.cetak');
             Route::post('/Promo-Layanan', 'account\PromoLayananController@store')
                 ->name('account.promo-layanan.store');
+            /*
+             * Rincian, dan alamatnya tanpa akhiran: ia yang paling sering
+             * dibuka, dan tautan dari layar lain menunjuk ke sini.
+             */
+            Route::get('/Promo-Layanan/{id}', 'account\PromoLayananController@detail')
+                ->name('account.promo-layanan.detail');
             Route::get('/Promo-Layanan/{id}/ubah', 'account\PromoLayananController@edit')
                 ->name('account.promo-layanan.edit');
+            Route::post('/Promo-Layanan/{id}/gandakan', 'account\PromoLayananController@gandakan')
+                ->name('account.promo-layanan.gandakan');
+
+            /*
+             * Dipasang dari sisi ANGKATAN. Alamatnya memuat kategori, bukan
+             * promo, supaya terbaca sebagai tindakan pada angkatan itu —
+             * promonya datang dari isian borangnya.
+             */
+            Route::post('/Promo-Layanan/angkatan/{kategori}/tempel', 'account\PromoLayananController@tempel')
+                ->name('account.promo-layanan.tempel');
             Route::put('/Promo-Layanan/{id}', 'account\PromoLayananController@update')
                 ->name('account.promo-layanan.update');
 
