@@ -680,11 +680,26 @@ class PulihkanPendaftaranTest extends TestCase
         $this->assertStringContainsString('id="' . $cocok[1] . '"', $isi,
             'Wadah hasil yang disebut data-mis-saring tidak ada di halamannya.');
 
-        $this->assertSame(1, preg_match('/data-mis-saring-juga="([a-z-]+)"/', $isi, $juga));
+        /*
+         * TIAP id yang disebutkan diperiksa, bukan satu.
+         *
+         * Pola lamanya `([a-z-]+)` tidak mengizinkan koma, jadi begitu
+         * daftarnya berisi lebih dari satu id — "thp-ringkas,thp-aktif" —
+         * ia berhenti cocok sama sekali. Penjaganya lalu merah bukan karena
+         * ada id yang hilang, melainkan karena bentuk nilainya berubah; dan
+         * sebaliknya, id kedua yang salah ketik tidak akan pernah
+         * tertangkap.
+         */
+        $this->assertSame(1, preg_match('/data-mis-saring-juga="([a-z0-9,-]+)"/', $isi, $juga),
+            'Borangnya tidak menyebut data-mis-saring-juga sama sekali.');
 
-        $this->assertStringContainsString('id="' . $juga[1] . '"', $isi,
-            'Ringkasan yang disebut data-mis-saring-juga tidak ada; angkanya '
-            . 'akan tertinggal pada nilai sebelum disaring.');
+        foreach (explode(',', $juga[1]) as $id) {
+            $id = trim($id);
+
+            $this->assertStringContainsString('id="' . $id . '"', $isi,
+                'Unsur "' . $id . '" yang disebut data-mis-saring-juga tidak ada; '
+                . 'isinya akan tertinggal pada nilai sebelum disaring.');
+        }
 
         // Kotak cari dan tombol cadangannya ikut dituntut: tanpa data-mis-cari
         // penyaringnya hidup tetapi tidak pernah menyahut ketikan.
