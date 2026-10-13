@@ -3845,3 +3845,142 @@ a.mis-ubin.terpilih {
         min-width: 0;
     }
 }
+
+/*
+ * ------------------------------------------------------------------
+ * Pemilih layar penuh untuk <select> berisi banyak pilihan
+ * ------------------------------------------------------------------
+ *
+ * Dipakai dua layar: saringan angkatan di Pendaftar Layanan, dan
+ * pemindahan angkatan di layar rincian. Perilakunya di misPemilih()
+ * pada mis-ui.js.
+ */
+.mis-pilih-popup {
+    padding: 0 0 6px;
+}
+
+.mis-pilih-popup .swal2-title {
+    padding: 18px 20px 10px;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--mis-tinta-1);
+}
+
+.mis-pilih-popup .swal2-html-container {
+    margin: 0;
+    padding: 0 14px 10px;
+    text-align: left;
+}
+
+.mis-pilih-cari {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0 0 10px;
+    padding: 0 13px;
+    border: 1px solid var(--mis-garis);
+    border-radius: 12px;
+    background: #fff;
+}
+
+.mis-pilih-cari:focus-within {
+    border-color: #a5b4fc;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, .14);
+}
+
+.mis-pilih-cari .fas {
+    font-size: 13px !important;
+    color: var(--mis-tinta-4);
+}
+
+.mis-pilih-cari input {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 42px;
+    border: 0;
+    background: none;
+    font-size: .88rem;
+    color: var(--mis-tinta-1);
+}
+
+.mis-pilih-cari input:focus { outline: none; }
+
+/*
+ * Tingginya dipatok supaya daftarnya yang bergulung, bukan seluruh
+ * kotaknya. Kotak yang ikut memanjang membuat kotak carinya tergulung
+ * keluar layar justru saat orang hendak mengetik ulang.
+ */
+.mis-pilih-daftar {
+    max-height: min(56vh, 420px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.mis-pilih-kelompok {
+    margin: 12px 0 5px;
+    padding: 0 4px;
+    font-size: .68rem;
+    font-weight: 800;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--mis-tinta-4);
+}
+
+.mis-pilih-kelompok:first-child { margin-top: 2px; }
+
+.mis-pilih-baris {
+    display: block;
+    width: 100%;
+    margin: 0 0 5px;
+    /*
+     * Tingginya tidak kurang dari 44px — sasaran ketuk yang bisa
+     * dikenai jempol. Daftar ini justru yang paling sering dipakai
+     * di ponsel.
+     */
+    min-height: 46px;
+    padding: 9px 13px;
+    border: 1px solid var(--mis-garis);
+    border-radius: 12px;
+    background: #fff;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease;
+}
+
+.mis-pilih-baris:hover,
+.mis-pilih-baris:focus-visible {
+    border-color: #c7d2fe;
+    background: #f8faff;
+}
+
+.mis-pilih-baris.terpilih {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 1px #6366f1 inset;
+}
+
+.mis-pilih-baris[hidden] { display: none; }
+
+.mis-pilih-judul {
+    display: block;
+    font-size: .85rem;
+    font-weight: 700;
+    line-height: 1.35;
+    color: var(--mis-tinta-1);
+}
+
+/* Nama layanannya ikut tertulis di tiap baris, bukan cuma di kepala
+   kelompoknya: begitu daftarnya disaring, kepala kelompok yang
+   tersisa bisa jauh di atas baris yang sedang dibaca. */
+.mis-pilih-ket {
+    display: block;
+    margin-top: 2px;
+    font-size: .72rem;
+    font-weight: 600;
+    color: var(--mis-tinta-4);
+}
+
+.mis-pilih-nihil {
+    margin: 14px 4px 6px;
+    font-size: .8rem;
+    color: var(--mis-tinta-3);
+}
