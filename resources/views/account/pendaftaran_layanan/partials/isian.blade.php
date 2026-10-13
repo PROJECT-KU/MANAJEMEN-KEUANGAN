@@ -128,7 +128,14 @@
     </label>
 
     @if ($kolom === 'kategori_id')
-        <select class="form-control-modern" id="{{ $id }}" name="{{ $kolom }}" required>
+        {{-- data-mis-pemilih: kliknya dicegat skrip layar rincian dan
+             diganti pemilih layar penuh — sama dengan saringan angkatan di
+             layar daftar. Angkatan Scopus Camp bernama sama persis
+             berpuluh-puluh, dan menu bawaan peramban tidak bisa dicari. --}}
+        <select class="form-control-modern" id="{{ $id }}" name="{{ $kolom }}" required
+            data-mis-pemilih="Pilih angkatan"
+            data-mis-pemilih-cari="Ketik nama atau nomor angkatan"
+            data-mis-pemilih-nihil="Tidak ada angkatan yang cocok.">
             @foreach ($angkatan as $a)
                 @php
                     /*

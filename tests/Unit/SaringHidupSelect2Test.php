@@ -89,6 +89,21 @@ class SaringHidupSelect2Test extends TestCase
             'Menu angkatan berada di luar borang penyaringnya, jadi '
             . 'pilihannya tidak akan pernah ikut tersaring.');
     }
+    /**
+     * mis-ui.js, tempat pemilih layar penuhnya tinggal.
+     *
+     * Perilakunya dipakai DUA layar — saringan angkatan di Pendaftar
+     * Layanan dan pemindahan angkatan di layar rincian — jadi ia dipindah
+     * ke berkas bersama. Salinan kedua yang menyimpang dari yang pertama
+     * adalah persoalan yang baru ketahuan sesudah salah satunya lama salah.
+     */
+    private function pemilih(): string
+    {
+        return (string) file_get_contents(
+            dirname(__DIR__, 2) . '/public/assets/js/mis-ui.js'
+        );
+    }
+
     /** Layar Pendaftar Layanan, tempat menu angkatannya berada. */
     private function layar(): string
     {
@@ -147,9 +162,9 @@ class SaringHidupSelect2Test extends TestCase
         $isi = $this->layar();
 
         $this->assertSame(1, preg_match(
-            "/menuAngkatan\.value = tombol\.dataset\.nilai;([\s\S]{0,1200}?)Swal\.close\(\)/",
+            '/sesudahPilih: function \\(menu\\) \\{([\\s\\S]*?)\\n                \\},/',
             $isi, $cocok
-        ), 'Blok yang memasang pilihan dari pemilih tidak ditemukan.');
+        ), 'Penyahut sesudah memilih tidak ditemukan di layar daftar.');
 
         $this->assertStringContainsString("trigger('change.select2')", $cocok[1],
             'Kotak Select2-nya tidak disegarkan; ia masih menuliskan pilihan lama.');
@@ -174,8 +189,8 @@ class SaringHidupSelect2Test extends TestCase
     public function test_nama_angkatan_tidak_dirangkai_jadi_html(): void
     {
         $this->assertSame(1, preg_match(
-            '/var tambah = function \(opsi, labelKelompok\) \{([\s\S]*?)\n            \};/',
-            $this->layar(), $cocok
+            '/function rakitBaris\\(opsi, labelKelompok, nilaiTerpilih\\) \\{([\\s\\S]*?)\\n    \\}/',
+            $this->pemilih(), $cocok
         ), 'Perakit baris pemilihnya tidak ditemukan.');
 
         $this->assertStringContainsString('judul.textContent = opsi.textContent', $cocok[1]);
@@ -196,11 +211,11 @@ class SaringHidupSelect2Test extends TestCase
     public function test_daftar_pemilih_dibaca_ulang_tiap_dibuka(): void
     {
         $this->assertSame(1, preg_match(
-            '/var bukaPemilihAngkatan = function \(\) \{([\s\S]*?)\n        \};/',
-            $this->layar(), $cocok
+            '/function misPemilih\\(menu, pilihan\\) \\{([\\s\\S]*?)\\n        return true;/',
+            $this->pemilih(), $cocok
         ), 'Fungsi pembuka pemilihnya tidak ditemukan.');
 
-        $this->assertStringContainsString("menuAngkatan.querySelectorAll('optgroup')", $cocok[1],
+        $this->assertStringContainsString("menu.querySelectorAll('optgroup')", $cocok[1],
             'Daftarnya tidak dibaca dari <select> saat dibuka, jadi ia bisa '
             . 'menawarkan angkatan layanan yang sedang tidak disaring.');
     }
@@ -399,6 +414,99 @@ class SaringHidupSelect2Test extends TestCase
         $this->assertStringContainsString('pdl-bukti-nomor', $blok,
             'Nomor pendaftarannya tidak ditulis di dialognya, jadi dua '
             . 'pendaftaran milik orang yang sama tidak bisa dibedakan.');
+    }
+
+    /** Layar rincian, tempat angkatan pendaftaran dipindahkan. */
+    private function rincian(): string
+    {
+        return (string) file_get_contents(
+            dirname(__DIR__, 2)
+            . '/resources/views/account/pendaftaran_layanan/rincian.blade.php'
+        );
+    }
+
+    /**
+     * Isian angkatan di layar RINCIAN memakai pemilih yang sama.
+     *
+     * Di sana menunya <select> biasa tanpa Select2, dan angkatan Scopus Camp
+     * bernama SAMA PERSIS berpuluh-puluh — yang membedakan cuma kode acak,
+     * nomor, dan tanggalnya. Menu bawaan peramban tidak bisa dicari sama
+     * sekali, jadi memindahkan satu pendaftaran berarti menggulung sambil
+     * membaca satu per satu. Terukur: 174 pilihan di menu itu.
+     */
+    public function test_isian_angkatan_rincian_memakai_pemilih_yang_sama(): void
+    {
+        $isian = (string) file_get_contents(
+            dirname(__DIR__, 2)
+            . '/resources/views/account/pendaftaran_layanan/partials/isian.blade.php'
+        );
+
+        $this->assertMatchesRegularExpression(
+            '/<select[^>]*name="\{\{ \$kolom \}\}"[\s\S]{0,200}?data-mis-pemilih=/', $isian,
+            'Isian angkatan tidak ditandai untuk dicegat, jadi yang terbuka '
+            . 'menu bawaan peramban yang tidak bisa dicari.'
+        );
+
+        $rincian = $this->rincian();
+
+        $this->assertStringContainsString('window.misPemilih(menu, {', $rincian,
+            'Layar rincian tidak memanggil pemilih bersama; perilakunya akan '
+            . 'menyimpang dari layar daftar.');
+    }
+
+    /**
+     * Menu bawaannya dicegat pada MOUSEDOWN, bukan click.
+     *
+     * Menu bawaan peramban terbuka pada mousedown; dicegat di click,
+     * keduanya terbuka berbarengan — menu asli di belakang dialognya.
+     *
+     * Papan ketik ikut ditangkap: Enter, spasi, dan panah bawah adalah cara
+     * membuka menu tanpa tetikus, dan dibiarkan, yang memakai papan ketik
+     * tetap mendapat menu lama.
+     */
+    public function test_menu_bawaan_rincian_dicegat_sebelum_terbuka(): void
+    {
+        $isi = $this->rincian();
+
+        $this->assertSame(1, preg_match(
+            "/addEventListener\('mousedown', function \(acara\) \{([\s\S]*?)\}\);/",
+            $isi, $cocok
+        ), 'Pencegatnya tidak dipasang pada mousedown, jadi menu bawaannya '
+            . 'sempat terbuka di belakang dialognya.');
+
+        $this->assertStringContainsString("closest('select[data-mis-pemilih]')", $cocok[1]);
+        $this->assertStringContainsString('preventDefault()', $cocok[1],
+            'Menu bawaannya tidak dibatalkan, jadi keduanya terbuka bersamaan.');
+
+        $this->assertSame(1, preg_match(
+            "/addEventListener\('keydown', function \(acara\) \{([\s\S]*?)\}\);/",
+            $isi, $papan
+        ), 'Papan ketik tidak ditangkap; yang memakainya tetap mendapat menu lama.');
+
+        foreach (["'Enter'", "' '", "'ArrowDown'"] as $tombol) {
+            $this->assertStringContainsString($tombol, $papan[1],
+                'Tombol ' . $tombol . ' tidak membuka pemilihnya.');
+        }
+    }
+
+    /**
+     * Pemilihnya TINGGAL DI SATU TEMPAT, bukan disalin ke tiap layar.
+     *
+     * Dua salinan yang menyimpang satu sama lain adalah persoalan yang baru
+     * ketahuan sesudah salah satunya lama salah — dan yang satu dipakai
+     * menyaring daftar, yang satu lagi memindahkan peserta beserta kursinya.
+     */
+    public function test_pemilihnya_tidak_disalin_ke_tiap_layar(): void
+    {
+        foreach (['layar', 'rincian'] as $berkas) {
+            $this->assertStringNotContainsString('mis-pilih-daftar', $this->{$berkas}(),
+                'Perakit pemilihnya disalin ke ' . $berkas . '; satu-satunya '
+                . 'tempatnya mis-ui.js.');
+        }
+
+        $this->assertStringContainsString('window.misPemilih = misPemilih;', $this->pemilih(),
+            'misPemilih() tidak dipasang ke window, jadi layar lain tidak bisa '
+            . 'memanggilnya.');
     }
 
 }

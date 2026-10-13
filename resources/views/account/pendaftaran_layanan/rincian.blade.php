@@ -5232,6 +5232,70 @@ Rincian Pendaftaran | MIS Rumah Scopus
      * termasuk saat GAGAL: menyalin yang gagal tanpa kabar membuat orang
      * menempelkan isi papan klip yang lama.
      */
+    /*
+     * Menu yang pilihannya banyak dibuka sebagai pemilih layar penuh.
+     *
+     * Angkatan Scopus Camp bernama SAMA PERSIS berpuluh-puluh — yang
+     * membedakan cuma kode acak, nomor, dan tanggalnya — dan menu bawaan
+     * peramban tidak bisa dicari sama sekali. Perilakunya sama dengan
+     * saringan angkatan di layar daftar; keduanya memanggil misPemilih().
+     *
+     * Didelegasikan dari dokumen: isian ini dirender per tab, dan sebagian
+     * tabnya baru ada sesudah skrip ini jalan.
+     */
+    (function () {
+        if (typeof window.misPemilih !== 'function') {
+            return;
+        }
+
+        var buka = function (menu) {
+            return window.misPemilih(menu, {
+                judul: menu.dataset.misPemilih || 'Pilih',
+                cariPlaceholder: menu.dataset.misPemilihCari,
+                nihil: menu.dataset.misPemilihNihil,
+            });
+        };
+
+        /*
+         * mousedown, BUKAN click: menu bawaan peramban terbuka pada
+         * mousedown, jadi mencegatnya di click berarti keduanya terbuka
+         * berbarengan.
+         */
+        document.addEventListener('mousedown', function (acara) {
+            var menu = acara.target.closest('select[data-mis-pemilih]');
+
+            if (!menu || acara.button !== 0) {
+                return;
+            }
+
+            if (buka(menu)) {
+                acara.preventDefault();
+                menu.blur();
+            }
+        });
+
+        /*
+         * Papan ketik ikut ditangkap. Enter, spasi, dan panah bawah adalah
+         * cara membuka menu tanpa tetikus; dibiarkan, yang memakai papan
+         * ketik tetap mendapat menu lama yang tidak bisa dicari.
+         */
+        document.addEventListener('keydown', function (acara) {
+            var menu = acara.target.closest('select[data-mis-pemilih]');
+
+            if (!menu) {
+                return;
+            }
+
+            if (acara.key !== 'Enter' && acara.key !== ' ' && acara.key !== 'ArrowDown') {
+                return;
+            }
+
+            if (buka(menu)) {
+                acara.preventDefault();
+            }
+        });
+    })();
+
     document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('[data-rin-salin]').forEach(function (tombol) {
             tombol.addEventListener('click', function () {
