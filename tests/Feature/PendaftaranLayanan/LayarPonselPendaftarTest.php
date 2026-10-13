@@ -1079,4 +1079,91 @@ class LayarPonselPendaftarTest extends TestCase
             'Isian yang memang selebar kisi ikut dibatalkan rentangnya.');
     }
 
+    /** Markah layar catatan penghapusan. */
+    private function arsip(): string
+    {
+        return (string) file_get_contents(
+            resource_path('views/account/pendaftaran_layanan/terhapus.blade.php')
+        );
+    }
+
+    /**
+     * Saringan arsip jadi KARTUNYA SENDIRI di ponsel.
+     *
+     * Terukur di 390px: borangnya berlatar tembus pandang, tanpa tepi, sudut
+     * 0, bantalan 0 — sementara tiap catatan di bawahnya kartu putih
+     * bersudut 14px. Isiannya bertumpuk satu per baris setinggi 185px, jadi
+     * yang terlihat deretan kotak yang tercecer di latar halaman tanpa ada
+     * yang menyatukannya.
+     *
+     * Hanya di ponsel: di layar lebar isiannya sebaris (71px), dan satu
+     * baris kendali tidak menuntut kotaknya sendiri.
+     */
+    #[Test]
+    public function saringan_arsip_jadi_kartu_di_ponsel(): void
+    {
+        $isi = $this->arsip();
+
+        $this->assertSame(1, preg_match('/@media \(max-width: 575\.98px\) \{(.*)/s', $isi, $blok),
+            'Blok gaya ponsel layar arsip tidak ada.');
+
+        $this->assertSame(1, preg_match('/\.thp-borang\s*\{([^}]*)\}/s', $blok[1], $cocok),
+            'Borang saringan tidak dijadikan kartu di ponsel.');
+
+        foreach (['background', 'border', 'border-radius', 'padding'] as $sifat) {
+            $this->assertMatchesRegularExpression('/\b' . preg_quote($sifat, '/') . ':/', $cocok[1],
+                'Kartunya tidak menyetel ' . $sifat . '; tanpa itu saringannya '
+                . 'tetap tercecer di latar halaman.');
+        }
+    }
+
+    /**
+     * Keping panjang BOLEH membungkus — semua kepingnya, bukan <span> saja.
+     *
+     * Aturannya sudah ada, dan bekerja untuk dua belas keping. Satu tidak:
+     * "dikembalikan 12 Okt 2026, 08:07 oleh tesss" ditulis sebagai <a> agar
+     * bisa ditekan, dan pemilih lamanya menyebut `.thp-ket > span` saja —
+     * jadi ia keluar dari aturan itu tanpa satu tanda pun.
+     *
+     * Terukur di 390px: kepingnya 315px di dalam induk 247px dan seluruh
+     * halaman jadi bisa digeser menyamping, lebar gulir 411px melawan layar
+     * 390px. Sesudah diperbaiki, 390 lawan 390.
+     */
+    #[Test]
+    public function semua_keping_arsip_boleh_membungkus(): void
+    {
+        preg_match('/@media \(max-width: 575\.98px\) \{(.*)/s', $this->arsip(), $blok);
+
+        $this->assertMatchesRegularExpression(
+            '/\.thp-ket > \*\s*\{[^}]*white-space:\s*normal/s', $blok[1],
+            'Aturan membungkusnya kembali menyebut satu jenis unsur saja; '
+            . 'keping yang ditulis sebagai <a> akan meluber lagi.'
+        );
+    }
+
+    /**
+     * Barisan tombol arsip MENGAMBIL barisnya sendiri di ponsel.
+     *
+     * Ia item flex seukuran isinya — terukur 257px — di dalam kaki kartu
+     * yang pada 320px cuma 177px. min-width: auto menahannya menyusut, jadi
+     * ia MELUBER alih-alih membungkus: lebar gulir halaman 353px melawan
+     * layar 320px.
+     */
+    #[Test]
+    public function barisan_tombol_arsip_boleh_membungkus(): void
+    {
+        preg_match('/@media \(max-width: 575\.98px\) \{(.*)/s', $this->arsip(), $blok);
+
+        $this->assertSame(1, preg_match(
+            '/\.thp-kaki > \.thp-aksi\s*\{([^}]*)\}/s', $blok[1], $cocok
+        ), 'Barisan tombolnya tidak diberi barisnya sendiri di ponsel.');
+
+        $this->assertMatchesRegularExpression('/flex:\s*1 1 100%/', $cocok[1],
+            'Barisan tombolnya tidak mengambil barisnya sendiri.');
+
+        $this->assertMatchesRegularExpression('/min-width:\s*0/', $cocok[1],
+            'Tanpa min-width: 0 ia tetap tidak boleh menyusut, jadi ia meluber '
+            . 'alih-alih membungkus.');
+    }
+
 }

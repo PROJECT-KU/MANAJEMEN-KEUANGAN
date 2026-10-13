@@ -69,6 +69,35 @@ Catatan Penghapusan | MIS Rumah Scopus
             margin-bottom: 15px;
         }
 
+        /*
+         * Di ponsel, saringannya jadi KARTUNYA SENDIRI.
+         *
+         * Terukur pada lebar 390px: borangnya berlatar tembus pandang, tanpa
+         * tepi, sudut 0, bantalan 0 — sementara tiap catatan di bawahnya
+         * kartu putih bersudut 14px. Isiannya bertumpuk satu per baris
+         * setinggi 185px, jadi yang terlihat deretan kotak yang tercecer di
+         * latar halaman tanpa ada yang menyatukannya.
+         *
+         * Di layar lebar bentuknya tetap: di sana isiannya sebaris (71px),
+         * dan satu baris kendali memang tidak menuntut kotaknya sendiri.
+         */
+        @media (max-width: 575.98px) {
+            .thp-borang {
+                padding: 14px 16px;
+                border: 1px solid var(--mis-garis);
+                border-radius: var(--mis-radius-kecil);
+                background: #fff;
+            }
+
+            /* Lipatan "Saringan lain" sudah di dalam kartunya, jadi garis
+               pemisahnya cukup — kotak di dalam kotak terbaca bertumpuk. */
+            .thp-borang .thp-lipat {
+                margin-top: 3px;
+                padding-top: 11px;
+                border-top: 1px dashed var(--mis-garis);
+            }
+        }
+
         .thp-borang .mis-isian {
             flex: 1 1 240px;
             min-width: 0;
@@ -513,6 +542,23 @@ Catatan Penghapusan | MIS Rumah Scopus
             }
 
             /*
+             * Barisan tombol MENGAMBIL barisnya sendiri, dan boleh menyusut.
+             *
+             * Ia item flex seukuran isinya — terukur 257px — di dalam kaki
+             * kartu yang pada 320px cuma 177px. min-width: auto menahannya
+             * menyusut, jadi ia MELUBER alih-alih membungkus: seluruh
+             * halaman ikut melebar, lebar gulirnya 353px melawan layar
+             * 320px.
+             *
+             * Diberi barisnya sendiri dan min-width: 0, kedua tombolnya
+             * membungkus sendiri saat memang tidak muat berdampingan.
+             */
+            .thp-kaki > .thp-aksi {
+                flex: 1 1 100%;
+                min-width: 0;
+            }
+
+            /*
              * Kepingnya BOLEH MEMBUNGKUS di layar sempit.
              *
              * .mis-lencana bersama menyetel white-space: nowrap — benar untuk
@@ -524,8 +570,17 @@ Catatan Penghapusan | MIS Rumah Scopus
              * Dibungkuskan, bukan dipendekkan kalimatnya: siapa yang
              * mengembalikan dan kapan sama pentingnya dengan fakta bahwa ia
              * dikembalikan.
+             *
+             * Pemilihnya menyebut SEMUA anak, bukan `span` saja. Versi
+             * pertamanya ditulis saat keping itu masih <span>; begitu ia jadi
+             * <a> agar bisa ditekan, ia keluar dari aturan ini tanpa satu
+             * tanda pun. Terukur di 390px: dua belas keping lain membungkus
+             * dengan benar sementara "dikembalikan 12 Okt 2026, 08:07 oleh
+             * tesss" tetap nowrap, selebar 315px di dalam induk 247px — dan
+             * seluruh halaman jadi bisa digeser menyamping, lebar gulirnya
+             * 411px melawan layar 390px.
              */
-            .thp-ket > span {
+            .thp-ket > * {
                 white-space: normal;
             }
         }
