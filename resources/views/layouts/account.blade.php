@@ -390,9 +390,13 @@ $isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';
                             </a>
                         </li>
 
-                        <li class="{{ setActive('account/Clinik-Scopus-Promo') }}">
-                            <a class="nav-link" href="{{ route('account.Clinik-Scopus-Promo.index') }}">
-                                <i class="fas fa-tags"></i> <span>Promo</span>
+                        {{-- Satu entri untuk promo SELURUH layanan. Sebelumnya menu
+                             ini menunjuk layar promo yang cuma melayani Clinik
+                             Scopus, padahal namanya "Promo" saja — jadi promo
+                             Scopus Camp terlihat tidak pernah ada. --}}
+                        <li class="{{ setActive('account/Promo-Layanan') }}">
+                            <a class="nav-link" href="{{ route('account.promo-layanan.index') }}">
+                                <i class="fas fa-tags"></i> <span>Promo Layanan</span>
                             </a>
                         </li>
                         @endif

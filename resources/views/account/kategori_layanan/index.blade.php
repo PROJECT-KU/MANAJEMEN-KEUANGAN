@@ -101,6 +101,25 @@ Angkatan Layanan | MIS
 
     .ang-tautan:hover { color: #4338ca; }
 
+    /*
+     * Promo yang sedang berjalan pada angkatan itu.
+     *
+     * Hijau, bukan ungu seperti tautan di sebelahnya: ia menyatakan harga
+     * yang sedang berlaku, dan satu-satunya hal lain berwarna hijau di layar
+     * ini adalah lencana status aktif — arti yang sejalan. Nominalnya tidak
+     * boleh terpatah; "Rp 4.050.000" yang jadi dua baris terbaca seperti dua
+     * angka.
+     */
+    .ang-promo {
+        display: inline-flex; align-items: baseline; gap: 4px;
+        margin-top: 2px;
+        line-height: 1.4;
+        font-size: .72rem; font-weight: 700; color: #15803d;
+        white-space: nowrap;
+    }
+
+    .ang-promo .fas { font-size: inherit; }
+
     .ang-kuota { display: inline-flex; align-items: baseline; gap: 4px; font-size: .8rem; color: var(--mis-tinta-2); }
 
     /* Satu nilai bertingkat: angkanya di atas, keterangannya di bawah. */
@@ -800,9 +819,26 @@ Angkatan Layanan | MIS
                                             <span class="ang-nama">
                                                 {{ (int) $a->biaya > 0 ? 'Rp ' . number_format((int) $a->biaya, 0, ',', '.') : '—' }}
                                             </span>
+                                            {{-- "diskon", bukan "promo". Sejak promo jadi
+                                                 fiturnya sendiri, kata "promo" di sini
+                                                 menunjuk hal yang berbeda dari menu Promo
+                                                 Layanan — dan dua arti untuk satu kata di
+                                                 layar yang sama membuat admin mencari
+                                                 promonya di tempat yang salah. --}}
                                             @if ((int) $a->total_biaya > 0 && (int) $a->total_biaya !== (int) $a->biaya)
                                                 <span class="ang-ket">
-                                                    promo Rp {{ number_format((int) $a->total_biaya, 0, ',', '.') }}
+                                                    diskon Rp {{ number_format((int) $a->total_biaya, 0, ',', '.') }}
+                                                </span>
+                                            @endif
+                                            {{-- Promo yang sedang berjalan. Dibaca lewat
+                                                 PromoAngkatan yang sudah dimuat
+                                                 berkelompok di pengendalinya — satu kueri
+                                                 untuk seluruh halaman, bukan satu per
+                                                 baris. --}}
+                                            @if ($a->promo_berjalan)
+                                                <span class="ang-promo" title="Promo {{ $a->promo_berjalan->nama }} — {{ $a->promo_berjalan->potongan_ringkas }} per peserta">
+                                                    <i class="fas fa-tags" aria-hidden="true"></i>
+                                                    promo Rp {{ number_format($a->harga_setelah_promo, 0, ',', '.') }}
                                                 </span>
                                             @endif
                                         </span>

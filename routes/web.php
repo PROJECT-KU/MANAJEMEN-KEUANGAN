@@ -629,14 +629,34 @@ Route::prefix('account')
                 ->name('account.pendaftaran-layanan.hapus');
 
 
-            //clinik scopus promo
-            Route::get('/Clinik-Scopus-Promo/data', 'account\ClinikScopusPromoController@index')->name('account.Clinik-Scopus-Promo.index');
-            Route::get('/Clinik-Scopus-Promo/data/create', 'account\ClinikScopusPromoController@create')->name('account.Clinik-Scopus-Promo.create');
-            Route::post('/Clinik-Scopus-Promo/data/store', 'account\ClinikScopusPromoController@store')->name('account.Clinik-Scopus-Promo.store');
-            Route::get('/Clinik-Scopus-Promo/data/edit/{id}', 'account\ClinikScopusPromoController@edit')->name('account.Clinik-Scopus-Promo.edit');
-            Route::post('/Clinik-Scopus-Promo/data/update-data/{id}', 'account\ClinikScopusPromoController@update')->name('account.Clinik-Scopus-Promo.update');
-            Route::delete('/Clinik-Scopus-Promo/data/{id}', 'account\ClinikScopusPromoController@destroy')->name('account.Clinik-Scopus-Promo.destroy');
-            Route::get('/Clinik-Scopus-Promo/search', 'account\ClinikScopusPromoController@search')->name('account.Clinik-Scopus-Promo.search');
+            /*
+             * Promo layanan — satu layar untuk SEMUA layanan.
+             *
+             * Menggantikan rute /Clinik-Scopus-Promo yang lama, yang hanya
+             * melayani satu layanan. Nama rutenya mengikuti gaya yang lebih
+             * baru di berkas ini (huruf kecil, bertanda hubung), bukan gaya
+             * "account.Clinik-Scopus-Promo.index" yang campur-campur.
+             */
+            Route::get('/Promo-Layanan', 'account\PromoLayananController@index')
+                ->name('account.promo-layanan.index');
+            Route::get('/Promo-Layanan/tambah', 'account\PromoLayananController@create')
+                ->name('account.promo-layanan.create');
+            Route::post('/Promo-Layanan', 'account\PromoLayananController@store')
+                ->name('account.promo-layanan.store');
+            Route::get('/Promo-Layanan/{id}/ubah', 'account\PromoLayananController@edit')
+                ->name('account.promo-layanan.edit');
+            Route::put('/Promo-Layanan/{id}', 'account\PromoLayananController@update')
+                ->name('account.promo-layanan.update');
+
+            /*
+             * Saklar lewat POST, bukan GET: ia mengubah keadaan, dan alamat
+             * GET yang mengubah keadaan akan ikut terpicu oleh pemuat
+             * pratinjau tautan dan tombol Kembali peramban.
+             */
+            Route::post('/Promo-Layanan/{id}/saklar', 'account\PromoLayananController@saklar')
+                ->name('account.promo-layanan.saklar');
+            Route::delete('/Promo-Layanan/{id}', 'account\PromoLayananController@destroy')
+                ->name('account.promo-layanan.hapus');
 
             /*
              * Clinik Scopus — tarif per sesi.

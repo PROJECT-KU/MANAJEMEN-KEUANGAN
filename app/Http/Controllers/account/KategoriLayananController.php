@@ -192,6 +192,15 @@ class KategoriLayananController extends Controller
         // dari 60 baris padahal yang benar jauh lebih sedikit.
         $totalPerlu = (clone $kueriDasar)->reorder()->perluApaPun()->count();
 
+        /*
+         * Promo untuk SELURUH halaman dalam satu kueri.
+         *
+         * Dibaca per baris lewat accessor-nya, layar dengan 10 angkatan
+         * menjalankan 10 kueri yang bentuknya sama persis — dan jumlahnya
+         * tumbuh begitu daftar per halamannya dinaikkan.
+         */
+        \App\Support\PromoAngkatan::muat($angkatan->getCollection());
+
         return view('account.kategori_layanan.index', [
             'angkatan' => $angkatan,
             'jumlah' => $jumlah,
