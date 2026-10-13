@@ -4017,6 +4017,15 @@ a.mis-ubin.terpilih {
 
 .mis-pilih-keping > span {
     padding: 1px 8px;
+    /*
+     * Garis tembus pandang, bukan tanpa garis.
+     *
+     * Keping kelompok di bawah ini bergaris 1px; tanpa garis penyeimbang di
+     * sini, baris yang punya keping kelompok jadi 2px lebih tinggi daripada
+     * yang tidak — terukur 64px melawan 62px antara kedua layar yang
+     * memakai pemilih yang sama.
+     */
+    border: 1px solid transparent;
     border-radius: 999px;
     background: #f1f5f9;
     font-size: .68rem;
@@ -4027,6 +4036,19 @@ a.mis-ubin.terpilih {
 .mis-pilih-baris.terpilih .mis-pilih-keping > span {
     background: #e0e7ff;
     color: #4338ca;
+}
+
+/*
+ * Kepingan kelompok: bergaris, tidak berlatar.
+ *
+ * Ia menyebut MILIK SIAPA barisnya, bukan keterangan tentang barisnya
+ * sendiri — dan dibedakan begitu ia tetap terbaca sebagai hal yang lain
+ * tanpa keluar dari satu bahasa rupa.
+ */
+.mis-pilih-keping-kelompok {
+    background: transparent !important;
+    border: 1px solid var(--mis-garis);
+    color: var(--mis-tinta-4) !important;
 }
 
 .mis-pilih-baris[hidden] { display: none; }
