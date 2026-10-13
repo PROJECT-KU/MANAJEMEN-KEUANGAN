@@ -1259,4 +1259,173 @@ class LayarPonselPendaftarTest extends TestCase
             'Jaraknya terlalu rapat untuk membedakan kedua kartu.');
     }
 
+    /**
+     * Kartu catatan arsip punya irama, tidak semuanya rata kiri.
+     *
+     * Terukur di 390px sebelum ini: kartunya 348px tinggi berisi satu
+     * tumpukan rata kiri — nomor, nama, enam keping dalam tiga baris,
+     * nominal, tautan rincian, dua tombol — tanpa satu pun garis tegak atau
+     * pemisah yang membedakan mana kepala, mana isi, mana kaki.
+     *
+     * Nomornya naik ke KANAN kepala kartu, di seberang medalinya; nominalnya
+     * rata kanan dengan garis pemisah di atasnya.
+     */
+    #[Test]
+    public function kartu_catatan_arsip_punya_irama(): void
+    {
+        $isi = $this->arsip();
+
+        $this->assertStringContainsString('class="thp-isi"', $isi,
+            'Badan kartunya tidak berkelas, jadi tata ulangnya di ponsel tidak '
+            . 'bisa dipilih.');
+
+        preg_match('/@media \(max-width: 575\.98px\) \{(.*)/s', $isi, $blok);
+
+        $this->assertSame(1, preg_match(
+            '/\.thp-isi > \.thp-nomor\s*\{([^}]*)\}/s', $blok[1], $nomor
+        ), 'Nomornya tidak ditata ulang di ponsel; ia kembali jadi baris '
+            . 'pertama yang mendesak namanya turun.');
+
+        $this->assertMatchesRegularExpression('/justify-self:\s*end/', $nomor[1],
+            'Nomornya tidak dirapatkan ke kanan kepala kartu.');
+
+        /*
+         * TANPA margin negatif.
+         *
+         * Versi pertama mengangkatnya 26px supaya sejajar titik tengah
+         * medalinya — melebihi bantalan atas kartunya yang cuma 14px, jadi
+         * nomornya tergambar DI LUAR kartu, menggantung di atas tepinya.
+         * Terlihat langsung di layar, tanpa satu galat pun, dan suite tetap
+         * hijau 1362 sementara cacatnya ada.
+         *
+         * Tidak perlu diangkat: .thp-isi sudah menempati lajur kedua baris
+         * pertama, jadi anak pertamanya memang sebaris dengan medalinya —
+         * terukur keduanya mulai di 15px dari tepi atas kartu, di 320px
+         * maupun 390px.
+         */
+        $this->assertDoesNotMatchRegularExpression('/margin-top:\s*-/', $nomor[1],
+            'Nomornya diangkat dengan margin negatif; kalau melebihi bantalan '
+            . 'atas kartunya, ia tergambar di luar kartu.');
+
+        $this->assertSame(1, preg_match('/\n            \.thp-uang\s*\{([^}]*)\}/s', $blok[1], $uang),
+            'Nominalnya tidak ditata ulang di ponsel.');
+
+        $this->assertMatchesRegularExpression('/text-align:\s*right/', $uang[1],
+            'Nominalnya masih rata kiri di tengah tumpukan, jadi ia terbaca '
+            . 'seperti keterangan lain yang kebetulan lewat.');
+
+        $this->assertMatchesRegularExpression('/border-top:/', $uang[1],
+            'Nominalnya tidak dipisah garis dari keterangan di atasnya.');
+    }
+
+    /**
+     * Tiap tombol arsip selebar barisnya.
+     *
+     * Berdampingan keduanya menuntut 258px — "Buang catatan" 133px,
+     * "Kembalikan" 118px, sela 7px — di dalam kolom isi yang 247px, jadi
+     * mereka membungkus. Dibiarkan selebar isinya, yang tersisa dua tombol
+     * bertumpuk dengan lebar berbeda dan tepi kanan yang ragged. Terukur
+     * sesudah diperbaiki: keduanya 247px.
+     *
+     * BORANGNYA yang disebut, bukan tombolnya: keduanya <form>
+     * ber-display:block, jadi borang yang jadi item lentur barisnya.
+     */
+    #[Test]
+    public function tombol_arsip_selebar_barisnya(): void
+    {
+        preg_match('/@media \(max-width: 575\.98px\) \{(.*)/s', $this->arsip(), $blok);
+
+        $this->assertMatchesRegularExpression(
+            '/\.thp-aksi > form\s*\{[^}]*flex:\s*1 1 100%/s', $blok[1],
+            'Borang tombolnya tidak mengambil barisnya sendiri; aturan yang '
+            . 'cuma menyebut tombolnya mendarat di dalam kotak yang lebarnya '
+            . 'sudah terlanjur mengikuti isinya.'
+        );
+
+        $this->assertMatchesRegularExpression(
+            '/\.thp-aksi > form > \.mis-tombol,\s*\.thp-aksi > \.mis-tombol\s*\{[^}]*width:\s*100%/s',
+            $blok[1],
+            'Tombolnya tidak selebar barisnya, jadi tepi kanannya ragged.'
+        );
+    }
+
+    /**
+     * Nama dan nomor BERBAGI baris pertama kartu arsip.
+     *
+     * Nomornya anak pertama di markah, jadi dibiarkan mengalir ia mengambil
+     * barisnya sendiri dan mendorong namanya turun. Keduanya ditempatkan
+     * tegas: nama di lajur 1 baris 1, nomor di lajur 2 baris 1.
+     *
+     * Terukur di 390px: nama butuh 168px, nomor 62px, sela 10px — 240px
+     * dalam lebar isi 247px, jadi keduanya memang muat sebaris.
+     */
+    #[Test]
+    public function nama_dan_nomor_arsip_sebaris(): void
+    {
+        preg_match('/@media \(max-width: 575\.98px\) \{(.*)/s', $this->arsip(), $blok);
+
+        $this->assertSame(1, preg_match('/\.thp-isi\s*\{([^}]*)\}/s', $blok[1], $isi),
+            'Badan kartunya tidak ditata ulang di ponsel.');
+
+        /*
+         * fit-content(40%), BUKAN minmax.
+         *
+         * minmax membiarkan lajur nomornya mengambil 40% penuh walau isinya
+         * tidak membutuhkannya — terukur 99px untuk nomor yang cuma 62px,
+         * dan 37px yang dirampasnya membuat NAMA membungkus jadi dua baris.
+         * fit-content berarti "seukuran isinya, tetapi tidak lebih dari 40%".
+         */
+        $this->assertMatchesRegularExpression(
+            '/grid-template-columns:\s*minmax\(0, 1fr\) fit-content\(\d+%\)/', $isi[1],
+            'Lajur nomornya tidak memakai fit-content, jadi ia mengambil lebih '
+            . 'dari yang dibutuhkannya dan namanya membungkus.'
+        );
+
+        $this->assertMatchesRegularExpression(
+            '/\.thp-isi > \.thp-nama\s*\{[^}]*grid-row:\s*1/s', $blok[1],
+            'Namanya tidak ditempatkan di baris pertama, jadi ia turun ke bawah '
+            . 'nomornya.'
+        );
+
+        $this->assertMatchesRegularExpression(
+            '/\.thp-isi > \.thp-nomor\s*\{[^}]*grid-row:\s*1/s', $blok[1],
+            'Nomornya tidak ditempatkan di baris pertama.'
+        );
+    }
+
+    /**
+     * Nomor panjang DIPOTONG di lajurnya, tidak menimpa namanya.
+     *
+     * `justify-self: end` membuat kepingnya seukuran isinya dan menembus
+     * lajurnya — terukur 188px menimpa namanya, dan elipsisnya tidak pernah
+     * terpakai. Pembatasnya 100%, yang pada anak kisi berarti selebar
+     * LAJURNYA; 40% akan berarti 40% dari lajur itu, dan terukur nomornya
+     * menciut jadi 28px, tinggal elipsis.
+     *
+     * Arsip boleh memuat nomor layanan mana pun — Clinik Scopus berbentuk
+     * "BOOK-05072026111623-ZRWIJ", 25 huruf — walau yang tersimpan sekarang
+     * cuma 8 huruf.
+     */
+    #[Test]
+    public function nomor_panjang_arsip_dipotong_bukan_menimpa(): void
+    {
+        preg_match('/@media \(max-width: 575\.98px\) \{(.*)/s', $this->arsip(), $blok);
+
+        preg_match('/\.thp-isi > \.thp-nomor\s*\{([^}]*)\}/s', $blok[1], $nomor);
+
+        $this->assertMatchesRegularExpression('/max-width:\s*100%/', $nomor[1],
+            'Nomornya tidak dibatasi selebar lajurnya, jadi ia menembus dan '
+            . 'menimpa namanya.');
+
+        $this->assertMatchesRegularExpression('/text-overflow:\s*ellipsis/', $nomor[1],
+            'Nomor panjang tidak dipotong elipsis.');
+
+        // Nilai penuhnya WAJIB tetap terbaca lewat title.
+        $this->assertMatchesRegularExpression(
+            '/<span class="thp-nomor"\s*\n?\s*title=/', $this->arsip(),
+            'Nomor penuhnya tidak disimpan di title; yang terpotong hilang '
+            . 'permanen.'
+        );
+    }
+
 }
