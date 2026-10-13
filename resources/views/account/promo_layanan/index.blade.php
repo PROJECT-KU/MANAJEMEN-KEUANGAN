@@ -39,6 +39,9 @@ Promo Layanan | MIS
     /* Angkatan yang belum dicentang satu pun: promonya tidak memotong apa pun,
        dan itu harus terbaca sebagai peringatan, bukan sebagai angka nol biasa. */
     .pro-nihil { display: inline-flex; align-items: center; gap: 5px; font-size: .76rem; font-weight: 700; color: #b45309; }
+    /* Bobot (0,2,1) supaya menang atas `a:hover` milik Bootstrap yang (0,1,1)
+       — tanpa itu warnanya berubah jadi biru bawaan saat disentuh. */
+    .pro-aksi a.pro-nihil:hover, a.pro-nihil:hover { color: #92400e; text-decoration: underline; }
 
     .pro-aksi { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
 
@@ -52,12 +55,14 @@ Promo Layanan | MIS
      * kolom Promo — yang paling perlu ruang — justru menyempit karena namanya
      * pendek dibanding periode dan tombolnya.
      */
-    .pro-k-nama { width: 30%; }
-    .pro-k-potongan { width: 15%; }
-    .pro-k-periode { width: 19%; }
-    .pro-k-angkatan { width: 14%; }
-    .pro-k-keadaan { width: 11%; }
-    .pro-k-aksi { width: 11%; }
+    .pro-k-nama { width: 24%; }
+    .pro-k-potongan { width: 12%; }
+    .pro-k-periode { width: 11%; }
+    .pro-k-selesai { width: 11%; }
+    .pro-k-angkatan { width: 10%; }
+    .pro-k-pakai { width: 12%; }
+    .pro-k-keadaan { width: 10%; }
+    .pro-k-aksi { width: 10%; }
 
     @media (max-width: 767.98px) {
         /*
@@ -81,13 +86,29 @@ Promo Layanan | MIS
                 <h1 class="mis-judul">Promo Layanan</h1>
                 <p class="mis-sub">Potongan harga yang berlaku otomatis untuk angkatan yang dipilih.</p>
             </div>
-            @if ($bolehUbah)
-                <div class="mis-kepala-aksi" id="pro-aksi">
+            <div class="mis-kepala-aksi" id="pro-aksi">
+                {{-- Unduhan membawa saringan yang sedang dipakai, bukan seluruh
+                     tabel: yang diunduh orang hampir selalu yang dilihatnya.
+
+                     $saringan datang dari pengendalinya (MEDAN_SARINGAN), TIDAK
+                     dirakit di sini — daftar yang ditulis tangan di markah
+                     cepat atau lambat ketinggalan satu medan, dan berkasnya
+                     memulangkan seluruh baris tanpa satu pun tanda bahwa
+                     saringannya tertinggal. --}}
+                <a class="mis-tombol mis-tombol-halus"
+                    href="{{ route('account.promo-layanan.excel', $saringan) }}">
+                    <i class="fas fa-file-excel mis-ikon-hijau"></i> Unduh Excel
+                </a>
+                <a class="mis-tombol mis-tombol-halus"
+                    href="{{ route('account.promo-layanan.cetak', $saringan) }}">
+                    <i class="fas fa-file-pdf mis-ikon-merah"></i> Unduh PDF
+                </a>
+                @if ($bolehUbah)
                     <a class="mis-tombol mis-tombol-ungu" href="{{ route('account.promo-layanan.create') }}">
                         <i class="fas fa-plus"></i> Buat promo
                     </a>
-                </div>
-            @endif
+                @endif
+            </div>
         </div>
 
         {{-- ---------------------------------------------- ringkasan --}}
@@ -96,13 +117,17 @@ Promo Layanan | MIS
              tombol berskrip, supaya alamatnya bisa disalin. --}}
         <div id="pro-ringkas">
         <div class="mis-ringkas-geser" data-mis-geser>
-        <div class="mis-ringkas mis-ringkas-5" aria-label="Ringkasan promo">
+        <div class="mis-ringkas mis-ringkas-auto" aria-label="Ringkasan promo">
             <a class="mis-ubin {{ $keadaan === null ? 'terpilih' : '' }}"
                 href="{{ route('account.promo-layanan.index', request()->only('cari', 'layanan')) }}"
                 title="Tampilkan semua promo">
                 <span class="mis-medali kecil mis-ungu" aria-hidden="true"><i class="fas fa-tags"></i></span>
                 <div>
-                    <p class="mis-ubin-angka">{{ number_format(array_sum($ringkas)) }}</p>
+                    {{-- 'semua' datang dari pengendalinya, BUKAN array_sum:
+                         "hampir habis" adalah bagian dari "sedang berjalan",
+                         jadi menjumlahkan seluruh ubin menghitung promo yang
+                         sama dua kali. --}}
+                    <p class="mis-ubin-angka">{{ number_format($ringkas['semua']) }}</p>
                     <p class="mis-ubin-label">Seluruh promo</p>
                 </div>
             </a>
@@ -114,7 +139,9 @@ Promo Layanan | MIS
                 // lambat.
                 $ubin = [
                     ['berjalan', 'mis-hijau', 'fa-bolt', 'Sedang berjalan'],
+                    ['hampir-habis', 'mis-jingga', 'fa-hourglass-half', 'Hampir habis'],
                     ['belum-mulai', 'mis-biru', 'fa-clock', 'Belum mulai'],
+                    ['kuota-habis', 'mis-kuning', 'fa-ban', 'Kuota habis'],
                     ['selesai', 'mis-abu', 'fa-flag-checkered', 'Sudah selesai'],
                     ['nonaktif', 'mis-merah', 'fa-power-off', 'Dimatikan'],
                 ];
@@ -294,8 +321,15 @@ Promo Layanan | MIS
                             @endphp
                             <th class="pro-k-nama" aria-sort="{{ $ariaUrut('nama') }}">@include('partials.urut-kolom', ['rute' => 'account.promo-layanan.index', 'bawa' => $saringan, 'kolom' => 'nama', 'label' => 'Promo'])</th>
                             <th class="pro-k-potongan">Potongan</th>
-                            <th class="pro-k-periode" aria-sort="{{ $ariaUrut('mulai') }}">@include('partials.urut-kolom', ['rute' => 'account.promo-layanan.index', 'bawa' => $saringan, 'kolom' => 'mulai', 'label' => 'Periode'])</th>
+                            <th class="pro-k-periode" aria-sort="{{ $ariaUrut('mulai') }}">@include('partials.urut-kolom', ['rute' => 'account.promo-layanan.index', 'bawa' => $saringan, 'kolom' => 'mulai', 'label' => 'Mulai'])</th>
+                            {{-- Keempat pengurut yang dikenal pengendali punya
+                                 kepala kolomnya sendiri. Dua di antaranya dulu
+                                 hanya ada di menu ponsel, jadi di layar lebar
+                                 "paling dekat selesai" tidak bisa dicapai sama
+                                 sekali. --}}
+                            <th class="pro-k-selesai" aria-sort="{{ $ariaUrut('selesai') }}">@include('partials.urut-kolom', ['rute' => 'account.promo-layanan.index', 'bawa' => $saringan, 'kolom' => 'selesai', 'label' => 'Selesai'])</th>
                             <th class="pro-k-angkatan">Angkatan</th>
+                            <th class="pro-k-pakai">Dipakai</th>
                             <th class="pro-k-keadaan">Keadaan</th>
                             <th class="pro-k-aksi text-right">Aksi</th>
                         </tr>
@@ -308,17 +342,21 @@ Promo Layanan | MIS
                                          kartu, dua anak sejajar membuat labelnya dan
                                          isinya berebut satu baris. --}}
                                     <div>
+                                        {{-- Menunjuk RINCIAN, bukan borang ubah.
+                                             Sebelumnya menekan nama promo langsung
+                                             membuka borangnya — jadi MELIHAT promo
+                                             berarti membuka layar yang setiap
+                                             isiannya bisa tersenggol. --}}
                                         <p class="pro-nama">
-                                            @if ($bolehUbah)
-                                                <a href="{{ route('account.promo-layanan.edit', $promo->id) }}"
-                                                    title="Ubah promo ini">{{ $promo->nama }}</a>
-                                            @else
-                                                {{ $promo->nama }}
-                                            @endif
+                                            <a href="{{ route('account.promo-layanan.detail', $promo->id) }}"
+                                                title="Lihat rincian promo ini">{{ $promo->nama }}</a>
                                         </p>
                                         @if ($promo->catatan)
-                                            <p class="pro-ket">{{ \Illuminate\Support\Str::limit($promo->catatan, 90) }}</p>
+                                            <p class="pro-ket">{{ \Illuminate\Support\Str::limit($promo->catatan, 70) }}</p>
                                         @endif
+                                        <p class="pro-ket">
+                                            oleh {{ $promo->penginput?->full_name ?: 'tidak tercatat' }}
+                                        </p>
                                     </div>
                                 </td>
 
@@ -335,9 +373,13 @@ Promo Layanan | MIS
                                     </div>
                                 </td>
 
-                                <td data-judul="Periode">
+                                <td data-judul="Mulai">
+                                    <span class="pro-periode">{{ $promo->mulai?->locale('id')->translatedFormat('j M Y') }}</span>
+                                </td>
+
+                                <td data-judul="Selesai">
                                     <div>
-                                        <span class="pro-periode">{{ $promo->periode_terbaca }}</span>
+                                        <span class="pro-periode">{{ $promo->selesai?->locale('id')->translatedFormat('j M Y') }}</span>
                                         @if ($promo->sisa_hari !== null && $promo->sisa_hari <= 7)
                                             <span class="pro-sisa">
                                                 {{ $promo->sisa_hari === 0 ? 'habis hari ini' : 'sisa ' . $promo->sisa_hari . ' hari' }}
@@ -354,11 +396,38 @@ Promo Layanan | MIS
                                     @else
                                         {{-- Promo tanpa angkatan tidak memotong apa pun.
                                              Ditulis "0" saja, ia terbaca seperti angka
-                                             biasa dan tidak ada yang memperbaikinya. --}}
-                                        <span class="pro-nihil" title="Promo ini belum memotong harga apa pun.">
+                                             biasa dan tidak ada yang memperbaikinya.
+
+                                             Berupa TAUTAN ke borangnya: peringatan yang
+                                             menunjuk masalah tanpa menawarkan jalan
+                                             keluarnya memaksa orang mencari sendiri ke
+                                             mana harus pergi. --}}
+                                        <a class="pro-nihil" href="{{ route('account.promo-layanan.edit', $promo->id) }}"
+                                            title="Promo ini belum memotong harga apa pun — pilih angkatannya.">
                                             <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
                                             belum dipilih
-                                        </span>
+                                        </a>
+                                    @endif
+                                </td>
+
+                                {{-- Hasilnya, dibaca dari pendaftaran yang tertali ke
+                                     promo ini. Tanpa kolom ini daftar promo tidak
+                                     pernah menyatakan mana yang berhasil. --}}
+                                <td data-judul="Dipakai">
+                                    @php ($pakai = \App\Support\DampakPromo::untuk((string) $promo->getKey()))
+                                    @if ($pakai['pendaftaran'] > 0)
+                                        <div>
+                                            <span class="pro-jumlah">
+                                                <strong>{{ number_format($pakai['pendaftaran']) }}</strong>
+                                                @if ($promo->kuota !== null)/{{ number_format($promo->kuota) }}@endif
+                                                daftar
+                                            </span>
+                                            <span class="pro-potongan-ket">
+                                                potong Rp {{ number_format($pakai['potongan'], 0, ',', '.') }}
+                                            </span>
+                                        </div>
+                                    @else
+                                        <span class="pro-ket">belum dipakai</span>
                                     @endif
                                 </td>
 
@@ -371,12 +440,30 @@ Promo Layanan | MIS
 
                                 <td data-judul="Aksi" class="text-right">
                                     <div class="pro-aksi">
+                                        <a href="{{ route('account.promo-layanan.detail', $promo->id) }}"
+                                            class="mis-tombol-garis" title="Lihat rincian"
+                                            aria-label="Lihat rincian promo {{ $promo->nama }}">
+                                            <i class="fas fa-eye" aria-hidden="true"></i>
+                                        </a>
+
                                         @if ($bolehUbah)
                                             <a href="{{ route('account.promo-layanan.edit', $promo->id) }}"
                                                 class="mis-tombol-garis" title="Ubah promo"
                                                 aria-label="Ubah promo {{ $promo->nama }}">
                                                 <i class="fas fa-pen" aria-hidden="true"></i>
                                             </a>
+
+                                            {{-- Menggandakan lewat POST: ia MEMBUAT baris
+                                                 baru, dan alamat GET yang membuat baris
+                                                 ikut terpicu pemuat pratinjau tautan. --}}
+                                            <form method="POST" action="{{ route('account.promo-layanan.gandakan', $promo->id) }}">
+                                                @csrf
+                                                <button type="submit" class="mis-tombol-garis"
+                                                    title="Gandakan promo"
+                                                    aria-label="Gandakan promo {{ $promo->nama }}">
+                                                    <i class="fas fa-copy" aria-hidden="true"></i>
+                                                </button>
+                                            </form>
 
                                             {{-- Saklar lewat POST: alamat GET yang mengubah
                                                  keadaan ikut terpicu pemuat pratinjau tautan. --}}

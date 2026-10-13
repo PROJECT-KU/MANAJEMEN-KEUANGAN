@@ -92,6 +92,9 @@ class PendaftaranSemuaLayanan
                 'kode_unik' => 'kode_unik',
                 'kode_diskon' => 'kode_diskon',
                 'nominal_diskon' => 'nominal_diskon',
+                // Tali ke promonya. Hanya ketiga tabel berangkatan yang
+                // punya kolom ini; yang lain memang tidak bisa kena promo.
+                'promo' => 'promo_id',
                 'bukti' => 'gambar',
                 'cara_bayar' => 'cara_bayar',
                 'catatan' => 'note',
@@ -138,6 +141,9 @@ class PendaftaranSemuaLayanan
                 'kode_unik' => 'kode_unik',
                 'kode_diskon' => 'kode_diskon',
                 'nominal_diskon' => 'nominal_diskon',
+                // Tali ke promonya. Hanya ketiga tabel berangkatan yang
+                // punya kolom ini; yang lain memang tidak bisa kena promo.
+                'promo' => 'promo_id',
                 'bukti' => 'gambar',
                 'cara_bayar' => 'cara_bayar',
                 'catatan' => 'note',
@@ -184,6 +190,9 @@ class PendaftaranSemuaLayanan
                 'kode_unik' => 'kode_unik',
                 'kode_diskon' => 'kode_diskon',
                 'nominal_diskon' => 'nominal_diskon',
+                // Tali ke promonya. Hanya ketiga tabel berangkatan yang
+                // punya kolom ini; yang lain memang tidak bisa kena promo.
+                'promo' => 'promo_id',
                 'bukti' => 'gambar',
                 'cara_bayar' => 'cara_bayar',
                 'catatan' => 'note',

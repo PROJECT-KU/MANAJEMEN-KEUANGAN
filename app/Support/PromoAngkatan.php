@@ -73,13 +73,24 @@ class PromoAngkatan
          * tanpa itu, promo yang kena lima angkatan tidak bisa dibedakan
          * dari lima promo yang masing-masing kena satu.
          */
+        /*
+         * Kuota disaring SESUDAH kueri, bukan di dalamnya.
+         *
+         * Jumlah pemakaian tersebar di tiga tabel pendaftaran, jadi tidak ada
+         * satu pun kolom di `promo_layanan` yang bisa dibandingkan di SQL.
+         * Dipaksa lewat subkueri, kuerinya jadi tiga subkueri bersarang yang
+         * dijalankan untuk SETIAP promo — sementara DampakPromo sudah
+         * menghitung semuanya sekali untuk seluruh promo.
+         */
         $promo = PromoLayanan::query()
             ->berjalan()
             ->whereHas('angkatan', fn ($q) => $q->whereIn('kategori_layanan.id', array_keys($perlu)))
             ->with(['angkatan' => fn ($q) => $q
                 ->whereIn('kategori_layanan.id', array_keys($perlu))
                 ->select('kategori_layanan.id')])
-            ->get();
+            ->get()
+            ->reject(fn (PromoLayanan $p) => $p->kuotaHabis())
+            ->values();
 
         // Semua yang diminta ditandai sudah dicari — termasuk yang tidak
         // kebagian promo. Tanpa penandaan itu, angkatan tanpa promo memicu

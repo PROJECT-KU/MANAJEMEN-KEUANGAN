@@ -61,6 +61,22 @@
     .det-nilai.samar { font-weight: 400; color: var(--mis-tinta-3); }
 
     /*
+     * Borang pasang/lepas promo di dalam baris fakta.
+     *
+     * Menurun, bukan sebaris: menu promo memuat nama DAN potongan DAN
+     * periodenya, jadi dipaksa sebaris ia menyempit sampai namanya terpotong
+     * di tengah — terukur pada kolom 330px di layar rincian.
+     */
+    .det-promo-borang {
+        display: grid; gap: 7px;
+        margin: 9px 0 0;
+        max-width: 420px;
+    }
+
+    .det-promo-borang .form-control-modern { font-size: .8rem; }
+    .det-promo-borang .mis-tombol { justify-self: start; }
+
+    /*
      * Deskripsi ditampilkan apa adanya dengan baris barunya dipertahankan —
      * sama seperti halaman publik, yang memakai white-space: pre-line. Kalau
      * di sini dirapatkan, admin menyetujui tampilan yang bukan yang dilihat
@@ -295,20 +311,58 @@
                          Barisnya sendiri, bukan diselipkan ke baris Biaya: promo
                          punya nama DAN periode, dan menempelkan ketiganya ke satu
                          baris membuat nominalnya tidak lagi terbaca sekilas. --}}
-                    @if ($angkatan->promo_berjalan)
-                        <div class="det-baris">
-                            <span class="det-label">Promo</span>
-                            <span class="det-nilai">
-                                <a href="{{ route('account.promo-layanan.edit', $angkatan->promo_berjalan->id) }}"
-                                    title="Buka promo ini">{{ $angkatan->promo_berjalan->nama }}</a>
+                    <div class="det-baris">
+                        <span class="det-label">Promo</span>
+                        <span class="det-nilai">
+                            @if ($angkatan->promo_berjalan)
+                                <a href="{{ route('account.promo-layanan.detail', $angkatan->promo_berjalan->id) }}"
+                                    title="Lihat rincian promo ini">{{ $angkatan->promo_berjalan->nama }}</a>
                                 <span class="det-nilai samar">
                                     &middot; {{ $angkatan->promo_berjalan->potongan_ringkas }} per peserta
                                     &middot; jadi Rp {{ number_format($angkatan->harga_setelah_promo, 0, ',', '.') }}
                                     &middot; sampai {{ $angkatan->promo_berjalan->selesai->locale('id')->translatedFormat('j M Y') }}
                                 </span>
-                            </span>
-                        </div>
-                    @endif
+
+                                @if ($bolehUbah)
+                                    {{-- Melepasnya dari SINI, bukan harus pindah ke
+                                         borang promo lalu mencari angkatan ini di
+                                         antara ratusan baris. --}}
+                                    <form method="POST" action="{{ route('account.promo-layanan.tempel', $angkatan->id) }}"
+                                        class="det-promo-borang">
+                                        @csrf
+                                        <input type="hidden" name="promo_id" value="{{ $angkatan->promo_berjalan->id }}">
+                                        <input type="hidden" name="lepas" value="1">
+                                        <button type="submit" class="mis-tombol mis-tombol-halus mis-tombol-ringkas">
+                                            <i class="fas fa-unlink mis-ikon-merah"></i> Lepas promo
+                                        </button>
+                                    </form>
+                                @endif
+                            @elseif ($bolehUbah && $promoTersedia->isNotEmpty())
+                                <form method="POST" action="{{ route('account.promo-layanan.tempel', $angkatan->id) }}"
+                                    class="det-promo-borang">
+                                    @csrf
+                                    <label class="mis-label" for="det-promo" style="margin: 0;">Pasang promo</label>
+                                    <select class="form-control-modern" id="det-promo" name="promo_id" required>
+                                        @foreach ($promoTersedia as $p)
+                                            <option value="{{ $p->id }}">
+                                                {{ $p->nama }} — {{ $p->potongan_ringkas }} ({{ $p->periode_terbaca }})
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <button type="submit" class="mis-tombol mis-tombol-ungu mis-tombol-ringkas">
+                                        <i class="fas fa-link"></i> Pasang
+                                    </button>
+                                </form>
+                            @else
+                                <span class="det-nilai samar">
+                                    Tidak ada promo
+                                    @if ($bolehUbah)
+                                        — <a href="{{ route('account.promo-layanan.create') }}">buat promo baru</a>
+                                    @endif
+                                </span>
+                            @endif
+                        </span>
+                    </div>
 
                     <div class="det-baris">
                         <span class="det-label">Grup WhatsApp</span>

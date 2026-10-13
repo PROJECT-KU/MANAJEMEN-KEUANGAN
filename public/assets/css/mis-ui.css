@@ -3319,6 +3319,19 @@ dialog {
 .mis-ringkas-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .mis-ringkas-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 
+/*
+ * Jumlah ubin yang TIDAK tetap.
+ *
+ * Dipakai layar yang keadaannya lebih dari lima — Promo Layanan punya enam
+ * keadaan ditambah ubin "semua". Dipatok repeat(7), di 992px tiap ubin cuma
+ * 133px dan labelnya terpotong; dengan auto-fit ia membungkus jadi dua baris
+ * sendiri tanpa titik putus yang harus dijaga satu per satu.
+ *
+ * Ditaruh di sini, bukan di layarnya: aturan ubin ringkasan yang disalin ke
+ * tiap layar adalah persis yang dilarang RupaBersamaTest.
+ */
+.mis-ringkas-auto { grid-template-columns: repeat(auto-fit, minmax(158px, 1fr)); }
+
 .mis-ubin {
     display: flex;
     align-items: center;

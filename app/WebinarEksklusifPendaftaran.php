@@ -30,6 +30,8 @@ class WebinarEksklusifPendaftaran extends Model
         'user_id',
         'nama', 'email', 'telp', 'affiliasi', 'disetujui_pada', 'pengingat_pada', 'jumlah_pendaftar',
         'ppn', 'kode_unik', 'kode_diskon', 'nominal_diskon', 'total_pembayaran',
+        // Tali ke promo yang memotong harganya; dibaca layar dampak promo.
+        'promo_id',
         'gambar', 'cara_bayar', 'bayar_rujukan', 'bayar_status',
         'bayar_pada', 'kedaluwarsa_pada', 'status', 'note',
     ];
