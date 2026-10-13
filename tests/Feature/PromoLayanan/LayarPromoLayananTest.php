@@ -348,6 +348,152 @@ class LayarPromoLayananTest extends TestCase
         $this->assertFalse($promo->fresh()->aktif);
     }
 
+    // ------------------------------------------------- satuan & format angka
+
+    #[Test]
+    public function nominal_bertitik_ribuan_tersimpan_sebagai_angka(): void
+    {
+        /*
+         * Kotak rupiahnya memformat dirinya sambil diketik, jadi yang sampai
+         * ke peladen "75.000". Tanpa pembersihan sebelum validasi, aturan
+         * `integer` menolaknya dan admin melihat "potongan rupiah harus
+         * berupa angka" pada kotak yang jelas-jelas berisi angka.
+         */
+        $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+        $nama = 'Promo Bertitik ' . Str::random(5);
+
+        $this->actingAs($admin)->post(route('account.promo-layanan.store'), [
+            'nama' => $nama, 'tipe' => 'rupiah', 'nominal' => '75.000',
+            'mulai' => now()->toDateString(), 'selesai' => now()->addDay()->toDateString(),
+        ])->assertSessionHasNoErrors();
+
+        $this->assertSame(75_000, PromoLayanan::where('nama', $nama)->firstOrFail()->nominal);
+    }
+
+    #[Test]
+    public function batas_potongan_bertitik_ikut_dibersihkan(): void
+    {
+        $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+        $nama = 'Promo Batas Bertitik ' . Str::random(5);
+
+        $this->actingAs($admin)->post(route('account.promo-layanan.store'), [
+            'nama' => $nama, 'tipe' => 'persen', 'persen' => 40,
+            'batas_potongan' => 'Rp 1.000.000',
+            'mulai' => now()->toDateString(), 'selesai' => now()->addDay()->toDateString(),
+        ])->assertSessionHasNoErrors();
+
+        $this->assertSame(1_000_000, PromoLayanan::where('nama', $nama)->firstOrFail()->batas_potongan);
+    }
+
+    #[Test]
+    public function kotak_rupiah_yang_dikosongkan_tetap_null_bukan_nol(): void
+    {
+        /*
+         * Untaian kosong yang jadi 0 akan ditolak `min:1` — galat pada medan
+         * yang memang boleh dikosongkan, dan admin tidak punya cara keluar
+         * selain menebak.
+         */
+        $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+        $nama = 'Promo Tanpa Batas ' . Str::random(5);
+
+        $this->actingAs($admin)->post(route('account.promo-layanan.store'), [
+            'nama' => $nama, 'tipe' => 'persen', 'persen' => 15,
+            'batas_potongan' => '',
+            'mulai' => now()->toDateString(), 'selesai' => now()->addDay()->toDateString(),
+        ])->assertSessionHasNoErrors();
+
+        $this->assertNull(PromoLayanan::where('nama', $nama)->firstOrFail()->batas_potongan);
+    }
+
+    #[Test]
+    public function kotak_rupiah_bukan_type_number_dan_bersatuan_rp(): void
+    {
+        /*
+         * type=number menolak memuat "75.000": peramban mengosongkan kotaknya
+         * diam-diam begitu titiknya diketik, dan yang terlihat cuma angka yang
+         * hilang. Dijaga dari markahnya karena gejalanya tidak meninggalkan
+         * jejak apa pun di peladen.
+         */
+        $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        $isi = $this->actingAs($admin)
+            ->get(route('account.promo-layanan.create'))->assertOk()->getContent();
+
+        foreach (['prf-nominal', 'prf-batas'] as $id) {
+            preg_match('/<input[^>]*id="' . $id . '"[^>]*>/', $isi, $cocok);
+
+            $this->assertNotEmpty($cocok, 'Kotak ' . $id . ' tidak ketemu di markahnya.');
+            $this->assertStringContainsString('type="text"', $cocok[0],
+                'Kotak ' . $id . ' kembali jadi type=number; titik ribuannya akan dibuang peramban.');
+            $this->assertStringContainsString('inputmode="numeric"', $cocok[0],
+                'Tanpa inputmode=numeric, ponsel memunculkan papan tik huruf untuk kotak uang.');
+            $this->assertStringContainsString('data-prf-rupiah', $cocok[0],
+                'Tanpa penanda itu kotaknya tidak ikut diformat sambil diketik.');
+        }
+
+        // Satuannya menempel di dalam kotaknya, bukan jadi label sendiri.
+        $this->assertSame(2, substr_count($isi, '<span class="prf-tanda kiri" aria-hidden="true">Rp</span>'));
+        $this->assertStringContainsString('<span class="prf-tanda kanan" aria-hidden="true">%</span>', $isi);
+    }
+
+    #[Test]
+    public function tanda_satuan_ditambat_ke_pembungkus_kotaknya(): void
+    {
+        /*
+         * Ditambat ke .mis-isian, tandanya meleset: tiap kotak di borang ini
+         * punya teks bantuan di bawahnya, jadi dasar .mis-isian bukan dasar
+         * kotaknya. Terukur sebelum dibetulkan: tanda 409-451 sementara
+         * kotaknya 402-442 — meleset 7px ke bawah pada KETIGA medan.
+         *
+         * Yang dijaga bentuk penambatannya, bukan angkanya: `top: 20px` yang
+         * kebetulan pas hari ini akan meleset lagi begitu ukuran labelnya
+         * berubah, dan tidak ada galat yang memberi tahu.
+         */
+        $berkas = file_get_contents(
+            base_path('resources/views/account/promo_layanan/form.blade.php')
+        );
+
+        $this->assertMatchesRegularExpression(
+            '/\.prf-kotak\s*\{[^}]*position:\s*relative/',
+            $berkas,
+            'Pembungkus kotaknya tidak lagi relative; tanda Rp/% akan menambat ke .mis-isian dan meleset.'
+        );
+
+        preg_match('/\.prf-tanda\s*\{([^}]*)\}/', $berkas, $aturan);
+
+        $this->assertNotEmpty($aturan, 'Aturan .prf-tanda tidak ketemu.');
+        $this->assertStringContainsString('top: 0', $aturan[1]);
+        $this->assertStringContainsString('bottom: 0', $aturan[1]);
+        $this->assertStringNotContainsString('height:', $aturan[1],
+            'Tinggi tetap membuat tandanya meleset begitu tinggi kotaknya berubah; biarkan inset yang menentukan.');
+        $this->assertStringContainsString('pointer-events: none', $aturan[1],
+            'Tanpa ini, menekan tepat di atas "Rp" tidak memfokuskan kotaknya.');
+
+        // Ketiga kotaknya memang dibungkus, bukan cuma gayanya yang ada.
+        $this->assertSame(3, substr_count($berkas, '<span class="prf-kotak">'));
+    }
+
+    #[Test]
+    public function nilai_tersimpan_dipajang_bertitik_saat_disunting(): void
+    {
+        /*
+         * Tersimpan 75000 dan dipajang "75000", kotaknya terbaca berbeda dari
+         * saat diketik — dan admin yang menyimpan ulang tanpa menyentuhnya
+         * melihat angkanya "berubah" sendiri.
+         */
+        $admin = $this->akun(User::PERAN_ADMINISTRATOR);
+
+        $promo = PromoLayanan::create([
+            'nama' => 'Promo Terpajang ' . Str::random(4), 'tipe' => 'rupiah', 'nominal' => 125_000,
+            'mulai' => now()->toDateString(), 'selesai' => now()->addDay()->toDateString(),
+            'aktif' => true,
+        ]);
+
+        $this->actingAs($admin)->get(route('account.promo-layanan.edit', $promo->id))
+            ->assertOk()
+            ->assertSee('value="125.000"', false);
+    }
+
     // ------------------------------------------------------------- validasi
 
     #[Test]

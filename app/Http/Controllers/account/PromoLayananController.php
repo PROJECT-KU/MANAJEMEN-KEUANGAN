@@ -368,6 +368,33 @@ class PromoLayananController extends Controller
      */
     private function periksa(Request $request): array
     {
+        /*
+         * Titik ribuan dibuang SEBELUM divalidasi, bukan sesudah.
+         *
+         * Kotak rupiahnya memformat dirinya sambil diketik, jadi yang sampai
+         * ke sini "75.000". Aturan `integer` menolaknya, dan pesan yang
+         * dilihat admin berbunyi "potongan rupiah harus berupa angka" pada
+         * kotak yang jelas-jelas berisi angka — tidak ada petunjuk sama
+         * sekali bahwa titiknya yang jadi soal.
+         *
+         * Yang dibuang semua yang BUKAN angka, bukan hanya tanda titiknya:
+         * koma, spasi, dan "Rp" yang ikut tertempel saat orang menyalin dari
+         * tempat lain sama-sama harus hilang.
+         *
+         * Kotak kosong tetap null, BUKAN 0: keduanya berbeda artinya bagi
+         * `nullable`, dan 0 akan ditolak `min:1` dengan galat pada medan yang
+         * memang boleh dikosongkan.
+         */
+        foreach (['nominal', 'batas_potongan'] as $medan) {
+            if (! $request->exists($medan)) {
+                continue;
+            }
+
+            $bersih = preg_replace('/\D+/', '', (string) $request->input($medan));
+
+            $request->merge([$medan => $bersih === '' ? null : (int) $bersih]);
+        }
+
         $isian = $request->validate([
             'nama' => ['required', 'string', 'max:120'],
             'tipe' => ['required', Rule::in(array_keys(PromoLayanan::TIPE))],
