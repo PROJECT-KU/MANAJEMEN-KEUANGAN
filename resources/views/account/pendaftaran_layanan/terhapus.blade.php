@@ -66,7 +66,6 @@ Catatan Penghapusan | MIS Rumah Scopus
             flex-wrap: wrap;
             gap: 11px;
             align-items: flex-end;
-            margin-bottom: 15px;
         }
 
         /*
@@ -82,13 +81,6 @@ Catatan Penghapusan | MIS Rumah Scopus
          * dan satu baris kendali memang tidak menuntut kotaknya sendiri.
          */
         @media (max-width: 575.98px) {
-            .thp-borang {
-                padding: 14px 16px;
-                border: 1px solid var(--mis-garis);
-                border-radius: var(--mis-radius-kecil);
-                background: #fff;
-            }
-
             /* Lipatan "Saringan lain" sudah di dalam kartunya, jadi garis
                pemisahnya cukup — kotak di dalam kotak terbaca bertumpuk. */
             .thp-borang .thp-lipat {
@@ -834,8 +826,31 @@ Catatan Penghapusan | MIS Rumah Scopus
                  Ringkasannya ikut diperbarui lewat data-mis-saring-juga:
                  angkanya berubah mengikuti saringan, dan ubin yang tertinggal
                  pada angka lama lebih menyesatkan daripada tidak ada. --}}
+            {{-- Dibungkus <details> + .mis-saring-kartu, SAMA PERSIS dengan
+                 layar Pendaftar Layanan.
+
+                 Di ponsel kendali yang selalu terbuka memakan satu layar
+                 penuh sebelum catatan pertama kelihatan; di layar lebar
+                 mis-ui.js memaksanya terbuka lewat data-mis-lipat dan
+                 menyembunyikan ringkasannya, jadi di sana ia tampak seperti
+                 baris penyaring biasa di dalam kartunya. Terukur di layar
+                 sebelah: tertutup di 390px, terbuka di 1440px dengan
+                 ringkasan display:none, dan kartunya putih bersudut 16px di
+                 kedua lebar. --}}
+            <details class="mis-lipat" id="thp-penyaring" data-mis-lipat>
+                <summary>
+                    <i class="fas fa-sliders-h mis-ikon-ungu" aria-hidden="true"></i>
+                    Cari &amp; saring
+                    {{-- Pembungkusnya SELALU ada walau isinya kosong:
+                         penyaring hidup memperbaruinya lewat innerHTML, dan
+                         unsur yang baru lahir saat saringan terpasang tidak
+                         akan pernah ketemu untuk diperbarui. --}}
+                    <span id="thp-aktif">@if ($adaSaringanArsip)<span class="mis-pil mis-pil-ungu">aktif</span>@endif</span>
+                </summary>
+
+            <div class="mis-saring-kartu">
             <form method="GET" class="thp-borang" id="thp-borang"
-                data-mis-saring="thp-hasil" data-mis-saring-juga="thp-ringkas">
+                data-mis-saring="thp-hasil" data-mis-saring-juga="thp-ringkas,thp-aktif">
                 <div class="mis-isian">
                     <label class="mis-label" for="thp-cari">Cari</label>
                     <input type="search" class="form-control-modern" id="thp-cari" name="cari"
@@ -946,6 +961,8 @@ Catatan Penghapusan | MIS Rumah Scopus
                     </a>
                 @endif
             </form>
+            </div>{{-- mis-saring-kartu --}}
+            </details>
 
             {{-- Membuang seluruh hasil saringan sekaligus.
 

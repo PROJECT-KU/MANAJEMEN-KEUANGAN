@@ -1088,33 +1088,72 @@ class LayarPonselPendaftarTest extends TestCase
     }
 
     /**
-     * Saringan arsip jadi KARTUNYA SENDIRI di ponsel.
+     * Saringan arsip DILIPAT dalam kartu, sama dengan layar Pendaftar
+     * Layanan.
      *
-     * Terukur di 390px: borangnya berlatar tembus pandang, tanpa tepi, sudut
-     * 0, bantalan 0 — sementara tiap catatan di bawahnya kartu putih
-     * bersudut 14px. Isiannya bertumpuk satu per baris setinggi 185px, jadi
-     * yang terlihat deretan kotak yang tercecer di latar halaman tanpa ada
-     * yang menyatukannya.
+     * Sebelumnya borangnya berlatar tembus pandang, tanpa tepi, sudut 0,
+     * bantalan 0 — sementara tiap catatan di bawahnya kartu putih bersudut
+     * 14px. Terukur di 390px isiannya bertumpuk setinggi 185px, jadi yang
+     * terlihat deretan kotak yang tercecer di latar halaman tanpa ada yang
+     * menyatukannya, dan satu layar penuh habis sebelum catatan pertama
+     * kelihatan.
      *
-     * Hanya di ponsel: di layar lebar isiannya sebaris (71px), dan satu
-     * baris kendali tidak menuntut kotaknya sendiri.
+     * Dipakai struktur yang SAMA dengan layar daftar, bukan kartu buatan
+     * sendiri: <details data-mis-lipat> + .mis-saring-kartu. Terukur di
+     * kedua layar — tertutup di 390px dengan ringkasan terlihat, dipaksa
+     * terbuka di 1440px dengan ringkasan display:none, kartunya putih
+     * bersudut 16px di keduanya.
      */
     #[Test]
-    public function saringan_arsip_jadi_kartu_di_ponsel(): void
+    public function saringan_arsip_dilipat_dalam_kartu(): void
     {
         $isi = $this->arsip();
 
-        $this->assertSame(1, preg_match('/@media \(max-width: 575\.98px\) \{(.*)/s', $isi, $blok),
-            'Blok gaya ponsel layar arsip tidak ada.');
+        $this->assertSame(1, preg_match(
+            '/<details class="mis-lipat" id="thp-penyaring" data-mis-lipat>([\s\S]*?)<form /',
+            $isi, $cocok
+        ), 'Saringan arsip tidak dibungkus lipatan seperti layar daftar; '
+            . 'kendalinya memakan satu layar penuh sebelum catatan pertama.');
 
-        $this->assertSame(1, preg_match('/\.thp-borang\s*\{([^}]*)\}/s', $blok[1], $cocok),
-            'Borang saringan tidak dijadikan kartu di ponsel.');
+        $this->assertStringContainsString('Cari &amp; saring', $cocok[1],
+            'Ringkasan lipatannya tidak menyebut "Cari & saring" seperti layar '
+            . 'sebelah.');
 
-        foreach (['background', 'border', 'border-radius', 'padding'] as $sifat) {
-            $this->assertMatchesRegularExpression('/\b' . preg_quote($sifat, '/') . ':/', $cocok[1],
-                'Kartunya tidak menyetel ' . $sifat . '; tanpa itu saringannya '
-                . 'tetap tercecer di latar halaman.');
-        }
+        $this->assertStringContainsString('mis-saring-kartu', $cocok[1],
+            'Borangnya tidak di dalam kartu saringan bersama, jadi ia tetap '
+            . 'tercecer di latar halaman.');
+
+        /*
+         * data-mis-lipat WAJIB: tanpanya mis-ui.js tidak memaksanya terbuka
+         * di layar lebar, dan di sana saringannya jadi tertutup — padahal di
+         * layar sebelah ia selalu terbuka.
+         */
+        $this->assertStringContainsString('data-mis-lipat', $isi,
+            'Lipatannya tidak ditandai, jadi di layar lebar ia tetap tertutup '
+            . 'sementara layar sebelah terbuka.');
+    }
+
+    /**
+     * Lencana "aktif" ikut diperbarui penyaring hidup.
+     *
+     * Saringannya terlipat, jadi saat tertutup satu-satunya tanda bahwa
+     * daftarnya sedang disaring adalah lencana ini. Tidak ikut diperbarui,
+     * ia tertinggal pada keadaan saat halaman dimuat — dan yang membaca
+     * mengira daftarnya utuh padahal sedang disaring.
+     */
+    #[Test]
+    public function lencana_aktif_arsip_ikut_diperbarui(): void
+    {
+        $isi = $this->arsip();
+
+        $this->assertStringContainsString('id="thp-aktif"', $isi,
+            'Pembungkus lencana aktifnya tidak ada.');
+
+        $this->assertMatchesRegularExpression(
+            '/data-mis-saring-juga="[^"]*thp-aktif/', $isi,
+            'Lencana aktifnya tidak ikut diperbarui penyaring hidup; saat '
+            . 'lipatannya tertutup, tidak ada tanda bahwa daftarnya disaring.'
+        );
     }
 
     /**
