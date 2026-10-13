@@ -3155,6 +3155,28 @@ body.mis-latar-terkunci {
         width: auto;
         margin: 0;
     }
+
+    /*
+     * Layar yang punya bilah navigasi bawah: toast DIANGKAT di atasnya.
+     *
+     * Bilahnya `position: fixed; bottom: 20px; height: 75px` — jadi ia
+     * memakan 95px terbawah — dan z-index-nya 2000 melawan 1060 milik
+     * wadah SweetAlert. Terukur di 390px dengan User-Agent ponsel: toast
+     * 745–830 melawan bilah 749–824, dan titik tengah toast-nya ditempati
+     * ikon bilah navigasi. Yang muncul sesudah menekan "salin" karena itu
+     * tidak pernah terbaca sampai habis.
+     *
+     * Diangkat, BUKAN sekadar dinaikkan z-index-nya: menang tumpukan
+     * berarti toast menutupi navigasinya selama tiga detik. Keduanya
+     * muat berdampingan, jadi keduanya ditampilkan.
+     *
+     * z-index tetap dinaikkan juga, untuk toast yang kebetulan lebih
+     * tinggi daripada ruang yang tersisa.
+     */
+    body:has(.mobile-bottom-nav).swal2-toast-shown > .swal2-container.swal2-top-end {
+        z-index: 2100 !important;
+        padding-bottom: calc(95px + env(safe-area-inset-bottom, 0px) + 10px);
+    }
 }
 
 /* =====================================================================
