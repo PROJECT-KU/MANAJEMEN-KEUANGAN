@@ -3910,6 +3910,19 @@ a.mis-ubin.terpilih {
  * kotaknya. Kotak yang ikut memanjang membuat kotak carinya tergulung
  * keluar layar justru saat orang hendak mengetik ulang.
  */
+/*
+ * Kotak cari MENEMPEL di atas daftarnya.
+ *
+ * Daftarnya yang bergulung, bukan kotaknya — tetapi begitu orang menggulung
+ * jauh lalu hendak mengetik ulang, kotaknya sudah lewat di atas. Menempel,
+ * ia selalu ada di tempat yang sama.
+ */
+.mis-pilih-cari {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
 .mis-pilih-daftar {
     max-height: min(56vh, 420px);
     overflow-y: auto;
@@ -3931,7 +3944,9 @@ a.mis-ubin.terpilih {
 .mis-pilih-baris {
     display: block;
     width: 100%;
-    margin: 0 0 5px;
+    /* Ruang untuk tanda centang pilihan yang sedang berlaku. */
+    position: relative;
+    margin: 0 0 6px;
     /*
      * Tingginya tidak kurang dari 44px — sasaran ketuk yang bisa
      * dikenai jempol. Daftar ini justru yang paling sering dipakai
@@ -3953,9 +3968,65 @@ a.mis-ubin.terpilih {
     background: #f8faff;
 }
 
+/*
+ * Yang sedang berlaku DITANDAI, tidak cuma dicincin.
+ *
+ * Daftar ini berisi puluhan baris yang namanya hampir sama; cincin tipis
+ * di tepinya harus dicari sendiri. Latar bernada dan tanda centang di
+ * ujungnya terbaca sekali lihat, bahkan saat barisnya sedang tergulung
+ * lewat.
+ */
 .mis-pilih-baris.terpilih {
     border-color: #6366f1;
+    background: #eef2ff;
     box-shadow: 0 0 0 1px #6366f1 inset;
+    padding-right: 38px;
+}
+
+.mis-pilih-baris.terpilih::after {
+    content: '\f00c';
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    width: 20px;
+    height: 20px;
+    margin-top: -10px;
+    border-radius: 999px;
+    background: #6366f1;
+    color: #fff;
+    font-family: 'Font Awesome 5 Free', 'Font Awesome 6 Free';
+    font-weight: 900;
+    font-size: .6rem;
+    line-height: 20px;
+    text-align: center;
+}
+
+/*
+ * Kepingan keterangan: tanggal dan sisa kuota.
+ *
+ * Dipisah dari namanya supaya yang dicari — namanya — berdiri sendiri di
+ * baris pertama. Sebagai satu untaian, ketiganya terbaca sederajat dan
+ * barisnya terpatah dua.
+ */
+.mis-pilih-keping {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 5px;
+    margin-top: 5px;
+}
+
+.mis-pilih-keping > span {
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: #f1f5f9;
+    font-size: .68rem;
+    font-weight: 600;
+    color: var(--mis-tinta-3);
+}
+
+.mis-pilih-baris.terpilih .mis-pilih-keping > span {
+    background: #e0e7ff;
+    color: #4338ca;
 }
 
 .mis-pilih-baris[hidden] { display: none; }
@@ -3983,4 +4054,30 @@ a.mis-ubin.terpilih {
     margin: 14px 4px 6px;
     font-size: .8rem;
     color: var(--mis-tinta-3);
+}
+
+/*
+ * Tombol tutup dialog pemilih: bulat kecil, bukan kotak bergaris.
+ *
+ * Bawaannya digambar sebagai kotak selebar 2em bergaris tebal dan duduk
+ * tepat di sebelah judulnya — terbaca seperti tombol tindakan, bukan
+ * seperti tanda tutup.
+ */
+.mis-pilih-popup .swal2-close {
+    width: 32px;
+    height: 32px;
+    margin: 10px 10px 0 0;
+    border-radius: 999px;
+    background: #f1f5f9;
+    color: var(--mis-tinta-3);
+    font-size: 1.4rem;
+    line-height: 32px;
+    transition: background .2s ease, color .2s ease;
+}
+
+.mis-pilih-popup .swal2-close:hover,
+.mis-pilih-popup .swal2-close:focus-visible {
+    background: #fee2e2;
+    color: #e11d48;
+    outline: none;
 }
