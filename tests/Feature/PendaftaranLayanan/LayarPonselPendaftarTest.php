@@ -1319,33 +1319,77 @@ class LayarPonselPendaftarTest extends TestCase
     }
 
     /**
-     * Tiap tombol arsip selebar barisnya.
+     * Kedua tombol arsip BERDAMPINGAN di ponsel.
      *
      * Berdampingan keduanya menuntut 258px — "Buang catatan" 133px,
-     * "Kembalikan" 118px, sela 7px — di dalam kolom isi yang 247px, jadi
-     * mereka membungkus. Dibiarkan selebar isinya, yang tersisa dua tombol
-     * bertumpuk dengan lebar berbeda dan tepi kanan yang ragged. Terukur
-     * sesudah diperbaiki: keduanya 247px.
+     * "Kembalikan" 118px, sela 7px. Selama kaki kartunya terkurung di lajur
+     * kedua ia cuma punya 247px, jadi keduanya membungkus dan bertumpuk.
+     * Sesudah kakinya membentang penuh melewati lajur medali, ruangnya
+     * cukup: terukur keduanya 145px, bersisian.
      *
      * BORANGNYA yang disebut, bukan tombolnya: keduanya <form>
      * ber-display:block, jadi borang yang jadi item lentur barisnya.
      */
     #[Test]
-    public function tombol_arsip_selebar_barisnya(): void
+    public function tombol_arsip_berdampingan_di_ponsel(): void
     {
         preg_match('/@media \(max-width: 575\.98px\) \{(.*)/s', $this->arsip(), $blok);
 
+        $this->assertSame(1, preg_match('/\.thp-aksi > form\s*\{([^}]*)\}/s', $blok[1], $cocok),
+            'Borang tombolnya tidak ditata; aturan yang cuma menyebut tombolnya '
+            . 'mendarat di dalam kotak yang lebarnya sudah terlanjur mengikuti '
+            . 'isinya.');
+
+        $this->assertMatchesRegularExpression('/flex:\s*1 1 0/', $cocok[1],
+            'Tombolnya tidak berbagi barisnya rata; dengan basis 100% keduanya '
+            . 'kembali bertumpuk satu per baris.');
+    }
+
+    /**
+     * Isi kartu arsip MEMBENTANG melewati lajur medali di ponsel.
+     *
+     * Medalinya memegang lajur 38px untuk SELURUH kartu: keping, nominal,
+     * tautan rincian, dan kedua tombol semuanya mulai di 66px sementara
+     * kartunya mulai di 30px — 36px kosong membentang di sisi kiri
+     * sepanjang kartu, dan tombolnya cuma kebagian 247px sehingga tidak
+     * muat berdampingan.
+     *
+     * Terukur sesudah dibentangkan: nominal dan kaki 17–313 (selebar isi
+     * kartu), tinggi kartu 348px jadi 313px.
+     */
+    #[Test]
+    public function isi_kartu_arsip_membentang_penuh(): void
+    {
+        preg_match('/@media \(max-width: 575\.98px\) \{(.*)/s', $this->arsip(), $blok);
+
+        /*
+         * .thp-isi DIBUBARKAN lewat display: contents.
+         *
+         * Selama ia kotak sendiri, apa pun di dalamnya — termasuk keping
+         * keterangan — terkurung di lajur kedua, dan tidak ada aturan pada
+         * anaknya yang bisa membawanya keluar.
+         */
         $this->assertMatchesRegularExpression(
-            '/\.thp-aksi > form\s*\{[^}]*flex:\s*1 1 100%/s', $blok[1],
-            'Borang tombolnya tidak mengambil barisnya sendiri; aturan yang '
-            . 'cuma menyebut tombolnya mendarat di dalam kotak yang lebarnya '
-            . 'sudah terlanjur mengikuti isinya.'
+            '/\.thp-isi\s*\{\s*display:\s*contents/s', $blok[1],
+            'Badan kartunya masih kotak sendiri, jadi isinya terkurung di lajur '
+            . 'kedua dan sisi kiri kartu tetap kosong.'
         );
 
         $this->assertMatchesRegularExpression(
-            '/\.thp-aksi > form > \.mis-tombol,\s*\.thp-aksi > \.mis-tombol\s*\{[^}]*width:\s*100%/s',
+            '/\.thp-isi > \*:not\(\.thp-nama\):not\(\.thp-nomor\)\s*\{[^}]*grid-column:\s*1 \/ -1/s',
             $blok[1],
-            'Tombolnya tidak selebar barisnya, jadi tepi kanannya ragged.'
+            'Keping dan keterangannya tidak membentang penuh.'
+        );
+
+        $this->assertMatchesRegularExpression(
+            '/\.thp-kaki,\s*\.thp-alasan\s*\{[^}]*grid-column:\s*1 \/ -1/s', $blok[1],
+            'Kaki kartunya tidak membentang penuh, jadi tombolnya tetap cuma '
+            . 'kebagian 247px dan tidak muat berdampingan.'
+        );
+
+        $this->assertMatchesRegularExpression(
+            '/\.thp-uang\s*\{[^}]*grid-column:\s*1 \/ -1/s', $blok[1],
+            'Nominalnya tidak membentang penuh.'
         );
     }
 
@@ -1364,8 +1408,28 @@ class LayarPonselPendaftarTest extends TestCase
     {
         preg_match('/@media \(max-width: 575\.98px\) \{(.*)/s', $this->arsip(), $blok);
 
-        $this->assertSame(1, preg_match('/\.thp-isi\s*\{([^}]*)\}/s', $blok[1], $isi),
-            'Badan kartunya tidak ditata ulang di ponsel.');
+        /*
+         * Dicari aturan .thp-baris yang MEMAKAI fit-content, bukan yang
+         * pertama ketemu.
+         *
+         * Berkas ini punya beberapa blok @media ponsel, dan potongan dari
+         * blok pertama ikut memuat aturan .thp-baris dasar — yang lajurnya
+         * memang "38px minmax(0, 1fr) auto" untuk layar lebar. Penjaganya
+         * lalu merah sambil mengutip aturan desktop.
+         */
+        preg_match_all('/\.thp-baris\s*\{([^}]*)\}/s', $this->arsip(), $semua, PREG_SET_ORDER);
+
+        $kartu = null;
+
+        foreach ($semua as $satu) {
+            if (str_contains($satu[1], 'fit-content')) {
+                $kartu = $satu[1];
+            }
+        }
+
+        $this->assertNotNull($kartu,
+            'Kisi kartunya tidak ditata ulang di ponsel; lajurnya kini milik '
+            . '.thp-baris sebab badan isinya dibubarkan display: contents.');
 
         /*
          * fit-content(40%), BUKAN minmax.
@@ -1373,10 +1437,9 @@ class LayarPonselPendaftarTest extends TestCase
          * minmax membiarkan lajur nomornya mengambil 40% penuh walau isinya
          * tidak membutuhkannya — terukur 99px untuk nomor yang cuma 62px,
          * dan 37px yang dirampasnya membuat NAMA membungkus jadi dua baris.
-         * fit-content berarti "seukuran isinya, tetapi tidak lebih dari 40%".
          */
         $this->assertMatchesRegularExpression(
-            '/grid-template-columns:\s*minmax\(0, 1fr\) fit-content\(\d+%\)/', $isi[1],
+            '/grid-template-columns:\s*auto minmax\(0, 1fr\) fit-content\(\d+%\)/', $kartu,
             'Lajur nomornya tidak memakai fit-content, jadi ia mengambil lebih '
             . 'dari yang dibutuhkannya dan namanya membungkus.'
         );
