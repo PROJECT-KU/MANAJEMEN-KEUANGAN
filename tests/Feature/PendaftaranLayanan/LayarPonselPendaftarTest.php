@@ -1011,4 +1011,72 @@ class LayarPonselPendaftarTest extends TestCase
         );
     }
 
+    /**
+     * Kisi isian jadi SATU LAJUR di ponsel.
+     *
+     * auto-fit di aturan dasarnya seharusnya menumpuk isiannya satu per
+     * baris saat ruangnya tidak cukup. Terukur, ia tidak:
+     *
+     *     320px  ->  200px 0px      lajur kedua NOL
+     *     390px  ->  215px 41px     lajur kedua 41px
+     *
+     * Jadi "Kode unik" dan "Nominal potongan" mendapat kotak selebar 41px
+     * dengan labelnya terpatah dua baris — dan di 320px kotaknya hilang
+     * sama sekali. Isian antar lajurnya pun tidak sejajar, terukur selisih
+     * 7px.
+     */
+    #[Test]
+    public function kisi_isian_satu_lajur_di_ponsel(): void
+    {
+        $isi = $this->rincian();
+
+        $this->assertSame(1, preg_match('/@media \(max-width: 575\.98px\) \{(.*)/s', $isi, $blok),
+            'Blok gaya ponsel layar rincian tidak ada.');
+
+        $this->assertMatchesRegularExpression(
+            '/\.rin-isian-kisi\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/s', $blok[1],
+            'Kisi isiannya tidak dipatok satu lajur di ponsel; auto-fit '
+            . 'menyisakan lajur kedua yang tidak pernah muat.'
+        );
+    }
+
+    /**
+     * Rentang antar-lajur DIBATALKAN di ponsel, dan dengan !important.
+     *
+     * Memaksa satu lajur saja TIDAK cukup: isian "Total bayar" membawa
+     * `style="grid-column: span 2"` yang dirakit peladen dari jumlah isian
+     * per bagian, dan satu rentang itu melahirkan lajur TERSIRAT kedua
+     * untuk seluruh kisinya. Terukur sesudah lajurnya dipatok satu: masih
+     * "38px 218px" di 390px dan "0px 186px" di 320px.
+     *
+     * !important dipakai justru karena lawannya gaya sebaris, yang tidak
+     * bisa dikalahkan bobot pemilih berapa pun — dan itu sebabnya
+     * memaksa satu lajur saja terlihat berhasil di sumber tetapi tidak
+     * mengubah apa pun di layar.
+     */
+    #[Test]
+    public function rentang_antar_lajur_dibatalkan_di_ponsel(): void
+    {
+        $isi = $this->rincian();
+
+        preg_match('/@media \(max-width: 575\.98px\) \{(.*)/s', $isi, $blok);
+
+        $this->assertSame(1, preg_match(
+            '/\.rin-isian-kisi > \.mis-isian:not\(\.rin-isian-penuh\)\s*\{([^}]*)\}/s',
+            $blok[1], $cocok
+        ), 'Rentang antar-lajurnya tidak dibatalkan di ponsel; satu isian '
+            . 'ber-span melahirkan lajur tersirat untuk seluruh kisinya.');
+
+        $this->assertMatchesRegularExpression('/grid-column:\s*auto\s*!important/', $cocok[1],
+            'Pembatalannya tanpa !important, jadi ia kalah oleh gaya sebaris '
+            . 'dan tidak mengubah apa pun di layar.');
+
+        /*
+         * Isian selebar kisi dikecualikan: ia memang 1 / -1, dan dengan satu
+         * lajur itu tetap berarti selebar kisinya.
+         */
+        $this->assertStringContainsString(':not(.rin-isian-penuh)', $blok[1],
+            'Isian yang memang selebar kisi ikut dibatalkan rentangnya.');
+    }
+
 }
