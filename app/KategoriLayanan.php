@@ -189,6 +189,53 @@ class KategoriLayanan extends Model
         return ClinikScopusBiayaPersesi::berlaku($this->layanan, $this->varian);
     }
 
+    /** Semua promo yang pernah dicentang untuk angkatan ini, berjalan atau tidak. */
+    public function promo()
+    {
+        return $this->belongsToMany(
+            PromoLayanan::class,
+            'promo_layanan_angkatan',
+            'kategori_id',
+            'promo_id'
+        )->withTimestamps();
+    }
+
+    /**
+     * Promo yang BENAR-BENAR memotong harga angkatan ini hari ini.
+     *
+     * Lewat PromoAngkatan, bukan lewat relasi `promo` yang disaring di sini:
+     * satu angkatan boleh kena beberapa promo sekaligus, dan yang menentukan
+     * mana yang menang adalah besar potongannya pada harga angkatan INI —
+     * pertanyaan yang tidak bisa dijawab satu `where` pada relasinya.
+     */
+    public function getPromoBerjalanAttribute(): ?PromoLayanan
+    {
+        return \App\Support\PromoAngkatan::untuk($this);
+    }
+
+    /**
+     * Harga satu kursi sebelum promo.
+     *
+     * `total_biaya` sudah memuat diskon angkatannya sendiri; promo berlaku DI
+     * ATAS angka itu, bukan menggantikannya.
+     */
+    public function getHargaSebelumPromoAttribute(): int
+    {
+        return \App\Support\PromoAngkatan::hargaDasar($this);
+    }
+
+    /** Berapa rupiah yang dipotong promo dari satu kursi; 0 kalau tidak ada. */
+    public function getPotonganPromoAttribute(): int
+    {
+        return $this->promo_berjalan?->potonganUntuk($this->harga_sebelum_promo) ?? 0;
+    }
+
+    /** Harga satu kursi yang benar-benar ditagih hari ini. */
+    public function getHargaSetelahPromoAttribute(): int
+    {
+        return max(0, $this->harga_sebelum_promo - $this->potongan_promo);
+    }
+
     /**
      * Tabel pendaftaran per layanan: kunci layanan -> nama tabelnya.
      *

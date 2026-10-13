@@ -713,7 +713,7 @@ Catatan Penghapusan | MIS Rumah Scopus
     </style>
 @endpush
 
-@push('skrip')
+@push('scripts')
 <script>
     /*
      * Penegasan sebelum mengembalikan.

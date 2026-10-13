@@ -162,6 +162,22 @@ class BuatPendaftaran
                 : 0;
 
             /*
+             * Promo angkatan, dihitung PER KURSI lalu dikalikan jumlahnya.
+             *
+             * Bukan dari subtotal sekaligus, walau untuk potongan persen
+             * hasilnya sama: untuk promo berupa rupiah hasilnya berbeda, dan
+             * yang benar per kursi. Harga yang dipajang di halaman umum
+             * adalah harga SATU orang, jadi promo "potong Rp 75.000" yang
+             * dihitung sekali untuk pesanan tujuh kursi akan menagih
+             * Rp 450.000 lebih banyak daripada yang terbaca di halamannya.
+             */
+            $promo = $angkatan !== null ? \App\Support\PromoAngkatan::untuk($angkatan) : null;
+
+            $potonganPromo = $promo !== null
+                ? $promo->potonganUntuk($satuanKursi) * $jumlah
+                : 0;
+
+            /*
              * Hanya SATU yang berlaku, dan yang dipakai yang paling
              * menguntungkan pendaftarnya.
              *
@@ -171,17 +187,42 @@ class BuatPendaftaran
              * Rp 7.700.000 — dan tidak ada yang akan menyadarinya, sebab
              * keduanya sama-sama "potongan yang dihitung sistem".
              *
+             * Seri dimenangkan yang urutannya lebih dulu di daftar ini:
+             * PROMO, lalu ALUMNI, lalu ROMBONGAN. Promo didahulukan karena ia
+             * yang paling sengaja — dicentang admin untuk angkatan ITU —
+             * sementara dua lainnya aturan umum yang disetel sekali di Tarif
+             * Layanan. Alumni tetap mengalahkan rombongan pada nilai yang
+             * sama, seperti sebelumnya.
+             *
              * Potongan khusus tetap paling akhir: ia yang diketik tangan, dan
              * sesuatu yang diketik tangan tidak boleh diam-diam ditumpuk di
              * atas potongan yang dihitung sistem.
              */
-            if ($potonganAlumni > 0 && $potonganAlumni >= $potonganRombongan) {
-                $potongan = $potonganAlumni;
-                $kodePotongan = 'ALUMNI';
-            } elseif ($potonganRombongan > 0) {
-                $potongan = $potonganRombongan;
-                $kodePotongan = 'ROMBONGAN';
-            } else {
+            $potongan = 0;
+            $kodePotongan = '';
+
+            /*
+             * Kode promo memuat NAMANYA, bukan cuma kata "PROMO".
+             *
+             * Kolomnya varchar(255) dan inilah satu-satunya keterangan yang
+             * tersimpan bersama barisnya. Promo bisa sudah dihapus atau sudah
+             * diganti isinya saat pendaftaran itu dibuka setengah tahun
+             * kemudian — tanpa namanya, potongan Rp 2.600.000 tidak bisa
+             * dijelaskan siapa pun. Alumni dan rombongan tidak perlu ini:
+             * keduanya aturan tunggal yang selalu bisa dibaca di Tarif Layanan.
+             */
+            foreach ([
+                ($promo !== null ? 'PROMO: ' . mb_substr($promo->nama, 0, 120) : 'PROMO') => (int) $potonganPromo,
+                'ALUMNI' => $potonganAlumni,
+                'ROMBONGAN' => $potonganRombongan,
+            ] as $kode => $nilai) {
+                if ($nilai > $potongan) {
+                    $potongan = $nilai;
+                    $kodePotongan = $kode;
+                }
+            }
+
+            if ($potongan <= 0) {
                 $potongan = max(0, (int) preg_replace('/\D+/', '', (string) ($isian['potongan'] ?? 0)));
                 $kodePotongan = trim((string) ($isian['kode_potongan'] ?? '')) ?: 'KHUSUS';
             }
