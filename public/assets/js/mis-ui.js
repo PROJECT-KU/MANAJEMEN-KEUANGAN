@@ -1049,32 +1049,43 @@
         judul.textContent = pecahan.nama;
         tombol.appendChild(judul);
 
-        if (pecahan.keping.length > 0) {
+        /*
+         * Nama kelompok jadi KEPING juga, sebaris dengan keterangan lain.
+         *
+         * Sebelumnya ia teks polos di barisnya sendiri sementara tanggal dan
+         * kuotanya berbentuk pil — dua bahasa rupa dalam satu baris, dan
+         * barisnya jadi 82px di layar daftar melawan 62px di layar rincian.
+         * Satu pemilih yang sama seharusnya terbaca sama di mana pun.
+         */
+        var keterangan = pecahan.keping.slice();
+
+        if (labelKelompok
+            && judul.textContent.toLowerCase().indexOf(labelKelompok.toLowerCase()) !== 0) {
+            keterangan.push(labelKelompok);
+        }
+
+        if (keterangan.length > 0) {
             var baris = document.createElement('span');
             baris.className = 'mis-pilih-keping';
 
-            pecahan.keping.forEach(function (k) {
+            keterangan.forEach(function (k, i) {
                 var keping = document.createElement('span');
+
+                /*
+                 * Kepingan kelompok dibedakan: ia menyebut MILIK SIAPA
+                 * barisnya, bukan keterangan tentang barisnya sendiri. Itu
+                 * yang dicari saat hasil pencarian mencampur beberapa
+                 * kelompok dan kepala kelompoknya jauh di atas.
+                 */
+                if (i === keterangan.length - 1 && k === labelKelompok) {
+                    keping.className = 'mis-pilih-keping-kelompok';
+                }
+
                 keping.textContent = k.trim();
                 baris.appendChild(keping);
             });
 
             tombol.appendChild(baris);
-        }
-
-        /*
-         * Nama kelompok DITAHAN kalau judulnya sudah memuatnya di depan.
-         *
-         * Sebagian pilihan dinamai dengan nama kelompoknya sendiri, jadi
-         * barisnya terbaca "Analisis Bibliometrik · angkatan ke-10" dengan
-         * "Analisis Bibliometrik" sekali lagi di bawahnya.
-         */
-        if (labelKelompok
-            && judul.textContent.toLowerCase().indexOf(labelKelompok.toLowerCase()) !== 0) {
-            var ket = document.createElement('span');
-            ket.className = 'mis-pilih-ket';
-            ket.textContent = labelKelompok;
-            tombol.appendChild(ket);
         }
 
         tombol.dataset.cari = (opsi.textContent + ' ' + (labelKelompok || '')).toLowerCase();
