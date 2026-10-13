@@ -616,4 +616,63 @@ class SaringHidupSelect2Test extends TestCase
         );
     }
 
+    /**
+     * Kedua pemilih punya SATU bahasa rupa.
+     *
+     * Pemilihnya memang satu fungsi, tetapi rupanya sempat tidak seragam:
+     * di layar daftar nama kelompok dirender sebagai teks polos di barisnya
+     * sendiri sementara tanggal dan kuotanya berbentuk pil. Terukur di
+     * 1440px — baris layar daftar 82px dengan tiga anak, baris layar
+     * rincian 62px dengan dua. Satu pemilih yang sama terbaca berbeda di
+     * dua layar.
+     *
+     * Nama kelompok kini keping juga, sebaris dengan keterangan lain.
+     */
+    public function test_nama_kelompok_jadi_keping_bukan_teks_polos(): void
+    {
+        $js = $this->pemilih();
+
+        $this->assertStringNotContainsString("'mis-pilih-ket'", $js,
+            'Nama kelompok kembali dirender sebagai teks polos di barisnya '
+            . 'sendiri; barisnya jadi lebih tinggi dan dua bahasa rupa '
+            . 'bercampur dalam satu baris.');
+
+        $this->assertSame(1, preg_match(
+            '/function rakitBaris\([^)]*\) \{([\s\S]*?)\n    \}/', $js, $cocok
+        ), 'Perakit barisnya tidak ditemukan.');
+
+        $this->assertStringContainsString('keterangan.push(labelKelompok)', $cocok[1],
+            'Nama kelompok tidak ikut jadi keping, jadi ia hilang sama sekali '
+            . 'dari barisnya — dan saat hasil pencarian mencampur beberapa '
+            . 'kelompok, tidak ada yang menyebut barisnya milik siapa.');
+
+        $this->assertStringContainsString('mis-pilih-keping-kelompok', $cocok[1],
+            'Keping kelompok tidak dibedakan dari keterangan barisnya sendiri.');
+    }
+
+    /**
+     * Keping kelompok TIDAK membuat barisnya lebih tinggi.
+     *
+     * Ia bergaris 1px; tanpa garis tembus pandang pada keping lain, baris
+     * yang punya keping kelompok jadi 2px lebih tinggi — terukur 64px
+     * melawan 62px antara kedua layar yang memakai pemilih yang sama.
+     */
+    public function test_keping_kelompok_tidak_meninggikan_barisnya(): void
+    {
+        $css = $this->gayaBersama();
+
+        $this->assertSame(1, preg_match(
+            '/\.mis-pilih-keping > span\s*\{([^}]*)\}/s', $css, $cocok
+        ), 'Aturan keping pemilih tidak ada.');
+
+        $this->assertMatchesRegularExpression('/border:\s*1px solid transparent/', $cocok[1],
+            'Keping biasa tidak punya garis penyeimbang, jadi baris yang '
+            . 'berkeping kelompok 2px lebih tinggi daripada yang tidak.');
+
+        $this->assertMatchesRegularExpression(
+            '/\.mis-pilih-keping-kelompok\s*\{[^}]*border:\s*1px solid/s', $css,
+            'Keping kelompok tidak dibedakan lewat garisnya.'
+        );
+    }
+
 }
