@@ -81,6 +81,20 @@ Catatan Penghapusan | MIS Rumah Scopus
          * dan satu baris kendali memang tidak menuntut kotaknya sendiri.
          */
         @media (max-width: 575.98px) {
+            /*
+             * Jarak ke kartu hasil di bawahnya.
+             *
+             * Saat terlipat, yang terlihat cuma bilah ringkasannya — dan
+             * ia tidak punya margin bawah, sementara .mis-saring-kartu yang
+             * punya sedang tidak bertinggi. Terukur: jarak 0px di 390px,
+             * jadi bilah "Cari & saring" dan kartu catatannya bersentuhan
+             * dan terbaca seperti satu kotak terbelah. Di 1440px lipatannya
+             * dipaksa terbuka, kartunya bertinggi, dan jaraknya sudah 14px.
+             */
+            #thp-penyaring {
+                margin-bottom: 14px;
+            }
+
             /* Lipatan "Saringan lain" sudah di dalam kartunya, jadi garis
                pemisahnya cukup — kotak di dalam kotak terbaca bertumpuk. */
             .thp-borang .thp-lipat {
@@ -810,7 +824,13 @@ Catatan Penghapusan | MIS Rumah Scopus
             </p>
         @endif
 
-        <div class="mis-kartu">
+        {{-- Saringan BERDIRI SENDIRI, di luar kartu hasilnya — sama dengan
+             layar Pendaftar Layanan, yang di sana memang tidak punya kartu
+             luar sama sekali: saringan dan hasilnya kartu bersaudara.
+
+             Dibungkus bersama, bilah "Cari & saring" dan tumpukan catatannya
+             terbaca sebagai satu benda, dan kartu saringannya jadi kotak di
+             dalam kotak. --}}
             {{-- form-control-modern, bukan kelas karangan sendiri: itu yang
                  dipakai kotak cari di layar daftarnya, dan isian yang
                  memanggil kelas yang tidak ada tampil sebagai kotak telanjang
@@ -963,6 +983,8 @@ Catatan Penghapusan | MIS Rumah Scopus
             </form>
             </div>{{-- mis-saring-kartu --}}
             </details>
+
+        <div class="mis-kartu">
 
             {{-- Membuang seluruh hasil saringan sekaligus.
 

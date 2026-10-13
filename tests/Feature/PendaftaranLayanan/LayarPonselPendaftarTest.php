@@ -1205,4 +1205,58 @@ class LayarPonselPendaftarTest extends TestCase
             . 'alih-alih membungkus.');
     }
 
+    /**
+     * Saringan arsip BERDIRI SENDIRI, di luar kartu hasilnya.
+     *
+     * Keduanya sempat dibungkus satu .mis-kartu, jadi bilah "Cari & saring"
+     * dan tumpukan catatannya terbaca sebagai satu benda — dan kartu
+     * saringannya jadi kotak di dalam kotak. Layar Pendaftar Layanan tidak
+     * punya kartu luar sama sekali: saringan dan hasilnya kartu bersaudara.
+     *
+     * Dijaga dari URUTAN markahnya: pembuka .mis-kartu harus datang SESUDAH
+     * lipatan saringannya ditutup.
+     */
+    #[Test]
+    public function saringan_arsip_di_luar_kartu_hasil(): void
+    {
+        $isi = $this->arsip();
+
+        $tutupLipat = strpos($isi, '</details>', strpos($isi, 'id="thp-penyaring"'));
+        $bukaKartu = strpos($isi, '<div class="mis-kartu">');
+        $hasil = strpos($isi, 'id="thp-hasil"');
+
+        $this->assertNotFalse($tutupLipat, 'Lipatan saringan arsip tidak ada.');
+        $this->assertNotFalse($bukaKartu, 'Kartu hasil arsip tidak ada.');
+
+        $this->assertGreaterThan($tutupLipat, $bukaKartu,
+            'Kartu hasil dibuka sebelum lipatan saringannya ditutup, jadi '
+            . 'saringan dan datanya kembali terbungkus satu kartu.');
+
+        $this->assertGreaterThan($bukaKartu, $hasil,
+            'Wadah hasilnya tidak di dalam kartu itu.');
+    }
+
+    /**
+     * Kartu saringan arsip tidak bersentuhan dengan kartu hasilnya.
+     *
+     * Saat terlipat, yang terlihat cuma bilah ringkasannya — dan ia tidak
+     * punya margin bawah, sementara .mis-saring-kartu yang punya sedang
+     * tidak bertinggi. Terukur: jarak 0px di 390px, jadi keduanya
+     * bersentuhan dan terbaca seperti satu kotak terbelah. Sesudah
+     * diperbaiki, 14px di 320, 390, dan 1440px.
+     */
+    #[Test]
+    public function kartu_saringan_arsip_punya_jarak_ke_hasilnya(): void
+    {
+        preg_match('/@media \(max-width: 575\.98px\) \{(.*)/s', $this->arsip(), $blok);
+
+        $this->assertSame(1, preg_match('/#thp-penyaring\s*\{[^}]*margin-bottom:\s*(\d+)px/s',
+            $blok[1], $cocok),
+            'Lipatan saringan arsip tidak punya jarak ke kartu hasil di '
+            . 'bawahnya; keduanya bersentuhan saat terlipat.');
+
+        $this->assertGreaterThanOrEqual(10, (int) $cocok[1],
+            'Jaraknya terlalu rapat untuk membedakan kedua kartu.');
+    }
+
 }
