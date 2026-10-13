@@ -96,86 +96,46 @@ Catatan Penghapusan | MIS Rumah Scopus
             /* Nomornya naik ke KANAN kepala kartu, di seberang medalinya —
                di sana ia jadi penanda kartu, bukan baris pertama yang
                mendesak namanya turun. */
+            /*
+             * display: contents — .thp-isi dibubarkan.
+             *
+             * Anak-anaknya jadi anak kisi KARTUNYA langsung, jadi keping dan
+             * keterangan bisa membentang melewati lajur medali. Selama ia
+             * kotak sendiri, apa pun di dalamnya terkurung di lajur kedua.
+             */
             .thp-isi {
-                display: grid;
-                /*
-                 * Nama di kiri, nomor di kanan — SEBARIS.
-                 *
-                 * Lajur nomornya dipatok minmax(0, 40%), bukan `auto`:
-                 * max-width pada kepingnya TIDAK membatasi lajurnya, dan
-                 * lajur `auto` tetap mengikuti lebar penuh nomornya.
-                 * Terukur dengan nomor "BOOK-05072026111623-ZRWIJ" di 320px:
-                 * lajur nama menciut sampai 0px dan namanya jadi pita tegak
-                 * setinggi 196px — padahal kepingnya sendiri sudah dipotong
-                 * elipsis jadi 67px.
-                 *
-                 * Yang dipakai fit-content(40%), bukan minmax: ia berarti
-                 * "seukuran isinya, tetapi tidak lebih dari 40%". minmax
-                 * membiarkan lajurnya mengambil 40% penuh walau isinya tidak
-                 * membutuhkannya — terukur di 390px lajur nomornya 99px
-                 * padahal nomornya cuma 62px, dan 37px yang dirampasnya
-                 * membuat NAMA membungkus jadi dua baris.
-                 *
-                 * Angkanya: nama butuh 168px, nomor 62px, sela 10px — 240px
-                 * dalam lebar isi 247px. Keduanya memang muat sebaris, asal
-                 * lajurnya tidak mengambil lebih dari yang dibutuhkan.
-                 */
-                grid-template-columns: minmax(0, 1fr) fit-content(40%);
-                align-items: baseline;
-                column-gap: 10px;
+                display: contents;
             }
 
             /*
-             * Sisanya membentang dua lajur.
+             * Hanya nama dan nomor yang memakai ketiga lajurnya; sisanya
+             * membentang penuh.
              *
-             * Tanpa ini keping, lencana, dan keterangan lain ikut terbagi ke
-             * kedua lajur kepala — dan lebar lajur kanannya ditentukan nomor
-             * yang sudah terlanjur sempit.
+             * Angkanya: nama butuh 168px, nomor 62px, sela 10px — 240px
+             * dalam lebar isi 247px, jadi keduanya memang muat sebaris.
+             *
+             * Lajur nomornya fit-content(40%), bukan minmax: ia berarti
+             * "seukuran isinya, tetapi tidak lebih dari 40%". minmax
+             * membiarkan lajurnya mengambil 40% penuh walau isinya tidak
+             * membutuhkannya — terukur lajurnya 99px untuk nomor 62px, dan
+             * 37px yang dirampasnya membuat NAMA membungkus dua baris.
              */
-            .thp-isi > *:not(.thp-nomor):not(.thp-nama) {
-                grid-column: 1 / -1;
-            }
-
-            /*
-             * Rata kanan saja — TANPA margin negatif.
-             *
-             * Versi pertama mengangkatnya 26px supaya sejajar titik tengah
-             * medalinya. Itu melebihi bantalan atas kartunya yang 14px, jadi
-             * nomornya tergambar DI LUAR kartu, menggantung di atas tepinya.
-             * Terlihat langsung di layar; tidak ada galat apa pun.
-             *
-             * Tidak perlu diangkat: .thp-isi sudah menempati lajur kedua
-             * baris pertama, jadi anak pertamanya memang sebaris dengan
-             * medalinya.
-             */
-            /*
-             * Nomor di lajur KANAN baris pertama, namanya di kiri.
-             *
-             * Keduanya ditempatkan tegas ke baris 1: nomornya anak pertama
-             * di markah, jadi dibiarkan mengalir ia mengambil baris sendiri
-             * dan mendorong namanya turun — persis yang terjadi sebelum ini.
-             *
-             * TANPA margin negatif. Versi sebelumnya mengangkatnya 26px
-             * supaya sejajar medali; itu melebihi bantalan atas kartunya yang
-             * 14px dan nomornya tergambar DI LUAR kartu.
-             */
-            .thp-isi > .thp-nomor {
+            .thp-isi > .thp-nama {
                 grid-column: 2;
                 grid-row: 1;
+                align-self: center;
+            }
+
+            .thp-isi > .thp-nomor {
+                grid-column: 3;
+                grid-row: 1;
+                align-self: center;
                 justify-self: end;
                 /*
-                 * TANPA max-width di kepingnya — lajurnya yang membatasi.
-                 *
-                 * Persen pada anak kisi dihitung terhadap LAJURNYA, bukan
-                 * terhadap kisinya: dengan lantai lajur 64px, `max-width: 40%`
-                 * berarti 40% dari 64px, dan terukur nomornya menciut jadi
-                 * 28px — tinggal elipsis. Pembatas 40% sudah dikerjakan
-                 * lajurnya sendiri.
-                 *
-                 * Yang dipakai 100%: itu berarti selebar LAJURNYA, bukan
-                 * selebar kisinya. Tanpa itu `justify-self: end` membuat
-                 * kepingnya seukuran isinya dan menembus lajurnya — terukur
-                 * 188px menimpa namanya, elipsisnya tidak pernah terpakai.
+                 * Pembatasnya 100%, yang pada anak kisi berarti selebar
+                 * LAJURNYA. Tanpa itu `justify-self: end` membuat kepingnya
+                 * seukuran isinya dan menembus lajurnya — terukur 188px
+                 * menimpa namanya, elipsisnya tidak pernah terpakai.
                  *
                  * Nomor penuhnya tetap ada di title; nama yang terpotong
                  * tidak punya cadangan apa pun, jadi namanya yang
@@ -187,9 +147,9 @@ Catatan Penghapusan | MIS Rumah Scopus
                 text-overflow: ellipsis;
             }
 
-            .thp-isi > .thp-nama {
-                grid-column: 1;
-                grid-row: 1;
+            /* Sisanya membentang penuh, melewati lajur medali. */
+            .thp-isi > *:not(.thp-nama):not(.thp-nomor) {
+                grid-column: 1 / -1;
             }
 
             /*
@@ -658,20 +618,29 @@ Catatan Penghapusan | MIS Rumah Scopus
         }
 
         @media (max-width: 575.98px) {
+            /*
+             * TIGA lajur, dan hanya baris pertama yang memakainya.
+             *
+             * Sebelumnya medalinya memegang lajur 38px untuk SELURUH kartu:
+             * keping, nominal, tautan rincian, dan kedua tombol semuanya
+             * mulai di 66px sementara kartunya mulai di 30px — 36px kosong
+             * membentang di sisi kiri sepanjang kartu, dan tombolnya cuma
+             * kebagian 247px sehingga tidak muat berdampingan.
+             */
             .thp-baris {
-                grid-template-columns: 38px minmax(0, 1fr);
+                grid-template-columns: auto minmax(0, 1fr) fit-content(40%);
             }
 
             /* Nominalnya turun ke bawah namanya, bukan terjepit di lajur
                ketiga selebar 60px yang memecah "Rp 1.250.000" jadi tiga
                baris. */
             .thp-uang {
-                grid-column: 2;
+                grid-column: 1 / -1;
             }
 
             .thp-kaki,
             .thp-alasan {
-                grid-column: 2;
+                grid-column: 1 / -1;
             }
 
             /*
@@ -692,13 +661,13 @@ Catatan Penghapusan | MIS Rumah Scopus
             }
 
             /*
-             * Tiap tombol SELEBAR barisnya.
+             * Kedua tombol BERDAMPINGAN, berbagi barisnya rata.
              *
              * Berdampingan keduanya menuntut 258px — "Buang catatan" 133px,
-             * "Kembalikan" 118px, sela 7px — di dalam kolom isi yang 247px,
-             * jadi mereka membungkus. Dibiarkan selebar isinya, yang tersisa
-             * dua tombol bertumpuk dengan lebar berbeda dan tepi kanan yang
-             * ragged.
+             * "Kembalikan" 118px, sela 7px. Selama kakinya terkurung di
+             * lajur kedua ia cuma punya 247px, jadi keduanya membungkus;
+             * sesudah kakinya membentang penuh melewati lajur medali,
+             * ruangnya cukup.
              *
              * Borangnya yang disebut, bukan tombolnya: keduanya <form>
              * ber-display:block, jadi BORANG yang jadi item lentur barisnya.
@@ -706,7 +675,7 @@ Catatan Penghapusan | MIS Rumah Scopus
              * yang lebarnya sudah terlanjur mengikuti isinya.
              */
             .thp-aksi > form {
-                flex: 1 1 100%;
+                flex: 1 1 0;
                 min-width: 0;
             }
 
