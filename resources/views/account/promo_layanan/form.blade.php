@@ -19,14 +19,54 @@
     .prf-wajib { color: #e11d48; font-weight: 800; }
 
     /*
-     * Kartunya menurun satu lajur, bukan dua berdampingan.
-     *
-     * Borang ini empat langkah yang harus dibaca BERURUTAN — "promo apa",
-     * "potongannya berapa", "kapan", "untuk siapa" — dan dua lajur membuat
-     * langkah ketiga duduk di sebelah langkah pertama. Yang memakainya bukan
-     * orang yang hafal borangnya.
+     * Di ponsel keempat langkah menurun satu lajur — harus dibaca berurutan:
+     * "promo apa", "potongannya berapa", "kapan", "untuk siapa". Yang
+     * memakainya bukan orang yang hafal borangnya.
      */
-    .prf-tumpuk { display: grid; gap: var(--mis-jarak); max-width: 880px; }
+    .prf-tumpuk { display: grid; gap: var(--mis-jarak); }
+
+    /*
+     * Di layar lebar langkah 4 pindah ke lajur kanan, setinggi ketiga langkah
+     * di kirinya.
+     *
+     * Bukan sekadar mengisi ruang kosong. Tiga langkah pertama borang pendek —
+     * tujuh isian seluruhnya — sementara langkah 4 daftar panjang yang
+     * menggulung sendiri. Dibiarkan menurun, kartunya dibatasi 880px dan sisa
+     * kanannya menganga ~380px pada layar 1960px.
+     *
+     * Yang didapat dari menyandingkannya: mengubah persennya di kiri membuat
+     * harga tiap angkatan di kanan ikut berubah DI DEPAN MATA. Menurun, kedua
+     * hal itu tidak pernah terlihat bersamaan, dan admin harus menggulung
+     * bolak-balik untuk memeriksa akibat satu ketikan.
+     *
+     * Urutan bacanya tidak berubah: urutan DOM tetap 1-2-3-4, dan nomor di
+     * kepala tiap kartu menyatakannya terang-terangan.
+     */
+    /* Tiga langkah pertama menumpuk sendiri, dengan jarak yang sama persis
+       seperti antar kartu di luarnya. */
+    .prf-lajur { display: grid; gap: var(--mis-jarak); align-content: start; }
+
+    @media (min-width: 992px) {
+        .prf-tumpuk {
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            /* start, bukan stretch: kartu yang isinya pendek tidak boleh
+               ditarik setinggi kolom sebelahnya — sisanya jadi petak putih
+               DI DALAM kartu. */
+            align-items: start;
+        }
+
+        /*
+         * Daftarnya dapat satu lajur penuh, jadi boleh lebih tinggi — dan
+         * tingginya diikat ke layar supaya tidak pernah melebihi jendelanya.
+         *
+         * Dipertegas dengan `.prf-tumpuk` di depannya. Aturan dasarnya
+         * (max-height: 320px) berbobot sama (0,1,0) DAN ditulis lebih
+         * belakang di berkas ini, jadi ia menang walau yang ini di dalam
+         * media query — terukur: daftarnya tetap 320px di 1440px. Bobot
+         * (0,2,0) membuatnya menang tanpa bergantung urutan.
+         */
+        .prf-tumpuk .prf-baris-bungkus { max-height: min(560px, calc(100vh - 360px)); }
+    }
 
     /* Nomor langkah di kepala kartu, supaya urutannya tidak bisa salah baca. */
     .prf-langkah { display: flex; align-items: center; gap: 9px; margin: 0 0 4px; }
@@ -310,6 +350,15 @@
 
             <div class="prf-tumpuk">
 
+                {{-- Tiga langkah pertama dibungkus jadi SATU unsur kisi.
+
+                     Bukan tiga unsur yang direntang lewat grid-row: span 3.
+                     Unsur yang membentang beberapa baris menarik baris-baris
+                     itu setinggi dirinya, jadi ketiga kartu di kiri terpisah
+                     jarak yang tidak diminta siapa pun — terukur 68px dan 72px
+                     pada jarak baku 16px. --}}
+                <div class="prf-lajur">
+
                 {{-- ------------------------------------------- langkah 1 --}}
                 <div class="mis-bagian">
                     <p class="prf-langkah">
@@ -475,6 +524,8 @@
                         </div>
                     </div>
                 </div>
+
+                </div>{{-- prf-lajur --}}
 
                 {{-- ------------------------------------------- langkah 4 --}}
                 <div class="mis-bagian">
