@@ -19,10 +19,23 @@ class PublicScopusCampController extends Controller
     // <!--================== NAMPILIN KATEGORI ==================-->
     public function public(Request $request)
     {
-        $categories = DB::table('kategori_layanan')->where('layanan', 'scopus_camp')
+        /*
+         * MODEL, bukan DB::table().
+         *
+         * Baris mentah stdClass tidak punya accessor, jadi
+         * `harga_setelah_promo` padanya adalah properti yang tidak ada —
+         * halamannya 500 dengan "Undefined property", dan tanpa accessor itu
+         * harga promo tidak akan pernah terlihat di halaman ini.
+         *
+         * Promonya dimuat berkelompok di bawah: satu kueri untuk seluruh
+         * daftar, bukan satu per kartu.
+         */
+        $categories = CategoriesScopusCamp::where('layanan', 'scopus_camp')
             ->where('status', 'active')
             ->orderBy('mulai', 'asc') // Mengurutkan berdasarkan kolom 'mulai' dari tanggal terawal ke akhir
             ->get();
+
+        \App\Support\PromoAngkatan::muat($categories);
 
         return view('public.scopus_camp.index', compact('categories'));
     }
@@ -164,11 +177,6 @@ class PublicScopusCampController extends Controller
         }
         // END
 
-        // CLEAR FORMAT RUPIAH
-        $cleanPPN = str_replace('.', '', $request->input('ppn'));
-        $cleanTotalPembayaran = str_replace('.', '', $request->input('total_pembayaran'));
-        // END
-
         // CEK APAKAH KODE DISKON NULL ATAU TIDAK
         $kodeDiskon = $request->input('kode_diskon');
         $nominalDiskon = null;
@@ -177,6 +185,27 @@ class PublicScopusCampController extends Controller
             $nominalDiskon = str_replace('.', '', $request->input('nominal_diskon'));
         }
         // END
+
+        /*
+         * Harganya DIHITUNG ULANG di peladen, bukan diterima dari borangnya.
+         *
+         * Sebelum ini `total_pembayaran`, `ppn`, dan `kode_unik` disimpan
+         * mentah dari kiriman — nominal yang ditagihkan sepenuhnya ditentukan
+         * sisi yang tidak bisa dipercaya, dan siapa pun bisa mendaftar dengan
+         * total nol tanpa satu baris pun yang menolak.
+         *
+         * Rumusnya di App\Support\HargaUmum, satu tempat bersama borangnya —
+         * jadi angka yang dipajang dan angka yang ditagih tidak bisa berselisih.
+         */
+        $harga = \App\Support\HargaUmum::hitung(
+            $kategori,
+            $jumlahPendaftarBaru,
+            $request->input('kode_unik'),
+            $nominalDiskon
+        );
+
+        $cleanPPN = (string) $harga['ppn'];
+        $cleanTotalPembayaran = (string) $harga['total'];
 
         $save = PendaftaranScopusCamp::create([
             'token'                                                     => $token,
@@ -187,12 +216,14 @@ class PublicScopusCampController extends Controller
             'telp'                                                      => $request->input('telp'),
             'affiliasi'                                                 => $request->input('affiliasi'),
             'ppn'                                                       => $cleanPPN,
-            'kode_unik'                                                 => $request->input('kode_unik'),
+            'kode_unik'                                                 => $harga['kode_unik'],
             'gambar'                                                    => $imagePath,
             'jumlah_pendaftar'                                          => $jumlahPendaftarBaru,
             'kode_diskon'                                               => $kodeDiskon,
             'nominal_diskon'                                            => $nominalDiskon,
             'total_pembayaran'                                          => $cleanTotalPembayaran,
+            // Tali ke promo yang memotong harganya; dibaca layar dampak promo.
+            'promo_id'                                                  => $harga['promo']?->getKey(),
             'status'                                                    => $request->input('status') ?? 'diproses',
             'note'                                                      => $request->input('note'),
         ]);

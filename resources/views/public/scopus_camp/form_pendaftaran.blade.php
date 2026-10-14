@@ -371,7 +371,15 @@ Form Pendaftaran Scopus Camp | Rumah Scopus
                                 <label>Biaya Per Sesi</label>
                                 <div class="input-group-glass readonly">
                                     <span class="input-group-text">Rp</span>
-                                    <input type="text" name="biaya" id="biaya" value="{{ number_format($item->biaya, 0, ',', '.') }}" class="form-control-glass currency" readonly>
+                                    {{-- harga_setelah_promo, BUKAN $item->biaya.
+
+                                         Halaman daftarnya MENCORET `biaya` dan
+                                         menjanjikan `total_biaya`; borang ini dulu
+                                         menagih angka yang dicoret itu. Terukur 18
+                                         angkatan terkena — Scopus Camp Padang
+                                         menjanjikan Rp 5.060.000 lalu menagih
+                                         Rp 5.500.000. Lihat App\Support\HargaUmum. --}}
+                                    <input type="text" name="biaya" id="biaya" value="{{ number_format($item->harga_setelah_promo, 0, ',', '.') }}" class="form-control-glass currency" readonly>
                                 </div>
                             </div>
                             <div class="form-group">
@@ -487,16 +495,27 @@ Form Pendaftaran Scopus Camp | Rumah Scopus
                         </div>
 
                         @php
-                        $jumlahPPN = ($item->ppn > 0) ? $item->biaya * ($item->ppn / 100) : 0;
+                        // Dihitung dari SATU kursi, seperti sebelumnya. Kejanggalan itu
+                        // dipertahankan apa adanya: membetulkannya di sini berarti
+                        // mengubah nominal yang ditagihkan untuk alasan yang berbeda
+                        // dari perkara promo, dan dua perubahan uang dalam satu
+                        // langkah tidak bisa ditelusuri kalau salah satunya keliru.
+                        $jumlahPPN = ($item->ppn > 0) ? $item->harga_setelah_promo * ($item->ppn / 100) : 0;
                         @endphp
 
                         <div class="summary-container">
                             <div class="summary-row">
                                 <span>Subtotal</span>
                                 <div>
-                                    <span>Rp</span> <span>{{ number_format($item->biaya, 0, ',', '.') }}</span>
+                                    @if ($item->harga_sebelum_promo > $item->harga_setelah_promo)
+                                        {{-- Harga asalnya dicoret, sama seperti di halaman
+                                             daftarnya — tanpa itu potongan promonya tidak
+                                             terlihat sama sekali di borang. --}}
+                                        <small class="text-muted text-decoration-line-through me-1">Rp {{ number_format($item->harga_sebelum_promo, 0, ',', '.') }}</small>
+                                    @endif
+                                    <span>Rp</span> <span>{{ number_format($item->harga_setelah_promo, 0, ',', '.') }}</span>
                                 </div>
-                                <input type="hidden" name="subtotal" id="subtotalInput" value="{{ $item->biaya }}">
+                                <input type="hidden" name="subtotal" id="subtotalInput" value="{{ $item->harga_setelah_promo }}">
                             </div>
 
                             <div class="summary-row">

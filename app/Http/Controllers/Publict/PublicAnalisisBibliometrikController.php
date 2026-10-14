@@ -19,10 +19,22 @@ class PublicAnalisisBibliometrikController extends Controller
     public function public(Request $request)
     {
 
-        $categories = DB::table('kategori_layanan')->where('layanan', 'bibliometrik')
+        /*
+         * MODEL, bukan DB::table().
+         *
+         * Baris mentah stdClass tidak punya accessor, jadi
+         * `harga_setelah_promo` padanya adalah properti yang tidak ada —
+         * halamannya 500 dengan "Undefined property", dan tanpa accessor itu
+         * harga promo tidak akan pernah terlihat di halaman ini.
+         */
+        $categories = CategoriesAnalisisBibliometrik::where('layanan', 'bibliometrik')
             ->where('status', 'active')
             ->latest()
             ->paginate(6);
+
+        // Promonya dimuat berkelompok: satu kueri untuk seluruh halaman,
+        // bukan satu per kartu.
+        \App\Support\PromoAngkatan::muat($categories->getCollection());
 
         return view('public.analisis_bibliometrik.index', compact('categories'));
     }
@@ -157,12 +169,6 @@ class PublicAnalisisBibliometrikController extends Controller
         }
         // END
 
-        // CLEAR FORMAT RUPIAH
-        $cleanPPN = str_replace('.', '', $request->input('ppn'));
-        $cleanNominalDiskon = str_replace('.', '', $request->input('nominal_diskon'));
-        $cleanTotalPembayaran = str_replace('.', '', $request->input('total_pembayaran'));
-        // END
-
         // CEK APAKAH KODE DISKON NULL ATAU TIDAK
         $kodeDiskon = $request->input('kode_diskon');
         $nominalDiskon = null;
@@ -171,6 +177,26 @@ class PublicAnalisisBibliometrikController extends Controller
             $nominalDiskon = str_replace('.', '', $request->input('nominal_diskon'));
         }
         // END
+
+        /*
+         * Harganya DIHITUNG ULANG di peladen, bukan diterima dari borangnya.
+         *
+         * Sebelum ini `total_pembayaran`, `ppn`, dan `kode_unik` disimpan
+         * mentah dari kiriman — nominal yang ditagihkan sepenuhnya ditentukan
+         * sisi yang tidak bisa dipercaya.
+         *
+         * Rumusnya di App\Support\HargaUmum, satu tempat bersama borangnya —
+         * jadi angka yang dipajang dan angka yang ditagih tidak bisa berselisih.
+         */
+        $harga = \App\Support\HargaUmum::hitung(
+            $kategori,
+            $jumlahPendaftarBaru,
+            $request->input('kode_unik'),
+            $nominalDiskon
+        );
+
+        $cleanPPN = (string) $harga['ppn'];
+        $cleanTotalPembayaran = (string) $harga['total'];
 
         $save = AnalisisBibliometrik::create([
             'token'                                                     => $token,
@@ -181,12 +207,14 @@ class PublicAnalisisBibliometrikController extends Controller
             'telp'                                                      => $request->input('telp'),
             'affiliasi'                                                 => $request->input('affiliasi'),
             'ppn'                                                       => $cleanPPN,
-            'kode_unik'                                                 => $request->input('kode_unik'),
+            'kode_unik'                                                 => $harga['kode_unik'],
             'gambar'                                                    => $imagePath,
             'jumlah_pendaftar'                                          => $jumlahPendaftarBaru,
             'kode_diskon'                                               => $kodeDiskon,
             'nominal_diskon'                                            => $nominalDiskon,
             'total_pembayaran'                                          => $cleanTotalPembayaran,
+            // Tali ke promo yang memotong harganya; dibaca layar dampak promo.
+            'promo_id'                                                  => $harga['promo']?->getKey(),
             'status'                                                    => $request->input('status') ?? 'diproses',
             'note'                                                      => $request->input('note'),
         ]);

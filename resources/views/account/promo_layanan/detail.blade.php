@@ -86,6 +86,32 @@
 
     /* --------------------------------------------------------- angkatan */
 
+    /*
+     * Pita peringatan angkatan terlewat. Kuning, bukan merah: tidak ada yang
+     * rusak — promonya bekerja persis seperti yang disetel. Yang perlu
+     * diputuskan orang apakah angkatan baru itu memang sengaja tidak ikut.
+     */
+    .prd-ingatkan { border-color: #fde68a !important; background: #fffbeb; }
+    .prd-ingatkan-judul { display: flex; align-items: center; gap: 8px; margin: 0 0 4px; line-height: 1.35; font-size: .88rem; font-weight: 800; color: #92400e; }
+    .prd-ingatkan-judul .fas { font-size: inherit; }
+    .prd-ingatkan-teks { margin: 0 0 11px; line-height: 1.55; font-size: .78rem; color: #a16207; }
+    .prd-keping-sisa { display: inline-flex; align-items: center; padding: 5px 11px; border-radius: 999px; background: #fef3c7; font-size: .75rem; font-weight: 700; color: #92400e; }
+
+    /* Ubin yang sekaligus tautan. .mis-ubin bersama sudah menyediakan
+       keadaan hover untuk a.mis-ubin, jadi yang ditulis di sini cuma
+       membuang garis bawah bawaannya.
+
+       Namanya tidak memuat kata "ubin" — RupaBersamaTest mencari pola
+       <awalan>-ubin untuk menangkap layar yang menyalin ubin ringkasannya
+       sendiri, dan nama modifier yang kebetulan mengandungnya ikut
+       tertangkap walau ia justru MEMAKAI ubin bersamanya. */
+    .prd-angka-tautan { text-decoration: none; }
+    .prd-angka-tautan:hover { text-decoration: none; }
+
+    .prd-lihat { display: inline-flex; align-items: center; gap: 5px; font-size: .76rem; font-weight: 700; color: #4f46e5; white-space: nowrap; }
+    .prd-lihat .fas { font-size: inherit; }
+    .prd-lihat:hover { color: #4338ca; text-decoration: none; }
+
     .prd-keping { display: flex; flex-wrap: wrap; gap: 7px; }
 
     .prd-keping a {
@@ -250,10 +276,25 @@
                 </p>
 
                 <div class="prd-angka">
-                    <div class="mis-ubin">
-                        <p class="mis-ubin-angka">{{ number_format($dampak['pendaftaran']) }}</p>
-                        <p class="mis-ubin-label">Pendaftaran</p>
-                    </div>
+                    {{-- Angkanya TAUTAN ke orangnya.
+
+                         "Dipakai 23 kali" menjawab berapa, tidak menjawab
+                         siapa — dan pertanyaan kedua selalu menyusul. Berupa
+                         <a>, bukan tombol berskrip, supaya alamatnya bisa
+                         disalin dan dikirim ke orang lain. --}}
+                    @if ($dampak['pendaftaran'] > 0)
+                        <a class="mis-ubin prd-angka-tautan"
+                            href="{{ route('account.pendaftaran-layanan.index', ['promo' => $promo->id]) }}"
+                            title="Lihat pendaftarnya">
+                            <p class="mis-ubin-angka">{{ number_format($dampak['pendaftaran']) }}</p>
+                            <p class="mis-ubin-label">Pendaftaran &middot; lihat orangnya</p>
+                        </a>
+                    @else
+                        <div class="mis-ubin">
+                            <p class="mis-ubin-angka">0</p>
+                            <p class="mis-ubin-label">Pendaftaran</p>
+                        </div>
+                    @endif
                     <div class="mis-ubin">
                         <p class="mis-ubin-angka">{{ number_format($dampak['peserta']) }}</p>
                         <p class="mis-ubin-label">Peserta</p>
@@ -290,6 +331,42 @@
                     </p>
                 @endif
             </div>
+
+            {{-- Angkatan yang dibuat SESUDAH promo ini dan belum dicentang.
+
+                 Akibat wajar dari "centang satu per satu", tetapi tanpa
+                 peringatan ini akibatnya tidak pernah terlihat: angkatan baru
+                 diam-diam harga normal, dan yang menyadarinya biasanya
+                 pendaftar yang membandingkan harga. --}}
+            @if ($terlewat->isNotEmpty())
+                <div class="mis-bagian prd-penuh prd-ingatkan" role="alert">
+                    <p class="prd-ingatkan-judul">
+                        <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+                        {{ $terlewat->count() }} angkatan dibuat sesudah promo ini dan belum ikut
+                    </p>
+                    <p class="prd-ingatkan-teks">
+                        Promo menempel pada angkatan yang dicentang, jadi angkatan baru tidak ikut sendiri.
+                        Selama belum dicentang, angkatan di bawah ini tetap harga normal.
+                    </p>
+                    <div class="prd-keping">
+                        @foreach ($terlewat->take(8) as $a)
+                            <a href="{{ route('account.kategori-layanan.detail', $a->id) }}">
+                                <i class="fas {{ $katalog[$a->layanan]['ikon'] ?? 'fa-tag' }}" aria-hidden="true"></i>
+                                {{ $a->nama }}{{ $a->nama_ke ? ' ke-' . $a->nama_ke : '' }}
+                            </a>
+                        @endforeach
+                        @if ($terlewat->count() > 8)
+                            <span class="prd-keping-sisa">+{{ $terlewat->count() - 8 }} lainnya</span>
+                        @endif
+                    </div>
+                    @if ($bolehUbah)
+                        <a href="{{ route('account.promo-layanan.edit', $promo->id) }}"
+                            class="mis-tombol mis-tombol-ungu" style="margin-top: 12px;">
+                            <i class="fas fa-check-square"></i> Centang angkatannya
+                        </a>
+                    @endif
+                </div>
+            @endif
 
             {{-- ------------------------------------------- per angkatan --}}
             <div class="mis-bagian prd-penuh">
@@ -337,6 +414,7 @@
                                         <th>Pendaftaran</th>
                                         <th>Peserta</th>
                                         <th class="text-right">Potongan</th>
+                                        <th class="text-right">Pendaftar</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -354,6 +432,13 @@
                                             <td data-judul="Peserta">{{ number_format($baris['peserta']) }}</td>
                                             <td data-judul="Potongan" class="text-right">
                                                 <span class="prd-uang">Rp {{ number_format($baris['potongan'], 0, ',', '.') }}</span>
+                                            </td>
+                                            <td data-judul="Pendaftar" class="text-right">
+                                                <a class="prd-lihat"
+                                                    href="{{ route('account.pendaftaran-layanan.index', ['promo' => $promo->id, 'angkatan' => $baris['kategori_id']]) }}"
+                                                    title="Lihat pendaftar angkatan ini yang kena promo">
+                                                    <i class="fas fa-users" aria-hidden="true"></i> lihat
+                                                </a>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -405,6 +490,19 @@
                             </div>
                         @endforeach
                     </div>
+
+                    {{-- Penomoran, bukan "lihat 50 terakhir": jejak lama justru
+                         yang dicari saat ada yang bertanya sejak kapan harganya
+                         berubah. --}}
+                    @if ($jejak->hasPages())
+                        <div class="mis-halaman" style="margin-top: var(--mis-jarak);">
+                            {{ $jejak->links('vendor.pagination.bootstrap-4') }}
+                            <p class="mis-halaman-ket">
+                                Menampilkan {{ $jejak->firstItem() }}–{{ $jejak->lastItem() }}
+                                dari {{ number_format($jejak->total()) }} peristiwa.
+                            </p>
+                        </div>
+                    @endif
                 @endif
             </div>
         </div>
