@@ -491,6 +491,82 @@ class PromoTerlihatDanMassalTest extends TestCase
             'Jumlah ubin bertanda kosong tidak cocok dengan jumlah yang angkanya nol.');
     }
 
+    // ------------------------------------------- tombol aksi & kotak centang
+
+    #[Test]
+    public function tombol_aksi_tidak_boleh_menyusut_sebelah(): void
+    {
+        /*
+         * `.pro-aksi` kisi lentur, dan bawaannya tiap anak boleh menyusut.
+         * Saat lebarnya kurang, yang mengalah hanyalah yang paling bisa
+         * mengalah: tombol Ubah yang <a> polos, bukan tombol di dalam <form>
+         * yang sudah inline-flex.
+         *
+         * Terukur: tombol Ubah 18x34 di antara tiga tombol 34x34 — dari layar
+         * ia terbaca seperti tombol yang sengaja dibuat beda sendiri.
+         *
+         * Dijaga DUA-DUANYA: larangan menyusutnya, dan lebar kolom yang
+         * memang cukup. Tanpa yang kedua, larangan menyusut cuma menukar
+         * tombol kerdil dengan tombol yang meluber keluar selnya.
+         */
+        $berkas = file_get_contents(
+            base_path('resources/views/account/promo_layanan/index.blade.php')
+        );
+
+        $this->assertMatchesRegularExpression(
+            '/\.pro-aksi > \*\s*\{[^}]*flex:\s*0 0 auto/',
+            $berkas,
+            'Tombol aksinya boleh menyusut lagi; yang paling lentur akan mengerut sendirian.'
+        );
+
+        preg_match('/\.pro-k-aksi\s*\{\s*width:\s*(\d+)%/', $berkas, $lebar);
+
+        $this->assertNotEmpty($lebar, 'Lebar kolom Aksi tidak ketemu.');
+        $this->assertGreaterThanOrEqual(16, (int) $lebar[1],
+            'Kolom Aksi menyempit lagi; isinya empat tombol 34px beserta jaraknya butuh 178px dari 1130px, yaitu 16%.');
+    }
+
+    #[Test]
+    public function kotak_centang_tidak_tertimpa_sel_sebelahnya(): void
+    {
+        /*
+         * `thead th` di mis-ui.css ber-position: sticky dengan z-index: 2,
+         * jadi TIAP SEL kepala adalah konteks tumpukan tersendiri — z-index
+         * pada unsur di dalam sel tidak akan pernah naik melewati sel
+         * tetangganya, berapa pun angkanya.
+         *
+         * Terukur sebelum dibetulkan: dua sudut kanan kotak "pilih semua"
+         * mengenai `pro-k-nama`, bukan centangnya. Separuh kanannya tidak bisa
+         * ditekan sama sekali, dan tepinya tertutup sel sebelahnya.
+         */
+        $berkas = file_get_contents(
+            base_path('resources/views/account/promo_layanan/index.blade.php')
+        );
+
+        $this->assertMatchesRegularExpression(
+            '/\.pro-tabel thead th\.pro-centang-sel\s*\{[^}]*z-index:\s*3/',
+            $berkas,
+            'Sel centang di kepala tabel tidak lagi dinaikkan lapisannya; sel PROMO akan menimpa separuh kanannya.'
+        );
+
+        preg_match('/\.pro-centang-sel\s*\{\s*width:\s*(\d+)px/', $berkas, $lebar);
+
+        $this->assertNotEmpty($lebar, 'Lebar kolom centang tidak ketemu.');
+        $this->assertGreaterThanOrEqual(44, (int) $lebar[1],
+            'Kolom centang menyempit lagi; daerah tekan centangnya 44px dan kotaknya terdorong keluar sel.');
+
+        /*
+         * Lapisannya dinaikkan pada SEL-nya, bukan pada bungkus di dalamnya —
+         * yang terakhir tidak pernah bisa bekerja melawan sel bersaudara yang
+         * sama-sama sticky.
+         */
+        $this->assertStringNotContainsString(
+            '.pro-centang-sel .mis-centang-bungkus { position: relative; z-index: 1; }',
+            $berkas,
+            'Lapisannya dinaikkan di dalam sel; itu tidak pernah menang melawan sel tetangga yang sticky.'
+        );
+    }
+
     // ------------------------------------------------- pengamat tidak boleh berputar
 
     #[Test]
