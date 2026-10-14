@@ -59,27 +59,14 @@ Promo Layanan | MIS
        — tanpa itu warnanya berubah jadi biru bawaan saat disentuh. */
     .pro-aksi a.pro-nihil:hover, a.pro-nihil:hover { color: #92400e; text-decoration: underline; }
 
-    @media (max-width: 575.98px) {
-        /*
-         * Dua unduhan berdampingan, "Buat promo" sendirian di bawahnya.
-         *
-         * Bertumpuk tiga, ketiganya memakan 160px sebelum ubin pertama
-         * terlihat — padahal dua di antaranya tombol pendek yang muat
-         * berdua dalam satu baris 390px. Yang membentang penuh tinggal
-         * tombol utamanya, dan itu justru membuatnya lebih menonjol.
-         */
-        #pro-aksi {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 8px;
-        }
-
-        #pro-aksi > .mis-tombol { width: 100%; justify-content: center; }
-
-        /* Tombol utama membentang dua lajur; :last-child supaya aturannya
-           tetap benar kalau tombol unduhnya nanti bertambah atau berkurang. */
-        #pro-aksi > .mis-tombol:last-child { grid-column: 1 / -1; }
-    }
+    /*
+     * Tidak ada aturan ponsel sendiri untuk #pro-aksi.
+     *
+     * Dulu ada: kisi dua lajur buatan sendiri supaya kedua unduhan
+     * berdampingan. Kelas bersama .mis-kepala-aksi-pasangan dan -trio
+     * mengerjakan hal yang sama untuk SELURUH layar, jadi aturan sendiri di
+     * sini cuma membuat tombol yang sama berperilaku beda antar layar.
+     */
 
     /* Kolom centang: ukuran dan daerah tekannya datang dari .mis-centang
        bersama, supaya tidak jadi ukuran ketiga untuk tugas yang sama. */
@@ -233,7 +220,28 @@ Promo Layanan | MIS
                 <h1 class="mis-judul">Promo Layanan</h1>
                 <p class="mis-sub">Potongan harga yang berlaku otomatis untuk angkatan yang dipilih.</p>
             </div>
-            <div class="mis-kepala-aksi" id="pro-aksi">
+            {{-- PASANGAN saja, bukan trio.
+
+                 Trio itu untuk layar yang tombol SEKUNDER-nya tiga atau
+                 lebih — di sana ikonnya naik ke atas dan namanya dipendekkan
+                 supaya semuanya tetap sebaris. Di sini tombol sekundernya
+                 cuma dua dan pada setengah lebar (160px di 390px) tulisan
+                 penuhnya masih muat; memendekkannya adalah kemunduran, dan
+                 panduan menyebutnya begitu.
+
+                 Nama pendeknya tetap disiapkan di markah: ia tidur selama
+                 kelas trio tidak dipasang, dan menambah tombol ketiga nanti
+                 cukup mengganti satu kelas. --}}
+            <div class="mis-kepala-aksi mis-kepala-aksi-pasangan" id="pro-aksi">
+                @if ($bolehUbah)
+                    {{-- Tombol UTAMA, diletakkan PERTAMA dan berwarna penuh:
+                         membuat promo itu tindakan, sementara kedua unduhan
+                         adalah pelengkap. --}}
+                    <a class="mis-tombol mis-tombol-ungu" href="{{ route('account.promo-layanan.create') }}">
+                        <i class="fas fa-plus" aria-hidden="true"></i> Buat promo
+                    </a>
+                @endif
+
                 {{-- Unduhan membawa saringan yang sedang dipakai, bukan seluruh
                      tabel: yang diunduh orang hampir selalu yang dilihatnya.
 
@@ -242,19 +250,25 @@ Promo Layanan | MIS
                      cepat atau lambat ketinggalan satu medan, dan berkasnya
                      memulangkan seluruh baris tanpa satu pun tanda bahwa
                      saringannya tertinggal. --}}
+                {{-- title dan aria-label WAJIB: di lebar ponsel tulisan
+                     panjangnya ditukar nama pendek, dan tombol yang menyebut
+                     "Excel" saja tidak menerangkan apa yang akan terunduh. --}}
                 <a class="mis-tombol mis-tombol-halus"
+                    title="Unduh daftar ini sebagai lembar kerja Excel"
+                    aria-label="Unduh daftar ini sebagai lembar kerja Excel"
                     href="{{ route('account.promo-layanan.excel', $saringan) }}">
-                    <i class="fas fa-file-excel mis-ikon-hijau"></i> Unduh Excel
+                    <i class="fas fa-file-excel mis-ikon-hijau" aria-hidden="true"></i>
+                    <span class="mis-tombol-teks">Unduh Excel</span>
+                    <span class="mis-tombol-ringkas" aria-hidden="true">Excel</span>
                 </a>
                 <a class="mis-tombol mis-tombol-halus"
+                    title="Unduh daftar ini sebagai PDF"
+                    aria-label="Unduh daftar ini sebagai PDF"
                     href="{{ route('account.promo-layanan.cetak', $saringan) }}">
-                    <i class="fas fa-file-pdf mis-ikon-merah"></i> Unduh PDF
+                    <i class="fas fa-file-pdf mis-ikon-merah" aria-hidden="true"></i>
+                    <span class="mis-tombol-teks">Unduh PDF</span>
+                    <span class="mis-tombol-ringkas" aria-hidden="true">PDF</span>
                 </a>
-                @if ($bolehUbah)
-                    <a class="mis-tombol mis-tombol-ungu" href="{{ route('account.promo-layanan.create') }}">
-                        <i class="fas fa-plus"></i> Buat promo
-                    </a>
-                @endif
             </div>
         </div>
 

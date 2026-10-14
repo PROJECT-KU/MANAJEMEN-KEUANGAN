@@ -323,25 +323,55 @@ Angkatan Layanan | MIS
                 <h1 class="mis-judul">Angkatan layanan</h1>
                 <p class="mis-sub">Semua angkatan jasa dalam satu daftar — harga dan deskripsinya ikut tarif induk.</p>
             </div>
+            {{-- PASANGAN saja, bukan trio.
+
+                 Trio itu untuk layar yang tombol SEKUNDER-nya tiga atau
+                 lebih — di sana ikonnya naik ke atas dan namanya dipendekkan
+                 supaya semuanya tetap sebaris. Di sini tombol sekundernya
+                 cuma dua dan pada setengah lebar (160px di 390px) tulisan
+                 penuhnya masih muat; memendekkannya adalah kemunduran, dan
+                 panduan menyebutnya begitu.
+
+                 Nama pendeknya tetap disiapkan di markah: ia tidur selama
+                 kelas trio tidak dipasang, dan menambah tombol ketiga nanti
+                 cukup mengganti satu kelas. --}}
             <div class="mis-kepala-aksi mis-kepala-aksi-pasangan" id="ang-aksi">
+                @if ($bolehUbah)
+                    {{-- Tombol UTAMA, diletakkan PERTAMA dan berwarna penuh:
+                         membuat angkatan itu tindakan, sementara kedua unduhan
+                         adalah pelengkap. Urutannya mengikuti layar Pendaftar
+                         Layanan supaya letak tombol yang sama tidak berpindah
+                         antar layar. --}}
+                    <a href="{{ route('account.kategori-layanan.create', ['layanan' => $layanan ?: 'scopus_camp']) }}"
+                        class="mis-tombol mis-tombol-ungu">
+                        <i class="fas fa-plus" aria-hidden="true"></i> Angkatan baru
+                    </a>
+                @endif
+
                 {{-- Layar kategori yang digantikan layar ini SUDAH punya unduhan
                      PDF dan Excel; menyatukannya tanpa keduanya berarti
                      diam-diam mencabut kemampuan yang sudah dipakai orang.
-                     Saringan yang sedang aktif ikut terbawa. --}}
+                     Saringan yang sedang aktif ikut terbawa.
+
+                     title dan aria-label WAJIB: di lebar ponsel tulisan
+                     panjangnya ditukar nama pendek, dan tombol yang menyebut
+                     "Excel" saja tidak menerangkan apa yang akan terunduh. --}}
                 <a href="{{ route('account.kategori-layanan.excel', request()->query()) }}"
-                    class="mis-tombol mis-tombol-halus">
-                    <i class="fas fa-file-excel"></i> Unduh Excel
+                    class="mis-tombol mis-tombol-halus"
+                    title="Unduh daftar ini sebagai lembar kerja Excel"
+                    aria-label="Unduh daftar ini sebagai lembar kerja Excel">
+                    <i class="fas fa-file-excel mis-ikon-hijau" aria-hidden="true"></i>
+                    <span class="mis-tombol-teks">Unduh Excel</span>
+                    <span class="mis-tombol-ringkas" aria-hidden="true">Excel</span>
                 </a>
                 <a href="{{ route('account.kategori-layanan.cetak', request()->query()) }}"
-                    class="mis-tombol mis-tombol-halus">
-                    <i class="fas fa-file-pdf"></i> Unduh PDF
+                    class="mis-tombol mis-tombol-halus"
+                    title="Unduh daftar ini sebagai PDF"
+                    aria-label="Unduh daftar ini sebagai PDF">
+                    <i class="fas fa-file-pdf mis-ikon-merah" aria-hidden="true"></i>
+                    <span class="mis-tombol-teks">Unduh PDF</span>
+                    <span class="mis-tombol-ringkas" aria-hidden="true">PDF</span>
                 </a>
-                @if ($bolehUbah)
-                    <a href="{{ route('account.kategori-layanan.create', ['layanan' => $layanan ?: 'scopus_camp']) }}"
-                        class="mis-tombol mis-tombol-ungu">
-                        <i class="fas fa-plus"></i> Angkatan baru
-                    </a>
-                @endif
             </div>
         </div>
 
