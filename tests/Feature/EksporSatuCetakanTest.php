@@ -3,9 +3,12 @@
 namespace Tests\Feature;
 
 use App\ClinikScopusBiayaPersesi;
+use App\Exports\AngkatanLayananExport;
 use App\Exports\PelangganExport;
 use App\Exports\PendaftaranLayananExport;
 use App\Exports\TarifLayananExport;
+use App\KategoriLayanan;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
@@ -35,6 +38,15 @@ use Tests\TestCase;
  */
 class EksporSatuCetakanTest extends TestCase
 {
+    /*
+     * Ekspor Angkatan Layanan memakai model sungguhan — accessor-nya
+     * (nama_layanan, jumlah_pendaftar, perlu_dicek) membaca katalog layanan
+     * dan tabel pendaftaran. Jadi uji ini tidak lagi bebas basis data, dan
+     * DatabaseTransactions WAJIB: tanpa itu angkatan contohnya tertinggal di
+     * basis data sungguhan dan ikut terhitung di layar mana pun.
+     */
+    use DatabaseTransactions;
+
     /** @return array{0: Worksheet, 1: string} lembar dan huruf lajur terakhirnya */
     private function lembar($ekspor, int $jumlahKolom): array
     {
@@ -93,7 +105,29 @@ class EksporSatuCetakanTest extends TestCase
         return [
             'Data Pelanggan' => fn () => $this->pelanggan(),
             'Tarif Layanan' => fn () => $this->tarif(),
+            'Angkatan Layanan' => fn () => $this->angkatan(),
         ];
+    }
+
+    /** @return array{0: Worksheet, 1: string} */
+    private function angkatan(): array
+    {
+        KategoriLayanan::lupakanPendaftar();
+
+        // DUA baris, sama banyak dengan contoh lain: baris berselang-seling
+        // baru terbentuk mulai baris genap pertama.
+        $baris = collect([1, 2])->map(fn ($n) => KategoriLayanan::create([
+            'layanan' => 'scopus_camp',
+            'nama' => 'Angkatan Cetakan ' . \Illuminate\Support\Str::random(6),
+            'nama_ke' => (string) $n,
+            'mulai' => now()->addMonth()->toDateString(),
+            'total_kuota' => '20', 'sisa_kuota' => '20', 'status' => 'active',
+            'biaya' => '2000000',
+        ]));
+
+        $ekspor = new AngkatanLayananExport($baris, 'Seluruh angkatan, tanpa saringan.');
+
+        return $this->lembar($ekspor, count($ekspor->headings()));
     }
 
     /** @return array{0: Worksheet, 1: string} */
