@@ -654,9 +654,18 @@ Tarif Layanan | MIS
             </div>
             <div class="mis-kepala-aksi">
                 @if ($totalKartu > 0)
+                    {{-- Dua bentuk unduhan, bukan satu: PDF untuk dibagikan dan
+                         dilampirkan, lembar kerja untuk dihitung — menyusun
+                         penawaran, menandai harga yang akan naik, atau
+                         menyalinnya ke proposal. Urutannya sama dengan layar
+                         lain: Excel dulu, baru PDF. --}}
+                    <a href="{{ route('account.Clinik-Scopus-Biaya-Persesi.excel') }}"
+                        class="mis-tombol mis-tombol-halus tar-cetak">
+                        <i class="fas fa-file-excel mis-ikon-hijau"></i> Unduh Excel
+                    </a>
                     <a href="{{ route('account.Clinik-Scopus-Biaya-Persesi.cetak') }}"
                         class="mis-tombol mis-tombol-halus tar-cetak">
-                        <i class="fas fa-file-pdf"></i> Unduh daftar harga
+                        <i class="fas fa-file-pdf mis-ikon-merah"></i> Unduh PDF
                     </a>
                 @endif
 
