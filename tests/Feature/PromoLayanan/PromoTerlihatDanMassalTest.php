@@ -403,6 +403,94 @@ class PromoTerlihatDanMassalTest extends TestCase
             ->assertSee('Jejak perubahan');
     }
 
+    // ------------------------------------------------------- ubin ringkasan
+
+    #[Test]
+    public function ubin_ringkasan_berjumlah_enam_dan_lajurnya_dipatok(): void
+    {
+        /*
+         * Tujuh ubin tidak pernah terbagi rapi, berapa pun lebarnya. Terukur
+         * di 1440px: wadahnya 1130px dan auto-fit hanya memuat ENAM lajur,
+         * jadi ubin ketujuh jatuh sendirian di baris kedua dengan petak
+         * kosong menganga di sebelahnya.
+         *
+         * Enam selalu terbagi: satu baris di layar lebar, 3+3 di layar
+         * sedang. Dijaga DUA-DUANYA — jumlah ubinnya dan cara lajurnya
+         * dipatok — sebab mengembalikan salah satu saja menghidupkan lagi
+         * ubin yang menggantung.
+         */
+        $isi = $this->actingAs($this->akun())
+            ->get(route('account.promo-layanan.index'))->assertOk()->getContent();
+
+        /*
+         * Ditambatkan ke aria-label, bukan ke kelas "mis-ringkas".
+         *
+         * Pembungkus gesernya bernama `mis-ringkas-geser`, jadi pola yang
+         * mencari `class="mis-ringkas...` menangkap pembungkusnya lebih dulu
+         * dan penjaganya merah untuk alasan yang sama sekali bukan yang
+         * dimaksud.
+         */
+        /*
+         * Batas akhirnya petunjuk geser, BUKAN `</div>` terdekat: `.*?` yang
+         * malas berhenti di penutup div ubin PERTAMA, jadi yang terhitung
+         * cuma satu ubin.
+         */
+        preg_match('/<div class="([^"]*)" aria-label="Ringkasan promo">(.*?)<p class="mis-ringkas-petunjuk"/s', $isi, $kisi);
+
+        $this->assertNotEmpty($kisi, 'Kisi ubin ringkasannya tidak ketemu.');
+        $this->assertStringContainsString('mis-ringkas-6', $kisi[1],
+            'Kisi ubinnya tidak lagi memakai .mis-ringkas-6; lajurnya kembali ditentukan lebar yang kebetulan tersedia.');
+        // Dihitung dari mis-ubin-angka, yang hanya ada SEKALI per ubin.
+        // Mencocokkan 'class="mis-ubin' saja ikut menghitung -angka dan
+        // -label miliknya, jadi angkanya selalu tiga kali lipat.
+        $this->assertSame(6, substr_count($kisi[2], 'mis-ubin-angka'),
+            'Jumlah ubinnya bukan enam lagi — selain enam, ada baris yang menyisakan petak kosong.');
+
+        $css = file_get_contents(public_path('assets/css/mis-ui.css'));
+
+        preg_match('/\.mis-ringkas-6\s*\{([^}]*)\}/', $css, $aturan);
+
+        $this->assertNotEmpty($aturan, 'Aturan .mis-ringkas-6 tidak ketemu.');
+        $this->assertStringNotContainsString('auto-fit', $aturan[1],
+            'Lajurnya kembali auto-fit; jumlah lajurnya akan ditentukan lebar layar, bukan oleh jumlah ubinnya.');
+        $this->assertStringContainsString('repeat(3', $aturan[1]);
+        $this->assertMatchesRegularExpression(
+            '/@media \(min-width: 1400px\)\s*\{\s*\.mis-ringkas-6\s*\{[^}]*repeat\(6/',
+            $css,
+            'Di layar lebar ubinnya tidak lagi dipatok enam lajur.'
+        );
+    }
+
+    #[Test]
+    public function ubin_bernilai_nol_ditandai_kosong(): void
+    {
+        /*
+         * Lima ubin yang berteriak sama kerasnya memaksa mata membaca
+         * semuanya untuk menemukan yang ada isinya. Yang nol diredupkan,
+         * BUKAN disembunyikan — ubin yang hilang saat nol membuat letak ubin
+         * yang sama berubah-ubah dari satu kunjungan ke kunjungan berikutnya.
+         */
+        $admin = $this->akun();
+
+        $promo = PromoLayanan::create([
+            'nama' => 'Promo Satu-satunya ' . Str::random(4), 'tipe' => 'persen', 'persen' => 10,
+            'mulai' => now()->subDay()->toDateString(),
+            'selesai' => now()->addDays(30)->toDateString(), 'aktif' => true,
+        ]);
+
+        $isi = $this->actingAs($admin)
+            ->get(route('account.promo-layanan.index', ['cari' => $promo->nama]))
+            ->assertOk()->getContent();
+
+        preg_match('/aria-label="Ringkasan promo">(.*?)<p class="mis-ringkas-petunjuk"/s', $isi, $kisi);
+
+        $this->assertNotEmpty($kisi, 'Kisi ubin ringkasannya tidak ketemu.');
+
+        // Berjalan = 1, sisanya nol: empat dari enam ubin harus bertanda kosong.
+        $this->assertSame(4, substr_count($kisi[1], 'kosong'),
+            'Jumlah ubin bertanda kosong tidak cocok dengan jumlah yang angkanya nol.');
+    }
+
     // ------------------------------------------------- pengamat tidak boleh berputar
 
     #[Test]
