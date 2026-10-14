@@ -309,7 +309,12 @@
             </td>
             <td class="sela"></td>
             <td class="kartu">
-                <span class="label">Berlaku per</span><br>
+                {{-- DULU "Berlaku per". Diganti saat kolom "Berlaku sejak"
+                     masuk ke tabelnya: dua tulisan yang hampir sama persis
+                     di satu halaman, padahal artinya berbeda — yang ini
+                     tanggal cetaknya, yang di tabel tanggal mulai berlakunya
+                     tiap tarif. --}}
+                <span class="label">Harga per tanggal</span><br>
                 <span class="nilai nilai-teks">{{ now()->locale('id')->translatedFormat('d F Y') }}</span>
             </td>
         </tr>
@@ -321,9 +326,15 @@
         <table class="daftar">
             <thead>
                 <tr>
-                    <th width="26%">Layanan</th>
+                    {{-- Persennya WAJIB berjumlah 100; Dompdf membagi sisanya
+                         sekehendaknya kalau kurang. Lebar kolom "Berlaku
+                         sejak" diambil dari Layanan dan Fasilitas sekaligus,
+                         supaya daftar fasilitasnya tidak menyempit sendirian
+                         — kolom itu yang paling banyak isinya. --}}
+                    <th width="24%">Layanan</th>
                     <th width="18%">Harga</th>
-                    <th width="56%">Fasilitas yang didapat</th>
+                    <th width="12%">Berlaku sejak</th>
+                    <th width="46%">Fasilitas yang didapat</th>
                 </tr>
             </thead>
             <tbody>
@@ -358,9 +369,9 @@
                                  yang sampai ke orangnya.
 
                                  Yang TIDAK ikut dan sengaja: siapa yang
-                                 menyetel tarifnya dan sejak kapan ia berlaku.
-                                 Keduanya urusan ke dalam, dan panduan sudah
-                                 mencatat bahwa kertas ini dibagikan ke luar. --}}
+                                 menyetel tarifnya. Itu urusan ke dalam, dan
+                                 panduan sudah mencatat bahwa kertas ini
+                                 dibagikan ke luar. --}}
                             @if ($t->diskon_alumni_persen > 0 || $t->diskon_rombongan_persen > 0)
                                 <br><span class="potongan">
                                     @if ($t->diskon_alumni_persen > 0)
@@ -375,6 +386,24 @@
                                     @endif
                                 </span>
                             @endif
+                        </td>
+
+                        {{-- Tanggal mulai berlakunya tarif ini.
+
+                             Aman dicetak di kertas yang dibagikan ke luar
+                             KARENA daftar ini hanya memuat tarif yang sudah
+                             berlaku: barisnya datang dari semuaYangBerlaku(),
+                             yang menyaring status AKTIF. Tarif yang baru
+                             dijadwalkan masih berstatus TERJADWAL dan tidak
+                             pernah sampai ke sini — justru itu kebocoran yang
+                             ditakutkan dulu, yaitu rencana kenaikan harga
+                             terbaca orang luar sebelum waktunya.
+
+                             Tarif lama banyak yang tanggalnya belum pernah
+                             diisi (terukur: 6 dari 8 saat kolom ini dibuat),
+                             jadi tanda pisahnya bukan kelainan. --}}
+                        <td class="samar nowrap">
+                            {{ $t->berlaku_mulai?->format('d/m/Y') ?? '—' }}
                         </td>
 
                         <td>
