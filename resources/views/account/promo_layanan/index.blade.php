@@ -83,7 +83,34 @@ Promo Layanan | MIS
 
     /* Kolom centang: ukuran dan daerah tekannya datang dari .mis-centang
        bersama, supaya tidak jadi ukuran ketiga untuk tugas yang sama. */
-    .pro-centang-sel { width: 34px; padding-right: 0 !important; }
+    /*
+     * 44px, bukan 34px — selebar daerah tekan centangnya.
+     *
+     * `.mis-centang-bungkus` sengaja melebihi kotaknya (bantalan 13px dengan
+     * margin -13px) supaya daerah tekannya 44px tanpa menggeser tata letak.
+     * Di sel 34px dengan table-layout: fixed, kotak centangnya sendiri sampai
+     * terdorong 2px keluar sel — terukur kotaknya 299-317 sementara sel
+     * berakhir di 315.
+     */
+    .pro-centang-sel { width: 44px; }
+
+    /*
+     * Lapisan selnya dinaikkan, BUKAN lapisan bungkusnya.
+     *
+     * `thead th` di mis-ui.css ber-position: sticky dengan z-index: 2, jadi
+     * TIAP SEL kepala adalah konteks tumpukan tersendiri — z-index pada unsur
+     * di DALAM sel tidak akan pernah bisa naik melewati sel tetangganya,
+     * berapa pun angkanya.
+     *
+     * Terukur sebelum dibetulkan: dua sudut kanan kotak "pilih semua"
+     * mengenai `pro-k-nama`, bukan centangnya — separuh kanannya tidak bisa
+     * ditekan sama sekali, dan tepinya tertutup sel sebelahnya.
+     *
+     * Dinaikkan, bukan daerah tekannya yang dikecilkan: 44px itu batas
+     * minimum yang memang disengaja untuk jari.
+     */
+    .pro-tabel thead th.pro-centang-sel { z-index: 3; }
+    .pro-tabel tbody td.pro-centang-sel { position: relative; z-index: 1; }
 
     .pro-massal {
         display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
@@ -120,6 +147,19 @@ Promo Layanan | MIS
     .pro-aksi form { display: inline-flex; margin: 0; }
 
     /*
+     * Tidak satu tombol pun boleh menyusut.
+     *
+     * Bawaannya `flex-shrink: 1`, dan saat lebarnya kurang yang mengalah
+     * hanyalah tombol yang paling bisa mengalah — tombol Ubah yang <a> polos,
+     * bukan tombol di dalam <form> yang sudah inline-flex. Hasilnya satu
+     * tombol 18px di antara tiga tombol 34px.
+     *
+     * Dengan flex: 0 0 auto, kekurangan lebar jadi terlihat sebagai luberan
+     * yang bisa diukur, bukan sebagai tombol yang diam-diam beda ukuran.
+     */
+    .pro-aksi > * { flex: 0 0 auto; }
+
+    /*
      * Lebar kolom dipatok persen.
      *
      * Dibiarkan otomatis, peramban membagi rata menurut isi terpanjang dan
@@ -148,7 +188,7 @@ Promo Layanan | MIS
      * yang paling lebar ditambah bantalan 24px:
      * potongan 85, tanggal 76, keadaan 73, aksi 154 (4 tombol 34px + 3 jarak).
      */
-    .pro-k-nama { width: 27%; }
+    .pro-k-nama { width: 26%; }
     .pro-k-potongan { width: 10%; }
     /* Sepersen dipinjamkan ke Potongan: tanggal terpanjang "30 Jul 2026"
        cuma 73px, sementara "per peserta" di bawah nominalnya butuh 74px dan
@@ -160,7 +200,16 @@ Promo Layanan | MIS
        sisa 12px: "belum dipakai" butuh 88px dan patah dua baris di 85px. */
     .pro-k-pakai { width: 11%; }
     .pro-k-keadaan { width: 9%; }
-    .pro-k-aksi { width: 15%; }
+    /*
+     * 16%, bukan 15%. Isinya EMPAT tombol 34px beserta tiga jarak 6px = 154px,
+     * ditambah bantalan sel 24px jadi 178px — 15% dari 1130px cuma 169px.
+     *
+     * Kekurangan 9px itu tidak membuat tombolnya meluber melainkan MENYUSUT,
+     * dan yang menyusut cuma satu: tombol Ubah yang bukan anak <form> ikut
+     * mengerut jadi 18x34 sementara tiga lainnya tetap 34x34. Terukur begitu;
+     * dari layar ia terbaca seperti tombol yang dibuat beda sendiri.
+     */
+    .pro-k-aksi { width: 16%; }
 
     @media (max-width: 767.98px) {
         /*
