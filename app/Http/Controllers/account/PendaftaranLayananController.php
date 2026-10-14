@@ -115,6 +115,11 @@ class PendaftaranLayananController extends Controller
     private const MEDAN_SARINGAN = [
         'cari', 'layanan', 'keadaan', 'bukti', 'bayar',
         'angkatan', 'dari', 'sampai', 'lama',
+        // Dipakai tautan dari layar Promo Layanan: "siapa saja yang kena
+        // promo ini?". WAJIB ikut di sini — tanpa itu tombol unduh dan kepala
+        // kolom pengurut melepaskannya diam-diam, dan berkasnya memulangkan
+        // seluruh pendaftar seolah tidak pernah ada saringan.
+        'promo',
     ];
 
     public function __construct()
@@ -2456,6 +2461,17 @@ class PendaftaranLayananController extends Controller
             'katalog' => Pendaftaran::katalog(),
             'keadaan' => Pendaftaran::KEADAAN,
             'pilihanAngkatan' => $this->pilihanAngkatan(),
+            /*
+             * Promo yang sedang menyaring, kalau ada.
+             *
+             * Dikirim sebagai MODEL, bukan cuma idnya: saringan yang cuma
+             * menampilkan uuid di layar tidak memberi tahu siapa pun promo
+             * mana yang sedang dipakai, dan orang yang menerima tautannya
+             * tidak punya cara mengetahuinya selain menebak.
+             */
+            'promoDisaring' => $pilihan['promo'] !== ''
+                ? \App\PromoLayanan::find($pilihan['promo'])
+                : null,
         ] + $pilihan);
     }
 
@@ -2594,6 +2610,16 @@ class PendaftaranLayananController extends Controller
          */
         $angkatan = trim((string) $request->input('angkatan'));
 
+        /*
+         * Saringan promo, dipakai tautan dari layar Promo Layanan.
+         *
+         * Nilainya id promo. Tidak ada daftar putih di sini karena yang
+         * dibandingkan kolom uuid, bukan nama kolom yang masuk ke SQL — dan
+         * id yang tidak ada hanya memulangkan nol baris, bukan membuka jalan
+         * suntikan.
+         */
+        $promo = trim((string) $request->input('promo'));
+
         $urut = array_key_exists((string) $request->input('urut'), Pendaftaran::URUTAN)
             ? (string) $request->input('urut')
             : 'waktu';
@@ -2604,6 +2630,7 @@ class PendaftaranLayananController extends Controller
             'cari' => $cari,
             'layanan' => $layanan,
             'angkatan' => $angkatan,
+            'promo' => $promo,
             'dari' => $dari,
             'sampai' => $sampai,
             'menggantung' => $menggantung,
@@ -2620,7 +2647,7 @@ class PendaftaranLayananController extends Controller
              */
             'adaSaringan' => $cari !== '' || $layanan !== '' || $keadaanDipilih !== ''
                 || $bukti !== '' || $angkatan !== '' || $dari !== '' || $sampai !== ''
-                || $caraBayar !== '' || $menggantung,
+                || $caraBayar !== '' || $menggantung || $promo !== '',
             /*
              * Berapa saringan LIPAT yang sedang terpasang.
              *
@@ -2690,6 +2717,7 @@ class PendaftaranLayananController extends Controller
         return $kueri
             ->when($p['layanan'] !== '', fn ($q) => $q->where('layanan', $p['layanan']))
             ->when($p['angkatan'] !== '', fn ($q) => $q->where('angkatan_id', $p['angkatan']))
+            ->when($p['promo'] !== '', fn ($q) => $q->where('promo', $p['promo']))
             ->when($p['keadaanDipilih'] !== '', function ($q) use ($p) {
                 if ($p['keadaanDipilih'] === 'lain') {
                     // Keranjang sisa, dan ia perlu ada: kolom statusnya varchar

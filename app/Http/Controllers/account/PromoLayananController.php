@@ -391,10 +391,19 @@ class PromoLayananController extends Controller
         $promo = PromoLayanan::with(['penginput', 'angkatan'])->findOrFail($id);
 
         return view('account.promo_layanan.detail', [
+            'terlewat' => $this->angkatanTerlewat($promo),
             'promo' => $promo,
             'dampak' => \App\Support\DampakPromo::untuk((string) $promo->getKey()),
             'perAngkatan' => \App\Support\DampakPromo::perAngkatan($promo),
-            'jejak' => $promo->jejak()->limit(50)->get(),
+            /*
+             * Jejaknya DINOMORI, bukan dipotong di 50.
+             *
+             * Dibatasi limit, yang ke-51 hilang tanpa satu pun tanda — dan
+             * justru jejak lama yang dicari saat ada yang bertanya "sejak
+             * kapan harganya segini?". Nama halamannya sendiri ('jejak')
+             * supaya tidak bentrok dengan penomoran lain di layar ini nanti.
+             */
+            'jejak' => $promo->jejak()->paginate(15, ['*'], 'jejak')->withQueryString(),
             'katalog' => Layanan::katalog(),
             'bolehUbah' => $this->bolehMengubah(),
         ]);
@@ -454,6 +463,40 @@ class PromoLayananController extends Controller
         \App\Support\PromoAngkatan::lupakan();
 
         return back()->with('success', $pesan);
+    }
+
+    /**
+     * Angkatan yang MESTINYA kena promo ini tetapi belum dicentang.
+     *
+     * Promo menempel pada angkatan yang dicentang satu per satu — itu memang
+     * yang diminta, sebab tidak semua angkatan dapat promo. Akibat wajarnya:
+     * angkatan yang dibuat SESUDAH promonya diam-diam tetap harga normal, dan
+     * tidak ada apa pun yang memberitahu siapa pun.
+     *
+     * Yang dianggap "mestinya": layanan yang sama dengan angkatan yang sudah
+     * dicentang, dibuat sesudah promonya, belum dicentang, dan tanggal
+     * mulainya masih di depan — angkatan yang sudah lewat tidak ada gunanya
+     * ditawarkan promo.
+     *
+     * @return \Illuminate\Support\Collection<int, KategoriLayanan>
+     */
+    private function angkatanTerlewat(PromoLayanan $promo)
+    {
+        $layanan = $promo->angkatan->pluck('layanan')->unique()->filter()->values();
+
+        // Promo yang belum menunjuk apa pun tidak punya "layanan yang sama"
+        // untuk dibandingkan; peringatannya sudah ditangani keadaan kosong.
+        if ($layanan->isEmpty() || $promo->keadaan === 'selesai') {
+            return collect();
+        }
+
+        return KategoriLayanan::query()
+            ->whereIn('layanan', $layanan)
+            ->whereNotIn('id', $promo->angkatan->pluck('id'))
+            ->where('created_at', '>', $promo->created_at)
+            ->whereDate('mulai', '>=', now()->toDateString())
+            ->orderByDesc('created_at')
+            ->get(['id', 'layanan', 'nama', 'nama_ke', 'mulai']);
     }
 
     // ------------------------------------------------------------- gandakan
@@ -842,6 +885,53 @@ class PromoLayananController extends Controller
             'success',
             'Promo "' . $promo->nama . '" sekarang ' . ($promo->aktif ? 'menyala.' : 'dimatikan.')
         );
+    }
+
+    /**
+     * Menyalakan atau mematikan beberapa promo sekaligus.
+     *
+     * TIDAK termasuk menghapus, dan itu disengaja: penghapusan massal berarti
+     * satu salah klik menghilangkan belasan promo beserta cakupannya, dan
+     * belum ada tong sampah untuk promo. Aturan yang sama sudah berlaku di
+     * aksi massal angkatan dan pelanggan.
+     */
+    public function massal(Request $request)
+    {
+        if (! $this->bolehMengubah()) {
+            return $this->tolak();
+        }
+
+        $isian = $request->validate([
+            'id' => ['required', 'array', 'min:1'],
+            'id.*' => ['string', 'exists:promo_layanan,id'],
+            'tindakan' => ['required', Rule::in(['nyalakan', 'matikan'])],
+        ], [], ['id' => 'promo']);
+
+        $nyala = $isian['tindakan'] === 'nyalakan';
+
+        /*
+         * Disimpan satu per satu lewat model, BUKAN satu `update()` massal.
+         *
+         * Pembaruan massal melewati kait model, jadi tidak ada satu baris pun
+         * jejak yang tertulis — dan mematikan dua belas promo sekaligus
+         * adalah justru perubahan yang paling perlu dicatat.
+         */
+        $berubah = 0;
+
+        foreach (PromoLayanan::whereIn('id', $isian['id'])->get() as $promo) {
+            if ((bool) $promo->aktif === $nyala) {
+                continue;
+            }
+
+            $promo->update(['aktif' => $nyala]);
+            $berubah++;
+        }
+
+        \App\Support\PromoAngkatan::lupakan();
+
+        return back()->with('success', $berubah === 0
+            ? 'Tidak ada yang berubah — semuanya sudah ' . ($nyala ? 'menyala.' : 'dimatikan.')
+            : $berubah . ' promo ' . ($nyala ? 'dinyalakan.' : 'dimatikan.'));
     }
 
     public function destroy(string $id)

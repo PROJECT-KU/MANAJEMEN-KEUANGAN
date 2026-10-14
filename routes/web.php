@@ -680,6 +680,12 @@ Route::prefix('account')
              * GET yang mengubah keadaan akan ikut terpicu oleh pemuat
              * pratinjau tautan dan tombol Kembali peramban.
              */
+            /*
+             * Aksi massal DI ATAS rute /{id}/...: ditaruh di bawahnya,
+             * "massal" terbaca sebagai sebuah {id}.
+             */
+            Route::post('/Promo-Layanan/massal', 'account\PromoLayananController@massal')
+                ->name('account.promo-layanan.massal');
             Route::post('/Promo-Layanan/{id}/saklar', 'account\PromoLayananController@saklar')
                 ->name('account.promo-layanan.saklar');
             Route::delete('/Promo-Layanan/{id}', 'account\PromoLayananController@destroy')

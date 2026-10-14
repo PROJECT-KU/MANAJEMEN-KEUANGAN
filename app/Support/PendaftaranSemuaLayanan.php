@@ -601,6 +601,13 @@ class PendaftaranSemuaLayanan
         'nomor', 'nama_orang', 'email', 'telp', 'affiliasi', 'angkatan_id',
         'jumlah', 'total', 'kode_unik', 'kode_diskon', 'nominal_diskon',
         'bukti', 'catatan', 'sesi', 'cara_bayar', 'grup',
+        /*
+         * Tali ke promo. Hanya tiga tabel berangkatan yang punya kolomnya;
+         * dua sisanya diisi NULL oleh ungkapan(), bukan dilewati — melewati
+         * satu kolom menggeser seluruh kolom sesudahnya dan UNION ALL
+         * mencocokkannya menurut posisi tanpa mengeluh.
+         */
+        'promo',
     ];
 
     /**

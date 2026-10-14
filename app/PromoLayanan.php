@@ -277,9 +277,21 @@ class PromoLayanan extends Model
             return $kueri;
         }
 
+        /*
+         * Pencariannya menjangkau NAMA ANGKATAN, bukan cuma nama promonya.
+         *
+         * Promo hampir selalu dicari lewat apa yang dipromokan — "mana promo
+         * Yogyakarta?" — bukan lewat nama promonya sendiri, yang justru
+         * paling sulit diingat ("Promo Ulang Tahun ke-8" atau "ke-7"?).
+         * Sebelum ini kata "Yogyakarta" memulangkan nol hasil walau ada promo
+         * yang menyasar Scopus Camp Yogyakarta.
+         */
         return $kueri->where(fn ($q) => $q
             ->where('nama', 'like', '%' . $kata . '%')
-            ->orWhere('catatan', 'like', '%' . $kata . '%'));
+            ->orWhere('catatan', 'like', '%' . $kata . '%')
+            ->orWhereHas('angkatan', fn ($a) => $a
+                ->where('kategori_layanan.nama', 'like', '%' . $kata . '%')
+                ->orWhere('kategori_layanan.nama_ke', 'like', '%' . $kata . '%')));
     }
 
     /**

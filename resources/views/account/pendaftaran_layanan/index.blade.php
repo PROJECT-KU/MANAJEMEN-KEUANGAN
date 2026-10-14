@@ -13,6 +13,31 @@ Pendaftar Layanan | MIS Rumah Scopus
 --}}
 @push('gaya')
     <style>
+        /*
+         * Pita saringan promo. Ungu seperti aksen MIS, bukan kuning
+         * peringatan: tidak ada yang salah — daftarnya memang sengaja
+         * dipersempit, dan pita ini cuma menyatakannya.
+         */
+        .pdl-pita-promo {
+            display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+            padding: 11px 13px; margin-bottom: 12px;
+            border: 1px solid #c7d2fe; border-radius: 13px;
+            background: #eef2ff;
+        }
+
+        .pdl-pita-promo-teks { flex: 1 1 240px; min-width: 0; line-height: 1.5; font-size: .8rem; color: #4338ca; }
+        /* font-size: inherit WAJIB — layout memasang .fas { font-size: 20px }
+           untuk seluruh halaman. */
+        .pdl-pita-promo-teks .fas { font-size: inherit; }
+        .pdl-pita-promo-teks a { font-weight: 800; color: #4338ca; text-decoration: underline; }
+        .pdl-pita-promo .mis-tombol { flex: 0 0 auto; }
+
+        @media (max-width: 575.98px) {
+            /* Tombolnya melebar penuh di barisnya sendiri: di 390px ia
+               terdorong ke kanan dan menyisakan lajur kosong di kiri. */
+            .pdl-pita-promo .mis-tombol { width: 100%; justify-content: center; }
+        }
+
         /* Ubin layanan di kolom pertama: medali kecil + namanya, tidak
            terpatah walau namanya dua kata. */
         .pdl-layanan {
@@ -2142,6 +2167,29 @@ Pendaftar Layanan | MIS Rumah Scopus
         </div>{{-- pdl-ringkas --}}
         </details>
 
+        {{-- Pita saringan promo.
+
+             Saringan ini TIDAK punya kendalinya sendiri di kartu penyaring,
+             dan itu disengaja: ia dipasang lewat tautan dari layar Promo
+             Layanan ("siapa saja yang kena promo ini?"), bukan dipilih dari
+             sini. Tanpa pita ini, satu-satunya tanda bahwa daftarnya sedang
+             dipersempit adalah jumlah barisnya — dan orang yang menerima
+             tautannya tidak punya cara mengetahui promo mana yang dipakai. --}}
+        @if ($promoDisaring)
+            <div class="pdl-pita-promo" role="status">
+                <span class="pdl-pita-promo-teks">
+                    <i class="fas fa-tags" aria-hidden="true"></i>
+                    Hanya pendaftaran yang kena promo
+                    <a href="{{ route('account.promo-layanan.detail', $promoDisaring->id) }}">{{ $promoDisaring->nama }}</a>
+                    &middot; potongan {{ $promoDisaring->potongan_ringkas }} per peserta
+                </span>
+                <a class="mis-tombol mis-tombol-halus mis-tombol-ringkas"
+                    href="{{ route($rute, collect(request()->query())->except('promo', 'page')->all()) }}">
+                    <i class="fas fa-times"></i> Lepas saringan promo
+                </a>
+            </div>
+        @endif
+
         {{-- ---------------------------------------------- penyaring --}}
         {{-- <details> membungkusnya: di ponsel empat kendali yang selalu
              terbuka memakan satu layar penuh sebelum baris pertama kelihatan.
@@ -2161,6 +2209,16 @@ Pendaftar Layanan | MIS Rumah Scopus
         <div class="mis-saring-kartu">
         <form method="GET" action="{{ route($rute) }}" class="mis-saring" id="pdl-borang" data-mis-saring="pdl-hasil"
             data-mis-saring-juga="pdl-ringkas,pdl-aksi,pdl-reset,pdl-aktif,pdl-lain-jumlah">
+            {{-- Saringan promo ikut terbawa saat menyaring.
+
+                 Dipasang lewat tautan dari layar Promo Layanan, bukan dipilih
+                 dari kartu ini — tetapi tanpa medan tersembunyi ini ia LEPAS
+                 begitu ada yang mengetik di kotak cari, dan daftarnya
+                 diam-diam kembali memuat seluruh pendaftar. Penjaga
+                 `saringan_baru_tidak_bisa_lupa_didaftarkan` menuntutnya tepat
+                 karena itu. --}}
+            <input type="hidden" name="promo" value="{{ $promo }}">
+
             {{-- Urutan ikut terbawa saat menyaring; tanpa ini, menekan tombol
                  terapkan diam-diam mengembalikan urutannya ke bawaan. --}}
             <input type="hidden" name="urut" value="{{ $urut }}">
