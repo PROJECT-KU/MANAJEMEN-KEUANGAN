@@ -403,6 +403,45 @@ class PromoTerlihatDanMassalTest extends TestCase
             ->assertSee('Jejak perubahan');
     }
 
+    // ------------------------------------------------- pengamat tidak boleh berputar
+
+    #[Test]
+    public function pengamat_perubahan_daftar_tidak_mengubah_dom(): void
+    {
+        /*
+         * Bilah aksi massal berada DI DALAM #pro-hasil, wadah yang diamati
+         * MutationObserver supaya centangnya bisa dipasang ulang sesudah
+         * penyaring hidup menukar isinya.
+         *
+         * Kalau pemanggilan balik observer itu merakit ulang medan
+         * tersembunyinya, ia melahirkan mutasi baru yang memanggil dirinya
+         * lagi — tanpa henti. Terukur sebelum dibetulkan: tab peramban
+         * menggantung dan skrip pengukur tidak pernah memulangkan apa pun.
+         * Tidak ada galat apa pun di konsol.
+         *
+         * Yang dijaga AKIBATNYA: pemanggilan baliknya tidak boleh menyentuh
+         * struktur DOM sama sekali.
+         */
+        $berkas = file_get_contents(
+            base_path('resources/views/account/promo_layanan/index.blade.php')
+        );
+
+        preg_match('/new MutationObserver\(([^)]*)\)/', $berkas, $pasang);
+
+        $this->assertNotEmpty($pasang, 'Pengamat perubahan daftarnya tidak ketemu.');
+        $this->assertSame('pasangUlang', trim($pasang[1]),
+            'Pengamatnya memanggil sesuatu selain pasangUlang; kalau itu mengubah DOM, ia akan memanggil dirinya sendiri tanpa henti.');
+
+        preg_match('/function pasangUlang\(\) \{(.*?)\n        \}/s', $berkas, $isi);
+
+        $this->assertNotEmpty($isi, 'Fungsi pasangUlang tidak ketemu.');
+
+        foreach (['appendChild', 'removeChild', '.remove(', 'innerHTML', 'createElement'] as $ubah) {
+            $this->assertStringNotContainsString($ubah, $isi[1],
+                'pasangUlang mengubah struktur DOM lewat "' . $ubah . '" — dipanggil dari MutationObserver, itu putaran tanpa henti.');
+        }
+    }
+
     // ------------------------------------------------------------ perkakas
 
     private function akun(string $peran = User::PERAN_ADMINISTRATOR): User

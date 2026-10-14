@@ -106,8 +106,20 @@
             @forelse($categories as $item)
             @php
             $kuotaHabis = $item->sisa_kuota === null || $item->sisa_kuota <= 0;
-                $adaDiskon=!empty($item->tipe_diskon) && ($item->biaya > $item->total_biaya);
-                $hematPersen = $item->biaya > 0 ? round((($item->biaya - $item->total_biaya) / $item->biaya) * 100) : 0;
+                /*
+                 * Harga asal lawan harga yang benar-benar ditagih.
+                 *
+                 * Dibandingkan dari harga_setelah_promo, bukan total_biaya:
+                 * sejak promo jadi fiturnya sendiri, potongan bisa datang dari
+                 * DUA sumber — diskon angkatannya dan promo yang menaunginya.
+                 * Dibaca dari total_biaya saja, promo tidak pernah terlihat di
+                 * halaman ini dan pengunjung melihat harga yang lebih mahal
+                 * daripada yang akan ditagih borangnya.
+                 */
+                $hargaAsal = (int) $item->biaya;
+                $hargaBayar = (int) $item->harga_setelah_promo;
+                $adaDiskon = $hargaAsal > $hargaBayar && $hargaBayar > 0;
+                $hematPersen = $adaDiskon ? round((($hargaAsal - $hargaBayar) / $hargaAsal) * 100) : 0;
                 @endphp
 
                 <div class="col-md-4 col-lg-3 mb-4 d-flex" data-aos="fade-up">
@@ -131,11 +143,11 @@
 
                             <div class="mb-3">
                                 @if($adaDiskon)
-                                <small class="text-muted text-decoration-line-through" style="font-size: 15px;">Rp {{ number_format($item->biaya, 0, ',', '.') }}</small>
+                                <small class="text-muted text-decoration-line-through" style="font-size: 15px;">Rp {{ number_format($hargaAsal, 0, ',', '.') }}</small>
                                 @endif
                                 <div class="mt-1">
                                     <span style="font-size: 20px; font-weight: 800; color: #ff3131;">
-                                        Rp {{ number_format($item->total_biaya, 0, ',', '.') }}
+                                        Rp {{ number_format($hargaBayar, 0, ',', '.') }}
                                     </span>
                                 </div>
                             </div>

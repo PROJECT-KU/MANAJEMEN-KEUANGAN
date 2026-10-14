@@ -676,6 +676,44 @@ Promo Layanan | MIS
 
         var angka = document.getElementById('pro-massal-angka');
 
+        /*
+         * Tri-state "pilih semua" dan centang tiap baris.
+         *
+         * SENGAJA hanya menyentuh properti `checked`/`indeterminate`, tidak
+         * satu pun struktur DOM — supaya aman dipanggil dari MutationObserver
+         * di bawah. Properti bukan atribut, jadi ia tidak melahirkan catatan
+         * mutasi baru.
+         */
+        function pasangUlang() {
+            var tampak = document.querySelectorAll('.pro-centang');
+            var kena = 0;
+
+            tampak.forEach(function (k) {
+                k.checked = dipilih.has(k.value);
+
+                if (k.checked) {
+                    kena++;
+                }
+            });
+
+            var semua = document.getElementById('pro-centang-semua');
+
+            if (semua) {
+                semua.checked = tampak.length > 0 && kena === tampak.length;
+                semua.indeterminate = kena > 0 && kena < tampak.length;
+            }
+        }
+
+        /*
+         * Penyegaran penuh — MENGUBAH DOM, jadi tidak boleh dipanggil dari
+         * MutationObserver.
+         *
+         * Bilah massalnya berada DI DALAM #pro-hasil, wadah yang diamati
+         * observer itu. Dipanggil dari sana, merakit ulang medan tersembunyi
+         * di bawah ini melahirkan mutasi baru yang memanggilnya lagi — dan
+         * seterusnya tanpa henti. Terukur: tab peramban menggantung dan skrip
+         * pengukur tidak pernah memulangkan apa pun.
+         */
         function segarkan() {
             angka.textContent = dipilih.size;
             bilah.hidden = dipilih.size === 0;
@@ -692,15 +730,7 @@ Promo Layanan | MIS
                 bilah.appendChild(m);
             });
 
-            var semua = document.getElementById('pro-centang-semua');
-            var tampak = document.querySelectorAll('.pro-centang');
-
-            if (semua && tampak.length) {
-                var kena = 0;
-                tampak.forEach(function (k) { if (dipilih.has(k.value)) kena++; });
-                semua.checked = kena === tampak.length;
-                semua.indeterminate = kena > 0 && kena < tampak.length;
-            }
+            pasangUlang();
         }
 
         // Dipasang pada document: isi daftarnya DITUKAR tiap ketikan, jadi
@@ -727,12 +757,8 @@ Promo Layanan | MIS
         var wadah = document.getElementById('pro-hasil');
 
         if (wadah && window.MutationObserver) {
-            new MutationObserver(function () {
-                document.querySelectorAll('.pro-centang').forEach(function (k) {
-                    k.checked = dipilih.has(k.value);
-                });
-                segarkan();
-            }).observe(wadah, { childList: true, subtree: true });
+            new MutationObserver(pasangUlang)
+                .observe(wadah, { childList: true, subtree: true });
         }
 
         segarkan();

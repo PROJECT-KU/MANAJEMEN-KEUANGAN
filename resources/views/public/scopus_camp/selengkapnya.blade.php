@@ -322,7 +322,7 @@ Detail Scopus Camp | Rumah Scopus
                                 <div class="meta-icon green"><i class="fa fa-money-bill-wave"></i></div>
                                 <div class="meta-text">
                                     <span class="meta-label">Total Investasi</span>
-                                    <span class="meta-value">Rp {{ number_format($item->total_biaya, 0, ',', '.') }}</span>
+                                    <span class="meta-value">Rp {{ number_format($item->harga_setelah_promo, 0, ',', '.') }}</span>
                                 </div>
                             </div>
 
