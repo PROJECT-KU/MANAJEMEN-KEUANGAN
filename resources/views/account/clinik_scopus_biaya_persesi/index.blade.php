@@ -652,20 +652,34 @@ Tarif Layanan | MIS
                     @endif
                 </p>
             </div>
-            <div class="mis-kepala-aksi">
+            {{-- Pasangan saja, bukan trio: kedua unduhan ini satu-satunya
+                 tombol sekunder di sini, dan pada setengah lebar tulisan
+                 penuhnya masih muat. --}}
+            <div class="mis-kepala-aksi mis-kepala-aksi-pasangan">
                 @if ($totalKartu > 0)
                     {{-- Dua bentuk unduhan, bukan satu: PDF untuk dibagikan dan
                          dilampirkan, lembar kerja untuk dihitung — menyusun
                          penawaran, menandai harga yang akan naik, atau
                          menyalinnya ke proposal. Urutannya sama dengan layar
                          lain: Excel dulu, baru PDF. --}}
+                    {{-- aria-label WAJIB: pada lebar sempit tulisan panjangnya
+                         ditukar nama pendek, dan tombol yang menyebut "Excel"
+                         saja tidak menerangkan apa yang akan terunduh. --}}
                     <a href="{{ route('account.Clinik-Scopus-Biaya-Persesi.excel') }}"
-                        class="mis-tombol mis-tombol-halus tar-cetak">
-                        <i class="fas fa-file-excel mis-ikon-hijau"></i> Unduh Excel
+                        class="mis-tombol mis-tombol-halus tar-cetak"
+                        title="Unduh daftar harga sebagai lembar kerja Excel"
+                        aria-label="Unduh daftar harga sebagai lembar kerja Excel">
+                        <i class="fas fa-file-excel mis-ikon-hijau" aria-hidden="true"></i>
+                        <span class="mis-tombol-teks">Unduh Excel</span>
+                        <span class="mis-tombol-ringkas" aria-hidden="true">Excel</span>
                     </a>
                     <a href="{{ route('account.Clinik-Scopus-Biaya-Persesi.cetak') }}"
-                        class="mis-tombol mis-tombol-halus tar-cetak">
-                        <i class="fas fa-file-pdf mis-ikon-merah"></i> Unduh PDF
+                        class="mis-tombol mis-tombol-halus tar-cetak"
+                        title="Unduh daftar harga sebagai PDF"
+                        aria-label="Unduh daftar harga sebagai PDF">
+                        <i class="fas fa-file-pdf mis-ikon-merah" aria-hidden="true"></i>
+                        <span class="mis-tombol-teks">Unduh PDF</span>
+                        <span class="mis-tombol-ringkas" aria-hidden="true">PDF</span>
                     </a>
                 @endif
 

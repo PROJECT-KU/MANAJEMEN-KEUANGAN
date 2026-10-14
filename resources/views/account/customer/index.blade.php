@@ -376,13 +376,26 @@ Data Pelanggan | MIS
                 {{-- Dua bentuk unduhan, bukan satu: PDF untuk dibaca dan
                      dilampirkan, lembar kerja untuk diolah. Daftar pelanggan
                      hampir selalu berakhir di spreadsheet. --}}
+                {{-- aria-label WAJIB: pada lebar sempit tulisan panjangnya
+                     ditukar nama pendek, dan tombol yang menyebut "Excel" saja
+                     tidak menerangkan apa yang akan terunduh. title tidak
+                     menolong di ponsel — di sana tidak ada kursor yang bisa
+                     berhenti di atas tombol. --}}
                 <a class="mis-tombol mis-tombol-halus"
+                    title="Unduh daftar ini sebagai lembar kerja Excel"
+                    aria-label="Unduh daftar ini sebagai lembar kerja Excel"
                     href="{{ route('account.customer.ekspor.excel', $bawa) }}">
-                    <i class="fas fa-file-excel mis-ikon-hijau"></i> Unduh Excel
+                    <i class="fas fa-file-excel mis-ikon-hijau" aria-hidden="true"></i>
+                    <span class="mis-tombol-teks">Unduh Excel</span>
+                    <span class="mis-tombol-ringkas" aria-hidden="true">Excel</span>
                 </a>
                 <a class="mis-tombol mis-tombol-halus"
+                    title="Unduh daftar ini sebagai PDF"
+                    aria-label="Unduh daftar ini sebagai PDF"
                     href="{{ route('account.customer.ekspor', $bawa) }}">
-                    <i class="fas fa-file-pdf mis-ikon-merah"></i> Unduh PDF
+                    <i class="fas fa-file-pdf mis-ikon-merah" aria-hidden="true"></i>
+                    <span class="mis-tombol-teks">Unduh PDF</span>
+                    <span class="mis-tombol-ringkas" aria-hidden="true">PDF</span>
                 </a>
             </div>
         </div>
