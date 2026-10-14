@@ -332,11 +332,15 @@
         <table class="daftar">
             <thead>
                 <tr>
-                    <th width="22%">Angkatan</th>
-                    <th width="14%">Layanan</th>
-                    <th width="14%">Tanggal</th>
-                    <th width="11%">Kuota</th>
-                    <th width="13%">Biaya</th>
+                    {{-- Persennya WAJIB berjumlah 100. Sempat berjumlah 84:
+                         Dompdf tidak menyalahkan apa pun, ia hanya membagi
+                         sisa 16% itu sekehendaknya, dan lebar yang dipatok
+                         di sini tidak lagi berarti apa-apa. --}}
+                    <th width="32%">Angkatan</th>
+                    <th width="17%">Layanan</th>
+                    <th width="17%">Tanggal</th>
+                    <th width="12%">Kuota</th>
+                    <th width="12%">Biaya</th>
                     <th width="10%">Status</th>
                 </tr>
             </thead>

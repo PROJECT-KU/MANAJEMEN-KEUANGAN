@@ -354,4 +354,73 @@ class EksporSatuCetakanTest extends TestCase
         $this->assertStringContainsString('1 pernah memesan', (string) $lembar->getCell('A2')->getValue());
         $this->assertStringContainsString('tanpa saringan', (string) $lembar->getCell('A3')->getValue());
     }
+
+    /**
+     * @test
+     *
+     * Lembar kerja dan berkas cetak Data Pelanggan menjawab pertanyaan yang
+     * sama.
+     *
+     * Keduanya diunduh dari satu tombol yang bersebelahan, jadi orang
+     * menganggapnya dua rupa dari daftar yang sama. Sewaktu kolom "Pesanan
+     * terakhir" baru ada di lembar kerjanya, yang mencetak PDF-nya tidak
+     * punya cara tahu kolom itu ada — tidak ada yang hilang, tidak ada yang
+     * salah, kolomnya saja yang tidak pernah ikut.
+     */
+    public function kolom_lembar_kerja_ikut_tercetak_di_berkas_pdfnya(): void
+    {
+        $orang = collect([
+            (object) [
+                'id' => 1, 'full_name' => 'Pelanggan Satu', 'username' => 'satu',
+                'email' => 'satu@contoh.test', 'email_verified_at' => now(),
+                'telp' => '081100000001', 'status' => 'active', 'created_at' => now(),
+            ],
+            (object) [
+                'id' => 2, 'full_name' => 'Pelanggan Dua', 'username' => 'dua',
+                'email' => 'dua@contoh.test', 'email_verified_at' => null,
+                'telp' => '81100000002', 'status' => 'nonaktif', 'created_at' => now(),
+            ],
+        ]);
+
+        $terakhir = now()->subDays(9);
+
+        $cetak = view('account.customer.ekspor-pdf', [
+            'pelanggan' => $orang,
+            'pesanan' => [1 => ['jumlah' => 2, 'terakhir' => $terakhir]],
+            'saringan' => [],
+        ])->render();
+
+        // Gaya ikut terkirim ke Dompdf, dan komentar di dalamnya memakai
+        // kata yang sama dengan kepala kolomnya; dibuang dulu supaya yang
+        // diperiksa benar-benar yang tercetak.
+        $tercetak = preg_replace('/<style\b.*?<\/style>/s', '', $cetak);
+
+        $kepalaLembar = (new PelangganExport($orang, [], []))->headings();
+
+        foreach ($kepalaLembar as $kepala) {
+            // Dua kolom ini memang disatukan di berkas cetaknya: "Status"
+            // memuat lencana verifikasinya, dan "Pesanan" memuat jumlahnya.
+            // Yang dijaga di sini isinya ikut tercetak, bukan judulnya sama
+            // persis.
+            if (in_array($kepala, ['Email terverifikasi', 'Jumlah pesanan', 'Nama lengkap', 'Status akun'], true)) {
+                continue;
+            }
+
+            $this->assertStringContainsString($kepala, $tercetak,
+                'Kolom "' . $kepala . '" ada di lembar kerjanya tetapi tidak di berkas cetaknya.');
+        }
+
+        $this->assertStringContainsString($terakhir->format('d/m/Y'), $tercetak,
+            'Tanggal pesanan terakhirnya tidak sampai ke berkas cetak; kolomnya '
+            . 'ada tetapi isinya tidak pernah diambil.');
+
+        // Pelanggan yang belum pernah memesan: tanda pisah, bukan sel kosong.
+        // Dihitung di dalam <tbody> saja — judul halamannya juga memakai
+        // tanda pisah, dan menghitungnya ikut membuat angka ini tidak berarti.
+        preg_match('/<tbody>(.*?)<\/tbody>/s', $tercetak, $isi);
+
+        $this->assertSame(2, substr_count($isi[1], '&mdash;') + substr_count($isi[1], '—'),
+            'Pelanggan Dua belum pernah memesan; sel "Pesanan" dan "Pesanan '
+            . 'terakhir"-nya harus bertanda pisah, bukan dikosongkan.');
+    }
 }
