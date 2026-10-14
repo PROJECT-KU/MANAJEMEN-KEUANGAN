@@ -329,7 +329,9 @@ class KategoriLayananController extends Controller
         KategoriLayanan::hitungPendaftar();
 
         return Excel::download(
-            new AngkatanLayananExport($angkatan),
+            // Saringannya ikut ke berkasnya: lembar berisi 29 dari 258
+            // angkatan tidak boleh terbaca seperti daftar yang lengkap.
+            new AngkatanLayananExport($angkatan, $this->ringkasanSaringan($request)),
             'angkatan-layanan-' . now()->format('Ymd-His') . '.xlsx'
         );
     }
