@@ -193,13 +193,21 @@ class ClinikScopusBiayaPersesiController extends Controller
      * Hanya layanan yang tarifnya SUDAH disetel yang ikut: "Belum disetel" itu
      * peringatan untuk admin, bukan keterangan untuk calon peserta.
      */
-    public function cetakPdf()
+    /**
+     * Tarif yang BERLAKU, dirakit sekali untuk kedua unduhan.
+     *
+     * Dipakai PDF dan Excel. Dirakit dua kali, cepat atau lambat keduanya
+     * menjawab berbeda — dan selisih daftar harga antara berkas yang dicetak
+     * dan berkas yang dihitung adalah jenis selisih yang paling mahal.
+     *
+     * Disusun dari KATALOG layanan, bukan dari isi tabel tarif: disusun dari
+     * tabelnya, layanan yang tarifnya belum disetel hilang dari daftar dan
+     * tidak ada yang tahu ia terlewat.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function barisUntukUnduhan(): array
     {
-        if (! $this->bolehMelihat()) {
-            return redirect()->route('account.dashboard.index')
-                ->with('error', 'Anda tidak punya akses ke tarif layanan.');
-        }
-
         $berlaku = ClinikScopusBiayaPersesi::semuaYangBerlaku();
         $baris = [];
 
@@ -222,7 +230,39 @@ class ClinikScopusBiayaPersesiController extends Controller
             }
         }
 
-        $html = view('account.clinik_scopus_biaya_persesi.cetak-pdf', ['baris' => $baris])->render();
+        return $baris;
+    }
+
+    /**
+     * Daftar harga sebagai lembar kerja.
+     *
+     * Berdampingan dengan PDF, tidak menggantikannya: PDF untuk dibagikan dan
+     * dilampirkan, lembar kerja untuk dihitung — menyusun penawaran, menandai
+     * harga yang akan naik, atau menyalinnya ke proposal.
+     */
+    public function eksporExcel()
+    {
+        if (! $this->bolehMelihat()) {
+            return redirect()->route('account.dashboard.index')
+                ->with('error', 'Anda tidak punya akses ke tarif layanan.');
+        }
+
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\TarifLayananExport($this->barisUntukUnduhan()),
+            'daftar-harga-layanan-' . now()->format('Ymd-His') . '.xlsx'
+        );
+    }
+
+    public function cetakPdf()
+    {
+        if (! $this->bolehMelihat()) {
+            return redirect()->route('account.dashboard.index')
+                ->with('error', 'Anda tidak punya akses ke tarif layanan.');
+        }
+
+        $html = view('account.clinik_scopus_biaya_persesi.cetak-pdf', [
+            'baris' => $this->barisUntukUnduhan(),
+        ])->render();
 
         $dompdf = new Dompdf();
         $pengaturan = $dompdf->getOptions();
