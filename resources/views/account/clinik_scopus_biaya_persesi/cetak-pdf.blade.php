@@ -168,6 +168,19 @@
            baris lalu menaikkan tinggi seluruh pita. */
         .nilai-teks { font-size: 8px; font-weight: normal; color: #334155; }
 
+        /*
+         * Potongan ditulis hijau, bukan abu seperti satuan di atasnya.
+         *
+         * Ia satu-satunya angka di lembar ini yang MENGURANGI yang harus
+         * dibayar; disamakan dengan keterangan satuan, ia terbaca sebagai
+         * catatan kaki dan terlewat oleh pembacanya.
+         */
+        .potongan {
+            font-size: 7.5px;
+            font-weight: bold;
+            color: #15803d;
+        }
+
         table.daftar {
             width: 100%;
             border-collapse: collapse;
@@ -331,6 +344,35 @@
                                 <br><span class="samar">
                                     + PPN {{ $t->ppn_persen }}% &rarr;
                                     <span class="tebal">Rp {{ number_format($t->total_dibayar, 0, ',', '.') }}</span>
+                                </span>
+                            @endif
+
+                            {{-- Potongan yang BERLAKU untuk pembacanya.
+
+                                 Lembar ini yang dibagikan ke calon peserta,
+                                 dan potongannya justru hal yang paling ingin
+                                 mereka ketahui — tetapi sebelum ini hanya ada
+                                 di lembar kerja yang dipakai ke dalam.
+                                 Terukur: Scopus Camp Jawa memberi potongan
+                                 alumni 10% yang tidak pernah muncul di kertas
+                                 yang sampai ke orangnya.
+
+                                 Yang TIDAK ikut dan sengaja: siapa yang
+                                 menyetel tarifnya dan sejak kapan ia berlaku.
+                                 Keduanya urusan ke dalam, dan panduan sudah
+                                 mencatat bahwa kertas ini dibagikan ke luar. --}}
+                            @if ($t->diskon_alumni_persen > 0 || $t->diskon_rombongan_persen > 0)
+                                <br><span class="potongan">
+                                    @if ($t->diskon_alumni_persen > 0)
+                                        Alumni &minus;{{ (int) $t->diskon_alumni_persen }}%
+                                    @endif
+                                    @if ($t->diskon_alumni_persen > 0 && $t->diskon_rombongan_persen > 0)
+                                        <br>
+                                    @endif
+                                    @if ($t->diskon_rombongan_persen > 0)
+                                        {{ (int) $t->diskon_rombongan_min }}+ orang
+                                        &minus;{{ (int) $t->diskon_rombongan_persen }}%
+                                    @endif
                                 </span>
                             @endif
                         </td>
