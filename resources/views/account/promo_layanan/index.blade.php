@@ -30,6 +30,22 @@ Promo Layanan | MIS
     .pro-potongan { display: block; line-height: 1.25; font-size: 1rem; font-weight: 800; color: #4338ca; white-space: nowrap; }
     .pro-potongan-ket { display: block; margin-top: 1px; line-height: 1.35; font-size: .72rem; color: var(--mis-tinta-3); }
 
+    /*
+     * Tanggal dan keping pendek tidak boleh terpatah DI LAYAR LEBAR.
+     *
+     * "30 Jul 2026" yang jadi "30 Jul / 2026" terbaca seperti dua keterangan,
+     * dan tiap sel yang patah menambah 18px ke tinggi SELURUH barisnya.
+     * Dibatasi ke layar lebar saja: di mode kartu lebarnya selebar kartu, dan
+     * nowrap di sana justru melebarkan kartunya keluar layar.
+     */
+    @media (min-width: 768px) {
+        /* .pro-nihil SENGAJA tidak ikut: "belum dipilih" boleh patah dua
+           baris, sebab tinggi barisnya sudah ditentukan kolom nama yang lebih
+           tinggi — memaksanya satu baris cuma merebut lebar dari kolom itu. */
+        .pro-periode,
+        .pro-jumlah { white-space: nowrap; }
+    }
+
     .pro-periode { display: block; line-height: 1.3; font-size: .8rem; color: var(--mis-tinta-2); }
     .pro-sisa { display: block; margin-top: 2px; line-height: 1.35; font-size: .72rem; font-weight: 700; color: #b45309; }
 
@@ -42,6 +58,28 @@ Promo Layanan | MIS
     /* Bobot (0,2,1) supaya menang atas `a:hover` milik Bootstrap yang (0,1,1)
        — tanpa itu warnanya berubah jadi biru bawaan saat disentuh. */
     .pro-aksi a.pro-nihil:hover, a.pro-nihil:hover { color: #92400e; text-decoration: underline; }
+
+    @media (max-width: 575.98px) {
+        /*
+         * Dua unduhan berdampingan, "Buat promo" sendirian di bawahnya.
+         *
+         * Bertumpuk tiga, ketiganya memakan 160px sebelum ubin pertama
+         * terlihat — padahal dua di antaranya tombol pendek yang muat
+         * berdua dalam satu baris 390px. Yang membentang penuh tinggal
+         * tombol utamanya, dan itu justru membuatnya lebih menonjol.
+         */
+        #pro-aksi {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        #pro-aksi > .mis-tombol { width: 100%; justify-content: center; }
+
+        /* Tombol utama membentang dua lajur; :last-child supaya aturannya
+           tetap benar kalau tombol unduhnya nanti bertambah atau berkurang. */
+        #pro-aksi > .mis-tombol:last-child { grid-column: 1 / -1; }
+    }
 
     /* Kolom centang: ukuran dan daerah tekannya datang dari .mis-centang
        bersama, supaya tidak jadi ukuran ketiga untuk tugas yang sama. */
@@ -88,14 +126,41 @@ Promo Layanan | MIS
      * kolom Promo — yang paling perlu ruang — justru menyempit karena namanya
      * pendek dibanding periode dan tombolnya.
      */
-    .pro-k-nama { width: 24%; }
-    .pro-k-potongan { width: 12%; }
-    .pro-k-periode { width: 11%; }
-    .pro-k-selesai { width: 11%; }
-    .pro-k-angkatan { width: 10%; }
-    .pro-k-pakai { width: 12%; }
-    .pro-k-keadaan { width: 10%; }
-    .pro-k-aksi { width: 10%; }
+    /*
+     * table-layout: fixed, dan itu bukan hiasan.
+     *
+     * Dengan tata letak otomatis, `width` pada <th> cuma SARAN: lebar
+     * sebenarnya datang dari isi tiap kolom. Terukur di 1440px — kolom PROMO
+     * diminta 23% (260px) tetapi hanya dapat 168px, karena kolom Aksi yang
+     * berisi tombol-tombol tak-terpatahkan menyita duluan. Akibatnya nama
+     * promo patah tiga baris dan tinggi barisnya 131px untuk isi yang
+     * sebenarnya muat dalam satu baris.
+     *
+     * Dipatok fixed, persennya berlaku apa adanya. Hanya di layar lebar: di
+     * mode kartu tabelnya bukan tabel lagi.
+     */
+    @media (min-width: 768px) {
+        .pro-tabel { table-layout: fixed; }
+    }
+
+    /*
+     * Persennya dari pengukuran, bukan dibagi rata. Tiap kolom diberi isinya
+     * yang paling lebar ditambah bantalan 24px:
+     * potongan 85, tanggal 76, keadaan 73, aksi 154 (4 tombol 34px + 3 jarak).
+     */
+    .pro-k-nama { width: 27%; }
+    .pro-k-potongan { width: 10%; }
+    /* Sepersen dipinjamkan ke Potongan: tanggal terpanjang "30 Jul 2026"
+       cuma 73px, sementara "per peserta" di bawah nominalnya butuh 74px dan
+       patah dua baris tepat di bawah angka besarnya. */
+    .pro-k-periode { width: 9%; }
+    .pro-k-selesai { width: 10%; }
+    .pro-k-angkatan { width: 9%; }
+    /* Sepersen dipinjam dari Potongan, yang isi terlebarnya 73px dan punya
+       sisa 12px: "belum dipakai" butuh 88px dan patah dua baris di 85px. */
+    .pro-k-pakai { width: 11%; }
+    .pro-k-keadaan { width: 9%; }
+    .pro-k-aksi { width: 15%; }
 
     @media (max-width: 767.98px) {
         /*
@@ -150,8 +215,8 @@ Promo Layanan | MIS
              tombol berskrip, supaya alamatnya bisa disalin. --}}
         <div id="pro-ringkas">
         <div class="mis-ringkas-geser" data-mis-geser>
-        <div class="mis-ringkas mis-ringkas-auto" aria-label="Ringkasan promo">
-            <a class="mis-ubin {{ $keadaan === null ? 'terpilih' : '' }}"
+        <div class="mis-ringkas mis-ringkas-6" aria-label="Ringkasan promo">
+            <a class="mis-ubin {{ $keadaan === null ? 'terpilih' : '' }} {{ $ringkas['semua'] === 0 ? 'kosong' : '' }}"
                 href="{{ route('account.promo-layanan.index', request()->only('cari', 'layanan')) }}"
                 title="Tampilkan semua promo">
                 <span class="mis-medali kecil mis-ungu" aria-hidden="true"><i class="fas fa-tags"></i></span>
@@ -170,18 +235,34 @@ Promo Layanan | MIS
                 // dan warnanya harus cocok dengan lencana keadaan di tabel di
                 // bawah, dan dua daftar terpisah pasti berselisih cepat atau
                 // lambat.
+                /*
+                 * LIMA keadaan berubin, bukan enam — bersama ubin "Seluruh
+                 * promo" jadi genap enam.
+                 *
+                 * Tujuh tidak pernah terbagi rapi berapa pun lebarnya:
+                 * terukur di 1440px wadahnya cuma muat enam lajur, jadi ubin
+                 * ketujuh jatuh sendirian dengan petak kosong di sebelahnya.
+                 *
+                 * "Kuota habis" yang dilepas, dan itu pilihan yang paling
+                 * sedikit menghilangkan: kuota sendiri isian pilihan, jadi
+                 * keadaan itu paling jarang terjadi — dan ia tetap bisa
+                 * dicapai lewat menu Keadaan, plus sudah diteriakkan sendiri
+                 * di "Perlu tindakan" pada dasbor.
+                 */
                 $ubin = [
                     ['berjalan', 'mis-hijau', 'fa-bolt', 'Sedang berjalan'],
                     ['hampir-habis', 'mis-jingga', 'fa-hourglass-half', 'Hampir habis'],
                     ['belum-mulai', 'mis-biru', 'fa-clock', 'Belum mulai'],
-                    ['kuota-habis', 'mis-kuning', 'fa-ban', 'Kuota habis'],
                     ['selesai', 'mis-abu', 'fa-flag-checkered', 'Sudah selesai'],
                     ['nonaktif', 'mis-merah', 'fa-power-off', 'Dimatikan'],
                 ];
             @endphp
 
             @foreach ($ubin as $u)
-                <a class="mis-ubin {{ $keadaan === $u[0] ? 'terpilih' : '' }}"
+                {{-- Ubin bernilai nol diredupkan lewat kelas bersama `kosong`:
+                     lima ubin yang berteriak sama kerasnya memaksa mata
+                     membaca semuanya untuk menemukan yang ada isinya. --}}
+                <a class="mis-ubin {{ $keadaan === $u[0] ? 'terpilih' : '' }} {{ $ringkas[$u[0]] === 0 ? 'kosong' : '' }}"
                     href="{{ route('account.promo-layanan.index', array_merge(request()->only('cari', 'layanan'), ['keadaan' => $u[0]])) }}"
                     title="Saring: {{ $u[3] }}">
                     <span class="mis-medali kecil {{ $u[1] }}" aria-hidden="true"><i class="fas {{ $u[2] }}"></i></span>
@@ -365,7 +446,7 @@ Promo Layanan | MIS
             {{-- mis-tabel-kartu: di bawah 768px tabelnya jadi tumpukan kartu,
                  jadi tidak perlu digeser ke samping di ponsel. --}}
             <div class="mis-tabel-bungkus">
-                <table class="mis-tabel mis-tabel-kartu">
+                <table class="mis-tabel mis-tabel-kartu pro-tabel">
                     <thead>
                         <tr>
                             @php
@@ -448,9 +529,17 @@ Promo Layanan | MIS
                                         @if ($promo->catatan)
                                             <p class="pro-ket">{{ \Illuminate\Support\Str::limit($promo->catatan, 70) }}</p>
                                         @endif
-                                        <p class="pro-ket">
-                                            oleh {{ $promo->penginput?->full_name ?: 'tidak tercatat' }}
-                                        </p>
+                                        {{-- Hanya kalau penulisnya memang tercatat.
+
+                                             "oleh tidak tercatat" menambah satu baris
+                                             penuh ke tiap kartu untuk menyatakan bahwa
+                                             tidak ada yang bisa dinyatakan — dan ketiga
+                                             promo yang dipindah dari Clinik Scopus
+                                             semuanya begitu, jadi barisnya muncul di
+                                             mana-mana tanpa pernah berguna. --}}
+                                        @if ($promo->penginput)
+                                            <p class="pro-ket">oleh {{ $promo->penginput->full_name }}</p>
+                                        @endif
                                     </div>
                                 </td>
 
@@ -577,12 +666,15 @@ Promo Layanan | MIS
 
                                 <td data-judul="Aksi" class="text-right">
                                     <div class="pro-aksi">
-                                        <a href="{{ route('account.promo-layanan.detail', $promo->id) }}"
-                                            class="mis-tombol-garis" title="Lihat rincian"
-                                            aria-label="Lihat rincian promo {{ $promo->nama }}">
-                                            <i class="fas fa-eye" aria-hidden="true"></i>
-                                        </a>
+                                        {{-- Tombol "lihat" dibuang: nama promonya sudah
+                                             menautkan ke rincian, dan layar Angkatan
+                                             Layanan di sebelah memakai pola yang sama
+                                             (ubah/gandakan/hapus, nama sebagai tautan).
 
+                                             Lima tombol menuntut 194px, dan itulah yang
+                                             menyita lebar kolom PROMO sampai tinggal
+                                             168px — nama promo jadi patah tiga baris
+                                             dan tiap baris tabel setinggi 131px. --}}
                                         @if ($bolehUbah)
                                             <a href="{{ route('account.promo-layanan.edit', $promo->id) }}"
                                                 class="mis-tombol-garis" title="Ubah promo"

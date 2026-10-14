@@ -3328,17 +3328,25 @@ dialog {
 .mis-ringkas-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 
 /*
- * Jumlah ubin yang TIDAK tetap.
+ * Enam ubin.
  *
- * Dipakai layar yang keadaannya lebih dari lima — Promo Layanan punya enam
- * keadaan ditambah ubin "semua". Dipatok repeat(7), di 992px tiap ubin cuma
- * 133px dan labelnya terpotong; dengan auto-fit ia membungkus jadi dua baris
- * sendiri tanpa titik putus yang harus dijaga satu per satu.
+ * Jumlahnya DIPATOK, bukan auto-fit. Dengan auto-fit, banyaknya lajur
+ * ditentukan lebar yang kebetulan tersedia — terukur di 1440px wadahnya
+ * 1130px dan hanya muat enam lajur dari tujuh ubin, jadi ubin terakhir jatuh
+ * sendirian di baris kedua dengan petak kosong menganga di sebelahnya.
  *
- * Ditaruh di sini, bukan di layarnya: aturan ubin ringkasan yang disalin ke
- * tiap layar adalah persis yang dilarang RupaBersamaTest.
+ * Enam selalu terbagi rapi: satu baris penuh di layar lebar, 3+3 di layar
+ * sedang. Tujuh tidak pernah, berapa pun lebarnya — itulah sebabnya ubin
+ * Promo Layanan dikurangi jadi enam dan "Kuota habis" pindah ke menu keadaan.
+ *
+ * Di bawah 1100px aturan ini tidak berlaku sama sekali: ubinnya sudah jadi
+ * barisan yang digeser, bukan kisi.
  */
-.mis-ringkas-auto { grid-template-columns: repeat(auto-fit, minmax(158px, 1fr)); }
+.mis-ringkas-6 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+@media (min-width: 1400px) {
+    .mis-ringkas-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
 
 /*
  * Sel yang hanya ada di mode kartu. DI LUAR media query mana pun: ditaruh di
@@ -3346,6 +3354,29 @@ dialog {
  * ponsel dan aturan kartunya tidak punya apa pun untuk ditimpa.
  */
 .mis-tabel .mis-kolom-kartu { display: none; }
+
+/*
+ * Ubin yang angkanya NOL diredupkan.
+ *
+ * Layar dengan enam keadaan hampir selalu punya empat atau lima ubin bernilai
+ * nol, dan semuanya berteriak sama kerasnya dengan yang berisi — mata harus
+ * membaca keenamnya satu per satu untuk menemukan yang ada isinya.
+ *
+ * Diredupkan, BUKAN disembunyikan: ubin yang hilang saat nol membuat jumlah
+ * ubinnya berubah-ubah mengikuti data, dan letak ubin yang sama tidak pernah
+ * tetap dari satu kunjungan ke kunjungan berikutnya.
+ */
+.mis-ubin.kosong { background: #fbfcfe; border-color: #eef2f7; }
+.mis-ubin.kosong .mis-ubin-angka,
+.mis-ubin.kosong .mis-ubin-label { color: var(--mis-tinta-4); }
+.mis-ubin.kosong .mis-medali { opacity: .4; filter: grayscale(.6); }
+
+/* Yang sedang TERPILIH tetap penuh walau angkanya nol: ia menyatakan saringan
+   yang sedang dipakai, dan itu justru harus terbaca jelas ketika hasilnya
+   kosong. Bobotnya (0,3,1) supaya menang atas aturan di atas. */
+a.mis-ubin.kosong.terpilih { background: #fff; }
+a.mis-ubin.kosong.terpilih .mis-ubin-angka { color: var(--mis-tinta); }
+a.mis-ubin.kosong.terpilih .mis-medali { opacity: 1; filter: none; }
 
 .mis-ubin {
     display: flex;
