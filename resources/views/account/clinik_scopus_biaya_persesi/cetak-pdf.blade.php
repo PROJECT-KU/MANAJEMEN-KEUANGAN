@@ -57,54 +57,116 @@
         }
 
         .anak-judul {
-            margin: 2px 0 0;
-            font-size: 9px;
+            margin: 3px 0 0;
+            font-size: 8.5px;
             color: #64748b;
         }
 
+        /* Baris kanan kepala: label kecil di atas nilainya, bukan dua baris
+           sejajar. Dua baris sejajar membuat "MIS Rumah Scopus Foundation"
+           dan waktu unduhnya terbaca sebagai satu kalimat. */
+        .meta-label {
+            font-size: 6.5px;
+            letter-spacing: 1px;
+            /* #a5b4fc nyaris tak terbaca di atas putih saat dicetak; #818cf8
+               tetap beraksen tanpa memudar. */
+            color: #818cf8;
+        }
+
+        .meta-nilai { font-size: 8.5px; color: #475569; font-weight: bold; }
+
+        /*
+         * Dua garis beda tebal, bukan satu.
+         *
+         * Satu garis penuh terbaca seperti pembatas seadanya; potongan tebal
+         * berwarna merek di ujung kiri membuat kepalanya terbaca sebagai kop.
+         * Keduanya fixed supaya ikut terulang di tiap halaman.
+         *
+         * 547pt, bukan 525pt: A4 TEGAK 595pt dikurangi bantalan 32px (24pt)
+         * di kedua sisi. Dengan 525pt garisnya berhenti 22pt sebelum tepi
+         * kanan isi, dan kepalanya terlihat kurang panjang.
+         */
         .garis-kepala {
             position: fixed;
             top: -14px;
             left: 0;
-            width: 525pt;
-            border-top: 2px solid #6366f1;
+            width: 547pt;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .garis-kepala-tebal {
+            position: fixed;
+            top: -16px;
+            left: 0;
+            width: 84pt;
+            border-top: 3px solid #6366f1;
         }
 
         .kaki {
             position: fixed;
             bottom: -44px;
             left: 0;
-            width: 525pt;
+            width: 547pt;
             padding-top: 6px;
             border-top: 1px solid #e2e8f0;
             font-size: 8px;
             color: #94a3b8;
         }
 
+        /*
+         * Ringkasan jadi kartu TERPISAH, bukan satu baris sel bersambung.
+         *
+         * Bersambung, ketiga angka berbeda terbaca seperti satu baris tabel
+         * dan tidak ada yang menonjol. Jaraknya dibuat dengan sel pemisah
+         * berlebar tetap: Dompdf tidak mengenal gap maupun border-spacing
+         * yang hanya mendatar.
+         */
         .keterangan-berkas {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 12px;
+            margin-bottom: 13px;
         }
 
-        .keterangan-berkas td {
-            padding: 5px 8px;
+        .keterangan-berkas td.kartu {
+            padding: 6px 9px;
             background: #f8fafc;
             border: 1px solid #e2e8f0;
-            font-size: 8.5px;
+            border-left: 3px solid #cbd5e1;
+            font-size: 8px;
         }
+
+        /*
+         * Warnanya membawa arti, bukan hiasan: nila untuk jumlah yang
+         * tercetak, kuning HANYA saat memang ada tarif yang kena PPN — selalu
+         * kuning, warnanya berhenti berarti apa-apa dan "Tidak ada" ikut
+         * terbaca seperti peringatan.
+         *
+         * Pemilihnya SELENGKAP pemilih dasarnya. Ditulis ".kartu-pokok" saja,
+         * bobotnya (0,1,0) kalah dari ".keterangan-berkas td.kartu" (0,2,1)
+         * di atas — dan yang tercetak ketiga kartu abu-abu seragam tanpa
+         * galat apa pun.
+         */
+        .keterangan-berkas td.kartu-pokok { border-left-color: #6366f1; background: #eef2ff; }
+        .keterangan-berkas td.kartu-awas  { border-left-color: #f59e0b; background: #fffbeb; }
+
+        .keterangan-berkas td.sela { padding: 0; border: 0; width: 7px; }
 
         .label {
             color: #94a3b8;
-            font-size: 7px;
+            font-size: 6.5px;
             text-transform: uppercase;
-            letter-spacing: .04em;
+            letter-spacing: .08em;
         }
 
         .nilai {
             color: #0f172a;
             font-weight: bold;
+            font-size: 11px;
         }
+
+        /* Tanggal berlakunya kalimat, bukan angka: pada 11px ia memakan dua
+           baris lalu menaikkan tinggi seluruh pita. */
+        .nilai-teks { font-size: 8px; font-weight: normal; color: #334155; }
 
         table.daftar {
             width: 100%;
@@ -180,22 +242,32 @@
     <div class="kepala">
         <table width="100%">
             <tr>
+                {{-- Kedua lajur tepi SAMA LEBAR, dan judulnya terpusat di
+                     lajur tengah.
+
+                     Dengan lajur logo 150px dan lajur kanan tanpa lebar
+                     tetap, judulnya terpusat pada SISA lebar — bukan pada
+                     lebar halaman — sehingga titik tengahnya jatuh sekitar
+                     sepertiga lebar kertas. 150px cukup memuat "MIS Rumah
+                     Scopus Foundation" pada 8,5px tebal di kertas tegak. --}}
                 @if ($logo)
                     <td width="150"><img src="{{ $logo }}" alt="MIS Rumah Scopus" height="38"></td>
                 @endif
-                <td>
+                <td align="center">
                     <p class="judul">Daftar Harga Layanan</p>
                     <p class="anak-judul">Harga dan fasilitas layanan jasa Rumah Scopus.</p>
                 </td>
-                <td align="right" class="anak-judul">
-                    MIS Rumah Scopus Foundation<br>
-                    Diunduh {{ now()->format('d/m/Y H:i') }} WIB
+                <td width="150" align="right">
+                    <span class="meta-label">DITERBITKAN OLEH</span><br>
+                    <span class="meta-nilai">MIS Rumah Scopus Foundation</span><br>
+                    <span class="anak-judul">Diunduh {{ now()->format('d/m/Y H:i') }} WIB</span>
                 </td>
             </tr>
         </table>
     </div>
 
     <div class="garis-kepala"></div>
+    <div class="garis-kepala-tebal"></div>
 
     <div class="kaki">
         <table width="100%">
@@ -210,18 +282,22 @@
     </div>
 
     <table class="keterangan-berkas">
-        <tr>
-            <td width="34%">
-                <span class="label">Berlaku per</span><br>
-                <span class="nilai">{{ now()->locale('id')->translatedFormat('d F Y') }}</span>
+        <tr valign="top">
+            <td width="22%" class="kartu kartu-pokok">
+                <span class="label">Tarif berlaku</span><br>
+                <span class="nilai">{{ count($baris) }}</span>
             </td>
-            <td width="33%">
-                <span class="label">Jumlah layanan</span><br>
-                <span class="nilai">{{ count($baris) }} tarif berlaku</span>
-            </td>
-            <td width="33%">
+            <td class="sela"></td>
+            <td width="24%" class="kartu {{ $berppn > 0 ? 'kartu-awas' : '' }}">
                 <span class="label">Dikenakan PPN</span><br>
-                <span class="nilai">{{ $berppn > 0 ? $berppn . ' dari ' . count($baris) : 'Tidak ada' }}</span>
+                <span class="nilai">
+                    {{ $berppn > 0 ? $berppn . ' dari ' . count($baris) : 'Tidak ada' }}
+                </span>
+            </td>
+            <td class="sela"></td>
+            <td class="kartu">
+                <span class="label">Berlaku per</span><br>
+                <span class="nilai nilai-teks">{{ now()->locale('id')->translatedFormat('d F Y') }}</span>
             </td>
         </tr>
     </table>

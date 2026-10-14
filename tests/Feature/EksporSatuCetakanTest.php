@@ -2,8 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\ClinikScopusBiayaPersesi;
 use App\Exports\PelangganExport;
 use App\Exports\PendaftaranLayananExport;
+use App\Exports\TarifLayananExport;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
@@ -13,21 +15,25 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Tests\TestCase;
 
 /**
- * Berkas unduhan Data Pelanggan berupa SATU CETAKAN dengan Pendaftar Layanan.
+ * SELURUH lembar kerja yang keluar dari MIS memakai satu cetakan.
  *
- * Dua berkas yang keluar dari sistem yang sama tidak boleh terbaca seperti
- * datang dari dua tempat. Sebelum ini kepala berkas Pelanggan cuma tiga baris
- * teks polos berukuran 13px sementara Pendaftar Layanan punya pita berjudul
- * terpusat, kepala kolom nila, dan baris berselang-seling.
+ * Berkas yang keluar dari sistem yang sama tidak boleh terbaca seperti datang
+ * dari tempat berbeda. Sebelum ini kepala berkas Pelanggan cuma tiga baris
+ * teks polos 13px dan Tarif Layanan tidak punya lembar kerja sama sekali,
+ * sementara Pendaftar Layanan sudah punya pita berjudul terpusat, kepala kolom
+ * nila, dan baris berselang-seling.
  *
- * Dijaga dengan MEMBANDINGKAN KEDUA BERKAS yang benar-benar dihasilkan, bukan
- * dengan mencocokkan ke angka yang ditulis di sini. Dicocokkan ke angka tetap,
- * memperbaiki rupa acuannya nanti membuat penjaga ini hijau sementara kedua
- * berkasnya justru kembali berbeda.
+ * Dijaga dengan MEMBANDINGKAN BERKAS yang benar-benar dihasilkan terhadap
+ * berkas acuannya, bukan dengan mencocokkan ke angka yang ditulis di sini.
+ * Dicocokkan ke angka tetap, memperbaiki rupa acuannya nanti membuat penjaga
+ * ini hijau sementara berkas-berkasnya justru kembali berbeda.
+ *
+ * Ekspor BARU wajib ditambahkan ke daftar di semuaEkspor(); daftar inilah yang
+ * membuat "satu cetakan" berarti sesuatu.
  *
  * Tanpa basis data: barisnya dirakit di sini.
  */
-class EksporPelangganSeragamTest extends TestCase
+class EksporSatuCetakanTest extends TestCase
 {
     /** @return array{0: Worksheet, 1: string} lembar dan huruf lajur terakhirnya */
     private function lembar($ekspor, int $jumlahKolom): array
@@ -77,6 +83,39 @@ class EksporPelangganSeragamTest extends TestCase
         return $this->lembar($ekspor, count($ekspor->headings()));
     }
 
+    /**
+     * Semua lembar kerja yang harus serupa acuannya.
+     *
+     * @return array<string, callable(): array{0: Worksheet, 1: string}>
+     */
+    private function semuaEkspor(): array
+    {
+        return [
+            'Data Pelanggan' => fn () => $this->pelanggan(),
+            'Tarif Layanan' => fn () => $this->tarif(),
+        ];
+    }
+
+    /** @return array{0: Worksheet, 1: string} */
+    private function tarif(): array
+    {
+        $tarif = new ClinikScopusBiayaPersesi([
+            'layanan' => 'clinik_scopus', 'biaya_persesi' => '125000', 'ppn' => '11',
+            'diskon_alumni_persen' => '10', 'diskon_rombongan_min' => '5',
+            'diskon_rombongan_persen' => '15',
+            'fasilitas' => ['Materi', 'Sertifikat'],
+        ]);
+
+        $baris = [
+            ['nama' => 'Clinik Scopus', 'namaVarian' => null, 'satuan' => 'per sesi', 'tarif' => $tarif],
+            ['nama' => 'Scopus Camp', 'namaVarian' => 'Jawa', 'satuan' => 'per peserta', 'tarif' => $tarif],
+        ];
+
+        $ekspor = new TarifLayananExport($baris, []);
+
+        return $this->lembar($ekspor, count($ekspor->headings()));
+    }
+
     /** @return array{0: Worksheet, 1: string} */
     private function acuan(): array
     {
@@ -112,46 +151,53 @@ class EksporPelangganSeragamTest extends TestCase
     /** @test */
     public function pita_kepala_berkasnya_serupa_dengan_pendaftar_layanan(): void
     {
-        [$p] = $this->pelanggan();
         [$a] = $this->acuan();
 
+        foreach ($this->semuaEkspor() as $nama => $buat) {
+            [$p] = $buat();
+            $this->bandingkanPita($p, $a, $nama);
+        }
+    }
+
+    private function bandingkanPita(Worksheet $p, Worksheet $a, string $nama): void
+    {
         foreach (['A1', 'A2', 'A3'] as $sel) {
             $this->assertSame(
                 $a->getStyle($sel)->getFill()->getStartColor()->getRGB(),
                 $p->getStyle($sel)->getFill()->getStartColor()->getRGB(),
-                'Latar ' . $sel . ' berbeda dari ekspor Pendaftar Layanan.'
+                $nama . ': latar ' . $sel . ' berbeda dari ekspor Pendaftar Layanan.'
             );
 
             $this->assertSame(
                 $a->getStyle($sel)->getFont()->getSize(),
                 $p->getStyle($sel)->getFont()->getSize(),
-                'Ukuran huruf ' . $sel . ' berbeda dari ekspor Pendaftar Layanan.'
+                $nama . ': ukuran huruf ' . $sel . ' berbeda dari ekspor Pendaftar Layanan.'
             );
 
             $this->assertSame(
                 $a->getStyle($sel)->getFont()->getColor()->getRGB(),
                 $p->getStyle($sel)->getFont()->getColor()->getRGB(),
-                'Warna huruf ' . $sel . ' berbeda dari ekspor Pendaftar Layanan.'
+                $nama . ': warna huruf ' . $sel . ' berbeda dari ekspor Pendaftar Layanan.'
             );
 
             $this->assertSame(
                 $a->getStyle($sel)->getAlignment()->getHorizontal(),
                 $p->getStyle($sel)->getAlignment()->getHorizontal(),
-                'Perataan ' . $sel . ' berbeda dari ekspor Pendaftar Layanan.'
+                $nama . ': perataan ' . $sel . ' berbeda dari ekspor Pendaftar Layanan.'
             );
         }
 
         $this->assertSame(
             $a->getStyle('A3')->getBorders()->getBottom()->getBorderStyle(),
             $p->getStyle('A3')->getBorders()->getBottom()->getBorderStyle(),
-            'Garis penutup pita berbeda; tanpa itu ketiga baris keterangan mengambang di atas tabel.'
+            $nama . ': garis penutup pita berbeda; tanpa itu ketiga baris keterangan mengambang di atas tabel.'
         );
 
         foreach ([1, 2, 3, 4] as $n) {
             $this->assertSame(
                 $a->getRowDimension($n)->getRowHeight(),
                 $p->getRowDimension($n)->getRowHeight(),
-                'Tinggi baris ' . $n . ' berbeda dari ekspor Pendaftar Layanan.'
+                $nama . ': tinggi baris ' . $n . ' berbeda dari ekspor Pendaftar Layanan.'
             );
         }
     }
@@ -169,13 +215,15 @@ class EksporPelangganSeragamTest extends TestCase
          * ditulis tetap, menambah satu kolom membuat pitanya berhenti tepat
          * sebelum kolom terakhir tanpa galat apa pun.
          */
-        [$lembar, $akhir] = $this->pelanggan();
+        foreach ($this->semuaEkspor() as $nama => $buat) {
+            [$lembar, $akhir] = $buat();
 
-        $gabungan = array_values($lembar->getMergeCells());
+            $gabungan = array_values($lembar->getMergeCells());
 
-        foreach (['1', '2', '3'] as $n) {
-            $this->assertContains('A' . $n . ':' . $akhir . $n, $gabungan,
-                'Baris kepala ke-' . $n . ' tidak digabung selebar tabelnya.');
+            foreach (['1', '2', '3'] as $n) {
+                $this->assertContains('A' . $n . ':' . $akhir . $n, $gabungan,
+                    $nama . ': baris kepala ke-' . $n . ' tidak digabung selebar tabelnya.');
+            }
         }
     }
 
@@ -184,19 +232,26 @@ class EksporPelangganSeragamTest extends TestCase
     /** @test */
     public function kepala_kolom_dan_baris_isinya_serupa_dengan_pendaftar_layanan(): void
     {
-        [$p] = $this->pelanggan();
         [$a] = $this->acuan();
 
+        foreach ($this->semuaEkspor() as $nama => $buat) {
+            [$p] = $buat();
+            $this->bandingkanTabel($p, $a, $nama);
+        }
+    }
+
+    private function bandingkanTabel(Worksheet $p, Worksheet $a, string $nama): void
+    {
         $this->assertSame(
             $a->getStyle('A4')->getFill()->getStartColor()->getRGB(),
             $p->getStyle('A4')->getFill()->getStartColor()->getRGB(),
-            'Latar kepala kolom berbeda dari ekspor Pendaftar Layanan.'
+            $nama . ': latar kepala kolom berbeda dari ekspor Pendaftar Layanan.'
         );
 
         $this->assertSame(
             $a->getStyle('A4')->getFont()->getColor()->getRGB(),
             $p->getStyle('A4')->getFont()->getColor()->getRGB(),
-            'Warna huruf kepala kolom berbeda dari ekspor Pendaftar Layanan.'
+            $nama . ': warna huruf kepala kolom berbeda dari ekspor Pendaftar Layanan.'
         );
 
         $this->assertTrue($p->getStyle('A4')->getFont()->getBold());
@@ -209,16 +264,19 @@ class EksporPelangganSeragamTest extends TestCase
         $this->assertSame(
             $a->getStyle('A6')->getFill()->getStartColor()->getRGB(),
             $p->getStyle('A6')->getFill()->getStartColor()->getRGB(),
-            'Baris berselang-selingnya berbeda dari ekspor Pendaftar Layanan.'
+            $nama . ': baris berselang-selingnya berbeda dari ekspor Pendaftar Layanan.'
         );
     }
 
     /** @test */
     public function kepala_kolom_tetap_terlihat_saat_digulung(): void
     {
-        [$lembar] = $this->pelanggan();
+        foreach ($this->semuaEkspor() as $nama => $buat) {
+            [$lembar] = $buat();
 
-        $this->assertSame('A5', $lembar->getFreezePane());
+            $this->assertSame('A5', $lembar->getFreezePane(),
+                $nama . ': kepala kolomnya tidak dibekukan; daftar panjang tidak bisa dibaca saat digulung.');
+        }
     }
 
     // -------------------------------------------------------- nomor telepon
