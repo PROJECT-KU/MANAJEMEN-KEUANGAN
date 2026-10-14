@@ -43,6 +43,39 @@ Promo Layanan | MIS
        — tanpa itu warnanya berubah jadi biru bawaan saat disentuh. */
     .pro-aksi a.pro-nihil:hover, a.pro-nihil:hover { color: #92400e; text-decoration: underline; }
 
+    /* Kolom centang: ukuran dan daerah tekannya datang dari .mis-centang
+       bersama, supaya tidak jadi ukuran ketiga untuk tugas yang sama. */
+    .pro-centang-sel { width: 34px; padding-right: 0 !important; }
+
+    .pro-massal {
+        display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+        padding: 11px 13px; margin-bottom: 12px;
+        border: 1px solid #c7d2fe; border-radius: 13px;
+        background: #eef2ff;
+    }
+
+    .pro-massal-jumlah { font-size: .8rem; color: #4338ca; }
+    .pro-massal-jumlah strong { font-size: .92rem; font-weight: 800; }
+    .pro-massal-tombol { display: flex; flex-wrap: wrap; gap: 8px; margin-left: auto; }
+
+    @media (max-width: 575.98px) {
+        /* Tombolnya turun ke barisnya sendiri dan melebar penuh: didorong ke
+           kanan di 390px, keduanya berdesakan jadi 90px dan tulisannya
+           terpotong. */
+        .pro-massal-tombol { width: 100%; margin-left: 0; }
+        .pro-massal-tombol .mis-tombol { flex: 1 1 0; min-width: 0; justify-content: center; }
+    }
+
+    /* Batang kuota. Tipis dan tanpa tulisan: angkanya sudah ada di atasnya,
+       yang ditambahkan batang ini cuma rasa "tinggal sedikit lagi" yang tidak
+       bisa diberikan dua angka bersebelahan. */
+    .pro-batang {
+        display: block; width: 100%; max-width: 110px; height: 5px;
+        margin-top: 5px; border-radius: 999px; background: #e2e8f0; overflow: hidden;
+    }
+
+    .pro-batang > span { display: block; height: 100%; border-radius: 999px; background: #6366f1; }
+
     .pro-aksi { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
 
     /* Borang saklar dan hapus tidak boleh memakai ruang barisnya sendiri. */
@@ -308,6 +341,27 @@ Promo Layanan | MIS
                 </div>
             </div>
         @else
+            @if ($bolehUbah)
+                {{-- Bilah aksi massal. Disembunyikan sampai ada yang dicentang:
+                     bilah kosong yang selalu nongkrong di atas daftar memakan
+                     satu baris penuh untuk sesuatu yang belum bisa dilakukan. --}}
+                <form method="POST" action="{{ route('account.promo-layanan.massal') }}"
+                    class="pro-massal" id="pro-massal" hidden>
+                    @csrf
+                    <span class="pro-massal-jumlah">
+                        <strong id="pro-massal-angka">0</strong> promo dipilih
+                    </span>
+                    <div class="pro-massal-tombol">
+                        <button type="submit" name="tindakan" value="nyalakan" class="mis-tombol mis-tombol-hijau">
+                            <i class="fas fa-toggle-on"></i> Nyalakan
+                        </button>
+                        <button type="submit" name="tindakan" value="matikan" class="mis-tombol mis-tombol-halus">
+                            <i class="fas fa-toggle-off mis-ikon-merah"></i> Matikan
+                        </button>
+                    </div>
+                </form>
+            @endif
+
             {{-- mis-tabel-kartu: di bawah 768px tabelnya jadi tumpukan kartu,
                  jadi tidak perlu digeser ke samping di ponsel. --}}
             <div class="mis-tabel-bungkus">
@@ -319,6 +373,14 @@ Promo Layanan | MIS
                                     ? ($arah === 'asc' ? 'ascending' : 'descending')
                                     : 'none';
                             @endphp
+                            @if ($bolehUbah)
+                                <th class="pro-centang-sel">
+                                    <label class="mis-centang-bungkus">
+                                        <input type="checkbox" id="pro-centang-semua" class="mis-centang"
+                                            aria-label="Pilih semua promo di halaman ini">
+                                    </label>
+                                </th>
+                            @endif
                             <th class="pro-k-nama" aria-sort="{{ $ariaUrut('nama') }}">@include('partials.urut-kolom', ['rute' => 'account.promo-layanan.index', 'bawa' => $saringan, 'kolom' => 'nama', 'label' => 'Promo'])</th>
                             <th class="pro-k-potongan">Potongan</th>
                             <th class="pro-k-periode" aria-sort="{{ $ariaUrut('mulai') }}">@include('partials.urut-kolom', ['rute' => 'account.promo-layanan.index', 'bawa' => $saringan, 'kolom' => 'mulai', 'label' => 'Mulai'])</th>
@@ -330,13 +392,45 @@ Promo Layanan | MIS
                             <th class="pro-k-selesai" aria-sort="{{ $ariaUrut('selesai') }}">@include('partials.urut-kolom', ['rute' => 'account.promo-layanan.index', 'bawa' => $saringan, 'kolom' => 'selesai', 'label' => 'Selesai'])</th>
                             <th class="pro-k-angkatan">Angkatan</th>
                             <th class="pro-k-pakai">Dipakai</th>
+                            {{-- Dua kolom di bawah ini HANYA ada di mode kartu.
+                                 Di layar lebar isinya sudah terwakili kolom
+                                 Mulai/Selesai dan Angkatan/Dipakai; di ponsel
+                                 keduanya digabung supaya kartunya kembali enam
+                                 baris, bukan delapan. --}}
+                            <th class="mis-kolom-kartu">Periode</th>
+                            <th class="mis-kolom-kartu">Cakupan</th>
                             <th class="pro-k-keadaan">Keadaan</th>
                             <th class="pro-k-aksi text-right">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($daftar as $promo)
+                            @php
+                                // Dihitung sekali di awal baris, bukan di dalam
+                                // salah satu sel: sel yang sama dipakai dua kali
+                                // (layar lebar dan mode kartu), dan menghitungnya
+                                // di dalam salah satunya berarti yang lain tidak
+                                // punya nilainya sama sekali.
+                                $pakai = \App\Support\DampakPromo::untuk((string) $promo->getKey());
+                                $sisaKuota = $promo->kuota === null
+                                    ? null
+                                    : max(0, (int) $promo->kuota - $pakai['pendaftaran']);
+                            @endphp
                             <tr>
+                                @if ($bolehUbah)
+                                    {{-- BUKAN mis-td-samar: kelas itu berarti
+                                         display:none di mode kartu, dan memakainya
+                                         di sini membuat seluruh aksi massal mustahil
+                                         dari ponsel — kotaknya ada di markah, nol
+                                         yang terlihat. --}}
+                                    <td class="pro-centang-sel">
+                                        <label class="mis-centang-bungkus">
+                                            <input type="checkbox" class="pro-centang mis-centang"
+                                                value="{{ $promo->id }}"
+                                                aria-label="Pilih promo {{ $promo->nama }}">
+                                        </label>
+                                    </td>
+                                @endif
                                 <td class="mis-td-utama">
                                     {{-- Sel bertingkat dibungkus SATU anak: di mode
                                          kartu, dua anak sejajar membuat labelnya dan
@@ -373,11 +467,11 @@ Promo Layanan | MIS
                                     </div>
                                 </td>
 
-                                <td data-judul="Mulai">
+                                <td data-judul="Mulai" class="mis-td-samar">
                                     <span class="pro-periode">{{ $promo->mulai?->locale('id')->translatedFormat('j M Y') }}</span>
                                 </td>
 
-                                <td data-judul="Selesai">
+                                <td data-judul="Selesai" class="mis-td-samar">
                                     <div>
                                         <span class="pro-periode">{{ $promo->selesai?->locale('id')->translatedFormat('j M Y') }}</span>
                                         @if ($promo->sisa_hari !== null && $promo->sisa_hari <= 7)
@@ -388,7 +482,7 @@ Promo Layanan | MIS
                                     </div>
                                 </td>
 
-                                <td data-judul="Angkatan">
+                                <td data-judul="Angkatan" class="mis-td-samar">
                                     @if ($promo->angkatan_count > 0)
                                         <span class="pro-jumlah">
                                             <strong>{{ $promo->angkatan_count }}</strong> angkatan
@@ -413,8 +507,7 @@ Promo Layanan | MIS
                                 {{-- Hasilnya, dibaca dari pendaftaran yang tertali ke
                                      promo ini. Tanpa kolom ini daftar promo tidak
                                      pernah menyatakan mana yang berhasil. --}}
-                                <td data-judul="Dipakai">
-                                    @php ($pakai = \App\Support\DampakPromo::untuk((string) $promo->getKey()))
+                                <td data-judul="Dipakai" class="mis-td-samar">
                                     @if ($pakai['pendaftaran'] > 0)
                                         <div>
                                             <span class="pro-jumlah">
@@ -425,10 +518,54 @@ Promo Layanan | MIS
                                             <span class="pro-potongan-ket">
                                                 potong Rp {{ number_format($pakai['potongan'], 0, ',', '.') }}
                                             </span>
+                                            {{-- Batang kuotanya: tanpa gambar, "12/50"
+                                                 harus dihitung sendiri tiap kali dibaca. --}}
+                                            @if ($promo->kuota !== null)
+                                                <span class="pro-batang" role="img"
+                                                    aria-label="Terpakai {{ $pakai['pendaftaran'] }} dari {{ $promo->kuota }} jatah">
+                                                    <span style="width: {{ $promo->kuota > 0 ? min(100, (int) round($pakai['pendaftaran'] / $promo->kuota * 100)) : 100 }}%"></span>
+                                                </span>
+                                            @endif
                                         </div>
                                     @else
                                         <span class="pro-ket">belum dipakai</span>
                                     @endif
+                                </td>
+
+                                {{-- ---- dua sel berikut HANYA tampil di mode kartu ---- --}}
+                                <td data-judul="Periode" class="mis-kolom-kartu">
+                                    <div>
+                                        <span class="pro-periode">{{ $promo->periode_terbaca }}</span>
+                                        @if ($promo->sisa_hari !== null && $promo->sisa_hari <= 7)
+                                            <span class="pro-sisa">
+                                                {{ $promo->sisa_hari === 0 ? 'habis hari ini' : 'sisa ' . $promo->sisa_hari . ' hari' }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                </td>
+
+                                <td data-judul="Cakupan" class="mis-kolom-kartu">
+                                    <div>
+                                        @if ($promo->angkatan_count > 0)
+                                            <span class="pro-jumlah">
+                                                <strong>{{ $promo->angkatan_count }}</strong> angkatan
+                                            </span>
+                                        @else
+                                            <a class="pro-nihil" href="{{ route('account.promo-layanan.edit', $promo->id) }}"
+                                                title="Promo ini belum memotong harga apa pun — pilih angkatannya.">
+                                                <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+                                                belum dipilih
+                                            </a>
+                                        @endif
+                                        <span class="pro-potongan-ket">
+                                            @if ($pakai['pendaftaran'] > 0)
+                                                dipakai {{ number_format($pakai['pendaftaran']) }}@if ($promo->kuota !== null)/{{ number_format($promo->kuota) }}@endif,
+                                                potong Rp {{ number_format($pakai['potongan'], 0, ',', '.') }}
+                                            @else
+                                                belum dipakai
+                                            @endif
+                                        </span>
+                                    </div>
                                 </td>
 
                                 {{-- HANYA sel ini yang berisi .mis-pil. Dua lencana
@@ -521,6 +658,86 @@ Promo Layanan | MIS
      * elemennya langsung ikut hilang bersama baris lamanya — tanpa galat,
      * dan tombol hapus diam-diam kembali menghapus tanpa bertanya.
      */
+    /*
+     * Pemilihan massal.
+     *
+     * Pilihan disimpan di Set, BUKAN dibaca dari kotak centang yang sedang
+     * tampil: isi daftarnya ditukar tiap ketikan oleh penyaring hidup, jadi
+     * membacanya dari DOM berarti pilihan ikut hilang tiap kali orang
+     * mengetik satu huruf.
+     */
+    (function () {
+        var dipilih = new Set();
+        var bilah = document.getElementById('pro-massal');
+
+        if (!bilah) {
+            return;
+        }
+
+        var angka = document.getElementById('pro-massal-angka');
+
+        function segarkan() {
+            angka.textContent = dipilih.size;
+            bilah.hidden = dipilih.size === 0;
+
+            // Medan tersembunyi dirakit ulang tiap kali: yang terkirim harus
+            // SELURUH pilihan, termasuk yang barisnya sedang tersaring keluar.
+            bilah.querySelectorAll('input[name="id[]"]').forEach(function (e) { e.remove(); });
+
+            dipilih.forEach(function (id) {
+                var m = document.createElement('input');
+                m.type = 'hidden';
+                m.name = 'id[]';
+                m.value = id;
+                bilah.appendChild(m);
+            });
+
+            var semua = document.getElementById('pro-centang-semua');
+            var tampak = document.querySelectorAll('.pro-centang');
+
+            if (semua && tampak.length) {
+                var kena = 0;
+                tampak.forEach(function (k) { if (dipilih.has(k.value)) kena++; });
+                semua.checked = kena === tampak.length;
+                semua.indeterminate = kena > 0 && kena < tampak.length;
+            }
+        }
+
+        // Dipasang pada document: isi daftarnya DITUKAR tiap ketikan, jadi
+        // pendengar pada kotaknya langsung ikut hilang bersama baris lamanya.
+        document.addEventListener('change', function (ev) {
+            if (ev.target.matches('.pro-centang')) {
+                ev.target.checked ? dipilih.add(ev.target.value) : dipilih.delete(ev.target.value);
+                segarkan();
+                return;
+            }
+
+            if (ev.target.id === 'pro-centang-semua') {
+                document.querySelectorAll('.pro-centang').forEach(function (k) {
+                    k.checked = ev.target.checked;
+                    ev.target.checked ? dipilih.add(k.value) : dipilih.delete(k.value);
+                });
+                segarkan();
+            }
+        });
+
+        // Sesudah daftarnya ditukar penyaring hidup, centangnya dipasang ulang
+        // dari Set — kalau tidak, baris yang kembali muncul terlihat belum
+        // dipilih padahal masih ikut terkirim.
+        var wadah = document.getElementById('pro-hasil');
+
+        if (wadah && window.MutationObserver) {
+            new MutationObserver(function () {
+                document.querySelectorAll('.pro-centang').forEach(function (k) {
+                    k.checked = dipilih.has(k.value);
+                });
+                segarkan();
+            }).observe(wadah, { childList: true, subtree: true });
+        }
+
+        segarkan();
+    })();
+
     document.addEventListener('submit', function (ev) {
         var borang = ev.target.closest('form[data-pro-hapus]');
 

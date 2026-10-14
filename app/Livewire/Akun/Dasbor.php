@@ -613,6 +613,31 @@ class Dasbor extends Component
             }
         }
 
+        /*
+         * Promo yang menuntut keputusan.
+         *
+         * Di sinilah pengingat promo tinggal, BUKAN di penjadwal. Cron di
+         * hosting ini belum pernah terpasang — pengingat terjadwal akan mati
+         * tanpa suara, dan promo yang kebablasan baru ketahuan dari laporan
+         * keuangan. Dasbor dibuka tiap hari oleh orang yang sama; itu tempat
+         * yang benar-benar terbaca.
+         */
+        /*
+         * Gerbangnya adalahOrangDalam() — yang berbasis `peran` — BUKAN
+         * $this->pelanggan yang berbasis `level`.
+         *
+         * Keduanya tidak selalu sejalan: layar Promo Layanan menjaga diri
+         * dengan adalahOrangDalam(), jadi akun ber-peran administrator yang
+         * level-nya masih 'user' (bentuk yang lazim di basis data ini) bisa
+         * membuka seluruh layar promo tetapi tidak pernah melihat satu pun
+         * pengingatnya. Terukur lewat uji dasbornya.
+         */
+        if ($pengguna->adalahOrangDalam()) {
+            foreach ($this->promoPerluDilihat() as $satu) {
+                $daftar[] = $satu;
+            }
+        }
+
         if ($this->pengawas) {
             $gagal = $this->ringkasSistem['gagal_24_jam'];
 
@@ -883,6 +908,81 @@ class Dasbor extends Component
             ->orderByDesc('artikel.created_at')
             ->limit(4)
             ->get();
+    }
+
+    /**
+     * Promo yang perlu dilihat orang hari ini.
+     *
+     * Tiga keadaan, dan ketiganya tidak terlihat dari mana pun kecuali dengan
+     * sengaja membuka layar promonya:
+     *
+     *   1. Menyala tetapi belum menunjuk angkatan mana pun — ia tidak memotong
+     *      apa pun, dan yang membuatnya mengira promonya sudah jalan.
+     *   2. Tinggal seminggu atau kurang.
+     *   3. Jatahnya tinggal sedikit.
+     *
+     * Dibatasi tiga baris: daftar "perlu tindakan" yang dibanjiri promo
+     * berhenti dibaca, dan yang hilang justru baris penting lainnya.
+     *
+     * @return array<int,array<string,mixed>>
+     */
+    private function promoPerluDilihat(): array
+    {
+        // Tabelnya mungkin belum ada di basis data yang belum bermigrasi;
+        // dasbor tidak boleh 500 gara-gara itu.
+        if (! \Illuminate\Support\Facades\Schema::hasTable('promo_layanan')) {
+            return [];
+        }
+
+        $daftar = [];
+
+        $promo = \App\PromoLayanan::query()
+            ->where('aktif', true)
+            ->whereDate('selesai', '>=', now()->toDateString())
+            ->withCount('angkatan')
+            ->orderBy('selesai')
+            ->get();
+
+        foreach ($promo as $p) {
+            if ($p->angkatan_count === 0) {
+                $daftar[] = [
+                    'warna' => 'merah',
+                    'ikon' => 'fa-tags',
+                    'judul' => 'Promo "' . \Illuminate\Support\Str::limit($p->nama, 32) . '" belum menunjuk angkatan',
+                    'teks' => 'Selama belum dicentang, promo ini tidak memotong harga apa pun.',
+                    'tautan' => route('account.promo-layanan.detail', $p->id),
+                ];
+
+                continue;
+            }
+
+            $sisaKuota = $p->sisa_kuota;
+
+            if ($sisaKuota !== null && $sisaKuota <= 3) {
+                $daftar[] = [
+                    'warna' => 'kuning',
+                    'ikon' => 'fa-hourglass-end',
+                    'judul' => 'Promo "' . \Illuminate\Support\Str::limit($p->nama, 32) . '" tinggal ' . $sisaKuota . ' jatah',
+                    'teks' => 'Sesudah habis promonya berhenti memotong sendiri.',
+                    'tautan' => route('account.promo-layanan.detail', $p->id),
+                ];
+
+                continue;
+            }
+
+            if ($p->sisa_hari !== null && $p->sisa_hari <= 7) {
+                $daftar[] = [
+                    'warna' => 'jingga',
+                    'ikon' => 'fa-calendar-times',
+                    'judul' => 'Promo "' . \Illuminate\Support\Str::limit($p->nama, 32) . '" '
+                        . ($p->sisa_hari === 0 ? 'habis hari ini' : 'tinggal ' . $p->sisa_hari . ' hari'),
+                    'teks' => 'Perpanjang tanggalnya kalau masih mau dilanjutkan.',
+                    'tautan' => route('account.promo-layanan.detail', $p->id),
+                ];
+            }
+        }
+
+        return array_slice($daftar, 0, 3);
     }
 
     public function render()

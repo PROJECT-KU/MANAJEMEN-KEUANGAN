@@ -2961,6 +2961,14 @@ body.mis-latar-terkunci {
         display: none;
     }
 
+    /* Kebalikannya: sel yang HANYA muncul di mode kartu. Dipakai saat
+       beberapa kolom terpisah di layar lebar lebih baik digabung jadi SATU
+       baris di ponsel — kartu yang isinya delapan baris berlabel sudah
+       melewati batas yang masih enak dipindai. */
+    .mis-tabel.mis-tabel-kartu tbody td.mis-kolom-kartu {
+        display: flex;
+    }
+
     /* sel utama tetap rata kiri dan memenuhi lebar kartu */
     .mis-tabel.mis-tabel-kartu tbody td.mis-td-utama {
         justify-content: flex-start;
@@ -3331,6 +3339,13 @@ dialog {
  * tiap layar adalah persis yang dilarang RupaBersamaTest.
  */
 .mis-ringkas-auto { grid-template-columns: repeat(auto-fit, minmax(158px, 1fr)); }
+
+/*
+ * Sel yang hanya ada di mode kartu. DI LUAR media query mana pun: ditaruh di
+ * dalam media query layar lebar, ia tidak punya `display` sama sekali di
+ * ponsel dan aturan kartunya tidak punya apa pun untuk ditimpa.
+ */
+.mis-tabel .mis-kolom-kartu { display: none; }
 
 .mis-ubin {
     display: flex;
