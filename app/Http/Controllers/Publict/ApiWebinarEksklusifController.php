@@ -142,7 +142,9 @@ class ApiWebinarEksklusifController extends Controller
                 'foto' => $a->alamat_pemateri,
             ],
 
-            'deskripsi' => $a->desc,
+            // desc_promo, BUKAN desc: harga yang tertulis di dalam naskahnya
+            // ikut menyesuaikan promo, tanpa admin perlu menyuntingnya.
+            'deskripsi' => $a->desc_promo,
 
             'kegiatan' => $tarif?->daftar_kegiatan ?? [],
             'fasilitas' => $tarif?->daftar_fasilitas ?? [],

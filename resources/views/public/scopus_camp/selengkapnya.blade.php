@@ -340,7 +340,9 @@ Detail Scopus Camp | Rumah Scopus
                                 <i class="fas fa-info-circle text-danger"></i> Deskripsi Kegiatan
                             </h5>
                             <div class="article-container" style="white-space: pre-line;">
-                                {{ $item->desc }}
+                                {{-- desc_promo: harga di dalam naskahnya ikut
+                                     menyesuaikan promo yang sedang berjalan. --}}
+                                {{ $item->desc_promo }}
                             </div>
                         </div>
 
