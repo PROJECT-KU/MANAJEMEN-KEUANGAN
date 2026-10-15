@@ -85,7 +85,21 @@
                                     <td style="padding-left: 80px;">Biaya</td>
                                     <td></td>
                                     <td style="padding-right: 80px; text-align: right;">
-                                        Rp. {{ number_format($categoriesanalisisbibliometrik->biaya, 0, ',', '.') }}
+                                        {{-- Harga yang BENAR-BENAR ditagih, bukan `biaya`.
+
+                                             Dengan promo berjalan, baris ini memajang harga
+                                             penuh sementara "Total" di bawah sudah terpotong,
+                                             sehingga kuitansinya tidak pernah berjumlah benar —
+                                             dan promonya tidak terlihat sama sekali oleh orang
+                                             yang mendapatkannya. --}}
+                                        @php($asal = (int) $categoriesanalisisbibliometrik->biaya)
+                                        @php($bayar = (int) $categoriesanalisisbibliometrik->harga_setelah_promo)
+
+                                        @if ($asal > $bayar && $bayar > 0)
+                                            <s style="color: #94a3b8;">Rp. {{ number_format($asal, 0, ',', '.') }}</s>
+                                            &nbsp;
+                                        @endif
+                                        Rp. {{ number_format($bayar ?: $asal, 0, ',', '.') }}
                                     </td>
                                 </tr>
                                 <tr>
