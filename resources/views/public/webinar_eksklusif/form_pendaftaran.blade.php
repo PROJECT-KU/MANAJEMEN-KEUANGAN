@@ -29,7 +29,10 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
         @endif
 
         @php($sisa = $sesi->total_kuota === null ? null : (int) $sesi->sisa_kuota)
-        @php($harga = (int) $sesi->biaya)
+        {{-- harga_setelah_promo, BUKAN biaya. Yang dipajang di sini harus
+             sama dengan yang ditagih pengendalinya; dua rumus terpisah untuk
+             satu angka adalah cara cacat ini lahir pertama kali. --}}
+        @php($harga = (int) $sesi->harga_setelah_promo)
 
         <div class="ses-kisi">
 

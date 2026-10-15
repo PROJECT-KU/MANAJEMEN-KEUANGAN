@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Publict;
 
 use App\Http\Controllers\Controller;
+use App\Support\PromoAngkatan;
 use App\KategoriLayanan;
 use App\Services\Doku;
 use App\Services\Gambar;
@@ -323,7 +324,10 @@ class PublicWebinarEksklusifController extends Controller
         $kode = trim((string) $request->input('kode'));
         $jumlah = max(1, min(self::MAKS_ROMBONGAN, (int) $request->input('jumlah', 1)));
 
-        $total = (int) $sesi->biaya * $jumlah;
+        // harga_setelah_promo, BUKAN biaya: kode diskon menumpuk di ATAS
+        // harga promo, dan menghitungnya dari harga penuh membuat angka di
+        // layar lebih besar daripada yang benar-benar akan ditagih.
+        $total = (int) $sesi->harga_setelah_promo * $jumlah;
         $potongan = $this->hitungPotongan($sesi, $kode, $total);
 
         if ($potongan <= 0) {
@@ -348,8 +352,14 @@ class PublicWebinarEksklusifController extends Controller
     {
         KategoriLayanan::hitungPendaftar();
 
+        $sesi = $this->kueriAktif()->get();
+
+        // Promonya dimuat SEKALI untuk seluruh daftar; dibaca per kartu,
+        // sepuluh sesi berarti sepuluh kueri yang bentuknya sama persis.
+        PromoAngkatan::muat($sesi);
+
         return view('public.webinar_eksklusif.index', [
-            'sesi' => $this->kueriAktif()->get(),
+            'sesi' => $sesi,
         ]);
     }
 
@@ -644,7 +654,21 @@ class PublicWebinarEksklusifController extends Controller
                     throw new KuotaHabis($sisa);
                 }
 
-                $harga = (int) $terkunci->biaya;
+                /*
+                 * Harga satu kursi dibaca dari harga_setelah_promo.
+                 *
+                 * Sebelum ini `biaya` — harga penuh — sehingga Promo Layanan
+                 * yang dipasang admin tidak pernah sampai ke tagihannya.
+                 * Layar MIS dan halaman landing sudah menyebut harga promo,
+                 * borang ini tetap menagih harga penuh, dan tidak ada galat
+                 * apa pun yang memberi tahu: pendaftar membayar lebih mahal
+                 * daripada yang dijanjikan kepadanya.
+                 *
+                 * Dibaca di DALAM transaksi dari baris yang sudah dikunci,
+                 * sama seperti kuotanya.
+                 */
+                $promo = PromoAngkatan::untuk($terkunci);
+                $harga = (int) $terkunci->harga_setelah_promo;
                 $total = $harga * $data['jumlah_pendaftar'];
 
                 /*
@@ -682,6 +706,11 @@ class PublicWebinarEksklusifController extends Controller
                     'total_pembayaran' => (string) $total,
                     'user_id' => auth()->id(),
                     'kode_unik' => $kodeUnik > 0 ? (string) $kodeUnik : null,
+                    // Tali ke promonya disimpan supaya layar dampak promo
+                    // bisa menghitung berapa pendaftaran yang benar-benar
+                    // memakainya — tanpa ini, promo terlihat tidak pernah
+                    // dipakai siapa pun.
+                    'promo_id' => $promo?->getKey(),
                     'kode_diskon' => $potongan > 0 ? trim((string) $data['kode_diskon']) : null,
                     'nominal_diskon' => $potongan > 0 ? (string) $potongan : null,
                     'cara_bayar' => $this->doku->siap() ? 'doku' : 'transfer',
@@ -742,7 +771,7 @@ class PublicWebinarEksklusifController extends Controller
         $hasil = $this->doku->buatTagihan([
             'nomor' => $pendaftaran->id_transaksi,
             'jumlah' => (int) $pendaftaran->total_pembayaran,
-            'harga_satuan' => (int) $sesi->biaya,
+            'harga_satuan' => (int) $sesi->harga_setelah_promo,
             'jumlah_peserta' => $pendaftaran->jumlah_pendaftar,
             'judul' => $sesi->nama,
             'nama' => $pendaftaran->nama,
