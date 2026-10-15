@@ -68,10 +68,22 @@ class PerakitDeskripsi
         // saat itu, bukan harga yang berlaku sekarang.
         $harga = $angkatan->biaya ?: $tarif?->biaya_persesi;
 
-        $promo = (int) $angkatan->total_biaya > 0
-            && (int) $angkatan->total_biaya !== (int) $harga
-                ? $angkatan->total_biaya
-                : null;
+        /*
+         * Harga sesudah promo dibaca dari harga_setelah_promo, bukan dari
+         * total_biaya saja.
+         *
+         * Potongan bisa datang dari DUA sumber sejak promo jadi fiturnya
+         * sendiri: diskon angkatannya (total_biaya) dan Promo Layanan yang
+         * menaunginya. Dibaca dari total_biaya saja, naskah yang baru dirakit
+         * menyebut harga yang lebih mahal daripada yang akan ditagih
+         * borangnya.
+         *
+         * Angkatan yang BELUM tersimpan — pratinjau di borangnya — tidak
+         * punya kunci, dan PromoAngkatan::untuk() memulangkan null untuk itu;
+         * jadi pratinjaunya jatuh ke perilaku lama, bukan galat.
+         */
+        $setelah = (int) $angkatan->harga_setelah_promo;
+        $promo = $setelah > 0 && $setelah !== (int) $harga ? $setelah : null;
 
         return [
             '{nama}' => (string) $angkatan->nama,

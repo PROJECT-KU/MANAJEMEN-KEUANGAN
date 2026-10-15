@@ -139,6 +139,38 @@ class ApiHargaPromoTest extends TestCase
     }
 
     /** @test */
+    public function naskah_deskripsinya_ikut_menyebut_harga_promo(): void
+    {
+        /*
+         * Halaman landing memajang naskah deskripsi apa adanya di bawah
+         * kotak harganya. Kalau naskah itu masih menyebut harga penuh, satu
+         * halaman menyebut dua harga berbeda untuk satu sesi — dan yang
+         * membacanya tidak punya cara tahu mana yang berlaku.
+         */
+        /*
+         * Tanggalnya sengaja PALING DEKAT: hanya sesi pertama yang dikirim
+         * lengkap beserta naskahnya; sesi lain cuma diringkas. Tanpa ini
+         * ujinya ikut bergantung sesi apa yang kebetulan ada di basis data.
+         */
+        $sesi = $this->sesi([
+            'mulai' => now()->addDay()->toDateString(),
+            'desc' => "Yang didapat peserta\n\n\u{1F4B5} Rp 150.000 per peserta",
+        ]);
+        $this->promo($sesi);
+
+        $isi = $this->getJson('/api/webinar-eksklusif')->json();
+
+        $this->assertSame($sesi->getKey(), $isi['sesi']['id'] ?? null,
+            'Sesi ujinya bukan yang terbit lengkap; naskahnya tidak ikut diperiksa.');
+
+        $this->assertStringContainsString('Rp 129.000', $isi['sesi']['deskripsi'] ?? '',
+            'Naskah yang dikirim ke halaman landing masih menyebut harga penuh.');
+
+        $this->assertStringContainsString('harga normal Rp 150.000', $isi['sesi']['deskripsi'] ?? '',
+            'Harga normalnya hilang; yang membaca tidak tahu ia sedang dapat potongan.');
+    }
+
+    /** @test */
     public function tanpa_promo_apa_pun_tidak_ada_harga_coret(): void
     {
         $sesi = $this->sesi();
