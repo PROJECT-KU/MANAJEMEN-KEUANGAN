@@ -6,6 +6,7 @@ use App\ClinikScopusBiayaPersesi;
 use App\Galeri;
 use App\Http\Controllers\Controller;
 use App\KategoriLayanan;
+use App\Support\PromoAngkatan;
 use App\Support\RentangTanggal;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -78,6 +79,10 @@ class ApiWebinarEksklusifController extends Controller
 
         $lain = $this->kueriAktif()->whereKeyNot($sesi->getKey())->limit(4)->get();
 
+        // Promonya dimuat SEKALI untuk semua sesi; dibaca per baris, lima
+        // sesi berarti lima kueri yang bentuknya sama persis.
+        PromoAngkatan::muat($lain->concat([$sesi]));
+
         return $this->jawab([
             'ada' => true,
             'pesan' => null,
@@ -90,6 +95,8 @@ class ApiWebinarEksklusifController extends Controller
     public function daftar(): JsonResponse
     {
         $sesi = $this->kueriAktif()->get();
+
+        PromoAngkatan::muat($sesi);
 
         return $this->jawab([
             'jumlah' => $sesi->count(),
@@ -181,10 +188,28 @@ class ApiWebinarEksklusifController extends Controller
         $mulai = $a->mulai ? Carbon::parse($a->mulai) : null;
         $selesai = $a->selesai ? Carbon::parse($a->selesai) : null;
 
+        /*
+         * Harga yang DITAGIH dibaca dari harga_setelah_promo, bukan dari
+         * total_biaya.
+         *
+         * Sebelum ini di sini cuma ada `total_biaya`, yaitu diskon per
+         * angkatan gaya lama. Promo Layanan — yang dipasang admin lewat
+         * layarnya sendiri dan berlaku otomatis — tersimpan di tabel
+         * terpisah dan tidak pernah menyentuh kolom itu. Akibatnya admin
+         * memasang promo, layar MIS dan borang pendaftarannya ikut turun,
+         * tetapi halaman landing di subdomain tetap memajang harga penuh:
+         * iklan berbayarnya mengarah ke halaman yang menyebut angka yang
+         * salah, dan tidak ada galat apa pun yang memberi tahu.
+         *
+         * harga_setelah_promo memakai rumus yang SAMA dengan yang menagih
+         * di borangnya (lihat HargaUmum), jadi angka yang dipajang di sini
+         * tidak bisa lagi berbeda dari yang ditagih nanti.
+         *
+         * `harga` tetap `biaya` — itu angka yang dicoret di halaman landing.
+         */
         $harga = (int) $a->biaya;
-        $promo = (int) $a->total_biaya > 0 && (int) $a->total_biaya !== $harga
-            ? (int) $a->total_biaya
-            : null;
+        $bayar = (int) $a->harga_setelah_promo;
+        $promo = $bayar > 0 && $bayar !== $harga ? $bayar : null;
 
         return [
             'id' => $a->getKey(),
