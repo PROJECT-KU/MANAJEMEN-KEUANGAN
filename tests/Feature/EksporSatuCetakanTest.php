@@ -423,4 +423,76 @@ class EksporSatuCetakanTest extends TestCase
             'Pelanggan Dua belum pernah memesan; sel "Pesanan" dan "Pesanan '
             . 'terakhir"-nya harus bertanda pisah, bukan dikosongkan.');
     }
+
+    /**
+     * @test
+     *
+     * Sama untuk Angkatan Layanan — kolom yang sama, urutan yang sama.
+     *
+     * Berbeda dari Data Pelanggan, berkas cetak angkatan memang sengaja
+     * meninggalkan beberapa kolom lembar kerjanya; yang dijaga di sini kolom
+     * yang DIPILIH ikut benar-benar sampai ke kertas, dan urutannya tidak
+     * bertukar terhadap lembar kerjanya.
+     */
+    public function kode_promo_angkatan_ikut_tercetak_di_berkas_pdfnya(): void
+    {
+        KategoriLayanan::lupakanPendaftar();
+
+        $angkatan = KategoriLayanan::create([
+            'layanan' => 'scopus_camp',
+            'nama' => 'Angkatan Cetakan ' . \Illuminate\Support\Str::random(6),
+            'nama_ke' => '9',
+            'mulai' => now()->addMonth()->toDateString(),
+            'total_kuota' => '20',
+            'sisa_kuota' => '20',
+            'status' => 'active',
+            'biaya' => '5500000',
+            'kode_diskon' => 'UJICETAK7',
+        ]);
+
+        KategoriLayanan::hitungPendaftar();
+
+        $cetak = view('account.kategori_layanan.cetak-pdf', [
+            'angkatan' => collect([$angkatan]),
+            // Untaian, bukan larik: ringkasanSaringan() memulangkan kalimat
+            // siap cetak, dan tampilannya mencetaknya apa adanya.
+            'saringan' => 'Seluruh angkatan, tanpa saringan.',
+        ])->render();
+
+        // Gaya dibuang dulu: komentar CSS ikut terkirim ke Dompdf dan bisa
+        // memuat kata yang sama dengan kepala kolomnya.
+        $tercetak = (string) preg_replace('/<style\b.*?<\/style>/s', '', $cetak);
+
+        $this->assertStringContainsString('Kode promo', $tercetak,
+            'Kepala kolom "Kode promo" tidak ada di berkas cetaknya, padahal '
+            . 'lembar kerjanya punya.');
+
+        $this->assertStringContainsString('UJICETAK7', $tercetak,
+            'Kode promonya tidak sampai ke kertas; kolomnya ada tetapi isinya '
+            . 'tidak pernah diambil.');
+
+        /*
+         * Urutannya mengikuti lembar kerja: Biaya, Kode promo, Status.
+         * Kolom yang sama berpindah tempat antara dua berkas yang diunduh
+         * dari dua tombol bersebelahan adalah cacat tersendiri — tidak ada
+         * yang salah isinya, cuma tidak bisa dibandingkan berdampingan.
+         */
+        preg_match('/<thead>(.*?)<\/thead>/s', $tercetak, $kepala);
+
+        preg_match_all('/<th\b[^>]*>(.*?)<\/th>/s', $kepala[1], $judul);
+
+        $urutan = array_map(fn ($t) => trim(strip_tags($t)), $judul[1]);
+
+        $this->assertSame(['Biaya', 'Kode promo', 'Status'],
+            array_values(array_slice($urutan, -3)),
+            'Urutan tiga kolom terakhirnya tidak sama dengan lembar kerjanya.');
+
+        $lembar = (new AngkatanLayananExport(collect([$angkatan]), ''))->headings();
+
+        $this->assertGreaterThan(
+            array_search('Biaya', $lembar, true),
+            array_search('Kode promo', $lembar, true),
+            'Di lembar kerjanya "Kode promo" tidak lagi sesudah "Biaya"; '
+            . 'urutan di berkas cetak harus ikut diperbaiki.');
+    }
 }

@@ -336,12 +336,17 @@
                          Dompdf tidak menyalahkan apa pun, ia hanya membagi
                          sisa 16% itu sekehendaknya, dan lebar yang dipatok
                          di sini tidak lagi berarti apa-apa. --}}
-                    <th width="32%">Angkatan</th>
-                    <th width="17%">Layanan</th>
-                    <th width="17%">Tanggal</th>
-                    <th width="12%">Kuota</th>
+                    <th width="28%">Angkatan</th>
+                    <th width="15%">Layanan</th>
+                    <th width="15%">Tanggal</th>
+                    <th width="11%">Kuota</th>
                     <th width="12%">Biaya</th>
-                    <th width="10%">Status</th>
+                    {{-- Urutannya mengikuti lembar kerjanya: Biaya, Kode
+                         promo, Status. Kolom yang sama tidak boleh berpindah
+                         tempat antara dua berkas yang diunduh dari dua tombol
+                         bersebelahan. --}}
+                    <th width="10%">Kode promo</th>
+                    <th width="9%">Status</th>
                 </tr>
             </thead>
             <tbody>
@@ -399,6 +404,18 @@
                                 <span class="samar">—</span>
                             @endif
                         </td>
+
+                        {{-- Kode diskon angkatan ini — "Kode promo" di lembar
+                             kerjanya, dan namanya disamakan di sini.
+
+                             BUKAN promo layanan: promo layanan berlaku
+                             otomatis per angkatan dan memang tidak punya kode
+                             yang diketik pendaftar. Potongannya sudah terbaca
+                             di kolom Biaya sebagai baris "promo Rp …".
+
+                             Terukur: 24 dari 262 angkatan punya kode, jadi
+                             kolom ini memang banyak bertanda pisah. --}}
+                        <td class="samar">{{ $a->kode_diskon ?: '—' }}</td>
 
                         <td>
                             @php($rupa = ['active' => 'Aktif', 'non active' => 'Nonaktif', 'draft' => 'Draf'])
