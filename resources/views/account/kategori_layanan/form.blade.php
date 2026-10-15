@@ -116,6 +116,43 @@
     .brg-area:focus { outline: none; border-color: #a5b4fc; box-shadow: 0 0 0 3px rgba(99, 102, 241, .5); }
 
     /*
+     * Kabar promo di atas kotak sunting.
+     *
+     * Hijau, bukan kuning: ini bukan peringatan dan tidak ada yang perlu
+     * dibetulkan admin — justru kabar bahwa sesuatu sudah berjalan benar
+     * tanpa ia mengerjakan apa pun. Kuning akan membuatnya mencari masalah
+     * yang tidak ada.
+     */
+    .brg-promo-kabar {
+        margin: 0 0 12px;
+        padding: 11px 13px;
+        border: 1px solid #a7f3d0;
+        border-left: 3px solid #10b981;
+        border-radius: 11px;
+        background: #f0fdf4;
+    }
+
+    .brg-promo-judul {
+        margin: 0 0 6px;
+        font-size: .78rem; font-weight: 800; color: #047857;
+        display: flex; align-items: center; gap: 7px;
+    }
+
+    .brg-promo-teks { margin: 0; font-size: .72rem; line-height: 1.5; color: #15803d; }
+
+    /* Kalimat yang benar-benar dibaca pelanggan: ditulis seperti kutipan
+       supaya terbaca sebagai contoh, bukan sebagai isian yang bisa disunting. */
+    .brg-promo-baris {
+        margin: 5px 0;
+        padding: 7px 10px;
+        border-radius: 8px;
+        background: #fff;
+        border: 1px dashed #a7f3d0;
+        font-size: .74rem; font-weight: 700; color: #065f46;
+        word-break: break-word;
+    }
+
+    /*
      * Dua kartu berdampingan, TIDAK lagi 50/50.
      *
      * Kartu kiri memuat dua belas isian, kartu kanan satu kotak teks. Dibagi
@@ -740,6 +777,49 @@
                             harga, dan fasilitas angkatan ini.
                         </p>
                     </div>
+
+                    {{-- Pemberitahuan promo.
+
+                         Kotak sunting di bawah SENGAJA tetap berisi naskah
+                         asli. Kalau ia ikut memajang harga promo, sekali tekan
+                         Simpan angka promonya tertulis permanen ke naskah dan
+                         tidak akan kembali saat promonya berakhir — cacat yang
+                         lebih sulit disadari daripada yang sedang diperbaiki.
+
+                         Jadi admin diberi tahu, bukan kotaknya yang diubah. --}}
+                    @php($promoJalan = $angkatan->exists ? $angkatan->promo_berjalan : null)
+                    @php($barisPromo = $promoJalan
+                        ? \App\Support\HargaDiDeskripsi::barisBerubah($angkatan, $angkatan->desc)
+                        : [])
+
+                    @if ($promoJalan)
+                        <div class="brg-promo-kabar">
+                            <p class="brg-promo-judul">
+                                <i class="fas fa-tag"></i>
+                                {{ $promoJalan->nama }} sedang berjalan
+                            </p>
+
+                            @if ($barisPromo)
+                                <p class="brg-promo-teks">
+                                    Di halaman umum, barisnya terbaca:
+                                </p>
+                                @foreach ($barisPromo as $baris)
+                                    <p class="brg-promo-baris">{{ $baris }}</p>
+                                @endforeach
+                                <p class="brg-promo-teks">
+                                    Naskah di bawah tidak perlu diubah — angkanya menyesuaikan
+                                    sendiri, dan kembali seperti semula saat promonya berakhir.
+                                </p>
+                            @else
+                                <p class="brg-promo-teks">
+                                    Naskah di bawah tidak menyebut harga normal angkatan ini
+                                    (Rp {{ number_format((int) $angkatan->harga_sebelum_promo, 0, ',', '.') }}),
+                                    jadi tidak ada kalimat yang perlu disesuaikan. Harga promonya
+                                    tetap tampil di kotak pendaftaran halaman umum.
+                                </p>
+                            @endif
+                        </div>
+                    @endif
 
                     <textarea class="brg-area" name="desc" id="brg-desc" rows="16"
                         placeholder="Tekan “Rakit dari cetakan”, lalu sunting seperlunya.">{{ old('desc', $angkatan->desc) }}</textarea>
