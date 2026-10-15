@@ -73,4 +73,39 @@ class HargaDiDeskripsi
 
         return (string) preg_replace($pola, $ganti, $naskah);
     }
+
+    /**
+     * Baris mana saja yang BERUBAH karena promonya.
+     *
+     * Dipakai layar "Ubah angkatan" untuk memberi tahu admin kalimat apa yang
+     * sebenarnya dibaca pelanggan, tanpa menyentuh kotak suntingnya. Kotak itu
+     * sengaja tetap berisi naskah asli: kalau ia ikut memajang harga promo,
+     * sekali tekan Simpan angka promonya tertulis permanen ke naskah dan tidak
+     * akan kembali saat promonya berakhir.
+     *
+     * @return list<string> kosong kalau tidak ada promo, atau kalau naskahnya
+     *                      memang tidak menyebut harga normalnya
+     */
+    public static function barisBerubah(KategoriLayanan $angkatan, ?string $naskah): array
+    {
+        $naskah = (string) $naskah;
+        $sesudah = self::sesuaikan($angkatan, $naskah);
+
+        if ($sesudah === $naskah) {
+            return [];
+        }
+
+        $asal = preg_split('/\r\n|\r|\n/', $naskah) ?: [];
+        $jadi = preg_split('/\r\n|\r|\n/', $sesudah) ?: [];
+
+        $berubah = [];
+
+        foreach ($jadi as $i => $baris) {
+            if (($asal[$i] ?? null) !== $baris && trim($baris) !== '') {
+                $berubah[] = trim($baris);
+            }
+        }
+
+        return $berubah;
+    }
 }
