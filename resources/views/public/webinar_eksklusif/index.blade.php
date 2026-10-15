@@ -74,10 +74,26 @@ Webinar Eksklusif | Rumah Scopus
                             @endif
 
                             <div class="sel-kaki">
+                                {{-- Harga yang BENAR-BENAR ditagih, dan harga
+                                     penuhnya dicoret kalau ada promo.
+
+                                     Sebelum ini kartu ini memajang `biaya`
+                                     mentah, jadi sesi yang sedang promo
+                                     terbaca harga penuh di sini lalu turun
+                                     sendiri di borangnya — selisih yang tidak
+                                     dijelaskan apa pun. --}}
+                                @php($hargaAsal = (int) $s->biaya)
+                                @php($hargaBayar = (int) $s->harga_setelah_promo)
+
                                 <span class="sel-harga">
-                                    {{ (int) $s->biaya > 0
-                                        ? 'Rp ' . number_format((int) $s->biaya, 0, ',', '.')
-                                        : 'Gratis' }}
+                                    @if ($hargaBayar > 0)
+                                        @if ($hargaAsal > $hargaBayar)
+                                            <s class="sel-harga-coret">Rp {{ number_format($hargaAsal, 0, ',', '.') }}</s>
+                                        @endif
+                                        Rp {{ number_format($hargaBayar, 0, ',', '.') }}
+                                    @else
+                                        Gratis
+                                    @endif
                                     <small>per peserta</small>
                                 </span>
 
@@ -236,6 +252,10 @@ Webinar Eksklusif | Rumah Scopus
 
     .sel-harga { font-size: 1.15rem; font-weight: 800; color: var(--navy); }
     .sel-harga small { display: block; font-size: .72rem; font-weight: 500; color: var(--tinta-2); }
+
+    /* Harga penuh yang dicoret: sengaja lebih kecil dan pudar supaya angka
+       yang dibaca duluan adalah yang benar-benar ditagih, bukan yang dicoret. */
+    .sel-harga-coret { font-size: .82rem; font-weight: 600; color: var(--tinta-2); margin-right: .25rem; }
 
     .sel-tombol {
         display: inline-flex;
