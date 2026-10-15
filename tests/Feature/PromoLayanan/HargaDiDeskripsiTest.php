@@ -6,7 +6,9 @@ use App\KategoriLayanan;
 use App\PromoLayanan;
 use App\Support\HargaDiDeskripsi;
 use App\Support\PromoAngkatan;
+use App\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -157,6 +159,69 @@ class HargaDiDeskripsiTest extends TestCase
         $this->promo($sesi);
 
         $this->assertStringContainsString('Rp 129.000', $sesi->fresh()->desc_promo);
+    }
+
+    private function admin(): User
+    {
+        $t = Str::random(8);
+
+        $orang = User::create([
+            'full_name' => 'Uji Naskah ' . $t, 'username' => 'nsk_' . $t,
+            'email' => $t . '@contoh.test', 'password' => Hash::make('RahasiaUji2026'),
+            'level' => 'user',
+        ]);
+
+        $orang->forceFill([
+            'status' => 'active', 'email_verified_at' => now(),
+            'peran' => User::PERAN_ADMINISTRATOR,
+        ])->save();
+
+        return $orang;
+    }
+
+    #[Test]
+    public function layar_ubah_memberi_tahu_promonya_tanpa_mengubah_kotaknya(): void
+    {
+        /*
+         * Kotak suntingnya HARUS tetap berisi naskah asli.
+         *
+         * Kalau ia ikut memajang harga promo, sekali tekan Simpan angka
+         * promonya tertulis permanen ke naskah — dan tidak akan kembali saat
+         * promonya berakhir. Cacat itu jauh lebih sulit disadari daripada
+         * yang sedang diperbaiki, sebab tidak ada yang kelihatan salah.
+         *
+         * Jadi adminnya diberi tahu, bukan kotaknya yang diubah.
+         */
+        $sesi = $this->sesi();
+        $promo = $this->promo($sesi);
+
+        $jawab = $this->actingAs($this->admin())
+            ->get(route('account.kategori-layanan.edit', $sesi->getKey()))
+            ->assertOk();
+
+        $jawab->assertSee($promo->nama . ' sedang berjalan', false);
+        $jawab->assertSee('Rp 129.000 (harga normal Rp 150.000) per peserta', false);
+
+        // Isi <textarea>-nya diperiksa tersendiri: yang di dalamnya harus
+        // masih naskah asli, bukan yang sudah disesuaikan.
+        preg_match('/<textarea[^>]*name="desc".*?>(.*?)<\/textarea>/s', $jawab->getContent(), $kotak);
+
+        $this->assertNotEmpty($kotak, 'Kotak deskripsinya tidak ketemu di halaman.');
+        $this->assertStringContainsString('Rp 150.000', $kotak[1]);
+        $this->assertStringNotContainsString('129.000', $kotak[1],
+            'Kotak suntingnya memajang harga promo; sekali Simpan, angka itu '
+            . 'tertulis permanen dan tidak kembali saat promonya berakhir.');
+    }
+
+    #[Test]
+    public function tanpa_promo_layar_ubah_tidak_memberi_kabar_apa_pun(): void
+    {
+        $sesi = $this->sesi();
+
+        $this->actingAs($this->admin())
+            ->get(route('account.kategori-layanan.edit', $sesi->getKey()))
+            ->assertOk()
+            ->assertDontSee('sedang berjalan', false);
     }
 
     #[Test]
