@@ -237,6 +237,22 @@ class KategoriLayanan extends Model
     }
 
     /**
+     * Naskah deskripsi dengan harga promonya sudah terpasang.
+     *
+     * Dipakai di SEMUA tempat yang memajang deskripsi ke orang luar, supaya
+     * promo tidak perlu diketik ulang admin ke dalam naskahnya — satu halaman
+     * yang menyebut dua harga berbeda untuk satu sesi lebih buruk daripada
+     * tidak menyebut harga sama sekali.
+     *
+     * Kolom `desc` aslinya TIDAK diubah: yang tersimpan tetap apa yang
+     * diketik admin, dan promo yang berakhir mengembalikan tulisannya sendiri.
+     */
+    public function getDescPromoAttribute(): string
+    {
+        return \App\Support\HargaDiDeskripsi::sesuaikan($this, $this->desc);
+    }
+
+    /**
      * Tabel pendaftaran per layanan: kunci layanan -> nama tabelnya.
      *
      * Didaftar di satu tempat karena dibaca dari empat tempat — penghitung
