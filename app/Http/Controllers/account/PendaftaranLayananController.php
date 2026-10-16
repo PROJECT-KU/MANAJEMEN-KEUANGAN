@@ -3142,7 +3142,7 @@ class PendaftaranLayananController extends Controller
 
         $dompdf = new Dompdf(['isRemoteEnabled' => false]);
         $dompdf->loadHtml($html);
-        // Mendatar: sembilan kolom tidak muat di lebar potret, dan memaksanya
+        // Mendatar: sepuluh kolom tidak muat di lebar potret, dan memaksanya
         // membuat nama serta email terpotong di tengah kata.
         $dompdf->setPaper('a4', 'landscape');
         $dompdf->render();
