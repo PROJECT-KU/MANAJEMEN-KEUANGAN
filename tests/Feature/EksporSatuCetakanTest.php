@@ -427,6 +427,106 @@ class EksporSatuCetakanTest extends TestCase
     /**
      * @test
      *
+     * Kode diskon ikut tercetak di berkas Pendaftar Layanan.
+     *
+     * Satu kolom untuk DUA hal yang di mata pembacanya sama saja: kode yang
+     * diketik pendaftar, dan potongan yang berlaku sendiri (alumni,
+     * rombongan, Promo Layanan). Lembar kerjanya sudah punya kolom itu sejak
+     * lama; berkas cetaknya belum, sehingga rekap yang dicetak tidak pernah
+     * bisa menjawab kenapa satu baris membayar lebih murah daripada yang lain
+     * di angkatan yang sama.
+     */
+    public function kode_diskon_ikut_tercetak_di_berkas_pendaftar(): void
+    {
+        $baris = collect([
+            $this->barisPendaftar(['kode_diskon' => 'SalamQ1', 'nominal_diskon' => '225000']),
+            $this->barisPendaftar(['kode_diskon' => 'ALUMNI', 'nominal_diskon' => '550000']),
+            $this->barisPendaftar(['kode_diskon' => 'PROMO: Promo Spesial', 'nominal_diskon' => '21000']),
+            $this->barisPendaftar(['kode_diskon' => null, 'nominal_diskon' => null]),
+        ]);
+
+        $cetak = view('account.pendaftaran_layanan.ekspor-pdf', [
+            'baris' => $baris,
+            // Larik "nama => nilai", bukan untaian: berkas ini merangkai
+            // saringannya sendiri, berbeda dari ekspor Angkatan Layanan yang
+            // menerima kalimat siap cetak.
+            'saringan' => [],
+            'katalog' => \App\Support\PendaftaranSemuaLayanan::katalog(),
+        ])->render();
+
+        $tercetak = (string) preg_replace('/<style\b.*?<\/style>/s', '', $cetak);
+
+        $this->assertStringContainsString('Kode diskon', $tercetak,
+            'Kepala kolom "Kode diskon" tidak ada di berkas cetaknya, padahal '
+            . 'lembar kerjanya punya.');
+
+        /*
+         * Kode yang DIKETIK orang dicetak apa adanya: besar-kecil hurufnya
+         * berarti, dan panitia mencocokkannya dengan kode yang disebar.
+         */
+        $this->assertStringContainsString('SalamQ1', $tercetak);
+
+        /*
+         * Potongan yang berlaku SENDIRI ditulis dengan huruf biasa — kalau
+         * dicetak "ALUMNI", ia terbaca seperti kode yang bisa diketik orang,
+         * dan panitia akan dicari-cari kode yang tidak pernah ada.
+         */
+        $this->assertStringContainsString('Alumni', $tercetak);
+        $this->assertStringNotContainsString('ALUMNI', $tercetak);
+        $this->assertStringContainsString('Promo: Promo Spesial', $tercetak);
+
+        // Nominalnya ikut: "Alumni" tanpa angka tidak menjawab berapa yang
+        // dipotong, dan berkas inilah yang dipakai merekap.
+        $this->assertStringContainsString('550.000', $tercetak);
+
+        // Urutannya mengikuti lembar kerjanya.
+        preg_match('/<thead>(.*?)<\/thead>/s', $tercetak, $kepala);
+        preg_match_all('/<th\b[^>]*>(.*?)<\/th>/s', $kepala[1], $judul);
+
+        $urutan = array_values(array_filter(
+            array_map(fn ($t) => trim(strip_tags($t)), $judul[1]),
+            fn ($t) => $t !== ''
+        ));
+
+        $this->assertSame(['Total bayar', 'Kode diskon', 'Keadaan'],
+            array_slice($urutan, -3),
+            'Urutan tiga kolom terakhirnya tidak sama dengan lembar kerjanya.');
+
+        $lembar = (new PendaftaranLayananExport(collect(), []))->headings();
+
+        $this->assertGreaterThan(
+            array_search('Total bayar', $lembar, true),
+            array_search('Kode diskon', $lembar, true),
+            'Di lembar kerjanya "Kode diskon" tidak lagi sesudah "Total bayar"; '
+            . 'urutan di berkas cetak harus ikut diperbaiki.');
+    }
+
+    /** Satu baris pendaftar secukupnya untuk dirender berkas cetaknya. */
+    private function barisPendaftar(array $ubah = []): object
+    {
+        return (object) array_merge([
+            'layanan' => 'scopus_camp',
+            'nomor' => 'UJI' . \Illuminate\Support\Str::random(4),
+            'nama_orang' => 'Pendaftar Uji',
+            'affiliasi' => 'Universitas Uji',
+            'telp' => '081100000001',
+            'email' => 'uji@contoh.test',
+            'jumlah' => 1,
+            'total' => '5500000',
+            'kode_unik' => '86',
+            'kode_diskon' => null,
+            'nominal_diskon' => null,
+            'status' => 'paid',
+            'bukti' => null,
+            'waktu' => now()->toDateTimeString(),
+            'kategori_id' => null,
+            'sesi' => 'Angkatan Uji',
+        ], $ubah);
+    }
+
+    /**
+     * @test
+     *
      * Sama untuk Angkatan Layanan — kolom yang sama, urutan yang sama.
      *
      * Berbeda dari Data Pelanggan, berkas cetak angkatan memang sengaja

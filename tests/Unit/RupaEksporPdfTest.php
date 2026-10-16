@@ -139,10 +139,24 @@ class RupaEksporPdfTest extends TestCase
     {
         $isi = $this->templat()['account/pendaftaran_layanan/ekspor-pdf.blade.php'];
 
-        $this->assertStringContainsString('<th width="11%" class="kanan">Total bayar</th>', $isi,
+        /*
+         * Lebar persennya SENGAJA tidak ikut dipatok di sini.
+         *
+         * Dulu memang dipatok — '<th width="11%" class="kanan">Total bayar</th>'
+         * ditulis utuh — dan penjaga ini langsung merah begitu kolom baru
+         * ditambahkan dan lebar kolom lain diperas supaya jumlahnya tetap 100.
+         * Merah karena hal yang sama sekali bukan urusannya: perataannya tidak
+         * pernah berubah.
+         *
+         * Yang dijaga di sini perataannya. Jumlah persennya dijaga
+         * KolomCetakUtuhTest, yang memang untuk itu.
+         */
+        $this->assertSame(1,
+            preg_match('/<th\b[^>]*class="kanan"[^>]*>Total bayar<\/th>/', $isi),
             'Kepala kolom nominal tidak rata kanan seperti angkanya.');
 
-        $this->assertStringContainsString('<th width="5%" class="tengah">Orang</th>', $isi,
+        $this->assertSame(1,
+            preg_match('/<th\b[^>]*class="tengah"[^>]*>Orang<\/th>/', $isi),
             'Kepala kolom jumlah orang tidak terpusat seperti angkanya.');
 
         // "Org" terlalu ringkas untuk kepala kolom cetak: berkas ini dibaca

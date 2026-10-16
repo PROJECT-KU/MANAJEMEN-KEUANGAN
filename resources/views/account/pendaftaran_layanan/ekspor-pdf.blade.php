@@ -384,15 +384,24 @@
                          jumlah orang di tengah, nominal di kanan. Semuanya
                          rata kiri, kepala "Total bayar" berdiri jauh dari
                          angka yang diwakilinya. --}}
+                    {{-- "Kode diskon" duduk sesudah "Total bayar", persis
+                         urutan lembar kerjanya: kolom yang sama tidak boleh
+                         berpindah tempat antara dua berkas yang diunduh dari
+                         dua tombol bersebelahan.
+
+                         Persennya WAJIB berjumlah 100; kurang sedikit saja,
+                         Dompdf membagikan sisanya sekehendaknya dan lebar
+                         yang disetel di sini berhenti berarti. --}}
                     <th width="3%" class="tengah">No.</th>
-                    <th width="12%">Layanan</th>
-                    <th width="10%">Nomor</th>
-                    <th width="17%">Pendaftar</th>
-                    <th width="13%">Kontak</th>
-                    <th width="15%">Sesi</th>
-                    <th width="5%" class="tengah">Orang</th>
-                    <th width="11%" class="kanan">Total bayar</th>
-                    <th width="14%">Keadaan</th>
+                    <th width="11%">Layanan</th>
+                    <th width="9%">Nomor</th>
+                    <th width="15%">Pendaftar</th>
+                    <th width="12%">Kontak</th>
+                    <th width="13%">Sesi</th>
+                    <th width="4%" class="tengah">Orang</th>
+                    <th width="10%" class="kanan">Total bayar</th>
+                    <th width="10%">Kode diskon</th>
+                    <th width="13%">Keadaan</th>
                 </tr>
             </thead>
             <tbody>
@@ -438,6 +447,44 @@
                                 <br><span class="samar">kode {{ number_format($kodeUnik, 0, ',', '.') }}</span>
                             @endif
                         </td>
+                        {{-- Kode diskon yang dipakai pendaftaran ini.
+
+                             Satu kolom untuk DUA hal yang terlihat sama di
+                             mata pembacanya: kode yang diketik pendaftar
+                             (SalamQ1, MEI DAY) dan potongan yang berlaku
+                             sendiri — ALUMNI, ROMBONGAN, dan Promo Layanan.
+                             Yang terakhir ditulis dengan huruf biasa supaya
+                             tidak terbaca seperti kode yang bisa diketik
+                             orang; kode sungguhan dibiarkan apa adanya sebab
+                             besar-kecil hurufnya berarti.
+
+                             Nominalnya ikut, karena daftar inilah yang
+                             dipakai merekap dan "ALUMNI" tanpa angka tidak
+                             menjawab berapa yang dipotong. --}}
+                        <td class="samar">
+                            @php
+                                $kodeBaris = trim((string) ($b->kode_diskon ?? ''));
+                                $potonganBaris = (int) ($b->nominal_diskon ?? 0);
+                                $tulisKode = match (true) {
+                                    $kodeBaris === '' => null,
+                                    $kodeBaris === 'ALUMNI' => 'Alumni',
+                                    $kodeBaris === 'ROMBONGAN' => 'Rombongan',
+                                    $kodeBaris === 'PROMO' => 'Promo',
+                                    str_starts_with($kodeBaris, 'PROMO: ') => 'Promo: ' . mb_substr($kodeBaris, 7),
+                                    default => $kodeBaris,
+                                };
+                            @endphp
+
+                            @if ($tulisKode === null)
+                                —
+                            @else
+                                <span class="tebal">{{ $tulisKode }}</span>
+                                @if ($potonganBaris > 0)
+                                    <br>&minus;&nbsp;Rp {{ number_format($potonganBaris, 0, ',', '.') }}
+                                @endif
+                            @endif
+                        </td>
+
                         <td>
                             <span class="lencana {{ $kelasLencana[$rupa['warna']] ?? 'l-abu' }}">{{ $rupa['label'] }}</span>
                             @if (! $buktiBaris['nilai'])
