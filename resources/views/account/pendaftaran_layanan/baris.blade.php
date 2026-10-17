@@ -251,7 +251,16 @@
                  berbagi satu baris sempit di mode kartu. --}}
             <span class="pdl-uang-ket">
                 <i class="fas {{ $caraBayar['ikon'] }}" aria-hidden="true"></i>
-                {{ $caraBayar['ringkas'] }}
+
+                {{-- Kanal yang BENAR-BENAR dipakai kalau lewat gerbang
+                     pembayaran — "VA Bank Mandiri", "QRIS", "OVO".
+
+                     "DOKU" saja tidak menjawab pertanyaan pertama panitia
+                     saat satu pembayaran perlu ditelusuri, yaitu lewat apa
+                     uangnya masuk. Pendaftaran lama belum punya nilainya,
+                     dan transfer manual memang tidak pernah punya — jadi
+                     keduanya jatuh ke label lamanya. --}}
+                {{ $b->kanal_bayar ?: $caraBayar['ringkas'] }}
             </span>
         </span>
     </td>
