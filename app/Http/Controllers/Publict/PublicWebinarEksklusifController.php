@@ -906,6 +906,37 @@ class PublicWebinarEksklusifController extends Controller
             return $pendaftaran;
         }
 
+        /*
+         * Pembayaran yang LEBIH TUA daripada pendaftarannya TIDAK diterima.
+         *
+         * Nomor tagihan bisa terpakai ulang — 17 Okt 2026 satu pendaftaran
+         * dihapus pukul 21:49:10 dan nomornya dipakai lagi 47 detik
+         * kemudian. Gerbang menjawab SUCCESS untuk nomor itu, sebab memang
+         * pernah dibayar; yang membayar pendahulunya. Tanpa penjagaan ini,
+         * pendaftaran baru tertandai lunas tanpa ada uang masuk, dan
+         * pendaftarnya menerima surat "SUDAH DIBAYAR".
+         *
+         * Pembuatan nomornya sendiri sudah dibetulkan supaya tidak pernah
+         * mengulang. Ini lapis kedua: yang menjaga uang tidak boleh
+         * bergantung pada satu lapis saja.
+         *
+         * Diberi kelonggaran sepuluh menit terhadap selisih jam antara
+         * peladen kita dan peladen gerbang — pembayaran yang sah selalu
+         * terjadi SESUDAH pendaftarannya, dan selisih sejam pun tidak
+         * mungkin wajar.
+         */
+        if ($kabar['waktu'] !== null
+            && $pendaftaran->created_at !== null
+            && $kabar['waktu']->lt($pendaftaran->created_at->copy()->subMinutes(10))) {
+            Log::warning('Pembayaran di gerbang lebih tua daripada pendaftarannya; tidak diwariskan', [
+                'nomor' => $pendaftaran->id_transaksi,
+                'bayar_pada' => (string) $kabar['waktu'],
+                'pendaftaran_dibuat' => (string) $pendaftaran->created_at,
+            ]);
+
+            return $pendaftaran;
+        }
+
         if ($kabar['lunas']) {
             /*
              * Kolomnya SAMA PERSIS dengan yang diisi penerima pemberitahuan.

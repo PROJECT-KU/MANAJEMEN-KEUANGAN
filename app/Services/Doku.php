@@ -289,6 +289,29 @@ class Doku
      *
      * @param  array<string, mixed>|null  $data
      */
+    /**
+     * Kapan transaksinya terjadi di gerbang, kalau disebutkan.
+     *
+     * @param  array<string, mixed>|null  $data
+     */
+    private function waktuTransaksi(?array $data): ?\Carbon\Carbon
+    {
+        $waktu = trim((string) data_get($data, 'transaction.date'));
+
+        if ($waktu === '') {
+            return null;
+        }
+
+        try {
+            return \Carbon\Carbon::parse($waktu);
+        } catch (\Throwable $e) {
+            // Bentuk tanggal yang tidak dikenali diperlakukan seperti tidak
+            // disebutkan: lebih baik kehilangan satu lapis penjagaan
+            // daripada menolak pembayaran yang sah.
+            return null;
+        }
+    }
+
     public function namaKanal(?array $data): ?string
     {
         $bank = trim((string) data_get($data, 'acquirer.name'));
@@ -403,7 +426,7 @@ class Doku
     {
         $gagalTahu = [
             'tahu' => false, 'lunas' => false, 'gagal' => false,
-            'status' => null, 'kanal' => null,
+            'status' => null, 'kanal' => null, 'waktu' => null,
         ];
 
         if (! $this->siap() || trim($nomor) === '') {
@@ -455,6 +478,16 @@ class Doku
             'gagal' => in_array($status, ['failed', 'expired', 'cancel', 'canceled'], true),
             'status' => $status ?: null,
             'kanal' => $this->namaKanal($data),
+
+            /*
+             * Kapan transaksinya terjadi di gerbang.
+             *
+             * Dipakai pemanggilnya untuk menolak pembayaran yang LEBIH TUA
+             * daripada pendaftarannya sendiri — nomor tagihan bisa terpakai
+             * ulang, dan pembayaran milik pendaftaran lain tidak boleh
+             * diwariskan.
+             */
+            'waktu' => $this->waktuTransaksi($data),
         ];
     }
 }
