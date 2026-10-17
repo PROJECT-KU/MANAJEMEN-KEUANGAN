@@ -482,6 +482,29 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                     <div class="sta-kartu sta-tunggu" id="sta-tunggu"
                         data-alamat="{{ route('public.webinareksklusif.keadaan', $pendaftaran->getKey()) }}">
 
+                        {{-- Tombol melanjutkan pembayaran, kalau alamatnya masih ada.
+
+                             Tanpa ini, yang menutup tab halaman bayar — atau membuka
+                             tautan di emailnya nanti — mendarat di sini dan melihat
+                             hitung mundur berjalan TANPA satu pun cara membayar.
+                             Kursinya dilepas saat waktunya habis, dan ia tidak pernah
+                             punya jalan menyelesaikannya.
+
+                             Masa berlaku tagihannya sama dengan tenggat pendaftaran
+                             ini, jadi tombolnya hilang sendiri bersamaan dengan
+                             habisnya hitung mundur di atas. --}}
+                        @if ($pendaftaran->bayar_url)
+                            <a href="{{ $pendaftaran->bayar_url }}" class="sta-tombol-bayar">
+                                <i class="fas fa-credit-card" aria-hidden="true"></i>
+                                Lanjutkan pembayaran
+                            </a>
+
+                            <p class="sta-tunggu-teks sta-tunggu-pisah">
+                                Sudah membayar? Tidak perlu menekan tombol itu lagi —
+                                halaman ini berubah sendiri dalam beberapa detik.
+                            </p>
+                        @endif
+
                         <span class="sta-tunggu-putar" aria-hidden="true"></span>
 
                         <p class="sta-tunggu-judul">Menunggu konfirmasi pembayaran</p>
@@ -1829,6 +1852,33 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
     /* ------------------------------- menunggu kabar gerbang pembayaran */
 
     .sta-tunggu { text-align: center; }
+
+    /*
+     * Tombol melanjutkan pembayaran. Satu-satunya hal yang bisa ditekan di
+     * kartu ini, dan memang harus menonjol: yang membukanya dari email
+     * datang justru UNTUK membayar.
+     */
+    .sta-tombol-bayar {
+        display: inline-flex; align-items: center; gap: 9px;
+        margin: 2px 0 4px;
+        padding: 12px 22px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #f97316, #ea580c);
+        color: #fff; font-size: .92rem; font-weight: 800;
+        text-decoration: none;
+        box-shadow: 0 6px 16px rgba(234, 88, 12, .28);
+    }
+
+    .sta-tombol-bayar:hover,
+    .sta-tombol-bayar:focus { color: #fff; text-decoration: none; filter: brightness(1.05); }
+
+    /* Garis pemisah: di bawahnya penjelasan untuk yang SUDAH membayar, dan
+       keduanya tidak boleh terbaca sebagai satu kalimat. */
+    .sta-tunggu-pisah {
+        margin: 12px 0 16px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--mis-garis, #e2e8f0);
+    }
 
     .sta-tunggu-putar {
         display: block;
