@@ -2,6 +2,8 @@
 
 namespace App;
 
+use Illuminate\Support\Facades\DB;
+
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -212,7 +214,34 @@ class WebinarEksklusifPendaftaran extends Model
         $terakhir = self::where('id_transaksi', 'like', $awalan . '%')
             ->orderByDesc('id_transaksi')->value('id_transaksi');
 
-        $urut = $terakhir ? ((int) substr($terakhir, -4)) + 1 : 1;
+        /*
+         * Nomor yang pernah DIHAPUS ikut diperhitungkan, dan ini bukan soal
+         * kerapian.
+         *
+         * Nomor ini dipakai sebagai invoice_number di gerbang pembayaran.
+         * Dihitung dari tabel hidup saja, menghapus satu pendaftaran
+         * membebaskan nomornya — dan pendaftaran BERIKUTNYA memakai nomor
+         * yang sama. Akibatnya berantai, dan ketiganya terjadi 17 Okt 2026:
+         *
+         *   1. gerbang menolak tagihannya sebab nomor itu sudah terpakai;
+         *   2. saat statusnya ditanyakan, gerbang menjawab SUCCESS — untuk
+         *      pembayaran milik pendaftaran yang sudah dihapus;
+         *   3. pendaftaran baru itu tertandai LUNAS tanpa ada uang masuk,
+         *      dan pendaftarnya menerima surat "SUDAH DIBAYAR".
+         *
+         * Terukur: WE-20261017-0015 dihapus pukul 21:49:10, dipakai ulang
+         * pukul 21:49:57, dan langsung mewarisi pembayaran Rp 130.239 milik
+         * pendahulunya.
+         */
+        $terakhirDihapus = DB::table('pendaftaran_dihapus')
+            ->where('layanan', 'webinar_eksklusif')
+            ->where('nomor', 'like', $awalan . '%')
+            ->orderByDesc('nomor')->value('nomor');
+
+        $urut = max(
+            $terakhir ? (int) substr($terakhir, -4) : 0,
+            $terakhirDihapus ? (int) substr($terakhirDihapus, -4) : 0
+        ) + 1;
 
         return $awalan . str_pad((string) $urut, 4, '0', STR_PAD_LEFT);
     }
