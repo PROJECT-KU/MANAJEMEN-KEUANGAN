@@ -34,6 +34,19 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
      disuguhi satu pun hal yang bisa ditekan berulang. --}}
 @php($menunggu = ! $lunas && ! $batal && ! $habis && $buktiAda)
 
+{{-- Keadaan KELIMA: membayar lewat gerbang pembayaran, kabarnya belum
+     sampai.
+
+     Pemberitahuan DOKU berjalan dari peladen ke peladen, dan hampir selalu
+     kalah cepat dari peramban yang cuma berpindah halaman. Akibatnya orang
+     mendarat di sini tepat sesudah membayar dan membaca "belum dibayar" —
+     lalu sebagian membayar lagi.
+
+     Layarnya tidak menyuruh apa-apa; ia menunggu, dan bertanya sendiri ke
+     peladen sampai kabarnya datang. --}}
+@php($menungguGerbang = ! $lunas && ! $batal && ! $habis
+    && $pendaftaran->cara_bayar === 'doku')
+
 {{-- Dua lajur hanya kalau lajur KANANNYA memang berisi.
 
      Yang sudah lunas, dibatalkan, atau kedaluwarsa tidak punya satu
@@ -458,6 +471,36 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                 </div>{{-- /lajur kiri --}}
 
                 <div class="sta-lajur sta-lajur-kanan">
+
+                @if ($menungguGerbang)
+                    {{-- Menunggu kabar dari gerbang pembayaran.
+
+                         Tidak ada satu pun hal yang bisa ditekan di sini, dan
+                         itu disengaja: yang bisa ditekan akan ditekan, dan
+                         tiap tekanan di saat begini berujung pada membayar
+                         dua kali. --}}
+                    <div class="sta-kartu sta-tunggu" id="sta-tunggu"
+                        data-alamat="{{ route('public.webinareksklusif.keadaan', $pendaftaran->getKey()) }}">
+
+                        <span class="sta-tunggu-putar" aria-hidden="true"></span>
+
+                        <p class="sta-tunggu-judul">Menunggu konfirmasi pembayaran</p>
+
+                        <p class="sta-tunggu-teks">
+                            Kalau pembayaran Anda sudah selesai, halaman ini berubah
+                            sendiri dalam beberapa detik. Tidak perlu membayar ulang,
+                            dan tidak perlu menutup halaman ini.
+                        </p>
+
+                        {{-- Muncul hanya kalau sudah lama tidak ada kabar. Dirakit
+                             di sini supaya kalimatnya tidak dirangkai JavaScript. --}}
+                        <p class="sta-tunggu-lama" id="sta-tunggu-lama" hidden>
+                            Kabarnya belum sampai juga. Kalau uang Anda sudah terpotong,
+                            simpan halaman ini dan hubungi panitia — pembayarannya tidak
+                            hilang, hanya konfirmasinya yang tertunda.
+                        </p>
+                    </div>
+                @endif
 
                 @if ($belumBayar && $pendaftaran->cara_bayar === 'transfer' && ! $ringkas)
 
@@ -1782,6 +1825,50 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
         .sta-rincian > div { flex-direction: column; align-items: flex-start; }
         .sta-rincian dd { text-align: left; }
     }
+
+    /* ------------------------------- menunggu kabar gerbang pembayaran */
+
+    .sta-tunggu { text-align: center; }
+
+    .sta-tunggu-putar {
+        display: block;
+        width: 34px; height: 34px;
+        margin: 2px auto 14px;
+        border: 3px solid #e2e8f0;
+        border-top-color: #6366f1;
+        border-radius: 50%;
+        animation: sta-berputar 900ms linear infinite;
+    }
+
+    @keyframes sta-berputar { to { transform: rotate(360deg); } }
+
+    .sta-tunggu-judul {
+        margin: 0 0 8px;
+        font-size: 1rem; font-weight: 800; color: #1e293b;
+    }
+
+    .sta-tunggu-teks { margin: 0; font-size: .85rem; line-height: 1.6; color: #475569; }
+
+    /* Kuning, bukan merah: pembayarannya belum tentu gagal — yang terlambat
+       baru kabarnya. Merah membuat orang menutup halaman dan menelepon. */
+    .sta-tunggu-lama {
+        margin: 14px 0 0;
+        padding: 11px 13px;
+        border: 1px solid #fde68a;
+        border-radius: 11px;
+        background: #fffbeb;
+        font-size: .82rem; line-height: 1.6; color: #92400e;
+        text-align: left;
+    }
+
+    /*
+     * Yang menyetel perangkatnya "kurangi gerak" tetap mendapat penanda
+     * bahwa sesuatu sedang berjalan — putarannya saja yang dihentikan,
+     * bukan lingkarannya yang dihilangkan.
+     */
+    @media (prefers-reduced-motion: reduce) {
+        .sta-tunggu-putar { animation: none; border-top-color: #6366f1; }
+    }
 </style>
 
 <script>
@@ -1871,5 +1958,90 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                 : semula;
         });
     });
+</script>
+
+<script>
+    /*
+     * Menanyakan keadaan pendaftaran ke peladen KITA SENDIRI, berulang,
+     * sampai kabarnya datang.
+     *
+     * Bukan bertanya ke gerbang pembayaran: yang menunggu adalah halaman
+     * ini, dan yang tahu duluan tetap peladen kita — begitu pemberitahuan
+     * DOKU masuk, statusnya berubah di sana.
+     */
+    (function () {
+        var kotak = document.getElementById('sta-tunggu');
+
+        if (! kotak) {
+            return;   // bukan pendaftaran yang sedang menunggu gerbang
+        }
+
+        var alamat = kotak.getAttribute('data-alamat');
+        var mulai = Date.now();
+        var lama = document.getElementById('sta-tunggu-lama');
+
+        /*
+         * Jarak bertanya MELEBAR seiring waktu.
+         *
+         * Tiap tab yang bertanya tiap tiga detik adalah satu proses peladen
+         * tiap tiga detik, dan hosting ini punya batas jumlah proses —
+         * halaman yang dibiarkan terbuka semalaman pernah menghabiskannya
+         * dan membuat seluruh situs menjawab 503. Tiga detik hanya untuk
+         * menit pertama, yaitu saat kabarnya memang hampir selalu datang.
+         */
+        function jarak() {
+            var lewat = Date.now() - mulai;
+
+            if (lewat < 60000) { return 3000; }
+            if (lewat < 300000) { return 8000; }
+
+            return 20000;
+        }
+
+        /* Berhenti sendiri sesudah sepuluh menit. Lewat dari itu kabarnya
+           tidak akan datang sendiri, dan yang dibutuhkan orangnya bukan
+           halaman yang terus berputar melainkan nomor panitia. */
+        var BATAS = 600000;
+
+        function tanya() {
+            if (Date.now() - mulai > BATAS) {
+                kotak.querySelector('.sta-tunggu-putar').style.display = 'none';
+
+                if (lama) { lama.hidden = false; }
+
+                return;
+            }
+
+            fetch(alamat, { headers: { 'Accept': 'application/json' } })
+                .then(function (j) { return j.ok ? j.json() : null; })
+                .then(function (d) {
+                    /*
+                     * Halamannya DIMUAT ULANG, bukan ditambal di tempat.
+                     * Keadaan lunas, batal, dan kedaluwarsa masing-masing
+                     * mengubah separuh halaman ini — menyalin aturannya ke
+                     * JavaScript berarti satu tempat lagi yang harus ikut
+                     * diubah tiap kali aturannya berubah, dan itu sudah tiga
+                     * kali terjadi.
+                     */
+                    if (d && d.selesai) {
+                        window.location.reload();
+
+                        return;
+                    }
+
+                    /* Sudah lebih dari semenit tanpa kabar: kalimat
+                       penenangnya dimunculkan, tetapi tetap bertanya. */
+                    if (lama && Date.now() - mulai > 90000) { lama.hidden = false; }
+
+                    setTimeout(tanya, jarak());
+                })
+                .catch(function () {
+                    // Jaringan putus sesaat bukan alasan berhenti menunggu.
+                    setTimeout(tanya, jarak());
+                });
+        }
+
+        setTimeout(tanya, 2500);
+    })();
 </script>
 @stop
