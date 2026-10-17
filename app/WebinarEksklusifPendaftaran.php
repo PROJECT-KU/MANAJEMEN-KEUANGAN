@@ -34,7 +34,7 @@ class WebinarEksklusifPendaftaran extends Model
         'ppn', 'kode_unik', 'kode_diskon', 'nominal_diskon', 'total_pembayaran',
         // Tali ke promo yang memotong harganya; dibaca layar dampak promo.
         'promo_id',
-        'gambar', 'cara_bayar', 'bayar_rujukan', 'bayar_status', 'bayar_kanal',
+        'gambar', 'cara_bayar', 'bayar_rujukan', 'bayar_url', 'bayar_status', 'bayar_kanal',
         'bayar_pada', 'kedaluwarsa_pada', 'status', 'note',
     ];
 
