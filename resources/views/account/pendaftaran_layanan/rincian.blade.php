@@ -3098,7 +3098,11 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                         <p class="mis-ubin-label">Total bayar</p>
                                         <p class="rin-angka-ket">
                                             <i class="fas {{ $caraBayar['ikon'] }}" aria-hidden="true"></i>
-                                            {{ $caraBayar['ringkas'] ?? $caraBayar['label'] }}
+                                            {{-- Kanal sungguhannya kalau lewat gerbang;
+                                                 "DOKU" saja tidak menjawab lewat apa
+                                                 uangnya masuk. --}}
+                                            {{ $pendaftaran->kanal_bayar
+                                                ?: ($caraBayar['ringkas'] ?? $caraBayar['label']) }}
                                         </p>
                                     </div>
                                 </div>
@@ -3171,7 +3175,7 @@ Rincian Pendaftaran | MIS Rumah Scopus
                             <p class="rin-nota rin-nota-biru">
                                 <i class="fas {{ $caraBayar['ikon'] }}" aria-hidden="true"></i>
                                 <span>
-                                    Dibayar lewat <strong>{{ $caraBayar['label'] }}</strong>.
+                                    Dibayar lewat <strong>{{ $caraBayar['label'] }}</strong>@if ($pendaftaran->kanal_bayar), kanal <strong>{{ $pendaftaran->kanal_bayar }}</strong>@endif.
                                     {{ $caraBayar['ket'] }}
                                     @if ($kodeUnik > 0 && $caraBayar['kunci'] !== 'tunai')
                                         Cocokkan mutasinya dengan nominal

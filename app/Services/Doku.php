@@ -269,6 +269,57 @@ class Doku
     }
 
     /**
+     * Nama kanal pembayaran yang benar-benar dipakai, siap dibaca orang.
+     *
+     * `cara_bayar` di basis data hanya membedakan transfer manual dari
+     * gerbang — lewat gerbang ia selalu "DOKU", padahal orangnya bisa
+     * membayar dengan VA Mandiri, QRIS, OVO, atau kartu. Itu justru
+     * pertanyaan pertama panitia saat satu pembayaran perlu ditelusuri.
+     *
+     * DOKU mengirimkannya di tiga medan sekaligus:
+     *
+     *     service.id     VIRTUAL_ACCOUNT
+     *     acquirer.name  Bank Mandiri
+     *     channel.id     VIRTUAL_ACCOUNT_BANK_MANDIRI
+     *
+     * Yang dipakai gabungan dua yang pertama — "VA Bank Mandiri" terbaca
+     * jauh lebih cepat daripada channel.id yang berhuruf besar semua dengan
+     * garis bawah. channel.id baru dipakai kalau keduanya kosong, dan
+     * dirapikan dulu.
+     *
+     * @param  array<string, mixed>|null  $data
+     */
+    public function namaKanal(?array $data): ?string
+    {
+        $bank = trim((string) data_get($data, 'acquirer.name'));
+        $layanan = mb_strtoupper(trim((string) data_get($data, 'service.id')));
+
+        if ($layanan === 'VIRTUAL_ACCOUNT') {
+            return $bank === '' ? 'Virtual Account' : 'VA ' . $bank;
+        }
+
+        if ($bank !== '') {
+            return $bank;
+        }
+
+        $kanal = trim((string) data_get($data, 'channel.id'));
+
+        if ($kanal === '') {
+            return $layanan === '' ? null : ucwords(mb_strtolower(str_replace('_', ' ', $layanan)));
+        }
+
+        /*
+         * QRIS tetap QRIS: huruf besar semuanya memang namanya, dan
+         * "Qris" terbaca seperti salah ketik.
+         */
+        if (in_array($kanal, ['QRIS', 'EMONEY_QRIS'], true)) {
+            return 'QRIS';
+        }
+
+        return ucwords(mb_strtolower(str_replace('_', ' ', $kanal)));
+    }
+
+    /**
      * Membersihkan teks dari huruf yang DITOLAK DOKU.
      *
      * DOKU hanya menerima a-z A-Z 0-9 dan . - / + , = _ : ' @ % ( ) beserta
@@ -350,7 +401,10 @@ class Doku
      */
     public function periksaStatus(string $nomor): array
     {
-        $gagalTahu = ['tahu' => false, 'lunas' => false, 'gagal' => false, 'status' => null];
+        $gagalTahu = [
+            'tahu' => false, 'lunas' => false, 'gagal' => false,
+            'status' => null, 'kanal' => null,
+        ];
 
         if (! $this->siap() || trim($nomor) === '') {
             return $gagalTahu;
@@ -400,6 +454,7 @@ class Doku
             'lunas' => in_array($status, ['success', 'settlement', 'paid'], true),
             'gagal' => in_array($status, ['failed', 'expired', 'cancel', 'canceled'], true),
             'status' => $status ?: null,
+            'kanal' => $this->namaKanal($data),
         ];
     }
 }
