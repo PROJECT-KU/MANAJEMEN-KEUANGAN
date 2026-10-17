@@ -99,6 +99,20 @@ Route::post('/Webinar-Eksklusif/store', 'Publict\PublicWebinarEksklusifControlle
 Route::get('/Webinar-Eksklusif/Status/{id}', 'Publict\PublicWebinarEksklusifController@status')->name('public.webinareksklusif.status');
 // Dibatasi 3 per menit: mengirim surat itu pekerjaan yang memakan waktu, dan
 // tombolnya bisa ditekan berkali-kali oleh orang yang tidak sabar menunggu.
+/*
+ * Keadaan satu pendaftaran, untuk ditanyakan berulang oleh halaman status.
+ *
+ * Yang membayar lewat gerbang pembayaran mendarat kembali di halaman status
+ * SEBELUM kabar lunasnya sampai — pemberitahuan DOKU berjalan dari peladen
+ * ke peladen dan hampir selalu kalah cepat dari peramban. Tanpa alamat ini,
+ * ia melihat "belum dibayar" tepat sesudah membayar, lalu membayar lagi.
+ *
+ * Hanya MEMBACA, dan hanya memulangkan keadaan — tidak ada nominal, nama,
+ * atau apa pun yang tidak sudah terlihat di halamannya sendiri.
+ */
+Route::get('/Webinar-Eksklusif/Status/{id}/keadaan', 'Publict\PublicWebinarEksklusifController@keadaan')
+    ->name('public.webinareksklusif.keadaan');
+
 Route::post('/Webinar-Eksklusif/Status/{id}/kirim-ulang', 'Publict\PublicWebinarEksklusifController@kirimUlang')
     ->middleware('throttle:3,1')
     ->name('public.webinareksklusif.kirimulang');
