@@ -309,20 +309,97 @@ class Doku
      * dihitung dari untaian yang persis seperti ini, jadi satu baris yang
      * tertukar membuat semua permintaan ditolak tanpa penjelasan.
      */
-    private function tandaTangan(string $jalur, string $requestId, string $waktu, string $isi): string
+    private function tandaTangan(string $jalur, string $requestId, string $waktu, ?string $isi = null): string
     {
-        $ringkasan = base64_encode(hash('sha256', $isi, true));
-
-        $bahan = implode("\n", [
+        $bahan = [
             'Client-Id:' . $this->clientId(),
             'Request-Id:' . $requestId,
             'Request-Timestamp:' . $waktu,
             'Request-Target:' . $jalur,
-            'Digest:' . $ringkasan,
-        ]);
+        ];
+
+        /*
+         * Digest HANYA untuk permintaan yang berbadan.
+         *
+         * Aturan DOKU: permintaan GET — dan Check Status memakai GET — tidak
+         * menyertakan Digest sama sekali. Menyertakannya dengan badan kosong
+         * membuat tanda tangannya tidak cocok, dan jawabannya 401 tanpa
+         * penjelasan apa pun tentang bagian mana yang salah.
+         */
+        if ($isi !== null) {
+            $bahan[] = 'Digest:' . base64_encode(hash('sha256', $isi, true));
+        }
 
         return 'HMACSHA256=' . base64_encode(
-            hash_hmac('sha256', $bahan, $this->rahasia(), true)
+            hash_hmac('sha256', implode("\n", $bahan), $this->rahasia(), true)
         );
+    }
+
+    /**
+     * Menanyakan LANGSUNG ke DOKU: tagihan ini sudah dibayar atau belum.
+     *
+     * Dipakai halaman status saat pembayar mendarat kembali, supaya ia tidak
+     * perlu menunggu pemberitahuan dari peladen DOKU. Pemberitahuan itu
+     * tetap jalan dan tetap jadi pegangan utama — ia yang datang walau
+     * halamannya sudah ditutup — tetapi ia tidak selalu cepat, dan di mesin
+     * pengembang tidak pernah sampai sama sekali.
+     *
+     * @return array{tahu: bool, lunas: bool, gagal: bool, status: ?string}
+     *         tahu=false berarti DOKU tidak menjawab atau belum mengenal
+     *         nomornya — BUKAN berarti belum dibayar.
+     */
+    public function periksaStatus(string $nomor): array
+    {
+        $gagalTahu = ['tahu' => false, 'lunas' => false, 'gagal' => false, 'status' => null];
+
+        if (! $this->siap() || trim($nomor) === '') {
+            return $gagalTahu;
+        }
+
+        $jalur = '/orders/v1/status/' . rawurlencode(trim($nomor));
+        $requestId = (string) Str::uuid();
+        $waktu = gmdate('Y-m-d\TH:i:s\Z');
+
+        try {
+            $jawab = Http::timeout(10)
+                ->withHeaders([
+                    'Client-Id' => $this->clientId(),
+                    'Request-Id' => $requestId,
+                    'Request-Timestamp' => $waktu,
+                    // Tanpa isi: GET tidak membawa Digest.
+                    'Signature' => $this->tandaTangan($jalur, $requestId, $waktu),
+                ])
+                ->get($this->pangkalan() . $jalur);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return $gagalTahu;
+        }
+
+        if (! $jawab->successful()) {
+            /*
+             * TIDAK dicatat sebagai galat.
+             *
+             * Nomor yang belum pernah dibayar wajar belum dikenal DOKU, dan
+             * halaman status menanyakannya berkali-kali — dicatat sebagai
+             * galat, lognya penuh oleh keadaan yang sepenuhnya normal.
+             */
+            return $gagalTahu;
+        }
+
+        $data = $jawab->json();
+
+        $status = mb_strtolower((string) (
+            data_get($data, 'transaction.status')
+            ?? data_get($data, 'order.status')
+            ?? ''
+        ));
+
+        return [
+            'tahu' => $status !== '',
+            'lunas' => in_array($status, ['success', 'settlement', 'paid'], true),
+            'gagal' => in_array($status, ['failed', 'expired', 'cancel', 'canceled'], true),
+            'status' => $status ?: null,
+        ];
     }
 }
