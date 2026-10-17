@@ -143,7 +143,27 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                  habis untuk sapaan. Di layar lebar ketiganya disejajarkan
                  jadi satu baris; di ponsel tetap bertumpuk di tengah, sebab
                  di sana lebarnya yang langka, bukan tingginya. --}}
-            <div class="sta-kepala">
+            <div class="sta-kepala{{ $lunas ? ' sta-kepala-rayakan' : '' }}">
+                {{-- Kepingan perayaan, hanya saat LUNAS.
+
+                     Dirakit dari petak CSS, bukan berkas GIF: berkas gif
+                     perayaan ukurannya ratusan kilobita, pecah di layar
+                     beresolusi tinggi, dan warnanya tidak bisa mengikuti
+                     warna situs. Yang di sini beberapa ratus bait, tajam di
+                     ukuran berapa pun, dan memakai warna yang sama dengan
+                     halaman ini.
+
+                     aria-hidden: tidak ada artinya untuk yang memakai
+                     pembaca layar, dan membacakan dua belas petak kosong
+                     justru menghalangi kabar yang sebenarnya. --}}
+                @if ($lunas)
+                    <span class="sta-rayakan" aria-hidden="true">
+                        @for ($k = 0; $k < 12; $k++)
+                            <i class="sta-keping sta-keping-{{ $k }}"></i>
+                        @endfor
+                    </span>
+                @endif
+
                 <span class="{{ trim('sta-ubin sta-ubin-' . $rupa[0] . ' ' . $rupa[2]) }}" aria-hidden="true">
                     <i class="fas {{ $rupa[1] }}"></i>
                 </span>
@@ -1047,6 +1067,88 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
     /* Bawaannya bertumpuk di tengah — keadaan ponsel, tempat yang langka
        lebarnya, bukan tingginya. */
     .sta-kepala { text-align: center; }
+
+    /* ---------------------------------------------------- perayaan lunas */
+
+    /*
+     * Hanya muncul saat pendaftarannya LUNAS, dan hanya sekali — tidak
+     * berulang. Animasi yang berputar terus menarik mata terus-menerus,
+     * dan halaman ini masih punya nomor pendaftaran serta tanggal yang
+     * harus dibaca orangnya.
+     */
+    .sta-kepala-rayakan { position: relative; }
+
+    .sta-rayakan {
+        position: absolute;
+        top: 0; left: 50%;
+        width: 300px; height: 180px;
+        margin-left: -150px;
+        pointer-events: none;   /* tidak boleh menghalangi tombol di bawahnya */
+        overflow: hidden;
+    }
+
+    .sta-keping {
+        position: absolute;
+        top: 34px; left: 50%;
+        width: 9px; height: 14px;
+        border-radius: 2px;
+        opacity: 0;
+        animation: sta-pecah 1250ms cubic-bezier(.2, .7, .3, 1) forwards;
+    }
+
+    /* Dua belas kepingan, masing-masing arah dan warnanya sendiri. Ditulis
+       satu per satu, bukan diacak JavaScript: acak membuat sebagian kepingan
+       sesekali menumpuk jadi satu gumpalan. */
+    .sta-keping-0  { background: #10b981; animation-delay: 0ms;   --x: -124px; --y: 10px;  --r: -220deg; }
+    .sta-keping-1  { background: #6366f1; animation-delay: 40ms;  --x: -96px;  --y: -34px; --r: 180deg; }
+    .sta-keping-2  { background: #f59e0b; animation-delay: 80ms;  --x: -64px;  --y: 44px;  --r: -140deg; }
+    .sta-keping-3  { background: #ec4899; animation-delay: 20ms;  --x: -34px;  --y: -52px; --r: 260deg; }
+    .sta-keping-4  { background: #10b981; animation-delay: 100ms; --x: -14px;  --y: 56px;  --r: -300deg; }
+    .sta-keping-5  { background: #38bdf8; animation-delay: 60ms;  --x: 12px;   --y: -56px; --r: 200deg; }
+    .sta-keping-6  { background: #f59e0b; animation-delay: 10ms;  --x: 36px;   --y: 38px;  --r: -180deg; }
+    .sta-keping-7  { background: #6366f1; animation-delay: 90ms;  --x: 66px;   --y: -38px; --r: 240deg; }
+    .sta-keping-8  { background: #ec4899; animation-delay: 50ms;  --x: 92px;   --y: 28px;  --r: -260deg; }
+    .sta-keping-9  { background: #38bdf8; animation-delay: 110ms; --x: 120px;  --y: -20px; --r: 160deg; }
+    .sta-keping-10 { background: #10b981; animation-delay: 30ms;  --x: -76px;  --y: 60px;  --r: 300deg; }
+    .sta-keping-11 { background: #f59e0b; animation-delay: 70ms;  --x: 78px;   --y: 62px;  --r: -200deg; }
+
+    /*
+     * Opasitasnya DITAHAN sampai tiga perempat jalan.
+     *
+     * Versi pertama memudar sejak 12%, dan pada pertengahan gerak
+     * kepingannya tinggal separuh terlihat — terukur di potret yang
+     * dibekukan pada 550ms: ada, tetapi nyaris tak terasa. Perayaan yang
+     * tidak terasa sama saja dengan tidak ada, sementara biayanya tetap
+     * dibayar.
+     */
+    @keyframes sta-pecah {
+        0%   { opacity: 0; transform: translate(0, 0) rotate(0deg) scale(.5); }
+        10%  { opacity: 1; }
+        75%  { opacity: 1; }
+        100% { opacity: 0; transform: translate(var(--x), var(--y)) rotate(var(--r)) scale(1); }
+    }
+
+    /* Centang lunasnya ikut menyembul sekali, supaya matanya jatuh ke sana
+       lebih dulu sebelum kepingannya menyebar. */
+    .sta-kepala-rayakan .sta-ubin {
+        animation: sta-menyembul 620ms cubic-bezier(.34, 1.56, .64, 1) both;
+    }
+
+    @keyframes sta-menyembul {
+        0%   { transform: scale(.4); opacity: 0; }
+        60%  { transform: scale(1.12); opacity: 1; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    /*
+     * Yang memilih gerak seminimal mungkin di setelan perangkatnya TIDAK
+     * mendapat animasi apa pun — bagi sebagian orang gerak tiba-tiba memicu
+     * pusing, dan kabar "sudah lunas" tetap tersampaikan tanpa itu.
+     */
+    @media (prefers-reduced-motion: reduce) {
+        .sta-rayakan { display: none; }
+        .sta-kepala-rayakan .sta-ubin { animation: none; }
+    }
 
     .sta-rincian {
         margin: 0 0 22px;
