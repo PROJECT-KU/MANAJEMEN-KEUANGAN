@@ -146,6 +146,22 @@ class Doku
                 'invoice_number' => $pesanan['nomor'],
                 'currency' => 'IDR',
                 'callback_url' => $pesanan['kembali'],
+
+                /*
+                 * Langsung kembali ke situs kita sesudah bayar.
+                 *
+                 * Bawaan DOKU auto_redirect = false: halaman hasil DOKU
+                 * ditampilkan, lalu MENUNGGU orang menekan tombol "Back to
+                 * Merchant". Banyak yang tidak menekannya — mereka sudah
+                 * melihat "Payment Successful" dan menutup tabnya, lalu
+                 * tidak pernah melihat nomor pendaftaran, tautan grup, atau
+                 * kabar bahwa tautan masuk dikirim ke emailnya.
+                 *
+                 * Dengan true, halaman hasilnya dilewati dan orangnya
+                 * mendarat di halaman status kita sendiri.
+                 */
+                'auto_redirect' => true,
+
                 'line_items' => $baris,
             ],
             'payment' => [

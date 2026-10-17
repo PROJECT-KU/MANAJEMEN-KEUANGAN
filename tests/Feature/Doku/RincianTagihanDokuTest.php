@@ -126,6 +126,34 @@ class RincianTagihanDokuTest extends TestCase
     }
 
     #[Test]
+    public function orangnya_dikembalikan_sendiri_ke_situs_kita(): void
+    {
+        /*
+         * auto_redirect = false adalah BAWAAN DOKU, dan dengan itu halaman
+         * hasil DOKU ditampilkan lalu menunggu orang menekan "Back to
+         * Merchant".
+         *
+         * Banyak yang tidak menekannya: mereka sudah membaca "Payment
+         * Successful" lalu menutup tabnya — dan tidak pernah melihat nomor
+         * pendaftarannya, tautan grup, atau kabar bahwa tautan masuk dikirim
+         * ke emailnya. Kegagalan yang tidak terlihat sebagai kegagalan di
+         * mana pun: pembayarannya berhasil, orangnya saja yang hilang.
+         */
+        Http::fake(['*' => Http::response(['response' => ['payment' => ['url' => 'https://bayar.test/x']]], 200)]);
+
+        $this->tagih(['kembali' => 'https://contoh.test/status/abc']);
+
+        $pesanan = $this->terkirim()['order'];
+
+        $this->assertTrue($pesanan['auto_redirect'] ?? false,
+            'auto_redirect tidak dikirim; DOKU akan berhenti di halaman '
+            . 'hasilnya sendiri dan menunggu orang menekan tombol.');
+
+        $this->assertSame('https://contoh.test/status/abc', $pesanan['callback_url'],
+            'Alamat kembalinya tidak ikut, jadi tidak ada tempat untuk dituju.');
+    }
+
+    #[Test]
     public function rincian_yang_meleset_tidak_pernah_dikirim(): void
     {
         /*
