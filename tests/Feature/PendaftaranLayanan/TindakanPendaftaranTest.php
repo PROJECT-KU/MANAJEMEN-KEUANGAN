@@ -242,10 +242,23 @@ class TindakanPendaftaranTest extends TestCase
         $angkatan = $this->angkatan('scopus_camp', 20, 20);
         $lama = now()->subDays(30);
 
+        /*
+         * Kedua baris uji diberi penanda acak, lalu daftarnya DISARING dengan
+         * penanda itu.
+         *
+         * Tanpa itu ujinya memeriksa halaman pertama dari tabel sungguhan —
+         * dan halaman pertama cuma memuat 20 baris. Terukur 17 Okt 2026: ada
+         * 65 pendaftaran "lama" yang lebih baru daripada baris uji ini, jadi
+         * barisnya terdorong ke halaman keempat dan ujinya merah tanpa ada
+         * satu pun kode yang berubah. Hijau atau merahnya cuma bergantung
+         * berapa banyak data yang kebetulan ada di basis data hari itu.
+         */
+        $tanda = Str::random(8);
+
         $tunai = PendaftaranScopusCamp::create([
             'id_transaksi' => 'UJI-TUNAI-' . Str::random(6),
             'kategori_id' => $angkatan->id,
-            'nama' => 'Menunggu Tapi Tunai',
+            'nama' => 'Menunggu Tapi Tunai ' . $tanda,
             'email' => 'lama1' . Str::random(6) . '@contoh.test',
             'telp' => '0816-0000-0015',
             'total_pembayaran' => '1000000',
@@ -257,7 +270,7 @@ class TindakanPendaftaranTest extends TestCase
         $transfer = PendaftaranScopusCamp::create([
             'id_transaksi' => 'UJI-TRF-' . Str::random(6),
             'kategori_id' => $angkatan->id,
-            'nama' => 'Menunggu Lewat Transfer',
+            'nama' => 'Menunggu Lewat Transfer ' . $tanda,
             'email' => 'lama2' . Str::random(6) . '@contoh.test',
             'telp' => '0816-0000-0016',
             'total_pembayaran' => '1000000',
@@ -267,12 +280,14 @@ class TindakanPendaftaranTest extends TestCase
         $transfer->forceFill(['created_at' => $lama, 'updated_at' => $lama])->save();
 
         $jawab = $this->actingAs($orang)->get(
-            route('account.pendaftaran-layanan.index', ['lama' => '1', 'layanan' => 'scopus_camp'])
+            route('account.pendaftaran-layanan.index', [
+                'lama' => '1', 'layanan' => 'scopus_camp', 'cari' => $tanda,
+            ])
         );
 
         $jawab->assertOk();
-        $jawab->assertSee('Menunggu Lewat Transfer');
-        $jawab->assertDontSee('Menunggu Tapi Tunai');
+        $jawab->assertSee('Menunggu Lewat Transfer ' . $tanda);
+        $jawab->assertDontSee('Menunggu Tapi Tunai ' . $tanda);
     }
 
     #[Test]

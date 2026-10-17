@@ -71,17 +71,79 @@ class Doku
         $requestId = (string) Str::uuid();
         $waktu = gmdate('Y-m-d\TH:i:s\Z');
 
+        /*
+         * Rincian tagihan HARUS berjumlah sama dengan totalnya.
+         *
+         * DOKU menolak dengan "AMOUNT NOT MATCH" kalau order.amount berbeda
+         * dari jumlah line_items-nya. Selama ini tidak pernah ketahuan sebab
+         * jalur DOKU belum pernah hidup — dan yang akan menabraknya justru
+         * pendaftaran yang PAKAI POTONGAN: totalnya sudah dikurangi, tetapi
+         * rinciannya masih harga penuh dikali jumlah peserta.
+         *
+         * Potongannya dikirim sebagai baris tersendiri bernilai minus — sudah
+         * diuji dan diterima DOKU — bukan dengan memperkecil harga satuannya.
+         * Dengan begitu yang membayar melihat harga asli DAN potongannya di
+         * halaman bayar, sama seperti yang tertulis di borangnya.
+         */
+        $baris = [[
+            'name' => $pesanan['judul'],
+            'price' => (int) $pesanan['harga_satuan'],
+            'quantity' => (int) $pesanan['jumlah_peserta'],
+        ]];
+
+        if ((int) ($pesanan['potongan'] ?? 0) > 0) {
+            $baris[] = [
+                'name' => trim((string) ($pesanan['label_potongan'] ?? 'Potongan')),
+                'price' => -1 * (int) $pesanan['potongan'],
+                'quantity' => 1,
+            ];
+        }
+
+        // Kode unik transfer biasanya 0 di jalur DOKU — pencocokannya memakai
+        // nomor rujukan. Tetap dihitung di sini supaya rinciannya tidak
+        // pernah meleset kalau suatu saat dipakai juga.
+        if ((int) ($pesanan['kode_unik'] ?? 0) > 0) {
+            $baris[] = [
+                'name' => 'Kode unik transfer',
+                'price' => (int) $pesanan['kode_unik'],
+                'quantity' => 1,
+            ];
+        }
+
+        $jumlahBaris = array_sum(array_map(
+            fn ($b) => $b['price'] * $b['quantity'],
+            $baris
+        ));
+
+        /*
+         * Kalau rinciannya tidak berjumlah sama dengan total yang tersimpan,
+         * tagihannya TIDAK dikirim.
+         *
+         * Mengirimkan jumlah rinciannya begitu saja akan menagih orang dengan
+         * angka yang berbeda dari yang tercatat di basis data — kekeliruan
+         * yang jauh lebih buruk daripada gagal membuat tagihan, sebab
+         * pemanggilnya sudah menyiapkan jalan mundur ke transfer manual.
+         */
+        if ($jumlahBaris !== (int) $pesanan['jumlah']) {
+            Log::error('Rincian tagihan DOKU tidak berjumlah sama dengan totalnya', [
+                'nomor' => $pesanan['nomor'],
+                'total_tersimpan' => (int) $pesanan['jumlah'],
+                'jumlah_rincian' => $jumlahBaris,
+            ]);
+
+            return [
+                'berhasil' => false, 'url' => null, 'rujukan' => null,
+                'pesan' => 'Rincian tagihannya tidak cocok dengan totalnya.',
+            ];
+        }
+
         $isi = [
             'order' => [
                 'amount' => (int) $pesanan['jumlah'],
                 'invoice_number' => $pesanan['nomor'],
                 'currency' => 'IDR',
                 'callback_url' => $pesanan['kembali'],
-                'line_items' => [[
-                    'name' => $pesanan['judul'],
-                    'price' => (int) $pesanan['harga_satuan'],
-                    'quantity' => (int) $pesanan['jumlah_peserta'],
-                ]],
+                'line_items' => $baris,
             ],
             'payment' => [
                 'payment_due_date' => self::MENIT_KEDALUWARSA,
