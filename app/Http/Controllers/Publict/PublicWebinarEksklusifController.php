@@ -840,6 +840,65 @@ class PublicWebinarEksklusifController extends Controller
      * memanggilnya. Semua yang ada di sini sudah terlihat di halamannya
      * sendiri.
      */
+    /**
+     * Menanyakan langsung ke gerbang pembayaran, lalu menyusulkan statusnya.
+     *
+     * Pemberitahuan dari DOKU tetap jalan dan tetap jadi pegangan utama — ia
+     * yang datang walau halamannya sudah ditutup. Tetapi ia tidak selalu
+     * cepat, dan di mesin pengembang tidak pernah sampai sama sekali karena
+     * `localhost` tidak bisa dihubungi dari luar.
+     *
+     * Jadi selama pembayar masih menatap layarnya, KITA yang bertanya. Arah
+     * panggilannya terbalik, dan justru itu yang membuatnya terjawab dalam
+     * hitungan detik.
+     */
+    private function susulkanDariGerbang(WebinarEksklusifPendaftaran $pendaftaran): WebinarEksklusifPendaftaran
+    {
+        // Hanya yang memang sedang menunggu gerbang. Yang transfer manual
+        // tidak punya tagihan di sana untuk ditanyakan.
+        if ($pendaftaran->cara_bayar !== 'doku' || $pendaftaran->status !== 'pending') {
+            return $pendaftaran;
+        }
+
+        $kabar = $this->doku->periksaStatus((string) $pendaftaran->id_transaksi);
+
+        /*
+         * tahu=false berarti DOKU tidak menjawab atau belum mengenal
+         * nomornya — BUKAN berarti belum dibayar. Dibiarkan menunggu.
+         */
+        if (! $kabar['tahu']) {
+            return $pendaftaran;
+        }
+
+        if ($kabar['lunas']) {
+            /*
+             * Kolomnya SAMA PERSIS dengan yang diisi penerima pemberitahuan.
+             * Dua jalur menuju satu keadaan: mana pun yang tiba lebih dulu,
+             * hasilnya tidak boleh bisa dibedakan.
+             */
+            $pendaftaran->forceFill([
+                'status' => 'paid',
+                'bayar_status' => $kabar['status'],
+                'bayar_pada' => now(),
+            ])->save();
+
+            return $pendaftaran->refresh();
+        }
+
+        if ($kabar['gagal']) {
+            $pendaftaran->forceFill([
+                'status' => $kabar['status'] === 'cancel' ? 'cancel' : 'expired',
+                'bayar_status' => $kabar['status'],
+            ])->save();
+
+            $this->kembalikanKuota($pendaftaran);
+
+            return $pendaftaran->refresh();
+        }
+
+        return $pendaftaran;
+    }
+
     public function keadaan(string $id)
     {
         $pendaftaran = WebinarEksklusifPendaftaran::whereKey($id)->first();
@@ -847,6 +906,8 @@ class PublicWebinarEksklusifController extends Controller
         if ($pendaftaran === null) {
             return response()->json(['ada' => false], 404);
         }
+
+        $pendaftaran = $this->susulkanDariGerbang($pendaftaran);
 
         $habis = $pendaftaran->sudah_kedaluwarsa || $pendaftaran->status === 'expired';
 
@@ -875,6 +936,10 @@ class PublicWebinarEksklusifController extends Controller
         if ($pendaftaran === null) {
             return $this->kembaliKeDaftar('Pendaftaran itu tidak ditemukan.');
         }
+
+        // Ditanyakan SEBELUM halamannya dirakit: yang mendarat tepat sesudah
+        // membayar langsung melihat hasilnya, tanpa menunggu satu putaran pun.
+        $pendaftaran = $this->susulkanDariGerbang($pendaftaran);
 
         /*
          * Alamat buktinya dirakit lewat AlamatGambar, bukan asset() langsung:
