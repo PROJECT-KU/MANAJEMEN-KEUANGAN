@@ -826,6 +826,48 @@ class PublicWebinarEksklusifController extends Controller
     // ------------------------------------------------------------ status
 
     /** Halaman status satu pendaftaran; tautannya dikirim ke email peserta. */
+    /**
+     * Keadaan satu pendaftaran, untuk ditanyakan berulang halaman statusnya.
+     *
+     * Yang membayar lewat gerbang pembayaran mendarat kembali di halaman
+     * status SEBELUM kabar lunasnya sampai: pemberitahuan DOKU berjalan dari
+     * peladen ke peladen, dan hampir selalu kalah cepat dari peramban yang
+     * cuma berpindah halaman. Tanpa alamat ini ia melihat "belum dibayar"
+     * tepat sesudah membayar — lalu sebagian membayar lagi.
+     *
+     * Yang dipulangkan HANYA keadaan, tidak ada nominal maupun nama: alamat
+     * ini tidak memakai sesi, dan siapa pun yang memegang tautannya bisa
+     * memanggilnya. Semua yang ada di sini sudah terlihat di halamannya
+     * sendiri.
+     */
+    public function keadaan(string $id)
+    {
+        $pendaftaran = WebinarEksklusifPendaftaran::whereKey($id)->first();
+
+        if ($pendaftaran === null) {
+            return response()->json(['ada' => false], 404);
+        }
+
+        $habis = $pendaftaran->sudah_kedaluwarsa || $pendaftaran->status === 'expired';
+
+        return response()->json([
+            'ada' => true,
+            'lunas' => (bool) $pendaftaran->lunas,
+            'batal' => $pendaftaran->status === 'cancel',
+            'habis' => (bool) $habis,
+
+            /*
+             * "selesai" berarti halaman TIDAK perlu bertanya lagi. Dihitung
+             * di sini, bukan di peramban: aturannya sudah berubah tiga kali,
+             * dan menyalinnya ke JavaScript berarti satu tempat lagi yang
+             * harus ikut diubah tiap kali.
+             */
+            'selesai' => (bool) ($pendaftaran->lunas
+                || $pendaftaran->status === 'cancel'
+                || $habis),
+        ]);
+    }
+
     public function status(string $id)
     {
         $pendaftaran = WebinarEksklusifPendaftaran::whereKey($id)->first();
