@@ -195,6 +195,7 @@ class PendaftaranSemuaLayanan
                 'promo' => 'promo_id',
                 'bukti' => 'gambar',
                 'cara_bayar' => 'cara_bayar',
+                'kanal_bayar' => 'bayar_kanal',
                 'catatan' => 'note',
             ],
         ],
@@ -608,6 +609,17 @@ class PendaftaranSemuaLayanan
          * mencocokkannya menurut posisi tanpa mengeluh.
          */
         'promo',
+
+        /*
+         * Kanal pembayaran yang benar-benar dipakai lewat gerbang — VA
+         * Mandiri, QRIS, OVO. Hanya Webinar Eksklusif yang punya kolomnya;
+         * sisanya diisi NULL oleh ungkapan(), sama seperti `promo`.
+         *
+         * `cara_bayar` saja tidak cukup: lewat gerbang ia selalu berbunyi
+         * "DOKU", dan panitia yang menelusuri satu pembayaran justru
+         * bertanya "lewat apa".
+         */
+        'kanal_bayar',
     ];
 
     /**

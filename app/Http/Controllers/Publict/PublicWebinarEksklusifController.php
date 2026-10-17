@@ -880,6 +880,10 @@ class PublicWebinarEksklusifController extends Controller
                 'status' => 'paid',
                 'bayar_status' => $kabar['status'],
                 'bayar_pada' => now(),
+
+                // Kanal yang benar-benar dipakai — VA Mandiri, QRIS, OVO.
+                // Tanpa ini layar panitia hanya bisa berkata "DOKU".
+                'bayar_kanal' => $kabar['kanal'] ?: $pendaftaran->bayar_kanal,
             ])->save();
 
             return $pendaftaran->refresh();
@@ -889,6 +893,7 @@ class PublicWebinarEksklusifController extends Controller
             $pendaftaran->forceFill([
                 'status' => $kabar['status'] === 'cancel' ? 'cancel' : 'expired',
                 'bayar_status' => $kabar['status'],
+                'bayar_kanal' => $kabar['kanal'] ?: $pendaftaran->bayar_kanal,
             ])->save();
 
             $this->kembalikanKuota($pendaftaran);
@@ -1031,6 +1036,15 @@ class PublicWebinarEksklusifController extends Controller
                 'status' => 'paid',
                 'bayar_status' => $status,
                 'bayar_pada' => now(),
+
+                /*
+                 * Kanalnya dibaca dari kiriman pemberitahuan ini juga, bukan
+                 * hanya dari jalur bertanya. Dua jalur menuju satu keadaan;
+                 * kalau hanya salah satu yang mengisinya, pendaftaran yang
+                 * kabarnya datang lebih dulu kehilangan keterangan ini.
+                 */
+                'bayar_kanal' => $this->doku->namaKanal($request->all())
+                    ?: $pendaftaran->bayar_kanal,
             ])->save();
         } elseif (in_array($status, ['failed', 'expired', 'cancel'], true)) {
             $pendaftaran->forceFill([

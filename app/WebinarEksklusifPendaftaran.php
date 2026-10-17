@@ -32,9 +32,27 @@ class WebinarEksklusifPendaftaran extends Model
         'ppn', 'kode_unik', 'kode_diskon', 'nominal_diskon', 'total_pembayaran',
         // Tali ke promo yang memotong harganya; dibaca layar dampak promo.
         'promo_id',
-        'gambar', 'cara_bayar', 'bayar_rujukan', 'bayar_status',
+        'gambar', 'cara_bayar', 'bayar_rujukan', 'bayar_status', 'bayar_kanal',
         'bayar_pada', 'kedaluwarsa_pada', 'status', 'note',
     ];
+
+    /**
+     * Nama kedua untuk kolom `bayar_kanal`.
+     *
+     * Kueri gabungan layar panitia menamainya `kanal_bayar` — nama kolomnya
+     * sendiri berbeda-beda antar lima tabel layanan, jadi yang dipakai di
+     * sana nama bersama. Layar rincian memakai model mentah ini, dan tanpa
+     * nama kedua tampilan yang sama harus ditulis dua kali dengan dua nama
+     * berbeda untuk satu hal yang sama.
+     *
+     * Model layanan lain tidak punya atribut ini, dan Eloquent memulangkan
+     * null untuk atribut yang tidak dikenal — jadi tampilan bersamanya aman
+     * dipakai kelima-limanya.
+     */
+    public function getKanalBayarAttribute(): ?string
+    {
+        return $this->attributes['bayar_kanal'] ?? null;
+    }
 
     protected $casts = [
         'jumlah_pendaftar' => 'integer',
