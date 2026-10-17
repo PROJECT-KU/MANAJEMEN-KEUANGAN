@@ -2032,11 +2032,18 @@ class WebinarEksklusifTest extends TestCase
     }
 
     /**
-     * Lewat gerbang pembayaran kode unik TIDAK dipakai: pencocokannya memakai
-     * nomor rujukan, dan menambah angka receh di sana justru membingungkan.
+     * Kode unik TETAP dipakai walau lewat gerbang pembayaran.
+     *
+     * Dulu sebaliknya — di sana pencocokannya sudah memakai nomor rujukan,
+     * jadi angka recehnya tidak menambah apa pun. Dibalik 17 Okt 2026 atas
+     * keputusan pemiliknya, dan konsekuensinya diterima: nominal yang dibayar
+     * berakhir ganjil.
+     *
+     * Rinciannya ikut dikirim ke gerbang pembayaran sebagai baris tersendiri;
+     * itu dijaga di tests/Feature/Doku/KodeUnikLewatDokuTest.
      */
     #[Test]
-    public function tanpa_kode_unik_kalau_lewat_gerbang_pembayaran(): void
+    public function kode_unik_tetap_dipakai_lewat_gerbang_pembayaran(): void
     {
         $palsu = new class extends \App\Services\Doku
         {
@@ -2064,8 +2071,11 @@ class WebinarEksklusifTest extends TestCase
 
         $p = WebinarEksklusifPendaftaran::where('email', 'gerbang@contoh.test')->first();
 
-        $this->assertNull($p->kode_unik);
-        $this->assertSame(129000, (int) $p->total_pembayaran, 'nominalnya bulat, tanpa kode unik');
+        $this->assertGreaterThan(0, (int) $p->kode_unik,
+            'Kode uniknya dinolkan padahal gerbang pembayaran aktif; itu perilaku lama.');
+
+        $this->assertSame(129000 + (int) $p->kode_unik, (int) $p->total_pembayaran,
+            'Kode uniknya tidak ikut masuk ke nominal yang ditagihkan.');
     }
 
     #[Test]
