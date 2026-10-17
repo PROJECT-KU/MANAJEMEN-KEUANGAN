@@ -88,6 +88,7 @@ class PublicWebinarEksklusifController extends Controller
      * sini: angkanya sempat berbeda-beda antar layanan, dan dua tempat yang
      * menyebut hal yang sama pasti berselisih begitu salah satunya diubah.
      */
+
     public const KODE_UNIK_MIN = \App\Support\PendaftaranSemuaLayanan::KODE_UNIK[0];
 
     public const KODE_UNIK_MAKS = \App\Support\PendaftaranSemuaLayanan::KODE_UNIK[1];
@@ -109,6 +110,7 @@ class PublicWebinarEksklusifController extends Controller
      * dipulangkan nol. Lebih baik dua nominal kembar daripada pendaftarannya
      * gagal tersimpan.
      */
+
     private function kodeUnikBebas(KategoriLayanan $sesi, int $totalDasar): int
     {
         $terpakai = WebinarEksklusifPendaftaran::where('kategori_id', $sesi->getKey())
@@ -688,11 +690,18 @@ class PublicWebinarEksklusifController extends Controller
                  * digit terakhir yang berbeda, satu mutasi rekening langsung
                  * menunjuk satu pendaftaran.
                  *
-                 * Hanya untuk transfer manual. Lewat gerbang pembayaran,
-                 * pencocokannya memakai nomor rujukan dan menambah angka receh
-                 * di sana justru membingungkan.
+                 * Dipakai untuk KEDUA cara bayar, atas keputusan pemiliknya
+                 * 17 Okt 2026. Sebelumnya kode uniknya dinolkan saat gerbang
+                 * pembayaran aktif, sebab di sana pencocokannya sudah memakai
+                 * nomor rujukan.
+                 *
+                 * Konsekuensinya memang nominal yang dibayar berakhir ganjil —
+                 * Rp 129.678 untuk webinar yang diiklankan Rp 129.000 — dan
+                 * itu diterima. Rinciannya ikut dikirim ke DOKU sebagai baris
+                 * tersendiri, jadi yang membayar melihat dari mana angka
+                 * recehnya datang, bukan sekadar total yang tidak bulat.
                  */
-                $kodeUnik = $this->doku->siap() ? 0 : $this->kodeUnikBebas($terkunci, $total);
+                $kodeUnik = $this->kodeUnikBebas($terkunci, $total);
                 $total += $kodeUnik;
 
                 $pendaftaran = WebinarEksklusifPendaftaran::create([

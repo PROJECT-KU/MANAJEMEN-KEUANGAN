@@ -86,14 +86,14 @@ class Doku
          * halaman bayar, sama seperti yang tertulis di borangnya.
          */
         $baris = [[
-            'name' => $pesanan['judul'],
+            'name' => $this->bersihkan((string) $pesanan['judul']),
             'price' => (int) $pesanan['harga_satuan'],
             'quantity' => (int) $pesanan['jumlah_peserta'],
         ]];
 
         if ((int) ($pesanan['potongan'] ?? 0) > 0) {
             $baris[] = [
-                'name' => trim((string) ($pesanan['label_potongan'] ?? 'Potongan')),
+                'name' => $this->bersihkan((string) ($pesanan['label_potongan'] ?? 'Potongan')),
                 'price' => -1 * (int) $pesanan['potongan'],
                 'quantity' => 1,
             ];
@@ -104,7 +104,10 @@ class Doku
         // pernah meleset kalau suatu saat dipakai juga.
         if ((int) ($pesanan['kode_unik'] ?? 0) > 0) {
             $baris[] = [
-                'name' => 'Kode unik transfer',
+                // "pembayaran", bukan "transfer": lewat gerbang ini orang
+                // boleh membayar dengan OVO, kartu, atau gerai — menyebutnya
+                // transfer membuat baris ini terbaca seperti salah tempat.
+                'name' => 'Kode unik pembayaran',
                 'price' => (int) $pesanan['kode_unik'],
                 'quantity' => 1,
             ];
@@ -150,7 +153,7 @@ class Doku
             ],
             'customer' => [
                 'id' => Str::limit((string) $pesanan['nomor'], 60, ''),
-                'name' => $pesanan['nama'],
+                'name' => $this->bersihkan((string) $pesanan['nama']),
                 'email' => $pesanan['email'],
                 'phone' => $pesanan['telp'],
             ],
@@ -247,6 +250,40 @@ class Doku
             $this->tandaTangan($jalur, $requestId, $waktu, $isiMentah),
             $kiriman
         );
+    }
+
+    /**
+     * Membersihkan teks dari huruf yang DITOLAK DOKU.
+     *
+     * DOKU hanya menerima a-z A-Z 0-9 dan . - / + , = _ : ' @ % ( ) beserta
+     * spasi. Satu huruf di luar itu membuat SELURUH tagihan ditolak dengan
+     * "Invalid character", dan yang mendaftar cuma melihat "pembayaran daring
+     * sedang bermasalah" tanpa petunjuk apa pun.
+     *
+     * Bukan kemungkinan yang jauh: judul sesi dan nama pendaftar diketik
+     * bebas, dan naskah di sistem ini penuh emoji serta tanda pisah panjang —
+     * 📘 🗓 – … semuanya ditolak. Terjadi persis begitu 17 Okt 2026, saat
+     * nama item diberi tanda pisah panjang "—" dan elipsis "…".
+     *
+     * Yang mirip DIGANTI padanannya, bukan dibuang: "–" jadi "-" dan "…" jadi
+     * "...", supaya tulisannya tetap terbaca. Sisanya dibuang.
+     */
+    private function bersihkan(string $teks): string
+    {
+        $padanan = [
+            '—' => '-', '–' => '-', '‒' => '-', '―' => '-',
+            '…' => '...',
+            '’' => "'", '‘' => "'", '‛' => "'",
+            '“' => "'", '”' => "'", '„' => "'", '«' => "'", '»' => "'",
+            '•' => '-', '·' => '-', '×' => 'x',
+            '&' => 'dan',
+        ];
+
+        $teks = strtr($teks, $padanan);
+        $teks = preg_replace('/[^a-zA-Z0-9 .\-\/+,=_:\x27@%()]/u', '', $teks);
+
+        // Spasi rangkap muncul sendiri begitu emoji di antaranya dibuang.
+        return trim((string) preg_replace('/\s{2,}/', ' ', (string) $teks));
     }
 
     /**
