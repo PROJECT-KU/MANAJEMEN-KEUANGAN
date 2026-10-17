@@ -80,6 +80,9 @@ class PromoWebinarDitagihTest extends TestCase
 
     private function daftarkan(KategoriLayanan $sesi, int $jumlah = 1): WebinarEksklusifPendaftaran
     {
+        $sebelumnya = WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)
+            ->pluck('id')->all();
+
         $peserta = [];
 
         for ($i = 2; $i <= $jumlah; $i++) {
@@ -97,11 +100,21 @@ class PromoWebinarDitagihTest extends TestCase
             'setuju' => '1',
         ])->assertRedirect();
 
-        $p = WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)->latest('id')->first();
+        /*
+         * Diambil dari SELISIH kumpulan id, bukan latest('id').
+         *
+         * Kunci utamanya UUID, jadi latest('id') mengurutkan menurut abjad
+         * UUID — bukan urutan pembuatan — dan memulangkan baris sembarang
+         * begitu ada lebih dari satu pendaftaran di sesi yang sama. Di sini
+         * baru satu, jadi selama ini benar karena kebetulan.
+         */
+        $baru = WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)
+            ->whereNotIn('id', $sebelumnya)
+            ->get();
 
-        $this->assertNotNull($p, 'Pendaftarannya tidak tersimpan sama sekali.');
+        $this->assertCount(1, $baru, 'Pendaftarannya tidak bertambah tepat satu.');
 
-        return $p;
+        return $baru->first();
     }
 
     #[Test]
