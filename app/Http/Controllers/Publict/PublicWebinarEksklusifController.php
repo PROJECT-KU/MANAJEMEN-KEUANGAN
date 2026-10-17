@@ -646,6 +646,26 @@ class PublicWebinarEksklusifController extends Controller
                         . ' untuk Anda — tidak perlu mendaftar lagi.');
         }
 
+        /*
+         * Gerbang pembayaran belum siap: DITOLAK di sini, sebelum barisnya
+         * dibuat dan sebelum kuotanya dipotong.
+         *
+         * Sejak transfer manual dicabut, tidak ada jalan bayar lain. Tanpa
+         * penjagaan ini borangnya akan menerima pendaftaran yang tidak bisa
+         * ditagih sama sekali — kursinya terpotong, orangnya menunggu, dan
+         * tidak ada satu pun layar yang menyatakan ada yang salah.
+         */
+        if (! $this->doku->siap()) {
+            Log::error('Pendaftaran Webinar Eksklusif ditolak: gerbang pembayaran belum disetel');
+
+            return back()->withInput()->with(
+                'error',
+                'Pembayaran daring sedang tidak tersedia. Pendaftaran Anda BELUM '
+                . 'tersimpan — silakan hubungi panitia lewat WhatsApp supaya '
+                . 'didaftarkan secara manual.'
+            );
+        }
+
         try {
             $pendaftaran = DB::transaction(function () use ($sesi, $data) {
                 $terkunci = KategoriLayanan::whereKey($sesi->getKey())->lockForUpdate()->first();
@@ -722,9 +742,17 @@ class PublicWebinarEksklusifController extends Controller
                     'promo_id' => $promo?->getKey(),
                     'kode_diskon' => $potongan > 0 ? trim((string) $data['kode_diskon']) : null,
                     'nominal_diskon' => $potongan > 0 ? (string) $potongan : null,
-                    'cara_bayar' => $this->doku->siap() ? 'doku' : 'transfer',
+                    /*
+                     * SELALU lewat gerbang pembayaran, sejak 17 Okt 2026.
+                     *
+                     * Transfer manual dicabut atas keputusan pemiliknya.
+                     * Jalurnya tidak lagi bisa dipilih, jadi tidak ada lagi
+                     * cabang di sini — yang tidak punya gerbang siap sudah
+                     * ditolak lebih dulu, sebelum barisnya dibuat.
+                     */
+                    'cara_bayar' => 'doku',
                     'status' => 'pending',
-                    'kedaluwarsa_pada' => now()->addMinutes(self::menitKedaluwarsa($this->doku->siap())),
+                    'kedaluwarsa_pada' => now()->addMinutes(Doku::MENIT_KEDALUWARSA),
                 ]);
 
                 /*
@@ -773,10 +801,6 @@ class PublicWebinarEksklusifController extends Controller
      */
     private function mulaiBayar(WebinarEksklusifPendaftaran $pendaftaran, KategoriLayanan $sesi)
     {
-        if (! $this->doku->siap()) {
-            return redirect()->route('public.webinareksklusif.status', $pendaftaran->getKey());
-        }
-
         $hasil = $this->doku->buatTagihan([
             'nomor' => $pendaftaran->id_transaksi,
             'jumlah' => (int) $pendaftaran->total_pembayaran,
@@ -805,14 +829,26 @@ class PublicWebinarEksklusifController extends Controller
         ]);
 
         if (! $hasil['berhasil'] || ! $hasil['url']) {
+            /*
+             * TIDAK lagi dialihkan ke transfer manual.
+             *
+             * Jalur itu dicabut 17 Okt 2026, jadi menandainya 'transfer'
+             * akan memberi orangnya halaman berisi nomor rekening yang
+             * sudah tidak dipakai — dan uang yang masuk ke sana tidak
+             * tercocokkan oleh siapa pun.
+             *
+             * Pendaftarannya TETAP disimpan: orangnya sudah mengisi borang,
+             * dan menghapusnya berarti ia mengulang dari nol karena
+             * kesalahan yang bukan miliknya.
+             */
             $pendaftaran->forceFill([
-                'cara_bayar' => 'transfer',
                 'note' => 'Pembayaran daring gagal dibuat: ' . ($hasil['pesan'] ?? 'tidak diketahui'),
             ])->save();
 
             return redirect()->route('public.webinareksklusif.status', $pendaftaran->getKey())
-                ->with('error', 'Pembayaran daring sedang bermasalah. '
-                    . 'Pendaftaran Anda sudah tersimpan — silakan bayar lewat transfer.');
+                ->with('error', 'Pembayaran daring sedang bermasalah. Pendaftaran Anda '
+                    . 'sudah tersimpan dan kursinya ditahan — silakan hubungi panitia '
+                    . 'lewat WhatsApp untuk menyelesaikan pembayarannya.');
         }
 
         $pendaftaran->forceFill([
@@ -886,7 +922,15 @@ class PublicWebinarEksklusifController extends Controller
                 'bayar_kanal' => $kabar['kanal'] ?: $pendaftaran->bayar_kanal,
             ])->save();
 
-            return $pendaftaran->refresh();
+            /*
+             * Dikabari SESUDAH tersimpan, dan hanya di sini — yaitu di
+             * dalam cabang yang baru saja memindahkan keadaannya. Kalau
+             * dipanggil di luar, tiap kali halamannya dibuka orangnya
+             * dikirimi surat yang sama lagi.
+             */
+            $this->kabariSudahLunas($pendaftaran->refresh());
+
+            return $pendaftaran;
         }
 
         if ($kabar['gagal']) {
@@ -1046,6 +1090,11 @@ class PublicWebinarEksklusifController extends Controller
                 'bayar_kanal' => $this->doku->namaKanal($request->all())
                     ?: $pendaftaran->bayar_kanal,
             ])->save();
+
+            // Cabang ini hanya dimasuki yang statusnya belum 'paid' —
+            // dijaga oleh pemeriksaan di atas — jadi suratnya tidak akan
+            // terkirim dua kali walau DOKU mengulang pemberitahuannya.
+            $this->kabariSudahLunas($pendaftaran->refresh());
         } elseif (in_array($status, ['failed', 'expired', 'cancel'], true)) {
             $pendaftaran->forceFill([
                 'status' => $status === 'cancel' ? 'cancel' : 'expired',
@@ -1305,6 +1354,31 @@ class PublicWebinarEksklusifController extends Controller
      * sedang bermasalah, yang pantas terjadi adalah galatnya dicatat, bukan
      * orangnya melihat layar error padahal pendaftarannya berhasil.
      */
+    /**
+     * Mengabari lewat surat bahwa pembayarannya sudah masuk.
+     *
+     * Sebelum ini surat pendaftaran hanya dikirim di dua tempat — saat
+     * mendaftar dan saat pendaftarnya sendiri menekan "kirim ulang" — jadi
+     * yang SUDAH membayar tetap hanya memegang surat berlabel "BELUM
+     * DIBAYAR". Tampilannya sudah lama bisa berbunyi "SUDAH DIBAYAR"; yang
+     * tidak ada adalah yang memanggilnya saat keadaannya berubah.
+     *
+     * Dipanggil dari dua jalur yang sama-sama bisa menandai lunas:
+     * pemberitahuan dari gerbang, dan pertanyaan kita sendiri ke gerbang.
+     * Keduanya memanggil SESUDAH menyimpan, dan hanya kalau keadaannya
+     * benar-benar berpindah — bukan tiap kali dilihat.
+     */
+    private function kabariSudahLunas(WebinarEksklusifPendaftaran $pendaftaran): void
+    {
+        $sesi = KategoriLayanan::find($pendaftaran->kategori_id);
+
+        if ($sesi === null) {
+            return;
+        }
+
+        $this->kirimEmailPendaftaran($pendaftaran, $sesi);
+    }
+
     private function kirimEmailPendaftaran(WebinarEksklusifPendaftaran $pendaftaran, KategoriLayanan $sesi): void
     {
         try {
