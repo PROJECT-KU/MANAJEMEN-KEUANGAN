@@ -38,5 +38,20 @@
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
+
+        <!--
+            Pembayaran daring DIMATIKAN di rangkaian uji.
+
+            Tanpa ini, ujinya ikut berubah perilaku begitu seseorang mengisi
+            kunci DOKU di .env miliknya: borang pendaftaran berhenti memakai
+            transfer manual dan beralih ke gerbang pembayaran, lalu sembilan
+            uji merah di mesin itu saja — sementara di mesin lain tetap hijau.
+            Terjadi persis begitu 17 Okt 2026.
+
+            Uji yang memang menguji DOKU menyalakannya sendiri lewat
+            config()->set(), jadi ia tidak bergantung keadaan .env siapa pun.
+        -->
+        <env name="DOKU_CLIENT_ID" value=""/>
+        <env name="DOKU_SECRET_KEY" value=""/>
     </php>
 </phpunit>
