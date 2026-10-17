@@ -853,6 +853,21 @@ class PublicWebinarEksklusifController extends Controller
 
         $pendaftaran->forceFill([
             'bayar_rujukan' => $hasil['rujukan'],
+
+            /*
+             * Alamat halaman bayarnya DISIMPAN.
+             *
+             * Sebelum ini ia hanya dipakai sekali untuk mengalihkan, lalu
+             * dibuang. Siapa pun yang menutup tab itu — atau membuka tautan
+             * di emailnya nanti — mendarat di halaman status yang menghitung
+             * mundur TANPA satu pun tombol untuk membayar, lalu kursinya
+             * dilepas saat waktunya habis.
+             *
+             * Masa berlakunya sama dengan tenggat pendaftarannya (60 menit),
+             * jadi tombolnya hilang sendiri bersamaan dengan habisnya waktu.
+             */
+            'bayar_url' => $hasil['url'],
+
             'bayar_status' => 'menunggu',
         ])->save();
 
