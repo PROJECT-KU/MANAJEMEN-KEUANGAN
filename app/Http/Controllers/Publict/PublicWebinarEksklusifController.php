@@ -773,6 +773,21 @@ class PublicWebinarEksklusifController extends Controller
             'jumlah' => (int) $pendaftaran->total_pembayaran,
             'harga_satuan' => (int) $sesi->harga_setelah_promo,
             'jumlah_peserta' => $pendaftaran->jumlah_pendaftar,
+
+            /*
+             * Potongan dan kode uniknya IKUT dikirim sebagai rincian.
+             *
+             * Tanpa keduanya, rincian tagihan tidak berjumlah sama dengan
+             * totalnya dan DOKU menolak dengan "AMOUNT NOT MATCH" — tepat
+             * pada pendaftaran yang memakai kode diskon, yaitu yang paling
+             * mungkin disalahkan orangnya sendiri.
+             */
+            'potongan' => (int) $pendaftaran->nominal_diskon,
+            'label_potongan' => $pendaftaran->kode_diskon
+                ? 'Potongan ' . $pendaftaran->kode_diskon
+                : 'Potongan',
+            'kode_unik' => (int) $pendaftaran->kode_unik,
+
             'judul' => $sesi->nama,
             'nama' => $pendaftaran->nama,
             'email' => $pendaftaran->email,
