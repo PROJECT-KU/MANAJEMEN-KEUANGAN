@@ -32,10 +32,14 @@ class PromoWebinarDitagihTest extends TestCase
 {
     use DatabaseTransactions;
 
+    // Borangnya menolak tanpa kredensial gerbang; lihat traitnya.
+    use \Tests\MenyiapkanGerbangBayar;
+
     protected function setUp(): void
     {
         parent::setUp();
 
+        $this->siapkanGerbangBayar();
         PromoAngkatan::lupakan();
     }
 

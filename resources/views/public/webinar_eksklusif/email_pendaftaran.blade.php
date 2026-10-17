@@ -194,20 +194,48 @@
                                                 <td valign="top" style="padding:3px 8px 3px 0;font-weight:bold;">1.</td>
                                                 <td style="padding:3px 0;">Buka halaman status lewat tombol di bawah.</td>
                                             </tr>
-                                            <tr>
-                                                <td valign="top" style="padding:3px 8px 3px 0;font-weight:bold;">2.</td>
-                                                <td style="padding:3px 0;">
-                                                    Transfer <strong>tepat sampai angka terakhir</strong> sesuai nominal di sana.
-                                                    @if ((int) $pendaftaran->kode_unik > 0)
-                                                        Angka terakhirnya kode unik Anda — kalau dibulatkan,
-                                                        pembayarannya tidak bisa kami cocokkan.
-                                                    @endif
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td valign="top" style="padding:3px 8px 3px 0;font-weight:bold;">3.</td>
-                                                <td style="padding:3px 0;">Kirim bukti transfernya ke panitia lewat WhatsApp.</td>
-                                            </tr>
+                                            {{-- Langkahnya BERCABANG menurut cara bayarnya.
+
+                                                 Sejak transfer manual dicabut, pendaftaran baru
+                                                 selalu lewat gerbang pembayaran — dan menyuruhnya
+                                                 "transfer lalu kirim bukti ke WhatsApp" berarti
+                                                 mengarahkan uang ke rekening yang tidak lagi
+                                                 dicocokkan siapa pun.
+
+                                                 Cabang transfernya DIPERTAHANKAN: pendaftaran lama
+                                                 masih ada dan suratnya masih bisa dikirim ulang. --}}
+                                            @if ($pendaftaran->cara_bayar === 'transfer')
+                                                <tr>
+                                                    <td valign="top" style="padding:3px 8px 3px 0;font-weight:bold;">2.</td>
+                                                    <td style="padding:3px 0;">
+                                                        Transfer <strong>tepat sampai angka terakhir</strong> sesuai nominal di sana.
+                                                        @if ((int) $pendaftaran->kode_unik > 0)
+                                                            Angka terakhirnya kode unik Anda — kalau dibulatkan,
+                                                            pembayarannya tidak bisa kami cocokkan.
+                                                        @endif
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td valign="top" style="padding:3px 8px 3px 0;font-weight:bold;">3.</td>
+                                                    <td style="padding:3px 0;">Kirim bukti transfernya ke panitia lewat WhatsApp.</td>
+                                                </tr>
+                                            @else
+                                                <tr>
+                                                    <td valign="top" style="padding:3px 8px 3px 0;font-weight:bold;">2.</td>
+                                                    <td style="padding:3px 0;">
+                                                        Selesaikan pembayarannya di halaman itu — bisa lewat
+                                                        transfer bank (virtual account), QRIS, e-wallet, atau kartu.
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td valign="top" style="padding:3px 8px 3px 0;font-weight:bold;">3.</td>
+                                                    <td style="padding:3px 0;">
+                                                        Begitu pembayarannya masuk, status Anda berubah sendiri
+                                                        dan kami kirimkan surat penanda lunas. Tidak perlu
+                                                        mengirim bukti apa pun.
+                                                    </td>
+                                                </tr>
+                                            @endif
                                         </table>
                                     </td>
                                 </tr>

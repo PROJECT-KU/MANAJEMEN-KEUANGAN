@@ -19,9 +19,47 @@ class WebinarEksklusifTest extends TestCase
 {
     use DatabaseTransactions;
 
+    /*
+     * Gerbang pembayaran disiapkan untuk SELURUH kelas ini.
+     *
+     * Sejak transfer manual dicabut, borang pendaftaran menolak kalau
+     * kredensial gerbangnya kosong — dan phpunit.xml sengaja
+     * mengosongkannya. Tanpa ini, 44 uji di berkas ini merah bukan karena
+     * yang diujinya rusak, melainkan karena pendaftarannya tidak pernah
+     * sampai tersimpan.
+     */
+    use \Tests\MenyiapkanGerbangBayar;
+
+    /**
+     * Pendaftaran PENINGGALAN yang bertanda transfer manual.
+     *
+     * Jalur itu dicabut 17 Okt 2026, jadi borang umum tidak bisa lagi
+     * menghasilkannya — tetapi barisnya masih ada di basis data, dan layar
+     * cara-bayarnya masih harus utuh untuk mereka. Dibuat langsung di sini,
+     * bukan lewat borang, supaya maksudnya terang: yang diuji layar lama,
+     * bukan jalur pendaftaran yang sekarang.
+     */
+    private function transferPeninggalan(KategoriLayanan $sesi, array $ubah = []): WebinarEksklusifPendaftaran
+    {
+        return WebinarEksklusifPendaftaran::create(array_merge([
+            'id_transaksi' => 'WE-LAMA-' . Str::random(6),
+            'kategori_id' => $sesi->getKey(),
+            'nama' => 'Pendaftar Peninggalan',
+            'email' => 'lama' . Str::random(5) . '@contoh.test',
+            'telp' => '6281234567890',
+            'jumlah_pendaftar' => 1,
+            'total_pembayaran' => '129770',
+            'kode_unik' => '770',
+            'cara_bayar' => 'transfer',
+            'status' => 'pending',
+            'kedaluwarsa_pada' => now()->addHours(20),
+        ], $ubah));
+    }
+
     protected function setUp(): void
     {
         parent::setUp();
+        $this->siapkanGerbangBayar();
         Layanan::lupakanKatalog();
         KategoriLayanan::lupakanPendaftar();
         ClinikScopusBiayaPersesi::lupakanPemeriksaanJadwal();
@@ -1680,34 +1718,37 @@ class WebinarEksklusifTest extends TestCase
      * pendaftaran transfer pasti kedaluwarsa walau uangnya sudah dikirim.
      */
     #[Test]
-    public function transfer_manual_diberi_waktu_satu_kali_24_jam(): void
+    public function pendaftaran_baru_diberi_waktu_enam_puluh_menit(): void
     {
+        /*
+         * Dulu 1x24 jam, sebab yang membayar harus pergi ke bank lalu
+         * mengunggah bukti. Sejak transfer manual dicabut dan semuanya lewat
+         * gerbang pembayaran, tenggatnya mengikuti masa berlaku tagihan di
+         * sana: 60 menit.
+         *
+         * Dipatok TEPAT, bukan "lebih pendek dari sebelumnya": angkanya
+         * dijanjikan kepada peserta di halaman status dan dipakai hitung
+         * mundur yang berjalan di layarnya. Yang dijanjikan harus yang
+         * dijaga.
+         */
         $sesi = $this->sesi();
 
         $this->post(route('public.webinareksklusif.store'), [
-            'kategori_id' => $sesi->id, 'nama' => 'Transfer', 'email' => 'transfer@contoh.test',
+            'kategori_id' => $sesi->id, 'nama' => 'Tenggat', 'email' => 'tenggat@contoh.test',
             'telp' => '08123457777', 'jumlah_pendaftar' => 1, 'setuju' => '1',
         ]);
 
-        $p = WebinarEksklusifPendaftaran::where('email', 'transfer@contoh.test')->first();
+        $p = WebinarEksklusifPendaftaran::where('email', 'tenggat@contoh.test')->first();
 
-        $this->assertSame('transfer', $p->cara_bayar, 'prasyarat: DOKU belum disetel');
+        $this->assertNotNull($p, 'Pendaftarannya tidak tersimpan sama sekali.');
+        $this->assertSame('doku', $p->cara_bayar, 'prasyarat: semuanya lewat gerbang');
 
-        /*
-         * Dipatok TEPAT 1x24 jam, bukan sekadar "lebih panjang dari gerbang".
-         *
-         * Bentuk longgarnya (> 12 jam) lolos juga untuk 13 jam maupun 72 jam,
-         * padahal angkanya dijanjikan kepada peserta di halaman status dan
-         * dipakai hitung mundur yang berjalan di layarnya. Yang dijanjikan
-         * harus yang dijaga.
-         *
-         * Dibandingkan dalam MENIT dengan kelonggaran satu menit: beberapa
-         * detik berlalu antara permintaannya diproses dan baris ini dijalankan.
-         */
-        $menit = now()->diffInMinutes($p->kedaluwarsa_pada, false);
-
-        $this->assertEqualsWithDelta(24 * 60, $menit, 1,
-            'Batas transfer manual harus 1x24 jam; itu yang tertulis di halaman status.');
+        $this->assertEqualsWithDelta(
+            \App\Services\Doku::MENIT_KEDALUWARSA,
+            now()->diffInMinutes($p->kedaluwarsa_pada),
+            1,
+            'Tenggatnya tidak sama dengan masa berlaku tagihan di gerbang.'
+        );
     }
 
     // --------------------------------------------- batas rombongan & email
@@ -2081,14 +2122,10 @@ class WebinarEksklusifTest extends TestCase
     #[Test]
     public function halaman_status_menyebut_kode_unik_dan_alasannya(): void
     {
-        $sesi = $this->sesi();
-
-        $this->post(route('public.webinareksklusif.store'), [
-            'kategori_id' => $sesi->id, 'nama' => 'Unik Status', 'email' => 'unik.status@contoh.test',
-            'telp' => '08123450902', 'jumlah_pendaftar' => 1, 'setuju' => '1',
-        ]);
-
-        $p = WebinarEksklusifPendaftaran::where('email', 'unik.status@contoh.test')->first();
+        // Kalimat "jangan dibulatkan" memang milik layar TRANSFER: lewat
+        // gerbang, nominalnya dipatok virtual account dan tidak mungkin
+        // dibulatkan orangnya.
+        $p = $this->transferPeninggalan($this->sesi());
 
         $this->get(route('public.webinareksklusif.status', $p->getKey()))
             ->assertOk()
@@ -2226,14 +2263,8 @@ class WebinarEksklusifTest extends TestCase
          * Dijaga PENANDA KELASNYA, bukan lebarnya: lebar hanya ada di
          * peramban, dan uji yang mengukurnya tidak bisa dijalankan di sini.
          */
-        $sesi = $this->sesi();
-
-        $this->post(route('public.webinareksklusif.store'), [
-            'kategori_id' => $sesi->id, 'nama' => 'Tata', 'email' => 'tata@contoh.test',
-            'telp' => '08123459999', 'jumlah_pendaftar' => 1, 'setuju' => '1',
-        ]);
-
-        $p = WebinarEksklusifPendaftaran::where('email', 'tata@contoh.test')->firstOrFail();
+        // Lajur kanannya berisi borang unggah bukti — milik layar transfer.
+        $p = $this->transferPeninggalan($this->sesi());
 
         $isi = $this->get(route('public.webinareksklusif.status', $p->getKey()))
             ->assertOk()
@@ -2768,11 +2799,9 @@ class WebinarEksklusifTest extends TestCase
          * orang yang memang belum membayar kehilangan satu-satunya jalan
          * membayar — dan tautan di emailnya menuju halaman yang sama.
          */
-        $sesi = $this->sesi(['total_kuota' => '20', 'sisa_kuota' => '20']);
-
-        $this->post(route('public.webinareksklusif.store'), $this->borang($sesi));
-
-        $p = WebinarEksklusifPendaftaran::where('email', 'berto@contoh.test')->firstOrFail();
+        // Yang diperiksa nomor rekening dan borang unggahnya — keduanya
+        // hanya ada di layar transfer.
+        $p = $this->transferPeninggalan($this->sesi(['total_kuota' => '20', 'sisa_kuota' => '20']));
 
         $isi = $this->get(route('public.webinareksklusif.status', $p->getKey()))
             ->assertOk()
