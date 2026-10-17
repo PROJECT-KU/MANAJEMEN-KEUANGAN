@@ -468,6 +468,42 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                         </ol>
                     </div>
                 @endif
+
+            {{--
+                TAWARAN BUAT AKUN — opt-in, bukan dibuatkan diam-diam.
+
+                Akun tidak dibuat otomatis saat mendaftar dengan sengaja:
+                akun hasil buatan sistem tidak punya sandi yang dipilih
+                orangnya, dan email yang salah ketik akan menciptakan akun
+                yang tidak bisa dibuka siapa pun — sekaligus menghalangi
+                pendaftaran akun sungguhannya nanti, sebab emailnya unik.
+
+                Jadi ditawarkan di sini, sesudah pendaftarannya aman, dengan
+                email dan namanya sudah dibawa ke borang pendaftaran akun.
+                Tidak ditampilkan kepada yang sudah masuk.
+
+                Letaknya di lajur KIRI, bukan kanan. Di kanan ia menumpuk di
+                bawah kabar pembayaran — terukur lajur kanan 611px sementara
+                lajur kiri berhenti di 341px, jadi separuh bawah sisi kiri
+                menganga kosong sementara sisi kanannya penuh sesak. Di sini
+                ia mengisi ruang itu, dan memang tempatnya: isinya tentang
+                orangnya, sama seperti rincian di atasnya.
+            --}}
+            @guest
+                @if (! $batal && ! $habis)
+                    <div class="sta-tawar-akun">
+                        <p class="sta-tawar-judul">Mau lebih mudah lain kali?</p>
+                        <p class="sta-tawar-isi">
+                            Dengan akun, riwayat pendaftaran Anda tersimpan dan borangnya
+                            terisi sendiri di sesi berikutnya.
+                        </p>
+                        <a href="{{ route('register', ['email' => $pendaftaran->email, 'nama' => $pendaftaran->nama]) }}">
+                            <i class="fas fa-user-plus" aria-hidden="true"></i>
+                            Buat akun pakai email ini
+                        </a>
+                    </div>
+                @endif
+            @endguest
                 </div>{{-- /lajur kiri --}}
 
                 <div class="sta-lajur sta-lajur-kanan">
@@ -675,77 +711,61 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
             @endif
 
 
-            {{--
-                TAWARAN BUAT AKUN — opt-in, bukan dibuatkan diam-diam.
-
-                Akun tidak dibuat otomatis saat mendaftar dengan sengaja:
-                akun hasil buatan sistem tidak punya sandi yang dipilih
-                orangnya, dan email yang salah ketik akan menciptakan akun
-                yang tidak bisa dibuka siapa pun — sekaligus menghalangi
-                pendaftaran akun sungguhannya nanti, sebab emailnya unik.
-
-                Jadi ditawarkan di sini, sesudah pendaftarannya aman, dengan
-                email dan namanya sudah dibawa ke borang pendaftaran akun.
-                Tidak ditampilkan kepada yang sudah masuk.
-            --}}
-            @guest
-                @if (! $batal && ! $habis)
-                    <div class="sta-tawar-akun">
-                        <p class="sta-tawar-judul">Mau lebih mudah lain kali?</p>
-                        <p class="sta-tawar-isi">
-                            Dengan akun, riwayat pendaftaran Anda tersimpan dan borangnya
-                            terisi sendiri di sesi berikutnya.
-                        </p>
-                        <a href="{{ route('register', ['email' => $pendaftaran->email, 'nama' => $pendaftaran->nama]) }}">
-                            <i class="fas fa-user-plus" aria-hidden="true"></i>
-                            Buat akun pakai email ini
-                        </a>
-                    </div>
-                @endif
-            @endguest
-
-            {{--
-                Kirim ulang bukti pendaftaran.
-
-                Satu-satunya jalan kembali ke halaman ini adalah tautan
-                ber-UUID di email. Kalau emailnya terhapus atau masuk folder
-                sampah, orangnya kehilangan nomor pendaftaran dan cara
-                bayarnya sekaligus — dan yang menanggung panitia lewat
-                WhatsApp.
-
-                Tidak ditampilkan untuk yang sudah batal atau kedaluwarsa:
-                di sana tidak ada lagi yang perlu disimpan.
-            --}}
-            @if (! $batal && ! $habis)
-                <form method="POST" action="{{ route('public.webinareksklusif.kirimulang', $pendaftaran->getKey()) }}"
-                    class="sta-kirim-ulang">
-                    @csrf
-                    <button type="submit">
-                        <i class="fas fa-paper-plane" aria-hidden="true"></i>
-                        Kirim ulang bukti pendaftaran ke email saya
-                    </button>
-                </form>
-            @endif
-
                 </div>{{-- /lajur kanan --}}
             </div>{{-- /kisi --}}
 
 
-            <div class="sta-aksi">
-                @if ($batal || $habis)
-                    <a href="{{ route('public.webinareksklusif.index') }}" class="sta-tombol">
-                        Lihat sesi yang dibuka
-                    </a>
-                @else
-                    <a href="{{ route('public.webinareksklusif.index') }}" class="sta-tautan">
-                        Lihat sesi lainnya
-                    </a>
-                @endif
-            </div>
+            {{--
+                KAKI HALAMAN.
 
-            <p class="sta-simpan">
-                Simpan halaman ini. Alamatnya bisa dibuka kapan saja untuk melihat status terbaru.
-            </p>
+                Tiga hal kecil ini dulu tersebar: tombol kirim ulang menggantung
+                di dasar lajur kanan, "Lihat sesi lainnya" berdiri sendiri di
+                tengah, dan kalimat "simpan halaman ini" melayang di bawahnya
+                lagi. Terukur: lajur kanan 446px sementara lajur kiri 341px,
+                dan selisihnya sebagian besar dari tombol yang menggantung itu.
+
+                Dikumpulkan jadi satu kaki bergaris, halamannya punya tepi
+                bawah yang disengaja — dan lajur kanannya ikut memendek
+                sampai sejajar dengan lajur kiri.
+
+                Keduanya memang tidak pernah bersamaan: tombol kirim ulang
+                hanya untuk yang pendaftarannya masih hidup, tombol oranye
+                hanya untuk yang sudah batal atau kedaluwarsa. Dulu syarat
+                yang sama ditulis dua kali di dua tempat yang berjauhan.
+            --}}
+            <div class="sta-kaki">
+                <div class="sta-kaki-aksi">
+                    @if ($batal || $habis)
+                        <a href="{{ route('public.webinareksklusif.index') }}" class="sta-tombol">
+                            Lihat sesi yang dibuka
+                        </a>
+                    @else
+                        {{-- Satu-satunya jalan kembali ke halaman ini adalah tautan
+                             ber-UUID di emailnya. Kalau emailnya terhapus atau masuk
+                             folder sampah, orangnya kehilangan nomor pendaftaran dan
+                             cara bayarnya sekaligus — dan yang menanggung panitia
+                             lewat WhatsApp. --}}
+                        <form method="POST"
+                            action="{{ route('public.webinareksklusif.kirimulang', $pendaftaran->getKey()) }}"
+                            class="sta-kirim-ulang">
+                            @csrf
+                            <button type="submit">
+                                <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                                Kirim ulang bukti pendaftaran ke email saya
+                            </button>
+                        </form>
+
+                        <a href="{{ route('public.webinareksklusif.index') }}" class="sta-tautan">
+                            <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                            Lihat sesi lainnya
+                        </a>
+                    @endif
+                </div>
+
+                <p class="sta-simpan">
+                    Simpan halaman ini. Alamatnya bisa dibuka kapan saja untuk melihat status terbaru.
+                </p>
+            </div>
         </div>
     </div>
 </section>
@@ -789,7 +809,29 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
 
     /* Satu lajur dulu. Dua lajurnya dipasang di media query layar lebar,
        bukan sebaliknya — halaman ini paling sering dibuka di ponsel. */
-    .sta-kisi { display: block; }
+    /*
+     * DI PONSEL kisinya flex tegak dan kedua pembungkus lajurnya dibuat
+     * display:contents — kotaknya lenyap, isinya naik jadi anak langsung
+     * kisinya. Gunanya satu: supaya urutan tumpukannya bisa diatur.
+     *
+     * Tanpa itu, tawaran buat akun — yang di layar lebar duduk di dasar
+     * lajur kiri — ikut terbawa ke atas saat lajurnya menumpuk, dan
+     * mendarat DI ANTARA rincian dan kartu menunggu. Iklan yang boleh
+     * dilewati jadi berdiri di depan satu-satunya kartu yang berubah
+     * sendiri saat pembayarannya masuk.
+     *
+     * display:contents aman di sini: pembungkusnya div polos tanpa tepi,
+     * bantalan, maupun makna — di ponsel memang tidak ada yang hilang.
+     * Di layar lebar ia dikembalikan jadi block oleh aturan kisi 2 lajur.
+     */
+    .sta-kisi { display: flex; flex-direction: column; }
+
+    .sta-kisi > .sta-lajur { display: contents; }
+
+    /* Hitung mundurnya tetap paling atas, tawaran akun selalu paling
+       bawah; sisanya mengikuti urutan markahnya. */
+    .sta-kisi > .sta-mundur { order: -1; }
+    .sta-kisi .sta-tawar-akun { order: 2; }
 
     .sta-galat,
     .sta-sukses,
@@ -832,12 +874,22 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
 
     /* ---------------------------------------------- tawaran buat akun */
 
+    /*
+     * Tawaran akun diredam jadi abu-abu, bukan nila lagi.
+     *
+     * Begitu kartu menunggu diberi warna nila, keduanya jadi kembar: dua
+     * kotak nila bertumpuk, sama besar, sama ramai — padahal yang satu
+     * kabar tentang uang orangnya dan yang satu lagi iklan yang boleh
+     * dilewati. Warnanya yang menentukan mana yang dibaca lebih dulu.
+     *
+     * Tombolnya TETAP nila: yang diredam kotaknya, bukan ajakannya.
+     */
     .sta-tawar-akun {
         margin: 0 0 16px;
         padding: 16px 18px;
         border-radius: 14px;
-        border: 1px solid #c7d2fe;
-        background: #eef2ff;
+        border: 1px solid var(--garis);
+        background: #f8fafc;
         text-align: center;
     }
 
@@ -941,7 +993,9 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
 
     /* ---------------------------------------- kirim ulang bukti pendaftaran */
 
-    .sta-kirim-ulang { margin: 0 0 14px; text-align: center; }
+    /* Dulu blok tersendiri dengan jarak bawah; sekarang satu item di
+       dalam baris kaki, jadi jaraknya diatur gap barisnya. */
+    .sta-kirim-ulang { margin: 0; }
 
     .sta-kirim-ulang button {
         display: inline-flex;
@@ -1225,11 +1279,21 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
         text-align: left;
     }
 
+    /*
+     * Kisi dua kolom, BUKAN flex-wrap.
+     *
+     * Dengan flex-wrap, nilai yang panjang — judul sesinya — tidak muat di
+     * sisa baris lalu turun utuh ke baris berikutnya, meninggalkan kata
+     * "Sesi" sendirian di baris atas. Enam baris rapi lalu satu baris yang
+     * patah begitu saja.
+     *
+     * Pada kisi, nilainya punya kolomnya sendiri: ia patah DI DALAM
+     * kolomnya dan labelnya tetap sebaris dengan baris pertamanya.
+     */
     .sta-rincian > div {
-        display: flex;
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
         align-items: baseline;
-        justify-content: space-between;
         gap: 4px 16px;
         padding: 8px 0;
         border-bottom: 1px solid #eef2f7;
@@ -1652,7 +1716,27 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
         line-height: 1.5;
     }
 
-    .sta-aksi { margin-top: 24px; }
+    /*
+     * KAKI HALAMAN: satu garis, satu baris tombol, satu kalimat.
+     *
+     * Garis atasnya yang bekerja. Tanpa itu ketiga hal di bawah sini
+     * tampak tercecer di ruang kosong dasar kartu; dengan garisnya,
+     * ruang kosong itu jadi bantalan yang disengaja.
+     */
+    .sta-kaki {
+        margin-top: 26px;
+        padding-top: 20px;
+        border-top: 1px solid var(--garis);
+    }
+
+    /* wrap: di ponsel kedua tombolnya menumpuk alih-alih terpotong. */
+    .sta-kaki-aksi {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 12px 18px;
+    }
 
     .sta-tombol {
         display: inline-flex;
@@ -1669,19 +1753,56 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
 
     .sta-tombol:hover { color: #fff; text-decoration: none; }
 
-    .sta-tautan { font-size: .9rem; font-weight: 700; color: var(--navy); }
+    /* Dulu cuma tulisan tebal di tengah ruang kosong — terbaca sebagai
+       judul, bukan sebagai tautan. Sekarang berdampingan dengan tombol
+       kirim ulang di baris kaki, jadi ia harus terlihat sederajat. */
+    .sta-tautan {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 11px 16px;
+        border-radius: 11px;
+        font-size: .88rem;
+        font-weight: 700;
+        color: var(--navy);
+        text-decoration: none;
+    }
 
-    .sta-simpan { margin: 18px 0 0; font-size: .76rem; color: var(--tinta-2); }
+    .sta-tautan:hover,
+    .sta-tautan:focus { background: #eef2f7; color: var(--navy); text-decoration: none; }
+
+    .sta-tautan > .fas { margin: 0 !important; font-size: .8rem; }
+
+    .sta-simpan { margin: 16px 0 0; font-size: .76rem; color: var(--tinta-2); }
 
     /* ------------------------------------------------- layar lebar: 2 lajur */
 
     @media (min-width: 992px) {
         .sta-kisi {
             display: grid;
+
+            /* Pembungkus lajurnya jadi kotak sungguhan lagi: di sini justru
+               kotaknya yang bekerja — ia yang jadi sel kisi, yang membawa
+               garis pemisah, dan yang menampung isi lajurnya. */
             /* minmax(0, ...) WAJIB: tanpa itu lajurnya memakai min-width auto
                dan isi terlebar di dalamnya — nomor rekening yang berspasi —
                melebarkan lajurnya melewati jatahnya, lalu kartunya meluber. */
             grid-template-columns: minmax(0, 1.06fr) minmax(0, .94fr);
+
+            /* auto 1fr, bukan dibiarkan auto keduanya.
+
+               Lajur kiri membentang DUA baris, dan sisa tinggi sebuah unsur
+               yang membentang dibagikan ke baris-baris yang dilintasinya.
+               Jadi baris pertama ikut melar mengikuti panjang rincian di
+               kiri, dan kotak hitung mundur — satu-satunya penghuni baris
+               itu — mengambang di puncaknya: terukur 79px menganga antara
+               dasar kotak kuning dan puncak kartu menunggu di bawahnya,
+               sementara di lajur kiri jaraknya cuma 16px.
+
+               Baris pertama dipatok sebesar isinya, sisanya diberikan ke
+               baris kedua. Yang melar baris yang memang kosong. */
+            grid-template-rows: auto 1fr;
+
             gap: 0 clamp(24px, 3vw, 44px);
             align-items: start;
         }
@@ -1703,7 +1824,9 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
            tetap duduk di baris 2 dan menyisakan lubang setinggi baris 1 yang
            kosong. Dibiarkan mengalir, lajur kanannya naik sendiri ke baris
            pertama begitu hitung mundurnya tidak ada. */
-        .sta-kisi > .sta-mundur { grid-column: 2; }
+        .sta-kisi > .sta-lajur { display: block; }
+
+        .sta-kisi > .sta-mundur { grid-column: 2; order: 0; }
         .sta-kisi > .sta-lajur-kanan { grid-column: 2; }
 
         /* Garis pemisahnya dipasang sebagai border KANAN lajur kiri, bukan
@@ -1720,6 +1843,18 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
         .sta-kisi:not(.sta-kisi-tunggal) > .sta-lajur-kiri {
             padding-right: clamp(24px, 3vw, 44px);
             border-right: 1px solid var(--garis);
+
+            /* align-self MENIMPA align-items:start kisinya, khusus lajur ini.
+
+               Tanpanya kotak lajur kiri berhenti tepat di dasar isinya —
+               terukur 341px — sementara sisi kanan berjalan terus sampai
+               611px. Garis pemisah ini digambar di tepi kotak itu, jadi
+               garisnya ikut berhenti di udara, 270px sebelum dasar kisinya,
+               dan halamannya terbaca seperti belum selesai digambar.
+
+               Diregangkan, garisnya turun sampai dasar kisi dan ruang kosong
+               di bawah rincian berubah jadi lajur yang memang kosong. */
+            align-self: stretch;
         }
 
         /* Judul dan kalimat pembukanya tidak ikut melebar sampai ujung:
@@ -1845,13 +1980,32 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
 
         /* Label dan nilainya ditumpuk: berdampingan, "Nomor pendaftaran" dan
            nomornya saling menghimpit sampai keduanya patah di tengah kata. */
-        .sta-rincian > div { flex-direction: column; align-items: flex-start; }
+        .sta-rincian > div { grid-template-columns: minmax(0, 1fr); align-items: start; }
         .sta-rincian dd { text-align: left; }
     }
 
     /* ------------------------------- menunggu kabar gerbang pembayaran */
 
-    .sta-tunggu { text-align: center; }
+    /*
+     * Kartu menunggu diberi warna sendiri, dan itu sepasang dengan
+     * kotak hitung mundur di atasnya: kuning untuk yang MENDESAK,
+     * nila untuk yang SEDANG BERJALAN.
+     *
+     * Sebelumnya putih di atas kartu putih — tepinya cuma bayangan
+     * tipis, jadi bagian terpenting halaman ini justru yang paling
+     * tidak kelihatan batasnya.
+     *
+     * Bayangannya dicabut: dua kotak bertumpuk yang sama-sama
+     * melayang membuat sisi kanan halaman tampak berlapis-lapis.
+     */
+    .sta-tunggu {
+        padding: 22px 24px 24px;
+        border-color: #c7d2fe;
+        border-radius: 16px;
+        background: linear-gradient(180deg, #f5f3ff, #eef2ff);
+        box-shadow: none;
+        text-align: center;
+    }
 
     /*
      * Tombol melanjutkan pembayaran. Satu-satunya hal yang bisa ditekan di
