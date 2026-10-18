@@ -218,6 +218,36 @@ class FakturBelumBayarTest extends TestCase
     }
 
     #[Test]
+    public function barisnya_menyebut_angkatan_dan_tanggal_kegiatannya(): void
+    {
+        /*
+         * Nama sesi saja tidak cukup pada dokumen yang DISIMPAN.
+         *
+         * Judul yang sama dipakai lagi di angkatan berikutnya, dan yang
+         * membuka faktur lamanya berbulan-bulan kemudian tidak punya cara
+         * tahu angkatan mana yang ia bayar. Bendahara yang mencocokkannya
+         * pun tidak.
+         */
+        $sesi = $this->sesi();
+        $sesi->forceFill([
+            'nama' => 'Sesi Uji Angkatan',
+            'nama_ke' => '7',
+            'mulai' => '2026-11-20',
+            'selesai' => '2026-11-20',
+        ])->save();
+
+        $p = $this->pendaftaran(['kategori_id' => $sesi->getKey()]);
+
+        $html = $this->dokumen($p->refresh());
+
+        $this->assertStringContainsString('Sesi Uji Angkatan #7', $html,
+            'Angkatannya tidak disebut di baris rinciannya.');
+
+        $this->assertStringContainsString('20 November 2026', $html,
+            'Tanggal kegiatannya tidak disebut di baris rinciannya.');
+    }
+
+    #[Test]
     public function kaki_dokumennya_memuat_kontak_dan_sosial_media(): void
     {
         /*
