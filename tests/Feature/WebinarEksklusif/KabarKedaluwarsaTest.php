@@ -7,6 +7,7 @@ use App\KategoriLayanan;
 use App\Mail\WebinarEksklusifKedaluwarsaMail;
 use App\WebinarEksklusifPendaftaran;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use PHPUnit\Framework\Attributes\Test;
@@ -76,6 +77,137 @@ class KabarKedaluwarsaTest extends TestCase
             'Penanda "sudah dikabari" tidak tertulis, jadi sapuan berikutnya '
             . 'akan mengirim surat yang sama lagi.'
         );
+    }
+
+    #[Test]
+    public function membuka_halaman_statusnya_sendiri_melepas_kursinya(): void
+    {
+        /*
+         * BUG-nya: halaman status menentukan "sudah kedaluwarsa" dari JAM
+         * semata, tanpa pernah memindahkan keadaan barisnya. Orangnya membaca
+         * "Batas waktu pembayarannya sudah lewat" sementara barisnya masih
+         * 'pending' — kuotanya tertahan, dan karena tidak ada perpindahan,
+         * tidak ada pula kabar yang berangkat.
+         *
+         * Ketiga jalur lain tidak menolongnya: penjadwalnya belum terpasang
+         * di peladen, pemberitahuan DOKU tidak punya transaksi untuk
+         * diceritakan pada tagihan yang kedaluwarsa tanpa pernah dibayar, dan
+         * pelepasan oportunis yang sudah ada menempel di halaman DAFTAR SESI
+         * — jadi kursinya baru kembali kalau ada ORANG LAIN yang membukanya.
+         */
+        Mail::fake();
+        Http::fake(['*/orders/v1/status/*' => Http::response([], 404)]);
+
+        $p = $this->pendaftaran();
+        $sesi = KategoriLayanan::find($p->kategori_id);
+        $kuotaAwal = (int) $sesi->sisa_kuota;
+
+        $this->get(route('public.webinareksklusif.status', $p->getKey()))->assertOk();
+
+        $this->assertSame('expired', $p->refresh()->status,
+            'Halamannya menggambarnya kedaluwarsa tetapi barisnya tidak pernah '
+            . 'berpindah; kursinya tetap tertahan dan kabarnya tidak berangkat.');
+
+        $this->assertSame($kuotaAwal + 1, (int) $sesi->refresh()->sisa_kuota,
+            'Kursinya tidak dikembalikan.');
+
+        Mail::assertSent(
+            WebinarEksklusifKedaluwarsaMail::class,
+            fn ($surat) => $surat->hasTo($p->email)
+        );
+    }
+
+    #[Test]
+    public function membuka_halamannya_berulang_tidak_mengirim_dua_kali(): void
+    {
+        /*
+         * Halaman ini dimuat ulang orang berkali-kali — itu memang yang
+         * disuruh kalimat di dalamnya. Kursinya pun tidak boleh dikembalikan
+         * dua kali: kuota yang membengkak membuka kursi yang tidak ada.
+         */
+        Mail::fake();
+        Http::fake(['*/orders/v1/status/*' => Http::response([], 404)]);
+
+        $p = $this->pendaftaran();
+        $sesi = KategoriLayanan::find($p->kategori_id);
+        $kuotaAwal = (int) $sesi->sisa_kuota;
+
+        for ($i = 0; $i < 3; $i++) {
+            $this->get(route('public.webinareksklusif.status', $p->getKey()))->assertOk();
+        }
+
+        Mail::assertSent(WebinarEksklusifKedaluwarsaMail::class, 1);
+
+        $this->assertSame($kuotaAwal + 1, (int) $sesi->refresh()->sisa_kuota,
+            'Kursinya dikembalikan lebih dari sekali.');
+    }
+
+    #[Test]
+    public function satu_permintaan_tidak_menanggung_surat_seluruh_tumpukan(): void
+    {
+        /*
+         * lepaskanYangKedaluwarsa() dipanggil juga oleh HALAMAN DAFTAR SESI
+         * yang dibuka umum. Tanpa batas, pengunjung pertama sesudah tumpukan
+         * menanggung seluruh kiriman SMTP-nya berurutan di dalam satu
+         * permintaan — dan tumpukan bukan dugaan: penjadwalnya belum
+         * terpasang di peladen.
+         *
+         * Yang terlewat batas TIDAK boleh hilang: statusnya sudah berpindah,
+         * jadi tidak ada sapuan lain yang akan melihatnya lagi kecuali lewat
+         * penandanya.
+         */
+        Mail::fake();
+
+        $sesi = $this->sesi();
+
+        for ($i = 0; $i < 7; $i++) {
+            $this->pendaftaran([
+                'kategori_id' => $sesi->getKey(),
+                'id_transaksi' => 'WE-TUMPUK-' . Str::random(6),
+                'email' => 'tumpuk' . Str::random(5) . '@contoh.test',
+            ]);
+        }
+
+        WebinarEksklusifPendaftaran::lepaskanYangKedaluwarsa($sesi->getKey(), 3);
+
+        Mail::assertSent(WebinarEksklusifKedaluwarsaMail::class, 3);
+
+        $this->assertSame(0,
+            WebinarEksklusifPendaftaran::where('kategori_id', $sesi->getKey())
+                ->where('status', 'pending')->count(),
+            'Pelepasannya ikut dibatasi; yang seharusnya dibatasi hanya suratnya.');
+
+        $this->assertSame(4,
+            WebinarEksklusifPendaftaran::belumDikabariKedaluwarsa()
+                ->where('kategori_id', $sesi->getKey())->count(),
+            'Yang terlewat batas tidak bisa ditemukan lagi, jadi kabarnya hilang.');
+    }
+
+    #[Test]
+    public function penguras_mengambil_yang_terlewat_batas(): void
+    {
+        Mail::fake();
+
+        $sesi = $this->sesi();
+
+        for ($i = 0; $i < 7; $i++) {
+            $this->pendaftaran([
+                'kategori_id' => $sesi->getKey(),
+                'id_transaksi' => 'WE-SISA-' . Str::random(6),
+                'email' => 'sisa' . Str::random(5) . '@contoh.test',
+            ]);
+        }
+
+        WebinarEksklusifPendaftaran::lepaskanYangKedaluwarsa($sesi->getKey(), 3);
+
+        $terkirim = app(KabariKursiDilepas::class)->sapu();
+
+        $this->assertSame(4, $terkirim);
+        Mail::assertSent(WebinarEksklusifKedaluwarsaMail::class, 7);
+
+        $this->assertSame(0,
+            WebinarEksklusifPendaftaran::belumDikabariKedaluwarsa()
+                ->where('kategori_id', $sesi->getKey())->count());
     }
 
     #[Test]

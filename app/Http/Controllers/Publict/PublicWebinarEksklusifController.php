@@ -1051,6 +1051,54 @@ class PublicWebinarEksklusifController extends Controller
         $pendaftaran = $this->susulkanDariGerbang($pendaftaran);
 
         /*
+         * Kursinya DILEPAS di sini juga, bukan cuma digambar sebagai lewat.
+         *
+         * Halaman ini dulu menentukan "sudah kedaluwarsa" dari JAM semata —
+         * $pendaftaran->sudah_kedaluwarsa — tanpa pernah memindahkan
+         * keadaannya. Jadi orangnya membaca "Batas waktu pembayarannya sudah
+         * lewat" sementara barisnya masih 'pending': kuotanya masih tertahan,
+         * dan karena tidak ada perpindahan, tidak ada pula kabar yang
+         * berangkat. Terukur pada WE-20261018-0001, dua menit sesudah
+         * batasnya: status 'pending', penanda kabar masih kosong.
+         *
+         * Ketiga jalur lain tidak menolongnya. Penjadwalnya belum terpasang
+         * di peladen; pemberitahuan DOKU tidak pernah sampai ke mesin lokal
+         * (dan untuk tagihan yang kedaluwarsa tanpa pernah dibayar, gerbangnya
+         * pun tidak punya transaksi untuk diceritakan); dan pelepasan
+         * oportunis yang sudah ada menempel di halaman DAFTAR SESI — jadi
+         * kursinya baru kembali kalau kebetulan ada ORANG LAIN membuka
+         * halaman itu.
+         *
+         * Halaman inilah satu-satunya yang pasti dibuka oleh orang yang
+         * punya kursinya.
+         *
+         * Batas suratnya 1, lalu MILIKNYA SENDIRI dipastikan terpisah.
+         *
+         * Pelepasannya menyapu satu sesi penuh — itu murah dan memang
+         * dikehendaki, sebab angka sisa kuotanya ikut dibetulkan. Tetapi
+         * jatah satu surat itu bisa jatuh ke pendaftaran ORANG LAIN yang
+         * kebetulan lebih dulu dalam daftarnya, dan orang yang membuka
+         * halaman ini justru tidak dikabari — padahal dialah yang sedang
+         * menatap layarnya.
+         *
+         * Panggilan kedua aman diulang: aksinya merebut penanda berkunci
+         * baris lebih dulu, jadi kalau suratnya sudah berangkat pada sapuan
+         * di atas, yang ini tidak mengirim apa-apa. Jadi paling banyak dua
+         * kiriman per pembukaan halaman, dan miliknya pasti salah satunya.
+         */
+        if ($pendaftaran->sudah_kedaluwarsa && $pendaftaran->status === 'pending') {
+            WebinarEksklusifPendaftaran::lepaskanYangKedaluwarsa(
+                $pendaftaran->kategori_id,
+                1
+            );
+
+            $pendaftaran->refresh();
+
+            app(\App\Actions\WebinarEksklusif\KabariKursiDilepas::class)
+                ->jalankan($pendaftaran);
+        }
+
+        /*
          * Alamat buktinya dirakit lewat AlamatGambar, bukan asset() langsung:
          * nilai kolomnya bisa jalur di cakram unggahan (unggahan baru) ATAU
          * nama berkas peninggalan jalur lama, dan hanya AlamatGambar yang tahu

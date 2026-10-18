@@ -26,6 +26,54 @@ use Illuminate\Support\Facades\Mail;
 class KabariKursiDilepas
 {
     /**
+     * Menguras yang statusnya sudah kedaluwarsa tetapi kabarnya belum
+     * berangkat.
+     *
+     * Jaring penampung untuk dua kebocoran yang keduanya nyata:
+     *
+     *   1. kabar yang terlewat batas per panggilan di
+     *      lepaskanYangKedaluwarsa();
+     *   2. kiriman yang gagal karena peladen suratnya sedang mati —
+     *      penandanya dikembalikan, jadi barisnya muncul lagi di sini.
+     *
+     * Tanpa penguras ini keduanya hilang tanpa tanda: barisnya sudah keluar
+     * dari bisaDilepas() begitu statusnya berpindah, jadi tidak ada satu pun
+     * sapuan lain yang akan melihatnya lagi.
+     *
+     * @param  int  $batas  0 berarti tanpa batas
+     * @return int banyaknya surat yang berangkat
+     */
+    public function sapu(int $batas = 0): int
+    {
+        $kueri = WebinarEksklusifPendaftaran::belumDikabariKedaluwarsa()
+            // Yang paling lama menunggu didahulukan; kalau batasnya menggigit
+            // lagi, yang tertinggal tetap yang paling baru.
+            ->orderBy('kedaluwarsa_pada');
+
+        if ($batas > 0) {
+            $kueri->limit($batas);
+        }
+
+        $terkirim = 0;
+
+        foreach ($kueri->get() as $p) {
+            try {
+                if ($this->jalankan($p)) {
+                    $terkirim++;
+                }
+            } catch (\Throwable $e) {
+                // Satu surat gagal tidak boleh menghentikan sisanya.
+                Log::error('Kabar kursi dilepas gagal saat menyapu.', [
+                    'nomor' => $p->id_transaksi,
+                    'galat' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        return $terkirim;
+    }
+
+    /**
      * @return bool benar kalau suratnya baru saja terkirim oleh pemanggil ini
      */
     public function jalankan(WebinarEksklusifPendaftaran $pendaftaran): bool
