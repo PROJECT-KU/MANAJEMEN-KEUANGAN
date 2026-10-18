@@ -24,6 +24,11 @@ use Tests\TestCase;
  *
  * Tombol di email berbunyi "Lihat cara pembayaran" dan menuju halaman ini,
  * jadi halaman inilah yang harus memuat caranya.
+ *
+ * Sejak 18 Okt 2026 tombol ini bukan lagi jalan CADANGAN melainkan SATU-SATUNYA
+ * jalan: borangnya tidak lagi mengalihkan ke halaman gerbang, melainkan ke
+ * halaman status ini — supaya halaman kita yang tetap terbuka saat waktunya
+ * habis. Alasan lengkapnya ada di GagalTanpaLayarDokuTest.
  */
 class LanjutkanBayarTest extends TestCase
 {
@@ -101,7 +106,7 @@ class LanjutkanBayarTest extends TestCase
 
         $this->get(route('public.webinareksklusif.status', $p->getKey()))
             ->assertOk()
-            ->assertSee('Lanjutkan pembayaran')
+            ->assertSee('Bayar sekarang')
             ->assertSee('https://bayar.uji.test/lanjut', false);
     }
 
@@ -118,7 +123,7 @@ class LanjutkanBayarTest extends TestCase
 
         $this->get(route('public.webinareksklusif.status', $p->getKey()))
             ->assertOk()
-            ->assertDontSee('Lanjutkan pembayaran');
+            ->assertDontSee('Bayar sekarang');
     }
 
     #[Test]
@@ -136,7 +141,7 @@ class LanjutkanBayarTest extends TestCase
 
         $this->get(route('public.webinareksklusif.status', $p->getKey()))
             ->assertOk()
-            ->assertDontSee('Lanjutkan pembayaran')
+            ->assertDontSee('Bayar sekarang')
             ->assertSee('Menunggu konfirmasi pembayaran');
     }
 }

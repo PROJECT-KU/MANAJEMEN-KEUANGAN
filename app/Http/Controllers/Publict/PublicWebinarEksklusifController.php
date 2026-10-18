@@ -871,7 +871,32 @@ class PublicWebinarEksklusifController extends Controller
             'bayar_status' => 'menunggu',
         ])->save();
 
-        return redirect()->away($hasil['url']);
+        /*
+         * TIDAK dialihkan ke halaman bayar; yang dibuka halaman status KITA.
+         *
+         * Sebelum ini seluruh jendela diserahkan ke DOKU, dan yang tidak
+         * membayar menanggung TIGA tekanan untuk sampai ke kabar yang
+         * sebenarnya milik kita: kotak "Sorry, Your order has expired" di
+         * halaman DOKU, lalu halaman time-out DOKU, lalu tombol "GO TO
+         * MERCHANT" yang baru mengantarnya kembali ke sini.
+         *
+         * Dua layar pertama digambar di domain DOKU dan TIDAK bisa kita
+         * ganti — tidak ada setelan alamat-alih saat kedaluwarsa di
+         * Checkout mereka; yang ada hanya pemberitahuan peladen-ke-peladen.
+         * Jadi yang diubah bukan layarnya, melainkan DI MANA orangnya
+         * berada saat waktunya habis.
+         *
+         * Sejak sekarang halaman inilah pangkalannya: hitung mundurnya
+         * berjalan di sini, penanyanya berjalan di sini, dan tombol
+         * bayarnya membuka DOKU di TAB LAIN. Begitu waktunya habis,
+         * pemberitahuan dan halaman gagalnya milik kita sendiri, tanpa satu
+         * pun tekanan.
+         *
+         * Ongkosnya satu tekanan di awal. Itu dibayar oleh hal lain yang
+         * memang dibutuhkan: nomor pendaftaran dan tenggatnya terbaca
+         * SEBELUM orangnya dihadapkan ke gerbang pembayaran.
+         */
+        return redirect()->route('public.webinareksklusif.status', $pendaftaran->getKey());
     }
 
     // ------------------------------------------------------------ status

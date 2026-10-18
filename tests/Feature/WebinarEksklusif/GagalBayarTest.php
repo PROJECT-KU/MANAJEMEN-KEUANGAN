@@ -128,7 +128,16 @@ class GagalBayarTest extends TestCase
             'kedaluwarsa_pada' => now()->subMinutes(5),
         ]);
 
-        WebinarEksklusifPendaftaran::lepaskanYangKedaluwarsa();
+        /*
+         * DISARING ke angkatan uji ini, bukan menyapu seluruh tabel.
+         *
+         * Basis data pengembangan memuat pendaftaran SUNGGUHAN, dan satu di
+         * antaranya kedaluwarsa sendiri sambil ujinya ditulis — 18 Okt 2026,
+         * WE-20261018-0003, dibuat 15:57 dan habis 16:57. Sejak detik itu
+         * sapuan tanpa saringan mengirim DUA surat, dan uji yang menghitung
+         * satu jadi merah tanpa ada satu pun baris kode yang berubah.
+         */
+        WebinarEksklusifPendaftaran::lepaskanYangKedaluwarsa($p->kategori_id);
 
         Mail::assertSent(WebinarEksklusifKedaluwarsaMail::class, 1);
         Mail::assertNotSent(WebinarEksklusifGagalBayarMail::class);

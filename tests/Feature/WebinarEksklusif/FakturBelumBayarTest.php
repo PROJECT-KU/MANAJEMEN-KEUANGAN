@@ -214,7 +214,7 @@ class FakturBelumBayarTest extends TestCase
         ])->render();
 
         $this->assertStringNotContainsString('CARA MEMBAYAR', $html);
-        $this->assertStringNotContainsString('Lanjutkan pembayaran', $html);
+        $this->assertStringNotContainsString('Bayar sekarang', $html);
     }
 
     #[Test]
