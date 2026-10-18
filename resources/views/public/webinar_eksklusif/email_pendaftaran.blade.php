@@ -244,6 +244,28 @@
                     </tr>
                 @endif
 
+                {{-- LAMPIRANNYA DISEBUT.
+
+                     Lampiran yang tidak disebut tidak dibuka, dan faktur yang
+                     tidak pernah dibuka sama saja dengan tidak dikirim —
+                     terutama bagi yang harus menyerahkannya ke bendahara
+                     kantornya lebih dulu supaya biayanya disetujui.
+
+                     Hanya selama belum lunas, sama seperti lampirannya
+                     sendiri: yang sudah membayar menerima surat ini lagi
+                     lewat tombol "kirim ulang", dan kalimat tentang faktur
+                     di situ akan menunjuk lampiran yang memang tidak ada. --}}
+                @if ($belumBayar)
+                    <tr>
+                        <td style="padding:0 26px;">
+                            <p style="margin:0;padding:13px 15px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;font-size:13px;color:#475569;line-height:1.6;">
+                                <strong style="color:#0f2b5b;">Fakturnya terlampir</strong> di email ini
+                                sebagai berkas PDF, lengkap dengan jumlah dan batas waktunya.
+                            </p>
+                        </td>
+                    </tr>
+                @endif
+
                 {{-- Tombolnya tabel ber-background dan DITENGAHKAN, bukan <a>
                      bergaya tombol: Outlook mengabaikan padding pada <a>. --}}
                 <tr>
