@@ -122,7 +122,26 @@ class WebinarEksklusifPendaftaran extends Model
         return trim((string) $this->gambar) !== '';
     }
 
-    public static function lepaskanYangKedaluwarsa(?string $kategoriId = null): int
+    /**
+     * Sudah kedaluwarsa tetapi kabarnya belum berangkat.
+     *
+     * Ada karena kabarnya DIBATASI per panggilan (lihat di bawah): yang
+     * terlewat batas harus bisa ditemukan lagi, kalau tidak ia hilang diam-
+     * diam. Status 'expired' saja tidak cukup sebagai saringan — barisnya
+     * sudah keluar dari bisaDilepas() begitu statusnya berpindah.
+     */
+    public function scopeBelumDikabariKedaluwarsa($kueri)
+    {
+        return $kueri->where('status', 'expired')
+            ->whereNull('kedaluwarsa_dikabari_pada')
+            ->whereNotNull('email');
+    }
+
+    /**
+     * @param  int  $batasKabar  banyaknya surat yang boleh berangkat dari
+     *                           satu panggilan; 0 berarti tanpa batas.
+     */
+    public static function lepaskanYangKedaluwarsa(?string $kategoriId = null, int $batasKabar = 5): int
     {
         $kueri = static::bisaDilepas();
 
@@ -203,7 +222,28 @@ class WebinarEksklusifPendaftaran extends Model
          * sudah telanjur dilepas, dan sapuan yang berhenti di tengah akan
          * meninggalkan sisanya tanpa kabar selamanya.
          */
+        /*
+         * KABARNYA DIBATASI, dan batasnya ada demi orang yang tidak ada
+         * hubungannya dengan surat-surat ini.
+         *
+         * Pemanggil terbanyak fungsi ini adalah HALAMAN DAFTAR SESI yang
+         * dibuka umum — ia melepas kursi supaya angka sisa kuotanya benar.
+         * Kalau lima puluh pendaftaran kedaluwarsa menumpuk (dan itu bukan
+         * dugaan: penjadwalnya belum terpasang di peladen, jadi tumpukan
+         * memang keadaan bawaannya), pengunjung pertama sesudahnya
+         * menanggung lima puluh kiriman SMTP berurutan di dalam satu
+         * permintaan — halamannya menggantung sampai habis waktu, dan di
+         * hosting ini kuota prosesnya ikut terkuras.
+         *
+         * Yang terlewat batas TIDAK hilang: statusnya sudah 'expired'
+         * sementara penandanya masih kosong, jadi ia tertangkap
+         * scopeBelumDikabariKedaluwarsa() dan dikuras perintah terjadwal.
+         */
         $kabari = app(\App\Actions\WebinarEksklusif\KabariKursiDilepas::class);
+
+        if ($batasKabar > 0) {
+            $berpindah = array_slice($berpindah, 0, $batasKabar);
+        }
 
         foreach ($berpindah as $p) {
             try {

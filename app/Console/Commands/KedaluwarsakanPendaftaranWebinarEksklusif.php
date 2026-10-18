@@ -61,6 +61,23 @@ class KedaluwarsakanPendaftaranWebinarEksklusif extends Command
             $kursi = WebinarEksklusifPendaftaran::lepaskanYangKedaluwarsa();
         }
 
+        /*
+         * Penguras kabarnya, dan ia TANPA BATAS di sini.
+         *
+         * Batas per panggilan ada demi halaman publik yang kebetulan ikut
+         * melepas kursi; perintah ini tidak ditunggu siapa pun, jadi di
+         * sinilah tumpukannya dihabiskan. Termasuk baris yang statusnya
+         * sudah berpindah pada sapuan-sapuan sebelumnya tetapi suratnya
+         * gagal berangkat.
+         */
+        if (! $kering) {
+            $dikabari = app(\App\Actions\WebinarEksklusif\KabariKursiDilepas::class)->sapu();
+
+            if ($dikabari > 0) {
+                $this->info($dikabari . ' kabar "kursi dilepas" dikirim.');
+            }
+        }
+
         $this->info(sprintf(
             '%d pendaftaran %sdikedaluwarsakan, %d kursi %sdilepas.',
             $lewat->count(),
