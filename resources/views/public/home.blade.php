@@ -229,15 +229,68 @@ Beranda | Rumah Scopus
        bentuk bawaan setiap kartu di internet; lengkung di atas terbaca
        seperti jendela, dan langsung memberi tahu bahwa ada orang yang
        memilihkan bentuknya. */
+    /* Bentuk RUMAH: atapnya melengkung, dindingnya lurus. Fotonya mengisi
+       bentuk ini sepenuhnya lewat object-fit: cover — bukan menyesuaikan
+       bentuknya ke foto, sebab tujuh belas fotonya punya enam perbandingan
+       sisi yang berbeda dan bingkainya tidak boleh ikut berubah tiap kali
+       slidernya berpindah. */
     .bnd-foto-bingkai {
         position: relative; overflow: hidden;
+        aspect-ratio: 4 / 5;
         border: 3px solid var(--tinta);
         border-radius: 200px 200px 22px 22px;
         box-shadow: 10px 10px 0 var(--stabilo);
         transform: rotate(-1.4deg);
         background: var(--kertas-2);
     }
-    .bnd-foto-bingkai img { width: 100%; height: auto; display: block; }
+
+    .bnd-slide {
+        position: absolute; inset: 0;
+        opacity: 0; visibility: hidden;
+        transition: opacity .7s ease, visibility .7s;
+    }
+    .bnd-slide-aktif { opacity: 1; visibility: visible; }
+    .bnd-slide img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    /* Lapisan tinta tipis di bagian bawah foto. Pengatur slidernya duduk di
+       atas foto yang isinya tidak bisa ditebak — tanpa lapisan ini, tombol
+       dan angkanya hilang begitu kebetulan jatuh di atas bagian yang
+       terang. */
+    .bnd-geser-kaki {
+        position: absolute; left: 0; right: 0; bottom: 0; z-index: 2;
+        display: flex; align-items: center; gap: 12px;
+        padding: 42px 18px 16px;
+        background: linear-gradient(to top, rgba(22, 35, 63, .78), transparent);
+    }
+
+    .bnd-geser-tombol {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 36px; height: 36px; flex: 0 0 auto;
+        border: 2px solid var(--kertas); border-radius: 50%;
+        background: rgba(22, 35, 63, .55); color: var(--kertas);
+        font-size: .95rem; cursor: pointer; padding: 0;
+        transition: background .18s ease, color .18s ease;
+    }
+    .bnd-geser-tombol:hover { background: var(--stabilo); color: var(--tinta); border-color: var(--stabilo); }
+
+    .bnd-geser-hitung {
+        margin-left: auto;
+        font-family: 'Fraunces', serif; font-weight: 700; font-size: .92rem;
+        color: var(--kertas); font-variant-numeric: tabular-nums;
+    }
+
+    /* Garis kemajuan tipis di tepi paling bawah bingkai: memberi tahu
+       slidernya memang berjalan sendiri, tanpa menambah satu pun kata. */
+    .bnd-geser-bar {
+        position: absolute; left: 0; right: 0; bottom: 0; z-index: 3;
+        height: 4px; background: rgba(251, 245, 233, .22);
+    }
+    .bnd-geser-bar > i {
+        display: block; height: 100%; width: 0;
+        background: var(--stabilo);
+    }
+    .bnd-geser-bar-jalan > i { animation: bnd-maju var(--lama, 5s) linear forwards; }
+    @keyframes bnd-maju { from { width: 0; } to { width: 100%; } }
 
     /* Selotip di dua pojok atas — tanda paling cepat dibaca bahwa sesuatu
        ditempel tangan. */
@@ -681,6 +734,12 @@ Beranda | Rumah Scopus
        pun alasan untuk bertahan. */
     @media (prefers-reduced-motion: reduce) {
         .bnd-gelembung { animation: none !important; }
+        .bnd-geser-bar-jalan > i { animation: none !important; }
+
+        /* Slidernya tidak berpindah sendiri — lihat alasannya di skripnya.
+           Tombol maju-mundurnya tetap jalan, jadi fotonya tetap bisa
+           dilihat semua. */
+        .bnd-slide { transition: none !important; }
         .bnd-cap { animation: none !important; }
         .bnd-stabilo::after { animation: none !important; transform: rotate(-1.2deg) skewX(-9deg); }
 
@@ -744,9 +803,72 @@ Beranda | Rumah Scopus
                     <span class="bnd-selotip bnd-selotip-kiri"></span>
                     <span class="bnd-selotip bnd-selotip-kanan"></span>
 
-                    <div class="bnd-foto-bingkai">
-                        <img src="{{ asset('assets/img/header1.png') }}"
-                            alt="Peserta pelatihan Rumah Scopus">
+                    {{-- Tujuh belas foto kegiatan sungguhan, menggantikan satu
+                         gambar hiasan. Aslinya HEIC dan JPG 1,5–4,6 MB dari
+                         kamera ponsel; diubah ke WebP lebar 1.200px.
+
+                         ORIENTASINYA sempat hilang. HEIC dari iPhone menyimpan
+                         arah putarnya di EXIF, bukan di piksel — dan `sips -s
+                         format jpeg` tidak memanggangnya ke hasil, jadi sebelas
+                         dari tujuh belas foto keluar miring 90 derajat tanpa
+                         satu pun galat. Diubah lewat `qlmanage -t` yang
+                         menghormati EXIF-nya. --}}
+                    <div class="bnd-foto-bingkai" data-bnd-geser>
+                        @php($fotoHero = [
+                            'Peserta merayakan kelulusan kelas di Rumah Scopus',
+                            'Peserta berfoto bersama di Rumah Scopus',
+                            'Suasana kelas Scopus Camp di Rumah Scopus',
+                            'Peserta Scopus Camp Banjarmasin berfoto bersama',
+                            'Peserta menerima buku dari Rumah Scopus',
+                            'Trainer mendampingi peserta menulis naskah',
+                            'Peserta mengerjakan naskah bersama trainer',
+                            'Sesi pendampingan penulisan di Rumah Scopus',
+                            'Peserta berdiskusi di ruang kelas Rumah Scopus',
+                            'Trainer menjelaskan materi kepada peserta',
+                            'Peserta bekerja dengan laptop di kelas',
+                            'Peserta menyimak paparan di layar',
+                            'Suasana kelas daring bersama trainer',
+                            'Peserta menerima penghargaan dari Rumah Scopus',
+                            'Peserta berfoto bersama seusai kelas',
+                            'Trainer memaparkan materi di depan kelas',
+                            'Dua peserta mengerjakan naskah bersama',
+                        ])
+
+                        @foreach ($fotoHero as $i => $keterangan)
+                            {{-- Hanya foto PERTAMA yang dimuat seketika. Sisanya
+                                 menunggu giliran lewat data-src, dan slidernya
+                                 memuat satu di depan saat berpindah.
+
+                                 Bukan loading="lazy": slide yang tidak aktif
+                                 tetap berada di dalam layar, cuma tembus pandang
+                                 — peramban menganggapnya terlihat dan mengunduh
+                                 ketujuh belasnya sekaligus, 3,3 MB di layar
+                                 pertama. --}}
+                            <div class="bnd-slide @if ($i === 0) bnd-slide-aktif @endif">
+                                <img
+                                    @if ($i === 0)
+                                        src="{{ asset('assets/img/public/header/header-01.webp') }}"
+                                        fetchpriority="high"
+                                    @else
+                                        data-src="{{ asset('assets/img/public/header/header-' . sprintf('%02d', $i + 1) . '.webp') }}"
+                                    @endif
+                                    alt="{{ $keterangan }}">
+                            </div>
+                        @endforeach
+
+                        <div class="bnd-geser-kaki">
+                            <button type="button" class="bnd-geser-tombol" data-bnd-mundur
+                                aria-label="Foto sebelumnya">
+                                <i class="bi bi-chevron-left"></i>
+                            </button>
+                            <button type="button" class="bnd-geser-tombol" data-bnd-maju
+                                aria-label="Foto berikutnya">
+                                <i class="bi bi-chevron-right"></i>
+                            </button>
+                            <span class="bnd-geser-hitung" data-bnd-hitungfoto>01 / {{ count($fotoHero) }}</span>
+                        </div>
+
+                        <span class="bnd-geser-bar" data-bnd-bar aria-hidden="true"><i></i></span>
                     </div>
 
                     <span class="bnd-gelembung bnd-gelembung-1">
@@ -1065,6 +1187,127 @@ Beranda | Rumah Scopus
     </section>
 
 </div>
+
+<script>
+    /*
+     * Slider foto hero.
+     *
+     * Ditulis sendiri, bukan memakai Swiper yang sudah dimuat layout ini:
+     * yang dibutuhkan cuma mengganti kelas aktif dan memuat gambar
+     * berikutnya. Swiper menambahkan pengukuran tata letak, sentuhan geser,
+     * dan pengamat ukuran — yang semuanya harus ikut dimatikan lagi untuk
+     * slider yang tidak bisa digeser tangan.
+     */
+    (function () {
+        var bingkai = document.querySelector('[data-bnd-geser]');
+
+        if (! bingkai) { return; }
+
+        var slide = bingkai.querySelectorAll('.bnd-slide');
+        var hitung = bingkai.querySelector('[data-bnd-hitungfoto]');
+        var bar = bingkai.querySelector('[data-bnd-bar]');
+        var kini = 0;
+        var jeda = null;
+        var LAMA = 5000;
+
+        if (slide.length < 2) { return; }
+
+        var diam = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+        /*
+         * Gambar dimuat SATU DI DEPAN, bukan semuanya sekaligus.
+         *
+         * Ketujuh belas foto berjumlah 3,3 MB. Slide yang tidak aktif tetap
+         * berada di dalam layar — cuma tembus pandang — jadi loading="lazy"
+         * tidak menahannya sama sekali; peramban akan mengunduh semuanya di
+         * layar pertama.
+         */
+        function muat(ke) {
+            var el = slide[ke];
+
+            if (! el) { return; }
+
+            var gambar = el.querySelector('img[data-src]');
+
+            if (! gambar) { return; }
+
+            gambar.src = gambar.getAttribute('data-src');
+            gambar.removeAttribute('data-src');
+        }
+
+        function dua(n) { return n < 10 ? '0' + n : String(n); }
+
+        function tampilkan(ke) {
+            ke = (ke + slide.length) % slide.length;
+
+            slide[kini].classList.remove('bnd-slide-aktif');
+            slide[ke].classList.add('bnd-slide-aktif');
+            kini = ke;
+
+            if (hitung) { hitung.textContent = dua(kini + 1) + ' / ' + dua(slide.length); }
+
+            muat(kini + 1 < slide.length ? kini + 1 : 0);
+            ulangBar();
+        }
+
+        /* Garis kemajuannya disetel ulang dengan MEMBUANG lalu memasang
+           kembali kelasnya, dan memaksa penataan ulang di antaranya.
+           Tanpa itu peramban menganggap kelasnya tidak pernah berubah dan
+           animasinya tidak mengulang dari nol. */
+        function ulangBar() {
+            if (! bar || jeda === null) { return; }
+
+            bar.classList.remove('bnd-geser-bar-jalan');
+            void bar.offsetWidth;
+            bar.style.setProperty('--lama', (LAMA / 1000) + 's');
+            bar.classList.add('bnd-geser-bar-jalan');
+        }
+
+        function mulai() {
+            if (jeda !== null) { return; }
+
+            jeda = setInterval(function () { tampilkan(kini + 1); }, LAMA);
+            ulangBar();
+        }
+
+        function berhenti() {
+            if (jeda === null) { return; }
+
+            clearInterval(jeda);
+            jeda = null;
+
+            if (bar) { bar.classList.remove('bnd-geser-bar-jalan'); }
+        }
+
+        bingkai.querySelector('[data-bnd-maju]').addEventListener('click', function () {
+            tampilkan(kini + 1);
+        });
+        bingkai.querySelector('[data-bnd-mundur]').addEventListener('click', function () {
+            tampilkan(kini - 1);
+        });
+
+        /* Berhenti saat ditunjuk atau saat tombolnya dapat fokus papan
+           ketik: foto yang berganti sendiri tepat ketika orangnya hendak
+           menekan tombol adalah cara tercepat membuat sliderny menjengkelkan. */
+        bingkai.addEventListener('mouseenter', berhenti);
+        bingkai.addEventListener('mouseleave', function () { if (! diam.matches) { mulai(); } });
+        bingkai.addEventListener('focusin', berhenti);
+
+        /* Berhenti juga saat tabnya tidak terlihat. Tanpa ini, slidernya
+           tetap berjalan di latar dan orangnya kembali ke foto acak —
+           sekaligus memuat ketujuh belasnya tanpa pernah ditonton. */
+        document.addEventListener('visibilitychange', function () {
+            if (document.hidden) { berhenti(); } else if (! diam.matches) { mulai(); }
+        });
+
+        muat(1);
+
+        /* Yang meminta gerak minimal tidak dijalankan sendiri. Tombol maju
+           dan mundurnya tetap bekerja, jadi ia tetap bisa melihat semuanya
+           — hanya atas kehendaknya sendiri. */
+        if (! diam.matches) { mulai(); }
+    })();
+</script>
 
 <script>
     /*
