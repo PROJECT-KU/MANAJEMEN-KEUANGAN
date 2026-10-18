@@ -589,7 +589,22 @@ Beranda | Rumah Scopus
        536px sementara keliling lingkarannya cuma 452px — 84px terakhir
        tergulung menimpa awalnya sendiri. Pada ukuran ini 431px, menyisakan
        21px sebagai jeda di tempat kedua putarannya bertemu. */
-    .bnd-cap text { fill: var(--stabilo); font-size: 11px; font-weight: 800; letter-spacing: .16em; }
+    /* 11,4px dan .16em — angkanya ganjil, dan itu memang dicari.
+
+       "RUMAH SCOPUS FOUNDATION" jauh lebih panjang daripada "RUMAH SCOPUS ·
+       JOGJA" yang dulu di sini. Pada ukuran awal 13px/.2em, dua putarannya
+       terukur 536px di keliling 452px — 84px terakhir tergulung menimpa
+       awalnya sendiri.
+
+       Dikecilkan ke 11px menghilangkan tumpang tindihnya tetapi menyisakan
+       431px: 21px kosong di satu titik, dan lubang selebar itu di antara
+       huruf yang jaraknya cuma 2px terbaca sebagai cacat, bukan sebagai
+       jeda.
+
+       Pada ukuran ini 447px, menyisakan 5px — selebar satu spasi di huruf
+       ini. Sambungan antara "·" terakhir dan "R" pertama jadi tidak bisa
+       dibedakan dari jarak kata di dalamnya. */
+    .bnd-cap text { fill: var(--stabilo); font-size: 11.4px; font-weight: 800; letter-spacing: .16em; }
     @keyframes bnd-putar { to { rotate: 360deg; } }
 
     /* ==================================================== kertas tempel */
