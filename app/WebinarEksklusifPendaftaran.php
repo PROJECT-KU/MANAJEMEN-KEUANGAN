@@ -35,7 +35,7 @@ class WebinarEksklusifPendaftaran extends Model
         // Tali ke promo yang memotong harganya; dibaca layar dampak promo.
         'promo_id',
         'gambar', 'cara_bayar', 'bayar_rujukan', 'bayar_url', 'bayar_status', 'bayar_kanal',
-        'bayar_pada', 'kedaluwarsa_pada', 'status', 'note',
+        'bayar_pada', 'kedaluwarsa_pada', 'kedaluwarsa_dikabari_pada', 'status', 'note',
     ];
 
     /**
@@ -60,6 +60,7 @@ class WebinarEksklusifPendaftaran extends Model
         'jumlah_pendaftar' => 'integer',
         'bayar_pada' => 'datetime',
         'kedaluwarsa_pada' => 'datetime',
+        'kedaluwarsa_dikabari_pada' => 'datetime',
         'disetujui_pada' => 'datetime',
         'pengingat_pada' => 'datetime',
     ];
@@ -137,6 +138,15 @@ class WebinarEksklusifPendaftaran extends Model
 
         $kursi = 0;
 
+        /*
+         * Yang BENAR-BENAR berpindah dikumpulkan, bukan seluruh $lewat.
+         *
+         * Dua proses bisa menyapu bersamaan, dan yang kalah merebut kunci
+         * baris keluar tanpa mengubah apa pun. Dikabari dari $lewat,
+         * orangnya menerima surat dari kedua proses itu.
+         */
+        $berpindah = [];
+
         foreach ($lewat as $p) {
             /*
              * Status dan kuota diubah dalam SATU transaksi. Terpisah, proses
@@ -144,7 +154,7 @@ class WebinarEksklusifPendaftaran extends Model
              * kedaluwarsa tetapi kursinya belum kembali — dan tidak ada yang
              * akan mengulangnya karena statusnya sudah bukan 'pending'.
              */
-            \Illuminate\Support\Facades\DB::transaction(function () use ($p, &$kursi) {
+            \Illuminate\Support\Facades\DB::transaction(function () use ($p, &$kursi, &$berpindah) {
                 /*
                  * Dibaca ulang DI DALAM transaksi dan dikunci. Dua proses yang
                  * menyapu bersamaan — perintah terjadwal dan orang yang sedang
@@ -158,6 +168,8 @@ class WebinarEksklusifPendaftaran extends Model
                 }
 
                 $segar->forceFill(['status' => 'expired', 'bayar_status' => 'kedaluwarsa'])->save();
+
+                $berpindah[] = $segar;
 
                 $kursi += (int) $segar->jumlah_pendaftar;
 
@@ -176,6 +188,32 @@ class WebinarEksklusifPendaftaran extends Model
                     ),
                 ])->save();
             });
+        }
+
+        /*
+         * Kabarnya dikirim SESUDAH semua transaksinya selesai, bukan di
+         * dalamnya.
+         *
+         * Di dalam transaksi, surat untuk transaksi yang ternyata batal
+         * sudah terlanjur terbang — dan peladen surat tidak ikut
+         * di-rollback. Lagi pula menahan kunci baris selama SMTP menjawab
+         * berarti seluruh sapuan ini menunggu jaringan.
+         *
+         * Kegagalan satu surat TIDAK boleh menghentikan sisanya: kursinya
+         * sudah telanjur dilepas, dan sapuan yang berhenti di tengah akan
+         * meninggalkan sisanya tanpa kabar selamanya.
+         */
+        $kabari = app(\App\Actions\WebinarEksklusif\KabariKursiDilepas::class);
+
+        foreach ($berpindah as $p) {
+            try {
+                $kabari->jalankan($p);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Kabar kursi dilepas gagal.', [
+                    'nomor' => $p->id_transaksi,
+                    'galat' => $e->getMessage(),
+                ]);
+            }
         }
 
         return $kursi;

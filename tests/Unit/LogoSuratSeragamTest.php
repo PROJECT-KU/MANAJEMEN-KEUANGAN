@@ -58,6 +58,17 @@ class LogoSuratSeragamTest extends TestCase
         'emails/pendaftaran/kerangka.blade.php',
         'public/webinar_eksklusif/email_pendaftaran.blade.php',
         'public/webinar_eksklusif/email_pengingat.blade.php',
+
+        /*
+         * Kabar "batas bayar lewat, kursi Anda dilepas". Pembacanya orang
+         * yang baru saja kehilangan kursinya dan sebagian masih mau ikut —
+         * jadi suratnya harus terbaca datang dari penyelenggaranya, bukan
+         * dari alat administrasi yang namanya tidak pernah ia dengar.
+         *
+         * Ditambahkan 18 Okt 2026, atas permintaan pemilik produk yang
+         * meminta surat ini "dari Rumah Scopus, bukan logo MIS".
+         */
+        'public/webinar_eksklusif/email_kedaluwarsa.blade.php',
     ];
 
     /** Berkas yang isinya surat, bukan halaman atau faktur. */
