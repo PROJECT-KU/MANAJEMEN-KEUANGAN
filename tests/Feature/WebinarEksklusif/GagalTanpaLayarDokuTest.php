@@ -13,11 +13,10 @@ use Tests\MenyiapkanGerbangBayar;
 use Tests\TestCase;
 
 /**
- * Yang gagal membayar menerima kabarnya DARI KITA, di halaman kita.
+ * Yang halaman statusnya terbuka menerima kabar gagalnya DARI KITA.
  *
- * Sebelum ini seluruh jendela peramban diserahkan ke DOKU begitu borangnya
- * dikirim. Yang tidak membayar lalu menanggung TIGA tekanan sebelum sampai
- * ke kabar yang sebenarnya milik kita:
+ * Tagihan DOKU yang habis masa berlakunya menahan orangnya di domain DOKU
+ * lewat TIGA tekanan sebelum ia sampai ke kabar yang sebenarnya milik kita:
  *
  *   1. kotak "Sorry, Your order has expired" di halaman DOKU;
  *   2. halaman time-out DOKU;
@@ -25,16 +24,25 @@ use Tests\TestCase;
  *
  * Dua layar pertama digambar di domain DOKU dan TIDAK bisa kita ganti:
  * Checkout mereka tidak punya setelan alamat-alih saat kedaluwarsa, yang ada
- * hanya pemberitahuan peladen-ke-peladen. Jadi yang diubah bukan layarnya,
- * melainkan DI MANA orangnya berada saat waktunya habis.
+ * hanya pemberitahuan peladen-ke-peladen.
  *
- * Tiga hal yang menopangnya, dan ketiganya dijaga di sini:
+ * SEJARAHNYA, supaya tidak diputuskan dua kali. 18 Okt 2026 borangnya sempat
+ * diubah agar mendarat di halaman status lebih dulu, supaya halaman kita yang
+ * tetap terbuka dan ketiga layar itu tidak pernah terlihat. Dikembalikan pada
+ * hari yang sama atas keputusan pemiliknya: ongkosnya satu tekanan tambahan
+ * yang ditanggung SEMUA pendaftar — termasuk mayoritas yang memang membayar —
+ * demi jalur yang hanya dilewati yang membatalkan. Keputusannya diterima, dan
+ * akibatnya diterima bersamanya.
  *
- *   - borangnya mendarat di halaman status KITA, bukan di halaman DOKU;
- *   - tombol bayarnya membuka DOKU di TAB LAIN, jadi halaman ini tetap hidup;
- *   - saat waktunya habis, halaman ini berbicara lebih dulu.
+ * Yang TETAP berlaku, dan itulah isi berkas ini: untuk siapa pun yang halaman
+ * status ini sedang terbuka — yang datang dari tautan di emailnya, dan yang
+ * tab bayarnya sudah ditutup — kabar gagalnya tetap milik kita sendiri. Tiga
+ * hal yang menopangnya:
  *
- * Satu saja dari ketiganya dicabut dan jalur tiga tekanan itu kembali.
+ *   - tombol bayar di halaman ini membuka DOKU di TAB LAIN, jadi halaman ini
+ *     tidak ikut terbuang;
+ *   - saat waktunya habis, halaman ini berbicara lebih dulu;
+ *   - nolnya ditanyakan dulu ke peladen sebelum berbicara.
  */
 class GagalTanpaLayarDokuTest extends TestCase
 {
@@ -122,15 +130,16 @@ class GagalTanpaLayarDokuTest extends TestCase
     }
 
     #[Test]
-    public function borangnya_mendarat_di_halaman_status_bukan_di_halaman_doku(): void
+    public function borangnya_mengantar_langsung_ke_halaman_bayar(): void
     {
         /*
-         * INI penjaga terpenting di berkas ini.
+         * Keputusan pemiliknya, 18 Okt 2026: menekan "Daftar dan bayar
+         * sekarang" harus membuka halaman pembayaran, bukan halaman antara.
          *
-         * Selama jendelanya diserahkan ke DOKU, tidak ada satu pun halaman
-         * kita yang terbuka saat waktunya habis — dan pemberitahuan sebagus
-         * apa pun di halaman status tidak akan pernah terlihat, sebab tidak
-         * ada yang sedang menatapnya.
+         * Dijaga supaya tidak berubah diam-diam. Pernah diubah sekali, dan
+         * perubahan itu menambah satu tekanan bagi SEMUA pendaftar — termasuk
+         * mayoritas yang memang membayar — tanpa seorang pun melihatnya
+         * sampai dicoba dengan tangan.
          */
         $sesi = $this->sesi();
 
@@ -142,16 +151,16 @@ class GagalTanpaLayarDokuTest extends TestCase
             'jumlah_pendaftar' => 1, 'peserta' => [], 'setuju' => '1',
         ]);
 
-        $p = WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)->firstOrFail();
+        $jawab->assertRedirect('https://bayar.uji.test/x');
 
-        $jawab->assertRedirect(route('public.webinareksklusif.status', $p->getKey()));
+        $p = WebinarEksklusifPendaftaran::where('kategori_id', $sesi->id)->firstOrFail();
 
         $this->assertSame(
             'https://bayar.uji.test/x',
             $p->bayar_url,
-            'Alamat halaman bayarnya tidak tersimpan; sejak borangnya tidak lagi '
-            . 'mengalihkan ke sana, kolom inilah SATU-SATUNYA jalan membayar yang '
-            . 'dimiliki pendaftarnya.'
+            'Alamat halaman bayarnya dibuang sesudah dipakai mengalihkan. Yang '
+            . 'menutup tab itu tidak punya jalan kembali, dan kursinya hangus '
+            . 'saat waktunya habis.'
         );
     }
 
@@ -159,9 +168,13 @@ class GagalTanpaLayarDokuTest extends TestCase
     public function tombol_bayarnya_membuka_tab_lain(): void
     {
         /*
-         * Tanpa target="_blank", tombol itu menimpa halaman ini dengan
-         * halaman DOKU — dan jalur tiga tekanan itu kembali utuh, hanya
-         * bergeser satu tekanan ke belakang.
+         * Yang sampai ke tombol ini bukan orang yang baru mengisi borang —
+         * borangnya mengalihkan langsung ke DOKU. Yang sampai ke sini datang
+         * dari tautan di emailnya, atau tab bayarnya sudah ditutup.
+         *
+         * Bagi mereka halaman ini SATU-SATUNYA yang terbuka. Tanpa
+         * target="_blank" tombolnya menimpa halaman ini dengan halaman DOKU,
+         * dan pemberitahuan kedaluwarsa di bawah kehilangan tempat berdiri.
          */
         Http::fake(['*/orders/v1/status/*' => Http::response([], 404)]);
 
@@ -182,9 +195,9 @@ class GagalTanpaLayarDokuTest extends TestCase
         $this->assertStringContainsString(
             'target="_blank"',
             $tangkap[0],
-            'Tombol bayarnya kembali menimpa halaman ini. Begitu waktunya habis, '
-            . 'yang terbuka di layar orangnya halaman DOKU — bukan halaman kita — '
-            . 'dan ia harus menekan tiga kali untuk sampai ke kabar yang benar.'
+            'Tombol bayarnya menimpa halaman ini. Begitu waktunya habis, yang '
+            . 'terbuka di layar orangnya halaman DOKU — bukan halaman kita — dan '
+            . 'ia harus menekan tiga kali untuk sampai ke kabar yang benar.'
         );
 
         $this->assertStringContainsString(

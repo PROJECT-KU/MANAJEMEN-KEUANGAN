@@ -24,11 +24,6 @@ use Tests\TestCase;
  *
  * Tombol di email berbunyi "Lihat cara pembayaran" dan menuju halaman ini,
  * jadi halaman inilah yang harus memuat caranya.
- *
- * Sejak 18 Okt 2026 tombol ini bukan lagi jalan CADANGAN melainkan SATU-SATUNYA
- * jalan: borangnya tidak lagi mengalihkan ke halaman gerbang, melainkan ke
- * halaman status ini — supaya halaman kita yang tetap terbuka saat waktunya
- * habis. Alasan lengkapnya ada di GagalTanpaLayarDokuTest.
  */
 class LanjutkanBayarTest extends TestCase
 {

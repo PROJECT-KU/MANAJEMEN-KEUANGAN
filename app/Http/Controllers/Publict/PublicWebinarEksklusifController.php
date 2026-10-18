@@ -872,31 +872,29 @@ class PublicWebinarEksklusifController extends Controller
         ])->save();
 
         /*
-         * TIDAK dialihkan ke halaman bayar; yang dibuka halaman status KITA.
+         * LANGSUNG ke halaman bayar, tanpa singgah di mana pun.
          *
-         * Sebelum ini seluruh jendela diserahkan ke DOKU, dan yang tidak
-         * membayar menanggung TIGA tekanan untuk sampai ke kabar yang
-         * sebenarnya milik kita: kotak "Sorry, Your order has expired" di
-         * halaman DOKU, lalu halaman time-out DOKU, lalu tombol "GO TO
-         * MERCHANT" yang baru mengantarnya kembali ke sini.
+         * Sempat diubah 18 Okt 2026 supaya mendarat di halaman status lebih
+         * dulu — supaya halaman KITA yang tetap terbuka saat waktunya habis,
+         * dan pemberitahuan kedaluwarsanya tidak perlu lewat tiga layar
+         * DOKU. Dikembalikan pada hari yang sama atas keputusan pemiliknya:
+         * ongkosnya satu tekanan tambahan yang ditanggung SEMUA pendaftar,
+         * termasuk mayoritas yang memang membayar, demi memperbaiki jalur
+         * yang hanya dilewati yang membatalkan.
          *
-         * Dua layar pertama digambar di domain DOKU dan TIDAK bisa kita
-         * ganti — tidak ada setelan alamat-alih saat kedaluwarsa di
-         * Checkout mereka; yang ada hanya pemberitahuan peladen-ke-peladen.
-         * Jadi yang diubah bukan layarnya, melainkan DI MANA orangnya
-         * berada saat waktunya habis.
+         * Yang ditanggung sebagai akibatnya, supaya tidak lupa: yang
+         * membiarkan tab DOKU terbuka sampai tagihannya habis akan melihat
+         * kotak "Sorry, Your order has expired", lalu halaman time-out DOKU,
+         * lalu menekan "GO TO MERCHANT" untuk sampai ke sini. Ketiganya
+         * digambar di domain DOKU dan tidak bisa kita ganti — Checkout
+         * mereka tidak punya setelan alamat-alih saat kedaluwarsa.
          *
-         * Sejak sekarang halaman inilah pangkalannya: hitung mundurnya
-         * berjalan di sini, penanyanya berjalan di sini, dan tombol
-         * bayarnya membuka DOKU di TAB LAIN. Begitu waktunya habis,
-         * pemberitahuan dan halaman gagalnya milik kita sendiri, tanpa satu
-         * pun tekanan.
-         *
-         * Ongkosnya satu tekanan di awal. Itu dibayar oleh hal lain yang
-         * memang dibutuhkan: nomor pendaftaran dan tenggatnya terbaca
-         * SEBELUM orangnya dihadapkan ke gerbang pembayaran.
+         * Mesin pemberitahuannya TIDAK ikut dibuang. Ia tetap bekerja untuk
+         * siapa pun yang halaman status ini sedang terbuka: yang datang dari
+         * tautan di emailnya, dan yang tab DOKU-nya sudah ditutup. Lihat
+         * GagalTanpaLayarDokuTest.
          */
-        return redirect()->route('public.webinareksklusif.status', $pendaftaran->getKey());
+        return redirect()->away($hasil['url']);
     }
 
     // ------------------------------------------------------------ status
