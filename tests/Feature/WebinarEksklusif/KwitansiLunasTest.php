@@ -186,6 +186,45 @@ class KwitansiLunasTest extends TestCase
     }
 
     #[Test]
+    public function capnya_menyatakan_lunas_dan_berlogo(): void
+    {
+        /*
+         * Capnya yang membuat selembar kertas terbaca sah, dan ia harus
+         * menyatakan hal yang SAMA dengan angkanya. Cap "belum dibayar" di
+         * atas kwitansi membuat orang yang sudah membayar dicurigai belum —
+         * oleh bendahara kantornya sendiri.
+         */
+        $p = $this->pendaftaran(['status' => 'paid', 'bayar_pada' => now()]);
+
+        $html = view('public.webinar_eksklusif.dokumen_pdf', [
+            'jenis' => 'kwitansi',
+            'pendaftaran' => $p,
+            'sesi' => KategoriLayanan::find($p->kategori_id),
+            'terbilang' => 'dua ratus rupiah',
+        ])->render();
+
+        /*
+         * Di ATRIBUT KELAS capnya, bukan di mana saja — nama kelasnya ada
+         * juga di blok <style> halaman yang sama.
+         *
+         * Baris ini sempat lulus memakai pencarian apa adanya, dan lulusnya
+         * karena kebetulan: .cap-belum tidak punya aturan CSS sendiri
+         * sehingga namanya memang hanya muncul di atribut. Begitu ia diberi
+         * satu aturan saja, ujinya akan merah tanpa ada yang salah.
+         */
+        $this->assertMatchesRegularExpression('/class="cap cap-lunas"/', $html,
+            'Kwitansi ini tidak memakai cap lunas.');
+
+        $this->assertDoesNotMatchRegularExpression('/class="cap cap-belum"/', $html,
+            'Kwitansi memakai cap belum dibayar; yang sudah membayar akan '
+            . 'dicurigai belum.');
+
+        // Logonya ikut di dalam capnya — itu yang membedakan cap dari
+        // kotak bertulisan.
+        $this->assertMatchesRegularExpression('/class="cap-logo"|cap-logo/', $html);
+    }
+
+    #[Test]
     public function kwitansinya_berlogo_rumah_scopus_bukan_mis(): void
     {
         /*
