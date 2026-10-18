@@ -66,14 +66,24 @@ class BerandaTest extends TestCase
              * sama. Memeriksa keduanya ada di halaman tidak membuktikan apa
              * pun — alamat /Clinik-Scopus bisa saja menempel di kartu lain,
              * dan itu persis bentuk cacatnya.
+             *
+             * Dibatasi dari judul kartu ini sampai judul kartu BERIKUTNYA,
+             * bukan dari nama kelas pembungkusnya. Versi pertama penjaga ini
+             * mencocokkan `<div class="bnd-layanan"` dan langsung merah saat
+             * rupanya dirombak dan kelasnya berganti nama — merah karena
+             * perubahan yang tidak ada hubungannya dengan tautan, yaitu
+             * bentuk kegagalan yang membuat orang berhenti mempercayai uji.
              */
-            $cocok = preg_match(
-                '#<div class="bnd-layanan".*?<h3>' . preg_quote($nama, '#') . '</h3>.*?href="[^"]*'
-                    . preg_quote($jalur, '#') . '"#s',
-                $isi
-            );
+            $mulai = strpos($isi, '<h3>' . $nama . '</h3>');
 
-            $this->assertSame(1, $cocok,
+            $this->assertNotFalse($mulai,
+                'Kartu "' . $nama . '" tidak tergambar di beranda sama sekali.');
+
+            $sesudah = substr($isi, $mulai + strlen($nama) + 9);
+            $judulBerikut = strpos($sesudah, '<h3>');
+            $petak = $judulBerikut === false ? $sesudah : substr($sesudah, 0, $judulBerikut);
+
+            $this->assertStringContainsString($jalur . '"', $petak,
                 'Kartu "' . $nama . '" tidak menunjuk ' . $jalur . '. Tombolnya tetap '
                 . 'membuka halaman yang sah, jadi tidak ada galat yang muncul — yang '
                 . 'menanggung orang yang memesan layanan yang salah.');

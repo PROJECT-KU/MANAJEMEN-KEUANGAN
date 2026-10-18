@@ -93,6 +93,14 @@
     <!-- End Facebook Pixel Code -->
 
 
+    {{-- Tempat halaman menyisipkan isian kepalanya sendiri — font, meta,
+         pratarik. Dipakai beranda untuk memuat huruf judulnya.
+
+         Di dalam <head>, bukan di badan halaman: <link rel="stylesheet">
+         yang ditulis sesudah isi halaman membuat peramban menggambar
+         paragraf dengan huruf cadangan lebih dulu, lalu menggesernya saat
+         huruf aslinya datang. --}}
+    @stack('kepala')
 </head>
 
 <body>
