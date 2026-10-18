@@ -3801,6 +3801,10 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                                 // orang yang menunggu dikembalikan.
                                                 'bayar-batal-terima' => ['fa-money-bill-wave', 'hijau'],
                                                 'bayar-batal-kembali' => ['fa-undo', 'merah'],
+
+                                                // Penutupan tagihan di gerbang pembayaran.
+                                                'tagihan-tutup' => ['fa-lock', 'hijau'],
+                                                'tagihan-gagal' => ['fa-unlock', 'kuning'],
                                             ];
 
                                             [$ikonJejak, $warnaJejak] = $rupaAksi[$satu->aksi]

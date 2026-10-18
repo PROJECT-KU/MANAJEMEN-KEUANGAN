@@ -246,6 +246,112 @@ class Doku
      * yang tahu alamat pemberitahuannya bisa menandai pendaftaran mana pun
      * sebagai lunas hanya dengan satu permintaan POST.
      */
+    /**
+     * Menutup tagihan yang belum dibayar, supaya tidak bisa dibayar lagi.
+     *
+     * Membatalkan di layar panitia tidak dengan sendirinya sampai ke DOKU:
+     * tagihannya di sana hidup sampai tenggatnya habis, dan pendaftar yang
+     * tabnya masih terbuka bisa tetap membayar kursi yang sudah diberikan
+     * kepada orang lain.
+     *
+     * DUA HAL YANG TIDAK BISA DILAKUKAN API INI, dan keduanya sudah terbaca
+     * di dasbor DOKU sendiri:
+     *
+     *   1. hanya pesanan Virtual Account dan QRIS yang bisa dibatalkan.
+     *      Kartu, e-wallet, PayLater, dan digital banking TIDAK. Jadi
+     *      penjagaan di sisi kita — menolak menaikkan status pendaftaran
+     *      yang sudah batal — tetap wajib ada selamanya, bukan sementara
+     *      sampai ini jalan;
+     *   2. pesanan yang sudah dibayar atau sudah kedaluwarsa tidak bisa
+     *      dibatalkan. Jawaban "gagal" untuk keduanya bukan kesalahan kita.
+     *
+     * TIDAK PERNAH melempar. Pemanggilnya sedang memindahkan status atas
+     * perintah panitia, dan kegagalan di sini tidak boleh membatalkan
+     * perpindahan itu — yang menanggung panitia yang menekan tombolnya.
+     *
+     * @return array{berhasil: bool, pesan: ?string}
+     */
+    public function batalkanTagihan(
+        ?string $nomor,
+        ?string $permintaanIdAsli,
+        string $catatan = 'Dibatalkan panitia'
+    ): array {
+        if (! $this->siap()) {
+            return ['berhasil' => false, 'pesan' => 'Pembayaran daring belum aktif.'];
+        }
+
+        $nomor = trim((string) $nomor);
+        $permintaanIdAsli = trim((string) $permintaanIdAsli);
+
+        /*
+         * original_request_id WAJIB, dan itulah satu-satunya sebab kolom
+         * bayar_permintaan_id ada. Pendaftaran yang tagihannya dibuat
+         * sebelum kolom itu lahir tidak memilikinya, dan tidak akan pernah
+         * bisa dibatalkan dari sini — disebutkan apa adanya supaya lognya
+         * tidak terbaca seperti gangguan jaringan.
+         */
+        if ($nomor === '' || $permintaanIdAsli === '') {
+            return [
+                'berhasil' => false,
+                'pesan' => 'Tagihan ini dibuat sebelum nomor permintaannya disimpan, '
+                    . 'jadi tidak bisa ditutup lewat DOKU.',
+            ];
+        }
+
+        $jalur = '/checkout/v3/cancellations';
+        $requestId = (string) Str::uuid();
+        $waktu = gmdate('Y-m-d\TH:i:s\Z');
+
+        $json = json_encode([
+            'order' => ['invoice_number' => $nomor],
+            'payment' => ['original_request_id' => $permintaanIdAsli],
+            'note' => $this->bersihkan($catatan),
+        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+
+        try {
+            /*
+             * Sepuluh detik, bukan dua puluh seperti saat membuat tagihan.
+             * Yang menunggu jawabannya panitia yang baru menekan "Dibatalkan"
+             * di layarnya, bukan proses latar.
+             */
+            $jawab = Http::timeout(10)
+                ->withHeaders([
+                    'Client-Id' => $this->clientId(),
+                    'Request-Id' => $requestId,
+                    'Request-Timestamp' => $waktu,
+                    'Signature' => $this->tandaTangan($jalur, $requestId, $waktu, $json),
+                    'Content-Type' => 'application/json',
+                ])
+                ->withBody($json, 'application/json')
+                ->post($this->pangkalan() . $jalur);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return ['berhasil' => false, 'pesan' => 'Tidak bisa menghubungi penyedia pembayaran.'];
+        }
+
+        if (! $jawab->successful()) {
+            /*
+             * Dicatat UTUH (tanpa tanda tangan maupun kunci), sebab jawaban
+             * inilah satu-satunya cara tahu mana yang "kanalnya tidak
+             * didukung" dan mana yang "fiturnya belum dinyalakan di dasbor".
+             * Keduanya gagal dengan cara yang sama dari luar.
+             */
+            Log::warning('DOKU menolak pembatalan tagihan', [
+                'status' => $jawab->status(),
+                'nomor' => $nomor,
+                'jawaban' => Str::limit($jawab->body(), 500),
+            ]);
+
+            return [
+                'berhasil' => false,
+                'pesan' => 'Penyedia pembayaran menolak pembatalan tagihan ini.',
+            ];
+        }
+
+        return ['berhasil' => true, 'pesan' => null];
+    }
+
     public function pemberitahuanSah(
         string $jalur,
         ?string $requestId,

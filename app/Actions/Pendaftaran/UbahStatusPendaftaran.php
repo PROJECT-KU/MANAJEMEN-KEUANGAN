@@ -116,6 +116,22 @@ class UbahStatusPendaftaran
         });
 
         /*
+         * Tagihannya ikut ditutup di gerbang pembayaran.
+         *
+         * SESUDAH transaksinya selesai, bukan di dalamnya: ini panggilan
+         * jaringan ke peladen orang lain, dan menahannya di dalam transaksi
+         * berarti baris angkatannya terkunci selama DOKU berpikir.
+         *
+         * Kegagalannya TIDAK membatalkan perpindahan status. Panitia sudah
+         * memutuskan pendaftaran ini batal; menolak keputusannya karena
+         * gerbang pembayaran sedang tidak menjawab hanya memindahkan masalah
+         * ke orang yang paling tidak bisa memperbaikinya. Yang gagal tercatat
+         * di log, dan penjagaan di penerima pemberitahuan tetap menangkap
+         * uang yang telanjur masuk.
+         */
+        $this->tutupTagihanGerbang($layanan, $pendaftaran->refresh(), $statusLama, $status, $olehSiapa);
+
+        /*
          * Pengirimnya PINDAH ke KirimSuratStatus.
          *
          * Tiga pemanggil sekarang: perpindahan status, tombol "kirim ulang"
@@ -133,6 +149,74 @@ class UbahStatusPendaftaran
             'pesan' => 'Status ' . ($pendaftaran->id_transaksi ?? $pendaftaran->id_pemesanan ?? '')
                 . ' jadi "' . Pendaftaran::pilihanStatus($layanan)[$status] . '".',
         ];
+    }
+
+    /**
+     * Menutup tagihan di gerbang pembayaran saat pendaftarannya berhenti aktif.
+     *
+     * Tanpa ini, membatalkan di layar panitia tidak sampai ke DOKU sama
+     * sekali: tagihannya hidup sampai tenggatnya habis, dan pendaftar yang
+     * tabnya masih terbuka bisa tetap membayar kursi yang sudah dikembalikan
+     * ke kuota — lalu diberikan kepada orang lain.
+     *
+     * Hanya Webinar Eksklusif: layanan lain belum memakai gerbang pembayaran
+     * sama sekali, dan tidak punya kolom tagihan untuk ditutup.
+     */
+    private function tutupTagihanGerbang(
+        string $layanan,
+        $pendaftaran,
+        string $statusLama,
+        string $statusBaru,
+        ?string $olehSiapa
+    ): void {
+        if ($layanan !== 'webinar_eksklusif') {
+            return;
+        }
+
+        $tidakAktif = ['cancel', 'expired'];
+
+        // Hanya perpindahan dari AKTIF ke tidak aktif. Yang sudah batal lalu
+        // ditandai kedaluwarsa tidak punya tagihan hidup untuk ditutup.
+        if (in_array($statusLama, $tidakAktif, true) || ! in_array($statusBaru, $tidakAktif, true)) {
+            return;
+        }
+
+        if ($pendaftaran->cara_bayar !== 'doku') {
+            return;   // peninggalan transfer manual; tidak punya tagihan di sana
+        }
+
+        $hasil = app(\App\Services\Doku::class)->batalkanTagihan(
+            $pendaftaran->id_transaksi,
+            $pendaftaran->bayar_permintaan_id,
+            'Dibatalkan panitia' . ($olehSiapa ? ' (' . $olehSiapa . ')' : '')
+        );
+
+        \App\PendaftaranJejak::create([
+            'layanan' => $layanan,
+            'pendaftaran_id' => (string) $pendaftaran->getKey(),
+            'aksi' => $hasil['berhasil'] ? 'tagihan-tutup' : 'tagihan-gagal',
+            'dari' => $statusLama,
+            'ke' => $statusBaru,
+
+            /*
+             * Hasilnya DICATAT, berhasil maupun gagal.
+             *
+             * Yang gagal justru yang paling perlu terlihat: tagihannya masih
+             * hidup, dan panitia yang mengira pembatalannya sudah menutup
+             * segalanya tidak akan memeriksa apa pun lagi. Kanal kartu dan
+             * e-wallet memang TIDAK BISA dibatalkan — jawaban gagal untuk
+             * keduanya normal, dan kalimat ini yang membedakannya dari
+             * gangguan sungguhan.
+             */
+            'ringkasan' => $hasil['berhasil']
+                ? 'Tagihan di DOKU ditutup; tidak bisa dibayar lagi'
+                : 'Tagihan di DOKU TIDAK tertutup — ' . $hasil['pesan']
+                    . ' Pembayaran yang telanjur masuk tetap ditangkap sistem, '
+                    . 'tetapi tagihannya masih bisa dibuka pendaftarnya.',
+
+            'oleh_id' => \Illuminate\Support\Facades\Auth::id(),
+            'oleh_nama' => $olehSiapa,
+        ]);
     }
 
     /**
