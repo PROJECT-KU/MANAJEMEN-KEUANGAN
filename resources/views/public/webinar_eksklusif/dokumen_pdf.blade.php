@@ -71,6 +71,20 @@
     $sisa = $total - $dibayar;
 
     $rp = fn (int $n) => ($n < 0 ? '-' : '') . number_format(abs($n), 0, ',', '.');
+
+    /*
+     * Nomor panitianya dibaca dari config, BUKAN diketik ulang di sini.
+     *
+     * Ia berubah saat orangnya berganti, dan nomor yang diketik ulang di
+     * tiap tempat akan tertinggal di sebagian tempat — pada dokumen yang
+     * sudah dicetak dan dipegang orang, tertinggalnya permanen.
+     *
+     * Disimpan format internasional tanpa plus (6288983567819) karena
+     * wa.me memintanya begitu; di sini dikembalikan ke bentuk yang dibaca
+     * orang Indonesia.
+     */
+    $wa = preg_replace('/^62/', '0', (string) config('panitia.whatsapp'));
+    $waTampil = trim(chunk_split($wa, 4, '-'), '-');
 @endphp
 <!DOCTYPE html>
 <html lang="id">
@@ -90,15 +104,22 @@
 
         table { width: 100%; border-collapse: collapse; }
 
-        .kop td { vertical-align: top; padding: 0; }
-        /* 58 + 42 = 100. Logonya dibesarkan 150 -> 215px, jadi jatah
-           kolomnya ikut dilebarkan; dibiarkan 30%, logonya meluber keluar
-           kolom dan Dompdf memotongnya tanpa satu pun galat. */
-        .kop-kiri { width: 58%; }
-        .kop-kanan { width: 42%; text-align: right; }
+        .kop td { vertical-align: middle; padding: 0; }
+        /* 46 + 54 = 100. Logonya 215px, jadi jatah kolomnya harus cukup;
+           terlalu sempit, logonya meluber dan Dompdf memotongnya tanpa satu
+           pun galat. */
+        .kop-kiri { width: 46%; }
+        .kop-kanan { width: 54%; text-align: right; }
 
-        .judul { margin: 0; font-size: 26px; font-weight: bold; color: #0f2b5b; letter-spacing: 1px; }
-        .nomor { margin: 3px 0 0; font-size: 11px; color: #64748b; }
+        .judul { margin: 0; font-size: 30px; font-weight: bold; color: #0f2b5b; letter-spacing: 2px; }
+        .nomor { margin: 4px 0 0; font-size: 11px; color: #64748b; }
+
+        .garis-kop {
+            margin-top: 12px;
+            border-top: 3px solid #b45309;
+            height: 1px; font-size: 0; line-height: 0;
+        }
+        .garis-lunas { border-top-color: #15803d; }
 
         .garis { border-top: 1px solid #e2e8f0; height: 1px; font-size: 0; line-height: 0; }
 
@@ -137,14 +158,58 @@
         .k-harga { width: 19%; text-align: right; }
         .k-jumlah { width: 19%; text-align: right; }
 
-        .ringkas { margin-top: 2px; }
-        .ringkas td { padding: 7px 10px; }
-        .ringkas-kosong { width: 62%; }
-        .ringkas-label { width: 19%; text-align: right; font-weight: bold; color: #0f2b5b; }
-        .ringkas-nilai { width: 19%; text-align: right; font-weight: bold; color: #0f2b5b; }
+        /* 52 + 48 = 100. */
+        .bawah-rinci { margin-top: 16px; }
+        .bawah-rinci > tr > td { vertical-align: top; padding: 0; }
+        .bawah-kiri { width: 52%; padding-right: 18px !important; }
+        .bawah-kanan { width: 48%; }
 
-        .sisa td { border-top: 2px solid #b45309; color: #b45309; font-size: 13px; }
-        .sisa-lunas td { border-top: 2px solid #15803d; color: #15803d; }
+        .terbilang-judul {
+            margin: 0 0 3px;
+            font-size: 9px; font-weight: bold; letter-spacing: 1px; color: #94a3b8;
+        }
+        .terbilang-isi { margin: 0; font-style: italic; color: #475569; }
+
+        /*
+         * border-spacing: 0 WAJIB di sini.
+         *
+         * border-collapse: separate dipakai supaya border-radius kotaknya
+         * tergambar — pada collapse, Dompdf mengabaikan radiusnya. Tetapi
+         * separate juga memberi JARAK antar sel, dan garis oranye di atas
+         * baris "Sisa tagihan" ikut terputus di jarak itu: terlihat di
+         * potret sebagai dua potong garis dengan celah di tengahnya.
+         */
+        .ringkas {
+            width: 100%;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        .ringkas td { padding: 8px 14px; border: 0; }
+        .ringkas-label { width: 52%; text-align: left; color: #475569; }
+        .ringkas-nilai { width: 48%; text-align: right; font-weight: bold; color: #0f2b5b; }
+
+        .ringkas-garis {
+            padding: 0 14px !important;
+            height: 2px; font-size: 0; line-height: 0;
+        }
+        .ringkas-garis:after {
+            content: '';
+            display: block;
+            border-top: 2px solid #b45309;
+        }
+
+        .sisa td {
+            padding-top: 9px !important;
+            color: #b45309;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .ringkas-lunas .ringkas-garis:after { border-top-color: #15803d; }
+        .ringkas-lunas .sisa td { color: #15803d; }
 
         /* 62 + 38 = 100. */
         .kaki-blok { margin-top: 30px; }
@@ -153,6 +218,26 @@
         .kaki-kanan { width: 38%; text-align: right; }
 
         .kaki { margin: 0; color: #94a3b8; font-size: 9.5px; line-height: 1.6; }
+
+        /* 46 + 54 = 100. */
+        .pita {
+            margin-top: 26px;
+            background: #f8fafc;
+            border-top: 2px solid #0f2b5b;
+            border-collapse: separate;
+        }
+        .pita td { padding: 12px 14px; vertical-align: top; border: 0; }
+        .pita-kiri { width: 46%; }
+        .pita-kanan { width: 54%; text-align: right; }
+
+        .pita-nama {
+            margin: 0 0 3px;
+            font-size: 10px; font-weight: bold; letter-spacing: .8px; color: #0f2b5b;
+        }
+        .pita-isi { margin: 0; font-size: 9.5px; line-height: 1.65; color: #64748b; }
+        .pita-isi strong { color: #0f2b5b; }
+        .pita-sosial { margin: 5px 0 0; font-size: 9.5px; color: #64748b; }
+        .pita-sosial strong { color: #0f2b5b; }
 
         /* Bingkai luar capnya; bingkai dalamnya digambar oleh <td>-nya. */
         .cap {
@@ -193,16 +278,18 @@
 <table class="kop">
     <tr>
         <td class="kop-kiri">
-            <p class="judul">{{ $judul }}</p>
-            <p class="nomor">No. {{ $nomor }}</p>
+            <img src="{{ $logo }}" alt="Rumah Scopus Foundation" width="215">
         </td>
         <td class="kop-kanan">
-            <img src="{{ $logo }}" alt="Rumah Scopus Foundation" width="215">
+            <p class="judul">{{ $judul }}</p>
+            <p class="nomor">No. {{ $nomor }}</p>
         </td>
     </tr>
 </table>
 
-<div class="garis" style="margin-top:14px;"></div>
+{{-- Garis tebal berwarna keadaan, bukan garis abu tipis: ia menutup kopnya
+     sekaligus menyebut keadaan dokumennya sebelum satu angka pun dibaca. --}}
+<div class="garis-kop {{ $lunas ? 'garis-lunas' : '' }}"></div>
 
 <table class="ket">
     <tr>
@@ -287,30 +374,54 @@
     @endforeach
 </table>
 
-<table class="ringkas">
+{{-- Terbilang di KIRI, ringkasan angka di KANAN, sejajar.
+
+     Ditumpuk, halamannya jadi satu kolom panjang yang seluruhnya rata kiri
+     dan ruang di sebelah kanan tabel terbuang. Bersebelahan, keduanya
+     mengisi lebar yang sama dan mata langsung menemukan angka akhirnya. --}}
+<table class="bawah-rinci">
     <tr>
-        <td class="ringkas-kosong"></td>
-        <td class="ringkas-label">Total</td>
-        <td class="ringkas-nilai">{{ $rp($total) }}</td>
-    </tr>
-    <tr>
-        <td class="ringkas-kosong"></td>
-        <td class="ringkas-label">Sudah dibayar</td>
-        <td class="ringkas-nilai">{{ $rp($dibayar) }}</td>
-    </tr>
-    <tr class="sisa {{ $lunas ? 'sisa-lunas' : '' }}">
-        <td class="ringkas-kosong" style="border-top:0;"></td>
-        {{-- Namanya SAMA di kedua dokumen: barisnya memang berarti hal
-             yang sama, yaitu berapa yang masih harus dibayar. Diberi nama
-             "Lunas" di kwitansi, angkanya jadi nol tanpa keterangan — dan
-             nol apa tidak terjawab oleh barisnya sendiri. Yang membedakan
-             warnanya. --}}
-        <td class="ringkas-label" style="color:inherit;">Sisa tagihan</td>
-        <td class="ringkas-nilai" style="color:inherit;">{{ $rp($sisa) }}</td>
+        <td class="bawah-kiri">
+            <p class="terbilang-judul">TERBILANG</p>
+            <p class="terbilang-isi">{{ $terbilang }}</p>
+        </td>
+
+        <td class="bawah-kanan">
+            <table class="ringkas {{ $lunas ? 'ringkas-lunas' : '' }}">
+                <tr>
+                    <td class="ringkas-label">Total</td>
+                    <td class="ringkas-nilai">{{ $rp($total) }}</td>
+                </tr>
+                <tr>
+                    <td class="ringkas-label">Sudah dibayar</td>
+                    <td class="ringkas-nilai">{{ $rp($dibayar) }}</td>
+                </tr>
+                {{-- Namanya SAMA di kedua dokumen: barisnya memang berarti
+                     hal yang sama, yaitu berapa yang masih harus dibayar.
+                     Diberi nama "Lunas" di kwitansi, angkanya jadi nol tanpa
+                     keterangan — dan nol apa tidak terjawab oleh barisnya
+                     sendiri. Yang membedakan warnanya. --}}
+                {{-- Garisnya BARIS TERSENDIRI selebar penuh, bukan
+                     border-top pada kedua selnya.
+
+                     Dompdf menggambar border tiap sel sebagai kotak
+                     terpisah; dua sel bersebelahan menghasilkan dua potong
+                     garis dengan celah di sambungannya — terlihat di potret
+                     sebagai garis yang putus di tengah. border-spacing: 0
+                     TIDAK menutupnya; dicoba, celahnya tetap ada.
+
+                     Satu sel ber-colspan tidak punya sambungan. --}}
+                <tr>
+                    <td colspan="2" class="ringkas-garis"></td>
+                </tr>
+                <tr class="sisa">
+                    <td class="ringkas-label">Sisa tagihan</td>
+                    <td class="ringkas-nilai">{{ $rp($sisa) }}</td>
+                </tr>
+            </table>
+        </td>
     </tr>
 </table>
-
-<p style="margin:14px 0 0;font-style:italic;color:#64748b;">Terbilang: {{ $terbilang }}</p>
 
 {{-- Kaki dua kolom: keterangan di kiri, CAP di kanan.
 
@@ -352,6 +463,42 @@
                     </td>
                 </tr>
             </table>
+        </td>
+    </tr>
+</table>
+
+{{-- PITA KAKI.
+
+     Dokumen ini berpindah tangan: disimpan, dicetak, diteruskan ke
+     bendahara kantor, kadang dibaca berbulan-bulan kemudian oleh orang
+     yang tidak pernah membuka emailnya. Tanpa pita ini, satu-satunya cara
+     menghubungi penerbitnya adalah mencari emailnya kembali.
+
+     Ikonnya TEKS, bukan gambar. Tiga berkas ikon yang ada di aplikasi ini
+     berukuran 14-25 KB; empat di antaranya akan melipatgandakan berkas yang
+     sekarang 20 KB. Lagi pula teks di dalam PDF bisa disalin, sementara
+     ikon tidak — dan yang hendak menghubungi perlu menyalin, bukan
+     memandang. TikTok pun memang tidak punya ikonnya di sini. --}}
+<table class="pita">
+    <tr>
+        <td class="pita-kiri">
+            <p class="pita-nama">RUMAH SCOPUS FOUNDATION</p>
+            <p class="pita-isi">
+                Bangunsari, Bangun Kerto, Turi, Sleman<br>
+                Daerah Istimewa Yogyakarta 55551
+            </p>
+        </td>
+
+        <td class="pita-kanan">
+            <p class="pita-isi">
+                <strong>rumahscopusfoundation.com</strong><br>
+                info@rumahscopusfoundation.com<br>
+                WhatsApp {{ $waTampil }}
+            </p>
+            <p class="pita-sosial">
+                Instagram &amp; TikTok <strong>@rumah_scopus</strong>
+                &nbsp;&middot;&nbsp; YouTube <strong>@rumahscopus</strong>
+            </p>
         </td>
     </tr>
 </table>
