@@ -623,26 +623,49 @@ Beranda | Rumah Scopus
     .bnd-tempel p { margin-top: 7px; font-size: .9rem; color: rgba(22, 35, 63, .72); }
 
     /* ====================================================== testimoni */
+    /* Tiga rekaman berjajar, lalu kutipannya di bawah.
+
+       Ketiganya TIDAK berperbandingan sisi sama: dua tegak 540x960 dan satu
+       rebah 960x540. Yang dipatok TINGGINYA, bukan lebarnya — dengan lebar
+       yang dipatok, rekaman rebahnya harus dipotong jadi tegak dan yang
+       terbuang justru sisi kiri-kanan, tempat orang yang sedang berbicara
+       biasanya berada.
+
+       Jadi tiap polaroid memeluk rekamannya sendiri: yang tegak jadi sempit
+       dan tinggi, yang rebah jadi lebar dan pendek. Tingginya berbeda, dan
+       itu memang bentuk foto yang dipasang di dinding. */
     .bnd-testi-kisi {
-        display: grid; grid-template-columns: .92fr 1.08fr; gap: 48px; align-items: center;
+        display: grid; grid-template-columns: repeat(3, 1fr);
+        gap: 28px; align-items: start; justify-items: center;
     }
 
     /* Bingkai polaroid: pinggiran bawah lebih tebal, seperti foto cetak. */
     .bnd-polaroid {
-        padding: 14px 14px 18px;
+        width: fit-content; max-width: 100%;
+        padding: 13px 13px 16px;
         background: var(--kertas);
         border: 2px solid var(--tinta);
-        box-shadow: 9px 9px 0 var(--ungu);
-        transform: rotate(-1.6deg);
     }
+    /* Kemiringan dan warna bayangannya berbeda-beda, ditulis satu per satu:
+       tiga polaroid bersudut sama terbaca sebagai cetakan, bukan sebagai
+       foto yang ditempel orang. */
+    .bnd-polaroid:nth-child(1) { transform: rotate(-1.8deg); box-shadow: 8px 8px 0 var(--ungu); }
+    .bnd-polaroid:nth-child(2) { transform: rotate(1.2deg); box-shadow: 8px 8px 0 var(--rumput); }
+    .bnd-polaroid:nth-child(3) { transform: rotate(-.9deg); box-shadow: 8px 8px 0 var(--bata); }
+
     .bnd-polaroid video {
-        width: 100%; height: 460px; object-fit: cover; display: block;
-        border: 2px solid var(--tinta);
+        display: block; max-height: 420px; width: auto; max-width: 100%;
+        border: 2px solid var(--tinta); background: var(--tinta);
     }
     .bnd-polaroid-kaki {
-        margin-top: 14px; text-align: center;
-        font-family: 'Fraunces', serif; font-weight: 700; font-size: .96rem;
+        margin-top: 12px; text-align: center;
+        font-family: 'Fraunces', serif; font-weight: 700; font-size: .88rem;
+        max-width: 24ch;
     }
+
+    /* Kutipannya turun ke bawah barisan rekaman dan dipusatkan: ia sekarang
+       merangkum ketiganya, bukan menemani satu di sebelahnya. */
+    .bnd-testi-kutip { max-width: 66ch; margin: 46px auto 0; }
 
     /* Gelembung percakapan dengan ekor di kiri bawah. */
     .bnd-balon {
@@ -715,7 +738,8 @@ Beranda | Rumah Scopus
         .bnd-rute-deret { gap: 32px 18px; }
         .bnd-rute-deret::before { display: none; }
         .bnd-cap { display: none; }
-        .bnd-polaroid video { height: 380px; }
+        .bnd-testi-kisi { grid-template-columns: repeat(2, 1fr); }
+        .bnd-polaroid video { max-height: 340px; }
     }
 
     @media (max-width: 767.98px) {
@@ -746,7 +770,8 @@ Beranda | Rumah Scopus
         .bnd-aksi > .bnd-tombol { flex: 1 1 100%; justify-content: center; }
         .bnd-ajakan { padding: 38px 22px; box-shadow: 6px 6px 0 var(--tinta); }
         .bnd-ajakan h2 { font-size: 1.68rem; }
-        .bnd-polaroid video { height: 320px; }
+        .bnd-testi-kisi { grid-template-columns: 1fr; gap: 34px; }
+        .bnd-polaroid video { max-height: 300px; }
         .bnd-nilai-angka { font-size: 2.6rem; }
         /* Relnya DISEMBUNYIKAN saat perhentiannya menumpuk tegak: garis
            mendatar di antara kotak yang tersusun ke bawah menunjuk arah
@@ -1158,40 +1183,55 @@ Beranda | Rumah Scopus
                 <h2 class="bnd-judul">Yang sudah duluan tembus</h2>
             </div>
 
+            {{-- Ketiga rekaman ini SAMA PERSIS dengan yang dipakai halaman
+                 iklan Webinar Eksklusif, dan sengaja diambil dari tempat yang
+                 sama: storage/video di MIS. Halaman iklan itu repo terpisah
+                 yang memuatnya lewat alamat ini juga — satu berkas, dua
+                 halaman, jadi mengganti rekamannya cukup sekali. --}}
             <div class="bnd-testi-kisi">
-                <div class="bnd-polaroid" data-aos="fade-right">
-                    {{-- preload="metadata": tanpa ini peramban mengunduh seluruh
-                         berkas videonya sebelum ada yang menekan putar — beban
-                         yang ditanggung SETIAP pengunjung beranda, termasuk yang
-                         tidak pernah menggulung sampai ke sini.
+                @foreach ([
+                    ['testimoni', 'testimoni-sampul', 'Peserta Scopus Camp — Yogyakarta'],
+                    ['testimoni2-web', 'testimoni2-sampul', 'Peserta Rumah Scopus'],
+                    ['testimoni3-web', 'testimoni3-sampul', 'Peserta Rumah Scopus'],
+                ] as $i => [$berkas, $sampul, $siapa])
+                    <figure class="bnd-polaroid" data-aos="fade-up" data-aos-delay="{{ $i * 110 }}">
+                        {{-- preload="none", BUKAN "metadata".
 
-                         TANPA poster=. Sempat diisi cover.png, dan gambar itu
-                         ternyata iklan layanan lain ("Manuskrip Berbasis Analisis
-                         Bibliometrik, 500k") — sampul yang menjanjikan isi berbeda
-                         dari videonya. --}}
-                    <video controls preload="metadata">
-                        <source src="{{ asset('assets/img/public/testimoni.MOV') }}" type="video/mp4">
-                        Peramban kamu belum bisa memutar video ini.
-                    </video>
-                    <div class="bnd-polaroid-kaki">Scopus Camp · Jogja</div>
-                </div>
+                             Ketiganya berjumlah 94 MB. Dengan "metadata" saja
+                             peramban tetap membuka sambungan ke tiap berkas
+                             untuk membaca kepalanya — tiga permintaan ke berkas
+                             puluhan megabita, di halaman depan, untuk rekaman
+                             yang belum tentu ditonton.
 
-                <div class="bnd-balon" data-aos="fade-left" data-aos-delay="120">
-                    <span class="bnd-balon-kutip">&ldquo;</span>
-                    <p>
-                        Awalnya pesimis banget. Rasanya Scopus itu buat orang lain,
-                        bukan buat saya. Tiga hari di Jogja ternyata cukup untuk
-                        mengubah cara saya memandang naskah sendiri.
-                    </p>
-                    <p>Sekarang sudah submit — dan ternyata memang sebisa itu.</p>
+                             Sampulnya yang menggantikan bingkai pertama, dan
+                             itu sebabnya tiap rekaman punya berkas -sampul
+                             sendiri. --}}
+                        <video controls playsinline preload="none"
+                            poster="{{ asset('storage/video/' . $sampul . '.webp') }}"
+                            aria-label="Testimoni {{ $siapa }}">
+                            <source src="{{ asset('storage/video/' . $berkas . '.mp4') }}" type="video/mp4">
+                            Peramban kamu belum bisa memutar video ini.
+                        </video>
+                        <figcaption class="bnd-polaroid-kaki">{{ $siapa }}</figcaption>
+                    </figure>
+                @endforeach
+            </div>
 
-                    <div class="bnd-balon-kaki">
-                        <i class="bi bi-people-fill"></i>
-                        <span>
-                            <strong>Peserta Scopus Camp</strong>
-                            <small>Pusat Rumah Scopus, Yogyakarta</small>
-                        </span>
-                    </div>
+            <div class="bnd-balon bnd-testi-kutip" data-aos="fade-up" data-aos-delay="120">
+                <span class="bnd-balon-kutip">&ldquo;</span>
+                <p>
+                    Awalnya pesimis banget. Rasanya Scopus itu buat orang lain,
+                    bukan buat saya. Tiga hari di Jogja ternyata cukup untuk
+                    mengubah cara saya memandang naskah sendiri.
+                </p>
+                <p>Sekarang sudah submit — dan ternyata memang sebisa itu.</p>
+
+                <div class="bnd-balon-kaki">
+                    <i class="bi bi-people-fill"></i>
+                    <span>
+                        <strong>Peserta Scopus Camp</strong>
+                        <small>Pusat Rumah Scopus, Yogyakarta</small>
+                    </span>
                 </div>
             </div>
         </div>
