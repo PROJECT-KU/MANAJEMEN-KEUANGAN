@@ -3,7 +3,7 @@
 namespace Tests\Feature\WebinarEksklusif;
 
 use App\KategoriLayanan;
-use App\Mail\WebinarEksklusifPendaftaranMail;
+use App\Mail\WebinarEksklusifLunasMail;
 use App\WebinarEksklusifPendaftaran;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Http;
@@ -77,7 +77,7 @@ class SuratLunasTest extends TestCase
 
         $this->getJson(route('public.webinareksklusif.keadaan', $p->getKey()))->assertOk();
 
-        Mail::assertSent(WebinarEksklusifPendaftaranMail::class, 1);
+        Mail::assertSent(WebinarEksklusifLunasMail::class, 1);
     }
 
     #[Test]
@@ -88,6 +88,11 @@ class SuratLunasTest extends TestCase
          * MENGETAHUI pembayarannya sudah masuk. Dikirim sebelum statusnya
          * tersimpan, isinya masih menyuruh orangnya membayar — dan itu
          * persis keluhan yang memulai perbaikan ini.
+         *
+         * Penandanya berubah 18 Okt 2026. Dulu yang dikirim surat bukti
+         * pendaftaran dalam mode lunas, dan penandanya lencana "SUDAH
+         * DIBAYAR" di dalamnya. Sekarang surat lunas tersendiri berikut
+         * kwitansinya, jadi yang dicari kalimat yang hanya ada di situ.
          */
         Http::fake(['*/orders/v1/status/*' => Http::response([
             'transaction' => ['status' => 'SUCCESS'],
@@ -97,10 +102,10 @@ class SuratLunasTest extends TestCase
 
         $this->getJson(route('public.webinareksklusif.keadaan', $p->getKey()))->assertOk();
 
-        Mail::assertSent(WebinarEksklusifPendaftaranMail::class, function ($surat) {
+        Mail::assertSent(WebinarEksklusifLunasMail::class, function ($surat) {
             $isi = $surat->render();
 
-            $this->assertStringContainsString('SUDAH DIBAYAR', $isi);
+            $this->assertStringContainsString('Pembayaran Anda sudah kami terima', $isi);
             $this->assertStringNotContainsString('BELUM DIBAYAR', $isi);
 
             return true;
@@ -125,7 +130,7 @@ class SuratLunasTest extends TestCase
             $this->getJson(route('public.webinareksklusif.keadaan', $p->getKey()))->assertOk();
         }
 
-        Mail::assertSent(WebinarEksklusifPendaftaranMail::class, 1);
+        Mail::assertSent(WebinarEksklusifLunasMail::class, 1);
     }
 
     #[Test]

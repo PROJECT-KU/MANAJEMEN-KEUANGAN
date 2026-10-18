@@ -175,9 +175,19 @@ class PendaftaranSemuaLayanan
                 'expired' => 'Kedaluwarsa',
                 'cancel' => 'Dibatalkan',
             ],
-            // Webinar tidak mengirim surat dari layar panitia: pemberitahuan
-            // lunasnya sudah dikirim jalur pendaftarannya sendiri.
-            'surat' => [],
+            /*
+             * Komentar di sini dulu berbunyi "webinar tidak mengirim surat
+             * dari layar panitia", dan itu sudah tidak benar: daftar kosong
+             * jatuh ke surat perubahan status umum, yang tidak menyebut
+             * nominal maupun cara bayarnya sama sekali.
+             *
+             * 'paid' sekarang dipatok ke surat lunas berkwitansi — SAMA
+             * PERSIS dengan yang dikirim jalur DOKU. Satu kejadian, satu
+             * surat, dari mana pun pelunasannya dicatat.
+             */
+            'surat' => [
+                'paid' => \App\Mail\WebinarEksklusifLunasMail::class,
+            ],
             'kolom' => [
                 'nomor' => 'id_transaksi',
                 'nama_orang' => 'nama',

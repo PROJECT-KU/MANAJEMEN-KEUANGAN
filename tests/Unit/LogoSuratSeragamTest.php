@@ -69,6 +69,14 @@ class LogoSuratSeragamTest extends TestCase
          * meminta surat ini "dari Rumah Scopus, bukan logo MIS".
          */
         'public/webinar_eksklusif/email_kedaluwarsa.blade.php',
+
+        /*
+         * Surat "pembayaran diterima" berikut kwitansinya. Pembacanya
+         * pendaftar, dan lampirannya kwitansi yang sebagian orang serahkan
+         * ke bendahara kantornya — jadi mereknya harus merek yayasan, baik
+         * di suratnya maupun di kwitansinya.
+         */
+        'public/webinar_eksklusif/email_lunas.blade.php',
     ];
 
     /** Berkas yang isinya surat, bukan halaman atau faktur. */

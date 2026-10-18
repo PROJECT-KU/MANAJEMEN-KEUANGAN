@@ -1,6 +1,34 @@
 <?php
 return [
 
+   /*
+   |--------------------------------------------------------------------------
+   | Bahasa
+   |--------------------------------------------------------------------------
+   |
+   | Bahasa yang dipakai mengeja angka jadi kata.
+   |
+   | WAJIB disebut di sini. Terbilang membacanya begini:
+   |
+   |     config('terbilang.locale') ?: config('app.locale')
+   |
+   | dan berkas ini dulu tidak menyebutnya sama sekali — jadi yang terbaca
+   | nilai bawaan dari config paketnya sendiri, yaitu 'en'. Ia MENANG atas
+   | app.locale yang sudah 'id', sebab ?: hanya mundur saat nilainya kosong,
+   | dan 'en' bukan nilai kosong.
+   |
+   | Akibatnya terukur pada dokumen yang keluar ke pelanggan: faktur Scopus
+   | Camp, faktur Analisis Bibliometrik, slip gaji, dan slip camp semuanya
+   | mencetak "two hundred thirty-two thousand nine hundred thirty-one
+   | rupiah" di bawah kata "Terbilang:".
+   |
+   | ICU di mesin ini memang bisa bahasa Indonesia — diperiksa langsung,
+   | NumberFormatter('id', SPELLOUT) memulangkan "dua ratus tiga puluh dua
+   | ribu sembilan ratus tiga puluh satu". Yang salah cuma bahasanya yang
+   | tidak pernah diminta.
+   */
+   'locale' => 'id',
+
     /*
     |--------------------------------------------------------------------------
     | Date Output Format

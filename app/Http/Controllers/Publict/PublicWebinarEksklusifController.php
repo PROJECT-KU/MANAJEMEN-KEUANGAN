@@ -1442,7 +1442,36 @@ class PublicWebinarEksklusifController extends Controller
             return;
         }
 
-        $this->kirimEmailPendaftaran($pendaftaran, $sesi);
+        /*
+         * Surat LUNAS berkwitansi, bukan bukti pendaftaran yang dikirim
+         * ulang dalam mode lunas.
+         *
+         * Yang lama masih bercerita tentang cara membayar — bagian itu
+         * memang disembunyikan saat lunas, tetapi yang tersisa cuma
+         * pengulangan surat yang sudah ia terima sejam sebelumnya, tanpa
+         * satu pun tanda bahwa uangnya sudah masuk.
+         *
+         * Kelas yang sama dipakai layar panitia (lihat
+         * PendaftaranSemuaLayanan::SUMBER), jadi pelunasan lewat DOKU dan
+         * pelunasan yang dicatat panitia menghasilkan surat yang identik.
+         */
+        try {
+            Mail::to($pendaftaran->email)->send(
+                new \App\Mail\WebinarEksklusifLunasMail($pendaftaran, $sesi)
+            );
+        } catch (\Throwable $e) {
+            /*
+             * Kegagalan surat TIDAK boleh menggagalkan pemanggilnya: yang
+             * memanggil ini jalur pemberitahuan DOKU, dan galat di sini
+             * membuat kami menjawab bukan-200 ke gerbangnya — yang lalu
+             * mengulang pemberitahuan pembayaran yang sebenarnya sudah
+             * tercatat.
+             */
+            Log::error('Surat lunas webinar eksklusif gagal dikirim.', [
+                'nomor' => $pendaftaran->id_transaksi,
+                'galat' => $e->getMessage(),
+            ]);
+        }
     }
 
     private function kirimEmailPendaftaran(WebinarEksklusifPendaftaran $pendaftaran, KategoriLayanan $sesi): void
