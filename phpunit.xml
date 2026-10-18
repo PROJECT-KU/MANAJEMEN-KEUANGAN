@@ -53,5 +53,21 @@
         -->
         <env name="DOKU_CLIENT_ID" value=""/>
         <env name="DOKU_SECRET_KEY" value=""/>
+
+        <!--
+            WhatsApp DIMATIKAN di rangkaian uji, dan ini bukan sekadar
+            kebersihan.
+
+            Tokennya di .env seseorang berarti rangkaian uji MENGIRIM
+            WHATSAPP SUNGGUHAN — ke nomor-nomor yang ada di data uji, yang
+            sebagian nomor orang betulan — dan ikut menghabiskan kuota
+            1.000 pesan/bulan paket gratisnya. Sekali jalan penuh bisa
+            memakan puluhan pesan.
+
+            Uji yang memang menguji Fonnte menyalakannya sendiri lewat
+            config()->set() DAN Http::fake(), jadi tidak satu pun
+            permintaan keluar.
+        -->
+        <env name="FONNTE_TOKEN" value=""/>
     </php>
 </phpunit>
