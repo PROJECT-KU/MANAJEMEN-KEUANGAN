@@ -111,7 +111,8 @@ class FakturBelumBayarTest extends TestCase
 
         // Isinya diperiksa dari TAMPILANNYA: teks di dalam PDF tersimpan
         // tersandi dan tidak bisa dicari apa adanya.
-        $html = view('public.webinar_eksklusif.faktur_pdf', [
+        $html = view('public.webinar_eksklusif.dokumen_pdf', [
+            'jenis' => 'faktur',
             'pendaftaran' => $p,
             'sesi' => KategoriLayanan::find($p->kategori_id),
             'terbilang' => 'seratus tiga puluh ribu delapan puluh dua rupiah',
@@ -119,8 +120,22 @@ class FakturBelumBayarTest extends TestCase
 
         $this->assertStringContainsString('FAKTUR', $html);
         $this->assertStringContainsString('130.082', $html);
-        $this->assertStringContainsString('Belum dibayar', $html);
+        $this->assertStringContainsString('Belum Dibayar', $html);
         $this->assertStringContainsString('Batas pembayaran', $html);
+
+        /*
+         * SISA TAGIHANNYA sama dengan totalnya, dan "Sudah dibayar" nol.
+         *
+         * Ini yang membedakan faktur dari kwitansi — bukan judulnya.
+         * Judulnya bisa benar sementara angkanya menyatakan uangnya sudah
+         * masuk, dan dokumen seperti itu adalah bukti palsu.
+         */
+        $this->assertStringContainsString('Sisa tagihan', $html);
+        $this->assertMatchesRegularExpression(
+            '/Sudah dibayar<\/td>\s*<td[^>]*>\s*0\s*</s',
+            $html,
+            'Faktur menyatakan sebagian sudah dibayar padahal belum.'
+        );
 
         // Kode uniknya WAJIB disebut: yang membayar harus mengirim angka
         // yang persis, dan selisih tiga digit membuat pembayarannya tidak

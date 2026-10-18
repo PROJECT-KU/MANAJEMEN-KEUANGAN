@@ -73,7 +73,8 @@ class WebinarEksklusifPendaftaranMail extends Mailable
          * kwitansinya sudah berangkat lewat WebinarEksklusifLunasMail.
          */
         if (! $this->pendaftaran->lunas) {
-            $faktur = Pdf::loadView('public.webinar_eksklusif.faktur_pdf', [
+            $faktur = Pdf::loadView('public.webinar_eksklusif.dokumen_pdf', [
+                'jenis' => 'faktur',
                 'pendaftaran' => $this->pendaftaran,
                 'sesi' => $this->sesi,
                 'terbilang' => Terbilang::make((int) $this->pendaftaran->total_pembayaran, ' rupiah'),

@@ -52,7 +52,8 @@ class WebinarEksklusifLunasMail extends Mailable
 
     public function build()
     {
-        $kwitansi = Pdf::loadView('public.webinar_eksklusif.kwitansi_pdf', [
+        $kwitansi = Pdf::loadView('public.webinar_eksklusif.dokumen_pdf', [
+            'jenis' => 'kwitansi',
             'pendaftaran' => $this->pendaftaran,
             'sesi' => $this->sesi,
             'terbilang' => Terbilang::make((int) $this->pendaftaran->total_pembayaran, ' rupiah'),
