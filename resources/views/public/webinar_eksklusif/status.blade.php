@@ -530,20 +530,21 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                              ini, jadi tombolnya hilang sendiri bersamaan dengan
                              habisnya hitung mundur di atas. --}}
                         @if ($pendaftaran->bayar_url)
-                            {{-- target="_blank": halaman gerbangnya dibuka di TAB LAIN,
-                                 dan itu seluruh maksudnya.
+                            {{-- target="_blank": halaman gerbangnya dibuka di TAB LAIN.
 
-                                 Sebelum ini seluruh jendela diserahkan ke DOKU. Yang
-                                 tidak membayar lalu menanggung tiga tekanan untuk
-                                 sampai ke kabar yang sebenarnya milik kita: kotak
-                                 "order has expired" di halaman DOKU, halaman time-out
-                                 DOKU, lalu tombol "GO TO MERCHANT". Dua layar pertama
-                                 digambar di domain mereka dan tidak bisa kita ganti.
+                                 Yang sampai ke tombol ini BUKAN orang yang baru
+                                 mengisi borang — borangnya mengalihkan langsung ke
+                                 DOKU. Yang sampai ke sini adalah yang datang dari
+                                 tautan di emailnya, atau yang tab bayarnya sudah
+                                 ditutup. Bagi mereka halaman ini satu-satunya yang
+                                 terbuka, dan menimpanya dengan halaman DOKU berarti
+                                 membuangnya.
 
-                                 Dengan tabnya terpisah, halaman INI tetap terbuka
-                                 selama orangnya membayar — jadi saat hitung mundurnya
-                                 habis, pemberitahuan dan halaman gagalnya milik kita,
-                                 tanpa satu pun tekanan.
+                                 Dengan tabnya terpisah, halaman ini tetap hidup:
+                                 hitung mundurnya berjalan, penanyanya berjalan, dan
+                                 saat waktunya habis pemberitahuan serta halaman
+                                 gagalnya milik kita sendiri — bukan tiga layar DOKU
+                                 yang tidak bisa kita ganti.
 
                                  rel="noopener": tanpa itu halaman gerbangnya memegang
                                  window.opener dan bisa mengalihkan halaman ini. --}}
