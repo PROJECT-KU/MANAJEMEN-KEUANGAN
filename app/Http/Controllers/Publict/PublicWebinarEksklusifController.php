@@ -1525,6 +1525,18 @@ class PublicWebinarEksklusifController extends Controller
                 'galat' => $e->getMessage(),
             ]);
         }
+
+        // WhatsApp-nya di cabang yang sama dengan suratnya; alasannya sama
+        // persis seperti di kirimEmailPendaftaran().
+        try {
+            app(\App\Actions\WebinarEksklusif\KabariWhatsApp::class)
+                ->lunas($pendaftaran, $sesi);
+        } catch (\Throwable $e) {
+            Log::warning('Kabar WhatsApp lunas gagal.', [
+                'nomor' => $pendaftaran->id_transaksi,
+                'pesan' => $e->getMessage(),
+            ]);
+        }
     }
 
     private function kirimEmailPendaftaran(WebinarEksklusifPendaftaran $pendaftaran, KategoriLayanan $sesi): void
@@ -1550,6 +1562,28 @@ class PublicWebinarEksklusifController extends Controller
             Log::error('Email pendaftaran Webinar Eksklusif gagal dikirim', [
                 'pendaftaran' => $pendaftaran->getKey(),
                 'email' => $pendaftaran->email,
+                'pesan' => $e->getMessage(),
+            ]);
+        }
+
+        /*
+         * WhatsApp-nya menempel DI SINI, pada pengirim emailnya sendiri,
+         * bukan di tiap pemanggil.
+         *
+         * Dipasang di pemanggil, dua jalur yang mengirim surat ini akan
+         * berbeda perlahan — yang satu mengabari lewat WhatsApp dan yang
+         * lain tidak, tanpa ada yang menyadarinya sampai ada pendaftar
+         * yang mengadu.
+         *
+         * try-nya TERPISAH dari milik email: email yang gagal tidak boleh
+         * ikut membatalkan WhatsApp-nya, dan sebaliknya.
+         */
+        try {
+            app(\App\Actions\WebinarEksklusif\KabariWhatsApp::class)
+                ->pendaftaranMasuk($pendaftaran, $sesi);
+        } catch (\Throwable $e) {
+            Log::warning('Kabar WhatsApp pendaftaran gagal.', [
+                'pendaftaran' => $pendaftaran->getKey(),
                 'pesan' => $e->getMessage(),
             ]);
         }
