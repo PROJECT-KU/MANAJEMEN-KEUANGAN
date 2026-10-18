@@ -854,6 +854,10 @@ class PublicWebinarEksklusifController extends Controller
         $pendaftaran->forceFill([
             'bayar_rujukan' => $hasil['rujukan'],
 
+            // Dibutuhkan Cancel Order API DOKU untuk menutup tagihan ini
+            // kalau pendaftarannya dibatalkan sebelum tenggatnya habis.
+            'bayar_permintaan_id' => $hasil['permintaan_id'],
+
             /*
              * Alamat halaman bayarnya DISIMPAN.
              *
@@ -1206,6 +1210,30 @@ class PublicWebinarEksklusifController extends Controller
             return response()->json(['ok' => true]);
         }
 
+        /*
+         * UANG MASUK SESUDAH PENDAFTARANNYA DIBATALKAN.
+         *
+         * Membatalkan di layar panitia tidak memberi tahu DOKU apa pun;
+         * tagihannya di sana tetap hidup sampai tenggatnya habis, dan
+         * pendaftar yang tabnya masih terbuka bisa tetap membayar.
+         *
+         * Sampai 18 Okt 2026 pembayaran itu lolos lewat cabang di bawah dan
+         * menghidupkan kembali barisnya jadi 'paid' — TANPA mengambil
+         * kursinya lagi, sebab kursinya sudah dikembalikan saat dibatalkan.
+         * Terukur: status cancel → paid, sisa kuota tidak berkurang, dan
+         * surat "Anda sudah lunas" berangkat ke orang yang pendaftarannya
+         * sudah dibatalkan panitia. Tiga kerusakan dari satu pembayaran.
+         *
+         * Dipisahkan ke cabangnya sendiri, DI ATAS cabang biasa, supaya
+         * aturan kursinya tidak bisa terlewat.
+         */
+        if (in_array($status, ['success', 'settlement'], true)
+            && in_array($pendaftaran->status, ['cancel', 'expired'], true)) {
+            $this->uangMasukSetelahBatal($pendaftaran, $status, $request);
+
+            return response()->json(['ok' => true]);
+        }
+
         if (in_array($status, ['success', 'settlement'], true)) {
             $pendaftaran->forceFill([
                 'status' => 'paid',
@@ -1257,6 +1285,163 @@ class PublicWebinarEksklusifController extends Controller
         ]);
 
         return false;
+    }
+
+    /**
+     * Pembayaran yang tiba untuk pendaftaran yang sudah batal/kedaluwarsa.
+     *
+     * Keputusan pemiliknya, 18 Okt 2026: TERIMA kalau kursinya masih ada.
+     * Orangnya sudah mengirim uang sungguhan, dan menolaknya padahal
+     * tempatnya masih kosong hanya memindahkan kerepotan ke dua pihak
+     * sekaligus — ia harus menunggu uangnya kembali, panitia harus
+     * mengurusnya.
+     *
+     * Kalau kursinya SUDAH TIDAK ADA, barisnya tetap batal. Menerimanya
+     * berarti menjual tempat yang sudah diberikan kepada orang lain, dan itu
+     * baru ketahuan di hari acaranya.
+     */
+    private function uangMasukSetelahBatal(
+        WebinarEksklusifPendaftaran $pendaftaran,
+        string $status,
+        Request $request
+    ): void {
+        $kanal = $this->doku->namaKanal($request->all()) ?: $pendaftaran->bayar_kanal;
+
+        /*
+         * Pengambilan kursinya DI DALAM transaksi dengan baris angkatannya
+         * dikunci, dan keputusan "masih ada atau tidak" dibaca dari baris
+         * yang sudah terkunci itu — bukan dari salinan yang dibaca sebelum
+         * kuncinya didapat. Dua pembayaran yang tiba bersamaan untuk sisa
+         * satu kursi adalah persis keadaan yang membuat penjagaan ini ada.
+         */
+        $dapatKursi = DB::transaction(function () use ($pendaftaran) {
+            $sesi = $pendaftaran->angkatan;
+
+            // Angkatan tanpa kuota tidak pernah kehabisan tempat.
+            if ($sesi === null || $sesi->total_kuota === null) {
+                return true;
+            }
+
+            $terkunci = KategoriLayanan::whereKey($sesi->getKey())->lockForUpdate()->first();
+
+            if ($terkunci === null) {
+                return true;
+            }
+
+            $butuh = (int) $pendaftaran->jumlah_pendaftar;
+
+            if ((int) $terkunci->sisa_kuota < $butuh) {
+                return false;
+            }
+
+            $terkunci->forceFill([
+                'sisa_kuota' => (string) ((int) $terkunci->sisa_kuota - $butuh),
+            ])->save();
+
+            return true;
+        });
+
+        if ($dapatKursi) {
+            $pendaftaran->forceFill([
+                'status' => 'paid',
+                'bayar_status' => $status,
+                'bayar_pada' => now(),
+                'bayar_kanal' => $kanal,
+            ])->save();
+
+            $this->jejakUangMasuk($pendaftaran, 'bayar-batal-terima',
+                'Uang masuk sesudah dibatalkan; kursinya masih ada, jadi '
+                . 'pendaftarannya diterima kembali dan ditandai lunas');
+
+            // Suratnya baru dikirim SESUDAH kursinya benar-benar terambil.
+            $this->kabariSudahLunas($pendaftaran->refresh());
+
+            return;
+        }
+
+        /*
+         * Kursinya habis. Statusnya TIDAK dipindahkan, dan tidak ada satu
+         * pun surat "lunas" yang berangkat — kalimat itu akan membuat
+         * orangnya datang ke kelas yang tidak punya tempat untuknya.
+         *
+         * Yang disimpan penandanya, supaya panitia punya daftar yang bisa
+         * dikerjakan dan bukan sekadar baris di log yang tidak pernah
+         * dibuka.
+         */
+        $pendaftaran->forceFill([
+            'bayar_status' => $status,
+            'bayar_pada' => now(),
+            'bayar_kanal' => $kanal,
+            'perlu_dikembalikan_pada' => now(),
+        ])->save();
+
+        $this->jejakUangMasuk($pendaftaran, 'bayar-batal-kembali',
+            'Uang masuk sesudah dibatalkan, tetapi kursinya sudah habis — '
+            . 'pendaftarannya TETAP batal dan uangnya perlu dikembalikan');
+
+        Log::critical('Uang masuk untuk pendaftaran yang sudah batal dan kursinya habis', [
+            'nomor' => $pendaftaran->id_transaksi,
+            'nominal' => $pendaftaran->total_pembayaran,
+            'kanal' => $kanal,
+        ]);
+
+        $this->kabariPanitiaPerluKembali($pendaftaran);
+    }
+
+    /**
+     * Satu baris di "Jejak perubahan", supaya panitia melihatnya di tempat
+     * ia memang bekerja — bukan di log peladen yang tidak pernah dibuka.
+     *
+     * Kalimatnya ditulis di sini sebagai `ringkasan`, bukan dirakit dari
+     * `aksi` di dalam model: keadaan ini butuh kalimat yang menerangkan
+     * SEBABNYA ("kursinya sudah habis"), dan itu tidak bisa disimpulkan dari
+     * nama aksi mana pun. Kolom `aksi` sendiri cuma varchar(20).
+     */
+    private function jejakUangMasuk(
+        WebinarEksklusifPendaftaran $pendaftaran,
+        string $aksi,
+        string $kalimat
+    ): void {
+        \App\PendaftaranJejak::create([
+            'layanan' => 'webinar_eksklusif',
+            'pendaftaran_id' => (string) $pendaftaran->getKey(),
+            'aksi' => $aksi,
+            'dari' => 'cancel',
+            'ke' => (string) $pendaftaran->status,
+            'ringkasan' => $kalimat,
+
+            // Bukan perbuatan seorang pengguna: yang melakukannya gerbang
+            // pembayaran. Dinamai begitu supaya layar jejaknya tidak
+            // menuding admin yang kebetulan sedang masuk.
+            'oleh_id' => null,
+            'oleh_nama' => 'Gerbang pembayaran (DOKU)',
+        ]);
+    }
+
+    /**
+     * WhatsApp ke panitia, bukan surat.
+     *
+     * Ini uang orang yang menunggu dikembalikan, dan yang menentukan bukan
+     * kelengkapan kalimatnya melainkan seberapa cepat ada manusia yang
+     * membacanya. Nomor panitianya sudah ada di config dan jalurnya sudah
+     * terbukti jalan; alamat surat panitia belum ada di mana pun.
+     */
+    private function kabariPanitiaPerluKembali(WebinarEksklusifPendaftaran $pendaftaran): void
+    {
+        $pesan = implode("\n", [
+            '*Uang masuk setelah pendaftaran dibatalkan*',
+            '',
+            'Nomor: *' . $pendaftaran->id_transaksi . '*',
+            'Nama: ' . $pendaftaran->nama,
+            'Nominal: Rp ' . number_format((int) $pendaftaran->total_pembayaran, 0, ',', '.'),
+            '',
+            'Kursinya sudah habis, jadi pendaftarannya TETAP batal dan tidak '
+                . 'ada surat lunas yang dikirim ke orangnya.',
+            '',
+            'Uangnya perlu dikembalikan. Rinciannya ada di layar Pendaftar Layanan.',
+        ]);
+
+        app(\App\Services\Fonnte::class)->kirim(config('panitia.whatsapp'), $pesan);
     }
 
     /** Mengembalikan kursi yang sempat dipesan tetapi tidak jadi dibayar. */
