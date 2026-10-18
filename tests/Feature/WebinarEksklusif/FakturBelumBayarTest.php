@@ -148,6 +148,66 @@ class FakturBelumBayarTest extends TestCase
     }
 
     #[Test]
+    public function capnya_tidak_pernah_menyatakan_lunas_di_faktur(): void
+    {
+        /*
+         * Cap "LUNAS" pada dokumen yang belum dibayar adalah BUKTI PALSU —
+         * dan cap justru yang paling dipercaya orang, sebab ia yang membuat
+         * selembar kertas terbaca sah.
+         *
+         * Cetakannya dipakai bersama kwitansi dan keadaannya diserahkan
+         * pemanggilnya, jadi tertukarnya bukan kemungkinan yang jauh.
+         */
+        $p = $this->pendaftaran();
+
+        $html = view('public.webinar_eksklusif.dokumen_pdf', [
+            'jenis' => 'faktur',
+            'pendaftaran' => $p,
+            'sesi' => KategoriLayanan::find($p->kategori_id),
+            'terbilang' => 'seratus tiga puluh ribu delapan puluh dua rupiah',
+        ])->render();
+
+        /*
+         * Dicari di ATRIBUT KELAS capnya, bukan di mana saja.
+         *
+         * Nama kelasnya muncul juga di blok <style> halaman yang sama — ia
+         * memang harus, sebab di situlah aturannya ditulis. Dicari apa
+         * adanya, "tidak memuat cap-lunas" mustahil terpenuhi dan ujinya
+         * merah selamanya tanpa ada yang salah pada dokumennya.
+         */
+        $this->assertMatchesRegularExpression('/class="cap cap-belum"/', $html,
+            'Faktur ini tidak memakai cap "belum dibayar".');
+
+        $this->assertDoesNotMatchRegularExpression('/class="cap cap-lunas"/', $html,
+            'Faktur memakai cap lunas; itu bukti palsu.');
+
+        $this->assertStringNotContainsString('>LUNAS<', $html);
+    }
+
+    #[Test]
+    public function langkah_cara_membayar_tidak_diulang_di_sini(): void
+    {
+        /*
+         * Dokumen ini dibaca bersama emailnya, dan emailnya sudah memuat
+         * tombol menuju halaman bayar. Langkah yang sama ditulis dua kali
+         * membuat yang satu tertinggal saat yang lain diperbarui — dan yang
+         * tertinggal pada dokumen keuangan selalu yang dicetak, sebab ia
+         * sudah ada di tangan orangnya.
+         */
+        $p = $this->pendaftaran();
+
+        $html = view('public.webinar_eksklusif.dokumen_pdf', [
+            'jenis' => 'faktur',
+            'pendaftaran' => $p,
+            'sesi' => KategoriLayanan::find($p->kategori_id),
+            'terbilang' => 'seratus tiga puluh ribu delapan puluh dua rupiah',
+        ])->render();
+
+        $this->assertStringNotContainsString('CARA MEMBAYAR', $html);
+        $this->assertStringNotContainsString('Lanjutkan pembayaran', $html);
+    }
+
+    #[Test]
     public function suratnya_menyebut_lampirannya(): void
     {
         /*
