@@ -56,6 +56,16 @@ class FakturBelumBayarTest extends TestCase
         ], $ubah));
     }
 
+    private function dokumen(WebinarEksklusifPendaftaran $p, string $jenis = 'faktur'): string
+    {
+        return view('public.webinar_eksklusif.dokumen_pdf', [
+            'jenis' => $jenis,
+            'pendaftaran' => $p,
+            'sesi' => KategoriLayanan::find($p->kategori_id),
+            'terbilang' => 'seratus tiga puluh ribu delapan puluh dua rupiah',
+        ])->render();
+    }
+
     private function surat(WebinarEksklusifPendaftaran $p): WebinarEksklusifPendaftaranMail
     {
         $s = new WebinarEksklusifPendaftaranMail($p, KategoriLayanan::find($p->kategori_id));
@@ -205,6 +215,55 @@ class FakturBelumBayarTest extends TestCase
 
         $this->assertStringNotContainsString('CARA MEMBAYAR', $html);
         $this->assertStringNotContainsString('Lanjutkan pembayaran', $html);
+    }
+
+    #[Test]
+    public function kaki_dokumennya_memuat_kontak_dan_sosial_media(): void
+    {
+        /*
+         * Dokumen ini BERPINDAH TANGAN: disimpan, dicetak, diteruskan ke
+         * bendahara kantor, kadang dibaca berbulan-bulan kemudian oleh
+         * orang yang tidak pernah membuka emailnya. Tanpa kaki ini,
+         * satu-satunya cara menghubungi penerbitnya adalah mencari
+         * emailnya kembali.
+         */
+        $p = $this->pendaftaran();
+
+        $html = $this->dokumen($p);
+
+        $this->assertStringContainsString('rumahscopusfoundation.com', $html);
+        $this->assertStringContainsString('@rumah_scopus', $html, 'Instagram/TikTok tidak disebut.');
+        $this->assertStringContainsString('@rumahscopus', $html, 'YouTube tidak disebut.');
+    }
+
+    #[Test]
+    public function nomor_panitia_ikut_config_bukan_diketik_di_cetakan(): void
+    {
+        /*
+         * Nomornya berubah saat orangnya berganti. Diketik langsung di
+         * cetakan, ia akan tertinggal — dan pada dokumen yang sudah dicetak
+         * dan dipegang orang, tertinggalnya PERMANEN.
+         *
+         * Disimpan format internasional tanpa plus karena wa.me memintanya;
+         * yang dicetak harus bentuk yang dibaca orang Indonesia.
+         */
+        /*
+         * Nomornya sengaja BERBEDA dari telp pendaftarannya.
+         *
+         * Dipakai angka yang sama, penegasan kedua di bawah ikut menemukan
+         * telepon PENDAFTAR di blok "Ditagihkan kepada" — yang memang
+         * tersimpan apa adanya — lalu menuduh cetakannya salah format.
+         * Uji itu sempat merah persis karena itu.
+         */
+        config()->set('panitia.whatsapp', '6289911223344');
+
+        $html = $this->dokumen($this->pendaftaran());
+
+        $this->assertStringContainsString('0899-1122-3344', $html,
+            'Nomor panitia di dokumen tidak mengikuti config.');
+
+        $this->assertStringNotContainsString('6289911223344', $html,
+            'Nomornya dicetak dalam format wa.me, bukan format yang dibaca orang.');
     }
 
     #[Test]
