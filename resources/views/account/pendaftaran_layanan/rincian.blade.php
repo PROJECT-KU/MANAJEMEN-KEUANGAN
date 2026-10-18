@@ -3172,6 +3172,31 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                 panitia yang membacanya tanpa tahu cara bayarnya
                                 akan mencari mutasi yang tidak akan pernah ada.
                             --}}
+                            {{-- UANG MASUK SESUDAH PENDAFTARANNYA DIBATALKAN.
+
+                                 Paling atas di kartu pembayaran, dan merah: ini
+                                 satu-satunya nota di layar ini yang menyangkut uang
+                                 orang lain yang menunggu dikembalikan.
+
+                                 Keadaannya tidak bisa dibaca dari status maupun
+                                 nominal — barisnya tetap bertanda batal, persis
+                                 seperti batal yang tidak pernah dibayar. Tanpa nota
+                                 ini satu-satunya jejaknya ada di log peladen, dan
+                                 tidak ada panitia yang membuka log. --}}
+                            @if (($pendaftaran->perlu_dikembalikan_pada ?? null))
+                                <p class="rin-nota rin-nota-bahaya">
+                                    <i class="fas fa-undo" aria-hidden="true"></i>
+                                    <span>
+                                        <strong>Uangnya perlu dikembalikan.</strong>
+                                        Pembayaran masuk pada
+                                        {{ $pendaftaran->perlu_dikembalikan_pada->locale('id')->translatedFormat('j F Y, H:i') }} WIB,
+                                        sesudah pendaftaran ini dibatalkan — dan kursinya
+                                        sudah habis, jadi pendaftarannya tetap batal.
+                                        Pendaftarnya TIDAK dikirimi surat lunas.
+                                    </span>
+                                </p>
+                            @endif
+
                             <p class="rin-nota rin-nota-biru">
                                 <i class="fas {{ $caraBayar['ikon'] }}" aria-hidden="true"></i>
                                 <span>
@@ -3770,6 +3795,12 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                                 'surat-gagal' => ['fa-exclamation-triangle', 'merah'],
                                                 'ingat-bayar' => ['fa-bell', 'kuning'],
                                                 'ingat-bayar-gagal' => ['fa-exclamation-triangle', 'merah'],
+
+                                                // Uang yang tiba sesudah pendaftarannya
+                                                // dibatalkan. Yang kedua merah: itu uang
+                                                // orang yang menunggu dikembalikan.
+                                                'bayar-batal-terima' => ['fa-money-bill-wave', 'hijau'],
+                                                'bayar-batal-kembali' => ['fa-undo', 'merah'],
                                             ];
 
                                             [$ikonJejak, $warnaJejak] = $rupaAksi[$satu->aksi]
