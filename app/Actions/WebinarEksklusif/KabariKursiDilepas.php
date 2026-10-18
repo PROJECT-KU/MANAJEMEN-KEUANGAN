@@ -175,6 +175,31 @@ class KabariKursiDilepas
             return false;
         }
 
+        /*
+         * WhatsApp-nya di sini juga, SESUDAH suratnya berhasil.
+         *
+         * Di sini, bukan di pemanggilnya: tiga jalur memanggil aksi ini,
+         * dan dipasang di masing-masing, ketiganya akan berbeda perlahan.
+         *
+         * Memakai penanda yang SAMA dengan suratnya — aksi ini sudah
+         * merebutnya di atas — jadi WhatsApp pun tidak terkirim dua kali.
+         * Kegagalannya tidak mengubah hasil: suratnya sudah berangkat, dan
+         * mengembalikan false di sini akan membuat pemanggilnya mengira
+         * orangnya belum dikabari sama sekali.
+         */
+        try {
+            $wa = app(KabariWhatsApp::class);
+
+            $gagalBayar
+                ? $wa->gagalBayar($segar, $sesi)
+                : $wa->kursiDilepas($segar, $sesi);
+        } catch (\Throwable $e) {
+            Log::warning('Kabar WhatsApp penutup gagal.', [
+                'nomor' => $pendaftaran->id_transaksi,
+                'pesan' => $e->getMessage(),
+            ]);
+        }
+
         return true;
     }
 }

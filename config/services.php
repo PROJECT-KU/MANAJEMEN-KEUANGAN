@@ -47,4 +47,27 @@ return [
         'produksi' => env('DOKU_PRODUKSI', false),
     ],
 
+    /*
+     * Fonnte — pengirim WhatsApp.
+     *
+     * Tokennya SATU-SATUNYA pengaman: siapa pun yang memegangnya bisa
+     * mengirim WhatsApp atas nama nomor itu. Jadi ia hanya di .env, tidak
+     * pernah di repositori, sama seperti kunci DOKU.
+     *
+     * Kosong = fitur ini DIAM, bukan galat. Di mesin pengembang dan di
+     * rangkaian uji tokennya memang tidak ada, dan pendaftaran tidak boleh
+     * gagal hanya karena WhatsApp tidak tersetel.
+     */
+    'fonnte' => [
+        'token' => env('FONNTE_TOKEN'),
+
+        /*
+         * Paket gratisnya 1.000 pesan/bulan. Angka ini TIDAK dipakai
+         * menghitung kuota — Fonnte yang menghitungnya, dan tebakan lokal
+         * akan berselisih dengan hitungan mereka. Disimpan supaya ambang
+         * peringatannya tidak diketik ulang di beberapa tempat.
+         */
+        'kuota_bulanan' => (int) env('FONNTE_KUOTA_BULANAN', 1000),
+    ],
+
 ];
