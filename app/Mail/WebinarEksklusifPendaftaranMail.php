@@ -4,9 +4,11 @@ namespace App\Mail;
 
 use App\KategoriLayanan;
 use App\WebinarEksklusifPendaftaran;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
+use Riskihajar\Terbilang\Facades\Terbilang;
 
 /**
  * Bukti pendaftaran Webinar Eksklusif, dikirim ke pendaftar.
@@ -42,7 +44,7 @@ class WebinarEksklusifPendaftaranMail extends Mailable
          * pendaftaran. Nomornya ikut supaya suratnya bisa dicari belakangan
          * dengan mengetik nomor yang disebut panitia.
          */
-        return $this->subject('Pendaftaran tersimpan — ' . $this->pendaftaran->id_transaksi)
+        $surat = $this->subject('Pendaftaran tersimpan — ' . $this->pendaftaran->id_transaksi)
             /*
              * mail.from.name, BUKAN app.name.
              *
@@ -57,5 +59,35 @@ class WebinarEksklusifPendaftaranMail extends Mailable
                 'sesi' => $this->sesi,
                 'tautanStatus' => route('public.webinareksklusif.status', $this->pendaftaran->getKey()),
             ]);
+
+        /*
+         * FAKTURNYA dilampirkan HANYA selama belum lunas.
+         *
+         * Surat ini dikirim ulang lewat tombol "kirim ulang bukti
+         * pendaftaran", dan tombol itu tetap ada sesudah pembayarannya
+         * masuk. Dilampirkan tanpa syarat, yang sudah membayar menerima
+         * tagihan untuk uang yang sudah ia bayar — dan sebagian akan
+         * membayarnya lagi.
+         *
+         * Yang sudah lunas memang tidak kekurangan apa-apa di sini:
+         * kwitansinya sudah berangkat lewat WebinarEksklusifLunasMail.
+         */
+        if (! $this->pendaftaran->lunas) {
+            $faktur = Pdf::loadView('public.webinar_eksklusif.faktur_pdf', [
+                'pendaftaran' => $this->pendaftaran,
+                'sesi' => $this->sesi,
+                'terbilang' => Terbilang::make((int) $this->pendaftaran->total_pembayaran, ' rupiah'),
+            ]);
+
+            $nomor = str_replace('WE-', 'INV-', (string) $this->pendaftaran->id_transaksi);
+
+            // Nama berkasnya memuat nomornya; alasannya sama seperti di
+            // kwitansi — folder unduhan yang sama, nama yang sama bertabrakan.
+            $surat->attachData($faktur->output(), $nomor . '.pdf', [
+                'mime' => 'application/pdf',
+            ]);
+        }
+
+        return $surat;
     }
 }
