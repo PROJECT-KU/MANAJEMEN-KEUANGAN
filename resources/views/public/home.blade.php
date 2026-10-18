@@ -582,7 +582,14 @@ Beranda | Rumah Scopus
         width: 160px; height: 160px; opacity: .92;
         animation: bnd-putar 26s linear infinite;
     }
-    .bnd-cap text { fill: var(--stabilo); font-size: 13px; font-weight: 800; letter-spacing: .2em; }
+    /* 11px dan .16em, bukan 13px dan .2em.
+
+       "RUMAH SCOPUS FOUNDATION" jauh lebih panjang daripada "RUMAH SCOPUS ·
+       JOGJA" yang dulu di sini. Pada ukuran lama, dua putarannya terukur
+       536px sementara keliling lingkarannya cuma 452px — 84px terakhir
+       tergulung menimpa awalnya sendiri. Pada ukuran ini 431px, menyisakan
+       21px sebagai jeda di tempat kedua putarannya bertemu. */
+    .bnd-cap text { fill: var(--stabilo); font-size: 11px; font-weight: 800; letter-spacing: .16em; }
     @keyframes bnd-putar { to { rotate: 360deg; } }
 
     /* ==================================================== kertas tempel */
@@ -1055,7 +1062,7 @@ Beranda | Rumah Scopus
             </defs>
             <text>
                 <textPath href="#bnd-lingkar">
-                    RUMAH SCOPUS · JOGJA · RUMAH SCOPUS · JOGJA ·
+                    RUMAH SCOPUS FOUNDATION · RUMAH SCOPUS FOUNDATION ·
                 </textPath>
             </text>
         </svg>
