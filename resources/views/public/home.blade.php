@@ -649,13 +649,37 @@ Beranda | Rumah Scopus
        Jadi tiap polaroid memeluk rekamannya sendiri: yang tegak jadi sempit
        dan tinggi, yang rebah jadi lebar dan pendek. Tingginya berbeda, dan
        itu memang bentuk foto yang dipasang di dinding. */
+    /* EMPAT kolom: tiga rekaman dan kutipannya, sebaris.
+
+       Kutipannya dulu berdiri sendiri di bawah barisan — selebar 677px di
+       tengah ruang 1.296px, jadi ada 310px kosong di kiri dan kanannya, dan
+       satu pita kosong lagi di antara keduanya. Dinaikkan jadi anggota
+       barisan yang sama, ruang itu terpakai dan tingginya ikut sama dengan
+       polaroid di sebelahnya. */
     .bnd-testi-kisi {
-        display: grid; grid-template-columns: repeat(3, 1fr);
-        gap: 28px; align-items: start; justify-items: center;
+        display: grid; grid-template-columns: repeat(4, 1fr);
+        gap: 24px; align-items: stretch; justify-items: center;
     }
+
+    /* Keempatnya MEREGANG ke tinggi baris yang sama.
+
+       Menyetel ukuran huruf kutipannya sampai pas tinggi polaroid pernah
+       dicoba, dan itu rapuh: tiap lebar layar memberi tinggi kutipan yang
+       berbeda, jadi angkanya pas di 1440 lalu meleset lagi di 1200.
+
+       Dengan meregang, selisihnya jatuh sebagai bidang putih di BAWAH
+       keterangan polaroid — dan itu kebetulan persis tepi bawah polaroid
+       sungguhan, yang memang lebih tebal daripada ketiga sisi lainnya. */
+    .bnd-testi-kisi > .bnd-polaroid { align-self: stretch; }
 
     /* Bingkai polaroid: pinggiran bawah lebih tebal, seperti foto cetak. */
     .bnd-polaroid {
+        /* margin: 0 — polaroidnya <figure>, dan Bootstrap memberi figure
+           margin-bottom: 1rem. Dengan peregangan baris, 16px itu terpotong
+           dari tingginya: terukur polaroid 498,453px di baris setinggi 514,
+           dan selisih 15,5px-nya persis satu rem. Gejalanya terbaca seperti
+           "peregangannya tidak jalan", padahal jalan. */
+        margin: 0;
         width: fit-content; max-width: 100%;
         padding: 13px 13px 16px;
         background: var(--kertas);
@@ -698,9 +722,24 @@ Beranda | Rumah Scopus
         font-family: 'Fraunces', serif; font-weight: 700; font-size: .88rem;
     }
 
-    /* Kutipannya turun ke bawah barisan rekaman dan dipusatkan: ia sekarang
-       merangkum ketiganya, bukan menemani satu di sebelahnya. */
-    .bnd-testi-kutip { max-width: 66ch; margin: 46px auto 0; }
+    /* Kutipannya jadi kartu keempat. Isinya dipusatkan tegak supaya tidak
+       menggantung di atas saat kalimatnya lebih pendek daripada rekaman di
+       sebelahnya. */
+    .bnd-testi-kutip {
+        width: 100%; margin: 0;
+        display: flex; flex-direction: column; justify-content: center;
+        padding: 22px 20px;
+    }
+    /* Ukurannya disetel supaya kartunya TIDAK melebihi tinggi polaroid di
+       sebelahnya. Pada .98rem/1,65 terukur 533px — 47px lebih tinggi, dan
+       selisih itu membuat ketiga polaroid menggantung dengan ruang kosong
+       di bawahnya, persis yang hendak dihilangkan. */
+    .bnd-testi-kutip p { font-size: .9rem; line-height: 1.58; }
+    .bnd-testi-kutip .bnd-balon-kutip { font-size: 2.6rem; margin-bottom: 4px; }
+    .bnd-testi-kutip .bnd-balon-kaki { margin-top: 14px; padding-top: 13px; }
+    .bnd-testi-kutip .bnd-balon-kaki i { width: 38px; height: 38px; font-size: .9rem; }
+    .bnd-testi-kutip .bnd-balon-kaki strong { font-size: .92rem; }
+    .bnd-testi-kutip .bnd-balon-kaki small { font-size: .8rem; }
 
     /* Gelembung percakapan dengan ekor di kiri bawah. */
     .bnd-balon {
@@ -775,6 +814,9 @@ Beranda | Rumah Scopus
         .bnd-cap { display: none; }
         .bnd-testi-kisi { grid-template-columns: repeat(2, 1fr); }
         .bnd-tayang { height: 360px; }
+        /* Di dua kolom kutipannya jatuh di baris kedua bersama satu rekaman;
+           tidak ada tinggi yang perlu disamakan lagi. */
+        .bnd-testi-kutip { align-self: start; }
     }
 
     @media (max-width: 767.98px) {
@@ -1258,9 +1300,10 @@ Beranda | Rumah Scopus
                         <figcaption class="bnd-polaroid-kaki">Peserta Rumah Scopus</figcaption>
                     </figure>
                 @endforeach
-            </div>
 
-            <div class="bnd-balon bnd-testi-kutip" data-aos="fade-up" data-aos-delay="120">
+                {{-- Kutipannya DI DALAM kisi, bukan sesudahnya: ia kartu
+                     keempat, bukan penutup di bawah barisan. --}}
+                <div class="bnd-balon bnd-testi-kutip" data-aos="fade-up" data-aos-delay="330">
                 <span class="bnd-balon-kutip">&ldquo;</span>
                 <p>
                     Awalnya pesimis banget. Rasanya Scopus itu buat orang lain,
@@ -1273,8 +1316,9 @@ Beranda | Rumah Scopus
                     <i class="bi bi-people-fill"></i>
                     <span>
                         <strong>Peserta Scopus Camp</strong>
-                        <small>Pusat Rumah Scopus, Yogyakarta</small>
-                    </span>
+                            <small>Pusat Rumah Scopus, Yogyakarta</small>
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>
