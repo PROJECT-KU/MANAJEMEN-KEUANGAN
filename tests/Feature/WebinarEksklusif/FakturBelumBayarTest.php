@@ -318,6 +318,39 @@ class FakturBelumBayarTest extends TestCase
     }
 
     #[Test]
+    public function kartu_faktur_tidak_menempel_ke_kartu_di_atasnya(): void
+    {
+        /*
+         * Kartu "Langkah berikutnya" ditutup "padding: 24px 26px 0" dan
+         * kartu faktur ini dulu dibuka "padding: 0 26px" — nol di KEDUA
+         * sisi, jadi keduanya benar-benar bersentuhan dan terbaca sebagai
+         * satu kotak yang warnanya berubah di tengah.
+         *
+         * Terukur lewat peramban: jaraknya 0px, kini 14px.
+         *
+         * Yang diperiksa di sini bantalan atasnya BUKAN NOL — bukan angka
+         * persisnya, sebab 14 cuma hasil penyetelan dan boleh berubah.
+         */
+        $html = $this->surat($this->pendaftaran())->render();
+
+        $this->assertMatchesRegularExpression(
+            '/<td style="padding:\s*(\d+)px[^"]*"[^>]*>\s*<p[^>]*>\s*<strong[^>]*>Fakturnya terlampir/s',
+            $html,
+            'Kartu faktur tidak punya bantalan atas sama sekali.'
+        );
+
+        preg_match(
+            '/<td style="padding:\s*(\d+)px[^"]*"[^>]*>\s*<p[^>]*>\s*<strong[^>]*>Fakturnya terlampir/s',
+            $html,
+            $cocok
+        );
+
+        $this->assertGreaterThan(0, (int) ($cocok[1] ?? 0),
+            'Kartu faktur menempel ke kartu di atasnya; keduanya terbaca '
+            . 'sebagai satu kotak yang warnanya berubah di tengah.');
+    }
+
+    #[Test]
     public function fakturnya_tidak_menyisipkan_font(): void
     {
         /*
