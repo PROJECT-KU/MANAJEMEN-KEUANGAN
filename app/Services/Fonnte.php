@@ -73,6 +73,23 @@ class Fonnte
                  * yang bisa mereka ubah sewaktu-waktu.
                  */
                 'countryCode' => '0',
+
+                /*
+                 * connectOnly: GAGAL CEPAT saat perangkatnya putus, bukan
+                 * mengantre sampai tersambung lagi.
+                 *
+                 * Ini nilai bawaan Fonnte, tetapi disebut tegas karena ia
+                 * keputusan, bukan warisan. Pesan terpenting kita —
+                 * "selesaikan pembayarannya, batas waktunya sekian" —
+                 * umurnya 60 menit. Diantrekan lalu sampai tiga hari
+                 * kemudian, ia menyuruh orang membayar tagihan yang
+                 * kursinya sudah lama dilepas; yang menerimanya bingung,
+                 * dan sebagian akan membayar sesuatu yang sudah tidak ada.
+                 *
+                 * Gagal cepat berarti kegagalannya tercatat di log hari itu
+                 * juga, dan tidak ada pesan basi yang terbang sendiri.
+                 */
+                'connectOnly' => true,
             ]);
         } catch (\Throwable $e) {
             Log::error('Fonnte tidak bisa dihubungi.', ['galat' => $e->getMessage()]);

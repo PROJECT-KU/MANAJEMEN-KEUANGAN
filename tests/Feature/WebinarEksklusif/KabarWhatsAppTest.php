@@ -198,6 +198,62 @@ class KabarWhatsAppTest extends TestCase
     }
 
     #[Test]
+    public function jalur_web_tidak_pernah_menidurkan_permintaannya(): void
+    {
+        /*
+         * Sapuan kedaluwarsa menjeda antar pesan supaya nomornya tidak
+         * terbaca sebagai penyiar. Jeda itu AMAN di perintah terjadwal —
+         * tidak ada orang yang menunggu layarnya — tetapi mematikan di
+         * jalur web: lepaskanYangKedaluwarsa() dipanggil saat halaman
+         * daftar sesi dan halaman status dibuka, dan satu sleep di situ
+         * membuat halamannya menggantung sampai habis waktu.
+         *
+         * Pin kontrak atas sumbernya: tidurnya tidak bisa diukur dari
+         * PHPUnit tanpa benar-benar menunggu.
+         */
+        $sumber = (string) file_get_contents(base_path('app/WebinarEksklusifPendaftaran.php'));
+
+        $awal = strpos($sumber, 'public static function lepaskanYangKedaluwarsa');
+        $this->assertNotFalse($awal);
+
+        $potong = substr($sumber, $awal, 6000);
+
+        $this->assertStringNotContainsString('sleep(', $potong,
+            'lepaskanYangKedaluwarsa() menidurkan prosesnya; ia dipanggil dari '
+            . 'halaman web, dan halamannya akan menggantung.');
+    }
+
+    #[Test]
+    public function sapuan_dibatasi_supaya_tidak_meledak(): void
+    {
+        /*
+         * Jaring kedua selain jeda: tumpukan yang sangat besar tidak
+         * dihabiskan sekali jalan. Puluhan pesan beruntun berbunyi hampir
+         * sama ke nomor berbeda adalah pola yang dibaca sebagai penyiar,
+         * dan itu yang membuat nomor diblokir.
+         */
+        Http::fake(['api.fonnte.com/*' => Http::response(['status' => true, 'id' => ['1']], 200)]);
+        config()->set('services.fonnte.batas_sapuan', 2);
+
+        $sesi = $this->sesi();
+
+        for ($i = 0; $i < 5; $i++) {
+            $this->pendaftaran([
+                'kategori_id' => $sesi->getKey(),
+                'id_transaksi' => 'WE-SAPU-' . Str::random(6),
+                'email' => 'sapu' . Str::random(5) . '@contoh.test',
+                'status' => 'expired',
+                'bayar_status' => 'kedaluwarsa',
+            ]);
+        }
+
+        $terkirim = app(\App\Actions\WebinarEksklusif\KabariKursiDilepas::class)->sapu();
+
+        $this->assertSame(2, $terkirim,
+            'Sapuan tidak dibatasi; satu kali jalan mengirim seluruh tumpukan.');
+    }
+
+    #[Test]
     public function gagal_kirim_whatsapp_tidak_menggagalkan_pendaftarannya(): void
     {
         /*
