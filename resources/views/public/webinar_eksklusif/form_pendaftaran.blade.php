@@ -461,8 +461,15 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                         <button type="submit" class="ses-tombol" id="ses-kirim">
                             {{-- "dan", bukan "&": di dalam {{ }} entitas HTML
                                  ikut dilolosi, jadi &amp; terbaca apa adanya
-                                 di layar sebagai "&amp;". --}}
-                            <span>{{ $bayarDaring ? 'Daftar dan bayar sekarang' : 'Daftar sekarang' }}</span>
+                                 di layar sebagai "&amp;".
+
+                                 "lanjut ke pembayaran", bukan "bayar sekarang":
+                                 tombol ini TIDAK lagi membuka halaman gerbang.
+                                 Ia mengantar ke halaman status — nomor
+                                 pendaftaran, tenggat, dan tombol bayarnya —
+                                 supaya halaman kita yang tetap terbuka selama
+                                 orangnya membayar di tab lain. --}}
+                            <span>{{ $bayarDaring ? 'Daftar dan lanjut ke pembayaran' : 'Daftar sekarang' }}</span>
                             <i class="fas fa-arrow-right" aria-hidden="true"></i>
                         </button>
                     @endif

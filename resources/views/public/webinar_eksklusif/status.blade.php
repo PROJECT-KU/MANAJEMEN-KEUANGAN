@@ -530,14 +530,34 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                              ini, jadi tombolnya hilang sendiri bersamaan dengan
                              habisnya hitung mundur di atas. --}}
                         @if ($pendaftaran->bayar_url)
-                            <a href="{{ $pendaftaran->bayar_url }}" class="sta-tombol-bayar">
+                            {{-- target="_blank": halaman gerbangnya dibuka di TAB LAIN,
+                                 dan itu seluruh maksudnya.
+
+                                 Sebelum ini seluruh jendela diserahkan ke DOKU. Yang
+                                 tidak membayar lalu menanggung tiga tekanan untuk
+                                 sampai ke kabar yang sebenarnya milik kita: kotak
+                                 "order has expired" di halaman DOKU, halaman time-out
+                                 DOKU, lalu tombol "GO TO MERCHANT". Dua layar pertama
+                                 digambar di domain mereka dan tidak bisa kita ganti.
+
+                                 Dengan tabnya terpisah, halaman INI tetap terbuka
+                                 selama orangnya membayar — jadi saat hitung mundurnya
+                                 habis, pemberitahuan dan halaman gagalnya milik kita,
+                                 tanpa satu pun tekanan.
+
+                                 rel="noopener": tanpa itu halaman gerbangnya memegang
+                                 window.opener dan bisa mengalihkan halaman ini. --}}
+                            <a href="{{ $pendaftaran->bayar_url }}" class="sta-tombol-bayar"
+                                target="_blank" rel="noopener">
                                 <i class="fas fa-credit-card" aria-hidden="true"></i>
-                                Lanjutkan pembayaran
+                                Bayar sekarang
                             </a>
 
                             <p class="sta-tunggu-teks sta-tunggu-pisah">
-                                Sudah membayar? Tidak perlu menekan tombol itu lagi —
-                                halaman ini berubah sendiri dalam beberapa detik.
+                                Tombol itu membuka halaman pembayaran di tab baru.
+                                <strong>Biarkan halaman ini tetap terbuka</strong> — di
+                                sinilah statusnya berubah sendiri begitu pembayaran Anda
+                                masuk, dan tidak perlu menekan tombolnya lagi.
                             </p>
                         @endif
 
@@ -2140,6 +2160,126 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
     }
 </style>
 
+{{-- Pemberitahuan gagal/kedaluwarsa MILIK KITA SENDIRI.
+
+     Dipanggil dari DUA tempat yang berjauhan — hitung mundur yang menyentuh
+     nol, dan penanya yang mendapat kabar batal dari peladen — jadi
+     penguncinya harus satu. Dua pemberitahuan bertumpuk untuk satu kejadian
+     yang sama adalah tepat yang hendak dihindari di sini.
+
+     Alasannya jalur gagal yang lama: seluruh jendela diserahkan ke DOKU, dan
+     yang tidak membayar menanggung TIGA tekanan sebelum sampai ke kabar yang
+     sebenarnya milik kita — kotak "order has expired" di halaman DOKU,
+     halaman time-out DOKU, lalu tombol "GO TO MERCHANT". Dua layar pertama
+     digambar di domain mereka dan tidak bisa kita ganti; Checkout DOKU tidak
+     punya setelan alamat-alih saat kedaluwarsa, yang ada hanya pemberitahuan
+     peladen-ke-peladen. Yang bisa kita ubah adalah DI MANA orangnya berada
+     saat waktunya habis — dan sejak tombol bayarnya membuka tab lain,
+     tempatnya di sini. --}}
+<script>
+    (function () {
+        var alamat = @json(route('public.webinareksklusif.keadaan', $pendaftaran->getKey()));
+        var sudah = false;
+
+        /*
+         * Pemberitahuannya, lalu halaman gagal kita sendiri.
+         *
+         * Halamannya DIMUAT ULANG sesudah ditutup, bukan ditambal di tempat:
+         * keadaan batal dan kedaluwarsa masing-masing mengubah separuh
+         * halaman ini, dan peladen yang tahu aturannya.
+         *
+         * Dimuat ulang pada penutupan APA PUN — tombolnya, Esc, maupun
+         * ketukan di luar kotaknya. Kalau hanya tombolnya, yang menekan Esc
+         * tertinggal di halaman berangka 00:00:00 yang tidak lagi benar.
+         */
+        window.staKabarGagal = function (jenis) {
+            if (sudah) { return; }
+
+            sudah = true;
+
+            var batal = jenis === 'batal';
+
+            if (typeof Swal === 'undefined') {
+                // Pustaka pemberitahuannya dimuat dari CDN dan bisa tidak
+                // sampai. Halaman yang benar tetap lebih penting daripada
+                // kotaknya.
+                window.location.reload();
+
+                return;
+            }
+
+            Swal.fire({
+                icon: 'warning',
+                iconColor: '#dc2626',
+                title: batal
+                    ? 'Pembayaran ini dibatalkan'
+                    : 'Batas waktu pembayarannya habis',
+                html: batal
+                    ? 'Pembayaran untuk pendaftaran ini dibatalkan, dan kursi yang '
+                        + 'kami tahan sudah dilepas.<br><br>Masih ingin ikut? '
+                        + 'Silakan daftar ulang selama kuotanya belum penuh.'
+                    : 'Kursi yang kami tahan untuk Anda sudah dilepas untuk orang '
+                        + 'lain.<br><br>Masih ingin ikut? Silakan daftar ulang '
+                        + 'selama kuotanya belum penuh — tidak ada biaya yang '
+                        + 'terpotong dari Anda.',
+                confirmButtonText: 'Mengerti',
+                confirmButtonColor: '#0f2b5b',
+            }).then(function () {
+                window.location.reload();
+            });
+        };
+
+        /*
+         * Hitung mundur yang menyentuh nol TIDAK langsung dipercaya.
+         *
+         * Angkanya dihitung dari jam PERAMBAN, dan jam peramban bisa salah
+         * beberapa menit. Yang jamnya maju akan melihat nol lebih dulu
+         * daripada peladen — dan kalau pemberitahuannya langsung muncul lalu
+         * halamannya dimuat ulang, peladen memulangkan keadaan menunggu lagi,
+         * nolnya tercapai lagi, dan orangnya terkurung dalam pemberitahuan
+         * yang berulang sampai jam peladennya menyusul.
+         *
+         * Jadi peladennya ditanya dulu. Hanya jawabannya yang menghentikan
+         * halaman ini.
+         */
+        window.staPeriksaAkhir = function (sisaPercobaan) {
+            if (sudah) { return; }
+
+            fetch(alamat, { headers: { 'Accept': 'application/json' } })
+                .then(function (j) { return j.ok ? j.json() : null; })
+                .then(function (d) {
+                    if (d && d.lunas) {
+                        window.location.reload();
+
+                        return;
+                    }
+
+                    if (d && (d.habis || d.batal)) {
+                        window.staKabarGagal(d.batal ? 'batal' : 'habis');
+
+                        return;
+                    }
+
+                    // Peladennya belum sepakat. Angka 00:00:00 dibiarkan di
+                    // layar — ia sudah menyatakan waktunya habis — dan
+                    // ditanya lagi sebentar kemudian.
+                    if (sisaPercobaan > 0) {
+                        setTimeout(function () {
+                            window.staPeriksaAkhir(sisaPercobaan - 1);
+                        }, 10000);
+                    }
+                })
+                .catch(function () {
+                    if (sisaPercobaan > 0) {
+                        setTimeout(function () {
+                            window.staPeriksaAkhir(sisaPercobaan - 1);
+                        }, 10000);
+                    }
+                });
+        };
+    })();
+</script>
+
 <script>
     /*
      * Hitung mundur batas waktu membayar, berjalan tiap detik.
@@ -2171,7 +2311,7 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
 
         if (!jam || !menit || !detik) { return; }
 
-        var sudahMuatUlang = false;
+        var sudahSelesai = false;
 
         var dua = function (n) { return n < 10 ? '0' + n : String(n); };
 
@@ -2183,13 +2323,20 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                 jam.textContent = menit.textContent = detik.textContent = '00';
 
                 /*
-                 * Dimuat ulang SEKALI, bukan berulang: peladen yang menentukan
-                 * status sebenarnya, dan halaman yang terus memuat ulang
-                 * sendiri tidak bisa dibaca siapa pun.
+                 * Ditanyakan SEKALI ke peladen, lalu pemberitahuan kita
+                 * sendiri — bukan dimuat ulang diam-diam.
+                 *
+                 * Sebelum ini halamannya memuat ulang sesudah 1,5 detik tanpa
+                 * sepatah kata, dan orangnya membaca sendiri dari kartu merah
+                 * yang menggantikan isi layarnya bahwa kursinya sudah hilang.
+                 * Yang hilang di situ pemberitahuannya, bukan kabarnya.
+                 *
+                 * Peladennya ditanya dulu karena nol ini dihitung dari jam
+                 * peramban; penjelasannya ada di staPeriksaAkhir.
                  */
-                if (!sudahMuatUlang) {
-                    sudahMuatUlang = true;
-                    setTimeout(function () { location.reload(); }, 1500);
+                if (!sudahSelesai) {
+                    sudahSelesai = true;
+                    window.staPeriksaAkhir(6);
                 }
 
                 return;
@@ -2293,7 +2440,23 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
                      * kali terjadi.
                      */
                     if (d && d.selesai) {
-                        window.location.reload();
+                        /*
+                         * Kabar BAIK dimuat ulang begitu saja: halaman
+                         * lunasnya sendiri yang merayakan, dan pemberitahuan
+                         * di depannya cuma satu tekanan sebelum orangnya
+                         * boleh melihatnya.
+                         *
+                         * Kabar buruk mendapat pemberitahuan kita sendiri.
+                         * Tanpa itu isi layarnya berganti jadi kartu merah
+                         * tanpa sepatah kata, dan yang sedang menatap tab
+                         * pembayaran di sebelah tidak pernah tahu kapan
+                         * kursinya dilepas.
+                         */
+                        if (d.lunas) {
+                            window.location.reload();
+                        } else {
+                            window.staKabarGagal(d.batal ? 'batal' : 'habis');
+                        }
 
                         return;
                     }
