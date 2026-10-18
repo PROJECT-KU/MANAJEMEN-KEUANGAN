@@ -253,35 +253,45 @@
         /*
          * DIPAKU KE DASAR HALAMAN, bukan mengekor isi.
          *
-         * Mengekor, pitanya berhenti tepat sesudah baris terakhir dan
-         * sisa halaman di bawahnya kosong melompong — terlihat seperti
-         * dokumen yang terpotong. position: fixed pada Dompdf menempelkannya
-         * ke tepi halaman, dan sekaligus mengulangnya di tiap halaman kalau
-         * rinciannya suatu saat lebih dari satu lembar.
+         * Mengekor, pitanya berhenti tepat sesudah baris terakhir dan sisa
+         * halaman di bawahnya kosong melompong — terbaca seperti dokumen
+         * yang terpotong. position: fixed pada Dompdf menempelkannya ke tepi
+         * halaman, dan sekaligus mengulangnya di tiap halaman kalau
+         * rinciannya suatu saat lebih dari selembar.
          *
-         * 46 + 54 = 100.
          */
+        .pita-aksen {
+            padding: 0 !important;
+            height: 4px;
+            background: #b45309;
+            font-size: 0; line-height: 0;
+        }
+        .pita-aksen-lunas { background: #15803d; }
+
+        /* 34 + 33 + 33 = 100. */
         .pita {
             position: fixed;
             bottom: 0;
-            left: 0;
-            right: 0;
-            background: #f8fafc;
-            border-top: 2px solid #0f2b5b;
-            border-collapse: separate;
+            left: 0; right: 0;
+            background: #0f2b5b;
+            border-collapse: collapse;
         }
-        .pita td { padding: 12px 14px; vertical-align: top; border: 0; }
-        .pita-kiri { width: 46%; }
-        .pita-kanan { width: 54%; text-align: right; }
+        .pita td { padding: 13px 16px; vertical-align: top; border: 0; }
+        .pita-kol { width: 33%; }
+        .pita-kol-akhir { width: 34%; }
 
-        .pita-nama {
-            margin: 0 0 3px;
-            font-size: 10px; font-weight: bold; letter-spacing: .8px; color: #0f2b5b;
+        .pita-label {
+            margin: 0 0 4px;
+            font-size: 8px;
+            font-weight: bold;
+            letter-spacing: 1.2px;
+            /* Biru pucat, bukan putih: labelnya penunjuk kolom, dan putih
+               penuh membuatnya bersaing dengan isinya sendiri. */
+            color: #93b4e8;
         }
-        .pita-isi { margin: 0; font-size: 9.5px; line-height: 1.65; color: #64748b; }
-        .pita-isi strong { color: #0f2b5b; }
-        .pita-sosial { margin: 5px 0 0; font-size: 9.5px; color: #64748b; }
-        .pita-sosial strong { color: #0f2b5b; }
+
+        .pita-isi { margin: 0; font-size: 9px; line-height: 1.7; color: #c7d9f5; }
+        .pita-isi strong { color: #ffffff; font-weight: bold; }
 
         /* Bingkai luar capnya; bingkai dalamnya digambar oleh <td>-nya. */
         .cap {
@@ -523,30 +533,59 @@
      yang tidak pernah membuka emailnya. Tanpa pita ini, satu-satunya cara
      menghubungi penerbitnya adalah mencari emailnya kembali.
 
+     TIGA KOLOM yang masing-masing rata kiri, bukan dua kolom yang saling
+     berlawanan rata. Kiri-lawan-kanan menyisakan lubang di tengah dan
+     memaksa mata melompat; tiga kolom sejajar terbaca sekali lihat.
+
+     Latarnya NAVY PEKAT, bukan abu muda. Abu muda di atas kertas putih
+     nyaris tidak terlihat, jadi pitanya tidak terbaca sebagai kaki
+     melainkan sebagai tulisan yang kebetulan ada di bawah. Pita pekat
+     menutup halamannya.
+
      Ikonnya TEKS, bukan gambar. Tiga berkas ikon yang ada di aplikasi ini
      berukuran 14-25 KB; empat di antaranya akan melipatgandakan berkas yang
-     sekarang 20 KB. Lagi pula teks di dalam PDF bisa disalin, sementara
-     ikon tidak — dan yang hendak menghubungi perlu menyalin, bukan
-     memandang. TikTok pun memang tidak punya ikonnya di sini. --}}
+     sekarang 22 KB. Teks di dalam PDF juga bisa disalin, sementara ikon
+     tidak — dan yang hendak menghubungi perlu menyalin, bukan memandang.
+     TikTok pun memang tidak punya ikonnya di sini. --}}
 <table class="pita">
+    {{-- Garis aksennya BARIS DI DALAM pitanya, bukan unsur terpisah di
+         atasnya.
+
+         Terpisah, ia butuh offset `bottom` sendiri yang harus dijaga tetap
+         cocok dengan tinggi pitanya — dan begitu isinya berubah satu baris,
+         keduanya berpisah tanpa ada yang memberi tahu. Terukur saat dicoba:
+         garisnya mengambang sekitar 70pt di atas pitanya.
+
+         Latar, bukan border: latar sel pasti tergambar setinggi yang
+         diminta, sementara border setipis ini kadang dibulatkan hilang. --}}
     <tr>
-        <td class="pita-kiri">
-            <p class="pita-nama">RUMAH SCOPUS FOUNDATION</p>
+        <td colspan="3" class="pita-aksen {{ $lunas ? 'pita-aksen-lunas' : '' }}"></td>
+    </tr>
+    <tr>
+        <td class="pita-kol">
+            <p class="pita-label">ALAMAT</p>
             <p class="pita-isi">
-                Bangunsari, Bangun Kerto, Turi, Sleman<br>
-                Daerah Istimewa Yogyakarta 55551
+                Bangunsari, Bangun Kerto<br>
+                Turi, Sleman<br>
+                D.I. Yogyakarta 55551
             </p>
         </td>
 
-        <td class="pita-kanan">
+        <td class="pita-kol">
+            <p class="pita-label">KONTAK</p>
             <p class="pita-isi">
                 <strong>rumahscopusfoundation.com</strong><br>
                 info@rumahscopusfoundation.com<br>
                 WhatsApp {{ $waTampil }}
             </p>
-            <p class="pita-sosial">
-                Instagram &amp; TikTok <strong>@rumah_scopus</strong>
-                &nbsp;&middot;&nbsp; YouTube <strong>@rumahscopus</strong>
+        </td>
+
+        <td class="pita-kol pita-kol-akhir">
+            <p class="pita-label">IKUTI KAMI</p>
+            <p class="pita-isi">
+                Instagram &amp; TikTok <strong>@rumah_scopus</strong><br>
+                YouTube <strong>@rumahscopus</strong><br>
+                Facebook <strong>RumahScopusAkademi</strong>
             </p>
         </td>
     </tr>
