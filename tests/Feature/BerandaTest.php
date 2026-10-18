@@ -91,6 +91,63 @@ class BerandaTest extends TestCase
     }
 
     #[Test]
+    public function tiap_foto_slider_hero_benar_benar_ada(): void
+    {
+        /*
+         * Slider hero memuat fotonya lewat data-src, dan gambar yang gagal
+         * dimuat lewat jalur itu TIDAK meninggalkan ikon rusak — slidenya
+         * cuma kosong, dan slidernya lanjut ke berikutnya seolah tidak
+         * terjadi apa-apa. Satu-satunya yang tahu adalah orang yang
+         * kebetulan menatap layar pada detik itu.
+         *
+         * Ketujuh belas berkasnya hasil ubahan dari HEIC dan JPG yang
+         * ASLINYA SUDAH DIBUANG. Kalau satu hilang dari repositori, ia tidak
+         * bisa dibuat ulang.
+         */
+        $isi = (string) $this->get('/')->assertOk()->getContent();
+
+        preg_match_all('#assets/img/public/header/(header-\d+\.webp)#', $isi, $cocok);
+
+        $berkas = array_unique($cocok[1]);
+
+        $this->assertGreaterThan(1, count($berkas),
+            'Slider hero tidak lagi memuat lebih dari satu foto.');
+
+        foreach ($berkas as $satu) {
+            $this->assertFileExists(public_path('assets/img/public/header/' . $satu),
+                'Foto hero "' . $satu . '" disebut di halaman tetapi berkasnya tidak ada. '
+                . 'Slide-nya akan kosong tanpa satu pun galat, dan berkas aslinya sudah '
+                . 'dibuang jadi tidak bisa dibuat ulang.');
+        }
+    }
+
+    #[Test]
+    public function hanya_foto_pertama_yang_dimuat_seketika(): void
+    {
+        /*
+         * Ketujuh belas fotonya berjumlah 3,3 MB. Slide yang tidak aktif
+         * tetap berada DI DALAM layar — cuma tembus pandang — jadi
+         * loading="lazy" tidak menahannya sama sekali; peramban akan
+         * mengunduh semuanya di layar pertama.
+         *
+         * Karena itu hanya yang pertama punya src; sisanya menunggu giliran
+         * lewat data-src. Terukur di peramban: 2 berkas diunduh saat halaman
+         * dibuka, bukan 17.
+         */
+        $isi = (string) $this->get('/')->assertOk()->getContent();
+
+        $langsung = preg_match_all('#<img[^>]*\ssrc="[^"]*header-\d+\.webp#', $isi);
+        $tunda = preg_match_all('#data-src="[^"]*header-\d+\.webp#', $isi);
+
+        $this->assertSame(1, $langsung,
+            'Lebih dari satu foto hero dimuat seketika; layar pertama menanggung '
+            . 'megabita gambar yang belum tentu dilihat.');
+
+        $this->assertGreaterThan(1, $tunda,
+            'Foto hero sisanya tidak lagi ditunda lewat data-src.');
+    }
+
+    #[Test]
     public function tidak_ada_paragraf_rata_kiri_kanan(): void
     {
         /*
