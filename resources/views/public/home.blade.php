@@ -276,38 +276,66 @@ Beranda | Rumah Scopus
         50%      { translate: 0 -13px; }
     }
 
-    /* ======================================================= pita lari */
-    /* Satu-satunya hal di halaman ini yang bergerak tanpa diminta — cukup
-       untuk membuat halamannya terasa hidup, tidak cukup untuk mengganggu
-       orang yang sedang membaca di sebelahnya.
+    /* ========================================================== rute */
+    /* Menggantikan pita berjalan yang dibuang 18 Okt 2026.
 
-       TIDAK DIMIRINGKAN. Versi pertama diputar -0,8deg, dan itu keliru:
-       pitanya membentang penuh dari tepi ke tepi, jadi kedua ujungnya
-       terpotong LURUS mengikuti tepi layar. Yang terbaca bukan "pita yang
-       ditempel miring" melainkan "pita yang dipasang kurang rapi" — miring
-       hanya terbaca disengaja kalau ujungnya ikut miring dan terlihat.
+       Pitanya cuma hiasan: delapan kata kunci yang berlari, tidak menjawab
+       satu pun pertanyaan. Padahal pertanyaan pengunjung sesudah membaca
+       hero selalu sama — "terus gimana caranya?" — dan halaman ini tidak
+       pernah menjawabnya di bagian mana pun.
 
-       Hurufnya juga diturunkan dari Fraunces 1.1rem ke Figtree .8rem.
-       Serif tebal berukuran judul di dalam pita gelap bersaing dengan judul
-       hero yang persis di atasnya; pita ini pelengkap, bukan pengumuman. */
-    .bnd-pita {
+       Bentuknya JALUR, bukan empat kartu. Empat kartu setara membuat mata
+       membacanya sebagai pilihan yang bisa diambil salah satu; rel
+       putus-putus dengan empat perhentian bernomor terbaca sebagai urutan
+       yang harus dilewati semua — dan urutan itulah seluruh isinya.
+
+       Tetap di pita tinta: ia memisahkan hero dari bagian berikutnya, peran
+       yang dulu dipegang pita berjalan. */
+    .bnd-rute {
         background: var(--tinta);
-        /* Tidak putih penuh: pita ini dibaca sekilas, bukan dibaca. */
-        color: rgba(251, 245, 233, .82);
-        padding: 11px 0; overflow: hidden;
+        padding: 46px 0 42px;
     }
-    .bnd-pita-isi {
-        display: flex; width: max-content;
-        animation: bnd-lari 34s linear infinite;
+
+    .bnd-rute-deret {
+        position: relative;
+        display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px;
     }
-    .bnd-pita-isi span {
-        display: inline-flex; align-items: center; gap: 18px;
-        padding-right: 18px; white-space: nowrap;
-        font-family: 'Figtree', sans-serif; font-weight: 700; font-size: .8rem;
-        letter-spacing: .2em;
+
+    /* Rel putus-putus, digambar di lapisan paling belakang. Tepi kiri dan
+       kanannya disisakan supaya relnya tidak menjulur keluar dari
+       perhentian pertama dan terakhir. */
+    .bnd-rute-deret::before {
+        content: ""; position: absolute; z-index: 0;
+        top: 26px; left: 12%; right: 12%;
+        border-top: 2px dashed rgba(251, 245, 233, .3);
     }
-    .bnd-pita-isi i { color: rgba(255, 216, 77, .75); font-size: .3rem; }
-    @keyframes bnd-lari { to { transform: translateX(-50%); } }
+
+    .bnd-rute-henti {
+        position: relative; z-index: 1; text-align: center;
+    }
+
+    .bnd-rute-nomor {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 54px; height: 54px; border-radius: 50%; margin-bottom: 16px;
+        background: var(--tinta);
+        border: 2px solid rgba(251, 245, 233, .34);
+        color: var(--stabilo);
+        font-family: 'Fraunces', serif; font-weight: 800; font-size: 1.3rem;
+        line-height: 1;
+        transition: background .22s ease, color .22s ease, border-color .22s ease, scale .22s ease;
+    }
+    /* Latarnya PEKAT, bukan tembus pandang: ia harus menutupi rel yang
+       lewat persis di belakangnya. */
+    .bnd-rute-henti:hover .bnd-rute-nomor {
+        background: var(--stabilo); color: var(--tinta);
+        border-color: var(--stabilo); scale: 1.08;
+    }
+
+    .bnd-rute-henti h3 { color: var(--kertas); font-size: 1.08rem; margin-bottom: 7px; }
+    .bnd-rute-henti p {
+        color: rgba(251, 245, 233, .7); font-size: .9rem;
+        max-width: 30ch; margin: 0 auto;
+    }
 
     /* ==================================================== kepala bagian */
     .bnd-kepala { margin-bottom: 44px; max-width: 62ch; }
@@ -597,7 +625,10 @@ Beranda | Rumah Scopus
         .bnd-bento > :nth-child(4) { grid-column: span 2; }
 
         .bnd-kisi-3,
-        .bnd-tempel-kisi { grid-template-columns: repeat(2, 1fr); }
+        .bnd-tempel-kisi,
+        .bnd-rute-deret { grid-template-columns: repeat(2, 1fr); }
+        .bnd-rute-deret { gap: 32px 18px; }
+        .bnd-rute-deret::before { display: none; }
         .bnd-cap { display: none; }
         .bnd-polaroid video { height: 380px; }
     }
@@ -613,7 +644,8 @@ Beranda | Rumah Scopus
         .bnd-bento,
         .bnd-kisi-3,
         .bnd-kisi-angka,
-        .bnd-tempel-kisi { grid-template-columns: 1fr; }
+        .bnd-tempel-kisi,
+        .bnd-rute-deret { grid-template-columns: 1fr; }
         .bnd-bento > :nth-child(1),
         .bnd-bento > :nth-child(4) { grid-column: span 1; }
 
@@ -631,7 +663,10 @@ Beranda | Rumah Scopus
         .bnd-ajakan h2 { font-size: 1.68rem; }
         .bnd-polaroid video { height: 320px; }
         .bnd-nilai-angka { font-size: 2.6rem; }
-        .bnd-pita-isi span { font-size: .72rem; letter-spacing: .16em; }
+        /* Relnya DISEMBUNYIKAN saat perhentiannya menumpuk tegak: garis
+           mendatar di antara kotak yang tersusun ke bawah menunjuk arah
+           yang salah. */
+        .bnd-rute-deret::before { display: none; }
     }
 
     /* ================================================== gerak minimal */
@@ -645,7 +680,6 @@ Beranda | Rumah Scopus
        dibuka orang; kalau layarnya membuatnya pusing, ia belum punya satu
        pun alasan untuk bertahan. */
     @media (prefers-reduced-motion: reduce) {
-        .bnd-pita-isi { animation: none !important; }
         .bnd-gelembung { animation: none !important; }
         .bnd-cap { animation: none !important; }
         .bnd-stabilo::after { animation: none !important; transform: rotate(-1.2deg) skewX(-9deg); }
@@ -728,23 +762,29 @@ Beranda | Rumah Scopus
         </div>
     </section>
 
-    {{-- =================================================== pita lari ==== --}}
-    {{-- Isinya DITULIS DUA KALI, dan itu bukan kelalaian: animasinya
-         menggeser isi sejauh -50%, jadi saat salinan pertama habis, salinan
-         kedua sudah persis di tempat salinan pertama bermula — pitanya
-         tersambung tanpa jeda. Dengan satu salinan, tiap putaran
-         meninggalkan ruang kosong selebar layar. --}}
-    <div class="bnd-pita" aria-hidden="true">
-        <div class="bnd-pita-isi">
-            @for ($k = 0; $k < 2; $k++)
-                <span>
-                    @foreach (['SCOPUS', 'Q1', 'SINTA', 'WEB OF SCIENCE', 'SUBMIT', 'UNDER REVIEW', 'ACCEPTED', 'PUBLISHED'] as $kata)
-                        {{ $kata }} <i class="bi bi-circle-fill"></i>
-                    @endforeach
-                </span>
-            @endfor
+    {{-- ====================================================== rute ===== --}}
+    <section class="bnd-rute">
+        <div class="container">
+            <div class="bnd-rute-deret">
+                {{-- Perhentian keempat sengaja menyebut "terbit", bukan
+                     "submit": submit cuma separuh jalan, dan menghentikan
+                     ceritanya di situ persis keraguan yang bikin orang ragu
+                     mendaftar. --}}
+                @foreach ([
+                    ['Ngobrol dulu', 'Cerita kondisi naskahmu. Gratis, dan nggak harus langsung ambil kelas.'],
+                    ['Pilih kelasnya', 'Kami bantu carikan yang paling pas sama waktu dan targetmu.'],
+                    ['Bedah bareng', 'Naskahmu sendiri yang dikerjakan — bukan contoh kasus punya orang.'],
+                    ['Sampai terbit', 'Ditemani terus lewat revisi reviewer, sampai artikelmu benar-benar terbit.'],
+                ] as $i => [$judul, $ket])
+                    <div class="bnd-rute-henti" data-aos="fade-up" data-aos-delay="{{ $i * 110 }}">
+                        <span class="bnd-rute-nomor">{{ $i + 1 }}</span>
+                        <h3>{{ $judul }}</h3>
+                        <p>{{ $ket }}</p>
+                    </div>
+                @endforeach
+            </div>
         </div>
-    </div>
+    </section>
 
     {{-- ================================================== alasan ======= --}}
     <section class="bnd-bagian">
