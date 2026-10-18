@@ -131,7 +131,24 @@ class WebinarEksklusifTest extends TestCase
         $tarif = ClinikScopusBiayaPersesi::berlaku('webinar_eksklusif', null);
 
         $this->assertNotNull($tarif, 'Tarif Webinar Eksklusif harus ada.');
-        $this->assertSame(129000, (int) $tarif->biaya_persesi);
+
+        /*
+         * Yang diperiksa tarifnya MASUK AKAL, bukan angkanya persis.
+         *
+         * Baris ini dulu menuntut tepat 129.000 — angka yang dibaca dari
+         * basis data NYATA, bukan dari data yang disiapkan ujinya sendiri.
+         * Panitia menaikkannya jadi 150.000 lewat layar admin pada 18 Okt
+         * 2026 pukul 11:46, dan ujinya langsung merah tanpa satu baris kode
+         * pun berubah.
+         *
+         * Uji yang merah karena harga dinaikkan tidak memberi tahu siapa pun
+         * apa-apa; ia cuma menghukum pekerjaan panitia. Yang benar-benar
+         * ingin dijaga di sini: layanannya terdaftar di katalog DAN punya
+         * tarif berlaku yang nilainya bukan nol — sebab tarif nol membuat
+         * borang pendaftarannya menagih Rp 0 tanpa satu pun galat.
+         */
+        $this->assertGreaterThan(0, (int) $tarif->biaya_persesi,
+            'Tarif Webinar Eksklusif nol; borangnya akan menagih Rp 0.');
     }
 
     #[Test]
