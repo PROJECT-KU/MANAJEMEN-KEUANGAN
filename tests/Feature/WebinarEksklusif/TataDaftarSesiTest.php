@@ -151,30 +151,46 @@ class TataDaftarSesiTest extends TestCase
     }
 
     #[Test]
-    public function lebar_kartunya_dibatasi(): void
+    public function lajurnya_berhenti_tumbuh_supaya_jaraknya_benar(): void
     {
         /*
-         * Batasnya ada di KARTU, bukan di lajurnya. Dipatok di lajur, tiga
-         * sesi tidak pernah muat bertiga — 360x3 + dua jarak 22px = 1.124px,
-         * sementara wadahnya 1.056px — dan yang tergambar dua kartu lalu
-         * satu kartu sendirian dengan lubang selebar satu kartu di sampingnya.
+         * Batas atas lajurnya harus LEBAR TETAP, bukan 1fr.
          *
-         * Pin kontrak atas sumbernya: CSS tidak bisa dijalankan dari PHPUnit.
+         * Dengan 1fr, auto-fit membuat lajur sebanyak yang muat lalu MEMBAGI
+         * RATA seluruh lebar kepada yang tersisa. Dua sesi berarti tiga lajur
+         * dibuat, yang ketiga menguncup, dan dua sisanya jadi 517px
+         * masing-masing. Akibatnya satu dari dua, tergantung kartunya
+         * dibatasi atau tidak — dan keduanya pernah terjadi di sini:
+         *
+         *   - kartunya dibatasi 360px: ia mengambang di tengah lajur 517px,
+         *     dan jarak antar kartu terukur 179px padahal gap-nya 22px;
+         *   - kartunya tidak dibatasi: ia melar jadi 517px dan sampul 4:5-nya
+         *     ikut setinggi 646px, yaitu kartu raksasa yang sudah diperbaiki.
+         *
+         * Batas di lajurnya menutup keduanya sekaligus, jadi tidak perlu lagi
+         * ada batas di kartunya.
+         *
+         * 330, bukan 360: tiga lajur 330px ditambah dua jarak 22px = 1.034px
+         * dan masih muat di wadah 1.056px, sementara 360px berarti 1.124px
+         * dan tiga sesi tidak pernah sebaris.
+         *
+         * Pin kontrak atas sumbernya: CSS tidak bisa dijalankan dari PHPUnit,
+         * jadi jaraknya sendiri diukur lewat peramban, bukan di sini.
          */
         $sumber = $this->sumber();
 
-        $this->assertMatchesRegularExpression(
-            '/\.sel-kartu \{[^}]*max-width:\s*\d+px/s',
+        $this->assertStringContainsString(
+            'grid-template-columns: repeat(auto-fit, minmax(280px, 330px));',
             $sumber,
-            'Lebar kartunya tidak lagi dibatasi; satu sesi akan melar sampai '
-            . 'selebar wadah dan posternya ikut setinggi dua layar.'
+            'Lajurnya kembali boleh tumbuh; kartunya akan mengambang di '
+            . 'tengah lajurnya dan jaraknya melar jauh melebihi gap-nya.'
         );
 
         $this->assertStringContainsString(
-            'grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));',
+            'justify-content: center;',
             $sumber,
-            'Lajurnya dipatok lebar tetap lagi; tiga sesi tidak akan muat '
-            . 'bertiga dan barisnya pecah dengan lubang di sampingnya.'
+            'Kelompok kartunya tidak dipusatkan; satu-dua kartu akan menempel '
+            . 'ke tepi kiri dengan ruang menganga di kanannya.'
         );
     }
 

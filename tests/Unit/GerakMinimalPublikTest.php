@@ -23,13 +23,24 @@ use PHPUnit\Framework\TestCase;
  * cuma bahwa tiap selektor beranimasi disebut lagi di dalam blok gerak
  * minimal.
  */
-class GerakMinimalStatusTest extends TestCase
+class GerakMinimalPublikTest extends TestCase
 {
-    private const TAMPILAN = 'resources/views/public/webinar_eksklusif/status.blade.php';
+    /**
+     * Halaman publik Webinar Eksklusif yang punya animasi sendiri.
+     *
+     * Daftarnya tumbuh: daftar sesi menyusul pada 18 Okt 2026 ketika tombol
+     * daftarnya diberi denyut, panah, dan kilau. Penjaga yang hanya menyebut
+     * satu berkas diam-diam berhenti menjaga begitu animasi berikutnya
+     * ditulis di berkas lain.
+     */
+    private const TAMPILAN = [
+        'resources/views/public/webinar_eksklusif/status.blade.php',
+        'resources/views/public/webinar_eksklusif/index.blade.php',
+    ];
 
-    private function sumber(): string
+    private function sumber(string $berkas): string
     {
-        $isi = (string) file_get_contents(dirname(__DIR__, 2) . '/' . self::TAMPILAN);
+        $isi = (string) file_get_contents(dirname(__DIR__, 2) . '/' . $berkas);
 
         // Komentar dibuang lebih dulu: nama animasi disebut juga di dalam
         // komentar yang menerangkan kenapa ia dipakai, dan penjaga yang
@@ -79,11 +90,18 @@ class GerakMinimalStatusTest extends TestCase
 
     public function test_tiap_animasi_dimatikan_saat_gerak_minimal(): void
     {
-        $isi = $this->sumber();
+        foreach (self::TAMPILAN as $berkas) {
+            $this->periksaSatuBerkas($berkas);
+        }
+    }
+
+    private function periksaSatuBerkas(string $berkas): void
+    {
+        $isi = $this->sumber($berkas);
         [$hemat, $blok] = $this->blokHematGerak($isi);
 
         $this->assertNotSame('', $hemat,
-            'Halaman ini tidak punya satu pun blok prefers-reduced-motion.');
+            $berkas . ' tidak punya satu pun blok prefers-reduced-motion.');
 
         preg_match_all('/animation:\s*([a-z][a-z0-9-]*)\s/i', $isi, $cocok, PREG_OFFSET_CAPTURE);
 
@@ -120,12 +138,36 @@ class GerakMinimalStatusTest extends TestCase
             }
         }
 
-        $this->assertGreaterThan(5, $diperiksa,
-            'Hampir tidak ada animasi yang terbaca — pembacanya hampir pasti '
-            . 'rusak, dan uji yang tidak membaca apa pun selalu hijau.');
+        $this->assertGreaterThan(2, $diperiksa,
+            $berkas . ': hampir tidak ada animasi yang terbaca — pembacanya '
+            . 'hampir pasti rusak, dan uji yang tidak membaca apa pun selalu hijau.');
 
         $this->assertSame([], $telanjang,
-            "Animasi berikut tetap berjalan untuk yang meminta gerak minimal:\n- "
-            . implode("\n- ", $telanjang) . "\n");
+            $berkas . " — animasi berikut tetap berjalan untuk yang meminta "
+            . "gerak minimal:\n- " . implode("\n- ", $telanjang) . "\n");
+    }
+
+    /**
+     * Tombol yang MATI tidak boleh bergerak.
+     *
+     * "Kuota penuh" yang berdenyut dan panahnya menyenggol maju adalah
+     * ajakan menekan sesuatu yang tidak bisa ditekan — dan yang menekannya
+     * berulang kali akan mengira halamannya yang rusak, bukan kuotanya yang
+     * habis.
+     */
+    public function test_tombol_mati_tidak_ikut_bergerak(): void
+    {
+        $isi = $this->sumber('resources/views/public/webinar_eksklusif/index.blade.php');
+
+        preg_match_all('/\.sel-tombol[^{]*\{[^}]*animation:[^;}]+;/s', $isi, $cocok);
+
+        $ikut = array_values(array_filter(
+            $cocok[0],
+            fn ($aturan) => ! str_contains($aturan, ':not(.sel-tombol-mati)')
+        ));
+
+        $this->assertSame([], $ikut,
+            "Aturan gerak berikut tidak mengecualikan tombol mati:\n- "
+            . implode("\n- ", array_map(fn ($a) => trim(explode('{', $a)[0]), $ikut)) . "\n");
     }
 }
