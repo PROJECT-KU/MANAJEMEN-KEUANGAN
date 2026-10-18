@@ -46,8 +46,29 @@
      */
     $perOrang = $jumlahOrang > 0 && $pokok % $jumlahOrang === 0;
 
+    /*
+     * Keterangan barisnya menyebut ANGKATAN dan TANGGAL KEGIATANNYA.
+     *
+     * Nama sesi saja tidak cukup pada dokumen yang disimpan: judul yang
+     * sama dipakai lagi di angkatan berikutnya, dan yang membuka faktur
+     * lamanya berbulan-bulan kemudian tidak punya cara tahu angkatan mana
+     * yang ia bayar. Bendahara yang mencocokkannya pun tidak.
+     *
+     * "#" mengikuti cara seluruh layanan lain menulis angkatan di aplikasi
+     * ini — Scopus Camp #10, Analisis Bibliometrik #3.
+     */
+    $angkatan = trim((string) ($sesi?->nama_ke ?? ''));
+
+    $tanggalSesi = $sesi?->mulai
+        ? \App\Support\RentangTanggal::tulis(
+            \Carbon\Carbon::parse($sesi->mulai),
+            $sesi->selesai ? \Carbon\Carbon::parse($sesi->selesai) : null
+        )
+        : null;
+
     $baris = [[
-        'nama' => $sesi?->nama ?: 'Webinar Eksklusif',
+        'nama' => ($sesi?->nama ?: 'Webinar Eksklusif') . ($angkatan !== '' ? ' #' . $angkatan : ''),
+        'nota' => trim(($tanggalSesi ?: '') . ($sesi?->jam ? ' · ' . $sesi->jam : ''), ' ·'),
         'qty' => $perOrang ? $jumlahOrang : 1,
         'harga' => $perOrang ? intdiv($pokok, $jumlahOrang) : $pokok,
     ]];
@@ -92,7 +113,14 @@
     <meta charset="utf-8">
     <title>{{ $judul }} {{ $nomor }}</title>
     <style>
-        @page { margin: 30px 36px; }
+        /*
+         * Bantalan bawahnya 120px, dan itu jatah PITA KAKI.
+         *
+         * Pitanya position: fixed, jadi ia keluar dari aliran halaman dan
+         * tidak lagi mendorong apa pun. Tanpa bantalan ini, isi yang panjang
+         * akan tergambar DI BAWAHNYA — dan yang tertimpa justru angka.
+         */
+        @page { margin: 30px 36px 120px; }
 
         body {
             margin: 0;
@@ -154,6 +182,9 @@
         }
         .rinci td { padding: 10px; border-bottom: 1px solid #eef2f7; vertical-align: top; }
         .k-ket { width: 52%; }
+        /* Tanggal kegiatannya baris kedua yang lebih kecil: ia keterangan
+           barisnya, bukan barisnya sendiri. */
+        .k-nota { display: block; margin-top: 2px; font-size: 9px; color: #94a3b8; }
         .k-qty { width: 10%; text-align: center; }
         .k-harga { width: 19%; text-align: right; }
         .k-jumlah { width: 19%; text-align: right; }
@@ -219,9 +250,22 @@
 
         .kaki { margin: 0; color: #94a3b8; font-size: 9.5px; line-height: 1.6; }
 
-        /* 46 + 54 = 100. */
+        /*
+         * DIPAKU KE DASAR HALAMAN, bukan mengekor isi.
+         *
+         * Mengekor, pitanya berhenti tepat sesudah baris terakhir dan
+         * sisa halaman di bawahnya kosong melompong — terlihat seperti
+         * dokumen yang terpotong. position: fixed pada Dompdf menempelkannya
+         * ke tepi halaman, dan sekaligus mengulangnya di tiap halaman kalau
+         * rinciannya suatu saat lebih dari satu lembar.
+         *
+         * 46 + 54 = 100.
+         */
         .pita {
-            margin-top: 26px;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
             background: #f8fafc;
             border-top: 2px solid #0f2b5b;
             border-collapse: separate;
@@ -366,7 +410,12 @@
     </tr>
     @foreach ($baris as $b)
         <tr>
-            <td class="k-ket">{{ $b['nama'] }}</td>
+            <td class="k-ket">
+                {{ $b['nama'] }}
+                @if (! empty($b['nota']))
+                    <span class="k-nota">{{ $b['nota'] }}</span>
+                @endif
+            </td>
             <td class="k-qty">{{ $b['qty'] }}</td>
             <td class="k-harga">{{ $rp($b['harga']) }}</td>
             <td class="k-jumlah">{{ $rp($b['harga'] * $b['qty']) }}</td>
