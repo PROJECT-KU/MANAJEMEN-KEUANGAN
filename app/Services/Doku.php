@@ -54,7 +54,7 @@ class Doku
      * Membuat tagihan dan mengembalikan alamat halaman bayarnya.
      *
      * @param  array<string, mixed>  $pesanan
-     * @return array{berhasil: bool, url: ?string, rujukan: ?string, pesan: ?string}
+     * @return array{berhasil: bool, url: ?string, rujukan: ?string, permintaan_id: ?string, pesan: ?string}
      */
     public function buatTagihan(array $pesanan): array
     {
@@ -62,7 +62,7 @@ class Doku
             return [
                 'berhasil' => false,
                 'url' => null,
-                'rujukan' => null,
+                'rujukan' => null, 'permintaan_id' => null,
                 'pesan' => 'Pembayaran daring belum aktif.',
             ];
         }
@@ -135,7 +135,7 @@ class Doku
             ]);
 
             return [
-                'berhasil' => false, 'url' => null, 'rujukan' => null,
+                'berhasil' => false, 'url' => null, 'rujukan' => null, 'permintaan_id' => null,
                 'pesan' => 'Rincian tagihannya tidak cocok dengan totalnya.',
             ];
         }
@@ -192,7 +192,7 @@ class Doku
             report($e);
 
             return [
-                'berhasil' => false, 'url' => null, 'rujukan' => null,
+                'berhasil' => false, 'url' => null, 'rujukan' => null, 'permintaan_id' => null,
                 'pesan' => 'Tidak bisa menghubungi penyedia pembayaran.',
             ];
         }
@@ -210,7 +210,7 @@ class Doku
             ]);
 
             return [
-                'berhasil' => false, 'url' => null, 'rujukan' => null,
+                'berhasil' => false, 'url' => null, 'rujukan' => null, 'permintaan_id' => null,
                 'pesan' => 'Penyedia pembayaran menolak tagihan ini.',
             ];
         }
@@ -221,6 +221,20 @@ class Doku
             'berhasil' => true,
             'url' => data_get($data, 'response.payment.url'),
             'rujukan' => data_get($data, 'response.order.invoice_number', $pesanan['nomor']),
+
+            /*
+             * Request-Id-nya IKUT DIPULANGKAN, bukan dibuang sesudah dipakai
+             * menandatangani.
+             *
+             * Cancel Order API DOKU mewajibkannya sebagai
+             * payment.original_request_id — nomor faktur saja tidak cukup.
+             * Tanpa menyimpannya, tagihan yang pendaftarannya sudah
+             * dibatalkan panitia tidak akan pernah bisa ditutup dari sisi
+             * kita, dan orangnya masih bisa membayar kursi yang sudah
+             * diberikan kepada orang lain.
+             */
+            'permintaan_id' => $requestId,
+
             'pesan' => null,
         ];
     }

@@ -35,7 +35,8 @@ class WebinarEksklusifPendaftaran extends Model
         // Tali ke promo yang memotong harganya; dibaca layar dampak promo.
         'promo_id',
         'gambar', 'cara_bayar', 'bayar_rujukan', 'bayar_url', 'bayar_status', 'bayar_kanal',
-        'bayar_pada', 'kedaluwarsa_pada', 'kedaluwarsa_dikabari_pada', 'status', 'note',
+        'bayar_pada', 'bayar_permintaan_id', 'perlu_dikembalikan_pada',
+        'kedaluwarsa_pada', 'kedaluwarsa_dikabari_pada', 'status', 'note',
     ];
 
     /**
@@ -59,6 +60,7 @@ class WebinarEksklusifPendaftaran extends Model
     protected $casts = [
         'jumlah_pendaftar' => 'integer',
         'bayar_pada' => 'datetime',
+        'perlu_dikembalikan_pada' => 'datetime',
         'kedaluwarsa_pada' => 'datetime',
         'kedaluwarsa_dikabari_pada' => 'datetime',
         'disetujui_pada' => 'datetime',
