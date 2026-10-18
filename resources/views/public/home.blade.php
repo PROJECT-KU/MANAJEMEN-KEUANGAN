@@ -4,569 +4,645 @@
 Beranda | Rumah Scopus
 @stop
 
+@push('kepala')
+{{-- Fraunces untuk judul, Figtree untuk teks.
+
+     BUKAN Poppins, dan itu disengaja. Poppins adalah huruf bawaan hampir
+     setiap templat gratis; halaman yang memakainya langsung terbaca sebagai
+     "templat", bukan sebagai milik seseorang. Fraunces punya sumbu SOFT dan
+     WONK yang membuat lengkungnya sedikit tidak rata — persis yang membuat
+     judul terasa digambar tangan, bukan dicetak mesin.
+
+     Sumbu optical size (opsz) dipakai di judul besar: pada ukuran besar
+     Fraunces menipiskan kaitnya sendiri, dan tanpa itu judulnya terlihat
+     gemuk. --}}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600..900&family=Figtree:wght@400;500;700;800&display=swap">
+@endpush
+
 @section('konten')
 {{--
-    Halaman depan Rumah Scopus.
+    Beranda Rumah Scopus — rombakan kedua, 18 Okt 2026.
 
-    Ditulis ulang 18 Okt 2026. Yang sebelumnya ada di sini bukan desain yang
-    buruk, melainkan desain yang TIDAK PERNAH DIPUTUSKAN: tiap bagian dirakit
-    sendiri-sendiri dengan gaya ditulis langsung di atribut style=, sehingga
-    satu halaman memuat tiga ukuran judul, dua perlakuan garis bawah, dan dua
-    pita jingga penuh yang berulang. Mata membacanya sebagai "halaman ini
-    disusun beberapa orang pada waktu yang berbeda".
+    Rombakan pertama rapi tetapi terbaca seperti halaman buatan mesin: kartu
+    putih seragam bersudut 18px, kisi simetris sempurna, Poppins, dan aksen
+    jingga di atas putih. Itu bentuk yang sama persis dengan ribuan halaman
+    lain, dan pemiliknya menyebutnya apa adanya.
 
-    Tiga hal yang diperbaiki, dan ketiganya bisa diperiksa:
+    Yang dikejar sekarang: HALAMAN YANG TERLIHAT DIBUAT ORANG.
 
-      1. SEMUA paragraf dulu rata kiri-kanan (text-align: justify). Pada kolom
-         kartu selebar 260px, itu membuat sungai putih melebar di tengah
-         kalimat — terukur pada kartu layanan, satu baris berisi tiga kata
-         dengan jarak antar kata hampir dua kali normal. Sekarang rata kiri
-         dengan text-wrap: pretty.
+      - Warnanya kertas dan tinta, bukan putih dan jingga. Latar krem hangat
+        bertekstur, tulisan biru tinta pekat, stabilo kuning sebagai penanda
+        — dunia rupa penerbitan ilmiah, bukan dunia rupa SaaS.
 
-      2. Perataan judulnya BERGANTIAN, tidak lagi semuanya rata tengah.
-         Bagian yang punya tautan lanjutan rata kiri dengan tautannya di
-         kanan; bagian yang berdiri sendiri rata tengah. Yang berubah bukan
-         selera melainkan kegunaannya: judul rata tengah dengan tautan di
-         kanan memaksa mata melompat dua kali untuk satu baris.
+      - Bentuknya tidak seragam. Kartu alasan memakai kisi bento dengan satu
+        kartu besar; kartu layanan berbentuk KARCIS dengan takik di tepinya;
+        yang dipelajari ditulis di kertas tempel yang miring-miring.
 
-      3. Warnanya tidak lagi satu jingga untuk segalanya. Tiap kartu membawa
-         warnanya sendiri lewat --c, dan tintanya dirakit dari warna itu
-         dengan color-mix — jadi menambah kartu tidak perlu menambah satu set
-         aturan CSS baru.
+      - Ada yang bergerak terus, bukan cuma muncul sekali saat digulung:
+        pita berjalan, kata yang berganti sendiri di judul, gelembung yang
+        mengapung, dan cap yang berputar pelan.
 
-    Gayanya ditulis dalam satu blok <style> di berkas ini, bukan di
-    assets/artikel/css/style.css: berkas itu milik templat artikel dan dipakai
-    SELURUH halaman publik, jadi menambahkan aturan beranda di sana akan
-    menyentuh halaman yang tidak sedang dikerjakan.
+      - Bayangannya PEJAL, bukan kabur. Bayangan kabur adalah tanda paling
+        khas antarmuka cetakan; bayangan pejal terbaca seperti sablon.
+
+    Bahasanya sengaja TIDAK formal, atas permintaan pemiliknya: memakai
+    "kamu", kalimat pendek, kata sehari-hari. Kalau nanti dirasa terlalu
+    santai untuk dosen senior, yang perlu diganti cuma kata sapaannya.
 --}}
 
 <style>
-    /* ------------------------------------------------------------ dasar */
+    /* ============================================================ dasar */
     .bnd {
-        /* Warna merek Rumah Scopus. Dibiarkan sebagai dua titik gradien,
-           bukan satu warna rata: seluruh identitas yang sudah ada —
-           tombol, pita, logo — memakai peralihan merah ke jingga ini. */
-        --api-1: #ff3131;
-        --api-2: #ff914d;
+        /* --- kertas & tinta ---------------------------------------- */
+        --kertas: #fbf5e9;
+        --kertas-2: #f5ecd9;
+        --tinta: #16233f;
+        --tinta-2: #5c6b85;
 
-        /* Biru tua. Dipakai untuk pita angka dan tulisan judul. Tanpa warna
-           kedua yang pekat, halaman ini cuma jingga di atas putih dari atas
-           sampai bawah, dan bagian yang penting kehilangan cara untuk
-           menonjol. */
-        --navy: #0f2b5b;
+        /* Stabilo. Satu-satunya warna yang boleh menimpa tulisan, dan
+           hanya untuk menandai — persis seperti stabilo sungguhan. */
+        --stabilo: #ffd84d;
 
-        --tinta: #1c1f26;
-        --tinta-2: #6b7280;
-        --garis: #e9edf2;
-        --latar: #f8fafc;
+        /* Empat warna penanda. Dipilih yang tidak satu pun bertetangga di
+           roda warna, supaya enam kartu berjajar tidak terbaca sebagai
+           satu gradasi. */
+        --bata: #d9442b;
+        --rumput: #0f766e;
+        --ungu: #5b3fd6;
+        --langit: #1668c9;
 
-        font-family: 'Poppins', 'Open Sans', sans-serif;
+        --garis: #e3d9c4;
+
+        position: relative;
+        background: var(--kertas);
         color: var(--tinta);
+        font-family: 'Figtree', system-ui, sans-serif;
+        overflow-x: clip;
     }
 
-    /* Judul dan paragraf halaman ini TIDAK memakai aturan bawaan templat
-       artikel: di sana h1 dan h2 punya ukuran dan margin sendiri yang
-       dirancang untuk halaman tulisan, bukan untuk halaman depan. */
+    /* Butiran kertas, dibuat dari feTurbulence sebagai SVG sebaris —
+       beberapa ratus bait, tajam di resolusi berapa pun, dan tidak perlu
+       satu pun berkas gambar yang harus ikut terdeploy.
+
+       Tanpa ini latar krem rata terbaca sebagai "warna latar", bukan
+       sebagai kertas. */
+    .bnd::before {
+        content: ""; position: absolute; inset: 0; z-index: 0;
+        pointer-events: none; opacity: .5;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.055'/%3E%3C/svg%3E");
+    }
+
+    .bnd > * { position: relative; z-index: 1; }
+
     .bnd h1, .bnd h2, .bnd h3 {
-        font-family: 'Poppins', sans-serif;
-        color: var(--tinta);
-        margin: 0;
-        /* Judul dua baris dibagi rata, bukan satu baris penuh dengan satu
-           kata menggantung sendirian di bawahnya. */
+        font-family: 'Fraunces', Georgia, serif;
+        font-weight: 800; color: var(--tinta); margin: 0;
+        font-variation-settings: 'SOFT' 20, 'WONK' 1;
+        letter-spacing: -.02em;
         text-wrap: balance;
     }
 
-    .bnd p {
-        margin: 0;
-        color: var(--tinta-2);
-        line-height: 1.65;
-        /* pretty, BUKAN justify. Lihat alasannya di kepala berkas. */
-        text-wrap: pretty;
+    .bnd p { margin: 0; color: var(--tinta-2); line-height: 1.65; text-wrap: pretty; }
+
+    .bnd-bagian { padding: 86px 0; }
+
+    /* Kepala situsnya `fixed-top` setinggi 80px. Tanpa ini, menekan "Lihat
+       kelasnya" menggulung halaman sampai tepi atas bagiannya — tepat di
+       belakang kepala situs — dan stiker beserta judulnya hilang di balik
+       menu. Terlihat persis begitu saat dipotret pada posisi gulir itu. */
+    #layanan { scroll-margin-top: 96px; }
+
+    /* ------------------------------------------------- stabilo & stiker */
+    /* Sapuan stabilo di belakang satu frasa. Miring sedikit dan tepinya
+       tidak rata — stabilo sungguhan tidak pernah berhenti tepat di ujung
+       huruf. Digambar DI BELAKANG tulisan lewat z-index negatif supaya
+       tulisannya tetap pekat dan terbaca. */
+    .bnd-stabilo { position: relative; display: inline-block; }
+    .bnd-stabilo::after {
+        content: ""; position: absolute; z-index: -1;
+        left: -.18em; right: -.24em; bottom: .04em; height: .52em;
+        background: var(--stabilo);
+        border-radius: 3px 10px 6px 12px;
+        transform-origin: left center;
+        /* Disapukan dari kiri ke kanan, seperti orang memegang stabilo. */
+        animation: bnd-sapu .62s cubic-bezier(.2, .8, .3, 1) .35s both;
+    }
+    @keyframes bnd-sapu {
+        from { transform: rotate(-1.2deg) skewX(-9deg) scaleX(0); }
+        to   { transform: rotate(-1.2deg) skewX(-9deg) scaleX(1); }
     }
 
-    .bnd-bagian { padding: 76px 0; }
-    .bnd-bagian-rapat { padding: 56px 0; }
-
-    /* ------------------------------------------------- kepala tiap bagian */
-    /* Satu bentuk untuk semua bagian: label kecil, judul besar, satu kalimat
-       penjelas. Sebelumnya tiap bagian punya polanya sendiri — ada yang
-       berjudul h1 dengan garis bawah gradien, ada yang h1 polos. */
-    .bnd-kepala { margin-bottom: 38px; }
-
-    .bnd-kepala-tengah { text-align: center; }
-    .bnd-kepala-tengah .bnd-sub { margin-left: auto; margin-right: auto; }
-
-    /* Rata kiri DENGAN tautan di kanan, sebaris. Dipakai bagian yang punya
-       kelanjutan; tautannya harus duduk sejajar judulnya, bukan melayang di
-       bawah tengah. */
-    .bnd-kepala-sisi {
-        display: flex; align-items: flex-end; justify-content: space-between;
-        gap: 24px; flex-wrap: wrap;
-    }
-
-    .bnd-label {
+    /* Stiker miring, dipakai di tiap kepala bagian. Kemiringannya kecil
+       dan tetap: stiker yang ditempel tangan tidak pernah sejajar, tetapi
+       juga tidak berpindah-pindah tiap halaman dimuat. */
+    .bnd-stiker {
         display: inline-flex; align-items: center; gap: 8px;
-        margin-bottom: 8px;
-        font-size: .74rem; font-weight: 700; letter-spacing: .16em;
-        text-transform: uppercase; color: var(--api-1);
+        padding: 8px 15px; border-radius: 999px;
+        background: var(--tinta); color: var(--kertas);
+        font-size: .78rem; font-weight: 800; letter-spacing: .04em;
+        transform: rotate(-2deg);
+        box-shadow: 3px 3px 0 rgba(22, 35, 63, .18);
     }
-    .bnd-label i { font-size: .8rem; line-height: 1; }
+    .bnd-stiker i { color: var(--stabilo); }
+
+    /* --------------------------------------------------------- tombol */
+    .bnd-tombol {
+        display: inline-flex; align-items: center; gap: 10px;
+        padding: 15px 28px; border: 2px solid var(--tinta); border-radius: 999px;
+        font-family: 'Figtree', sans-serif; font-weight: 800; font-size: 1rem;
+        text-decoration: none; cursor: pointer;
+        transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .bnd-tombol-utama {
+        background: var(--bata); color: #fff;
+        box-shadow: 5px 5px 0 var(--tinta);
+    }
+    .bnd-tombol-utama:hover {
+        color: #fff; transform: translate(-2px, -2px);
+        box-shadow: 8px 8px 0 var(--tinta);
+    }
+    .bnd-tombol-kedua {
+        background: var(--kertas); color: var(--tinta);
+        box-shadow: 5px 5px 0 rgba(22, 35, 63, .22);
+    }
+    .bnd-tombol-kedua:hover {
+        color: var(--tinta); transform: translate(-2px, -2px);
+        box-shadow: 8px 8px 0 rgba(22, 35, 63, .22);
+    }
+
+    /* ============================================================= hero */
+    .bnd-hero { padding: 124px 0 70px; }
+
+    /* 1.08fr : 0.92fr, bukan 1 : 1. Kisi yang persis seimbang membuat kedua
+       sisinya saling bersaing; sedikit tidak seimbang memberi tahu mata
+       sisi mana yang dibaca lebih dulu. */
+    .bnd-hero-kisi {
+        display: grid; grid-template-columns: 1.08fr .92fr;
+        gap: 56px; align-items: center;
+    }
+
+    .bnd-hero h1 {
+        margin-top: 20px;
+        font-size: 3.4rem; line-height: 1.06;
+        font-variation-settings: 'opsz' 120, 'SOFT' 20, 'WONK' 1;
+    }
+
+    /* Kata yang berganti sendiri. Ketiganya ditumpuk di petak kisi yang
+       SAMA, jadi lebar kotaknya mengikuti kata terpanjang dan baris di
+       bawahnya tidak melompat tiap kali katanya berganti. */
+    .bnd-putar { display: inline-grid; vertical-align: baseline; text-align: left; }
+    .bnd-putar > span {
+        grid-area: 1 / 1;
+        color: var(--bata); opacity: 0;
+        animation: bnd-ganti 10.5s infinite;
+    }
+    .bnd-putar > span:nth-child(2) { animation-delay: 3.5s; }
+    .bnd-putar > span:nth-child(3) { animation-delay: 7s; }
+    @keyframes bnd-ganti {
+        0%        { opacity: 0; translate: 0 14px; }
+        4%, 30%   { opacity: 1; translate: 0 0; }
+        34%, 100% { opacity: 0; translate: 0 -14px; }
+    }
+
+    .bnd-hero p { margin-top: 20px; font-size: 1.12rem; max-width: 46ch; }
+
+    .bnd-aksi { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 32px; }
+
+    .bnd-centang { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 30px; }
+    .bnd-centang span {
+        display: inline-flex; align-items: center; gap: 8px;
+        font-size: .92rem; font-weight: 600; color: var(--tinta);
+    }
+    .bnd-centang i { color: var(--rumput); }
+
+    /* ------------------------------------------------------ foto hero */
+    .bnd-foto { position: relative; }
+
+    /* Bingkai LENGKUNG, bukan persegi membulat. Persegi membulat adalah
+       bentuk bawaan setiap kartu di internet; lengkung di atas terbaca
+       seperti jendela, dan langsung memberi tahu bahwa ada orang yang
+       memilihkan bentuknya. */
+    .bnd-foto-bingkai {
+        position: relative; overflow: hidden;
+        border: 3px solid var(--tinta);
+        border-radius: 200px 200px 22px 22px;
+        box-shadow: 10px 10px 0 var(--stabilo);
+        transform: rotate(-1.4deg);
+        background: var(--kertas-2);
+    }
+    .bnd-foto-bingkai img { width: 100%; height: auto; display: block; }
+
+    /* Selotip di dua pojok atas — tanda paling cepat dibaca bahwa sesuatu
+       ditempel tangan. */
+    .bnd-selotip {
+        position: absolute; z-index: 3;
+        width: 86px; height: 26px;
+        background: rgba(255, 216, 77, .72);
+        border-left: 1px dashed rgba(22, 35, 63, .18);
+        border-right: 1px dashed rgba(22, 35, 63, .18);
+    }
+    .bnd-selotip-kiri { top: 10px; left: -14px; transform: rotate(-32deg); }
+    .bnd-selotip-kanan { top: 10px; right: -14px; transform: rotate(32deg); }
+
+    /* Dua gelembung angka mengapung di tepi foto: membawa bukti ke layar
+       pertama, tanpa menunggu orangnya menggulung sampai pita angka. */
+    .bnd-gelembung {
+        position: absolute; z-index: 4;
+        display: flex; align-items: center; gap: 11px;
+        padding: 12px 16px; border-radius: 16px;
+        background: var(--kertas); border: 2px solid var(--tinta);
+        box-shadow: 4px 4px 0 rgba(22, 35, 63, .2);
+        animation: bnd-apung 5.4s ease-in-out infinite;
+    }
+    .bnd-gelembung strong {
+        display: block; line-height: 1;
+        font-family: 'Fraunces', serif; font-size: 1.3rem;
+    }
+    .bnd-gelembung small { font-size: .74rem; color: var(--tinta-2); font-weight: 600; }
+    .bnd-gelembung i { font-size: 1.1rem; }
+
+    .bnd-gelembung-1 { left: -32px; top: 20%; rotate: -3deg; }
+    .bnd-gelembung-2 { right: -24px; bottom: 15%; rotate: 2.5deg; animation-delay: 1.8s; }
+
+    @keyframes bnd-apung {
+        0%, 100% { translate: 0 0; }
+        50%      { translate: 0 -13px; }
+    }
+
+    /* ======================================================= pita lari */
+    /* Satu-satunya hal di halaman ini yang bergerak tanpa diminta — cukup
+       untuk membuat halamannya terasa hidup, tidak cukup untuk mengganggu
+       orang yang sedang membaca di sebelahnya. */
+    .bnd-pita {
+        background: var(--tinta); color: var(--kertas);
+        padding: 15px 0; overflow: hidden;
+        transform: rotate(-.8deg) scale(1.03);
+    }
+    .bnd-pita-isi {
+        display: flex; width: max-content;
+        animation: bnd-lari 26s linear infinite;
+    }
+    .bnd-pita-isi span {
+        display: inline-flex; align-items: center; gap: 20px;
+        padding-right: 20px; white-space: nowrap;
+        font-family: 'Fraunces', serif; font-weight: 700; font-size: 1.1rem;
+        letter-spacing: .05em;
+    }
+    .bnd-pita-isi i { color: var(--stabilo); font-size: .5rem; }
+    @keyframes bnd-lari { to { transform: translateX(-50%); } }
+
+    /* ==================================================== kepala bagian */
+    .bnd-kepala { margin-bottom: 44px; max-width: 62ch; }
+    .bnd-kepala-tengah { margin-left: auto; margin-right: auto; text-align: center; }
 
     .bnd-judul {
-        font-size: 2.45rem; font-weight: 800; line-height: 1.08;
-        letter-spacing: -.03em;
+        margin-top: 16px;
+        font-size: 2.6rem; line-height: 1.12;
+        font-variation-settings: 'opsz' 72, 'SOFT' 20, 'WONK' 1;
     }
 
     /* `.bnd p.bnd-sub`, bukan `.bnd-sub`.
 
-       Aturan `.bnd p { margin: 0 }` di atas berbobot (0,1,1) — satu kelas
-       satu elemen — sedangkan `.bnd-sub` hanya (0,1,0). Selektor kelas
-       tunggal KALAH, dan margin-top-nya tidak pernah berlaku: terukur
-       jaraknya 0px di keempat kepala bagian, pada 390px maupun 1440px.
-       Gejalanya cuma terlihat di ponsel, tempat judul dua baris dan
-       kalimat penjelasnya saling menempel sampai terbaca sebagai satu blok.
+       Aturan `.bnd p { margin: 0 }` di atas berbobot (0,1,1); selektor kelas
+       tunggal hanya (0,1,0) dan KALAH — margin-top-nya tidak akan pernah
+       berlaku. Pernah terjadi persis begitu pada rombakan pertama: terukur
+       0px di keempat kepala bagian, dan gejalanya hanya terlihat di ponsel
+       tempat judul dua baris menempel pada kalimat penjelasnya. */
+    .bnd p.bnd-sub { margin-top: 15px; font-size: 1.06rem; }
 
-       Yang ditambah elemennya, bukan !important: menang lewat !important
-       berarti aturan berikutnya harus ikut memakainya juga. */
-    .bnd p.bnd-sub {
-        margin-top: 14px; max-width: 58ch;
-        font-size: 1.02rem;
+    /* ========================================================== bento */
+    /* Empat kartu, EMPAT UKURAN BERBEDA. Kisi yang keempat kotaknya sama
+       persis adalah tanda paling kentara bahwa isinya tidak pernah
+       ditimbang — padahal "sudah kebukti ratusan kali" jelas lebih berat
+       daripada tiga lainnya, dan kartunya harus menunjukkan itu. */
+    .bnd-bento {
+        display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
     }
+    .bnd-bento > :nth-child(1) { grid-column: span 2; }
+    .bnd-bento > :nth-child(4) { grid-column: span 2; }
 
-    .bnd-tautan {
-        display: inline-flex; align-items: center; gap: 8px;
-        color: var(--api-1); font-weight: 700; font-size: .95rem;
-        text-decoration: none; white-space: nowrap;
-        transition: gap .18s ease, color .18s ease;
-    }
-    .bnd-tautan:hover { color: #d9531a; gap: 13px; }
-
-    /* ------------------------------------------------------------- hero */
-    .bnd-hero {
-        position: relative; overflow: hidden;
-        /* 118px, bukan 76: kepala situsnya fixed-top setinggi 80px, dan
-           angka ini TIDAK boleh turun di bawah itu — judulnya akan
-           tertutup. */
-        padding: 118px 0 84px;
-        background:
-            radial-gradient(circle at 88% 8%, rgba(255, 145, 77, .20), transparent 46%),
-            radial-gradient(circle at 4% 72%, rgba(15, 43, 91, .10), transparent 44%),
-            linear-gradient(180deg, #fff 0%, var(--latar) 100%);
-    }
-
-    .bnd-hero-kisi {
-        display: grid; grid-template-columns: 1.05fr .95fr;
-        gap: 54px; align-items: center;
-    }
-
-    .bnd-hero h1 {
-        font-size: 3.1rem; font-weight: 800; line-height: 1.07;
-        letter-spacing: -.035em;
-    }
-
-    /* Satu kata disorot, bukan seluruh judul diwarnai. Judul berwarna penuh
-       di atas latar terang kehilangan kepekatannya; satu kata berwarna
-       justru menarik mata ke kata yang memang menjual. */
-    .bnd-sorot {
-        background: linear-gradient(90deg, var(--api-1), var(--api-2));
-        -webkit-background-clip: text; background-clip: text;
-        -webkit-text-fill-color: transparent; color: transparent;
-    }
-
-    .bnd-hero p { margin-top: 18px; font-size: 1.06rem; max-width: 52ch; }
-
-    .bnd-aksi { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 30px; }
-
-    .bnd-tombol {
-        display: inline-flex; align-items: center; gap: 10px;
-        padding: 14px 26px; border-radius: 999px;
-        font-weight: 700; font-size: .98rem; text-decoration: none;
-        border: 1px solid transparent;
-        transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
-    }
-    .bnd-tombol-utama {
-        background: linear-gradient(90deg, var(--api-1), var(--api-2));
-        color: #fff;
-        box-shadow: 0 12px 26px rgba(255, 73, 49, .32);
-    }
-    .bnd-tombol-utama:hover {
-        color: #fff; transform: translateY(-2px);
-        box-shadow: 0 16px 32px rgba(255, 73, 49, .42);
-    }
-    .bnd-tombol-kedua {
-        background: #fff; color: var(--navy); border-color: var(--garis);
-        box-shadow: 0 6px 16px rgba(15, 43, 91, .08);
-    }
-    .bnd-tombol-kedua:hover {
-        color: var(--navy); transform: translateY(-2px); border-color: #cfd8e3;
-    }
-
-    /* Tiga janji singkat di bawah tombol. Menjawab keraguan yang muncul
-       justru SESUDAH orang tertarik — "berapa lama", "siapa yang mengajar" —
-       tanpa menunggu ia menggulung ke bagian berikutnya. */
-    .bnd-janji {
-        display: flex; flex-wrap: wrap; gap: 10px 22px; margin-top: 28px;
-        padding-top: 22px; border-top: 1px dashed #e3e8ef;
-    }
-    .bnd-janji span {
-        display: inline-flex; align-items: center; gap: 8px;
-        font-size: .88rem; font-weight: 600; color: var(--tinta-2);
-    }
-    .bnd-janji i { color: #16a34a; font-size: .95rem; }
-
-    .bnd-hero-gambar { position: relative; }
-    .bnd-hero-gambar img {
-        position: relative; z-index: 1;
-        width: 100%; height: auto; display: block;
-        border-radius: 22px;
-    }
-
-    /* Bulatan jingga lembut di belakang fotonya. Tanpa ini fotonya
-       melayang sendirian di ruang putih sisi kanan. */
-    .bnd-hero-gambar::before {
-        content: ""; position: absolute; z-index: 0;
-        inset: -8% -6% -10% -4%;
-        border-radius: 42% 58% 54% 46% / 52% 44% 56% 48%;
-        background: linear-gradient(135deg, rgba(255, 145, 77, .28), rgba(255, 49, 49, .14));
-        filter: blur(2px);
-        animation: bnd-ombak 14s ease-in-out infinite;
-    }
-
-    @keyframes bnd-ombak {
-        0%, 100% { border-radius: 42% 58% 54% 46% / 52% 44% 56% 48%; transform: translateY(0); }
-        50%      { border-radius: 56% 44% 46% 54% / 44% 56% 44% 56%; transform: translateY(-10px); }
-    }
-
-    /* ---------------------------------------------------- kartu alasan */
-    .bnd-kisi-4 {
-        display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;
-    }
-
-    /* Satu bentuk kartu dipakai bagian "kenapa memilih" dan "yang dipelajari".
-       Warnanya datang dari --c yang dipasang per kartu, jadi menambah kartu
-       tidak menambah satu set aturan baru. */
     .bnd-kartu {
         position: relative; overflow: hidden;
-        background: #fff; border: 1px solid var(--garis); border-radius: 18px;
-        padding: 26px 22px;
-        transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+        padding: 28px 26px;
+        background: var(--kertas-2);
+        border: 2px solid var(--tinta); border-radius: 20px;
+        box-shadow: 5px 5px 0 rgba(22, 35, 63, .14);
+        transition: transform .2s ease, box-shadow .2s ease;
     }
     .bnd-kartu:hover {
-        transform: translateY(-4px);
-        border-color: color-mix(in srgb, var(--c) 34%, #fff);
-        box-shadow: 0 16px 32px color-mix(in srgb, var(--c) 20%, transparent);
+        transform: translate(-3px, -3px);
+        box-shadow: 9px 9px 0 var(--c);
     }
 
-    /* Sapuan warna samar di pojok kanan atas, membesar saat disentuh.
-       Perlakuan yang sama di semua kartu halaman ini supaya terbaca sebagai
-       satu bahasa, bukan beberapa percobaan. */
-    .bnd-kartu::before {
-        content: ""; position: absolute; top: -40px; right: -40px;
-        width: 108px; height: 108px; border-radius: 50%;
-        background: color-mix(in srgb, var(--c) 13%, transparent);
-        transition: transform .3s ease;
-    }
-    .bnd-kartu:hover::before { transform: scale(1.4); }
-
-    .bnd-ikon {
-        position: relative; z-index: 1;
+    .bnd-kartu-ikon {
         display: inline-flex; align-items: center; justify-content: center;
-        width: 52px; height: 52px; border-radius: 15px; margin-bottom: 16px;
-        background: color-mix(in srgb, var(--c) 12%, #fff);
-        color: var(--c); font-size: 1.35rem;
-        transition: background .22s ease, color .22s ease, transform .22s ease;
+        width: 54px; height: 54px; border-radius: 16px; margin-bottom: 18px;
+        background: var(--c); color: #fff; font-size: 1.4rem;
+        border: 2px solid var(--tinta);
+        transition: rotate .22s ease, scale .22s ease;
     }
-    .bnd-kartu:hover .bnd-ikon {
-        background: var(--c); color: #fff; transform: rotate(-6deg) scale(1.06);
+    .bnd-kartu:hover .bnd-kartu-ikon { rotate: -8deg; scale: 1.08; }
+
+    .bnd-kartu h3 { font-size: 1.22rem; margin-bottom: 9px; }
+    .bnd-kartu p { font-size: .97rem; }
+
+    /* Kartu besar: angkanya yang bicara, bukan ikonnya. */
+    .bnd-kartu-besar { display: flex; align-items: center; gap: 28px; }
+    .bnd-angka-raksasa {
+        flex: 0 0 auto;
+        font-family: 'Fraunces', serif; font-weight: 900;
+        font-size: 4.4rem; line-height: .92; color: var(--bata);
+        font-variation-settings: 'opsz' 120, 'WONK' 1;
     }
 
-    .bnd-kartu h3 {
-        position: relative; z-index: 1;
-        font-size: 1.08rem; font-weight: 700; margin-bottom: 7px;
-    }
-    .bnd-kartu p { position: relative; z-index: 1; font-size: .92rem; }
+    /* ======================================================== layanan */
+    .bnd-kisi-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; }
 
-    /* --------------------------------------------------- kartu layanan */
-    .bnd-kisi-3 {
-        display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+    /* Bentuk KARCIS: takik setengah lingkaran di kedua tepi, tepat di garis
+       putus-putus yang memisahkan gambar dari keterangannya. Takiknya dua
+       lingkaran sewarna latar yang menimpa tepi kartu — cara yang sama
+       dipakai karcis sungguhan. */
+    .bnd-karcis {
+        position: relative; display: flex; flex-direction: column;
+        background: var(--kertas-2);
+        border: 2px solid var(--tinta); border-radius: 18px;
+        box-shadow: 6px 6px 0 rgba(22, 35, 63, .16);
+        transition: transform .22s ease, box-shadow .22s ease;
     }
-
-    .bnd-layanan {
-        display: flex; flex-direction: column; overflow: hidden;
-        background: #fff; border: 1px solid var(--garis); border-radius: 20px;
-        transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
-    }
-    .bnd-layanan:hover {
-        transform: translateY(-5px);
-        border-color: color-mix(in srgb, var(--c) 32%, #fff);
-        box-shadow: 0 20px 40px color-mix(in srgb, var(--c) 22%, transparent);
+    .bnd-karcis:hover {
+        transform: translate(-3px, -4px);
+        box-shadow: 11px 11px 0 var(--c);
     }
 
-    .bnd-layanan-atas { position: relative; overflow: hidden; }
-    .bnd-layanan-atas img {
-        width: 100%; height: 188px; object-fit: cover; display: block;
-        transition: transform .4s ease;
+    .bnd-karcis-gambar { position: relative; overflow: hidden; border-radius: 16px 16px 0 0; }
+    .bnd-karcis-gambar img {
+        width: 100%; height: 190px; object-fit: cover; display: block;
+        transition: scale .45s ease;
     }
-    .bnd-layanan:hover .bnd-layanan-atas img { transform: scale(1.06); }
+    .bnd-karcis:hover .bnd-karcis-gambar img { scale: 1.07; }
 
-    /* Lencana cara belajarnya duduk DI ATAS gambar, bukan di bawah judul:
-       di situ ia terbaca bersamaan dengan gambarnya, dan tidak menambah satu
-       baris lagi pada tumpukan teks yang sudah padat. */
-    .bnd-lencana {
-        position: absolute; left: 14px; top: 14px; z-index: 1;
-        display: inline-flex; align-items: center; gap: 6px;
-        padding: 6px 12px; border-radius: 999px;
-        background: rgba(255, 255, 255, .94);
-        color: var(--c); font-size: .74rem; font-weight: 700;
-        letter-spacing: .02em;
-        box-shadow: 0 4px 12px rgba(15, 23, 42, .14);
-    }
-
-    /* Ubin bergradien untuk layanan yang belum punya foto. Lebih jujur
-       daripada memakai foto layanan lain, dan tetap seukuran gambar yang
-       lain supaya barisannya tidak pincang. */
-    .bnd-layanan-ubin {
+    .bnd-karcis-ubin {
         display: flex; align-items: center; justify-content: center;
-        height: 188px;
-        background: linear-gradient(135deg, color-mix(in srgb, var(--c) 92%, #000 0%), color-mix(in srgb, var(--c) 55%, #fff));
-        color: #fff; font-size: 3.4rem;
+        height: 190px; border-radius: 16px 16px 0 0;
+        background: var(--c); color: #fff; font-size: 3.6rem;
     }
 
-    .bnd-layanan-isi {
+    .bnd-karcis-tag {
+        position: absolute; left: 14px; top: 14px; z-index: 2;
+        padding: 6px 13px; border-radius: 999px;
+        background: var(--kertas); border: 2px solid var(--tinta);
+        font-size: .74rem; font-weight: 800; color: var(--tinta);
+        transform: rotate(-2.5deg);
+    }
+
+    /* Garis sobek berikut takiknya. */
+    .bnd-karcis-sobek {
+        position: relative; height: 0;
+        border-top: 2px dashed rgba(22, 35, 63, .3);
+    }
+    .bnd-karcis-sobek::before,
+    .bnd-karcis-sobek::after {
+        content: ""; position: absolute; top: -13px;
+        width: 24px; height: 24px; border-radius: 50%;
+        background: var(--kertas-2);
+        border: 2px solid var(--tinta);
+    }
+    .bnd-karcis-sobek::before { left: -14px; clip-path: inset(0 0 0 48%); }
+    .bnd-karcis-sobek::after { right: -14px; clip-path: inset(0 48% 0 0); }
+
+    .bnd-karcis-isi {
         display: flex; flex-direction: column; flex: 1 1 auto;
-        padding: 20px 22px 22px;
+        padding: 24px 24px 24px;
     }
-    .bnd-layanan-isi h3 { font-size: 1.14rem; font-weight: 700; margin-bottom: 9px; }
-    .bnd-layanan-isi p { font-size: .92rem; }
+    .bnd-karcis-isi h3 { font-size: 1.2rem; margin-bottom: 10px; }
+    .bnd-karcis-isi p { font-size: .96rem; }
 
-    /* Tombolnya didorong ke dasar kartu supaya SEMUA tombol sebaris,
-       berapa pun panjang keterangannya. Sebelumnya keterangan yang panjang
-       menurunkan tombolnya sendiri dan barisan tombol jadi bergerigi. */
-    .bnd-layanan-tombol {
-        display: inline-flex; align-items: center; justify-content: center; gap: 9px;
-        margin-top: auto; padding-top: 18px;
+    /* Tombolnya didorong ke dasar kartu supaya semua tombol sebaris,
+       berapa pun panjang keterangannya. */
+    .bnd-karcis-tombol {
+        display: inline-flex; align-items: center; gap: 9px;
+        margin-top: auto; padding-top: 20px;
+        color: var(--c); font-weight: 800; font-size: .97rem; text-decoration: none;
+        transition: gap .2s ease;
     }
-    .bnd-layanan-tombol > a {
-        display: inline-flex; align-items: center; justify-content: center; gap: 9px;
-        width: 100%; padding: 12px 18px; border-radius: 12px;
-        background: color-mix(in srgb, var(--c) 10%, #fff);
-        color: var(--c); font-weight: 700; font-size: .93rem; text-decoration: none;
-        transition: background .2s ease, color .2s ease, gap .2s ease;
-    }
-    .bnd-layanan:hover .bnd-layanan-tombol > a {
-        background: var(--c); color: #fff; gap: 13px;
-    }
+    .bnd-karcis:hover .bnd-karcis-tombol { gap: 15px; }
 
-    /* ------------------------------------------------------ pita angka */
-    /* Biru tua, BUKAN jingga. Halaman ini sudah punya dua tempat jingga
-       pekat (tombol hero dan kepala tiap bagian); pita ketiga berwarna sama
-       membuat ketiganya saling meredam. Biru tua juga memberi jeda gelap di
-       tengah halaman yang seluruhnya terang. */
+    /* ========================================================== angka */
     .bnd-angka {
         position: relative; overflow: hidden;
-        padding: 64px 0;
-        background:
-            radial-gradient(circle at 12% 18%, rgba(255, 145, 77, .22), transparent 42%),
-            radial-gradient(circle at 88% 82%, rgba(255, 49, 49, .18), transparent 46%),
-            linear-gradient(135deg, #0f2b5b 0%, #16386f 55%, #0b2149 100%);
+        padding: 82px 0;
+        background: var(--tinta);
     }
-    .bnd-angka .bnd-judul, .bnd-angka .bnd-sub { color: #fff; }
-    .bnd-angka .bnd-sub { color: rgba(255, 255, 255, .76); }
-    .bnd-angka .bnd-label { color: var(--api-2); }
+    .bnd-angka .bnd-judul, .bnd-angka h3 { color: var(--kertas); }
+    .bnd-angka p { color: rgba(251, 245, 233, .72); }
 
-    .bnd-kisi-angka {
-        display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px;
-    }
+    .bnd-kisi-angka { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
 
     .bnd-nilai {
-        position: relative; overflow: hidden;
-        padding: 28px 24px; border-radius: 18px;
-        background: rgba(255, 255, 255, .07);
-        border: 1px solid rgba(255, 255, 255, .16);
+        padding: 30px 26px; border-radius: 20px;
+        background: rgba(251, 245, 233, .07);
+        border: 2px dashed rgba(251, 245, 233, .3);
         transition: background .22s ease, transform .22s ease;
     }
-    .bnd-nilai:hover { background: rgba(255, 255, 255, .12); transform: translateY(-4px); }
-
-    .bnd-nilai-kepala { display: flex; align-items: center; gap: 14px; }
-    .bnd-nilai-ikon {
-        display: inline-flex; align-items: center; justify-content: center;
-        width: 48px; height: 48px; border-radius: 14px; flex: 0 0 auto;
-        background: linear-gradient(135deg, var(--api-1), var(--api-2));
-        color: #fff; font-size: 1.25rem;
-    }
+    .bnd-nilai:hover { background: rgba(251, 245, 233, .13); transform: translateY(-4px); }
     .bnd-nilai-angka {
-        font-size: 2.7rem; font-weight: 800; line-height: 1; color: #fff;
-        letter-spacing: -.03em;
-        /* Angka berjalan tidak boleh menggeser tata letaknya tiap kali
-           lebar digitnya berubah. */
+        margin-top: 12px;
+        font-family: 'Fraunces', serif; font-weight: 900;
+        font-size: 3.1rem; line-height: 1; color: var(--stabilo);
+        font-variation-settings: 'opsz' 120, 'WONK' 1;
         font-variant-numeric: tabular-nums;
     }
-    .bnd-nilai p { margin-top: 14px; color: rgba(255, 255, 255, .78); font-size: .9rem; }
+    .bnd-nilai p { margin-top: 12px; font-size: .95rem; }
 
-    /* ------------------------------------------------- yang akan dipelajari */
-    .bnd-pelajari-kisi {
-        display: grid; grid-template-columns: 1.1fr .9fr; gap: 46px; align-items: center;
+    /* Cap bundar berputar pelan di sisi pita. Tulisannya dibengkokkan
+       mengikuti lingkaran lewat <textPath> — bukan gambar, jadi tajam di
+       layar mana pun dan beratnya beberapa ratus bait. */
+    .bnd-cap {
+        position: absolute; right: 3%; top: 50%; translate: 0 -50%;
+        width: 160px; height: 160px; opacity: .92;
+        animation: bnd-putar 26s linear infinite;
     }
-    .bnd-kisi-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .bnd-cap text { fill: var(--stabilo); font-size: 13px; font-weight: 800; letter-spacing: .2em; }
+    @keyframes bnd-putar { to { rotate: 360deg; } }
 
-    .bnd-pelajari-gambar img {
-        width: 100%; height: auto; display: block; border-radius: 20px;
+    /* ==================================================== kertas tempel */
+    .bnd-tempel-kisi { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px 24px; }
+
+    /* Kertas tempel. Miringnya BERBEDA-BEDA, diberikan satu per satu di
+       markahnya — bukan satu sudut untuk semua, dan bukan diacak
+       JavaScript. Sudut yang sama di enam kertas terbaca sebagai cetakan;
+       sudut yang diacak tiap muat membuat halamannya tidak pernah sama dua
+       kali, dan itu mengganggu orang yang kembali. */
+    .bnd-tempel {
+        position: relative;
+        padding: 30px 22px 24px;
+        background: var(--c);
+        box-shadow: 4px 5px 0 rgba(22, 35, 63, .18);
+        transition: rotate .2s ease, translate .2s ease, box-shadow .2s ease;
     }
+    /* Diluruskan saat disentuh: yang sedang dibaca berdiri tegak, sisanya
+       tetap miring. */
+    .bnd-tempel:hover { rotate: 0deg; translate: 0 -5px; box-shadow: 7px 9px 0 rgba(22, 35, 63, .26); }
 
-    /* Keenamnya hanya berisi ikon dan satu baris nama — tidak ada keterangan
-       yang menyusul. Dengan bentuk kartu penuh, terukur 150px tingginya
-       untuk satu baris teks: dua pertiga kartunya ruang kosong, dan enam
-       kartu seperti itu memanjangkan kolomnya jauh melewati gambar di
-       sebelahnya.
-
-       Dibuat mendatar: ikon di kiri, nama di kanan, sebaris. Yang berubah
-       cuma susunannya — warna, sapuan pojok, dan angkatannya saat disentuh
-       tetap sama persis dengan kartu di bagian lain. */
-    .bnd-kartu-ringkas {
-        display: flex; align-items: center; gap: 14px;
-        padding: 16px 18px;
+    .bnd-tempel::before {
+        content: ""; position: absolute; left: 50%; top: -11px;
+        width: 74px; height: 22px; translate: -50% 0; rotate: -2deg;
+        background: rgba(251, 245, 233, .8);
+        border-left: 1px dashed rgba(22, 35, 63, .16);
+        border-right: 1px dashed rgba(22, 35, 63, .16);
     }
-    .bnd-kartu-ringkas .bnd-ikon {
-        width: 44px; height: 44px; margin-bottom: 0; flex: 0 0 auto;
-        border-radius: 13px; font-size: 1.15rem;
-    }
-    .bnd-kartu-ringkas h3 { margin-bottom: 0; font-size: 1rem; }
+    .bnd-tempel i { font-size: 1.5rem; color: var(--tinta); }
+    .bnd-tempel h3 { margin-top: 12px; font-size: 1.06rem; }
+    .bnd-tempel p { margin-top: 7px; font-size: .9rem; color: rgba(22, 35, 63, .72); }
 
-    /* ---------------------------------------------------------- testimoni */
+    /* ====================================================== testimoni */
     .bnd-testi-kisi {
-        display: grid; grid-template-columns: .95fr 1.05fr; gap: 42px; align-items: center;
+        display: grid; grid-template-columns: .92fr 1.08fr; gap: 48px; align-items: center;
     }
 
-    .bnd-testi-video {
-        position: relative; border-radius: 20px; overflow: hidden;
-        background: linear-gradient(135deg, var(--api-1), var(--api-2));
-        box-shadow: 0 22px 44px rgba(255, 73, 49, .26);
+    /* Bingkai polaroid: pinggiran bawah lebih tebal, seperti foto cetak. */
+    .bnd-polaroid {
+        padding: 14px 14px 18px;
+        background: var(--kertas);
+        border: 2px solid var(--tinta);
+        box-shadow: 9px 9px 0 var(--ungu);
+        transform: rotate(-1.6deg);
     }
-    .bnd-testi-video video {
-        width: 100%; height: 520px; object-fit: cover; display: block;
+    .bnd-polaroid video {
+        width: 100%; height: 460px; object-fit: cover; display: block;
+        border: 2px solid var(--tinta);
+    }
+    .bnd-polaroid-kaki {
+        margin-top: 14px; text-align: center;
+        font-family: 'Fraunces', serif; font-weight: 700; font-size: .96rem;
     }
 
-    /* Kutipan, bukan paragraf biasa: isinya memang perkataan tentang
-       peserta, dan tanda kutip raksasa memberi tahu itu sebelum satu kata
-       pun dibaca. Sebelumnya teks ini dibungkus <h3> rata kiri-kanan —
-       judul yang bukan judul, dengan sungai putih di tengahnya. */
-    .bnd-kutip { position: relative; padding-left: 4px; }
-    .bnd-kutip::before {
-        content: "\201C";
-        position: absolute; left: -10px; top: -46px;
-        font-family: Georgia, 'Times New Roman', serif;
-        font-size: 7rem; line-height: 1; color: color-mix(in srgb, var(--api-2) 32%, #fff);
-        pointer-events: none;
+    /* Gelembung percakapan dengan ekor di kiri bawah. */
+    .bnd-balon {
+        position: relative;
+        padding: 34px 32px;
+        background: var(--kertas);
+        border: 2px solid var(--tinta); border-radius: 22px;
+        box-shadow: 6px 6px 0 rgba(22, 35, 63, .16);
     }
-    .bnd-kutip p {
-        position: relative; z-index: 1;
-        font-size: 1.08rem; line-height: 1.75; color: #374151;
+    .bnd-balon::after {
+        content: ""; position: absolute; left: 46px; bottom: -16px;
+        width: 28px; height: 28px;
+        background: var(--kertas);
+        border-right: 2px solid var(--tinta); border-bottom: 2px solid var(--tinta);
+        rotate: 56deg;
     }
-    .bnd-kutip p + p { margin-top: 14px; }
-
-    .bnd-kutip-kaki {
-        display: flex; align-items: center; gap: 13px; margin-top: 24px;
-        padding-top: 20px; border-top: 1px solid var(--garis);
+    .bnd-balon p { font-size: 1.1rem; line-height: 1.72; color: var(--tinta); }
+    .bnd-balon p + p { margin-top: 14px; }
+    .bnd-balon-kutip {
+        display: block; margin-bottom: 8px;
+        font-family: 'Fraunces', serif; font-size: 3.4rem; line-height: .55;
+        color: var(--stabilo);
     }
-    .bnd-kutip-kaki i {
+    .bnd-balon-kaki {
+        display: flex; align-items: center; gap: 13px; margin-top: 26px;
+        padding-top: 20px; border-top: 2px dashed var(--garis);
+    }
+    .bnd-balon-kaki i {
         display: inline-flex; align-items: center; justify-content: center;
-        width: 44px; height: 44px; border-radius: 50%; flex: 0 0 auto;
-        background: linear-gradient(135deg, var(--api-1), var(--api-2));
-        color: #fff; font-size: 1.05rem;
+        width: 46px; height: 46px; border-radius: 50%; flex: 0 0 auto;
+        background: var(--rumput); color: #fff; border: 2px solid var(--tinta);
     }
-    .bnd-kutip-kaki strong { display: block; font-size: .98rem; color: var(--tinta); }
-    .bnd-kutip-kaki small { color: var(--tinta-2); font-size: .86rem; }
+    .bnd-balon-kaki strong { display: block; font-size: 1rem; }
+    .bnd-balon-kaki small { color: var(--tinta-2); font-size: .88rem; }
 
-    /* ------------------------------------------------------- ajakan akhir */
+    /* ========================================================= ajakan */
     .bnd-ajakan {
-        position: relative; overflow: hidden;
-        padding: 52px 46px; border-radius: 26px;
-        background:
-            radial-gradient(circle at 92% 12%, rgba(255, 255, 255, .22), transparent 42%),
-            linear-gradient(120deg, var(--api-1), var(--api-2));
-        box-shadow: 0 24px 48px rgba(255, 73, 49, .3);
-        text-align: center;
+        padding: 62px 48px; text-align: center;
+        background: var(--stabilo);
+        border: 3px solid var(--tinta); border-radius: 26px;
+        box-shadow: 10px 10px 0 var(--tinta);
     }
-    .bnd-ajakan h2 {
-        color: #fff; font-size: 2.1rem; font-weight: 800; letter-spacing: -.03em;
-        line-height: 1.12;
-    }
+    .bnd-ajakan h2 { font-size: 2.5rem; line-height: 1.12; }
     .bnd-ajakan p {
-        color: rgba(255, 255, 255, .92); margin: 14px auto 0; max-width: 56ch;
+        margin: 16px auto 0; max-width: 52ch;
+        color: rgba(22, 35, 63, .78); font-size: 1.08rem;
     }
     .bnd-ajakan .bnd-aksi { justify-content: center; }
-    .bnd-ajakan .bnd-tombol-utama {
-        background: #fff; color: var(--api-1); box-shadow: 0 12px 26px rgba(15, 23, 42, .2);
-    }
-    .bnd-ajakan .bnd-tombol-utama:hover { color: var(--api-1); }
-    .bnd-ajakan .bnd-tombol-kedua {
-        background: rgba(255, 255, 255, .14); color: #fff;
-        border-color: rgba(255, 255, 255, .5);
-    }
-    .bnd-ajakan .bnd-tombol-kedua:hover { color: #fff; background: rgba(255, 255, 255, .24); }
+    .bnd-ajakan .bnd-tombol-kedua { background: var(--kertas); }
 
-    /* ---------------------------------------------------------- layar kecil */
+    /* ==================================================== layar kecil */
     @media (max-width: 991.98px) {
         .bnd-hero-kisi,
-        .bnd-pelajari-kisi,
-        .bnd-testi-kisi { grid-template-columns: 1fr; gap: 36px; }
+        .bnd-testi-kisi { grid-template-columns: 1fr; gap: 44px; }
+        .bnd-foto { order: 2; }
+        .bnd-hero h1 { font-size: 2.7rem; }
+        .bnd-judul { font-size: 2.1rem; }
 
-        /* Gambar hero turun KE BAWAH teksnya di layar sempit. Di atas, ia
-           mendorong judul dan tombolnya keluar dari layar pertama — dan
-           yang harus terbaca lebih dulu kalimatnya, bukan fotonya. */
-        .bnd-hero-gambar { order: 2; }
+        .bnd-bento { grid-template-columns: repeat(2, 1fr); }
+        .bnd-bento > :nth-child(1),
+        .bnd-bento > :nth-child(4) { grid-column: span 2; }
 
-        .bnd-kisi-4 { grid-template-columns: repeat(2, 1fr); }
-        .bnd-kisi-3 { grid-template-columns: repeat(2, 1fr); }
-        .bnd-hero h1 { font-size: 2.5rem; }
-        .bnd-judul { font-size: 2.05rem; }
-        .bnd-testi-video video { height: 420px; }
+        .bnd-kisi-3,
+        .bnd-tempel-kisi { grid-template-columns: repeat(2, 1fr); }
+        .bnd-cap { display: none; }
+        .bnd-polaroid video { height: 380px; }
     }
 
     @media (max-width: 767.98px) {
-        .bnd-bagian { padding: 54px 0; }
-        .bnd-hero { padding: 104px 0 62px; }
-        .bnd-hero h1 { font-size: 2.05rem; }
-        .bnd-hero p { font-size: 1rem; }
-        .bnd-judul { font-size: 1.72rem; }
-        .bnd-kepala { margin-bottom: 28px; }
+        .bnd-bagian { padding: 58px 0; }
+        .bnd-hero { padding: 104px 0 52px; }
+        .bnd-hero h1 { font-size: 2.1rem; }
+        .bnd-hero p { font-size: 1.02rem; }
+        .bnd-judul { font-size: 1.8rem; }
+        .bnd-kepala { margin-bottom: 30px; }
 
-        .bnd-kisi-4,
+        .bnd-bento,
         .bnd-kisi-3,
-        .bnd-kisi-2,
-        .bnd-kisi-angka { grid-template-columns: 1fr; }
+        .bnd-kisi-angka,
+        .bnd-tempel-kisi { grid-template-columns: 1fr; }
+        .bnd-bento > :nth-child(1),
+        .bnd-bento > :nth-child(4) { grid-column: span 1; }
+
+        .bnd-kartu-besar { flex-direction: column; align-items: flex-start; gap: 14px; }
+        .bnd-angka-raksasa { font-size: 3.4rem; }
+
+        /* Gelembung angkanya DISEMBUNYIKAN di ponsel: pada lebar 390px
+           keduanya menimpa wajah orang di fotonya, dan yang menolong di
+           layar lebar justru merusak di layar sempit. */
+        .bnd-gelembung { display: none; }
+        .bnd-foto-bingkai { border-radius: 140px 140px 18px 18px; }
 
         .bnd-aksi > .bnd-tombol { flex: 1 1 100%; justify-content: center; }
-        .bnd-ajakan { padding: 38px 22px; border-radius: 20px; }
-        .bnd-ajakan h2 { font-size: 1.58rem; }
-        .bnd-testi-video video { height: 340px; }
-        .bnd-nilai-angka { font-size: 2.3rem; }
-        .bnd-kutip::before { font-size: 5rem; top: -32px; }
+        .bnd-ajakan { padding: 38px 22px; box-shadow: 6px 6px 0 var(--tinta); }
+        .bnd-ajakan h2 { font-size: 1.68rem; }
+        .bnd-polaroid video { height: 320px; }
+        .bnd-nilai-angka { font-size: 2.6rem; }
+        .bnd-pita-isi span { font-size: .98rem; }
     }
 
-    /* Jalan keluar untuk SEMUA gerak di halaman ini. Ditulis paling bawah
-       supaya tidak ada aturan sesudahnya yang menghidupkannya lagi.
+    /* ================================================== gerak minimal */
+    /* Tiap selektor beranimasi DISEBUT TERANG di sini, bukan hanya tersapu
+       `.bnd *`: penjaga GerakMinimalPublikTest mencocokkan teks selektornya
+       apa adanya, dan sapuan bintang membuatnya buta terhadap animasi
+       berikutnya yang ditulis orang lain.
 
-       Orang yang menyalakan "kurangi gerak" di sistemnya sebagian
-       menyalakannya karena gerak di layar membuatnya pusing — dan beranda
-       adalah halaman pertama yang ia buka, sebelum ia tahu situs ini apa.
-
-       Selektor beranimasinya DISEBUT TERANG di baris pertama, bukan hanya
-       tersapu oleh `.bnd *`. Penjaga GerakMinimalPublikTest mencocokkan
-       teks selektornya apa adanya; sapuan bintang memang mematikannya di
-       peramban, tetapi membuat penjaga itu buta — dan animasi berikutnya
-       yang ditulis orang lain akan lolos tanpa ada yang memberi tahu. */
+       Yang berjalan terus — pita, kata berputar, gelembung mengapung, cap
+       berputar — dimatikan sepenuhnya. Beranda adalah halaman pertama yang
+       dibuka orang; kalau layarnya membuatnya pusing, ia belum punya satu
+       pun alasan untuk bertahan. */
     @media (prefers-reduced-motion: reduce) {
-        .bnd-hero-gambar::before {
-            animation: none !important;
-        }
+        .bnd-pita-isi { animation: none !important; }
+        .bnd-gelembung { animation: none !important; }
+        .bnd-cap { animation: none !important; }
+        .bnd-stabilo::after { animation: none !important; transform: rotate(-1.2deg) skewX(-9deg); }
+
+        /* Kata berputar dimatikan berarti ketiganya tertumpuk dan tidak ada
+           yang terbaca. Yang pertama dibiarkan terlihat. */
+        .bnd-putar > span { animation: none !important; opacity: 0; }
+        .bnd-putar > span:first-child { opacity: 1; }
 
         .bnd *,
         .bnd *::before,
-        .bnd *::after {
-            animation: none !important;
-            transition: none !important;
-        }
+        .bnd *::after { transition: none !important; }
     }
 </style>
 
@@ -577,75 +653,286 @@ Beranda | Rumah Scopus
         <div class="container">
             <div class="bnd-hero-kisi">
                 <div data-aos="fade-up">
-                    <span class="bnd-label">
-                        <i class="bi bi-mortarboard-fill"></i> Pelatihan jurnal bereputasi
+                    <span class="bnd-stiker">
+                        <i class="bi bi-stars"></i> Ratusan naskah sudah tembus
                     </span>
 
-                    {{-- "Terindeks Scopus" disorot, bukan seluruh judulnya:
-                         itu kata yang dicari orang saat mendarat di sini. --}}
                     <h1>
-                        Dari naskah pertama sampai
-                        <span class="bnd-sorot">terindeks Scopus</span>
+                        Naskahmu nggak berhenti di
+                        <span class="bnd-putar">
+                            <span>laci.</span>
+                            <span>draft.</span>
+                            <span>angan.</span>
+                        </span>
+                        <br>
+                        Kita bantu sampai <span class="bnd-stabilo">terbit</span>.
                     </h1>
 
                     <p>
-                        Rumah Scopus mendampingi penulis Indonesia menembus jurnal
-                        internasional bereputasi — dari menyusun naskah, memilih jurnal,
-                        sampai artikelnya benar-benar terbit.
+                        Nggak perlu jago nulis dari awal. Bawa saja idemu — nanti kita
+                        bedah bareng sampai jadi naskah yang siap dikirim ke jurnal
+                        internasional.
                     </p>
 
                     <div class="bnd-aksi">
                         <a href="#layanan" class="bnd-tombol bnd-tombol-utama">
-                            Lihat layanan kami <i class="bi bi-arrow-right"></i>
+                            Lihat kelasnya <i class="bi bi-arrow-right"></i>
                         </a>
                         <a href="https://www.youtube.com/@rumahscopus" target="_blank" rel="noopener"
                             class="bnd-tombol bnd-tombol-kedua">
-                            <i class="bi bi-play-circle-fill"></i> Tonton cerita peserta
+                            <i class="bi bi-play-fill"></i> Cerita alumni
                         </a>
                     </div>
 
-                    <div class="bnd-janji">
-                        <span><i class="bi bi-check-circle-fill"></i> Trainer berpengalaman</span>
-                        <span><i class="bi bi-check-circle-fill"></i> Praktik langsung</span>
-                        <span><i class="bi bi-check-circle-fill"></i> Didampingi sampai terbit</span>
+                    <div class="bnd-centang">
+                        <span><i class="bi bi-check2-circle"></i> Trainernya publish sendiri</span>
+                        <span><i class="bi bi-check2-circle"></i> Latihan pakai naskahmu</span>
+                        <span><i class="bi bi-check2-circle"></i> Ditemani sampai terbit</span>
                     </div>
                 </div>
 
-                <div class="bnd-hero-gambar" data-aos="zoom-out" data-aos-delay="150">
-                    <img src="{{ asset('assets/img/header1.png') }}"
-                        alt="Peserta pelatihan Rumah Scopus">
+                <div class="bnd-foto" data-aos="zoom-out" data-aos-delay="150">
+                    <span class="bnd-selotip bnd-selotip-kiri"></span>
+                    <span class="bnd-selotip bnd-selotip-kanan"></span>
+
+                    <div class="bnd-foto-bingkai">
+                        <img src="{{ asset('assets/img/header1.png') }}"
+                            alt="Peserta pelatihan Rumah Scopus">
+                    </div>
+
+                    <span class="bnd-gelembung bnd-gelembung-1">
+                        <i class="bi bi-mortarboard-fill" style="color: var(--bata)"></i>
+                        <span><strong>5.000+</strong><small>alumni</small></span>
+                    </span>
+                    <span class="bnd-gelembung bnd-gelembung-2">
+                        <i class="bi bi-journal-check" style="color: var(--rumput)"></i>
+                        <span><strong>1.851</strong><small>artikel terbit</small></span>
+                    </span>
                 </div>
             </div>
         </div>
     </section>
 
-    {{-- ============================================ kenapa memilih ===== --}}
+    {{-- =================================================== pita lari ==== --}}
+    {{-- Isinya DITULIS DUA KALI, dan itu bukan kelalaian: animasinya
+         menggeser isi sejauh -50%, jadi saat salinan pertama habis, salinan
+         kedua sudah persis di tempat salinan pertama bermula — pitanya
+         tersambung tanpa jeda. Dengan satu salinan, tiap putaran
+         meninggalkan ruang kosong selebar layar. --}}
+    <div class="bnd-pita" aria-hidden="true">
+        <div class="bnd-pita-isi">
+            @for ($k = 0; $k < 2; $k++)
+                <span>
+                    @foreach (['SCOPUS', 'Q1', 'SINTA', 'WEB OF SCIENCE', 'SUBMIT', 'UNDER REVIEW', 'ACCEPTED', 'PUBLISHED'] as $kata)
+                        {{ $kata }} <i class="bi bi-circle-fill"></i>
+                    @endforeach
+                </span>
+            @endfor
+        </div>
+    </div>
+
+    {{-- ================================================== alasan ======= --}}
     <section class="bnd-bagian">
         <div class="container">
-            {{-- Rata tengah: bagian ini tidak punya kelanjutan ke mana pun,
-                 jadi tidak ada yang perlu duduk di sisi kanannya. --}}
-            <div class="bnd-kepala bnd-kepala-tengah" data-aos="fade-up">
-                <span class="bnd-label"><i class="bi bi-patch-check-fill"></i> Kenapa Rumah Scopus</span>
-                <h2 class="bnd-judul">Bukan sekadar kelas menulis</h2>
+            <div class="bnd-kepala" data-aos="fade-up">
+                <span class="bnd-stiker"><i class="bi bi-heart-fill"></i> Kenapa balik lagi</span>
+                <h2 class="bnd-judul">Yang bikin orang betah sampai naskahnya terbit</h2>
                 <p class="bnd-sub">
-                    Empat hal yang membuat peserta bertahan sampai artikelnya terbit,
-                    bukan berhenti di tengah jalan.
+                    Bukan karena kelasnya seru saja — tapi karena nggak ditinggal
+                    pas bagian yang paling susah.
                 </p>
             </div>
 
-            {{-- Warnanya dipasang per kartu lewat --c. Keempatnya sengaja
-                 berbeda supaya barisan ini tidak terbaca sebagai satu blok
-                 jingga yang sama dari ujung ke ujung. --}}
-            <div class="bnd-kisi-4">
+            <div class="bnd-bento">
+                {{-- Kartu pertama dan keempat melebar dua kolom; alasannya ada
+                     di aturan .bnd-bento. --}}
+                <div class="bnd-kartu" style="--c: var(--bata)" data-aos="fade-up">
+                    <span class="bnd-kartu-ikon"><i class="bi bi-person-check-fill"></i></span>
+                    <h3>Trainernya nggak cuma ngajar</h3>
+                    <p>
+                        Mereka nulis dan publish sendiri di jurnal bereputasi. Jadi yang
+                        dibagikan pengalaman waktu naskahnya ditolak reviewer, bukan isi
+                        slide.
+                    </p>
+                </div>
+
+                <div class="bnd-kartu" style="--c: var(--rumput)" data-aos="fade-up" data-aos-delay="100">
+                    <span class="bnd-kartu-ikon"><i class="bi bi-pencil-fill"></i></span>
+                    <h3>Naskahmu sendiri</h3>
+                    <p>Bukan contoh kasus punya orang. Pulang dari kelas, naskahmu sudah jalan.</p>
+                </div>
+
+                <div class="bnd-kartu" style="--c: var(--ungu)" data-aos="fade-up" data-aos-delay="200">
+                    <span class="bnd-kartu-ikon"><i class="bi bi-chat-heart-fill"></i></span>
+                    <h3>Nggak ditinggal</h3>
+                    <p>
+                        Kelas selesai bukan berarti selesai. Pendampingan jalan terus
+                        sampai artikelmu benar-benar terbit.
+                    </p>
+                </div>
+
+                <div class="bnd-kartu bnd-kartu-besar" style="--c: var(--langit)"
+                    data-aos="fade-up" data-aos-delay="300">
+                    <span class="bnd-angka-raksasa">1.851</span>
+                    <span>
+                        <h3>Sudah kebukti, bukan janji</h3>
+                        <p>
+                            Segitu jumlah artikel peserta yang sudah terbit dan terindeks
+                            Scopus. Angkanya nambah terus tiap bulan.
+                        </p>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {{-- ================================================= layanan ======= --}}
+    <section class="bnd-bagian" id="layanan" style="background: var(--kertas-2);">
+        <div class="container">
+            <div class="bnd-kepala bnd-kepala-tengah" data-aos="fade-up">
+                <span class="bnd-stiker"><i class="bi bi-ticket-perforated-fill"></i> Pilih kelasmu</span>
+                <h2 class="bnd-judul">Mau yang mana dulu?</h2>
+                <p class="bnd-sub">
+                    Enam cara belajar. Ada yang tiga hari penuh, ada yang cukup lima
+                    puluh menit — tinggal cocokkan sama waktumu.
+                </p>
+            </div>
+
+            {{-- CLINIK SCOPUS DULU MENUNJUK /Analisis-Bibliometrik.
+
+                 Bukan salah ketik yang kelihatan: tombolnya tetap berbunyi
+                 normal dan tetap membuka halaman yang sah, jadi yang tahu ia
+                 salah cuma orang yang menekannya lalu memesan layanan lain —
+                 dan orang itu tidak mengadu, ia pergi. Dijaga BerandaTest. --}}
+            <div class="bnd-kisi-3">
                 @foreach ([
-                    ['#f26522', 'bi-person-badge-fill', 'Trainer profesional', 'Didampingi trainer yang sudah menerbitkan artikelnya sendiri di jurnal bereputasi.'],
-                    ['#2563eb', 'bi-people-fill', 'Pendampingan penuh', 'Tidak berhenti di kelas — pendampingan berlanjut sampai artikel Anda terindeks.'],
-                    ['#7c3aed', 'bi-pencil-square', 'Learning by doing', 'Naskah Anda sendiri yang dikerjakan di kelas, bukan contoh kasus milik orang lain.'],
-                    ['#16a34a', 'bi-award-fill', 'Terbukti berulang', 'Ratusan artikel peserta sudah terindeks Scopus, bukan janji di atas kertas.'],
-                ] as $i => [$warna, $ikon, $judul, $ket])
-                    <div class="bnd-kartu" style="--c: {{ $warna }}"
-                        data-aos="fade-up" data-aos-delay="{{ $i * 90 }}">
-                        <span class="bnd-ikon"><i class="bi {{ $ikon }}"></i></span>
+                    ['var(--bata)', 'HomeScopusCamp.png', 'Offline · 3 hari', 'Scopus Camp', 'Tiga hari ketemu langsung di Jogja, naskahmu dibedah sampai kelar. Habis itu masih ditemani setahun penuh.', url('/Scopus-Camp')],
+                    ['var(--langit)', 'HomeOnlineTraining.png', 'Online · 8 sesi', 'Online Training', 'Delapan kali ketemu daring bareng trainer. Cocok buat yang susah ninggalin kampus.', 'https://rumahscopus.com/courses/online-class/'],
+                    ['var(--ungu)', 'HomeScopusKafe.png', 'Privat · 5 jam', 'Scopus Kafe', 'Lima jam berdua sama trainer. Buat naskah yang sudah jalan tapi mentok di satu bagian.', url('/Scopus-Kafe')],
+                    ['var(--rumput)', 'HomeBibliometrik.png', 'Online · 8 sesi', 'Analisis Bibliometrik', 'Belajar baca peta riset: mana yang sudah ramai, mana celah yang belum digarap orang.', url('/Analisis-Bibliometrik')],
+                    ['#b45309', 'HomeScopusClinic.png', 'Chat · 50 menit', 'Clinik Scopus', 'Lagi mentok satu pertanyaan saja? Ngobrol lewat chat lima puluh menit, langsung dapat jalan keluarnya.', url('/Clinik-Scopus')],
+                    ['#be185d', null, 'Daring · kuota terbatas', 'Webinar Eksklusif', 'Sesi daring bertema khusus, dibuka berkala. Kuotanya sedikit, jadi jangan kelamaan mikir.', url('/Webinar-Eksklusif')],
+                ] as $i => [$warna, $gambar, $tag, $judul, $ket, $tautan])
+                    <div class="bnd-karcis" style="--c: {{ $warna }}"
+                        data-aos="fade-up" data-aos-delay="{{ ($i % 3) * 110 }}">
+                        <div class="bnd-karcis-gambar">
+                            @if ($gambar)
+                                <img src="{{ asset('assets/img/public/' . $gambar) }}" alt="{{ $judul }}">
+                            @else
+                                {{-- Belum ada fotonya. Ubin berwarna lebih jujur
+                                     daripada meminjam foto layanan lain. --}}
+                                <div class="bnd-karcis-ubin"><i class="bi bi-broadcast"></i></div>
+                            @endif
+                            <span class="bnd-karcis-tag">{{ $tag }}</span>
+                        </div>
+
+                        <div class="bnd-karcis-sobek"></div>
+
+                        <div class="bnd-karcis-isi">
+                            <h3>{{ $judul }}</h3>
+                            <p>{{ $ket }}</p>
+                            <a href="{{ $tautan }}" class="bnd-karcis-tombol">
+                                Intip detailnya <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    {{-- =================================================== angka ======= --}}
+    <section class="bnd-angka">
+        {{-- Cap bundar berputar. Tulisannya dibengkokkan mengikuti lingkaran
+             lewat <textPath> — bukan gambar, jadi tetap tajam dan beratnya
+             beberapa ratus bait. --}}
+        <svg class="bnd-cap" viewBox="0 0 200 200" aria-hidden="true">
+            <defs>
+                <path id="bnd-lingkar"
+                    d="M 100,100 m -72,0 a 72,72 0 1,1 144,0 a 72,72 0 1,1 -144,0" />
+            </defs>
+            <text>
+                <textPath href="#bnd-lingkar">
+                    RUMAH SCOPUS · JOGJA · RUMAH SCOPUS · JOGJA ·
+                </textPath>
+            </text>
+        </svg>
+
+        <div class="container">
+            <div class="bnd-kepala" data-aos="fade-up">
+                <span class="bnd-stiker"
+                    style="background: var(--stabilo); color: var(--tinta); box-shadow: 3px 3px 0 rgba(251, 245, 233, .28);">
+                    <i class="bi bi-bar-chart-fill" style="color: var(--bata)"></i> Angkanya
+                </span>
+                <h2 class="bnd-judul">Nggak perlu kami lebih-lebihkan</h2>
+                <p class="bnd-sub">
+                    Ini hitungan dari peserta yang benar-benar menyelesaikan
+                    pendampingannya bareng kami.
+                </p>
+            </div>
+
+            {{-- Penghitungnya DITULIS SENDIRI di bawah, bukan purecounter.
+
+                 Bukan karena purecounter buruk — ia memang sudah dimuat
+                 layout ini — melainkan karena pemisah ribuannya koma dan
+                 tidak bisa diganti. "5,000" salah dalam Bahasa Indonesia,
+                 dan angka yang salah tulis pada bagian yang isinya memang
+                 cuma angka adalah hal pertama yang dilihat orang.
+
+                 Yang diperbaiki dari versi lama tetap dipertahankan: ia baru
+                 berhitung saat bagiannya TERLIHAT. Versi lama berjalan pada
+                 DOMContentLoaded — ribuan langkah untuk angka yang ada
+                 3.000px di bawah layar pertama, dan sudah selesai jauh
+                 sebelum ada yang menggulung ke sana. --}}
+            <div class="bnd-kisi-angka">
+                @foreach ([
+                    ['bi-mortarboard-fill', 5000, 'orang sudah ikut kelas kami'],
+                    ['bi-send-check-fill', 2315, 'naskah sudah dikirim ke jurnal internasional'],
+                    ['bi-journal-check', 1851, 'artikel sudah terbit dan terindeks Scopus'],
+                ] as $i => [$ikon, $nilai, $ket])
+                    <div class="bnd-nilai" data-aos="fade-up" data-aos-delay="{{ $i * 110 }}">
+                        <i class="bi {{ $ikon }}" style="color: var(--stabilo); font-size: 1.5rem;"></i>
+
+                        {{-- Angkanya DITULIS UTUH di markahnya, bukan nol.
+                             Yang JavaScript-nya mati — atau yang memakai
+                             pembaca layar — tetap membaca angka yang benar,
+                             bukan tiga buah nol. --}}
+                        <div class="bnd-nilai-angka" data-bnd-hitung="{{ $nilai }}">
+                            {{ number_format($nilai, 0, ',', '.') }}
+                        </div>
+
+                        <p>{{ $ket }}</p>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    {{-- ============================================ kertas tempel ======= --}}
+    <section class="bnd-bagian">
+        <div class="container">
+            <div class="bnd-kepala bnd-kepala-tengah" data-aos="fade-up">
+                <span class="bnd-stiker"><i class="bi bi-lightbulb-fill"></i> Isi kelasnya</span>
+                <h2 class="bnd-judul">Yang bakal kamu kuasai</h2>
+                <p class="bnd-sub">
+                    Enam hal yang kepakai terus, dari halaman pertama sampai artikelmu
+                    nongol di indeks.
+                </p>
+            </div>
+
+            <div class="bnd-tempel-kisi">
+                @foreach ([
+                    ['#ffd84d', '-2.2', 'bi-file-earmark-text-fill', 'Nulis yang enak dibaca', 'Susunan kalimat yang bikin reviewer betah, bukan bikin ngantuk.'],
+                    ['#a7f3d0', '1.8', 'bi-robot', 'Pakai AI dengan benar', 'Boleh dibantu AI — asal tahu batas yang masih aman buat jurnal.'],
+                    ['#bfdbfe', '-1.4', 'bi-diagram-3-fill', 'Bongkar anatomi paper', 'Tiap bagian paper punya tugasnya. Kalau tahu, nulisnya jauh lebih cepat.'],
+                    ['#fecdd3', '2.4', 'bi-link-45deg', 'Cari referensi kelas satu', 'Bukan asal banyak, tapi yang bikin argumenmu susah dibantah.'],
+                    ['#e9d5ff', '-2', 'bi-chat-square-text-fill', 'Dibimbing terus', 'Mentok di tengah jalan? Ada yang bisa ditanya, nggak jalan sendirian.'],
+                    ['#fde68a', '1.2', 'bi-patch-check-fill', 'Sampai terindeks', 'Submit itu baru separuh jalan. Kita temani sampai benar-benar terbit.'],
+                ] as $i => [$warna, $miring, $ikon, $judul, $ket])
+                    <div class="bnd-tempel"
+                        style="--c: {{ $warna }}; rotate: {{ $miring }}deg;"
+                        data-aos="fade-up" data-aos-delay="{{ $i * 70 }}">
+                        <i class="bi {{ $ikon }}"></i>
                         <h3>{{ $judul }}</h3>
                         <p>{{ $ket }}</p>
                     </div>
@@ -654,195 +941,42 @@ Beranda | Rumah Scopus
         </div>
     </section>
 
-    {{-- ================================================ layanan ======== --}}
-    <section class="bnd-bagian" id="layanan" style="background: var(--latar);">
-        <div class="container">
-            {{-- Rata kiri dengan tautan di kanan: bagian ini PUNYA
-                 kelanjutan, dan tautannya harus sejajar judulnya. --}}
-            <div class="bnd-kepala bnd-kepala-sisi" data-aos="fade-up">
-                <div>
-                    <span class="bnd-label"><i class="bi bi-grid-fill"></i> Layanan kami</span>
-                    <h2 class="bnd-judul">Pilih jalur yang paling cocok</h2>
-                    <p class="bnd-sub">
-                        Enam cara belajar dengan tempo dan cara pendampingan yang berbeda —
-                        dari kelas tiga hari penuh sampai konsultasi lima puluh menit.
-                    </p>
-                </div>
-                <a href="{{ url('/contact') }}" class="bnd-tautan">
-                    Bingung memilih? Tanya kami <i class="bi bi-arrow-right"></i>
-                </a>
-            </div>
-
-            {{-- CLINIK SCOPUS DULU MENUNJUK KE /Analisis-Bibliometrik.
-
-                 Bukan salah ketik yang kelihatan: tombolnya tetap berbunyi
-                 "Pesan Sekarang" dan tetap membuka halaman yang sah, jadi
-                 satu-satunya yang tahu ia salah adalah orang yang menekannya
-                 lalu mendapati dirinya memesan layanan lain. Dibetulkan ke
-                 /Clinik-Scopus. --}}
-            <div class="bnd-kisi-3">
-                @foreach ([
-                    ['#f26522', 'HomeScopusCamp.png', 'Offline · 3 hari', 'Scopus Camp', 'Pendampingan tatap muka selama tiga hari penuh, lalu pendampingan lanjutan selama satu tahun.', url('/Scopus-Camp')],
-                    ['#2563eb', 'HomeOnlineTraining.png', 'Online · 8 pertemuan', 'Online Training', 'Delapan kali pertemuan daring bersama trainer, dengan pendampingan lanjutan selama tiga bulan.', 'https://rumahscopus.com/courses/online-class/'],
-                    ['#7c3aed', 'HomeScopusKafe.png', 'Privat · 5 jam', 'Scopus Kafe', 'Sesi privat lima jam, satu lawan satu, untuk naskah yang sudah berjalan dan butuh dibereskan.', url('/Scopus-Kafe')],
-                    ['#0891b2', 'HomeBibliometrik.png', 'Online · 8 pertemuan', 'Analisis Bibliometrik', 'Belajar memetakan arah riset dan menemukan celah yang belum digarap orang lain.', url('/Analisis-Bibliometrik')],
-                    ['#16a34a', 'HomeScopusClinic.png', 'Chat · 50 menit', 'Clinik Scopus', 'Konsultasi singkat lewat chat untuk satu pertanyaan yang sedang menghambat naskah Anda.', url('/Clinik-Scopus')],
-                    ['#db2777', null, 'Daring · sesi terbatas', 'Webinar Eksklusif', 'Sesi daring bertema khusus dengan kuota terbatas, dibuka berkala sepanjang tahun.', url('/Webinar-Eksklusif')],
-                ] as $i => [$warna, $gambar, $lencana, $judul, $ket, $tautan])
-                    <div class="bnd-layanan" style="--c: {{ $warna }}"
-                        data-aos="fade-up" data-aos-delay="{{ ($i % 3) * 110 }}">
-                        <div class="bnd-layanan-atas">
-                            @if ($gambar)
-                                <img src="{{ asset('assets/img/public/' . $gambar) }}" alt="{{ $judul }}">
-                            @else
-                                {{-- Belum punya fotonya. Ubin bergradien lebih
-                                     jujur daripada meminjam foto layanan lain. --}}
-                                <div class="bnd-layanan-ubin"><i class="bi bi-broadcast"></i></div>
-                            @endif
-                            <span class="bnd-lencana">{{ $lencana }}</span>
-                        </div>
-
-                        <div class="bnd-layanan-isi">
-                            <h3>{{ $judul }}</h3>
-                            <p>{{ $ket }}</p>
-                            <span class="bnd-layanan-tombol">
-                                <a href="{{ $tautan }}">
-                                    Lihat detailnya <i class="bi bi-arrow-right"></i>
-                                </a>
-                            </span>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    </section>
-
-    {{-- ================================================== angka ======== --}}
-    <section class="bnd-angka">
+    {{-- ================================================ testimoni ====== --}}
+    <section class="bnd-bagian" style="background: var(--kertas-2);">
         <div class="container">
             <div class="bnd-kepala bnd-kepala-tengah" data-aos="fade-up">
-                <span class="bnd-label"><i class="bi bi-graph-up-arrow"></i> Sudah dipercaya</span>
-                <h2 class="bnd-judul">Ribuan penulis sudah lebih dulu</h2>
-                <p class="bnd-sub">
-                    Angka ini dikumpulkan dari peserta yang benar-benar menyelesaikan
-                    pendampingannya bersama kami.
-                </p>
-            </div>
-
-            {{-- data-purecounter: angkanya baru berjalan saat bagian ini
-                 TERLIHAT, bukan saat halamannya dimuat.
-
-                 Versi sebelumnya menjalankan ketiganya lewat
-                 requestAnimationFrame pada DOMContentLoaded — yaitu ribuan
-                 langkah untuk angka yang berada 3.000px di bawah layar
-                 pertama, dan sudah selesai berhitung jauh sebelum ada yang
-                 menggulung ke sana. Yang tersisa untuk dilihat orangnya cuma
-                 angka diam. --}}
-            <div class="bnd-kisi-angka">
-                @foreach ([
-                    ['bi-mortarboard-fill', 5000, 'alumni sudah mengikuti pelatihan di Rumah Scopus'],
-                    ['bi-send-check-fill', 2315, 'naskah sudah disubmit ke jurnal internasional'],
-                    ['bi-journal-check', 1851, 'artikel sudah terbit dan terindeks Scopus'],
-                ] as $i => [$ikon, $nilai, $ket])
-                    <div class="bnd-nilai" data-aos="fade-up" data-aos-delay="{{ $i * 110 }}">
-                        <div class="bnd-nilai-kepala">
-                            <span class="bnd-nilai-ikon"><i class="bi {{ $ikon }}"></i></span>
-                            <span class="bnd-nilai-angka purecounter"
-                                data-purecounter-start="0"
-                                data-purecounter-end="{{ $nilai }}"
-                                data-purecounter-duration="2">0</span>
-                        </div>
-                        <p>{{ $ket }}</p>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    </section>
-
-    {{-- ============================================== yang dipelajari === --}}
-    <section class="bnd-bagian">
-        <div class="container">
-            <div class="bnd-pelajari-kisi">
-                <div>
-                    {{-- Rata kiri, menempel pada daftarnya sendiri. Rata
-                         tengah di kolom yang bersebelahan dengan gambar
-                         membuat judulnya tidak jelas milik sisi yang mana. --}}
-                    <div class="bnd-kepala" data-aos="fade-up">
-                        <span class="bnd-label"><i class="bi bi-lightbulb-fill"></i> Isi pelatihan</span>
-                        <h2 class="bnd-judul">Apa yang akan Anda pelajari</h2>
-                        <p class="bnd-sub">
-                            Enam keterampilan yang dipakai berulang kali sepanjang
-                            perjalanan satu naskah.
-                        </p>
-                    </div>
-
-                    <div class="bnd-kisi-2">
-                        @foreach ([
-                            ['#2563eb', 'bi-file-earmark-richtext-fill', 'Penulisan digital'],
-                            ['#7c3aed', 'bi-cpu-fill', 'Memanfaatkan AI'],
-                            ['#0891b2', 'bi-diagram-3-fill', 'Anatomi paper'],
-                            ['#16a34a', 'bi-link-45deg', 'Referensi terbaik'],
-                            ['#d97706', 'bi-chat-square-text-fill', 'Pendampingan'],
-                            ['#db2777', 'bi-patch-check-fill', 'Terindeks Scopus'],
-                        ] as $i => [$warna, $ikon, $judul])
-                            <div class="bnd-kartu bnd-kartu-ringkas" style="--c: {{ $warna }}"
-                                data-aos="fade-up" data-aos-delay="{{ $i * 70 }}">
-                                <span class="bnd-ikon"><i class="bi {{ $ikon }}"></i></span>
-                                <h3>{{ $judul }}</h3>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-
-                <div class="bnd-pelajari-gambar" data-aos="fade-left" data-aos-delay="150">
-                    <img src="{{ asset('assets/artikel/img/Tiny.jpg') }}"
-                        alt="Ilustrasi proses menulis dan menelaah artikel ilmiah">
-                </div>
-            </div>
-        </div>
-    </section>
-
-    {{-- ============================================== testimoni ======== --}}
-    <section class="bnd-bagian" style="background: var(--latar);">
-        <div class="container">
-            <div class="bnd-kepala bnd-kepala-tengah" data-aos="fade-up">
-                <span class="bnd-label"><i class="bi bi-chat-quote-fill"></i> Testimoni</span>
-                <h2 class="bnd-judul">Kata mereka yang sudah tembus</h2>
+                <span class="bnd-stiker"><i class="bi bi-chat-quote-fill"></i> Kata mereka</span>
+                <h2 class="bnd-judul">Yang sudah duluan tembus</h2>
             </div>
 
             <div class="bnd-testi-kisi">
-                <div class="bnd-testi-video" data-aos="fade-right">
-                    {{-- preload="metadata": tanpa ini peramban mengunduh
-                         seluruh berkas videonya sebelum ada yang menekan
-                         putar — beban yang ditanggung setiap pengunjung
-                         beranda, termasuk yang tidak pernah menggulung
-                         sampai ke sini. Dengan metadata saja, peramban tetap
-                         menggambar bingkai pertamanya sebagai sampul.
+                <div class="bnd-polaroid" data-aos="fade-right">
+                    {{-- preload="metadata": tanpa ini peramban mengunduh seluruh
+                         berkas videonya sebelum ada yang menekan putar — beban
+                         yang ditanggung SETIAP pengunjung beranda, termasuk yang
+                         tidak pernah menggulung sampai ke sini.
 
                          TANPA poster=. Sempat diisi cover.png, dan gambar itu
-                         ternyata iklan layanan lain ("Manuskrip Berbasis
-                         Analisis Bibliometrik, 500k") — sampul yang
-                         menjanjikan isi yang berbeda dari videonya. --}}
+                         ternyata iklan layanan lain ("Manuskrip Berbasis Analisis
+                         Bibliometrik, 500k") — sampul yang menjanjikan isi berbeda
+                         dari videonya. --}}
                     <video controls preload="metadata">
                         <source src="{{ asset('assets/img/public/testimoni.MOV') }}" type="video/mp4">
-                        Peramban Anda tidak bisa memutar video ini.
+                        Peramban kamu belum bisa memutar video ini.
                     </video>
+                    <div class="bnd-polaroid-kaki">Scopus Camp · Jogja</div>
                 </div>
 
-                <div class="bnd-kutip" data-aos="fade-left" data-aos-delay="120">
+                <div class="bnd-balon" data-aos="fade-left" data-aos-delay="120">
+                    <span class="bnd-balon-kutip">&ldquo;</span>
                     <p>
-                        Testimoni dari peserta yang berhasil submit ke jurnal
-                        internasional bereputasi di Scopus. Para peserta merasa
-                        bahagia setelah mengikuti Scopus Camp di pusat Rumah Scopus
-                        di Yogyakarta selama tiga hari.
+                        Awalnya pesimis banget. Rasanya Scopus itu buat orang lain,
+                        bukan buat saya. Tiga hari di Jogja ternyata cukup untuk
+                        mengubah cara saya memandang naskah sendiri.
                     </p>
-                    <p>
-                        Dari yang awalnya pesimis dan takut untuk tembus ke Scopus,
-                        sekarang mereka sudah membuktikan sendiri bahwa tembus Scopus
-                        itu mudah.
-                    </p>
+                    <p>Sekarang sudah submit — dan ternyata memang sebisa itu.</p>
 
-                    <div class="bnd-kutip-kaki">
+                    <div class="bnd-balon-kaki">
                         <i class="bi bi-people-fill"></i>
                         <span>
                             <strong>Peserta Scopus Camp</strong>
@@ -854,18 +988,18 @@ Beranda | Rumah Scopus
         </div>
     </section>
 
-    {{-- ================================================ ajakan ========= --}}
-    <section class="bnd-bagian-rapat">
+    {{-- =================================================== ajakan ====== --}}
+    <section class="bnd-bagian">
         <div class="container">
             <div class="bnd-ajakan" data-aos="zoom-in">
-                <h2>Naskah Anda layak terbit</h2>
+                <h2>Sudah siap naskahmu terbit?</h2>
                 <p>
-                    Mulai dari satu sesi konsultasi, atau langsung ikut kelas penuh.
-                    Kami bantu dari langkah pertama.
+                    Nggak harus langsung ambil kelas penuh. Ngobrol dulu lima puluh
+                    menit juga boleh — nanti kita cari jalannya bareng.
                 </p>
                 <div class="bnd-aksi">
                     <a href="#layanan" class="bnd-tombol bnd-tombol-utama">
-                        Pilih layanan <i class="bi bi-arrow-right"></i>
+                        Pilih kelas <i class="bi bi-arrow-right"></i>
                     </a>
                     <a href="{{ url('/contact') }}" class="bnd-tombol bnd-tombol-kedua">
                         <i class="bi bi-chat-dots-fill"></i> Tanya dulu
@@ -876,4 +1010,76 @@ Beranda | Rumah Scopus
     </section>
 
 </div>
+
+<script>
+    /*
+     * Angka yang berhitung naik saat bagiannya masuk layar.
+     *
+     * Ditulis di sini, bukan memakai purecounter yang sudah dimuat layout:
+     * pemisah ribuan purecounter koma dan tidak bisa diganti, sedangkan
+     * Bahasa Indonesia memakai titik. Lima belas baris lebih murah daripada
+     * menampilkan "5,000" di bagian yang isinya memang cuma angka.
+     *
+     * IntersectionObserver, bukan penyimak gulir: yang terakhir memanggil
+     * fungsinya puluhan kali per detik selama halamannya digulung, dan
+     * beranda ini panjang.
+     */
+    (function () {
+        var angka = document.querySelectorAll('[data-bnd-hitung]');
+
+        if (! angka.length || ! ('IntersectionObserver' in window)) {
+            return;   // angkanya sudah tertulis utuh di markahnya
+        }
+
+        /* Yang meminta gerak minimal tidak dihitung-naikkan sama sekali —
+           angka yang berkedip-kedip termasuk gerak yang dihindarinya. */
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            return;
+        }
+
+        var tulis = function (el, nilai) {
+            el.textContent = nilai.toLocaleString('id-ID');
+        };
+
+        var jalan = function (el) {
+            var tujuan = parseInt(el.getAttribute('data-bnd-hitung'), 10);
+
+            if (! isFinite(tujuan)) { return; }
+
+            var mulai = null;
+            var lama = 1600;
+
+            var langkah = function (kini) {
+                if (mulai === null) { mulai = kini; }
+
+                var maju = Math.min((kini - mulai) / lama, 1);
+
+                // Melambat di ujung: angka yang berhenti mendadak terbaca
+                // seperti halaman yang tersendat.
+                tulis(el, Math.round(tujuan * (1 - Math.pow(1 - maju, 3))));
+
+                if (maju < 1) { requestAnimationFrame(langkah); }
+            };
+
+            requestAnimationFrame(langkah);
+        };
+
+        var pengamat = new IntersectionObserver(function (masuk) {
+            masuk.forEach(function (satu) {
+                if (! satu.isIntersecting) { return; }
+
+                // Berhenti mengamati SEBELUM menghitung: tanpa itu, menggulung
+                // naik-turun melewati bagian ini menjalankan hitungannya lagi
+                // dari nol, dan angkanya terlihat seperti sedang berubah.
+                pengamat.unobserve(satu.target);
+                jalan(satu.target);
+            });
+        }, { threshold: .4 });
+
+        angka.forEach(function (el) {
+            tulis(el, 0);
+            pengamat.observe(el);
+        });
+    })();
+</script>
 @stop
