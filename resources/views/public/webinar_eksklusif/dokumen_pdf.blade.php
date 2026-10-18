@@ -91,8 +91,11 @@
         table { width: 100%; border-collapse: collapse; }
 
         .kop td { vertical-align: top; padding: 0; }
-        .kop-kiri { width: 70%; }
-        .kop-kanan { width: 30%; text-align: right; }
+        /* 58 + 42 = 100. Logonya dibesarkan 150 -> 215px, jadi jatah
+           kolomnya ikut dilebarkan; dibiarkan 30%, logonya meluber keluar
+           kolom dan Dompdf memotongnya tanpa satu pun galat. */
+        .kop-kiri { width: 58%; }
+        .kop-kanan { width: 42%; text-align: right; }
 
         .judul { margin: 0; font-size: 26px; font-weight: bold; color: #0f2b5b; letter-spacing: 1px; }
         .nomor { margin: 3px 0 0; font-size: 11px; color: #64748b; }
@@ -143,13 +146,46 @@
         .sisa td { border-top: 2px solid #b45309; color: #b45309; font-size: 13px; }
         .sisa-lunas td { border-top: 2px solid #15803d; color: #15803d; }
 
-        .langkah { margin: 18px 0 0; }
-        .langkah-judul { margin: 0 0 5px; font-size: 10px; font-weight: bold; letter-spacing: 1px; color: #64748b; }
-        .langkah td { padding: 3px 0; vertical-align: top; border: 0; }
-        .langkah-no { width: 4%; font-weight: bold; color: #0f2b5b; }
-        .langkah-isi { width: 96%; color: #334155; }
+        /* 62 + 38 = 100. */
+        .kaki-blok { margin-top: 30px; }
+        .kaki-blok td { vertical-align: bottom; padding: 0; }
+        .kaki-kiri { width: 62%; }
+        .kaki-kanan { width: 38%; text-align: right; }
 
-        .kaki { margin-top: 22px; color: #94a3b8; font-size: 9.5px; line-height: 1.6; }
+        .kaki { margin: 0; color: #94a3b8; font-size: 9.5px; line-height: 1.6; }
+
+        /* Bingkai luar capnya; bingkai dalamnya digambar oleh <td>-nya. */
+        .cap {
+            width: 170px;
+            margin-left: auto;
+            border: 2px solid #b45309;
+            border-radius: 10px;
+            border-collapse: separate;
+        }
+
+        .cap td {
+            padding: 11px 10px 9px;
+            border: 1px solid #b45309;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .cap-logo { display: block; margin: 0 auto 6px; }
+
+        .cap-kata {
+            margin: 0;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 1.5px;
+            color: #b45309;
+        }
+
+        .cap-tanggal { margin: 2px 0 0; font-size: 8.5px; color: #b45309; }
+
+        .cap-lunas { border-color: #15803d; }
+        .cap-lunas td { border-color: #15803d; }
+        .cap-lunas .cap-kata,
+        .cap-lunas .cap-tanggal { color: #15803d; }
     </style>
 </head>
 <body>
@@ -161,7 +197,7 @@
             <p class="nomor">No. {{ $nomor }}</p>
         </td>
         <td class="kop-kanan">
-            <img src="{{ $logo }}" alt="Rumah Scopus Foundation" width="150">
+            <img src="{{ $logo }}" alt="Rumah Scopus Foundation" width="215">
         </td>
     </tr>
 </table>
@@ -276,32 +312,49 @@
 
 <p style="margin:14px 0 0;font-style:italic;color:#64748b;">Terbilang: {{ $terbilang }}</p>
 
-@unless ($lunas)
-    <div class="langkah">
-        <p class="langkah-judul">CARA MEMBAYAR</p>
-        <table>
-            <tr>
-                <td class="langkah-no">1.</td>
-                <td class="langkah-isi">Buka halaman status pendaftaran Anda lewat tautan di email ini.</td>
-            </tr>
-            <tr>
-                <td class="langkah-no">2.</td>
-                <td class="langkah-isi">Tekan <b>Lanjutkan pembayaran</b>, lalu pilih caranya &mdash; transfer bank
-                    (virtual account), QRIS, e-wallet, atau kartu.</td>
-            </tr>
-            <tr>
-                <td class="langkah-no">3.</td>
-                <td class="langkah-isi">Begitu pembayarannya masuk, status Anda berubah sendiri dan kwitansinya
-                    kami kirim lewat email. Tidak perlu mengirim bukti apa pun.</td>
-            </tr>
-        </table>
-    </div>
-@endunless
+{{-- Kaki dua kolom: keterangan di kiri, CAP di kanan.
 
-<p class="kaki">
-    Nomor pendaftaran: {{ $pendaftaran->id_transaksi }}<br>
-    {{ $judul === 'KWITANSI' ? 'Kwitansi' : 'Faktur' }} ini diterbitkan otomatis dan sah tanpa tanda tangan basah.
-</p>
+     Langkah "cara membayar" dibuang dari sini. Dokumen ini dibaca bersama
+     emailnya, dan emailnya sudah memuat tombol menuju halaman bayar —
+     langkah yang sama ditulis dua kali membuat yang satu tertinggal saat
+     yang lain diperbarui, dan yang tertinggal pada dokumen keuangan selalu
+     yang dicetak. --}}
+<table class="kaki-blok">
+    <tr>
+        <td class="kaki-kiri">
+            <p class="kaki">
+                Nomor pendaftaran: {{ $pendaftaran->id_transaksi }}<br>
+                {{ $lunas ? 'Kwitansi' : 'Faktur' }} ini diterbitkan otomatis oleh sistem
+                Rumah Scopus Foundation dan sah tanpa tanda tangan basah.
+            </p>
+        </td>
+
+        <td class="kaki-kanan">
+            {{-- CAP.
+
+                 Bingkai ganda, bukan satu garis: satu garis terbaca sebagai
+                 kotak biasa, dua garis terbaca sebagai stempel. Warnanya
+                 mengikuti keadaan dokumennya, jadi capnya tidak pernah
+                 menyatakan hal yang berbeda dari angkanya.
+
+                 TIDAK diputar miring. Dompdf tidak mengenal transform, dan
+                 yang memakainya tergambar lurus tanpa satu pun galat — jadi
+                 kemiringannya hanya akan ada di kepala penulisnya. --}}
+            <table class="cap {{ $lunas ? 'cap-lunas' : 'cap-belum' }}">
+                <tr>
+                    <td>
+                        <img src="{{ $logo }}" alt="" width="118" class="cap-logo">
+                        <p class="cap-kata">{{ $lunas ? 'LUNAS' : 'BELUM DIBAYAR' }}</p>
+                        <p class="cap-tanggal">
+                            {{ ($lunas ? $pendaftaran->bayar_pada : $pendaftaran->created_at)
+                                ?->locale('id')->translatedFormat('j F Y') ?: '' }}
+                        </p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
 
 </body>
 </html>
