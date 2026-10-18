@@ -1248,6 +1248,23 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
         100% { opacity: 0; transform: translate(var(--x), var(--y)) rotate(var(--r)) scale(1); }
     }
 
+    /*
+     * Konfetinya TIDAK pecah untuk yang meminta gerak minimal.
+     *
+     * Ketinggalan saat animasi lainnya diberi jalan keluar: terukur delapan
+     * dari sembilan animasi di halaman ini sudah dimatikan, dan hanya ini
+     * yang tidak. Justru yang ini yang paling tidak boleh tertinggal —
+     * delapan belas kepingan melesat serentak dari satu titik adalah persis
+     * gerak yang dihindari orang yang menyalakan setelan itu.
+     *
+     * Cukup mematikan animasinya: dasar .sta-keping sudah opacity:0, jadi
+     * kepingannya lenyap sama sekali alih-alih tertinggal menumpuk di
+     * titik awalnya.
+     */
+    @media (prefers-reduced-motion: reduce) {
+        .sta-keping { animation: none !important; }
+    }
+
     /* Centang lunasnya ikut menyembul sekali, supaya matanya jatuh ke sana
        lebih dulu sebelum kepingannya menyebar. */
     .sta-kepala-rayakan .sta-ubin {
@@ -1405,6 +1422,54 @@ Status Pendaftaran {{ $pendaftaran->id_transaksi }} | Rumah Scopus
         font-weight: 700;
         letter-spacing: .08em;
         text-transform: uppercase;
+    }
+
+    /*
+     * Ikon jamnya BERDETAK.
+     *
+     * Kotak kuning ini satu-satunya yang mendesak di halaman, dan satu-satunya
+     * isinya yang bergerak adalah angka detik — yang berganti tanpa suara di
+     * tengah kotak diam. Ikon yang ikut berdetak membuat seluruh kotaknya
+     * terbaca HIDUP, bukan gambar yang kebetulan memuat angka.
+     *
+     * Geraknya PATAH, bukan halus: itu yang membedakan detak jam dari
+     * goyangan. Dua titik saja, melompat seketika di tengah daur — perpindahan
+     * beransur akan terbaca seperti unsur yang bergetar karena rusak.
+     *
+     * Daurnya 2 detik dengan lompatan di 0% dan 50%, jadi satu detak per
+     * detik — seirama angka detik di bawahnya. Bukan tersambung ke
+     * penghitungnya: menyamakannya betul-betul menuntut skripnya menyetir
+     * animasi ini tiap detik, dan mata tidak bisa membedakan keduanya.
+     *
+     * display-nya disebut untuk nanti, bukan untuk sekarang: transform tidak
+     * berlaku pada unsur inline, dan <i> memang inline — tetapi induknya flex,
+     * jadi anaknya sudah di-block-kan sendiri oleh flex (terukur: computed
+     * display-nya "block", bukan "inline-block" yang ditulis di sini).
+     * Disebut supaya detaknya tetap hidup kalau induknya suatu saat berhenti
+     * jadi flex; tanpa itu ikonnya akan diam tanpa satu pun tanda bahwa ada
+     * aturan yang tidak berlaku.
+     */
+    .sta-mundur-kop > .fas {
+        display: inline-block;
+        /* Titik putarnya badan jamnya, bukan tengah kotak glifnya — diputar
+           dari tengah, tombol di puncaknya ikut menyapu dan terbaca miring. */
+        transform-origin: 50% 60%;
+        animation: sta-detak 2s steps(1, end) infinite;
+    }
+
+    @keyframes sta-detak {
+        0%   { transform: rotate(-8deg); }
+        50%  { transform: rotate(8deg); }
+        100% { transform: rotate(-8deg); }
+    }
+
+    /* Gerak minimal: detaknya dimatikan dan ikonnya kembali tegak.
+       Cukup animation:none — miringnya seluruhnya datang dari animasi ini,
+       tidak ada transform diam di unsurnya yang bisa tertinggal. Diperiksa
+       langsung dengan peramban yang meminta gerak minimal: animationName
+       "none", transform "none", nol animasi berjalan. */
+    @media (prefers-reduced-motion: reduce) {
+        .sta-mundur-kop > .fas { animation: none !important; }
     }
 
     .sta-mundur-kop > .fas { margin: 0 !important; font-size: .9rem; }
