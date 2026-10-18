@@ -985,7 +985,7 @@ Beranda | Rumah Scopus
                      ceritanya di situ persis keraguan yang bikin orang ragu
                      mendaftar. --}}
                 @foreach ([
-                    ['Ngobrol dulu', 'Cerita kondisi naskahmu. Gratis, dan nggak harus langsung ambil kelas.'],
+                    ['Ngobrol dulu', 'Cerita kondisi naskahmu ke admin. Gratis, dan nggak ada kewajiban lanjut.'],
                     ['Pilih kelasnya', 'Kami bantu carikan yang paling pas sama waktu dan targetmu.'],
                     ['Bedah bareng', 'Naskahmu sendiri yang dikerjakan — bukan contoh kasus punya orang.'],
                     ['Sampai terbit', 'Ditemani terus lewat revisi reviewer, sampai artikelmu benar-benar terbit.'],
@@ -1285,9 +1285,21 @@ Beranda | Rumah Scopus
         <div class="container">
             <div class="bnd-ajakan" data-aos="zoom-in">
                 <h2>Sudah siap naskahmu terbit?</h2>
+                {{-- JANGAN menawarkan "ngobrol lima puluh menit" di sini.
+
+                     Kalimat itu dulu berdiri di tempat ini, dan itu keliru:
+                     sesi lima puluh menit adalah Clinik Scopus, layanan
+                     BERBAYAR. Menawarkannya sebagai jalan masuk yang santai
+                     membuat orang mengira konsultasinya gratis — dan yang
+                     menanggung kekecewaannya admin yang harus menjelaskan
+                     bahwa itu produk, bukan sambutan.
+
+                     Yang memang gratis cuma bertanya ke admin. Itu yang
+                     ditawarkan di sini. --}}
                 <p>
-                    Nggak harus langsung ambil kelas penuh. Ngobrol dulu lima puluh
-                    menit juga boleh — nanti kita cari jalannya bareng.
+                    Nggak harus langsung ambil kelas. Tanya-tanya dulu ke admin
+                    kami — gratis, dan nggak ada kewajiban apa pun. Nanti kita
+                    bantu carikan yang paling pas buat naskahmu.
                 </p>
                 <div class="bnd-aksi">
                     <a href="#layanan" class="bnd-tombol bnd-tombol-utama">
