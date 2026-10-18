@@ -183,8 +183,20 @@ Beranda | Rumah Scopus
     /* 1.08fr : 0.92fr, bukan 1 : 1. Kisi yang persis seimbang membuat kedua
        sisinya saling bersaing; sedikit tidak seimbang memberi tahu mata
        sisi mana yang dibaca lebih dulu. */
+    /* Lajur fotonya dipatok LEBARNYA, bukan pecahan.
+
+       Dulu .92fr, jadi bingkainya ikut melebar bersama layar: terukur
+       607x751 di layar 1440, sementara kolom teks di sebelahnya cuma 478
+       tinggi. Fotonya 273px lebih tinggi daripada tulisan yang seharusnya
+       dibaca lebih dulu, dan yang terbaca "ini halaman foto", bukan "ini
+       halaman tawaran".
+
+       Dipatok di JALURNYA, bukan lewat max-width pada kotak fotonya: pernah
+       dicoba begitu dengan margin-left:auto, dan itu membatalkan peregangan
+       item grid-nya — seluruh isi kotak itu berposisi mutlak, jadi lebarnya
+       mengerut ke isi yang tersisa, yaitu 7px. */
     .bnd-hero-kisi {
-        display: grid; grid-template-columns: 1.08fr .92fr;
+        display: grid; grid-template-columns: minmax(0, 1fr) 440px;
         gap: 56px; align-items: center;
     }
 
@@ -223,6 +235,15 @@ Beranda | Rumah Scopus
     .bnd-centang i { color: var(--rumput); }
 
     /* ------------------------------------------------------ foto hero */
+    /* Lebarnya DIBATASI, dan batasnya dipasang di sini — bukan di
+       bingkainya — supaya selotip dan gelembung angka yang berpatokan ke
+       kotak ini ikut bergeser bersamanya.
+
+       Tanpa batas ini, bingkainya memakai seluruh lebar lajurnya: terukur
+       607x751 di layar 1440, sementara kolom teks di sebelahnya cuma 478
+       tinggi. Fotonya 273px lebih tinggi daripada tulisan yang seharusnya
+       dibaca lebih dulu, dan yang terbaca "ini halaman foto", bukan
+       "ini halaman tawaran". */
     .bnd-foto { position: relative; }
 
     /* Bingkai LENGKUNG, bukan persegi membulat. Persegi membulat adalah
@@ -668,8 +689,12 @@ Beranda | Rumah Scopus
     /* ==================================================== layar kecil */
     @media (max-width: 991.98px) {
         .bnd-hero-kisi,
-        .bnd-testi-kisi { grid-template-columns: 1fr; gap: 44px; }
-        .bnd-foto { order: 2; }
+        .bnd-testi-kisi { grid-template-columns: minmax(0, 1fr); gap: 44px; }
+        /* Di layar sempit fotonya turun ke bawah teks dan dipusatkan;
+           tidak ada lagi lajur kanan yang harus ditempelinya. Di sini
+           max-width aman: kisinya sudah satu lajur, jadi tidak ada
+           peregangan item grid yang bisa dibatalkan. */
+        .bnd-foto { order: 2; max-width: 400px; margin-inline: auto; width: 100%; }
         .bnd-hero h1 { font-size: 2.7rem; }
         .bnd-judul { font-size: 2.1rem; }
 
