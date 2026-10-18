@@ -65,7 +65,16 @@ class KabarKedaluwarsaTest extends TestCase
 
         $p = $this->pendaftaran();
 
-        WebinarEksklusifPendaftaran::lepaskanYangKedaluwarsa();
+        /*
+         * DISARING ke angkatan uji ini, bukan menyapu seluruh tabel.
+         *
+         * Basis data pengembangan memuat pendaftaran SUNGGUHAN, dan satu di
+         * antaranya kedaluwarsa sendiri sambil ujinya ditulis — 18 Okt 2026,
+         * WE-20261018-0003, dibuat 15:57 dan habis 16:57. Sejak detik itu
+         * sapuan tanpa saringan mengirim DUA surat, dan uji yang menghitung
+         * satu jadi merah tanpa ada satu pun baris kode yang berubah.
+         */
+        WebinarEksklusifPendaftaran::lepaskanYangKedaluwarsa($p->kategori_id);
 
         Mail::assertSent(
             WebinarEksklusifKedaluwarsaMail::class,
@@ -190,6 +199,21 @@ class KabarKedaluwarsaTest extends TestCase
 
         $sesi = $this->sesi();
 
+        /*
+         * Tunggakan yang SUDAH ADA dihitung lebih dulu.
+         *
+         * sapu() tidak punya saringan angkatan — ia memang dirancang
+         * menguras SELURUH tabel, sebab itu tugasnya di penjadwal. Di mesin
+         * pengembang tabel itu memuat pendaftaran sungguhan, dan satu baris
+         * yang kedaluwarsa tanpa sempat dikabari sudah cukup membuat angka
+         * mutlak di bawah meleset — tanpa ada satu pun baris kode yang
+         * berubah. Terjadi persis begitu 18 Okt 2026.
+         *
+         * Jadi yang diperiksa SELISIHNYA, dan selisih itu tetap menguji hal
+         * yang sama: empat yang terlewat batas tiga memang terambil.
+         */
+        $tunggakan = WebinarEksklusifPendaftaran::belumDikabariKedaluwarsa()->count();
+
         for ($i = 0; $i < 7; $i++) {
             $this->pendaftaran([
                 'kategori_id' => $sesi->getKey(),
@@ -202,8 +226,8 @@ class KabarKedaluwarsaTest extends TestCase
 
         $terkirim = app(KabariKursiDilepas::class)->sapu();
 
-        $this->assertSame(4, $terkirim);
-        Mail::assertSent(WebinarEksklusifKedaluwarsaMail::class, 7);
+        $this->assertSame(4, $terkirim - $tunggakan);
+        Mail::assertSent(WebinarEksklusifKedaluwarsaMail::class, 7 + $tunggakan);
 
         $this->assertSame(0,
             WebinarEksklusifPendaftaran::belumDikabariKedaluwarsa()
@@ -222,7 +246,16 @@ class KabarKedaluwarsaTest extends TestCase
 
         $p = $this->pendaftaran();
 
-        WebinarEksklusifPendaftaran::lepaskanYangKedaluwarsa();
+        /*
+         * DISARING ke angkatan uji ini, bukan menyapu seluruh tabel.
+         *
+         * Basis data pengembangan memuat pendaftaran SUNGGUHAN, dan satu di
+         * antaranya kedaluwarsa sendiri sambil ujinya ditulis — 18 Okt 2026,
+         * WE-20261018-0003, dibuat 15:57 dan habis 16:57. Sejak detik itu
+         * sapuan tanpa saringan mengirim DUA surat, dan uji yang menghitung
+         * satu jadi merah tanpa ada satu pun baris kode yang berubah.
+         */
+        WebinarEksklusifPendaftaran::lepaskanYangKedaluwarsa($p->kategori_id);
 
         $aksi = app(KabariKursiDilepas::class);
         $aksi->jalankan($p->refresh());
