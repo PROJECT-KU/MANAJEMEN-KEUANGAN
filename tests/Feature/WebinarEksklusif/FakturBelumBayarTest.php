@@ -264,6 +264,13 @@ class FakturBelumBayarTest extends TestCase
         $this->assertStringContainsString('rumahscopusfoundation.com', $html);
         $this->assertStringContainsString('@rumah_scopus', $html, 'Instagram/TikTok tidak disebut.');
         $this->assertStringContainsString('@rumahscopus', $html, 'YouTube tidak disebut.');
+        $this->assertStringContainsString('RumahScopusAkademi', $html, 'Facebook tidak disebut.');
+
+        // Ketiga kolomnya ada: alamat, kontak, dan sosial. Satu kolom yang
+        // hilang menyisakan pita yang timpang, bukan pita yang salah.
+        foreach (['ALAMAT', 'KONTAK', 'IKUTI KAMI'] as $kolom) {
+            $this->assertStringContainsString($kolom, $html, $kolom . ' tidak ada di kaki dokumennya.');
+        }
     }
 
     #[Test]
