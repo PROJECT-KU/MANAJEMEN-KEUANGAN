@@ -153,7 +153,8 @@ class KwitansiLunasTest extends TestCase
 
         // Isi kwitansinya diperiksa dari TAMPILANNYA, bukan dari PDF-nya:
         // teks di dalam PDF tersimpan tersandi dan tidak bisa dicari apa adanya.
-        $html = view('public.webinar_eksklusif.kwitansi_pdf', [
+        $html = view('public.webinar_eksklusif.dokumen_pdf', [
+            'jenis' => 'kwitansi',
             'pendaftaran' => $p,
             'sesi' => KategoriLayanan::find($p->kategori_id),
             'terbilang' => \Riskihajar\Terbilang\Facades\Terbilang::make(232931, ' rupiah'),
@@ -161,7 +162,27 @@ class KwitansiLunasTest extends TestCase
 
         $this->assertStringContainsString($p->id_transaksi, $html);
         $this->assertStringContainsString('232.931', $html);
-        $this->assertStringContainsString('LUNAS', $html);
+        /*
+         * Keadaannya dibaca dari ANGKANYA, bukan dari satu kata.
+         *
+         * Cetakannya kini dipakai bersama faktur, dan bedanya cuma keadaan
+         * yang diserahkan pemanggilnya. Judul yang benar dengan angka yang
+         * salah — "Sudah dibayar 0" di atas kata KWITANSI — adalah bukti
+         * palsu, dan satu kata saja tidak menangkapnya.
+         */
+        $this->assertStringContainsString('Pembayaran Diterima', $html);
+
+        $this->assertMatchesRegularExpression(
+            '/Sudah dibayar<\/td>\s*<td[^>]*>\s*232\.931\s*</s',
+            $html,
+            'Kwitansi menyatakan uangnya belum masuk.'
+        );
+
+        $this->assertMatchesRegularExpression(
+            '/Sisa tagihan<\/td>\s*<td[^>]*>\s*0\s*</s',
+            $html,
+            'Kwitansi masih menyisakan tagihan.'
+        );
     }
 
     #[Test]
@@ -174,7 +195,8 @@ class KwitansiLunasTest extends TestCase
          */
         $p = $this->pendaftaran(['status' => 'paid', 'bayar_pada' => now()]);
 
-        $html = view('public.webinar_eksklusif.kwitansi_pdf', [
+        $html = view('public.webinar_eksklusif.dokumen_pdf', [
+            'jenis' => 'kwitansi',
             'pendaftaran' => $p,
             'sesi' => KategoriLayanan::find($p->kategori_id),
             'terbilang' => 'dua ratus rupiah',
