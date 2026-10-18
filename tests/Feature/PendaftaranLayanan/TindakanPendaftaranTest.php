@@ -2801,6 +2801,12 @@ class TindakanPendaftaranTest extends TestCase
          *
          * Sekarang tiap perubahan status memberi tahu pendaftarnya. Lihat
          * SuratPerubahanStatusTest untuk jaminan cakupan kedua puluh tiganya.
+         *
+         * DISESUAIKAN 18 Okt 2026. Webinar yang dilunaskan panitia tidak lagi
+         * memakai surat status umum, melainkan surat lunas berkwitansi — yang
+         * sama persis dengan yang dikirim jalur DOKU. Yang dijaga uji ini
+         * tetap sama: KEDUANYA dikabari. Yang berubah cuma webinar mendapat
+         * surat yang lebih tepat, bukan kehilangan suratnya.
          */
         Mail::fake();
 
@@ -2819,7 +2825,9 @@ class TindakanPendaftaranTest extends TestCase
             $this->flushSession();
         }
 
-        Mail::assertSent(\App\Mail\PerubahanStatusPendaftaranMail::class, 2);
+        // Satu surat per pendaftar, dan tidak ada yang terlewat.
+        Mail::assertSent(\App\Mail\WebinarEksklusifLunasMail::class, 1);
+        Mail::assertSent(\App\Mail\PerubahanStatusPendaftaranMail::class, 1);
     }
 
     #[Test]
