@@ -197,6 +197,149 @@ class KabarWhatsAppTest extends TestCase
         });
     }
 
+    /**
+     * Keempat pemberitahuan, dirakit lalu diambil isi pesannya.
+     *
+     * @return array<string, string>
+     */
+    private function semuaPesan(): array
+    {
+        Http::fake(['api.fonnte.com/*' => Http::response(['status' => true, 'id' => ['1']], 200)]);
+
+        $p = $this->pendaftaran();
+        $sesi = KategoriLayanan::find($p->kategori_id);
+        $wa = app(KabariWhatsApp::class);
+
+        $pesan = [];
+
+        foreach (['pendaftaranMasuk', 'lunas', 'gagalBayar', 'kursiDilepas'] as $cara) {
+            Http::fake(['api.fonnte.com/*' => Http::response(['status' => true, 'id' => ['1']], 200)]);
+
+            $wa->{$cara}($p, $sesi);
+
+            $terkirim = null;
+            Http::assertSent(function ($permintaan) use (&$terkirim) {
+                $terkirim = $permintaan['message'];
+
+                return true;
+            });
+
+            $pesan[$cara] = (string) $terkirim;
+        }
+
+        return $pesan;
+    }
+
+    #[Test]
+    public function semua_pemberitahuan_melarang_membalas_dan_menyebut_nomor_panitia(): void
+    {
+        /*
+         * Nomor pengirimnya nomor SISTEM, bukan nomor panitia. Balasan ke
+         * sana tidak dibaca siapa pun — dan yang membalas lalu menunggu
+         * jawaban yang tidak akan pernah datang, sementara masalahnya
+         * (uangnya sudah terpotong, kursinya hilang) tetap tidak tertangani.
+         *
+         * Keempatnya, bukan sebagiannya: pemberitahuan yang satu melarang
+         * membalas sementara yang lain diam membuat orang menebak-nebak
+         * mana yang boleh.
+         */
+        config()->set('panitia.whatsapp', '6288983567819');
+
+        foreach ($this->semuaPesan() as $cara => $pesan) {
+            $this->assertStringContainsString('jangan dibalas', $pesan,
+                $cara . ' tidak melarang membalas.');
+
+            $this->assertStringContainsString('0889-8356-7819', $pesan,
+                $cara . ' tidak menyebut nomor admin resmi yang bisa dihubungi.');
+
+            /*
+             * "admin resmi", bukan "panitia": panitia bisa berarti siapa
+             * saja yang terlibat acara, dan penipu pun menyebut dirinya
+             * panitia. Yang membedakan orang asli dari penipu adalah kata
+             * "resmi" yang menunjuk SATU nomor.
+             */
+            $this->assertStringContainsString('admin resmi Rumah Scopus Foundation', $pesan,
+                $cara . ' tidak menyebut siapa yang resmi.');
+        }
+    }
+
+    #[Test]
+    public function semua_pemberitahuan_memperingatkan_penipuan(): void
+    {
+        /*
+         * Orang yang baru saja mendaftar adalah sasaran empuk: ia memang
+         * sedang menunggu dihubungi soal pembayaran, jadi siapa pun yang
+         * menyapa mengaku Rumah Scopus akan dipercaya.
+         *
+         * Peringatannya di SEMUA pemberitahuan, bukan sebagiannya — yang
+         * ditipu belum tentu membaca pesan yang kebetulan memuatnya.
+         */
+        foreach ($this->semuaPesan() as $cara => $pesan) {
+            $this->assertStringContainsString('Hati-hati penipuan', $pesan,
+                $cara . ' tidak memperingatkan penipuan.');
+
+            $this->assertStringContainsString('rekening pribadi', $pesan,
+                $cara . ' tidak menyebut modus yang dipakai penipunya.');
+        }
+    }
+
+    #[Test]
+    public function janji_tanpa_transfer_manual_masih_benar(): void
+    {
+        /*
+         * Kakinya berjanji "kami tidak pernah meminta transfer ke rekening
+         * pribadi, pembayaran hanya lewat tautan resmi".
+         *
+         * Janji itu BOLEH ditulis karena transfer manual sudah dicabut dari
+         * Webinar Eksklusif. Kalau suatu saat dibuka lagi, kalimatnya harus
+         * ikut berubah — kalau tidak, ia jadi janji yang dilanggar
+         * sistemnya sendiri, dan justru mengajari orang mengabaikan
+         * peringatan penipuan kita.
+         *
+         * Baris ini yang akan merah lebih dulu kalau itu terjadi.
+         */
+        $sumber = (string) file_get_contents(
+            base_path('app/Http/Controllers/Publict/PublicWebinarEksklusifController.php')
+        );
+
+        $this->assertStringNotContainsString("'cara_bayar' => 'transfer'", $sumber,
+            'Transfer manual hidup lagi, sementara pemberitahuan WhatsApp '
+            . 'masih berjanji pembayaran hanya lewat tautan resmi.');
+    }
+
+    #[Test]
+    public function tidak_ada_pemberitahuan_yang_menyuruh_membalas(): void
+    {
+        /*
+         * Ditambahkan karena pesan "kursi dilepas" SEMPAT berbunyi "Balas
+         * pesan ini dengan menyebut nomor di atas" — bertentangan langsung
+         * dengan kakinya sendiri, di pesan yang sama.
+         *
+         * Satu pesan yang menyuruh membalas sementara kakinya melarang
+         * membuat pembacanya berhenti mempercayai keduanya.
+         */
+        foreach ($this->semuaPesan() as $cara => $pesan) {
+            $this->assertStringNotContainsString('Balas pesan ini', $pesan,
+                $cara . ' menyuruh membalas, padahal kakinya melarang.');
+        }
+    }
+
+    #[Test]
+    public function nomor_panitia_di_whatsapp_ikut_config(): void
+    {
+        /*
+         * Nomornya berubah saat orangnya berganti. Diketik di perakit
+         * pesan, ia akan tertinggal — dan yang menerima pemberitahuan
+         * dengan nomor basi menghubungi orang yang sudah tidak menangani.
+         */
+        config()->set('panitia.whatsapp', '6289911223344');
+
+        foreach ($this->semuaPesan() as $cara => $pesan) {
+            $this->assertStringContainsString('0899-1122-3344', $pesan,
+                $cara . ' memakai nomor panitia yang diketik, bukan dari config.');
+        }
+    }
+
     #[Test]
     public function jalur_web_tidak_pernah_menidurkan_permintaannya(): void
     {
