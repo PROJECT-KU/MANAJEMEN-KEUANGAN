@@ -198,6 +198,49 @@ class BerandaTest extends TestCase
     }
 
     #[Test]
+    public function yang_gratis_tidak_pernah_disebut_berdampingan_dengan_sesi_berbayar(): void
+    {
+        /*
+         * Sesi lima puluh menit adalah Clinik Scopus — layanan BERBAYAR.
+         * Yang gratis cuma bertanya ke admin.
+         *
+         * Ajakan di kaki beranda pernah berbunyi "Ngobrol dulu lima puluh
+         * menit juga boleh" tepat di kalimat yang mengajak orang masuk tanpa
+         * komitmen. Tidak ada galat, tidak ada yang rusak di layar — yang
+         * rusak harapan orangnya, dan yang menanggung admin yang harus
+         * menjelaskan bahwa itu produk, bukan sambutan.
+         *
+         * Dijaga dari JARAK antar-kalimatnya, bukan dari keberadaan
+         * katanya: kedua kata itu memang harus tetap ada di halaman ini,
+         * hanya tidak boleh bertetangga.
+         */
+        $isi = (string) $this->get('/')->assertOk()->getContent();
+
+        // Markahnya dibuang dulu: kalimat yang terpotong dua baris di berkas
+        // Blade menyatu lagi di sini. Pencarian pada sumbernya memberi
+        // negatif palsu justru untuk kalimat yang sedang dicari.
+        $teks = (string) preg_replace('/\s+/', ' ', strip_tags($isi));
+
+        preg_match_all('/gratis/i', $teks, $cocok, PREG_OFFSET_CAPTURE);
+
+        $this->assertNotEmpty($cocok[0],
+            'Kata "gratis" hilang dari beranda; tawaran bertanya tanpa biaya '
+            . 'itu satu-satunya pintu masuk yang tidak menuntut apa pun.');
+
+        foreach ($cocok[0] as [$_, $posisi]) {
+            $sekitar = mb_substr($teks, max(0, $posisi - 130), 260);
+
+            $this->assertDoesNotMatchRegularExpression(
+                '/lima puluh menit|50 menit/i',
+                $sekitar,
+                'Sesi lima puluh menit (Clinik Scopus, BERBAYAR) disebut berdampingan '
+                . 'dengan kata "gratis". Pembacanya akan mengira konsultasinya tidak '
+                . 'berbayar: "' . trim($sekitar) . '"'
+            );
+        }
+    }
+
+    #[Test]
     public function tidak_ada_paragraf_rata_kiri_kanan(): void
     {
         /*
