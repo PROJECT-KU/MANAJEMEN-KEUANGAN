@@ -36,6 +36,12 @@ class GerakMinimalPublikTest extends TestCase
     private const TAMPILAN = [
         'resources/views/public/webinar_eksklusif/status.blade.php',
         'resources/views/public/webinar_eksklusif/index.blade.php',
+
+        // Beranda menyusul 18 Okt 2026, saat ditulis ulang dan diberi
+        // bulatan beranimasi di belakang foto hero. Ia halaman PERTAMA yang
+        // dibuka orang — sebelum ia tahu situs ini apa, dan sebelum ia punya
+        // alasan untuk bertahan kalau layarnya membuatnya pusing.
+        'resources/views/public/home.blade.php',
     ];
 
     private function sumber(string $berkas): string
@@ -90,12 +96,32 @@ class GerakMinimalPublikTest extends TestCase
 
     public function test_tiap_animasi_dimatikan_saat_gerak_minimal(): void
     {
+        $terbaca = 0;
+
         foreach (self::TAMPILAN as $berkas) {
-            $this->periksaSatuBerkas($berkas);
+            $terbaca += $this->periksaSatuBerkas($berkas);
         }
+
+        /*
+         * Pemeriksa-diri: uji yang tidak membaca apa pun selalu hijau, dan
+         * pembaca animasi di bawah bekerja dengan memotong teks di sekitar
+         * tanda kurung — cara yang bisa diam-diam berhenti bekerja ketika
+         * bentuk berkasnya berubah.
+         *
+         * Dihitung untuk SELURUH daftar, bukan per berkas. Sebelumnya tiap
+         * berkas wajib memuat lebih dari dua animasi — dan itu bukan sifat
+         * yang hendak dijaga, melainkan kebetulan dua berkas pertamanya.
+         * Beranda masuk daftar 18 Okt 2026 dengan SATU animasi, dan
+         * penjaganya merah bukan karena ada animasi yang telanjang,
+         * melainkan karena animasinya terlalu sedikit.
+         */
+        $this->assertGreaterThan(2, $terbaca,
+            'Hampir tidak ada animasi yang terbaca di seluruh daftar — pembacanya '
+            . 'hampir pasti rusak, dan uji yang tidak membaca apa pun selalu hijau.');
     }
 
-    private function periksaSatuBerkas(string $berkas): void
+    /** @return int berapa animasi di luar blok hemat gerak yang diperiksa */
+    private function periksaSatuBerkas(string $berkas): int
     {
         $isi = $this->sumber($berkas);
         [$hemat, $blok] = $this->blokHematGerak($isi);
@@ -138,13 +164,18 @@ class GerakMinimalPublikTest extends TestCase
             }
         }
 
-        $this->assertGreaterThan(2, $diperiksa,
-            $berkas . ': hampir tidak ada animasi yang terbaca — pembacanya '
-            . 'hampir pasti rusak, dan uji yang tidak membaca apa pun selalu hijau.');
+        /* Berkas yang masuk daftar ini masuk KARENA punya animasi. Nol
+           berarti animasinya dicabut tanpa mengeluarkan berkasnya dari
+           daftar, atau pembacanya berhenti mengenali bentuk tulisannya. */
+        $this->assertGreaterThan(0, $diperiksa,
+            $berkas . ': tidak ada satu pun animasi terbaca, padahal berkas ini '
+            . 'ada di daftar justru karena punya animasi.');
 
         $this->assertSame([], $telanjang,
             $berkas . " — animasi berikut tetap berjalan untuk yang meminta "
             . "gerak minimal:\n- " . implode("\n- ", $telanjang) . "\n");
+
+        return $diperiksa;
     }
 
     /**
