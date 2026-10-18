@@ -46,6 +46,12 @@ class KabariKursiDilepas
      */
     public function sapu(int $batas = 0): int
     {
+        // 0 = pakai batas dari config. Bukan "tanpa batas": tumpukan yang
+        // sangat besar justru yang paling mungkin dibaca sebagai penyiar.
+        if ($batas <= 0) {
+            $batas = max(0, (int) config('services.fonnte.batas_sapuan', 40));
+        }
+
         $kueri = WebinarEksklusifPendaftaran::belumDikabariKedaluwarsa()
             // Yang paling lama menunggu didahulukan; kalau batasnya menggigit
             // lagi, yang tertinggal tetap yang paling baru.
@@ -57,7 +63,32 @@ class KabariKursiDilepas
 
         $terkirim = 0;
 
+        /*
+         * JEDA ANTAR PESAN, dan hanya di sini.
+         *
+         * Yang membuat nomor WhatsApp diblokir bukan banyaknya pesan dalam
+         * sehari, melainkan LEDAKAN: puluhan pesan beruntun dalam hitungan
+         * detik, ke nomor berbeda, berbunyi hampir sama.
+         *
+         * Pesan yang dipicu satu orang menyebar sendiri mengikuti
+         * kedatangan orangnya; yang bisa meledak cuma sapuan ini, yang bisa
+         * memindahkan puluhan pendaftaran sekaligus.
+         *
+         * Tidurnya aman DI SINI karena pemanggilnya perintah terjadwal —
+         * tidak ada orang yang menunggu layarnya. Di jalur web, menidurkan
+         * permintaan berarti halamannya menggantung, jadi di sana yang
+         * dipakai batas jumlah, bukan jeda.
+         */
+        $jeda = max(0, (int) config('services.fonnte.jeda_sapuan_detik', 25));
+        $pertama = true;
+
         foreach ($kueri->get() as $p) {
+            if (! $pertama && $jeda > 0) {
+                sleep($jeda);
+            }
+
+            $pertama = false;
+
             try {
                 if ($this->jalankan($p)) {
                     $terkirim++;

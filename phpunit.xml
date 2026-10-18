@@ -69,5 +69,16 @@
             permintaan keluar.
         -->
         <env name="FONNTE_TOKEN" value=""/>
+
+        <!--
+            Jedanya NOL di rangkaian uji.
+
+            Sapuan kedaluwarsa menjeda 25 detik antar pesan supaya nomornya
+            tidak terbaca sebagai penyiar. Dibiarkan hidup di sini, satu uji
+            dengan tujuh baris kedaluwarsa akan benar-benar tidur dua setengah
+            menit — dan rangkaian yang lambat adalah rangkaian yang berhenti
+            dijalankan orang.
+        -->
+        <env name="FONNTE_JEDA_SAPUAN_DETIK" value="0"/>
     </php>
 </phpunit>

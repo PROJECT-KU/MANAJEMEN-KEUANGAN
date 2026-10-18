@@ -68,6 +68,34 @@ return [
          * peringatannya tidak diketik ulang di beberapa tempat.
          */
         'kuota_bulanan' => (int) env('FONNTE_KUOTA_BULANAN', 1000),
+
+        /*
+         * Jeda antar pesan DI DALAM SATU SAPUAN, dalam detik.
+         *
+         * Yang membuat nomor diblokir bukan banyaknya pesan dalam sehari,
+         * melainkan LEDAKAN: puluhan pesan beruntun dalam hitungan detik,
+         * ke nomor-nomor berbeda, berbunyi hampir sama. Itu pola yang
+         * dibaca sebagai penyiar, bukan sebagai percakapan.
+         *
+         * Pesan yang dipicu satu orang — mendaftar, membayar — tidak pernah
+         * meledak: ia menyebar sendiri mengikuti kedatangan orangnya. Yang
+         * bisa meledak cuma sapuan kedaluwarsa terjadwal, yang bisa
+         * memindahkan puluhan pendaftaran sekaligus.
+         *
+         * Jadi jedanya DIPASANG DI SITU SAJA. Dipasang di semua pesan,
+         * kabar "selesaikan pembayarannya, batas waktunya 60 menit lagi"
+         * akan sampai ketika sebagian waktunya sudah habis — dan untuk
+         * sebagian orang, sesudah kursinya telanjur dilepas.
+         */
+        'jeda_sapuan_detik' => (int) env('FONNTE_JEDA_SAPUAN_DETIK', 25),
+
+        /*
+         * Batas pesan per sapuan. Jaring kedua: tumpukan yang sangat besar
+         * tidak dihabiskan sekali jalan, melainkan dicicil tiap kali
+         * perintahnya berjalan. Sisanya tetap tertangkap
+         * scopeBelumDikabariKedaluwarsa().
+         */
+        'batas_sapuan' => (int) env('FONNTE_BATAS_SAPUAN', 40),
     ],
 
 ];
