@@ -329,7 +329,20 @@ class SuratPerubahanStatusTest extends TestCase
                 "Perubahan status {$layanan} tidak mengirim surat apa pun.");
         }
 
-        Mail::assertSent(PerubahanStatusPendaftaranMail::class, 2);
+        /*
+         * SATU surat umum, bukan dua, sejak 18 Okt 2026.
+         *
+         * Webinar Eksklusif yang dibatalkan kini memakai surat gagal bayar
+         * tersendiri — surat umum tidak menyebut nominalnya, tidak menyebut
+         * dana yang mungkin sempat tertahan di bank, dan tidak memberi jalan
+         * mendaftar lagi.
+         *
+         * Yang dijaga uji ini tetap sama: kedua layanan yang DULU diam kini
+         * mengabari pendaftarnya. Itu sudah ditegaskan lewat $hasil['surat']
+         * di atas; dua baris ini memastikan suratnya yang TEPAT.
+         */
+        Mail::assertSent(\App\Mail\WebinarEksklusifGagalBayarMail::class, 1);
+        Mail::assertSent(PerubahanStatusPendaftaranMail::class, 1);
     }
 
     #[Test]

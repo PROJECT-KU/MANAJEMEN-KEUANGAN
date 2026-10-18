@@ -3,6 +3,7 @@
 namespace App\Actions\WebinarEksklusif;
 
 use App\KategoriLayanan;
+use App\Mail\WebinarEksklusifGagalBayarMail;
 use App\Mail\WebinarEksklusifKedaluwarsaMail;
 use App\WebinarEksklusifPendaftaran;
 use Illuminate\Support\Facades\DB;
@@ -79,11 +80,15 @@ class KabariKursiDilepas
     public function jalankan(WebinarEksklusifPendaftaran $pendaftaran): bool
     {
         /*
-         * HANYA 'expired'. Yang dibatalkan ('cancel') tidak menerima surat
-         * ini: pembatalan datang dari keputusan — orangnya sendiri atau
-         * panitia — dan kalimat "batas waktunya lewat" akan salah di situ.
+         * 'expired' DAN 'cancel'. Keduanya berarti pendaftarannya berakhir
+         * tanpa pembayaran, dan keduanya berhak dikabari.
+         *
+         * Dulu hanya 'expired', dengan alasan "kalimat batas waktunya lewat
+         * akan salah untuk yang dibatalkan" — alasan yang benar, tetapi
+         * jalan keluarnya salah: yang dibatalkan jadi tidak menerima apa-apa
+         * sama sekali. Yang benar memilih KALIMATNYA, bukan mendiamkannya.
          */
-        if ($pendaftaran->status !== 'expired') {
+        if (! in_array($pendaftaran->status, ['expired', 'cancel'], true)) {
             return false;
         }
 
@@ -118,11 +123,33 @@ class KabariKursiDilepas
         }
 
         $sesi = KategoriLayanan::whereKey($pendaftaran->kategori_id)->first();
+        $segar = $pendaftaran->refresh();
+
+        /*
+         * Suratnya dipilih dari BAYAR_STATUS, bukan dari status pendaftaran.
+         *
+         * Status pendaftaran hanya mengenal 'expired' dan 'cancel', dan
+         * jawaban "failed" dari gerbang — kartu ditolak, saldo kurang,
+         * transaksi dihentikan bank — dipetakan ke 'expired'. Dibaca dari
+         * sana, orang yang kartunya baru saja ditolak menerima surat yang
+         * mengatakan ia TERLAMBAT: ia menyalahkan dirinya atas sesuatu yang
+         * sebenarnya bisa diulang sekarang juga.
+         *
+         * bayar_status menyimpan jawaban gerbangnya apa adanya, jadi di
+         * situlah bedanya masih utuh.
+         */
+        $gagalBayar = in_array(
+            (string) $segar->bayar_status,
+            ['failed', 'cancel', 'canceled', 'deny', 'denied'],
+            true
+        );
+
+        $surat = $gagalBayar
+            ? new WebinarEksklusifGagalBayarMail($segar, $sesi)
+            : new WebinarEksklusifKedaluwarsaMail($segar, $sesi);
 
         try {
-            Mail::to($pendaftaran->email)->send(
-                new WebinarEksklusifKedaluwarsaMail($pendaftaran->refresh(), $sesi)
-            );
+            Mail::to($pendaftaran->email)->send($surat);
         } catch (\Throwable $e) {
             /*
              * PENANDANYA DIKEMBALIKAN saat pengirimannya gagal.

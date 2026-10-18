@@ -1211,9 +1211,14 @@ class PublicWebinarEksklusifController extends Controller
 
             $this->kembalikanKuota($pendaftaran);
 
-            // Jalur ketiga menuju keadaan yang sama; alasannya sama persis
-            // seperti di susulkanDariGerbang(), termasuk amannya dipanggil
-            // berulang saat DOKU mengirim pemberitahuannya lebih dari sekali.
+            /*
+             * Jalur ketiga menuju keadaan yang sama; alasannya sama persis
+             * seperti di susulkanDariGerbang(), termasuk amannya dipanggil
+             * berulang saat DOKU mengirim pemberitahuannya lebih dari sekali.
+             *
+             * Berlaku untuk 'cancel' juga, bukan cuma 'expired': aksinya
+             * yang memilih kalimat suratnya dari bayar_status.
+             */
             app(\App\Actions\WebinarEksklusif\KabariKursiDilepas::class)
                 ->jalankan($pendaftaran->refresh());
         }
