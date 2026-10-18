@@ -50,6 +50,7 @@ class KabariWhatsApp
             $this->tautanStatus($p),
             '',
             'Fakturnya kami kirim ke email Anda. Kursi ditahan sampai batas waktu di atas.',
+            ...$this->kaki(),
         ], fn ($b) => $b !== null)));
     }
 
@@ -66,6 +67,7 @@ class KabariWhatsApp
             '',
             'Kwitansinya kami kirim ke ' . $p->email . '.',
             'Tautan masuk sesinya dibagikan panitia lewat grup peserta di WhatsApp.',
+            ...$this->kaki(),
         ], fn ($b) => $b !== null)));
     }
 
@@ -82,6 +84,7 @@ class KabariWhatsApp
             '',
             'Mau daftar lagi?',
             $this->tautanDaftar($sesi),
+            ...$this->kaki(),
         ]));
     }
 
@@ -92,11 +95,69 @@ class KabariWhatsApp
             '',
             'Halo ' . $p->nama . ', pembayaran untuk ' . $p->id_transaksi . ' belum masuk sampai batas waktunya, jadi kursinya kami lepas untuk peserta lain.',
             '',
-            'Merasa sudah membayar? Balas pesan ini dengan menyebut nomor di atas — pembayarannya tidak hilang, hanya konfirmasinya yang tertunda.',
+            'Merasa sudah membayar? Hubungi admin resmi kami dengan menyebut nomor di atas — pembayarannya tidak hilang, hanya konfirmasinya yang tertunda.',
             '',
             'Masih ingin ikut? Kursinya bisa diambil lagi selama kuotanya belum penuh:',
             $this->tautanDaftar($sesi),
+            ...$this->kaki(),
         ]));
+    }
+
+    /**
+     * Kaki yang sama untuk SEMUA pemberitahuan.
+     *
+     * Tiga hal, dan ketiganya menjawab persoalan yang berbeda:
+     *
+     *   1. "jangan dibalas" — nomor pengirimnya nomor SISTEM. Balasan ke
+     *      sini tidak dibaca siapa pun, dan yang membalas lalu menunggu
+     *      jawaban yang tidak akan pernah datang;
+     *   2. ke mana harus menghubungi — tanpa itu, butir pertama cuma
+     *      menutup pintu tanpa menunjukkan pintu lain;
+     *   3. PERINGATAN PENIPUAN, dan ini yang paling penting.
+     *
+     * Butir ketiga ada karena orang yang baru saja mendaftar adalah sasaran
+     * empuk: ia memang sedang menunggu dihubungi soal pembayaran, jadi
+     * siapa pun yang menyapa mengaku Rumah Scopus akan dipercaya. Menyebut
+     * SATU nomor resmi mengubah "siapa pun yang mengaku" jadi sesuatu yang
+     * bisa dicocokkan sendiri oleh orangnya, di pesan yang sudah ada di
+     * tangannya.
+     *
+     * "admin resmi", bukan "panitia": panitia bisa berarti siapa saja yang
+     * terlibat acara, dan penipu pun menyebut dirinya panitia.
+     *
+     * Kalimat "tidak pernah meminta transfer ke rekening pribadi" BOLEH
+     * ditulis setegas ini karena memang begitu adanya: sejak transfer
+     * manual dicabut, Webinar Eksklusif hanya menerima pembayaran lewat
+     * gerbang resminya. Kalau suatu saat jalur manual dibuka lagi, kalimat
+     * ini harus ikut berubah — kalau tidak, ia jadi janji yang dilanggar
+     * sistemnya sendiri.
+     *
+     * Nomornya dibaca dari config('panitia.whatsapp'), BUKAN diketik di
+     * sini: ia berubah saat orangnya berganti, dan nomor yang diketik ulang
+     * di tiap tempat akan tertinggal di sebagian tempat.
+     *
+     * Dirakit di SATU tempat, bukan disalin ke empat pesan: disalin,
+     * keempatnya akan berbeda perlahan — dan yang berbeda adalah nomor yang
+     * dipakai orang untuk memastikan ia tidak sedang ditipu.
+     */
+    private function kaki(): array
+    {
+        $wa = preg_replace('/^62/', '0', (string) config('panitia.whatsapp'));
+        $tampil = trim(chunk_split((string) $wa, 4, '-'), '-');
+
+        return [
+            '',
+            '— — —',
+            'Pesan ini dikirim otomatis, *mohon jangan dibalas*.',
+            '',
+            'Ada kendala atau pertanyaan? Hubungi *admin resmi Rumah Scopus Foundation*, '
+                . 'dan hanya di nomor ini:',
+            '*' . $tampil . '*',
+            '',
+            '*Hati-hati penipuan.* Ada pihak yang mengatasnamakan Rumah Scopus '
+                . 'Foundation. Kami tidak pernah meminta transfer ke rekening pribadi, '
+                . 'dan pembayaran hanya lewat tautan resmi di pesan maupun email ini.',
+        ];
     }
 
     private function tautanStatus(WebinarEksklusifPendaftaran $p): string
