@@ -148,6 +148,56 @@ class BerandaTest extends TestCase
     }
 
     #[Test]
+    public function ketiga_rekaman_testimoni_tidak_diunduh_sebelum_ditonton(): void
+    {
+        /*
+         * Ketiganya berjumlah 94 MB, dan ini halaman DEPAN.
+         *
+         * preload="metadata" saja sudah membuat peramban membuka sambungan
+         * ke tiap berkas untuk membaca kepalanya — tiga permintaan ke berkas
+         * puluhan megabita, untuk rekaman yang belum tentu ditonton. Satu
+         * kata yang berubah di sini tidak merusak apa pun yang kelihatan;
+         * yang menanggung kuota pengunjungnya.
+         *
+         * Sampulnya wajib ada karena preload="none" berarti peramban TIDAK
+         * punya bingkai pertama untuk digambar: tanpa poster, ketiganya
+         * kotak hitam.
+         *
+         * Berkasnya sendiri tidak diperiksa di sini — storage/app diabaikan
+         * git, jadi uji yang menuntutnya ada akan merah di tiap kloning
+         * baru. Yang dijaga bentuk markahnya.
+         */
+        $isi = (string) $this->get('/')->assertOk()->getContent();
+
+        preg_match_all('#<video[^>]*>#', $isi, $cocok);
+
+        $rekaman = array_values(array_filter($cocok[0],
+            fn ($satu) => str_contains($satu, 'poster')));
+
+        $this->assertCount(3, $rekaman,
+            'Jumlah rekaman testimoni berubah; beranda seharusnya memakai tiga '
+            . 'rekaman yang sama dengan halaman iklan Webinar Eksklusif.');
+
+        foreach ($rekaman as $satu) {
+            $this->assertStringContainsString('preload="none"', $satu,
+                'Rekaman testimoni tidak lagi preload="none". Ketiganya 94 MB, dan '
+                . 'ini halaman depan — yang menanggung kuota pengunjungnya.');
+
+            $this->assertMatchesRegularExpression('#poster="[^"]+\.webp"#', $satu,
+                'Rekaman testimoni kehilangan sampulnya. Dengan preload="none" '
+                . 'peramban tidak punya bingkai pertama untuk digambar, jadi yang '
+                . 'tampil kotak hitam.');
+        }
+
+        foreach (['testimoni', 'testimoni2-web', 'testimoni3-web'] as $berkas) {
+            $this->assertStringContainsString('storage/video/' . $berkas . '.mp4', $isi,
+                'Rekaman "' . $berkas . '" tidak lagi dipakai. Ketiganya sengaja '
+                . 'diambil dari tempat yang sama dengan halaman iklan — satu berkas, '
+                . 'dua halaman, jadi menggantinya cukup sekali.');
+        }
+    }
+
+    #[Test]
     public function tidak_ada_paragraf_rata_kiri_kanan(): void
     {
         /*
