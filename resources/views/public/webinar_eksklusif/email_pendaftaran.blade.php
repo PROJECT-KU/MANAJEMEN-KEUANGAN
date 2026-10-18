@@ -257,7 +257,21 @@
                      di situ akan menunjuk lampiran yang memang tidak ada. --}}
                 @if ($belumBayar)
                     <tr>
-                        <td style="padding:0 26px;">
+                        {{-- Bantalan ATASNYA 14px, dan itu bukan sekadar
+                             kerapian.
+
+                             Baris di atasnya ditutup "padding: 24px 26px 0"
+                             dan baris ini dulu dibuka "padding: 0 26px" —
+                             nol di kedua sisi, jadi kedua kartunya benar-benar
+                             bersentuhan dan terbaca sebagai satu kotak yang
+                             warnanya berubah di tengah.
+
+                             14px, bukan 24px seperti jarak antarbagian lain:
+                             keduanya memang sepasang — yang satu menyuruh
+                             membayar, yang lain menyebut tagihannya — dan
+                             jarak sepenuhnya akan memisahkan yang seharusnya
+                             dibaca berurutan. --}}
+                        <td style="padding:14px 26px 0;">
                             <p style="margin:0;padding:13px 15px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;font-size:13px;color:#475569;line-height:1.6;">
                                 <strong style="color:#0f2b5b;">Fakturnya terlampir</strong> di email ini
                                 sebagai berkas PDF, lengkap dengan jumlah dan batas waktunya.
