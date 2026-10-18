@@ -39,6 +39,27 @@ class IkonAdaGlifnyaTest extends TestCase
         'fa-user-gear',          // layouts/version.blade.php
     ];
 
+    /**
+     * Membuang komentar sebelum nama ikonnya dicari.
+     *
+     * Nama FA6 disebut justru di komentar yang menerangkan KENAPA ia tidak
+     * boleh dipakai — dan komentar tidak pernah tergambar, jadi menuduhnya
+     * salah. Terjadi 18 Okt 2026: penjaga ini merah karena satu komentar
+     * yang berbunyi "namanya fa-check-circle, bukan fa-circle-check", yaitu
+     * kalimat yang justru menjaga hal yang sama.
+     *
+     * Penjaga yang merah karena alasan yang salah mengajari orang
+     * mengabaikannya — dan itu lebih berbahaya daripada tidak ada penjaga.
+     */
+    private function tanpaKomentar(string $isi): string
+    {
+        // Komentar Blade lebih dulu: isinya bisa memuat /* */ yang bukan
+        // komentar CSS, dan membuangnya terbalik akan menyisakan potongan.
+        $isi = (string) preg_replace('/\{\{--.*?--\}\}/s', '', $isi);
+
+        return (string) preg_replace('#/\*.*?\*/#s', '', $isi);
+    }
+
     public function test_semua_nama_ikon_di_tampilan_ada_glifnya(): void
     {
         $akar = dirname(__DIR__, 2);
@@ -54,7 +75,7 @@ class IkonAdaGlifnyaTest extends TestCase
                 continue;
             }
 
-            preg_match_all('/\bfa-[a-z0-9-]{2,}/', (string) file_get_contents($b->getPathname()), $c);
+            preg_match_all('/\bfa-[a-z0-9-]{2,}/', $this->tanpaKomentar((string) file_get_contents($b->getPathname())), $c);
 
             foreach ($c[0] as $nama) {
                 $ketemu[$nama][] = str_replace($akar . '/resources/views/', '', $b->getPathname());
@@ -64,7 +85,7 @@ class IkonAdaGlifnyaTest extends TestCase
         // Ikut dipindai: toast merakit ikonnya dari sini, bukan dari Blade.
         preg_match_all(
             '/\bfa-[a-z0-9-]{2,}/',
-            (string) file_get_contents($akar . '/public/assets/js/mis-ui.js'),
+            $this->tanpaKomentar((string) file_get_contents($akar . '/public/assets/js/mis-ui.js')),
             $cJs
         );
 
