@@ -187,6 +187,20 @@ class PendaftaranSemuaLayanan
              */
             'surat' => [
                 'paid' => \App\Mail\WebinarEksklusifLunasMail::class,
+
+                /*
+                 * Dibatalkan dari layar panitia memakai surat yang SAMA
+                 * dengan yang dikirim saat gerbang menolak pembayarannya.
+                 * Pembayaran lewat layanan ini hanya satu jalur — DOKU —
+                 * jadi "dibatalkan" di sini selalu berarti pembayarannya
+                 * tidak pernah selesai.
+                 *
+                 * Sebelumnya jatuh ke surat perubahan status umum, yang
+                 * tidak menyebut nominalnya, tidak menyebut dana yang
+                 * mungkin sempat tertahan, dan tidak memberi jalan
+                 * mendaftar lagi.
+                 */
+                'cancel' => \App\Mail\WebinarEksklusifGagalBayarMail::class,
             ],
             'kolom' => [
                 'nomor' => 'id_transaksi',

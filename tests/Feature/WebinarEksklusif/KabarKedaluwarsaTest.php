@@ -235,17 +235,24 @@ class KabarKedaluwarsaTest extends TestCase
     public function yang_dibatalkan_tidak_menerima_surat_batas_waktu(): void
     {
         /*
-         * 'cancel' datang dari keputusan — orangnya sendiri atau panitia —
-         * dan kalimat "batas waktunya lewat" akan salah di situ.
+         * Kalimat "batas waktunya lewat" salah untuk yang dibatalkan.
+         *
+         * DIPERBAIKI 18 Okt 2026, dan maksud ujinya tidak berubah — hanya
+         * jalan keluarnya. Dulu baris ini menuntut TIDAK ADA surat sama
+         * sekali, dan itu jalan keluar yang salah: yang pembayarannya
+         * ditolak gerbang jadi tidak dikabari apa pun. Yang benar memilih
+         * KALIMATNYA, bukan mendiamkannya.
          */
         Mail::fake();
 
-        $p = $this->pendaftaran(['status' => 'cancel']);
+        $p = $this->pendaftaran(['status' => 'cancel', 'bayar_status' => 'cancel']);
 
         $terkirim = app(KabariKursiDilepas::class)->jalankan($p);
 
-        $this->assertFalse($terkirim);
-        Mail::assertNothingSent();
+        $this->assertTrue($terkirim, 'Yang dibatalkan kembali didiamkan.');
+
+        Mail::assertNotSent(WebinarEksklusifKedaluwarsaMail::class);
+        Mail::assertSent(\App\Mail\WebinarEksklusifGagalBayarMail::class, 1);
     }
 
     #[Test]
