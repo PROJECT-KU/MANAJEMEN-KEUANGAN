@@ -228,30 +228,34 @@ Webinar Eksklusif | Rumah Scopus
     .sel-kisi {
         display: grid;
         /*
-         * Batas atas lajurnya 1fr, BUKAN 360px, dan kartunya yang dibatasi.
+         * Batas atas lajurnya 330px, dan angka itu dihitung, bukan dikira.
          *
-         * Dipatok 360px, tiga sesi tidak pernah muat bertiga: 360x3 + dua
-         * jarak 22px = 1.124px, sementara wadahnya 1.056px. Yang tergambar
-         * dua kartu lalu satu kartu sendirian di baris berikutnya, dengan
-         * lubang selebar satu kartu di sebelahnya.
+         * Dengan 1fr, auto-fit membuat lajur sebanyak yang muat lalu
+         * MEMBAGI RATA seluruh lebar kepada yang tersisa. Dua sesi berarti
+         * tiga lajur dibuat, yang ketiga menguncup, dan dua sisanya jadi
+         * 517px masing-masing — kartu 360px lalu mengambang di tengah
+         * lajurnya sendiri. Terukur: jarak antar kartu 179px, bukan 22px
+         * yang disetel di sini.
          *
-         * Dengan 1fr lajurnya membagi rata ruang yang ADA — tiga sesi jadi
-         * tiga lajur 337px — dan lebar kartunya tetap terjaga oleh max-width
-         * di bawah.
+         * Dipatok lebar tetap, lajurnya berhenti tumbuh dan jaraknya
+         * benar-benar jadi gap-nya. 330, bukan 360: tiga lajur 330px
+         * ditambah dua jarak 22px = 1.034px, masih muat di wadah 1.056px —
+         * sementara 360px berarti 1.124px dan tiga sesi tidak pernah
+         * sebaris.
+         *
+         * justify-content memusatkan kelompoknya, jadi satu-dua kartu tidak
+         * menempel ke tepi kiri dengan ruang menganga di kanannya.
          */
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(280px, 330px));
         justify-content: center;
         gap: 22px;
     }
 
-    /* Kartunya yang dibatasi, bukan lajurnya. Tanpa ini satu-dua sesi
-       membuat kartunya melar sampai selebar wadah — sampul 4:5 selebar
-       1.056px berarti poster setinggi 1.320px, dua layar penuh untuk satu
-       sesi. margin-inline memusatkannya di dalam lajurnya sendiri. */
-    .sel-kartu {
-        width: 100%;
-        max-width: 360px;
-        margin-inline: auto;
+    /* Di layar sempit lajurnya dibiarkan memenuhi wadahnya: dipatok 330px,
+       kartunya menyisakan tepi kosong di kanan-kiri pada layar yang memang
+       sudah sempit. */
+    @media (max-width: 520px) {
+        .sel-kisi { grid-template-columns: minmax(0, 1fr); }
     }
 
     .sel-kartu {
@@ -308,9 +312,7 @@ Webinar Eksklusif | Rumah Scopus
     @media (min-width: 820px) {
         .sel-kisi-tunggal { grid-template-columns: minmax(0, 1fr); }
 
-        /* Batas 360px dicabut di sini: kartu mendatar memang memakai
-           seluruh lebar wadahnya, dan posternya yang dipatok 40%. */
-        .sel-kisi-tunggal .sel-kartu { flex-direction: row; max-width: none; }
+        .sel-kisi-tunggal .sel-kartu { flex-direction: row; }
 
         /*
          * Lebar posternya dipatok persen, dan tingginya DIBIARKAN mengikuti
@@ -475,6 +477,105 @@ Webinar Eksklusif | Rumah Scopus
     .sel-tombol > .fas { margin: 0 !important; }
 
     .sel-tombol-mati { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; }
+
+    /* ------------------------------------------- gerak tombol daftar
+     *
+     * Ketiganya dipindahkan dari halaman landing Webinar Eksklusif, yang
+     * repo dan subdomainnya terpisah dari aplikasi ini. Disalin, bukan
+     * dibagi: tidak ada satu pun berkas gaya yang dipakai berdua, dan
+     * menautkan keduanya berarti satu repo menyetir tampilan repo lain.
+     *
+     * TIDAK satu pun dipasang pada .sel-tombol-mati. Tombol "Kuota penuh"
+     * yang berdenyut dan panahnya menyenggol maju adalah ajakan menekan
+     * sesuatu yang tidak bisa ditekan — dan yang menekannya berulang kali
+     * akan mengira halamannya rusak.
+     */
+
+    /*
+     * Denyutnya digambar ::after, jadi yang membesar HANYA bayangannya.
+     * Tombolnya sendiri yang diskalakan membuat sasaran tekan ikut bergerak,
+     * dan sasaran yang bergerak lebih sulit dikenai — terutama di ponsel.
+     */
+    .sel-tombol:not(.sel-tombol-mati) { position: relative; }
+
+    .sel-tombol:not(.sel-tombol-mati)::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        box-shadow: 0 0 0 0 rgba(255, 140, 0, .55);
+        animation: sel-denyut-tombol 2.4s ease-out infinite;
+        pointer-events: none;
+    }
+
+    @keyframes sel-denyut-tombol {
+        0%   { box-shadow: 0 0 0 0 rgba(255, 140, 0, .5); }
+        70%  { box-shadow: 0 0 0 18px rgba(255, 140, 0, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(255, 140, 0, 0); }
+    }
+
+    /* Panah kanannya menyenggol ke depan: menandakan ada langkah lanjutan,
+       bukan sekadar tombol yang berdiri. */
+    .sel-tombol:not(.sel-tombol-mati) .fa-arrow-right {
+        animation: sel-panah-maju 1.6s ease-in-out infinite;
+    }
+
+    @keyframes sel-panah-maju {
+        0%, 100% { transform: translateX(0); }
+        50%      { transform: translateX(5px); }
+    }
+
+    /* Sapuan kilau HANYA di peranti yang benar-benar punya tetikus.
+       Di layar sentuh tidak ada hover, dan sebagian peramban menahannya
+       sampai sentuhan pertama — kilau yang baru muncul sesudah ditekan
+       tidak menarik siapa pun, ia cuma terlambat. */
+    @media (hover: hover) {
+        /*
+         * overflow: hidden HANYA saat hover, dan itu bukan kerapian.
+         *
+         * Kilau sapuannya unsur sempit yang melintas dari luar tombol, jadi
+         * ia harus dipotong tepinya. Tetapi overflow: hidden memotong
+         * SELURUH yang tergambar di luar kotak tombol — termasuk bayangan
+         * cincin denyut yang justru melebar KE LUAR. Dipasang tetap, cincin
+         * denyutnya tidak pernah terlihat sama sekali; terukur di potret
+         * diam: tombolnya polos tanpa satu pun cincin.
+         *
+         * Dibatasi ke :hover, keduanya tidak pernah saling memotong:
+         * cincinnya terlihat selama tetikusnya tidak di atas tombol, dan
+         * begitu ia di atas tombol, kilaunya yang mengambil alih.
+         */
+        .sel-tombol:not(.sel-tombol-mati):hover { overflow: hidden; }
+
+        .sel-tombol:not(.sel-tombol-mati)::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -60%;
+            width: 45%;
+            height: 100%;
+            background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .45), transparent);
+            transform: skewX(-18deg);
+            pointer-events: none;
+        }
+
+        .sel-tombol:not(.sel-tombol-mati):hover::before {
+            animation: sel-sapuan-kilau .7s ease;
+        }
+    }
+
+    @keyframes sel-sapuan-kilau {
+        from { left: -60%; }
+        to   { left: 115%; }
+    }
+
+    /* Gerak minimal: ketiganya dimatikan, sama seperti di landing-nya. */
+    @media (prefers-reduced-motion: reduce) {
+        .sel-tombol:not(.sel-tombol-mati)::after,
+        .sel-tombol:not(.sel-tombol-mati) .fa-arrow-right,
+        .sel-tombol:not(.sel-tombol-mati):hover::before {
+            animation: none !important;
+        }
+    }
 
     .sel-kosong {
         max-width: 460px;
