@@ -668,14 +668,34 @@ Beranda | Rumah Scopus
     .bnd-polaroid:nth-child(2) { transform: rotate(1.2deg); box-shadow: 8px 8px 0 var(--rumput); }
     .bnd-polaroid:nth-child(3) { transform: rotate(-.9deg); box-shadow: 8px 8px 0 var(--bata); }
 
-    .bnd-polaroid video {
-        display: block; max-height: 420px; width: auto; max-width: 100%;
+    /* Kotak tayang berukuran SAMA untuk ketiganya, dan rekamannya
+       memenuhinya dari dalam.
+
+       Dua rekaman memang tegak 540x960. Yang ketiga tersimpan 960x540 —
+       tetapi isinya sebenarnya rekaman TEGAK yang diberi bantalan kiri-kanan
+       berisi potongan lain yang tidak ada hubungannya. Memotong sisinya
+       bukan mengorbankan apa pun; justru membuang bantalan itu.
+
+       Sebelumnya tiap polaroid memeluk rekamannya sendiri, dan yang rebah
+       jadi 290px lebih pendek daripada tetangganya — ruang kosong selebar
+       satu kolom menganga di tengah barisan. */
+    .bnd-tayang {
+        position: relative; overflow: hidden;
+        height: 420px; aspect-ratio: var(--ar, 9 / 16);
         border: 2px solid var(--tinta); background: var(--tinta);
     }
+    /* Rekamannya diperbesar sampai TINGGINYA penuh, lalu dipusatkan;
+       kelebihan lebarnya terpotong rata kiri-kanan. max-width: none wajib —
+       tanpa itu aturan bawaan templat menahannya di 100% dan yang rebah
+       justru menyusut jadi pita tipis di tengah kotak. */
+    .bnd-tayang video {
+        position: absolute; top: 50%; left: 50%; translate: -50% -50%;
+        height: 100%; width: auto; max-width: none; display: block;
+    }
+
     .bnd-polaroid-kaki {
         margin-top: 12px; text-align: center;
         font-family: 'Fraunces', serif; font-weight: 700; font-size: .88rem;
-        max-width: 24ch;
     }
 
     /* Kutipannya turun ke bawah barisan rekaman dan dipusatkan: ia sekarang
@@ -754,7 +774,7 @@ Beranda | Rumah Scopus
         .bnd-rute-deret::before { display: none; }
         .bnd-cap { display: none; }
         .bnd-testi-kisi { grid-template-columns: repeat(2, 1fr); }
-        .bnd-polaroid video { max-height: 340px; }
+        .bnd-tayang { height: 360px; }
     }
 
     @media (max-width: 767.98px) {
@@ -786,7 +806,7 @@ Beranda | Rumah Scopus
         .bnd-ajakan { padding: 38px 22px; box-shadow: 6px 6px 0 var(--tinta); }
         .bnd-ajakan h2 { font-size: 1.68rem; }
         .bnd-testi-kisi { grid-template-columns: 1fr; gap: 34px; }
-        .bnd-polaroid video { max-height: 300px; }
+        .bnd-tayang { height: 420px; }
         .bnd-nilai-angka { font-size: 2.6rem; }
         /* Relnya DISEMBUNYIKAN saat perhentiannya menumpuk tegak: garis
            mendatar di antara kotak yang tersusun ke bawah menunjuk arah
@@ -1204,11 +1224,17 @@ Beranda | Rumah Scopus
                  yang memuatnya lewat alamat ini juga — satu berkas, dua
                  halaman, jadi mengganti rekamannya cukup sekali. --}}
             <div class="bnd-testi-kisi">
+                {{-- --ar hanya diberikan pada yang tersimpan rebah.
+
+                     23/36 bukan 9/16: isi tegaknya menempati bagian tengah
+                     selebar 345 dari 960 piksel sumbernya, jadi kotak
+                     seketat 9/16 akan ikut memotong bahu orangnya. Angka ini
+                     memotong persis sampai tepi bantalannya. --}}
                 @foreach ([
-                    ['testimoni', 'testimoni-sampul', 'Peserta Scopus Camp — Yogyakarta'],
-                    ['testimoni2-web', 'testimoni2-sampul', 'Peserta Rumah Scopus'],
-                    ['testimoni3-web', 'testimoni3-sampul', 'Peserta Rumah Scopus'],
-                ] as $i => [$berkas, $sampul, $siapa])
+                    ['testimoni', 'testimoni-sampul', null],
+                    ['testimoni2-web', 'testimoni2-sampul', '23 / 36'],
+                    ['testimoni3-web', 'testimoni3-sampul', null],
+                ] as $i => [$berkas, $sampul, $rasio])
                     <figure class="bnd-polaroid" data-aos="fade-up" data-aos-delay="{{ $i * 110 }}">
                         {{-- preload="none", BUKAN "metadata".
 
@@ -1221,13 +1247,15 @@ Beranda | Rumah Scopus
                              Sampulnya yang menggantikan bingkai pertama, dan
                              itu sebabnya tiap rekaman punya berkas -sampul
                              sendiri. --}}
-                        <video controls playsinline preload="none"
-                            poster="{{ asset('storage/video/' . $sampul . '.webp') }}"
-                            aria-label="Testimoni {{ $siapa }}">
-                            <source src="{{ asset('storage/video/' . $berkas . '.mp4') }}" type="video/mp4">
-                            Peramban kamu belum bisa memutar video ini.
-                        </video>
-                        <figcaption class="bnd-polaroid-kaki">{{ $siapa }}</figcaption>
+                        <div class="bnd-tayang" @if ($rasio) style="--ar: {{ $rasio }}" @endif>
+                            <video controls playsinline preload="none"
+                                poster="{{ asset('storage/video/' . $sampul . '.webp') }}"
+                                aria-label="Testimoni peserta Rumah Scopus">
+                                <source src="{{ asset('storage/video/' . $berkas . '.mp4') }}" type="video/mp4">
+                                Peramban kamu belum bisa memutar video ini.
+                            </video>
+                        </div>
+                        <figcaption class="bnd-polaroid-kaki">Peserta Rumah Scopus</figcaption>
                     </figure>
                 @endforeach
             </div>
