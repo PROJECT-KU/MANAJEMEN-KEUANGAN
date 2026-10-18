@@ -77,6 +77,11 @@ class LogoSuratSeragamTest extends TestCase
          * di suratnya maupun di kwitansinya.
          */
         'public/webinar_eksklusif/email_lunas.blade.php',
+
+        /* Kabar pembayaran yang tidak berhasil. Pembacanya pendaftar yang
+           baru saja gagal membayar dan sebagian masih mau ikut — surat
+           bermerek asing di saat begitu dihapus tanpa dibuka. */
+        'public/webinar_eksklusif/email_gagal_bayar.blade.php',
     ];
 
     /** Berkas yang isinya surat, bukan halaman atau faktur. */

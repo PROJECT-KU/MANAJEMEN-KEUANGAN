@@ -107,6 +107,37 @@ Webinar Eksklusif | Rumah Scopus
                                 </div>
                             @endif
 
+                            {{-- YANG DIDAPAT PESERTA.
+
+                                 Hanya digambar saat sesinya satu, yaitu saat
+                                 kartunya mendatar dan ada ruang untuknya. Di
+                                 kartu tegak berjajar, empat baris ini membuat
+                                 kartunya memanjang tanpa alasan — dan yang
+                                 membandingkan beberapa sesi mencari tanggal
+                                 dan harga, bukan daftar fasilitas yang sama
+                                 persis di semuanya.
+
+                                 Sumbernya daftar BERSTRUKTUR di tarifnya,
+                                 bukan deskripsi teks bebas sesi ini. Deskripsi
+                                 itu dirakit dari cetakan dan memuat "Rp
+                                 150.000 per peserta" — angka yang sudah tidak
+                                 benar, sementara kartunya menagih 129.000.
+                                 Mengurainya berarti memajang dua harga
+                                 berbeda di satu kartu. --}}
+                            @if ($sesi->count() === 1 && count($s->daftar_fasilitas) > 0)
+                                <div class="sel-fasilitas">
+                                    <p class="sel-fasilitas-judul">Yang Anda dapat</p>
+                                    <ul>
+                                        @foreach (array_slice($s->daftar_fasilitas, 0, 4) as $f)
+                                            <li>
+                                                <i class="fas fa-check-circle" aria-hidden="true"></i>
+                                                {{ $f }}
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+
                             <div class="sel-kaki">
                                 {{-- Harga yang BENAR-BENAR ditagih, dan harga
                                      penuhnya dicoret kalau ada promo.
@@ -439,6 +470,48 @@ Webinar Eksklusif | Rumah Scopus
 
     .sel-waktu > .fas,
     .sel-pemateri > .fas { margin: 0 !important; color: #ff6a00; font-size: .85rem; }
+
+    /* Daftar yang didapat peserta — lihat alasannya di markahnya. */
+    .sel-fasilitas { margin: 14px 0 0; }
+
+    .sel-fasilitas-judul {
+        margin: 0 0 7px;
+        font-size: .74rem;
+        font-weight: 700;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+        color: #94a3b8;
+    }
+
+    .sel-fasilitas ul { list-style: none; margin: 0; padding: 0; }
+
+    .sel-fasilitas li {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        margin-bottom: 5px;
+        font-size: .85rem;
+        line-height: 1.5;
+        color: var(--tinta-2);
+    }
+
+    /*
+     * Centang hijau: ini yang DIDAPAT, bukan syarat yang harus dipenuhi.
+     *
+     * NAMANYA fa-check-circle, bukan fa-circle-check. Yang kedua nama
+     * Font Awesome 6, dan halaman ini memuat Font Awesome 5 — landing
+     * Webinar Eksklusif tempat gaya tombolnya disalin memang memakai FA6,
+     * jadi nama dari sana tidak bisa dibawa apa adanya.
+     *
+     * Gagalnya DIAM: terukur lebar 0, tinggi 0, content "none". Bukan kotak
+     * rusak, bukan tanda tanya — tidak ada apa-apa, dan daftarnya terbaca
+     * seperti memang tidak berikon.
+     */
+    .sel-fasilitas .fa-check-circle {
+        margin-top: 3px;
+        flex: 0 0 auto;
+        color: #10b981;
+    }
 
     .sel-kaki {
         display: flex;
