@@ -174,7 +174,11 @@ Beranda | Rumah Scopus
     }
 
     /* ============================================================= hero */
-    .bnd-hero { padding: 124px 0 70px; }
+    /* Bawahnya 70 jadi 44: pita berjalan di bawahnya adalah PENUTUP hero,
+       bukan bagian yang berdiri sendiri. Dengan 70px di atas dan 86px dari
+       bagian berikutnya, pitanya terbaca mengapung di antara dua ruang
+       kosong. */
+    .bnd-hero { padding: 124px 0 44px; }
 
     /* 1.08fr : 0.92fr, bukan 1 : 1. Kisi yang persis seimbang membuat kedua
        sisinya saling bersaing; sedikit tidak seimbang memberi tahu mata
@@ -275,23 +279,34 @@ Beranda | Rumah Scopus
     /* ======================================================= pita lari */
     /* Satu-satunya hal di halaman ini yang bergerak tanpa diminta — cukup
        untuk membuat halamannya terasa hidup, tidak cukup untuk mengganggu
-       orang yang sedang membaca di sebelahnya. */
+       orang yang sedang membaca di sebelahnya.
+
+       TIDAK DIMIRINGKAN. Versi pertama diputar -0,8deg, dan itu keliru:
+       pitanya membentang penuh dari tepi ke tepi, jadi kedua ujungnya
+       terpotong LURUS mengikuti tepi layar. Yang terbaca bukan "pita yang
+       ditempel miring" melainkan "pita yang dipasang kurang rapi" — miring
+       hanya terbaca disengaja kalau ujungnya ikut miring dan terlihat.
+
+       Hurufnya juga diturunkan dari Fraunces 1.1rem ke Figtree .8rem.
+       Serif tebal berukuran judul di dalam pita gelap bersaing dengan judul
+       hero yang persis di atasnya; pita ini pelengkap, bukan pengumuman. */
     .bnd-pita {
-        background: var(--tinta); color: var(--kertas);
-        padding: 15px 0; overflow: hidden;
-        transform: rotate(-.8deg) scale(1.03);
+        background: var(--tinta);
+        /* Tidak putih penuh: pita ini dibaca sekilas, bukan dibaca. */
+        color: rgba(251, 245, 233, .82);
+        padding: 11px 0; overflow: hidden;
     }
     .bnd-pita-isi {
         display: flex; width: max-content;
-        animation: bnd-lari 26s linear infinite;
+        animation: bnd-lari 34s linear infinite;
     }
     .bnd-pita-isi span {
-        display: inline-flex; align-items: center; gap: 20px;
-        padding-right: 20px; white-space: nowrap;
-        font-family: 'Fraunces', serif; font-weight: 700; font-size: 1.1rem;
-        letter-spacing: .05em;
+        display: inline-flex; align-items: center; gap: 18px;
+        padding-right: 18px; white-space: nowrap;
+        font-family: 'Figtree', sans-serif; font-weight: 700; font-size: .8rem;
+        letter-spacing: .2em;
     }
-    .bnd-pita-isi i { color: var(--stabilo); font-size: .5rem; }
+    .bnd-pita-isi i { color: rgba(255, 216, 77, .75); font-size: .3rem; }
     @keyframes bnd-lari { to { transform: translateX(-50%); } }
 
     /* ==================================================== kepala bagian */
@@ -616,7 +631,7 @@ Beranda | Rumah Scopus
         .bnd-ajakan h2 { font-size: 1.68rem; }
         .bnd-polaroid video { height: 320px; }
         .bnd-nilai-angka { font-size: 2.6rem; }
-        .bnd-pita-isi span { font-size: .98rem; }
+        .bnd-pita-isi span { font-size: .72rem; letter-spacing: .16em; }
     }
 
     /* ================================================== gerak minimal */
