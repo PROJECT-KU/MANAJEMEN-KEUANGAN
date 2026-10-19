@@ -2,264 +2,200 @@
 
 @section('title', 'Blog | Rumah Scopus')
 
+@push('kepala')
+{{-- Huruf yang SAMA dengan beranda: Fraunces untuk judul, Figtree untuk
+     teks. Tanpa ini halaman blog berganti rupa begitu orang menekan menu
+     Blog — dan pergantian huruf di tengah jalan terbaca sebagai pindah
+     situs, bukan sebagai pindah halaman. --}}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600..900&family=Figtree:wght@400;500;700;800&display=swap">
+@endpush
+
 @section('konten')
-<style>
-    /* Hero Refined - Blog Version */
-    .hero {
-        position: relative;
-        /* Padding disesuaikan */
-        background: #ffffff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-    }
+{{--
+    Blog Rumah Scopus — dirombak 19 Okt 2026 mengikuti beranda.
 
-    /* Background halus agar tidak kosong */
-    .hero::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 100%;
-        height: 100%;
-        background: radial-gradient(circle at center, rgba(255, 49, 49, 0.02) 0%, transparent 70%);
-        z-index: 0;
-    }
+    Yang diganti dan kenapa:
 
-    .hero .container {
-        position: relative;
-        z-index: 1;
-    }
+      - PALETNYA. Halaman ini memakai gradien merah-jingga #ff3131 -> #ff914d
+        di atas putih: palet lama yang sudah ditinggalkan beranda justru
+        karena pemiliknya menyebutnya terlalu mirip situs lain. Satu situs
+        dengan dua palet terbaca sebagai dua situs.
 
-    /* Badge Blog */
-    .hero-meta {
-        display: inline-flex;
-        align-items: center;
-        padding: 6px 16px;
-        background: #fff5f5;
-        border: 1px solid rgba(255, 49, 49, 0.1);
-        border-radius: 50px;
-        margin-bottom: 20px;
-    }
+      - LAYAR PERTAMANYA. Terukur hero-nya 900px dengan isi 387px — 513px
+        putih kosong yang harus digulung orang sebelum melihat satu judul
+        pun. Tingginya datang dari #hero{height:900px} milik templat; halaman
+        ini tidak memakai #hero lagi sama sekali.
 
-    /* Judul Utama */
-    .hero h1 {
-        font-size: clamp(32px, 5vw, 56px);
-        font-weight: 800;
-        color: #0f172a;
-        line-height: 1.2;
-        margin-bottom: 20px;
-    }
+      - KALIMATNYA. Layar pertamanya dulu berisi kutipan motivasi dan tiga
+        janji — "Sertifikat Resmi" dan "Akses Selamanya" — yang tidak ada
+        hubungannya dengan membaca blog; itu janji kelas berbayar, dipasang
+        di halaman yang isinya bacaan gratis. Tombolnya pun berbunyi
+        "Langganan Update Artikel" lalu membuka kanal YouTube.
 
-    .hero .hero-description {
-        max-width: 800px;
-        margin: 0 auto;
-        font-size: 18px;
-        color: #64748b;
-        line-height: 1.6;
-    }
+      - SUSUNANNYA. Dulu dikelompokkan per kategori lalu take(3). Kategori
+        Journal punya lima tulisan, jadi dua di antaranya tidak pernah
+        muncul di /blog. Sekarang semuanya terpajang: satu yang terbaru
+        dibesarkan, sisanya berkisi.
+--}}
+@include('public.article.partials.gaya')
+<div class="blg">
 
-    /* Utilitas Gradient - Pastikan ini ada agar teks tidak hilang */
-    .text-gradient {
-        background: linear-gradient(135deg, #ff3131 0%, #ff914d 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        display: inline-block;
-        /* Penting agar gradient tampil sempurna */
-    }
+    {{-- ==================================================== kepala ===== --}}
+    <section class="blg-kepala">
+        <div class="container">
+            <span class="blg-stiker"><i class="bi bi-journal-text"></i> Bacaan gratis</span>
 
-    /* Tombol */
-    .btn-hero {
-        background: linear-gradient(135deg, #ff3131 0%, #ff914d 100%);
-        color: white !important;
-        padding: 12px 30px;
-        border-radius: 10px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        box-shadow: 0 10px 20px rgba(255, 49, 49, 0.15);
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-    }
+            <h1 class="blg-judul">
+                Yang biasanya bikin naskah <span class="blg-stabilo">mandek</span>
+            </h1>
 
-    .btn-hero:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 15px 25px rgba(255, 49, 49, 0.25);
-    }
+            <p class="blg-sub">
+                Catatan soal nulis artikel, milih jurnal, ngolah data, sampai
+                hal-hal kecil yang sering bikin naskah balik lagi dari reviewer.
+                {{ $artikel->count() }} tulisan, semuanya boleh dibaca siapa saja.
+            </p>
 
-    /* Card Modernization */
-    .post-box {
-        transition: all 0.3s ease;
-        border: none;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-        border-radius: 15px;
-        overflow: hidden;
-        background: #fff;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        padding: 0 !important;
-        /* Reset padding to handle image correctly */
-    }
+            @if ($categories_artikel->isNotEmpty())
+                {{-- Keripik kategori, bukan tab: tiap satunya halaman sendiri
+                     yang memang sudah ada rutenya. Yang kosong sudah disaring
+                     di pengendali, jadi tidak ada yang mengantar ke halaman
+                     tanpa isi. --}}
+                <div class="blg-keripik">
+                    @foreach ($categories_artikel as $i => $kategori)
+                        <a href="{{ route('blog.topic.kategori', ['categories_artikel_id' => $kategori->id]) }}"
+                            class="blg-keripik-butir" style="--c: {{ ['var(--jingga)', 'var(--rumput)', 'var(--ungu)', 'var(--langit)', '#be185d'][$i % 5] }}">
+                            {{ $kategori->kategori }}
+                            <span>{{ $jumlahPerKategori[$kategori->id] ?? 0 }}</span>
+                        </a>
+                    @endforeach
+                </div>
+            @endif
+        </div>
+    </section>
 
-    .post-box:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-    }
+    @php
+        $sorotan = $artikel->first();
+        $sisanya = $artikel->skip(1);
 
-    .post-img img {
-        width: 100%;
-        height: 220px;
-        object-fit: cover;
-    }
+        /*
+         * Lama baca dihitung dari isinya, bukan ditulis admin.
+         *
+         * 200 kata per menit — patokan yang lazim untuk teks non-fiksi
+         * berbahasa Indonesia. Markahnya dibuang dulu; tanpa itu, tulisan
+         * yang banyak <p> dan <strong>-nya terhitung dua kali lebih panjang
+         * daripada yang benar-benar dibaca orang.
+         */
+        $lamaBaca = function ($isi) {
+            $kata = str_word_count(trim(strip_tags((string) $isi)));
 
-    .post-content {
-        padding: 25px;
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-    }
+            return max(1, (int) ceil($kata / 200));
+        };
+    @endphp
 
-    .post-title {
-        font-size: 20px;
-        font-weight: 700;
-        margin: 15px 0;
-        line-height: 1.4;
-        color: var(--text-dark);
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-
-    .section-header {
-        margin-bottom: 40px;
-        border-bottom: 2px solid #f1f2f6;
-        padding-bottom: 15px;
-    }
-
-    .author-img {
-        width: 45px;
-        height: 45px;
-        object-fit: cover;
-        border: 2px solid #fff;
-        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-    }
-</style>
-
-<section id="hero" class="hero">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-10" data-aos="fade-up">
-
-                <div class="hero-meta">
-                    <span class="text-gradient fw-bold small text-uppercase" style="letter-spacing: 1px;">
-                        <i class="bi bi-journal-text me-2"></i> Arsip Pengetahuan & Riset
+    {{-- =================================================== sorotan ===== --}}
+    @if ($sorotan)
+        <section class="blg-bagian">
+            <div class="container">
+                <a href="{{ route('blog.topic.blog-single', ['id' => $sorotan->id]) }}" class="blg-sorot">
+                    <span class="blg-sorot-gambar">
+                        {{-- fetchpriority high + TANPA lazy: ini gambar terbesar di
+                             layar pertama sesudah digulung sedikit, dan menundanya
+                             membuat kotaknya kosong justru saat orang menatapnya. --}}
+                        <img src="{{ asset('images/' . $sorotan->gambar_depan) }}"
+                            alt="{{ $sorotan->judul }}" fetchpriority="high" decoding="async">
                     </span>
+
+                    <span class="blg-sorot-isi">
+                        <span class="blg-tanda">Terbaru</span>
+
+                        <h2>{{ $sorotan->judul }}</h2>
+
+                        <span class="blg-cuplik">
+                            {{ \Illuminate\Support\Str::limit(trim(strip_tags((string) $sorotan->isi)), 190) }}
+                        </span>
+
+                        <span class="blg-meta">
+                            @if ($sorotan->kategori)
+                                <span><i class="bi bi-tag"></i> {{ $sorotan->kategori }}</span>
+                            @endif
+                            <span><i class="bi bi-calendar3"></i>
+                                {{ \Carbon\Carbon::parse($sorotan->created_at)->locale('id')->translatedFormat('j M Y') }}</span>
+                            <span><i class="bi bi-clock"></i> {{ $lamaBaca($sorotan->isi) }} menit baca</span>
+                        </span>
+
+                        <span class="blg-ajak">Baca sekarang <i class="bi bi-arrow-right"></i></span>
+                    </span>
+                </a>
+            </div>
+        </section>
+    @endif
+
+    {{-- ================================================== sisanya ====== --}}
+    @if ($sisanya->isNotEmpty())
+        <section class="blg-bagian" style="background: var(--kertas-2); padding-top: 62px;">
+            <div class="container">
+                <h2 class="blg-judul-kecil">Tulisan lainnya</h2>
+
+                <div class="blg-kisi">
+                    @foreach ($sisanya as $i => $artikelnya)
+                        <a href="{{ route('blog.topic.blog-single', ['id' => $artikelnya->id]) }}"
+                            class="blg-kartu" data-aos="fade-up" data-aos-delay="{{ ($i % 3) * 90 }}">
+                            <span class="blg-kartu-gambar">
+                                <img src="{{ asset('images/' . $artikelnya->gambar_depan) }}"
+                                    alt="{{ $artikelnya->judul }}" loading="lazy" decoding="async">
+                                @if ($artikelnya->kategori)
+                                    <span class="blg-kartu-tag">{{ $artikelnya->kategori }}</span>
+                                @endif
+                            </span>
+
+                            <span class="blg-kartu-isi">
+                                <span class="blg-meta">
+                                    <span><i class="bi bi-calendar3"></i>
+                                        {{ \Carbon\Carbon::parse($artikelnya->created_at)->locale('id')->translatedFormat('j M Y') }}</span>
+                                    <span><i class="bi bi-clock"></i> {{ $lamaBaca($artikelnya->isi) }} menit</span>
+                                </span>
+
+                                <h3>{{ $artikelnya->judul }}</h3>
+
+                                <span class="blg-kartu-kaki">
+                                    <span class="blg-penulis">
+                                        <img src="{{ $artikelnya->gambar ? \App\Support\FotoProfil::url($artikelnya->gambar) : asset('assets/img/avatar/avatar-1.png') }}"
+                                            alt="" loading="lazy">
+                                        {{ \Illuminate\Support\Str::limit($artikelnya->full_name, 16) }}
+                                    </span>
+                                    <span class="blg-ajak-kecil">Baca <i class="bi bi-arrow-right"></i></span>
+                                </span>
+                            </span>
+                        </a>
+                    @endforeach
                 </div>
+            </div>
+        </section>
+    @endif
 
-                <h1>
-                    Temukan <span class="text-gradient">Inspirasi</span> & Strategi <br class="d-none d-md-block">
-                    Publikasi <span class="text-gradient">Jurnal Scopus</span>
-                </h1>
-
-                <div class="hero-description">
-                    <p class="mb-0">
-                        "Janganlah pernah menyerah ketika kamu masih mampu berusaha lagi. <br class="d-none d-md-block">
-                        Tidak ada kata berakhir sampai kamu berhenti mencoba."
-                    </p>
-                </div>
-
-                <div class="mt-4">
-                    <a href="https://www.youtube.com/@rumahscopus" class="btn-hero" target="_blank">
-                        Langganan Update Artikel <i class="bi bi-bell ms-2"></i>
+    {{-- =================================================== ajakan ====== --}}
+    <section class="blg-bagian">
+        <div class="container">
+            <div class="blg-ajakan">
+                <h2>Udah baca-baca, sekarang gimana?</h2>
+                <p>
+                    Bacaan bisa bantu sampai titik tertentu. Selebihnya naskahmu
+                    perlu dibedah bareng orang yang sudah sering menembus jurnalnya.
+                </p>
+                <div class="blg-aksi">
+                    <a href="{{ url('/#jadwal') }}" class="blg-tombol blg-tombol-utama">
+                        Lihat jadwal kelas <i class="bi bi-arrow-right"></i>
+                    </a>
+                    <a href="{{ url('/contact') }}" class="blg-tombol blg-tombol-kedua">
+                        <i class="bi bi-chat-dots-fill"></i> Tanya dulu
                     </a>
                 </div>
-
-                <div class="mt-4 d-flex justify-content-center align-items-center gap-3">
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-check2-circle text-success me-2"></i>
-                        <span class="small text-muted fw-bold">Tips Riset</span>
-                    </div>
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-check2-circle text-success me-2"></i>
-                        <span class="small text-muted fw-bold">Sertifikat Resmi</span>
-                    </div>
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-check2-circle text-success me-2"></i>
-                        <span class="small text-muted fw-bold">Akses Selamanya</span>
-                    </div>
-                </div>
-
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-@foreach ($categories_artikel as $category)
-@php
-$articlesInCategory = $artikel->where('categories_artikel_id', $category->id)
-->where('status', 'publish')
-->sortByDesc('created_at')
-->take(3);
-@endphp
-
-@if ($articlesInCategory->isNotEmpty())
-<section class="recent-blog-posts py-5">
-    <div class="container" data-aos="fade-up">
-
-        <header class="section-header d-flex justify-content-between align-items-end">
-            <div>
-                <h2 class="fw-bold mb-0" style="letter-spacing: -1px;">{{ strtoupper($category->kategori) }}</h2>
-            </div>
-            <a href="{{ route('blog.topic.kategori', ['categories_artikel_id' => $category->id]) }}" class="text-gradient text-decoration-none">
-                Selengkapnya <i class="bi bi-chevron-right"></i>
-            </a>
-        </header>
-
-        <div class="row g-4">
-            @foreach ($articlesInCategory as $article)
-            <div class="col-lg-4 col-md-6">
-                <article class="post-box">
-                    <div class="post-img">
-                        <img src="{{ asset('images/' . $article->gambar_depan) }}" alt="{{ $article->judul }}">
-                    </div>
-
-                    <div class="post-content">
-                        <div class="d-flex align-items-center mb-3">
-                            <small class="text-muted">
-                                <i class="bi bi-calendar3 me-1"></i> {{ \Carbon\Carbon::parse($article->created_at)->translatedFormat('d M Y') }}
-                            </small>
-                        </div>
-
-                        <h3 class="post-title">
-                            <a href="{{ route('blog.topic.blog-single', ['id' => $article->id]) }}" class="text-decoration-none text-dark">
-                                {{ $article->judul }}
-                            </a>
-                        </h3>
-
-                        <div class="mt-auto d-flex justify-content-between align-items-center pt-3 border-top">
-                            <div class="d-flex align-items-center">
-                                <img src="{{ $article->gambar ? \App\Support\FotoProfil::url($article->gambar) : asset('assets/img/avatar/avatar-1.png') }}"
-                                    class="rounded-circle author-img me-2" alt="Author">
-                                <small class="fw-bold text-secondary">{{ Str::limit($article->full_name, 15) }}</small>
-                            </div>
-                            <a href="{{ route('blog.topic.blog-single', ['id' => $article->id]) }}"
-                                class="text-gradient text-decoration-none fw-bold small">
-                                Baca <i class="bi bi-arrow-right"></i>
-                            </a>
-                        </div>
-                    </div>
-                </article>
-            </div>
-            @endforeach
-        </div>
-
-    </div>
-</section>
-@endif
-@endforeach
-
+</div>
 @stop
