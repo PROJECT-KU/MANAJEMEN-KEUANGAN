@@ -392,4 +392,177 @@ class BerandaTest extends TestCase
             'Ada lagi aturan `.bnd-sub {` berdiri sendiri; aturan itu kalah bobot '
             . 'dan tidak akan pernah berlaku.');
     }
+
+    // ------------------------------------------------- isi dari basis data
+
+    /**
+     * Satu angkatan buatan uji.
+     *
+     * Kolomnya `mulai`/`selesai`/`nama_ke` — BUKAN tanggal_mulai,
+     * tanggal_selesai, nomor_angkatan seperti yang dipakai beberapa uji lama.
+     * Nama yang salah tidak melempar apa pun: $fillable membuangnya diam-diam
+     * dan barisnya tersimpan dengan `mulai` NULL, lalu hilang dari saringan
+     * jadwal tanpa sebab yang kelihatan.
+     */
+    private function angkatan(array $ganti = []): \App\KategoriLayanan
+    {
+        return \App\KategoriLayanan::create(array_merge([
+            'layanan' => 'scopus_camp',
+            'nama' => 'UJI Beranda ' . \Illuminate\Support\Str::random(6),
+            'nama_ke' => random_int(9000, 9999),
+            'mulai' => now()->addDay()->toDateString(),
+            'selesai' => now()->addDays(3)->toDateString(),
+            'total_kuota' => 12,
+            'sisa_kuota' => 12,
+            'biaya' => 4200000,
+            'status' => 'active',
+        ], $ganti));
+    }
+
+    #[Test]
+    public function jadwal_memajang_angkatan_yang_masih_bisa_didaftari(): void
+    {
+        /*
+         * Beranda dulu TIDAK punya bagian jadwal sama sekali: pengendalinya
+         * memulangkan view tanpa satu pun data, sementara ratusan angkatan
+         * menunggu dibuka. Orang yang datang harus menebak kapan kelasnya
+         * dengan membuka enam halaman layanan satu-satu.
+         */
+        $terbuka = $this->angkatan();
+
+        $isi = (string) $this->get('/')->assertOk()->getContent();
+
+        $this->assertStringContainsString($terbuka->nama, $isi,
+            'Angkatan yang paling dekat dan kuotanya masih ada tidak muncul di '
+            . 'beranda. Bagian jadwalnya tidak lagi membaca basis data.');
+
+        $this->assertStringContainsString($terbuka->id, $isi,
+            'Nama angkatannya muncul tetapi tanpa tautan ke halamannya; orang '
+            . 'melihat jadwalnya lalu tidak punya jalan untuk mendaftar.');
+    }
+
+    #[Test]
+    public function jadwal_menyembunyikan_angkatan_yang_sudah_jalan_atau_penuh(): void
+    {
+        /*
+         * Dua yang TIDAK boleh muncul, masing-masing karena alasan berbeda:
+         *
+         *   - yang tanggal mulainya sudah tiba. KategoriLayanan sendiri
+         *     menyebut angkatan begitu sudah tertutup sejak 5 Okt 2026, atas
+         *     permintaan pemiliknya: memajangnya berarti mengajak orang
+         *     membayar acara yang sudah separuh jalan;
+         *
+         *   - yang sisa kuotanya nol. Mendaftarkannya pasti gagal di borang,
+         *     dan kegagalan itu baru ketahuan sesudah orangnya mengisi semua.
+         *
+         * Keduanya dibuat lebih AWAL daripada angkatan mana pun yang ada,
+         * jadi kalau saringannya rusak mereka pasti terpajang di urutan
+         * teratas — bukan kebetulan tidak terlihat karena kalah urutan.
+         */
+        $sudahJalan = $this->angkatan([
+            'mulai' => now()->subDay()->toDateString(),
+            'selesai' => now()->addDay()->toDateString(),
+        ]);
+
+        $penuh = $this->angkatan(['sisa_kuota' => 0]);
+
+        $isi = (string) $this->get('/')->assertOk()->getContent();
+
+        $this->assertStringNotContainsString($sudahJalan->nama, $isi,
+            'Angkatan yang tanggal mulainya sudah lewat terpajang di beranda. '
+            . 'Orang akan membayar acara yang sudah berjalan.');
+
+        $this->assertStringNotContainsString($penuh->nama, $isi,
+            'Angkatan yang kuotanya habis terpajang di beranda. Orangnya baru '
+            . 'tahu penuh sesudah mengisi seluruh borang.');
+    }
+
+    #[Test]
+    public function harga_kartu_layanan_ikut_tarif_yang_berlaku(): void
+    {
+        /*
+         * Sebelum ini beranda tidak menyebut SATU pun harga — kata "Rp" nol
+         * kali di seluruh halaman — padahal tarif tiap layanan sudah diurus
+         * admin. Harga yang disembunyikan membuat orang menutup halaman,
+         * bukan menanyakannya.
+         *
+         * Yang dijaga: angkanya benar-benar datang dari tarif, bukan ditulis
+         * tangan di markahnya. Angka yang ditulis tangan berhenti benar pada
+         * hari admin mengubah tarifnya, dan tidak ada yang memberi tahu —
+         * yang menanggung selisihnya admin yang harus menjelaskan ke orang
+         * yang sudah telanjur membaca angka lama.
+         */
+        $tarif = \App\ClinikScopusBiayaPersesi::query()
+            ->aktif()
+            ->where('layanan', 'scopus_camp')
+            ->first();
+
+        $this->assertNotNull($tarif, 'Tidak ada tarif Scopus Camp yang berlaku untuk diuji.');
+
+        $tarif->forceFill(['biaya_persesi' => 4321000])->save();
+        \App\ClinikScopusBiayaPersesi::lupakanPemeriksaanJadwal();
+
+        $this->get('/')->assertOk()->assertSee('Rp 4.321.000', false);
+    }
+
+    #[Test]
+    public function beranda_tidak_pernah_memajang_rupiah_nol(): void
+    {
+        /*
+         * Angkatan beraya nol memang ada — terukur di basis data — dan
+         * "mulai dari Rp 0" di samping kelas berbayar terbaca sebagai
+         * kesalahan sistem, bukan sebagai kelas gratis.
+         */
+        $this->angkatan(['biaya' => 0, 'total_biaya' => 0]);
+
+        $isi = (string) $this->get('/')->assertOk()->getContent();
+        $teks = (string) preg_replace('/\s+/', ' ', strip_tags($isi));
+
+        $this->assertDoesNotMatchRegularExpression('/Rp\s*0(?![.,\d])/', $teks,
+            'Beranda memajang "Rp 0". Pembacanya membaca itu sebagai sistem yang '
+            . 'rusak, bukan sebagai kelas tanpa biaya.');
+    }
+
+    #[Test]
+    public function ketiga_alat_gratis_tertaut_dan_halamannya_hidup(): void
+    {
+        /*
+         * Ketiga halaman ini sudah lama ada dan memulangkan 200, tetapi
+         * beranda tidak menyebutnya sama sekali — bagian layanannya menulis
+         * "Enam cara belajar" padahal pintunya sembilan.
+         */
+        $isi = (string) $this->get('/')->assertOk()->getContent();
+
+        foreach (['/Refrensi-Paper', '/Cek-Plagiasi', '/paperisasi/public/data'] as $jalur) {
+            $this->assertStringContainsString(url($jalur), $isi,
+                'Beranda tidak lagi menautkan ' . $jalur . '; alat yang bisa dipakai '
+                . 'tanpa bayar itu jadi tidak pernah ditemukan orang.');
+
+            $this->get($jalur)->assertOk();
+        }
+    }
+
+    #[Test]
+    public function tulisan_terbaru_tertaut_ke_artikelnya(): void
+    {
+        /*
+         * Blognya hidup dan beranda tidak menautkannya satu kali pun, bahkan
+         * tidak ke /blog. Orang yang belum siap membeli tidak punya apa pun
+         * untuk dibaca sebelum pergi.
+         */
+        $artikel = \App\Artikel::where('status', 'publish')->orderByDesc('created_at')->first();
+
+        if ($artikel === null) {
+            $this->markTestSkipped('Belum ada artikel terbit untuk diuji.');
+        }
+
+        $isi = (string) $this->get('/')->assertOk()->getContent();
+
+        $this->assertStringContainsString(
+            route('blog.topic.blog-single', ['id' => $artikel->id]), $isi,
+            'Tulisan terbaru tidak lagi tertaut dari beranda.');
+
+        $this->assertStringContainsString(url('/blog'), $isi,
+            'Beranda kehilangan jalan ke blognya.');
+    }
 }
