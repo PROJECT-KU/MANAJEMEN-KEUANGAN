@@ -90,6 +90,49 @@ class KepalaSitusTest extends TestCase
     }
 
     #[Test]
+    public function logonya_tidak_diregangkan(): void
+    {
+        /*
+         * Logonya pernah digambar 180x40 padahal berkasnya 1906x470 —
+         * terukur nisbah 4,5 lawan 4,055, meregang sekitar sebelas persen.
+         *
+         * Sebabnya DUA aturan yang sama-sama berlaku: width: 180px di
+         * atribut style=, dan max-height: 40px dari templat. Keduanya
+         * dituruti, jadi peramban mengisi kotak 180x40 dan nisbahnya
+         * dibuang.
+         *
+         * Tidak ada galat, dan tidak ada satu pun yang bisa ditunjuk
+         * sebagai "rusak" — logo teregang cuma terbaca "dipaksa", dan
+         * itulah kata yang dipakai pemiliknya.
+         */
+        $isi = (string) $this->get('/')->assertOk()->getContent();
+
+        $cocok = preg_match('#<a[^>]*class="logo[^"]*"[^>]*>\s*<img[^>]*>#s', $isi, $tangkap);
+
+        $this->assertSame(1, $cocok, 'Gambar logo di kepala situs tidak ditemukan.');
+
+        $this->assertDoesNotMatchRegularExpression('/style\s*=\s*"[^"]*width/i', $tangkap[0],
+            'Logo kepala situs kembali mematok lebarnya di atribut style=. Bersama '
+            . 'max-height dari templat, keduanya memaksa gambarnya ke kotak yang '
+            . 'nisbahnya berbeda dari berkasnya.');
+
+        $sumber = (string) preg_replace(
+            ['#/\*.*?\*/#s', '#\{\{--.*?--\}\}#s'], '',
+            (string) file_get_contents(base_path(self::LAYOUT))
+        );
+
+        $this->assertMatchesRegularExpression(
+            '/#header \.logo img \{[^}]*width:\s*auto[^}]*\}/s', $sumber,
+            'Lebar logo bukan lagi auto; nisbahnya tidak lagi dijamin utuh.');
+
+        $this->assertMatchesRegularExpression(
+            '/#header \.logo img \{[^}]*max-height:\s*none[^}]*\}/s', $sumber,
+            'max-height: none dicabut. Templat memasang max-height: 40px, dan tanpa '
+            . 'pembatalan itu tinggi 46px yang kita minta kalah oleh batas atasnya — '
+            . 'gambarnya mengerut lagi tanpa satu pun galat.');
+    }
+
+    #[Test]
     public function seluruh_halaman_publik_masih_menggambar_menunya(): void
     {
         /*
