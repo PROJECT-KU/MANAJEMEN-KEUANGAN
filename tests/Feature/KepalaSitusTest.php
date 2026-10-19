@@ -157,4 +157,155 @@ class KepalaSitusTest extends TestCase
                 . 'sempit tidak ada satu pun jalan ke menu.');
         }
     }
+
+    // ------------------------------------------------------------ kaki situs
+
+    /** Potongan HTML di antara <footer> dan </footer> pada satu halaman. */
+    private function kaki(string $jalur = '/'): string
+    {
+        $isi = (string) $this->get($jalur)->assertOk()->getContent();
+
+        $cocok = preg_match('#<footer\b.*?</footer>#s', $isi, $tangkap);
+
+        $this->assertSame(1, $cocok, 'Halaman ' . $jalur . ' tidak punya <footer>.');
+
+        return $tangkap[0];
+    }
+
+    #[Test]
+    public function tiap_tautan_di_kaki_halaman_benar_benar_sampai(): void
+    {
+        /*
+         * Butir "Contact" di kaki halaman menunjuk /blog/contact — dan itu
+         * 404. Rutenya /contact.
+         *
+         * Kaki halaman ini ikut di SETIAP halaman umum, jadi semua orang yang
+         * mencari cara menghubungi dari bawah halaman mendarat di halaman
+         * kosong. Tidak ada galat di log, tidak ada yang mengadu: orang yang
+         * gagal menghubungi tidak menghubungi untuk memberi tahu bahwa ia
+         * gagal menghubungi. Ia pergi.
+         *
+         * Dijaga dengan BENAR-BENAR membuka tiap tautannya, bukan dengan
+         * mencocokkan daftar alamat: daftar yang dicocokkan ikut salah
+         * begitu rutenya berganti nama.
+         */
+        preg_match_all('/href="([^"#][^"]*)"/', $this->kaki(), $cocok);
+
+        $dalam = array_values(array_unique(array_filter(
+            $cocok[1],
+            fn ($t) => str_starts_with($t, url('/')) || str_starts_with($t, '/')
+        )));
+
+        $this->assertNotEmpty($dalam, 'Kaki halaman tidak punya satu pun tautan ke dalam situs.');
+
+        $gagal = [];
+
+        foreach ($dalam as $tautan) {
+            $jalur = '/' . ltrim((string) parse_url($tautan, PHP_URL_PATH), '/');
+            $kode = $this->get($jalur)->getStatusCode();
+
+            if ($kode >= 400) {
+                $gagal[] = $jalur . ' -> ' . $kode;
+            }
+        }
+
+        $this->assertSame([], $gagal,
+            "Tautan di kaki halaman ini tidak sampai ke mana pun:\n- "
+            . implode("\n- ", $gagal));
+    }
+
+    #[Test]
+    public function kaki_halaman_tidak_punya_tautan_buntu(): void
+    {
+        /*
+         * Kolom "Layanan Kami" dulu berisi LIMA butir yang semuanya
+         * href="#": Class Online, Class Offline, Scopus Kafe, Online
+         * Training, Meeting Room. Diklik, tidak terjadi apa-apa.
+         *
+         * Lebih buruk daripada 404: halaman tidak berganti sama sekali, jadi
+         * orangnya mengira kliknya yang meleset dan mencoba lagi.
+         *
+         * Di kepala situs href="#" masih sah — pembuka submenu "Class"
+         * memang begitu — tetapi di kaki halaman tidak ada submenu apa pun.
+         */
+        preg_match_all('/<a\b[^>]*href="#"[^>]*>(.*?)<\/a>/s', $this->kaki(), $cocok);
+
+        $buntu = array_map(fn ($t) => trim((string) preg_replace('/\s+/', ' ', strip_tags($t))), $cocok[1]);
+
+        $this->assertSame([], $buntu,
+            "Butir kaki halaman ini tidak mengarah ke mana pun:\n- "
+            . implode("\n- ", $buntu));
+    }
+
+    #[Test]
+    public function kaki_halaman_memakai_bahasa_rupa_yang_sama(): void
+    {
+        /*
+         * Kakinya sempat TIDAK ikut dirombak, dan selisihnya terukur:
+         * latarnya rgb(246, 249, 255) — biru-putih dingin — sementara
+         * beranda krem hangat #fdf5e8; hurufnya Open Sans + Nunito sementara
+         * beranda Fraunces + Figtree. Halamannya berakhir dengan rupa situs
+         * yang berbeda, tepat di bawah ajakan terakhirnya.
+         *
+         * Yang dijaga bukan warnanya — warna boleh berganti — melainkan
+         * BOBOT pemilihnya. Aturan bawaan templat sedalam
+         * `.footer .footer-top .footer-links ul a` berbobot (0,4,1); timpaan
+         * berkelas saja kalah dan tidak berlaku sama sekali, tanpa galat,
+         * dan kakinya diam-diam kembali ke rupa lamanya.
+         */
+        $sumber = (string) preg_replace(
+            ['#/\*.*?\*/#s', '#\{\{--.*?--\}\}#s'], '',
+            (string) file_get_contents(base_path(self::LAYOUT))
+        );
+
+        $this->assertMatchesRegularExpression('/#footer \{[^}]*background:/s', $sumber,
+            'Kaki halaman tidak lagi punya aturan latar ber-#footer; ia akan memakai '
+            . 'latar bawaan templat yang warnanya dari palet lama.');
+
+        $this->assertMatchesRegularExpression("/#footer \{[^}]*font-family:[^;]*Figtree/s", $sumber,
+            'Kaki halaman tidak lagi memaksa hurufnya; ia akan kembali ke Open Sans '
+            . 'bawaan templat sementara seluruh halaman memakai Figtree.');
+
+        /*
+         * Timpaan yang MENANDINGI aturan templat harus ber-#footer. Yang
+         * tidak punya tandingan — kelas milik kita sendiri seperti
+         * .kaki-wa — boleh berkelas saja.
+         */
+        $telanjang = [];
+
+        foreach (['.footer-top', '.footer-links', '.footer-info', '.copyright', '.social-links'] as $bagian) {
+            if (preg_match('/(?<![\w#-])\.footer\s+' . preg_quote($bagian, '/') . '\b/', $sumber)) {
+                $telanjang[] = '.footer ' . $bagian;
+            }
+        }
+
+        $this->assertSame([], $telanjang,
+            "Timpaan kaki halaman ini ditulis tanpa awalan #footer dan akan kalah "
+            . "bobot melawan aturan bawaan templat:\n- " . implode("\n- ", $telanjang));
+    }
+
+    #[Test]
+    public function tiap_halaman_publik_punya_jalan_ke_whatsapp(): void
+    {
+        /*
+         * Seluruh halaman umum dulu tidak punya SATU PUN tautan WhatsApp —
+         * terukur nol — padahal itu jalur yang benar-benar dipakai
+         * pelanggan, dan nomornya sudah lama ada di config/panitia.php.
+         *
+         * Alamatnya WAJIB api.whatsapp.com, BUKAN wa.me: lewat wa.me emoji
+         * dan sebagian tanda baca sampai dalam keadaan rusak, dan pengirimnya
+         * tidak pernah tahu karena di layarnya sendiri tampak baik-baik saja.
+         * Alasan lengkapnya di App\Support\TautanWa.
+         */
+        foreach (['/', '/blog', '/contact', '/Scopus-Camp'] as $jalur) {
+            $isi = (string) $this->get($jalur)->assertOk()->getContent();
+
+            $this->assertStringContainsString('api.whatsapp.com/send?phone=', $isi,
+                'Halaman ' . $jalur . ' kehilangan tautan WhatsApp-nya.');
+
+            $this->assertStringNotContainsString('wa.me/', $isi,
+                'Halaman ' . $jalur . ' memakai wa.me. Lewat alamat itu emoji dan '
+                . 'tanda baca pesannya sampai dalam keadaan rusak tanpa tanda apa pun.');
+        }
+    }
 }

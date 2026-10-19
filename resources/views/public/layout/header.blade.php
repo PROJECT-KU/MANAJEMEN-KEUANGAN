@@ -288,6 +288,164 @@
             display: block; width: 100%; padding: 0 6px 4px;
         }
 
+        /* ====================================================== kaki situs
+
+           Kakinya dulu TIDAK ikut dirombak, dan terukur: latarnya
+           rgb(246, 249, 255) — biru-putih dingin — sementara beranda krem
+           hangat #fdf5e8, hurufnya Open Sans + Nunito sementara beranda
+           Fraunces + Figtree. Halamannya berakhir dengan rupa situs yang
+           berbeda, tepat di bawah ajakan terakhirnya, dan itu bagian yang
+           dilihat paling akhir.
+
+           Tiap pemilih di bawah DIAWALI #footer — bobot (1,0,0) — supaya
+           menang atas aturan bawaan templat yang sedalam
+           `.footer .footer-top .footer-links ul a` (0,4,1). Tanpa awalan itu
+           kelas tunggal kalah telak dan tidak ada yang berubah, tanpa galat
+           apa pun. */
+        #footer {
+            --kaki-tinta: #16233f;
+            --kaki-kertas: #fdf5e8;
+            --kaki-jingga: #e76d20;
+            --kaki-jingga-muda: #fb8c3d;
+            --kaki-redup: rgba(251, 245, 233, .66);
+            --kaki-garis: rgba(251, 245, 233, .15);
+
+            background: var(--kaki-tinta);
+            color: var(--kaki-kertas);
+            font-family: 'Figtree', system-ui, sans-serif;
+        }
+        #footer .footer-top { background: transparent; padding: 58px 0 36px; }
+
+        /* Logonya DIALASI keping krem, bukan dibalik warnanya.
+
+           filter: brightness(0) invert(1) sempat dipakai di sini dan terlihat
+           benar sekilas — tulisannya memang jadi putih rapi. Tapi penyaring
+           itu memutihkan SETIAP piksel yang tidak tembus pandang, jadi tanda
+           lingkaran berisi di kiri logo berubah jadi bulatan putih polos:
+           rumah dan kata "Scopus" di dalamnya hilang sama sekali. Tidak ada
+           galat, dan di potret kecil kelihatan seperti logo biasa.
+
+           Keping krem membuat logonya tampil dengan warna aslinya. */
+        #footer .footer-top .footer-info .logo {
+            display: inline-flex !important; width: auto;
+            padding: 9px 15px; margin-bottom: 16px;
+            background: var(--kaki-kertas); border-radius: 14px;
+        }
+        #footer .footer-top .footer-info .logo img {
+            height: 42px; width: auto; max-height: none; margin: 0;
+        }
+        #footer .footer-top .footer-info p { color: var(--kaki-redup); font-size: .95rem; }
+
+        #footer .footer-top h4 {
+            position: relative;
+            padding: 0 0 12px; margin-bottom: 16px;
+            font-family: 'Fraunces', Georgia, serif;
+            font-weight: 800; font-size: 1.06rem;
+            color: var(--kaki-kertas);
+            border-bottom: none;
+        }
+        #footer .footer-top h4::after {
+            content: ''; position: absolute; left: 0; bottom: 0;
+            width: 38px; height: 3px; border-radius: 3px;
+            background: var(--kaki-jingga);
+        }
+
+        #footer .footer-top .footer-links ul { padding: 0; margin: 0; list-style: none; }
+        #footer .footer-top .footer-links ul li { padding: 5px 0; display: flex; align-items: baseline; }
+        #footer .footer-top .footer-links ul i {
+            color: var(--kaki-jingga); font-size: .8rem; margin-right: 6px; line-height: 1;
+        }
+        #footer .footer-top .footer-links ul a {
+            color: var(--kaki-redup); font-size: .93rem; font-weight: 500;
+            text-decoration: none; transition: color .18s ease;
+        }
+        #footer .footer-top .footer-links ul a:hover { color: var(--kaki-jingga-muda); }
+
+        #footer .footer-top .social-links a {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 38px; height: 38px; margin-right: 8px;
+            background: transparent; color: var(--kaki-kertas);
+            border: 2px solid var(--kaki-garis); border-radius: 12px;
+            font-size: 1rem;
+            transition: background .18s ease, border-color .18s ease, transform .18s ease;
+        }
+        #footer .footer-top .social-links a:hover {
+            background: var(--kaki-jingga); border-color: var(--kaki-jingga);
+            color: #fff; transform: translateY(-2px);
+        }
+
+        #footer .kaki-alamat { color: var(--kaki-redup); font-size: .93rem; margin-bottom: 14px; }
+        #footer ul.kaki-kontak { padding: 0; margin: 0; list-style: none; }
+        #footer ul.kaki-kontak li {
+            display: flex; align-items: center; gap: 9px; padding: 5px 0;
+            font-size: .93rem;
+        }
+        #footer ul.kaki-kontak i { color: var(--kaki-jingga); }
+        #footer ul.kaki-kontak a {
+            color: var(--kaki-redup); text-decoration: none; transition: color .18s ease;
+        }
+        #footer ul.kaki-kontak a:hover { color: var(--kaki-jingga-muda); }
+
+        #footer .copyright {
+            padding: 20px 0; text-align: center;
+            color: var(--kaki-redup); font-size: .88rem;
+            border-top: 1px solid var(--kaki-garis);
+        }
+        #footer .copyright strong span { color: var(--kaki-kertas); }
+
+        /* Tombol naik-ke-atas bawaan templat berwarna #4154f1 — biru nila
+           yang tidak ada di mana pun lagi di halaman ini sesudah rombakan.
+           Satu-satunya benda yang tersisa dari palet lama, dan ia mengambang
+           di atas segalanya. */
+        .back-to-top {
+            background: #b85213 !important;
+            border: 2px solid #16233f;
+            border-radius: 13px !important;
+            width: 44px !important; height: 44px !important;
+            box-shadow: 3px 3px 0 rgba(22, 35, 63, .4);
+        }
+        .back-to-top:hover { background: #16233f !important; }
+        .back-to-top i { color: #fff; }
+
+        /* =============================================== tombol WhatsApp
+
+           Beranda dan seluruh halaman umum tidak punya satu pun tautan
+           WhatsApp — terukur nol — padahal itu jalur yang benar-benar
+           dipakai pelanggan, dan nomornya sudah ada di config/panitia.php.
+
+           Lewat TautanWa, yang memakai api.whatsapp.com dan BUKAN wa.me:
+           lewat wa.me emoji dan sebagian tanda baca sampai dalam keadaan
+           rusak. Alasannya ditulis lengkap di kelas itu. */
+        .kaki-wa {
+            position: fixed; right: 15px; bottom: 64px; z-index: 99999;
+            display: inline-flex; align-items: center; gap: 9px;
+            padding: 11px 16px;
+            background: #16a34a; color: #fff;
+            border: 2px solid #0f3b23; border-radius: 999px;
+            box-shadow: 3px 3px 0 rgba(15, 59, 35, .5);
+            font-family: 'Figtree', system-ui, sans-serif;
+            font-weight: 800; font-size: .9rem; text-decoration: none;
+            transition: transform .18s ease, box-shadow .18s ease;
+        }
+        .kaki-wa:hover {
+            color: #fff; transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0 rgba(15, 59, 35, .5);
+        }
+        .kaki-wa i { font-size: 1.12rem; }
+
+        /* Di ponsel tombolnya mengkerut jadi lingkaran: tulisannya memakan
+           sepertiga lebar layar dan menutupi isi halaman di bawahnya. */
+        @media (max-width: 575px) {
+            .kaki-wa { padding: 0; width: 48px; height: 48px; justify-content: center; }
+            .kaki-wa span { display: none; }
+            .kaki-wa i { font-size: 1.4rem; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            #footer .footer-top .social-links a,
+            .kaki-wa { transition: none !important; }
+        }
+
         @media (prefers-reduced-motion: reduce) {
             #navbar a,
             #navbar .kop-tombol,
@@ -426,8 +584,13 @@
             <div class="container">
                 <div class="row gy-4">
                     <div class="col-lg-5 col-md-12 footer-info">
-                        <a href="{{url('/blog')}}" class="logo d-flex align-items-center">
-                            <img src="{{ asset('assets/img/LogoRSC.png') }}" alt="">
+                        {{-- Menunjuk beranda, bukan /blog.
+
+                             Logo di kaki halaman adalah jalan pulang yang orang
+                             coba lebih dulu sebelum mencari menu; mengantarnya ke
+                             blog berarti ia harus mencari lagi dari sana. --}}
+                        <a href="{{ url('/') }}" class="logo d-flex align-items-center">
+                            <img src="{{ asset('assets/img/LogoRSC.png') }}" alt="Rumah Scopus Foundation">
                         </a>
                         <p>Rumah Scopus adalah penyedia layanan jasa di bidang pendampingan penyusunan artikel ilmiah dan publikasi artikel ke jurnal terindeks Scopus.</p>
                         <div class="social-links mt-3">
@@ -438,34 +601,73 @@
                         </div>
                     </div>
 
+                    {{-- "Contact" di kolom ini dulu menunjuk /blog/contact — 404.
+
+                         Rutenya /contact, dan kaki halaman ini ikut di SETIAP
+                         halaman umum, jadi semua orang yang mencari cara
+                         menghubungi dari bawah halaman mendarat di halaman
+                         kosong. Tidak ada yang mengadu; mereka pergi. Dijaga
+                         KepalaSitusTest, yang benar-benar membuka tautannya. --}}
                     <div class="col-lg-2 col-6 footer-links">
-                        <h4>Link Bermanfaat</h4>
+                        <h4>Jelajahi</h4>
                         <ul>
+                            <li><i class="bi bi-chevron-right"></i> <a href="{{ url('/') }}">Beranda</a></li>
                             <li><i class="bi bi-chevron-right"></i> <a href="{{ url('/blog') }}">Blog</a></li>
-                            <li><i class="bi bi-chevron-right"></i> <a href="https://rumahscopus.com/courses/online-class/" target="_blank">Class Online</a></li>
-                            <li><i class="bi bi-chevron-right"></i> <a href="https://rumahscopusfoundation.com/account/Scopus-Camp" target="_blank">Class Offline</a></li>
-                            <li><i class="bi bi-chevron-right"></i> <a href="{{ url('/blog/contact') }}">Contact</a></li>
+                            <li><i class="bi bi-chevron-right"></i> <a href="{{ url('/Refrensi-Paper') }}">Refrensi Paper</a></li>
+                            <li><i class="bi bi-chevron-right"></i> <a href="{{ url('/Cek-Plagiasi') }}">Cek Plagiasi</a></li>
+                            <li><i class="bi bi-chevron-right"></i> <a href="{{ url('/paperisasi/public/data') }}">Cek ID Paper</a></li>
+                            <li><i class="bi bi-chevron-right"></i> <a href="{{ url('/contact') }}">Kontak</a></li>
+                            <li><i class="bi bi-chevron-right"></i> <a href="{{ url('/ketentuan-layanan') }}">Ketentuan layanan</a></li>
                         </ul>
                     </div>
 
+                    {{-- Kelima butirnya dulu href="#" — diklik, tidak terjadi
+                         apa pun. "Meeting Room" dibuang, bukan ditautkan:
+                         halaman umumnya memang tidak ada, dan menautkannya ke
+                         mana pun berarti mengulang cacat yang sama dengan
+                         bentuk berbeda. --}}
                     <div class="col-lg-2 col-6 footer-links">
                         <h4>Layanan Kami</h4>
                         <ul>
-                            <li><i class="bi bi-chevron-right"></i> <a href="#">Class Online</a></li>
-                            <li><i class="bi bi-chevron-right"></i> <a href="#">Class Offline</a></li>
-                            <li><i class="bi bi-chevron-right"></i> <a href="#">Scopus Kafe</a></li>
-                            <li><i class="bi bi-chevron-right"></i> <a href="#">Online Training</a></li>
-                            <li><i class="bi bi-chevron-right"></i> <a href="#">Meeting Room</a></li>
+                            <li><i class="bi bi-chevron-right"></i> <a href="{{ url('/Scopus-Camp') }}">Scopus Camp</a></li>
+                            <li><i class="bi bi-chevron-right"></i> <a href="https://rumahscopus.com/courses/online-class/" target="_blank" rel="noopener">Online Training</a></li>
+                            <li><i class="bi bi-chevron-right"></i> <a href="{{ url('/Scopus-Kafe') }}">Scopus Kafe</a></li>
+                            <li><i class="bi bi-chevron-right"></i> <a href="{{ url('/Analisis-Bibliometrik') }}">Analisis Bibliometrik</a></li>
+                            <li><i class="bi bi-chevron-right"></i> <a href="{{ url('/Clinik-Scopus') }}">Clinik Scopus</a></li>
+                            <li><i class="bi bi-chevron-right"></i> <a href="{{ url('/Webinar-Eksklusif') }}">Webinar Eksklusif</a></li>
                         </ul>
                     </div>
 
                     <div class="col-lg-3 col-md-12 footer-contact text-center text-md-start">
                         <h4>Hubungi Kami</h4>
-                        <p>
-                            Bangunsari, Jl. Bangunsari, Bangunsari, Bangun Kerto, Turi, Sleman Regency, Special Region of Yogyakarta 55551 <br><br>
-                            <strong>Phone:</strong> <b>Dinar</b> +62 812-2688-3280<br>
-                            <strong>Email:</strong> info@rumahscopusfoundation.com<br>
+                        {{-- Nomor dan alamat suratnya jadi TAUTAN.
+
+                             Sebelumnya cuma tulisan: di ponsel — tempat kaki
+                             halaman paling sering dibaca — menghubunginya
+                             berarti menyalin angkanya satu per satu lalu
+                             pindah aplikasi sendiri. --}}
+                        <p class="kaki-alamat">
+                            Bangunsari, Jl. Bangunsari, Bangun Kerto, Turi,
+                            Sleman, Daerah Istimewa Yogyakarta 55551
                         </p>
+
+                        <ul class="kaki-kontak">
+                            <li>
+                                <i class="bi bi-whatsapp"></i>
+                                <a href="{{ \App\Support\TautanWa::kirim(config('panitia.whatsapp')) }}"
+                                    target="_blank" rel="noopener">
+                                    {{ config('panitia.whatsapp_nama') }}
+                                </a>
+                            </li>
+                            <li>
+                                <i class="bi bi-telephone-fill"></i>
+                                <a href="tel:+6281226883280">Dinar — +62 812-2688-3280</a>
+                            </li>
+                            <li>
+                                <i class="bi bi-envelope-fill"></i>
+                                <a href="mailto:info@rumahscopusfoundation.com">info@rumahscopusfoundation.com</a>
+                            </li>
+                        </ul>
 
                     </div>
 
@@ -482,6 +684,13 @@
         </div>
     </footer><!-- End Footer -->
 
+
+    <a href="{{ \App\Support\TautanWa::kirim(config('panitia.whatsapp'), 'Halo, saya mau tanya soal kelas Rumah Scopus.') }}"
+        class="kaki-wa" target="_blank" rel="noopener"
+        aria-label="Tanya admin lewat WhatsApp">
+        <i class="bi bi-whatsapp"></i>
+        <span>Tanya admin</span>
+    </a>
 
     <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 

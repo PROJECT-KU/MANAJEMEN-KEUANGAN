@@ -51,8 +51,28 @@ Blog | Rumah Scopus
                         <div class="info-box">
                             <i class="bi bi-telephone"></i>
                             <h3>Telp</h3>
-                            <p class="mb-2"><b>Dinar</b> +62 812-2688-3280 <a href="https://wa.me/+6281226883280" target="_blank"><i style="font-size: 25px;" class="fab fa-whatsapp"></i></a></p>
-                            <p><b>[Elsa]</b> +62 857-4781-0881 <a href="https://wa.me/+6285747810881" target="_blank"><i style="font-size: 25px;" class="fab fa-whatsapp"></i></a></p>
+                            {{-- Lewat TautanWa, bukan wa.me ditulis tangan.
+
+                                 Dua hal yang salah di bentuk lamanya. Pertama
+                                 alamatnya: lewat wa.me emoji dan sebagian tanda
+                                 baca sampai dalam keadaan rusak — alasannya
+                                 ditulis lengkap di App\Support\TautanWa.
+                                 Kedua nomornya ditulis "+6281226883280"; wa.me
+                                 meminta angka saja, dan tanda plusnya ikut
+                                 terbaca sebagai bagian nomor.
+
+                                 Nomornya juga jadi tautan tel:, supaya di ponsel
+                                 bisa ditelepon tanpa disalin satu per satu. --}}
+                            <p class="mb-2">
+                                <b>Dinar</b>
+                                <a href="tel:+6281226883280">+62 812-2688-3280</a>
+                                <a href="{{ \App\Support\TautanWa::kirim('6281226883280') }}" target="_blank" rel="noopener" aria-label="WhatsApp Dinar"><i style="font-size: 25px;" class="fab fa-whatsapp"></i></a>
+                            </p>
+                            <p>
+                                <b>Elsa</b>
+                                <a href="tel:+6285747810881">+62 857-4781-0881</a>
+                                <a href="{{ \App\Support\TautanWa::kirim('6285747810881') }}" target="_blank" rel="noopener" aria-label="WhatsApp Elsa"><i style="font-size: 25px;" class="fab fa-whatsapp"></i></a>
+                            </p>
                         </div>
                     </div>
                 </div>
