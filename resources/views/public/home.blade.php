@@ -113,7 +113,8 @@ Beranda | Rumah Scopus
        kelasnya" menggulung halaman sampai tepi atas bagiannya — tepat di
        belakang kepala situs — dan stiker beserta judulnya hilang di balik
        menu. Terlihat persis begitu saat dipotret pada posisi gulir itu. */
-    #layanan { scroll-margin-top: 96px; }
+    #layanan,
+    #testimoni { scroll-margin-top: 96px; }
 
     /* ------------------------------------------------- stabilo & stiker */
     /* Sapuan stabilo di belakang satu frasa. Miring sedikit dan tepinya
@@ -923,8 +924,15 @@ Beranda | Rumah Scopus
                         <a href="#layanan" class="bnd-tombol bnd-tombol-utama">
                             Lihat kelasnya <i class="bi bi-arrow-right"></i>
                         </a>
-                        <a href="https://www.youtube.com/@rumahscopus" target="_blank" rel="noopener"
-                            class="bnd-tombol bnd-tombol-kedua">
+                        {{-- Menuju bagian testimoni di halaman ini, BUKAN ke
+                             YouTube. Tombol di hero yang membuka tab lain
+                             mengirim orang keluar sebelum ia sempat melihat
+                             satu pun layanan — dan rekamannya memang sudah ada
+                             di halaman ini, beberapa gulir di bawah.
+
+                             Tautan ke kanal YouTube-nya tidak hilang: ia ada
+                             di kaki situs bersama ikon sosial lainnya. --}}
+                        <a href="#testimoni" class="bnd-tombol bnd-tombol-kedua">
                             <i class="bi bi-play-fill"></i> Cerita alumni
                         </a>
                     </div>
@@ -1256,7 +1264,7 @@ Beranda | Rumah Scopus
     </section>
 
     {{-- ================================================ testimoni ====== --}}
-    <section class="bnd-bagian" style="background: var(--kertas-2);">
+    <section class="bnd-bagian" id="testimoni" style="background: var(--kertas-2);">
         <div class="container">
             <div class="bnd-kepala bnd-kepala-tengah" data-aos="fade-up">
                 <span class="bnd-stiker"><i class="bi bi-chat-quote-fill"></i> Kata mereka</span>

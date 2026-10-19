@@ -241,6 +241,39 @@ class BerandaTest extends TestCase
     }
 
     #[Test]
+    public function tombol_cerita_alumni_menuju_bagian_testimoni(): void
+    {
+        /*
+         * Tombolnya dulu membuka kanal YouTube di tab lain — mengirim orang
+         * KELUAR dari halaman sebelum ia sempat melihat satu pun layanan,
+         * padahal rekamannya sudah ada di halaman ini beberapa gulir di
+         * bawah.
+         *
+         * Jangkarnya ikut dijaga: href="#testimoni" yang menunjuk id yang
+         * tidak ada TIDAK memberi galat apa pun — tombolnya sekadar tidak
+         * melakukan apa-apa, dan tidak ada yang tahu selain orang yang
+         * menekannya.
+         */
+        $isi = (string) $this->get('/')->assertOk()->getContent();
+
+        $cocok = preg_match('#<a\b[^>]*href="\#testimoni"[^>]*>(.*?)</a>#s', $isi, $tangkap);
+
+        $this->assertSame(1, $cocok,
+            'Tidak ada tautan menuju #testimoni di beranda.');
+
+        $this->assertStringContainsString('Cerita alumni', $tangkap[1],
+            'Tautan #testimoni-nya bukan tombol "Cerita alumni".');
+
+        $this->assertMatchesRegularExpression('/id="testimoni"/', $isi,
+            'Tombol "Cerita alumni" menunjuk #testimoni tetapi bagiannya tidak '
+            . 'punya id itu. Tombolnya tidak akan melakukan apa-apa, tanpa galat.');
+
+        $this->assertStringNotContainsString('youtube.com/@rumahscopus', $tangkap[0],
+            'Tombol "Cerita alumni" kembali membuka YouTube; orangnya dikirim '
+            . 'keluar halaman sebelum melihat satu pun layanan.');
+    }
+
+    #[Test]
     public function tidak_ada_paragraf_rata_kiri_kanan(): void
     {
         /*
