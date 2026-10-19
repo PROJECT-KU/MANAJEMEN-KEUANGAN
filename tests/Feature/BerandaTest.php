@@ -187,6 +187,20 @@ class BerandaTest extends TestCase
                 'Rekaman testimoni kehilangan sampulnya. Dengan preload="none" '
                 . 'peramban tidak punya bingkai pertama untuk digambar, jadi yang '
                 . 'tampil kotak hitam.');
+
+            /*
+             * Butir "Download" di menu tiga titik Chrome dibuang.
+             *
+             * Ini BUKAN pengamanan dan tidak boleh dikira begitu: alamat
+             * berkasnya tetap ada di sumber halaman, dan uji ini tidak
+             * berpura-pura sebaliknya. Yang dijaga cuma bahwa jalan paling
+             * mudahnya tidak diam-diam terbuka lagi — atributnya gampang
+             * hilang saat markahnya disunting, dan hilangnya tidak terlihat
+             * sampai ada yang membuka menu pemutarnya.
+             */
+            $this->assertStringContainsString('controlsList="nodownload"', $satu,
+                'Rekaman testimoni kehilangan controlsList="nodownload"; tombol '
+                . 'Download kembali muncul di menu pemutarnya.');
         }
 
         foreach (['testimoni', 'testimoni2-web', 'testimoni3-web'] as $berkas) {
