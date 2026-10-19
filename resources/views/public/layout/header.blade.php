@@ -657,9 +657,24 @@
                                     {{ config('panitia.whatsapp_nama') }}
                                 </a>
                             </li>
+                            {{-- Nomornya dari config('panitia.whatsapp'), BUKAN diketik
+                                 di sini.
+
+                                 Sebelumnya "+62 812-2688-3280" ditulis dua kali di
+                                 baris ini — sekali di href="tel:", sekali sebagai
+                                 tulisannya — jadi menggantinya berarti mengubah dua
+                                 tempat, dan yang lupa salah satunya menghasilkan
+                                 nomor yang TERBACA benar tetapi MENELEPON nomor
+                                 lama. Tidak ada galat; yang menanggung orang yang
+                                 menekannya.
+
+                                 Nilai yang sama juga sudah memberi makan baris
+                                 WhatsApp di atas, jadi keduanya tidak bisa
+                                 berselisih lagi. --}}
+                            @php($telp = \App\Support\NomorTelepon::rapikan(config('panitia.whatsapp')))
                             <li>
                                 <i class="bi bi-telephone-fill"></i>
-                                <a href="tel:+6281226883280">Dinar — +62 812-2688-3280</a>
+                                <a href="tel:+{{ $telp }}">{{ \App\Support\NomorTelepon::tampil($telp) }}</a>
                             </li>
                             <li>
                                 <i class="bi bi-envelope-fill"></i>
