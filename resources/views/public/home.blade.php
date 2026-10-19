@@ -763,6 +763,21 @@ Beranda | Rumah Scopus
     }
     .bnd-alat-kartu:hover .bnd-alat-ajak { gap: 14px; }
 
+    /* Alatnya tinggal DUA sesudah Cek Plagiasi dibuang, dan .bnd-kisi-3
+       tetap memesan tiga kolom — terukur 441px kosong menganga di kanan,
+       membuat bagiannya terbaca seperti ada kartu yang gagal dimuat.
+
+       DI DALAM @media (min-width: 992px), bukan berdiri sendiri. Timpaan
+       telanjang `.bnd-alat .bnd-kisi-3` berbobot (0,2,0) dan akan MENANG
+       melawan `.bnd-kisi-3` (0,1,0) di dalam media ponsel — dua kolom
+       selebar 420px bertahan sampai layar 390px dan meluber keluar. */
+    @media (min-width: 992px) {
+        .bnd-alat .bnd-kisi-3 {
+            grid-template-columns: repeat(2, minmax(0, 420px));
+            justify-content: center;
+        }
+    }
+
     /* ======================================================== bacaan */
     .bnd-baca {
         display: flex; flex-direction: column;
@@ -1665,14 +1680,20 @@ Beranda | Rumah Scopus
     </section>
 
     {{-- ==================================================== alat ====== --}}
-    {{-- Tiga halaman ini SUDAH ADA dan semuanya memulangkan 200, tapi tidak
-         pernah disebut beranda sama sekali. Bagian layanan di atas menulis
-         "Enam cara belajar" padahal pintunya sembilan.
+    {{-- Kedua halaman ini SUDAH ADA dan sama-sama memulangkan 200, tapi tidak
+         pernah disebut beranda sama sekali.
 
          Dipisah dari kartu layanan, bukan dijejalkan ke sana, karena memang
          bukan barang yang sama: yang di atas dijual, yang di sini dipakai
          tanpa bayar dan tanpa daftar. Mencampurnya membuat orang mengira
-         salah satunya jebakan. --}}
+         salah satunya jebakan.
+
+         Cek Plagiasi dulu jadi kartu ketiga di sini dan DIBUANG 19 Okt 2026.
+         Bukan sekadar tidak terpakai: tombol kirimnya memanggil
+         FileUpload::create(), dan kelas FileUpload tidak pernah ada di
+         proyek ini — tidak di App, tidak di App\Models, tidak di mana pun.
+         Setiap naskah yang dikirim orang berakhir di galat 500 sesudah
+         berkasnya telanjur tersimpan. --}}
     <section class="bnd-bagian bnd-alat">
         <div class="container">
             <div class="bnd-kepala bnd-kepala-tengah" data-aos="fade-up">
@@ -1681,7 +1702,7 @@ Beranda | Rumah Scopus
                 </span>
                 <h2 class="bnd-judul">Dipakai dulu, nggak usah bayar</h2>
                 <p class="bnd-sub">
-                    Tiga alat yang boleh dipakai siapa saja — nggak perlu daftar,
+                    Dua alat yang boleh dipakai siapa saja — nggak perlu daftar,
                     nggak perlu login.
                 </p>
             </div>
@@ -1693,9 +1714,6 @@ Beranda | Rumah Scopus
                         ? 'Telusuri ' . number_format($jumlah_referensi, 0, ',', '.') . ' paper yang sudah kami kumpulkan. Buat cari pembanding atau bahan sitasi.'
                         : 'Telusuri kumpulan paper kami buat cari pembanding atau bahan sitasi.',
                      url('/Refrensi-Paper'), 'Cari paper'],
-                    ['bi-file-earmark-check', 'var(--langit)', 'Cek Plagiasi',
-                     'Kirim naskahmu, nanti tim kami yang periksa kemiripannya. Formatnya doc, docx, atau pdf.',
-                     url('/Cek-Plagiasi'), 'Kirim naskah'],
                     ['bi-upc-scan', 'var(--ungu)', 'Cek ID Paper',
                      'Sudah pernah ikut kelas kami? Lacak nomor paper-mu di sini, tanpa perlu tanya admin dulu.',
                      url('/paperisasi/public/data'), 'Lacak ID'],

@@ -51,8 +51,7 @@
                             <li><a href="https://rumahscopusfoundation.com/account/Scopus-Camp" target="_blank">Class Offline</a></li>
                         </ul>
                     </li>
-                    <li><a class="nav-link scrollto" href="{{ url('/Cek-Plagiasi') }}">Cek Plagiasi</a></li>
-                    <li><a class="nav-link scrollto" href="{{ url('/blog/contact') }}">Contact</a></li>
+                    <li><a class="nav-link scrollto" href="{{ url('/contact') }}">Kontak</a></li>
                 </ul>
                 <i class="bi bi-list mobile-nav-toggle"></i>
             </nav><!-- .navbar -->
@@ -95,7 +94,6 @@
                         <ul>
                             <li><i class="bi bi-chevron-right"></i> <a href="#">Class Online</a></li>
                             <li><i class="bi bi-chevron-right"></i> <a href="#">Class Offline</a></li>
-                            <li><i class="bi bi-chevron-right"></i> <a href="#">Cek Plagiasi</a></li>
                             <li><i class="bi bi-chevron-right"></i> <a href="#">Webinar</a></li>
                         </ul>
                     </div>
