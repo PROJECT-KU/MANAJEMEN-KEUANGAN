@@ -591,6 +591,26 @@ Beranda | Rumah Scopus
     .bnd-karcis-isi h3 { font-size: 1.2rem; margin-bottom: 10px; }
     .bnd-karcis-isi p { font-size: .96rem; }
 
+    /* Pemilihnya `.bnd-karcis-isi p.bnd-karcis-harga`, bukan
+       `.bnd-karcis-harga` saja.
+
+       Sebarisnya di atas — `.bnd-karcis-isi p` — berbobot (0,1,1); kelas
+       tunggal cuma (0,1,0) dan KALAH, jadi ukuran hurufnya tetap .96rem dan
+       seluruh jarak di bawah ini tidak berlaku. Tidak ada galat; angkanya
+       cuma terlihat seperti kalimat biasa. Jebakan yang sama pernah membuat
+       .bnd-sub tidak berjarak sama sekali. */
+    .bnd-karcis-isi p.bnd-karcis-harga {
+        display: flex; align-items: baseline; gap: 9px;
+        margin-top: 15px; padding-top: 14px;
+        border-top: 2px dashed rgba(231, 109, 32, .45);
+        font-size: .88rem;
+    }
+    .bnd-karcis-harga span { color: var(--tinta-2); font-weight: 600; }
+    .bnd-karcis-harga strong {
+        font-family: 'Fraunces', serif; font-weight: 800; font-size: 1.24rem;
+        color: var(--c);
+    }
+
     /* Tombolnya didorong ke dasar kartu supaya semua tombol sebaris,
        berapa pun panjang keterangannya. */
     .bnd-karcis-tombol {
@@ -600,6 +620,277 @@ Beranda | Rumah Scopus
         transition: gap .2s ease;
     }
     .bnd-karcis:hover .bnd-karcis-tombol { gap: 15px; }
+
+    /* ========================================================= jadwal */
+    /* Dua kolom TAK SAMA, dan itu intinya: kolom kiri tetap 320px, daftarnya
+       mengambil sisanya. Bagian lain halaman ini semuanya kisi simetris. */
+    .bnd-jadwal-kisi {
+        display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 52px;
+        align-items: start;
+    }
+
+    /* Kepalanya ikut menggulung sampai daftarnya habis. Daftar empat baris
+       lebih tinggi daripada kepalanya, dan tanpa ini kolom kiri jadi ruang
+       kosong memanjang — persis keluhan "bagian tengah kosong" yang sudah
+       pernah muncul di bagian testimoni. */
+    @media (min-width: 993px) {
+        .bnd-jadwal-kepala { position: sticky; top: 104px; }
+    }
+    .bnd-jadwal-kepala .bnd-tombol { margin-top: 24px; }
+
+    .bnd-jadwal-deret { display: flex; flex-direction: column; gap: 16px; }
+
+    .bnd-jadwal-baris {
+        display: grid; grid-template-columns: 74px minmax(0, 1fr) auto;
+        gap: 22px; align-items: center;
+        padding: 17px 21px;
+        background: var(--kertas);
+        border: 2px solid var(--tinta); border-radius: 18px;
+        box-shadow: 5px 5px 0 var(--c);
+        color: var(--tinta); text-decoration: none;
+        transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .bnd-jadwal-baris:hover {
+        transform: translate(-3px, -3px);
+        box-shadow: 9px 9px 0 var(--c);
+        color: var(--tinta);
+    }
+
+    .bnd-jadwal-tgl {
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        padding: 9px 4px; border-radius: 13px;
+        background: var(--c); color: #fff; line-height: 1;
+    }
+    .bnd-jadwal-tgl strong {
+        font-family: 'Fraunces', serif; font-weight: 900; font-size: 1.68rem;
+    }
+    .bnd-jadwal-tgl span {
+        margin-top: 4px; font-size: .72rem; font-weight: 800;
+        letter-spacing: .1em; text-transform: uppercase;
+    }
+
+    .bnd-jadwal-isi { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+
+    .bnd-jadwal-tanda {
+        align-self: flex-start;
+        padding: 2px 9px; border-radius: 999px;
+        background: color-mix(in srgb, var(--c) 14%, transparent);
+        color: var(--c);
+        font-size: .71rem; font-weight: 800;
+        letter-spacing: .07em; text-transform: uppercase;
+    }
+    .bnd-jadwal-nama {
+        font-family: 'Fraunces', serif; font-weight: 800; font-size: 1.1rem;
+        line-height: 1.3;
+    }
+    .bnd-jadwal-rinci {
+        display: flex; flex-wrap: wrap; gap: 4px 16px;
+        color: var(--tinta-2); font-size: .85rem; font-weight: 600;
+    }
+    .bnd-jadwal-rinci i { margin-right: 4px; color: var(--c); }
+
+    .bnd-jadwal-kanan {
+        display: flex; flex-direction: column; align-items: flex-end; gap: 3px;
+        text-align: right; white-space: nowrap;
+    }
+    .bnd-jadwal-coret { color: var(--tinta-2); font-size: .8rem; font-weight: 600; }
+    .bnd-jadwal-harga {
+        font-family: 'Fraunces', serif; font-weight: 800; font-size: 1.08rem;
+    }
+    .bnd-jadwal-sisa {
+        padding: 1px 9px; border-radius: 999px;
+        background: var(--stabilo); color: var(--tinta);
+        font-size: .72rem; font-weight: 800;
+    }
+    .bnd-jadwal-ajak {
+        display: inline-flex; align-items: center; gap: 7px;
+        margin-top: 3px; color: var(--c); font-weight: 800; font-size: .88rem;
+        transition: gap .2s ease;
+    }
+    .bnd-jadwal-baris:hover .bnd-jadwal-ajak { gap: 13px; }
+
+    @media (max-width: 992px) {
+        .bnd-jadwal-kisi { grid-template-columns: 1fr; gap: 32px; }
+    }
+    @media (max-width: 600px) {
+        .bnd-jadwal-baris {
+            grid-template-columns: 58px minmax(0, 1fr);
+            gap: 15px; padding: 15px 16px;
+        }
+        /* Kolom kanan turun ke bawah teksnya dan ikut lebar penuh, bukan
+           menumpuk di kolom tanggal. */
+        .bnd-jadwal-kanan {
+            grid-column: 1 / -1;
+            flex-direction: row; align-items: center; justify-content: flex-start;
+            flex-wrap: wrap; gap: 6px 12px;
+            padding-top: 11px; border-top: 2px dashed rgba(22, 35, 63, .14);
+        }
+        .bnd-jadwal-ajak { margin-top: 0; margin-left: auto; }
+    }
+
+    /* =========================================================== alat */
+    .bnd-alat { background: var(--kertas); }
+
+    .bnd-alat-kartu {
+        display: flex; flex-direction: column;
+        padding: 28px 26px 26px;
+        background: var(--kertas-2);
+        border: 2px solid var(--tinta); border-radius: 20px;
+        box-shadow: 6px 6px 0 var(--c);
+        color: var(--tinta); text-decoration: none;
+        transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .bnd-alat-kartu:hover {
+        transform: translate(-3px, -3px);
+        box-shadow: 10px 10px 0 var(--c);
+        color: var(--tinta);
+    }
+    .bnd-alat-ikon {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 52px; height: 52px; margin-bottom: 17px;
+        border-radius: 15px; background: var(--c); color: #fff; font-size: 1.4rem;
+    }
+    .bnd-alat-kartu h3 {
+        font-family: 'Fraunces', serif; font-weight: 800; font-size: 1.15rem;
+        margin-bottom: 9px;
+    }
+    .bnd-alat-kartu p { font-size: .94rem; }
+    .bnd-alat-ajak {
+        display: inline-flex; align-items: center; gap: 8px;
+        margin-top: auto; padding-top: 19px;
+        color: var(--c); font-weight: 800; font-size: .95rem;
+        transition: gap .2s ease;
+    }
+    .bnd-alat-kartu:hover .bnd-alat-ajak { gap: 14px; }
+
+    /* ======================================================== bacaan */
+    .bnd-baca {
+        display: flex; flex-direction: column;
+        background: var(--kertas);
+        border: 2px solid var(--tinta); border-radius: 20px;
+        box-shadow: 6px 6px 0 var(--jingga-muda);
+        color: var(--tinta); text-decoration: none; overflow: hidden;
+        transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .bnd-baca:hover {
+        transform: translate(-3px, -3px);
+        box-shadow: 10px 10px 0 var(--jingga-muda);
+        color: var(--tinta);
+    }
+    .bnd-baca-gambar { display: block; aspect-ratio: 16 / 10; overflow: hidden; }
+    .bnd-baca-gambar img {
+        width: 100%; height: 100%; object-fit: cover; display: block;
+        transition: scale .4s ease;
+    }
+    .bnd-baca:hover .bnd-baca-gambar img { scale: 1.07; }
+
+    .bnd-baca-isi {
+        display: flex; flex-direction: column; flex: 1 1 auto;
+        padding: 20px 22px 22px;
+        border-top: 2px solid var(--tinta);
+    }
+    .bnd-baca-tanggal {
+        color: var(--tinta-2); font-size: .79rem; font-weight: 700;
+        letter-spacing: .05em; text-transform: uppercase;
+    }
+    .bnd-baca-isi h3 {
+        margin: 7px 0 0;
+        font-family: 'Fraunces', serif; font-weight: 800; font-size: 1.08rem;
+        line-height: 1.35;
+    }
+    .bnd-baca-ajak {
+        display: inline-flex; align-items: center; gap: 8px;
+        margin-top: auto; padding-top: 17px;
+        color: var(--jingga-tua); font-weight: 800; font-size: .92rem;
+        transition: gap .2s ease;
+    }
+    .bnd-baca:hover .bnd-baca-ajak { gap: 14px; }
+
+    /* =========================================================== faq */
+    /* Dua kolom supaya enam pertanyaan tidak jadi menara setinggi layar. */
+    .bnd-faq-deret {
+        display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px 20px; align-items: start;
+    }
+
+    .bnd-faq-butir {
+        background: var(--kertas);
+        border: 2px solid var(--tinta); border-radius: 17px;
+        box-shadow: 4px 4px 0 rgba(22, 35, 63, .13);
+        overflow: hidden;
+    }
+    .bnd-faq-butir summary {
+        display: flex; align-items: center; justify-content: space-between; gap: 16px;
+        padding: 17px 20px;
+        font-family: 'Fraunces', serif; font-weight: 800; font-size: 1.01rem;
+        cursor: pointer; list-style: none;
+    }
+    /* Segitiga bawaan dibuang di kedua mesin peramban; penandanya ikon kita
+       sendiri yang berputar jadi silang saat terbuka. */
+    .bnd-faq-butir summary::-webkit-details-marker { display: none; }
+    .bnd-faq-butir summary::marker { content: ''; }
+
+    .bnd-faq-butir summary i {
+        flex: 0 0 auto;
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 28px; height: 28px; border-radius: 9px;
+        background: var(--jingga); color: #fff; font-size: .82rem;
+        transition: rotate .22s ease;
+    }
+    .bnd-faq-butir[open] summary i { rotate: 45deg; }
+    .bnd-faq-butir[open] { box-shadow: 4px 4px 0 var(--jingga-muda); }
+
+    .bnd-faq-butir p {
+        margin: 0; padding: 0 20px 19px;
+        font-size: .95rem;
+    }
+
+    @media (max-width: 860px) {
+        .bnd-faq-deret { grid-template-columns: 1fr; }
+    }
+
+    /* ================================================= ajakan ponsel */
+    .bnd-pita-hp { display: none; }
+
+    @media (max-width: 767px) {
+        .bnd-pita-hp {
+            position: fixed; left: 0; right: 0; bottom: 0; z-index: 99998;
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+            background: var(--kertas);
+            border-top: 2px solid var(--tinta);
+            box-shadow: 0 -4px 18px rgba(22, 35, 63, .12);
+        }
+        .bnd-pita-utama {
+            flex: 1 1 auto;
+            display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+            padding: 13px 18px;
+            background: var(--jingga-kuat); color: #fff;
+            border: 2px solid var(--tinta); border-radius: 999px;
+            font-weight: 800; font-size: .97rem; text-decoration: none;
+        }
+        .bnd-pita-utama:hover, .bnd-pita-utama:focus { color: #fff; }
+        .bnd-pita-wa {
+            flex: 0 0 auto;
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 48px; height: 48px;
+            background: #16a34a; color: #fff;
+            border: 2px solid var(--tinta); border-radius: 15px;
+            font-size: 1.3rem; text-decoration: none;
+        }
+        .bnd-pita-wa:hover, .bnd-pita-wa:focus { color: #fff; }
+
+        /* Halaman diberi ruang ekstra supaya pita ini tidak menutupi baris
+           terakhir kaki halaman. */
+        body { padding-bottom: 76px; }
+
+        /* Tombol mengambang milik tata letak dinaikkan ke atas pita.
+           Tombol WhatsApp mengambangnya DISEMBUNYIKAN — pita ini sudah
+           memuatnya, dan dua tombol WhatsApp di satu layar membuat orang
+           mengira keduanya mengarah ke tempat berbeda. */
+        .kaki-wa { display: none !important; }
+        .back-to-top { bottom: 86px !important; }
+    }
 
     /* ========================================================== angka */
     .bnd-angka {
@@ -1130,6 +1421,118 @@ Beranda | Rumah Scopus
         </div>
     </section>
 
+    {{-- ================================================= jadwal ======= --}}
+    {{-- Bagian ini TIDAK ADA sebelumnya, dan itu lubang terbesar beranda.
+
+         Pengendalinya dulu memulangkan view tanpa satu pun data, sementara
+         233 angkatan menunggu dibuka di basis data. Orang yang datang ingin
+         tahu dua hal — KAPAN dan BERAPA — lalu harus menebaknya dengan
+         membuka enam halaman layanan satu-satu.
+
+         Tata letaknya SENGAJA asimetris: kolom kiri tetap, daftar di kanan.
+         Enam bagian lain halaman ini berirama sama persis — pita selebar
+         layar, stiker, judul tengah, lalu kisi simetris — dan sesudah bagian
+         ketiga mata sudah bisa menebaknya. Satu bagian yang bentuknya lain
+         memutus hafalan itu.
+
+         Kosong berarti HILANG, bukan "belum ada jadwal": pita kosong yang
+         mengumumkan ketiadaan lebih buruk daripada tidak bertanya. --}}
+    @if ($sesi->isNotEmpty())
+        <section class="bnd-bagian bnd-jadwal" id="jadwal">
+            <div class="container">
+                <div class="bnd-jadwal-kisi">
+                    <div class="bnd-jadwal-kepala" data-aos="fade-right">
+                        <span class="bnd-stiker"><i class="bi bi-calendar-event-fill"></i> Jadwal terdekat</span>
+                        <h2 class="bnd-judul">Yang paling cepat jalan</h2>
+                        <p class="bnd-sub">
+                            @if ($jumlah_sesi > count($sesi))
+                                Ada {{ $jumlah_sesi }} kelas yang sedang dibuka. Ini
+                                {{ count($sesi) }} yang paling dekat —
+                            @else
+                                Ini kelas yang sedang dibuka —
+                            @endif
+                            tanggalnya sudah pasti, kursinya yang nggak.
+                        </p>
+
+                        <a href="#layanan" class="bnd-tombol bnd-tombol-kedua">
+                            Lihat semua kelas <i class="bi bi-arrow-down"></i>
+                        </a>
+                    </div>
+
+                    <div class="bnd-jadwal-deret">
+                        @foreach ($sesi as $i => $k)
+                            @php($warna = [
+                                'scopus_camp' => 'var(--jingga)',
+                                'webinar_eksklusif' => '#be185d',
+                                'bibliometrik' => 'var(--rumput)',
+                                'scopus_kafe' => 'var(--ungu)',
+                                'clinik_scopus' => '#b45309',
+                            ][$k['layanan']] ?? 'var(--langit)')
+
+                            <a href="{{ $k['tautan'] }}" class="bnd-jadwal-baris"
+                                style="--c: {{ $warna }}"
+                                data-aos="fade-up" data-aos-delay="{{ $i * 90 }}">
+
+                                <span class="bnd-jadwal-tgl">
+                                    <strong>{{ $k['tgl'] }}</strong>
+                                    <span>{{ $k['bulan'] }}</span>
+                                </span>
+
+                                <span class="bnd-jadwal-isi">
+                                    <span class="bnd-jadwal-tanda">{{ $k['layanan_nama'] }}</span>
+                                    <span class="bnd-jadwal-nama">{{ $k['judul'] }}</span>
+
+                                    <span class="bnd-jadwal-rinci">
+                                        <span><i class="bi bi-calendar3"></i> {{ $k['hari'] }}, {{ $k['tanggal'] }}</span>
+
+                                        @if ($k['jam'])
+                                            <span><i class="bi bi-clock"></i> {{ $k['jam'] }}</span>
+                                        @endif
+
+                                        @if ($k['tempat'])
+                                            <span>
+                                                <i class="bi {{ $k['daring'] ? 'bi-camera-video' : 'bi-geo-alt' }}"></i>
+                                                {{ $k['tempat'] }}
+                                            </span>
+                                        @endif
+
+                                        {{-- Pematerinya muncul di sini, dan itu disengaja: kolom
+                                             pemateri + jabatan + fotonya sudah lama terisi admin
+                                             dan tidak pernah sampai ke beranda. Orang membeli
+                                             orang, bukan nama kelas. --}}
+                                        @if ($k['pemateri'])
+                                            <span><i class="bi bi-person-badge"></i> {{ $k['pemateri'] }}</span>
+                                        @endif
+                                    </span>
+                                </span>
+
+                                <span class="bnd-jadwal-kanan">
+                                    {{-- Harga nol DIAM, tidak jadi "Rp 0". --}}
+                                    @if ($k['harga'] > 0)
+                                        @if ($k['harga_penuh'])
+                                            <s class="bnd-jadwal-coret">Rp {{ number_format($k['harga_penuh'], 0, ',', '.') }}</s>
+                                        @endif
+                                        <span class="bnd-jadwal-harga">Rp {{ number_format($k['harga'], 0, ',', '.') }}</span>
+                                    @endif
+
+                                    {{-- Sisa kursi disebut hanya kalau tinggal sedikit.
+                                         "20 kursi" tidak mendesak siapa pun; "sisa 3 kursi"
+                                         iya — dan menyebutnya saat masih longgar membuat
+                                         angka itu kehilangan arti waktu benar-benar sempit. --}}
+                                    @if ($k['sisa'] !== null && $k['sisa'] <= 5)
+                                        <span class="bnd-jadwal-sisa">sisa {{ $k['sisa'] }} kursi</span>
+                                    @endif
+
+                                    <span class="bnd-jadwal-ajak">Lihat <i class="bi bi-arrow-right"></i></span>
+                                </span>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </section>
+    @endif
+
     {{-- ================================================== alasan ======= --}}
     <section class="bnd-bagian">
         <div class="container">
@@ -1203,15 +1606,28 @@ Beranda | Rumah Scopus
                  normal dan tetap membuka halaman yang sah, jadi yang tahu ia
                  salah cuma orang yang menekannya lalu memesan layanan lain —
                  dan orang itu tidak mengadu, ia pergi. Dijaga BerandaTest. --}}
+            {{-- HARGANYA dari $harga, bukan ditulis di sini.
+
+                 Sebelum ini beranda tidak menyebut satu angka pun — kata
+                 "Rp" nol kali di seluruh halaman — padahal tarif tiap
+                 layanan sudah diurus admin di satu tabel. Harga yang
+                 disembunyikan membuat orang menutup halaman, bukan
+                 menanyakannya; dan yang betul-betul mau tahu harus membuka
+                 enam halaman layanan satu-satu.
+
+                 Kuncinya kode layanan yang SAMA dengan katalog Layanan dan
+                 kolom `layanan` di kategori_layanan. Yang tarif berlakunya
+                 belum diisi — Online Training — kartunya diam saja, bukan
+                 memajang "mulai dari Rp 0". --}}
             <div class="bnd-kisi-3">
                 @foreach ([
-                    ['var(--jingga)', 'HomeScopusCamp.png', 'Offline · 3 hari', 'Scopus Camp', 'Tiga hari ketemu langsung di Jogja, naskahmu dibedah sampai kelar. Habis itu masih ditemani setahun penuh.', url('/Scopus-Camp')],
-                    ['var(--langit)', 'HomeOnlineTraining.png', 'Online · 8 sesi', 'Online Training', 'Delapan kali ketemu daring bareng trainer. Cocok buat yang susah ninggalin kampus.', 'https://rumahscopus.com/courses/online-class/'],
-                    ['var(--ungu)', 'HomeScopusKafe.png', 'Privat · 5 jam', 'Scopus Kafe', 'Lima jam berdua sama trainer. Buat naskah yang sudah jalan tapi mentok di satu bagian.', url('/Scopus-Kafe')],
-                    ['var(--rumput)', 'HomeBibliometrik.png', 'Online · 8 sesi', 'Analisis Bibliometrik', 'Belajar baca peta riset: mana yang sudah ramai, mana celah yang belum digarap orang.', url('/Analisis-Bibliometrik')],
-                    ['#b45309', 'HomeScopusClinic.png', 'Chat · 50 menit', 'Clinik Scopus', 'Lagi mentok satu pertanyaan saja? Ngobrol lewat chat lima puluh menit, langsung dapat jalan keluarnya.', url('/Clinik-Scopus')],
-                    ['#be185d', null, 'Daring · kuota terbatas', 'Webinar Eksklusif', 'Sesi daring bertema khusus, dibuka berkala. Kuotanya sedikit, jadi jangan kelamaan mikir.', url('/Webinar-Eksklusif')],
-                ] as $i => [$warna, $gambar, $tag, $judul, $ket, $tautan])
+                    ['scopus_camp', 'var(--jingga)', 'HomeScopusCamp.png', 'Offline · 3 hari', 'Scopus Camp', 'Tiga hari ketemu langsung di Jogja, naskahmu dibedah sampai kelar. Habis itu masih ditemani setahun penuh.', url('/Scopus-Camp')],
+                    ['online_training', 'var(--langit)', 'HomeOnlineTraining.png', 'Online · 8 sesi', 'Online Training', 'Delapan kali ketemu daring bareng trainer. Cocok buat yang susah ninggalin kampus.', 'https://rumahscopus.com/courses/online-class/'],
+                    ['scopus_kafe', 'var(--ungu)', 'HomeScopusKafe.png', 'Privat · 5 jam', 'Scopus Kafe', 'Lima jam berdua sama trainer. Buat naskah yang sudah jalan tapi mentok di satu bagian.', url('/Scopus-Kafe')],
+                    ['bibliometrik', 'var(--rumput)', 'HomeBibliometrik.png', 'Online · 8 sesi', 'Analisis Bibliometrik', 'Belajar baca peta riset: mana yang sudah ramai, mana celah yang belum digarap orang.', url('/Analisis-Bibliometrik')],
+                    ['clinik_scopus', '#b45309', 'HomeScopusClinic.png', 'Chat · 50 menit', 'Clinik Scopus', 'Lagi mentok satu pertanyaan saja? Ngobrol lewat chat lima puluh menit, langsung dapat jalan keluarnya.', url('/Clinik-Scopus')],
+                    ['webinar_eksklusif', '#be185d', null, 'Daring · kuota terbatas', 'Webinar Eksklusif', 'Sesi daring bertema khusus, dibuka berkala. Kuotanya sedikit, jadi jangan kelamaan mikir.', url('/Webinar-Eksklusif')],
+                ] as $i => [$kode, $warna, $gambar, $tag, $judul, $ket, $tautan])
                     <div class="bnd-karcis" style="--c: {{ $warna }}"
                         data-aos="fade-up" data-aos-delay="{{ ($i % 3) * 110 }}">
                         <div class="bnd-karcis-gambar">
@@ -1230,11 +1646,67 @@ Beranda | Rumah Scopus
                         <div class="bnd-karcis-isi">
                             <h3>{{ $judul }}</h3>
                             <p>{{ $ket }}</p>
+
+                            @if (($harga[$kode] ?? 0) > 0)
+                                <p class="bnd-karcis-harga">
+                                    <span>mulai dari</span>
+                                    <strong>Rp {{ number_format($harga[$kode], 0, ',', '.') }}</strong>
+                                </p>
+                            @endif
+
                             <a href="{{ $tautan }}" class="bnd-karcis-tombol">
                                 Intip detailnya <i class="bi bi-arrow-right"></i>
                             </a>
                         </div>
                     </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    {{-- ==================================================== alat ====== --}}
+    {{-- Tiga halaman ini SUDAH ADA dan semuanya memulangkan 200, tapi tidak
+         pernah disebut beranda sama sekali. Bagian layanan di atas menulis
+         "Enam cara belajar" padahal pintunya sembilan.
+
+         Dipisah dari kartu layanan, bukan dijejalkan ke sana, karena memang
+         bukan barang yang sama: yang di atas dijual, yang di sini dipakai
+         tanpa bayar dan tanpa daftar. Mencampurnya membuat orang mengira
+         salah satunya jebakan. --}}
+    <section class="bnd-bagian bnd-alat">
+        <div class="container">
+            <div class="bnd-kepala bnd-kepala-tengah" data-aos="fade-up">
+                <span class="bnd-stiker" style="background: var(--rumput); color: #fff;">
+                    <i class="bi bi-tools"></i> Gratis
+                </span>
+                <h2 class="bnd-judul">Dipakai dulu, nggak usah bayar</h2>
+                <p class="bnd-sub">
+                    Tiga alat yang boleh dipakai siapa saja — nggak perlu daftar,
+                    nggak perlu login.
+                </p>
+            </div>
+
+            <div class="bnd-kisi-3">
+                @foreach ([
+                    ['bi-search', 'var(--rumput)', 'Refrensi Paper',
+                     $jumlah_referensi > 0
+                        ? 'Telusuri ' . number_format($jumlah_referensi, 0, ',', '.') . ' paper yang sudah kami kumpulkan. Buat cari pembanding atau bahan sitasi.'
+                        : 'Telusuri kumpulan paper kami buat cari pembanding atau bahan sitasi.',
+                     url('/Refrensi-Paper'), 'Cari paper'],
+                    ['bi-file-earmark-check', 'var(--langit)', 'Cek Plagiasi',
+                     'Kirim naskahmu, nanti tim kami yang periksa kemiripannya. Formatnya doc, docx, atau pdf.',
+                     url('/Cek-Plagiasi'), 'Kirim naskah'],
+                    ['bi-upc-scan', 'var(--ungu)', 'Cek ID Paper',
+                     'Sudah pernah ikut kelas kami? Lacak nomor paper-mu di sini, tanpa perlu tanya admin dulu.',
+                     url('/paperisasi/public/data'), 'Lacak ID'],
+                ] as $i => [$ikon, $warna, $judul, $ket, $tautan, $ajak])
+                    <a href="{{ $tautan }}" class="bnd-alat-kartu" style="--c: {{ $warna }}"
+                        data-aos="fade-up" data-aos-delay="{{ $i * 110 }}">
+                        <span class="bnd-alat-ikon"><i class="bi {{ $ikon }}"></i></span>
+                        <h3>{{ $judul }}</h3>
+                        <p>{{ $ket }}</p>
+                        <span class="bnd-alat-ajak">{{ $ajak }} <i class="bi bi-arrow-right"></i></span>
+                    </a>
                 @endforeach
             </div>
         </div>
@@ -1283,12 +1755,20 @@ Beranda | Rumah Scopus
                  DOMContentLoaded — ribuan langkah untuk angka yang ada
                  3.000px di bawah layar pertama, dan sudah selesai jauh
                  sebelum ada yang menggulung ke sana. --}}
+            {{-- Angkanya pindah ke config/beranda.php.
+
+                 Bukan ke basis data, dan itu disengaja: yang tercatat di
+                 sistem ini cuma 136 pendaftaran Scopus Camp: aplikasinya baru,
+                 yayasannya tidak. Menghitungnya dari tabel akan mengubah
+                 "5.000 orang" jadi "153 orang" — bukan membuatnya jujur,
+                 melainkan menghapus kerja sepuluh tahun yang memang terjadi
+                 tapi tidak lewat sistem ini. Alasan lengkapnya ada di
+                 config/beranda.php. --}}
             <div class="bnd-kisi-angka">
-                @foreach ([
-                    ['bi-mortarboard-fill', 5000, 'orang sudah ikut kelas kami'],
-                    ['bi-send-check-fill', 2315, 'naskah sudah dikirim ke jurnal internasional'],
-                    ['bi-journal-check', 1851, 'artikel sudah terbit dan terindeks Scopus'],
-                ] as $i => [$ikon, $nilai, $ket])
+                @foreach (config('beranda.angka') as $i => $angka)
+                    @php($ikon = $angka['ikon'])
+                    @php($nilai = (int) $angka['nilai'])
+                    @php($ket = $angka['ket'])
                     <div class="bnd-nilai" data-aos="fade-up" data-aos-delay="{{ $i * 110 }}">
                         <i class="bi {{ $ikon }}" style="color: var(--stabilo); font-size: 1.5rem;"></i>
 
@@ -1440,6 +1920,99 @@ Beranda | Rumah Scopus
         </div>
     </section>
 
+    {{-- ================================================== artikel ===== --}}
+    {{-- Blognya hidup — 12 tulisan terbit — dan beranda tidak menautkannya
+         satu kali pun, bahkan tidak ke /blog. Orang yang belum siap membeli
+         tidak punya apa pun untuk dibaca sebelum pergi. --}}
+    @if ($artikel->isNotEmpty())
+        <section class="bnd-bagian" style="background: var(--kertas-2);">
+            <div class="container">
+                <div class="bnd-kepala bnd-kepala-tengah" data-aos="fade-up">
+                    <span class="bnd-stiker"><i class="bi bi-journal-text"></i> Bacaan</span>
+                    <h2 class="bnd-judul">Belum siap daftar? Baca dulu</h2>
+                    <p class="bnd-sub">
+                        Tulisan-tulisan soal nulis artikel, cari jurnal, dan hal-hal
+                        yang biasanya bikin naskah mandek.
+                    </p>
+                </div>
+
+                <div class="bnd-kisi-3">
+                    @foreach ($artikel as $i => $a)
+                        <a href="{{ route('blog.topic.blog-single', ['id' => $a->id]) }}"
+                            class="bnd-baca" data-aos="fade-up" data-aos-delay="{{ $i * 110 }}">
+                            <span class="bnd-baca-gambar">
+                                {{-- loading="lazy" aman di sini: kartunya di bawah layar
+                                     pertama dan TIDAK berada di dalam apa pun yang
+                                     opacity-0 — penundaannya betul-betul jalan. --}}
+                                <img src="{{ asset('images/' . $a->gambar_depan) }}"
+                                    alt="{{ $a->judul }}" loading="lazy" decoding="async">
+                            </span>
+                            <span class="bnd-baca-isi">
+                                <span class="bnd-baca-tanggal">
+                                    {{ \Carbon\Carbon::parse($a->created_at)->locale('id')->translatedFormat('j M Y') }}
+                                </span>
+                                <h3>{{ $a->judul }}</h3>
+                                <span class="bnd-baca-ajak">Baca <i class="bi bi-arrow-right"></i></span>
+                            </span>
+                        </a>
+                    @endforeach
+                </div>
+
+                <div class="bnd-aksi" style="justify-content: center; margin-top: 38px;">
+                    <a href="{{ url('/blog') }}" class="bnd-tombol bnd-tombol-kedua">
+                        Semua tulisan <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </section>
+    @endif
+
+    {{-- ====================================================== faq ====== --}}
+    {{-- Dipakai <details>, BUKAN akordeon ber-JavaScript.
+
+         Buka-tutupnya jadi urusan peramban: tetap jalan kalau skripnya gagal
+         dimuat, bisa dicari lewat Ctrl+F karena isinya tetap di DOM, dan
+         pembaca layar sudah tahu membacanya tanpa atribut aria tambahan.
+
+         Jawabannya diambil dari daftar fasilitas yang BENAR-BENAR tersimpan
+         di tarif tiap layanan, bukan dikarang: sertifikat, rekaman, dan
+         pendampingan lanjutan semuanya ada di sana. --}}
+    <section class="bnd-bagian bnd-faq" id="faq">
+        <div class="container">
+            <div class="bnd-kepala bnd-kepala-tengah" data-aos="fade-up">
+                <span class="bnd-stiker" style="background: var(--ungu); color: #fff;">
+                    <i class="bi bi-patch-question-fill"></i> Sering ditanya
+                </span>
+                <h2 class="bnd-judul">Yang biasanya ditanyain duluan</h2>
+            </div>
+
+            <div class="bnd-faq-deret">
+                @foreach ([
+                    ['Naskah saya belum jadi. Boleh ikut?',
+                     'Boleh. Yang penting datanya sudah ada — menulisnya justru yang dikerjakan bareng di kelas. Kalau datanya juga belum, cerita dulu saja ke admin, nanti dicarikan kelas yang paling masuk akal buat kondisimu. Nanyanya gratis.'],
+                    ['Dapat sertifikat, nggak?',
+                     'Dapat. Scopus Camp dapat sertifikat plus perlengkapan peserta, webinar dapat e-sertifikat resmi atas nama peserta, dan kelas bibliometrik dapat sertifikat plus rekaman kelasnya.'],
+                    ['Selesai kelas terus ditinggal gitu aja?',
+                     'Nggak. Di Scopus Camp pendampingannya jalan terus sampai jurnalnya memberi jawaban — termasuk pas kamu harus benerin revisi dari reviewer.'],
+                    ['Harus datang ke Jogja?',
+                     'Nggak semua. Scopus Camp memang ketemu langsung, tapi webinar, Analisis Bibliometrik, dan Scopus Kafe punya kelas daring. Tempat atau platform-nya ditulis di tiap jadwal di atas.'],
+                    ['Kuotanya keburu habis gimana?',
+                     'Jadwalnya dibuka berkala, jadi hampir selalu ada angkatan berikutnya. Biar nggak kelewatan, kabari admin kelas mana yang kamu incar — nanti dikabari waktu dibuka.'],
+                    ['Bayarnya gimana?',
+                     'Pilih kelasnya, isi formulir pendaftaran, lalu bayar lewat jalur yang muncul di layar. Bukti pendaftaranmu dikirim ke email yang kamu isi, jadi pastikan alamatnya benar.'],
+                ] as $i => [$tanya, $jawab])
+                    <details class="bnd-faq-butir" data-aos="fade-up" data-aos-delay="{{ ($i % 3) * 90 }}">
+                        <summary>
+                            <span>{{ $tanya }}</span>
+                            <i class="bi bi-plus-lg"></i>
+                        </summary>
+                        <p>{{ $jawab }}</p>
+                    </details>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
     {{-- =================================================== ajakan ====== --}}
     <section class="bnd-bagian">
         <div class="container">
@@ -1472,6 +2045,27 @@ Beranda | Rumah Scopus
             </div>
         </div>
     </section>
+
+    {{-- =============================================== ajakan ponsel ==
+
+         Sesudah layar pertama, tombol daftarnya 6.000px jauhnya — terukur
+         tinggi halaman ini 6.314px. Di ponsel itu berarti orang yang sudah
+         yakin di tengah halaman harus menggulung balik ke atas atau terus ke
+         bawah untuk menemukan jalan masuknya.
+
+         Hanya di beranda, dan hanya di ponsel: di layar lebar menunya selalu
+         kelihatan, jadi pita ini cuma akan menutupi isi halaman tanpa
+         menambah apa pun. --}}
+    <div class="bnd-pita-hp">
+        <a href="#layanan" class="bnd-pita-utama">
+            Lihat kelas <i class="bi bi-arrow-right"></i>
+        </a>
+        <a href="{{ \App\Support\TautanWa::kirim(config('panitia.whatsapp'), 'Halo, saya mau tanya soal kelas Rumah Scopus.') }}"
+            class="bnd-pita-wa" target="_blank" rel="noopener"
+            aria-label="Tanya admin lewat WhatsApp">
+            <i class="bi bi-whatsapp"></i>
+        </a>
+    </div>
 
 </div>
 
