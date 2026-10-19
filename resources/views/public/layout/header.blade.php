@@ -55,6 +55,9 @@
         #header {
             --kop-jingga: #e76d20;
             --kop-jingga-muda: #fb8c3d;
+            /* Khusus tombol berisi penuh — lihat alasannya di .kop-tombol. */
+            --kop-jingga-kuat: #b85213;
+            --kop-jingga-kuat-2: #a8470e;
             --kop-tinta: #16233f;
             --kop-kertas: #fdf5e8;
             --kop-kertas-2: #f8ead4;
@@ -117,32 +120,35 @@
         }
 
         /* ------------------------------------------------ tombol masuk */
-        /* Jingga berisi tulisan TINTA, bukan putih.
+        /* Putih di atas jingga yang LEBIH DALAM — sama seperti tombol di
+           beranda, dan dengan alasan yang sama.
 
-           Putih di atas jingga logo berasio 3,18 — di bawah ambang
-           keterbacaan 4,5 untuk tulisan seukuran ini. Tinta di atas
-           jingga yang sama berasio 4,91. Alasan yang sama persis dengan
-           tombol di beranda. */
+           Terukur: putih di atas jingga logo #e76d20 berasio 3,18 (gagal);
+           tinta di atas jingga logo 4,91 (lulus, tetapi dua warna gelap
+           sedang berdampingan terbaca kurang menonjol); putih di atas
+           #b85213 berasio 4,94 — lulus DAN menonjol. */
         #navbar .kop-tombol,
         #navbar .kop-tombol:focus {
             display: inline-flex; align-items: center; gap: 8px;
             padding: 9px 18px; margin: 0;
-            background: var(--kop-jingga);
-            color: var(--kop-tinta);
+            background: var(--kop-jingga-kuat);
+            color: #fff;
             border: 2px solid var(--kop-tinta);
             border-radius: 999px;
             font-family: 'Figtree', sans-serif; font-size: 14.5px; font-weight: 800;
             box-shadow: 3px 3px 0 var(--kop-tinta);
             transition: transform .16s ease, box-shadow .16s ease;
         }
+        /* Saat disentuh latarnya DIPEKATKAN, bukan dimudakan: jingga muda
+           menjatuhkan rasio putihnya kembali ke 2,35. */
         #navbar .kop-tombol:hover {
-            color: var(--kop-tinta); background: var(--kop-jingga-muda);
+            color: #fff; background: var(--kop-jingga-kuat-2);
             transform: translate(-2px, -2px);
             box-shadow: 5px 5px 0 var(--kop-tinta);
         }
         #navbar .kop-tombol img {
             width: 24px; height: 24px; border-radius: 50%; object-fit: cover;
-            border: 2px solid var(--kop-tinta);
+            border: 2px solid #fff;
         }
 
         /* ================= LAYAR SEMPIT ================= */
