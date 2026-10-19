@@ -1,258 +1,141 @@
 @extends('public.layout.header')
 
 @section('title')
-Kategori Blog | Rumah Scopus
+{{ $kategoriIni?->kategori ?? 'Kategori' }} | Blog Rumah Scopus
 @stop
-<style>
-    /* Hero Category - Modern Center Focus */
-    .hero {
-        position: relative;
-        padding: 150px 0 100px;
-        background: #ffffff;
-        overflow: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
 
-    /* Background Ornament agar tidak kosong */
-    .hero::before {
-        content: "";
-        position: absolute;
-        width: 400px;
-        height: 400px;
-        background: radial-gradient(circle, rgba(255, 49, 49, 0.05) 0%, transparent 70%);
-        top: -150px;
-        right: -50px;
-        z-index: 0;
-    }
-
-    .hero .container {
-        position: relative;
-        z-index: 1;
-    }
-
-    .hero-meta-badge {
-        display: inline-flex;
-        align-items: center;
-        padding: 8px 20px;
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 50px;
-        margin-bottom: 30px;
-    }
-
-    /* Tipografi Utama Halaman Kategori */
-    .hero h1 {
-        font-size: clamp(36px, 6vw, 64px);
-        font-weight: 800;
-        color: #0f172a;
-        line-height: 1.1;
-        letter-spacing: -3px;
-        margin-bottom: 25px;
-    }
-
-    .hero-description {
-        max-width: 700px;
-        margin: 0 auto;
-        font-size: 18px;
-        color: #64748b;
-        line-height: 1.8;
-    }
-
-    /* Tombol Premium */
-    .btn-hero {
-        background: linear-gradient(135deg, #ff3131 0%, #ff914d 100%);
-        color: white !important;
-        padding: 16px 35px;
-        border-radius: 12px;
-        font-weight: 700;
-        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        box-shadow: 0 10px 20px rgba(255, 49, 49, 0.2);
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-    }
-
-    .btn-hero:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 15px 30px rgba(255, 49, 49, 0.3);
-    }
-
-    .btn-get-started {
-        background: linear-gradient(135deg, #ff3131 0%, #ff914d 100%);
-        color: white !important;
-        padding: 14px 30px;
-        border-radius: 12px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        box-shadow: 0 10px 20px rgba(255, 49, 49, 0.2);
-        text-decoration: none;
-    }
-
-    .btn-get-started:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 15px 30px rgba(255, 49, 49, 0.3);
-    }
-
-    /* Animasi Halus untuk Gambar */
-    .hero-img img {
-        animation: floating 4s ease-in-out infinite;
-        filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.05));
-    }
-
-    @keyframes floating {
-
-        0%,
-        100% {
-            transform: translateY(0);
-        }
-
-        50% {
-            transform: translateY(-15px);
-        }
-    }
-</style>
+@push('kepala')
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600..900&family=Figtree:wght@400;500;700;800&display=swap">
+@endpush
 
 @section('konten')
-<!-- ======= Hero Section ======= -->
-<section id="hero" class="hero text-center">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-11">
+{{--
+    Halaman kategori blog — dirombak 19 Okt 2026, mengikuti /blog.
 
-                <div class="hero-meta-badge shadow-sm" data-aos="fade-up">
-                    <span class="text-gradient fw-bold small text-uppercase" style="letter-spacing: 2px;">
-                        <i class="bi bi-tag-fill me-2"></i> Kategori Artikel
-                    </span>
-                </div>
+    Dirombak BARENGAN, bukan menyusul: keripik kategori di /blog mengantar
+    ke sini, jadi halaman ini yang pertama dibuka orang sesudah melihat rupa
+    barunya. Dibiarkan memakai gradien merah lama, perpindahannya terbaca
+    seperti keluar dari situsnya.
 
-                <h1 data-aos="fade-up" data-aos-delay="100">
-                    Eksplorasi <span class="text-gradient">Wawasan</span> Melalui <br class="d-none d-md-block">
-                    Koleksi <span class="text-gradient">Publikasi Riset</span>
-                </h1>
+    Gaya halamannya di-include dari partial yang sama dengan /blog. Berkas
+    lamanya menaruh <style> MENGGANTUNG di luar @section — tetap tercetak,
+    tetapi mendarat sebelum <!doctype html>.
+--}}
+@include('public.article.partials.gaya')
 
-                <div class="hero-description mt-4" data-aos="fade-up" data-aos-delay="200">
-                    <p class="fst-italic text-muted">
-                        "Janganlah pernah menyerah ketika kamu masih mampu berusaha lagi. <br class="d-none d-md-block">
-                        Tidak ada kata berakhir sampai kamu berhenti mencoba."
-                    </p>
-                </div>
+<div class="blg">
 
-                <div class="mt-5" data-aos="fade-up" data-aos-delay="300">
-                    <a href="https://www.youtube.com/@rumahscopus" class="btn-hero" target="_blank">
-                        Mulai Belajar Sekarang <i class="bi bi-arrow-right ms-2"></i>
-                    </a>
-
-                    <div class="mt-4 d-flex justify-content-center align-items-center gap-4">
-                        <div class="d-flex align-items-center">
-                            <i class="bi bi-journal-text text-danger me-2"></i>
-                            <span class="small text-muted fw-bold">Update Berkala</span>
-                        </div>
-                        <div class="d-flex align-items-center">
-                            <i class="bi bi-shield-check text-danger me-2"></i>
-                            <span class="small text-muted fw-bold">Konten Terverifikasi</span>
-                        </div>
-                    </div>
-                </div>
-
+    {{-- ==================================================== kepala ===== --}}
+    <section class="blg-kepala">
+        <div class="container">
+            {{-- Remah jejak: halaman ini satu-satunya layar blog yang bisa
+                 dibuka tanpa lewat /blog — dari mesin pencari, misalnya —
+                 dan tanpa jalan pulang orangnya tertahan di satu kategori. --}}
+            <div class="blg-balik-baris">
+                <a href="{{ url('/blog') }}" class="blg-balik">
+                    <i class="bi bi-arrow-left"></i> Semua tulisan
+                </a>
             </div>
-        </div>
-    </div>
-</section>
 
-<main id="main">
-    @foreach ($categories_artikel as $category)
-    <!-- ======= Team Section ======= -->
-    <style>
-        /* Remove border when hovering over the image */
-        #image-preview {
-            border: none !important;
-            /* Hapus border pada gambar */
-        }
+            <span class="blg-stiker"><i class="bi bi-tag-fill"></i> Kategori</span>
 
-        #image-preview:hover {
-            border: none;
-            /* Hapus border pada gambar saat dihover */
-        }
+            <h1 class="blg-judul">{{ $kategoriIni?->kategori ?? 'Kategori' }}</h1>
 
-        .container {
-            width: 100%;
-            max-width: 1200px;
-            /* Sesuaikan lebar container sesuai kebutuhan */
-            margin: 0 auto;
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .more-text {
-            font-size: 15px;
-            margin: 0;
-            text-align: right;
-        }
-    </style>
-    <section id="recent-blog-posts" class="recent-blog-posts">
-        <div class="container" data-aos="fade-up">
-            @php
-            // Mendapatkan ID kategori dari URL
-            $categoryID = request()->segment(3);
-
-            // Menentukan apakah kategori saat ini sesuai dengan kategori yang dipilih
-            $isCurrentCategory = $categoryID == $category->id;
-            @endphp
-
-            @if ($isCurrentCategory)
-            <header class="section-header">
-                <p style="font-size: 30px;">{{ strtoupper($category->kategori) }}</p>
-            </header>
-
-            <div class="row">
-                @foreach ($articles as $article)
-                @if ($article->status == 'publish')
-                <div class="col-lg-4 mb-5">
-                    <div class="post-box">
-                        <div class="post-img"><img src="{{ asset('images/' . $article->gambar_depan) }}" class="img-fluid" alt=""></div>
-                        <span class="post-date" style="font-size: 12px;">
-                            {{ \Carbon\Carbon::parse($article->created_at)->format('l, j F Y') }}
-                            <!-- Format: hari bulan tanggal tahun -->
-                            - {{ \Carbon\Carbon::parse($article->created_at)->diffForHumans() }}
-                            <!-- Berapa menit atau berapa jam yang lalu -->
-                        </span>
-
-                        <h3 class="post-title">{{ $article->judul }}</h3>
-
-                        <header class="readmore mt-auto" style="display: flex; justify-content: space-between; align-items: center;">
-                            <div style="display: flex; align-items: center;">
-                                @if ($article->gambar == null)
-                                <img alt="image" id="image-preview" src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="img-thumbnail rounded-circle" style="width: 55px; height:55px;">
-                                @else
-                                <img id="image-preview" class="img-thumbnail rounded-circle" src="{{ \App\Support\FotoProfil::url($article->gambar) }}" alt="Preview Image" style="width: 55px; height:55px;">
-                                @endif
-                                <div style="font-size: 15px; margin-left: 10px;" class="mt-3">
-                                    <p>{{ $article->full_name }}</p>
-                                </div>
-                            </div>
-                            <a href="{{ route('blog.topic.blog-single', ['id' => $article->id]) }}" class="readmore stretched-link" style="text-align: right;  background: linear-gradient(to right, #ff3131, #ff914d);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;">
-                                <span>Baca</span>
-                                <i class="bi bi-arrow-right"></i>
-                            </a>
-                        </header>
-
-                    </div>
-                </div>
+            <p class="blg-sub">
+                @if ($totalArticles > 0)
+                    {{ $totalArticles }} tulisan di kategori ini.
+                @else
+                    Belum ada tulisan di kategori ini.
                 @endif
-                @endforeach
-            </div>
+            </p>
+
+            @if ($categories_artikel->isNotEmpty())
+                <div class="blg-keripik">
+                    @foreach ($categories_artikel as $i => $kategori)
+                        <a href="{{ route('blog.topic.kategori', ['categories_artikel_id' => $kategori->id]) }}"
+                            class="blg-keripik-butir {{ $kategori->id == $kategoriIni?->id ? 'blg-keripik-aktif' : '' }}"
+                            style="--c: {{ ['var(--jingga)', 'var(--rumput)', 'var(--ungu)', 'var(--langit)', '#be185d'][$i % 5] }}">
+                            {{ $kategori->kategori }}
+                            <span>{{ $kategori->jumlah_artikel }}</span>
+                        </a>
+                    @endforeach
+                </div>
             @endif
-            @endforeach
-            {{ $articles->links("vendor.pagination.bootstrap-4") }}
         </div>
     </section>
-</main>
+
+    {{-- =================================================== tulisan ===== --}}
+    <section class="blg-bagian" style="background: var(--kertas-2);">
+        <div class="container">
+            @if ($articles->isEmpty())
+                {{-- Kosong berbunyi, bukan diam. Kisi kosong tanpa kalimat
+                     terbaca sebagai halaman yang gagal dimuat. --}}
+                <div class="blg-kosong">
+                    <i class="bi bi-journal-x"></i>
+                    <h2>Belum ada tulisan di sini</h2>
+                    <p>Kategorinya sudah dibuat, tulisannya belum. Coba lihat kategori lain dulu.</p>
+                    <a href="{{ url('/blog') }}" class="blg-tombol blg-tombol-kedua">
+                        <i class="bi bi-arrow-left"></i> Balik ke semua tulisan
+                    </a>
+                </div>
+            @else
+                @php
+                    $lamaBaca = function ($isi) {
+                        $kata = str_word_count(trim(strip_tags((string) $isi)));
+
+                        return max(1, (int) ceil($kata / 200));
+                    };
+                @endphp
+
+                <div class="blg-kisi">
+                    @foreach ($articles as $i => $artikelnya)
+                        <a href="{{ route('blog.topic.blog-single', ['id' => $artikelnya->id]) }}"
+                            class="blg-kartu" data-aos="fade-up" data-aos-delay="{{ ($i % 3) * 90 }}">
+                            <span class="blg-kartu-gambar">
+                                {{-- Tiga kartu teratas TIDAK ditunda: ketiganya di layar
+                                     pertama, dan menundanya membuat kotaknya kosong
+                                     justru saat orang menatapnya. --}}
+                                <img src="{{ asset('images/' . $artikelnya->gambar_depan) }}"
+                                    alt="{{ $artikelnya->judul }}"
+                                    loading="{{ $i < 3 ? 'eager' : 'lazy' }}" decoding="async">
+                                @if ($artikelnya->kategori)
+                                    <span class="blg-kartu-tag">{{ $artikelnya->kategori }}</span>
+                                @endif
+                            </span>
+
+                            <span class="blg-kartu-isi">
+                                <span class="blg-meta">
+                                    <span><i class="bi bi-calendar3"></i>
+                                        {{ \Carbon\Carbon::parse($artikelnya->created_at)->locale('id')->translatedFormat('j M Y') }}</span>
+                                    <span><i class="bi bi-clock"></i> {{ $lamaBaca($artikelnya->isi) }} menit</span>
+                                </span>
+
+                                <h3>{{ $artikelnya->judul }}</h3>
+
+                                <span class="blg-kartu-kaki">
+                                    <span class="blg-penulis">
+                                        <img src="{{ $artikelnya->gambar ? \App\Support\FotoProfil::url($artikelnya->gambar) : asset('assets/img/avatar/avatar-1.png') }}"
+                                            alt="" loading="lazy">
+                                        {{ \Illuminate\Support\Str::limit($artikelnya->full_name, 16) }}
+                                    </span>
+                                    <span class="blg-ajak-kecil">Baca <i class="bi bi-arrow-right"></i></span>
+                                </span>
+                            </span>
+                        </a>
+                    @endforeach
+                </div>
+
+                @if ($articles->hasPages())
+                    <div class="blg-halaman">
+                        {{ $articles->links() }}
+                    </div>
+                @endif
+            @endif
+        </div>
+    </section>
+
+</div>
 @stop
