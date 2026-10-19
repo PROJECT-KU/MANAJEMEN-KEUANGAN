@@ -16,6 +16,16 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
 
+    {{-- Figtree untuk menu kepala situs.
+
+         Dimuat di sini, bukan lewat @push('kepala') seperti huruf judul
+         beranda: kepala situs muncul di SETIAP halaman publik, jadi kalau
+         hurufnya cuma dimuat beranda, menu yang sama akan berganti rupa
+         begitu orang membuka Blog. Satu keluarga huruf, empat ketebalan. --}}
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Figtree:wght@500;600;700;800&display=swap">
+
     <!-- Vendor CSS Files -->
     <link href="{{ asset('assets/artikel/vendor/aos/aos.css') }}" rel="stylesheet">
     <link href="{{ asset('assets/artikel/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
@@ -30,40 +40,222 @@
     <link href="{{ asset('assets/artikel/css/style.css') }}" rel="stylesheet">
 
     <style>
-        /* <!-- ANIMASI GARIS PADA MENU --> */
-        .navbar ul li {
-            position: relative;
-            /* Ensure positioning context for the underline (::after) */
+        /* ================= KEPALA SITUS & MENU =================
+           Ditulis DI SINI, bukan di assets/artikel/css/style.css.
+
+           Berkas itu milik templat yang dipakai seluruh halaman publik —
+           menyuntingnya berarti menyentuh layar yang sedang tidak
+           dikerjakan, dan tidak ada yang memberi tahu kalau ada yang
+           rusak di salah satunya. Blok ini dimuat SESUDAH style.css, jadi
+           pada bobot yang sama ia yang menang; tidak satu pun butuh
+           !important.
+
+           Warnanya mengikuti beranda, dan jingganya diambil dari berkas
+           logo yang terpasang persis di sebelah menu ini (#e76d20). */
+        #header {
+            --kop-jingga: #e76d20;
+            --kop-jingga-muda: #fb8c3d;
+            --kop-tinta: #16233f;
+            --kop-kertas: #fdf5e8;
+            --kop-kertas-2: #f8ead4;
+            --kop-garis: #efe0c8;
+
+            background: #fff;
+            border-bottom: 1px solid var(--kop-garis);
+        }
+        .header.header-scrolled {
+            box-shadow: 0 6px 24px rgba(22, 35, 63, .08);
         }
 
-        .navbar ul li a {
-            padding: 0px;
-            margin: 0 10px;
-            /* Use horizontal margin only to space out the menu items */
-            display: inline-block;
-            position: relative;
-            /* Necessary for the underline to be positioned correctly */
+        /* --------------------------------------------- menu layar lebar */
+        #navbar a,
+        #navbar a:focus {
+            padding: 9px 14px;
+            margin: 0 2px;
+            border-radius: 11px;
+            font-family: 'Figtree', 'Nunito', sans-serif;
+            font-size: 15px; font-weight: 700;
+            color: var(--kop-tinta);
+            transition: color .18s ease, background .18s ease;
+        }
+        #navbar a:hover,
+        #navbar li:hover > a {
+            color: var(--kop-jingga);
+            background: var(--kop-kertas-2);
         }
 
-        .navbar ul li a.active {
-            color: #ff3131;
-            /* Active text color */
-            text-decoration: none;
-            /* Remove any default underline */
+        /* Butir yang sedang dibuka: tulisannya jingga, dan sebatang
+           penanda membulat di bawahnya. Menggantikan garis gradien
+           merah-jingga lama yang warnanya tidak ada di logo mana pun. */
+        #navbar a.active,
+        #navbar a.active:focus { color: var(--kop-jingga); background: transparent; }
+        #navbar a.active::after {
+            content: ''; position: absolute;
+            left: 14px; right: 14px; bottom: 2px; height: 3px;
+            border-radius: 99px;
+            background: var(--kop-jingga);
+        }
+        #navbar li { position: relative; }
+
+        /* ------------------------------------------- daftar turun Class */
+        #navbar .dropdown ul {
+            left: 6px; padding: 8px;
+            background: var(--kop-kertas);
+            border: 2px solid var(--kop-tinta);
+            border-radius: 16px;
+            /* Bayangan PEJAL, sama seperti kartu di beranda. Bayangan
+               kabur adalah tanda paling khas antarmuka cetakan. */
+            box-shadow: 5px 5px 0 rgba(22, 35, 63, .17);
+        }
+        #navbar .dropdown ul a {
+            padding: 9px 13px; margin: 0; border-radius: 9px;
+            font-size: 14.5px; font-weight: 600;
+        }
+        #navbar .dropdown ul li:hover > a,
+        #navbar .dropdown ul a:hover {
+            color: var(--kop-jingga); background: var(--kop-kertas-2);
         }
 
-        .navbar ul li a.active::after {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 4px;
-            bottom: -2px;
-            left: 0;
-            background: linear-gradient(to right, #ff3131, #ff914d);
-            border-radius: 2px;
+        /* ------------------------------------------------ tombol masuk */
+        /* Jingga berisi tulisan TINTA, bukan putih.
+
+           Putih di atas jingga logo berasio 3,18 — di bawah ambang
+           keterbacaan 4,5 untuk tulisan seukuran ini. Tinta di atas
+           jingga yang sama berasio 4,91. Alasan yang sama persis dengan
+           tombol di beranda. */
+        #navbar .kop-tombol,
+        #navbar .kop-tombol:focus {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 9px 18px; margin: 0;
+            background: var(--kop-jingga);
+            color: var(--kop-tinta);
+            border: 2px solid var(--kop-tinta);
+            border-radius: 999px;
+            font-family: 'Figtree', sans-serif; font-size: 14.5px; font-weight: 800;
+            box-shadow: 3px 3px 0 var(--kop-tinta);
+            transition: transform .16s ease, box-shadow .16s ease;
+        }
+        #navbar .kop-tombol:hover {
+            color: var(--kop-tinta); background: var(--kop-jingga-muda);
+            transform: translate(-2px, -2px);
+            box-shadow: 5px 5px 0 var(--kop-tinta);
+        }
+        #navbar .kop-tombol img {
+            width: 24px; height: 24px; border-radius: 50%; object-fit: cover;
+            border: 2px solid var(--kop-tinta);
         }
 
-        /* <!-- END --> */
+        /* ================= LAYAR SEMPIT ================= */
+        /* Tombol hamburgernya jadi TOMBOL, bukan ikon telanjang.
+
+           Sebagai ikon 28px tanpa bingkai, sasaran sentuhnya jauh di bawah
+           44px yang disarankan untuk jempol — dan di layar terang ia
+           nyaris tidak terbaca sebagai sesuatu yang bisa ditekan. */
+        .mobile-nav-toggle {
+            display: none;
+            width: 44px; height: 44px;
+            align-items: center; justify-content: center;
+            border: 2px solid var(--kop-tinta); border-radius: 13px;
+            background: var(--kop-kertas);
+            color: var(--kop-jingga);
+            font-size: 22px; line-height: 1;
+            box-shadow: 3px 3px 0 var(--kop-tinta);
+            transition: background .18s ease, color .18s ease;
+        }
+        @media (max-width: 1200px) {
+            .mobile-nav-toggle { display: inline-flex; }
+        }
+        .mobile-nav-toggle.bi-x {
+            position: fixed; top: 18px; right: 18px; z-index: 9999;
+            background: var(--kop-tinta); color: var(--kop-kertas);
+            border-color: var(--kop-kertas);
+            box-shadow: none;
+        }
+
+        /* Tirai gelapnya memakai tinta, bukan biru templat. */
+        .navbar-mobile { background: rgba(22, 35, 63, .66); }
+
+        /* SETIAP aturan di bawah ditulis `#navbar.navbar-mobile`, bukan
+           `.navbar-mobile` saja — dan itu bukan kerapian.
+
+           Aturan layar lebar di atas memakai #navbar, yang berbobot ID.
+           Selektor berkelas saja KALAH melawannya, jadi versi pertama blok
+           ini mati diam-diam: terukur di ponsel, butir menunya memakai
+           padding 14px/9px dan ukuran 15px milik layar lebar, latar butir
+           aktifnya tetap tembus pandang, dan penandanya jadi campuran —
+           lebar 5px dari sini, tinggi 3px dari sana.
+
+           Gejalanya paling menipu: menunya tampak HAMPIR benar, jadi mudah
+           disimpulkan selesai. */
+        #navbar.navbar-mobile ul {
+            top: 76px; right: 14px; left: 14px; bottom: auto;
+            max-height: calc(100vh - 100px);
+            padding: 10px;
+            background: var(--kop-kertas);
+            border: 2px solid var(--kop-tinta);
+            border-radius: 20px;
+            box-shadow: 7px 7px 0 rgba(22, 35, 63, .3);
+        }
+        #navbar.navbar-mobile a,
+        #navbar.navbar-mobile a:focus {
+            padding: 14px; margin: 0; border-radius: 12px;
+            font-size: 16px; font-weight: 700;
+            color: var(--kop-tinta);
+        }
+        #navbar.navbar-mobile li + li > a {
+            border-top: 1px dashed var(--kop-garis); border-radius: 0;
+        }
+        #navbar.navbar-mobile a:hover,
+        #navbar.navbar-mobile li:hover > a {
+            color: var(--kop-jingga); background: var(--kop-kertas-2);
+        }
+
+        /* Butir yang sedang dibuka: latar krem, batang jingga di KIRI.
+
+           Di daftar yang tersusun tegak, garis BAWAH terbaca sebagai
+           pemisah antar-butir, bukan sebagai penanda. */
+        #navbar.navbar-mobile a.active {
+            color: var(--kop-jingga);
+            background: var(--kop-kertas-2);
+            padding-left: 24px;
+        }
+        #navbar.navbar-mobile a.active::after {
+            left: 9px; right: auto; top: 50%; bottom: auto;
+            width: 5px; height: 58%; translate: 0 -50%;
+            border-radius: 99px;
+        }
+
+        #navbar.navbar-mobile .dropdown ul {
+            position: static; margin: 4px 8px 8px; padding: 6px;
+            background: var(--kop-kertas-2);
+            border: 1px dashed var(--kop-garis);
+            border-radius: 12px; box-shadow: none;
+            max-height: none;
+        }
+        #navbar.navbar-mobile .dropdown ul a {
+            padding: 12px; font-size: 15px; font-weight: 600;
+        }
+        #navbar.navbar-mobile .dropdown ul li + li > a {
+            border-top: 0; border-radius: 9px;
+        }
+
+        /* Tombol masuknya selebar panel: di layar sempit ia tujuan utama
+           menu ini, dan tombol yang menggantung separuh lebar terbaca
+           seperti sisa tata letak layar lebar. */
+        #navbar.navbar-mobile .kop-tombol,
+        #navbar.navbar-mobile .kop-tombol:focus {
+            width: 100%; justify-content: center;
+            margin: 10px 0 4px; padding: 14px 18px; font-size: 15.5px;
+        }
+        #navbar.navbar-mobile .kop-bungkus-tombol {
+            display: block; width: 100%; padding: 0 6px 4px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            #navbar a,
+            #navbar .kop-tombol,
+            .mobile-nav-toggle { transition: none !important; }
+        }
     </style>
 
     <!-- Facebook Pixel Code -->
@@ -136,9 +328,17 @@
                     <li><a class="nav-link scrollto {{ Request::is('Refrensi-Paper') ? 'active' : '' }}" href="{{ url('/Refrensi-Paper') }}">Referensi Paper</a></li>
                     <li><a class="nav-link scrollto {{ Request::is('contact') ? 'active' : '' }}" href="{{ url('/contact') }}">Kontak</a></li>
 
-                    <!-- Tombol Login/Register -->
+                    {{-- Tombol masuk / akun.
+
+                         Gaya sebarisnya DIBUANG dan dipindahkan ke kelas
+                         .kop-tombol: style= menang atas aturan CSS mana pun,
+                         jadi selama warnanya ditulis di sini, menatanya dari
+                         lembar gaya tidak akan pernah berpengaruh — dan itu
+                         yang membuat tombol ini tertinggal memakai gradien
+                         merah-jingga lama sementara seluruh halaman sudah
+                         berpindah ke jingga logo. --}}
                     <li>
-                        <div class="d-flex gap-2 ms-lg-3 mt-2 mt-lg-0">
+                        <div class="kop-bungkus-tombol ms-lg-3 mt-2 mt-lg-0">
                             @auth
                             @php
                             // Ambil dua kata pertama dari full_name
@@ -151,22 +351,13 @@
                             : asset('assets/img/avatar/avatar-1.png');
                             @endphp
 
-                            <a href="{{ url('/account/dashboard') }}"
-                                class="btn d-flex align-items-center"
-                                style="padding: 6px 12px; color: white; font-size: 14px; background: linear-gradient(to right, #ff3131, #ff914d)">
-
-                                <img src="{{ $userImage }}"
-                                    alt="Profile"
-                                    class="rounded-circle me-2"
-                                    style="width: 26px; height: 26px; object-fit: cover; border: 2px solid white;">
-
+                            <a href="{{ url('/account/dashboard') }}" class="kop-tombol">
+                                <img src="{{ $userImage }}" alt="Foto profil">
                                 Hi, {{ $shortName }}
                             </a>
                             @else
-                            <a href="{{ url('/login') }}"
-                                class="btn"
-                                style="padding: 8px 12px; color: white; font-size: 14px; background: linear-gradient(to right, #ff3131, #ff914d);">
-                                Login / Register
+                            <a href="{{ url('/login') }}" class="kop-tombol">
+                                <i class="bi bi-box-arrow-in-right"></i> Login / Register
                             </a>
                             @endauth
                         </div>
