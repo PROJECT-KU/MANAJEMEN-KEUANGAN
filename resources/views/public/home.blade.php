@@ -73,6 +73,18 @@ Beranda | Rumah Scopus
            berbeda, satu warna yang sama. */
         --jingga: #e76d20;
         --jingga-muda: #fb8c3d;
+
+        /* Jingga yang lebih dalam, KHUSUS tombol berisi penuh.
+
+           Tombol tulisannya kecil dan harus menonjol; latar jingga logo
+           memaksa tulisannya bertinta (putih cuma berasio 3,18 di sana),
+           dan tinta di atas jingga — walau lulus di angka 4,91 — terbaca
+           kurang menonjol karena keduanya sama-sama gelap sedang.
+
+           Pada #b85213 putih berasio 4,94: lulus dengan ruang lega, dan
+           warnanya masih jelas jingga. Permukaan LEBAR tetap memakai jingga
+           logo; yang butuh warna lebih dalam cuma tulisan kecil. */
+        --jingga-kuat: #b85213;
         /* #ad4d12, bukan #c25613: dipakai sebagai TULISAN di atas kertas,
            dan pada #c25613 rasionya cuma 4,19 — di bawah ambang 4,5. */
         --jingga-tua: #ad4d12;
@@ -176,22 +188,25 @@ Beranda | Rumah Scopus
         text-decoration: none; cursor: pointer;
         transition: transform .18s ease, box-shadow .18s ease;
     }
-    /* Tulisannya TINTA, bukan putih.
+    /* Putih di atas jingga yang LEBIH DALAM.
 
-       Putih di atas jingga logo (#e76d20) berasio 3,18 — di bawah ambang
-       keterbacaan 4,5 untuk tulisan seukuran ini, dan 16px tebal belum
-       terhitung "tulisan besar" yang ambangnya 3. Tinta di atas jingga
-       yang sama berasio 4,91.
+       Tiga pilihan, ketiganya terukur: putih di atas jingga logo #e76d20
+       berasio 3,18 (gagal); tinta di atas jingga logo 4,91 (lulus, tetapi
+       dua warna gelap sedang yang berdampingan terbaca kurang menonjol);
+       putih di atas #b85213 berasio 4,94 — lulus DAN menonjol.
 
-       Yang ditukar warnanya, BUKAN jingganya: menggelapkan latarnya sampai
-       putih lulus berarti meninggalkan warna logo yang justru sedang
-       dijadikan patokan. */
+       Jadi yang digelapkan cuma latar TOMBOLNYA, bukan jingga halamannya.
+       Permukaan lebar — pita ajakan, sorotan, penanda — tetap memakai
+       jingga logo apa adanya. */
     .bnd-tombol-utama {
-        background: var(--jingga); color: var(--tinta);
+        background: var(--jingga-kuat); color: #fff;
         box-shadow: 5px 5px 0 var(--tinta);
     }
     .bnd-tombol-utama:hover {
-        color: var(--tinta); transform: translate(-2px, -2px);
+        /* Latarnya tidak dimudakan saat disentuh: jingga yang lebih muda
+           menjatuhkan rasio putihnya kembali di bawah ambang. Yang bergerak
+           bayangannya. */
+        color: #fff; transform: translate(-2px, -2px);
         box-shadow: 8px 8px 0 var(--tinta);
     }
     .bnd-tombol-kedua {
