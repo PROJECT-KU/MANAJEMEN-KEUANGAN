@@ -22,7 +22,6 @@ class FaviconSeragamTest extends TestCase
      */
     private const DIKECUALIKAN = [
         'public/layout/header.blade.php',
-        'public/plagiasi/layout/header.blade.php',
     ];
 
     public function test_semua_layar_back_office_memakai_favicon_halaman_masuk(): void
