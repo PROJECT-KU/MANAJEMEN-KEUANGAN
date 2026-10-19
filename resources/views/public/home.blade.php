@@ -1309,7 +1309,27 @@ Beranda | Rumah Scopus
                              Sampulnya yang menggantikan bingkai pertama, dan
                              itu sebabnya tiap rekaman punya berkas -sampul
                              sendiri. --}}
+                        {{-- controlsList="nodownload": membuang butir "Download"
+                             dari menu tiga titik bawaan Chrome.
+
+                             INI TIDAK MENCEGAH UNDUHAN, dan jangan sampai
+                             dikira begitu. Alamat berkasnya tetap ada di
+                             sumber halaman, dan siapa pun yang membuka
+                             DevTools — atau sekadar menempelkan alamatnya di
+                             bilah alamat — tetap mendapatkannya utuh.
+
+                             Yang dicabut cuma jalan yang paling mudah: satu
+                             tekanan di menu yang kebetulan ada di depan mata.
+                             Mencegah sungguhan butuh alamat bertanda tangan
+                             yang kedaluwarsa, potongan HLS beralas token,
+                             atau DRM — dan ketiganya pun tidak mutlak.
+
+                             Tidak didukung Firefox maupun Safari; di sana
+                             menu unduhnya memang tidak ada di tempat yang
+                             sama, tetapi "Simpan video sebagai…" lewat klik
+                             kanan tetap bisa. --}}
                         <video controls playsinline preload="none"
+                            controlsList="nodownload"
                             poster="{{ asset('storage/video/' . $sampul . '.webp') }}"
                             aria-label="Testimoni peserta Rumah Scopus">
                             <source src="{{ asset('storage/video/' . $berkas . '.mp4') }}" type="video/mp4">
@@ -1377,6 +1397,27 @@ Beranda | Rumah Scopus
     </section>
 
 </div>
+
+<script>
+    /*
+     * Klik kanan di atas rekaman testimoni tidak memunculkan menu peramban.
+     *
+     * Pasangan controlsList="nodownload": yang itu membuang butir Download
+     * dari menu tiga titik, yang ini membuang "Simpan video sebagai…" dari
+     * menu klik kanan. Keduanya menutup jalan yang paling mudah SAJA —
+     * alamat berkasnya tetap ada di sumber halaman, dan ini bukan
+     * pengamanan. Lihat keterangan di markahnya.
+     *
+     * Hanya pada rekaman itu, bukan seluruh halaman: mematikan klik kanan
+     * di mana-mana merampas salin-tempel, buka-di-tab-baru, dan periksa
+     * ejaan dari orang yang tidak sedang mengunduh apa pun.
+     */
+    (function () {
+        document.querySelectorAll('.bnd-polaroid video').forEach(function (v) {
+            v.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+        });
+    })();
+</script>
 
 <script>
     /*
