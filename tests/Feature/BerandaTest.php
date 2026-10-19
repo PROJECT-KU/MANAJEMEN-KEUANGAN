@@ -298,11 +298,20 @@ class BerandaTest extends TestCase
          *    salah sampai diletakkan bersebelahan dengan logonya di kepala
          *    situs.
          *
-         * 2. Tulisan di atas jingga itu TINTA, bukan putih. Putih di atas
-         *    #e76d20 berasio 3,18 — di bawah ambang 4,5 untuk tulisan
-         *    seukuran tombol, sementara tinta berasio 4,91. Putih di atas
-         *    jingga TERLIHAT baik-baik saja bagi mata yang sehat di layar
-         *    yang terang; yang menanggung orang lain.
+         * 2. Tombol berisi penuh memakai PASANGAN yang terukur lulus:
+         *    putih di atas #b85213, berasio 4,94.
+         *
+         *    Dua pasangan lain pernah dipakai dan ditinggalkan, keduanya
+         *    karena angkanya: putih di atas jingga logo #e76d20 berasio
+         *    3,18 — gagal, walau TERLIHAT baik-baik saja bagi mata yang
+         *    sehat di layar terang. Tinta di atas jingga logo berasio 4,91
+         *    — lulus, tetapi dua warna gelap sedang yang berdampingan
+         *    terbaca kurang menonjol, dan pemiliknya menyebutnya begitu.
+         *
+         *    Yang dijaga PASANGANNYA, bukan salah satunya: putih di atas
+         *    jingga logo gagal, dan tinta di atas jingga dalam lebih gagal
+         *    lagi (3,16). Mengganti satu sisi saja menghasilkan tombol yang
+         *    tidak terbaca, tanpa galat apa pun.
          */
         $sumber = (string) preg_replace(
             ['#/\*.*?\*/#s', '#\{\{--.*?--\}\}#s'], '',
@@ -317,10 +326,18 @@ class BerandaTest extends TestCase
 
         $this->assertSame(1, $cocok, 'Aturan .bnd-tombol-utama tidak ditemukan.');
 
-        $this->assertStringContainsString('color: var(--tinta)', $tangkap[0],
-            'Tombol utamanya kembali bertulisan putih di atas jingga. Rasionya '
-            . '3,18 — di bawah ambang keterbacaan, dan tidak ada galat yang '
-            . 'memberitahukannya.');
+        $this->assertStringContainsString('background: var(--jingga-kuat)', $tangkap[0],
+            'Latar tombol utamanya bukan lagi --jingga-kuat. Putih di atas jingga '
+            . 'logo berasio 3,18 — di bawah ambang keterbacaan.');
+
+        $this->assertStringContainsString('color: #fff', $tangkap[0],
+            'Tulisan tombol utamanya bukan lagi putih. Tinta di atas jingga yang '
+            . 'dalam berasio 3,16 — lebih buruk daripada kombinasi mana pun yang '
+            . 'pernah dipakai di sini.');
+
+        $this->assertStringContainsString('--jingga-kuat: #b85213;', $sumber,
+            'Jingga tombolnya bergeser dari #b85213. Rasio putih di atasnya 4,94; '
+            . 'satu langkah lebih muda saja sudah jatuh di bawah 4,5.');
     }
 
     #[Test]
