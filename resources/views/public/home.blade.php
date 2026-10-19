@@ -57,19 +57,35 @@ Beranda | Rumah Scopus
     /* ============================================================ dasar */
     .bnd {
         /* --- kertas & tinta ---------------------------------------- */
-        --kertas: #fbf5e9;
-        --kertas-2: #f5ecd9;
+        /* Kertasnya dihangatkan sedikit ke arah jingga (#fbf5e9 jadi
+           #fdf5e8): latar krem netral membuat jingga di atasnya terbaca
+           sebagai tempelan, bukan sebagai warna rumahnya sendiri. */
+        --kertas: #fdf5e8;
+        --kertas-2: #f8ead4;
         --tinta: #16233f;
         --tinta-2: #5c6b85;
 
+        /* JINGGA LOGO — warna utama halaman ini.
+
+           Bukan dikira-kira: diambil dari berkas logonya sendiri. Piksel
+           paling menonjol pada LogoRSC.png yang terpasang di kepala situs
+           adalah #e76d20, dan Icon-RS.png memulangkan #e86d20. Dua berkas
+           berbeda, satu warna yang sama. */
+        --jingga: #e76d20;
+        --jingga-muda: #fb8c3d;
+        /* #ad4d12, bukan #c25613: dipakai sebagai TULISAN di atas kertas,
+           dan pada #c25613 rasionya cuma 4,19 — di bawah ambang 4,5. */
+        --jingga-tua: #ad4d12;
+
         /* Stabilo. Satu-satunya warna yang boleh menimpa tulisan, dan
-           hanya untuk menandai — persis seperti stabilo sungguhan. */
+           hanya untuk menandai — persis seperti stabilo sungguhan.
+           Dipertahankan justru supaya jingganya tidak sendirian: halaman
+           satu warna terbaca monoton, sekalipun warnanya benar. */
         --stabilo: #ffd84d;
 
-        /* Empat warna penanda. Dipilih yang tidak satu pun bertetangga di
-           roda warna, supaya enam kartu berjajar tidak terbaca sebagai
-           satu gradasi. */
-        --bata: #d9442b;
+        /* Warna penyerta, dipakai LEBIH JARANG daripada jingga. Dipilih
+           yang tidak satu pun bertetangga di roda warna, supaya enam kartu
+           berjajar tidak terbaca sebagai satu gradasi. */
         --rumput: #0f766e;
         --ungu: #5b3fd6;
         --langit: #1668c9;
@@ -147,7 +163,10 @@ Beranda | Rumah Scopus
         transform: rotate(-2deg);
         box-shadow: 3px 3px 0 rgba(22, 35, 63, .18);
     }
-    .bnd-stiker i { color: var(--stabilo); }
+    /* Ikon stikernya jingga, bukan stabilo. Stiker muncul di tiap kepala
+       bagian, jadi satu aturan ini sendirian menaruh jingga di enam tempat
+       yang tersebar merata sepanjang halaman. */
+    .bnd-stiker i { color: var(--jingga-muda); }
 
     /* --------------------------------------------------------- tombol */
     .bnd-tombol {
@@ -157,12 +176,22 @@ Beranda | Rumah Scopus
         text-decoration: none; cursor: pointer;
         transition: transform .18s ease, box-shadow .18s ease;
     }
+    /* Tulisannya TINTA, bukan putih.
+
+       Putih di atas jingga logo (#e76d20) berasio 3,18 — di bawah ambang
+       keterbacaan 4,5 untuk tulisan seukuran ini, dan 16px tebal belum
+       terhitung "tulisan besar" yang ambangnya 3. Tinta di atas jingga
+       yang sama berasio 4,91.
+
+       Yang ditukar warnanya, BUKAN jingganya: menggelapkan latarnya sampai
+       putih lulus berarti meninggalkan warna logo yang justru sedang
+       dijadikan patokan. */
     .bnd-tombol-utama {
-        background: var(--bata); color: #fff;
+        background: var(--jingga); color: var(--tinta);
         box-shadow: 5px 5px 0 var(--tinta);
     }
     .bnd-tombol-utama:hover {
-        color: #fff; transform: translate(-2px, -2px);
+        color: var(--tinta); transform: translate(-2px, -2px);
         box-shadow: 8px 8px 0 var(--tinta);
     }
     .bnd-tombol-kedua {
@@ -179,7 +208,16 @@ Beranda | Rumah Scopus
        bukan bagian yang berdiri sendiri. Dengan 70px di atas dan 86px dari
        bagian berikutnya, pitanya terbaca mengapung di antara dua ruang
        kosong. */
-    .bnd-hero { padding: 124px 0 44px; }
+    /* Semburat jingga samar di belakang hero. Latar krem rata membuat
+       tombol jingga di atasnya terbaca sebagai benda asing; dengan
+       semburat ini jingganya terbaca sebagai warna ruangannya sendiri. */
+    .bnd-hero {
+        position: relative;
+        padding: 124px 0 44px;
+        background:
+            radial-gradient(circle at 86% 6%, rgba(231, 109, 32, .17), transparent 48%),
+            radial-gradient(circle at 2% 70%, rgba(255, 216, 77, .2), transparent 42%);
+    }
 
     /* 1.08fr : 0.92fr, bukan 1 : 1. Kisi yang persis seimbang membuat kedua
        sisinya saling bersaing; sedikit tidak seimbang memberi tahu mata
@@ -213,7 +251,7 @@ Beranda | Rumah Scopus
     .bnd-putar { display: inline-grid; vertical-align: baseline; text-align: left; }
     .bnd-putar > span {
         grid-area: 1 / 1;
-        color: var(--bata); opacity: 0;
+        color: var(--jingga); opacity: 0;
         animation: bnd-ganti 10.5s infinite;
     }
     .bnd-putar > span:nth-child(2) { animation-delay: 3.5s; }
@@ -261,7 +299,7 @@ Beranda | Rumah Scopus
         aspect-ratio: 4 / 5;
         border: 3px solid var(--tinta);
         border-radius: 200px 200px 22px 22px;
-        box-shadow: 10px 10px 0 var(--stabilo);
+        box-shadow: 10px 10px 0 var(--jingga-muda);
         transform: rotate(-1.4deg);
         background: var(--kertas-2);
     }
@@ -394,7 +432,7 @@ Beranda | Rumah Scopus
         width: 54px; height: 54px; border-radius: 50%; margin-bottom: 16px;
         background: var(--tinta);
         border: 2px solid rgba(251, 245, 233, .34);
-        color: var(--stabilo);
+        color: var(--jingga-muda);
         font-family: 'Fraunces', serif; font-weight: 800; font-size: 1.3rem;
         line-height: 1;
         transition: background .22s ease, color .22s ease, border-color .22s ease, scale .22s ease;
@@ -402,8 +440,8 @@ Beranda | Rumah Scopus
     /* Latarnya PEKAT, bukan tembus pandang: ia harus menutupi rel yang
        lewat persis di belakangnya. */
     .bnd-rute-henti:hover .bnd-rute-nomor {
-        background: var(--stabilo); color: var(--tinta);
-        border-color: var(--stabilo); scale: 1.08;
+        background: var(--jingga); color: #fff;
+        border-color: var(--jingga); scale: 1.08;
     }
 
     .bnd-rute-henti h3 { color: var(--kertas); font-size: 1.08rem; margin-bottom: 7px; }
@@ -472,7 +510,7 @@ Beranda | Rumah Scopus
     .bnd-angka-raksasa {
         flex: 0 0 auto;
         font-family: 'Fraunces', serif; font-weight: 900;
-        font-size: 4.4rem; line-height: .92; color: var(--bata);
+        font-size: 4.4rem; line-height: .92; color: var(--jingga);
         font-variation-settings: 'opsz' 120, 'WONK' 1;
     }
 
@@ -777,19 +815,43 @@ Beranda | Rumah Scopus
     .bnd-balon-kaki small { color: var(--tinta-2); font-size: .88rem; }
 
     /* ========================================================= ajakan */
+    /* Blok terbesar di halaman, dan sekarang JINGGA — ini yang membuat
+       jingganya terbaca dominan, bukan sekadar sering muncul.
+
+       Dulu stabilo. Kuning sebesar ini menarik mata lebih kuat daripada
+       seluruh jingga di atasnya digabung, jadi warna merek yang sebenarnya
+       justru kalah oleh penanda. */
     .bnd-ajakan {
+        position: relative; overflow: hidden;
         padding: 62px 48px; text-align: center;
-        background: var(--stabilo);
+        background:
+            radial-gradient(circle at 88% 10%, rgba(255, 216, 77, .34), transparent 46%),
+            linear-gradient(118deg, var(--jingga) 0%, var(--jingga-muda) 100%);
         border: 3px solid var(--tinta); border-radius: 26px;
         box-shadow: 10px 10px 0 var(--tinta);
     }
-    .bnd-ajakan h2 { font-size: 2.5rem; line-height: 1.12; }
+    /* Tinta, bukan putih — alasannya sama seperti pada tombol utama, dan
+       di sini taruhannya lebih besar: paragraf ini yang paling panjang di
+       halaman dan dibaca orang yang sedang memutuskan. */
+    .bnd-ajakan h2 { font-size: 2.5rem; line-height: 1.12; color: var(--tinta); }
     .bnd-ajakan p {
         margin: 16px auto 0; max-width: 52ch;
-        color: rgba(22, 35, 63, .78); font-size: 1.08rem;
+        color: rgba(22, 35, 63, .88); font-size: 1.08rem;
     }
     .bnd-ajakan .bnd-aksi { justify-content: center; }
-    .bnd-ajakan .bnd-tombol-kedua { background: var(--kertas); }
+    /* Tombol utamanya DIBALIK jadi kertas di atas jingga: tombol jingga di
+       atas latar jingga hilang bentuknya. */
+    .bnd-ajakan .bnd-tombol-utama { background: var(--kertas); color: var(--jingga-tua); }
+    .bnd-ajakan .bnd-tombol-utama:hover { color: var(--jingga-tua); }
+    .bnd-ajakan .bnd-tombol-kedua {
+        background: transparent; color: var(--tinta);
+        border-color: var(--tinta);
+        box-shadow: 5px 5px 0 rgba(22, 35, 63, .3);
+    }
+    .bnd-ajakan .bnd-tombol-kedua:hover {
+        color: var(--tinta); background: var(--kertas);
+        box-shadow: 8px 8px 0 rgba(22, 35, 63, .3);
+    }
 
     /* ==================================================== layar kecil */
     @media (max-width: 991.98px) {
@@ -1017,7 +1079,7 @@ Beranda | Rumah Scopus
                     </div>
 
                     <span class="bnd-gelembung bnd-gelembung-1">
-                        <i class="bi bi-mortarboard-fill" style="color: var(--bata)"></i>
+                        <i class="bi bi-mortarboard-fill" style="color: var(--jingga)"></i>
                         <span><strong>5.000+</strong><small>alumni</small></span>
                     </span>
                     <span class="bnd-gelembung bnd-gelembung-2">
@@ -1068,7 +1130,7 @@ Beranda | Rumah Scopus
             <div class="bnd-bento">
                 {{-- Kartu pertama dan keempat melebar dua kolom; alasannya ada
                      di aturan .bnd-bento. --}}
-                <div class="bnd-kartu" style="--c: var(--bata)" data-aos="fade-up">
+                <div class="bnd-kartu" style="--c: var(--jingga)" data-aos="fade-up">
                     <span class="bnd-kartu-ikon"><i class="bi bi-person-check-fill"></i></span>
                     <h3>Trainernya nggak cuma ngajar</h3>
                     <p>
@@ -1128,7 +1190,7 @@ Beranda | Rumah Scopus
                  dan orang itu tidak mengadu, ia pergi. Dijaga BerandaTest. --}}
             <div class="bnd-kisi-3">
                 @foreach ([
-                    ['var(--bata)', 'HomeScopusCamp.png', 'Offline · 3 hari', 'Scopus Camp', 'Tiga hari ketemu langsung di Jogja, naskahmu dibedah sampai kelar. Habis itu masih ditemani setahun penuh.', url('/Scopus-Camp')],
+                    ['var(--jingga)', 'HomeScopusCamp.png', 'Offline · 3 hari', 'Scopus Camp', 'Tiga hari ketemu langsung di Jogja, naskahmu dibedah sampai kelar. Habis itu masih ditemani setahun penuh.', url('/Scopus-Camp')],
                     ['var(--langit)', 'HomeOnlineTraining.png', 'Online · 8 sesi', 'Online Training', 'Delapan kali ketemu daring bareng trainer. Cocok buat yang susah ninggalin kampus.', 'https://rumahscopus.com/courses/online-class/'],
                     ['var(--ungu)', 'HomeScopusKafe.png', 'Privat · 5 jam', 'Scopus Kafe', 'Lima jam berdua sama trainer. Buat naskah yang sudah jalan tapi mentok di satu bagian.', url('/Scopus-Kafe')],
                     ['var(--rumput)', 'HomeBibliometrik.png', 'Online · 8 sesi', 'Analisis Bibliometrik', 'Belajar baca peta riset: mana yang sudah ramai, mana celah yang belum digarap orang.', url('/Analisis-Bibliometrik')],
@@ -1184,7 +1246,7 @@ Beranda | Rumah Scopus
             <div class="bnd-kepala" data-aos="fade-up">
                 <span class="bnd-stiker"
                     style="background: var(--stabilo); color: var(--tinta); box-shadow: 3px 3px 0 rgba(251, 245, 233, .28);">
-                    <i class="bi bi-bar-chart-fill" style="color: var(--bata)"></i> Angkanya
+                    <i class="bi bi-bar-chart-fill" style="color: var(--jingga)"></i> Angkanya
                 </span>
                 <h2 class="bnd-judul">Nggak perlu kami lebih-lebihkan</h2>
                 <p class="bnd-sub">
@@ -1284,7 +1346,7 @@ Beranda | Rumah Scopus
             @php($rekaman = [
                 ['testimoni', 'testimoni-sampul', '-1.8', 'var(--ungu)'],
                 ['testimoni2-web', 'testimoni2-sampul', '1.2', 'var(--rumput)'],
-                ['testimoni3-web', 'testimoni3-sampul', '-.9', 'var(--bata)'],
+                ['testimoni3-web', 'testimoni3-sampul', '-.9', 'var(--jingga)'],
             ])
 
             <div class="bnd-testi-kisi">
