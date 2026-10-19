@@ -524,22 +524,51 @@ class BerandaTest extends TestCase
     }
 
     #[Test]
-    public function ketiga_alat_gratis_tertaut_dan_halamannya_hidup(): void
+    public function alat_gratisnya_tertaut_dan_halamannya_hidup(): void
     {
         /*
-         * Ketiga halaman ini sudah lama ada dan memulangkan 200, tetapi
-         * beranda tidak menyebutnya sama sekali — bagian layanannya menulis
-         * "Enam cara belajar" padahal pintunya sembilan.
+         * Kedua halaman ini sudah lama ada dan memulangkan 200, tetapi
+         * beranda tidak menyebutnya sama sekali.
          */
         $isi = (string) $this->get('/')->assertOk()->getContent();
 
-        foreach (['/Refrensi-Paper', '/Cek-Plagiasi', '/paperisasi/public/data'] as $jalur) {
+        foreach (['/Refrensi-Paper', '/paperisasi/public/data'] as $jalur) {
             $this->assertStringContainsString(url($jalur), $isi,
                 'Beranda tidak lagi menautkan ' . $jalur . '; alat yang bisa dipakai '
                 . 'tanpa bayar itu jadi tidak pernah ditemukan orang.');
 
             $this->get($jalur)->assertOk();
         }
+    }
+
+    #[Test]
+    public function cek_plagiasi_tidak_dihidupkan_lagi_separuh_separuh(): void
+    {
+        /*
+         * Cek Plagiasi dibuang 19 Okt 2026 atas permintaan pemiliknya.
+         *
+         * Yang dijaga di sini BUKAN keputusan membuangnya — itu boleh
+         * dibatalkan kapan saja — melainkan membuangnya SETENGAH. Fitur ini
+         * sudah pernah berada dalam keadaan itu dan bertahan lama: tombol
+         * kirimnya memanggil FileUpload::create() sementara kelas FileUpload
+         * tidak pernah ada di proyek ini, jadi setiap naskah yang dikirim
+         * orang berakhir di galat 500 — sesudah berkasnya telanjur
+         * tersimpan, dan tanpa seorang pun tahu kecuali yang mengirim.
+         *
+         * Tautan yang hidup ke halaman yang sudah tidak ada mengulang bentuk
+         * kegagalan yang sama: orangnya menemukan pintunya, menekannya, lalu
+         * mendapat halaman kosong.
+         */
+        $isi = (string) $this->get('/')->assertOk()->getContent();
+
+        $this->assertStringNotContainsString('Cek-Plagiasi', $isi,
+            'Beranda menautkan /Cek-Plagiasi lagi, padahal rutenya sudah tidak ada. '
+            . 'Yang menekannya mendapat 404.');
+
+        $this->assertNull(
+            app('router')->getRoutes()->getByName('cek.plagiasi.public'),
+            'Rute cek.plagiasi.public hidup lagi tanpa pengendali dan tampilannya; '
+            . 'membukanya melempar galat, bukan menampilkan halaman.');
     }
 
     #[Test]

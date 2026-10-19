@@ -27,10 +27,6 @@ Route::get('/blog/topic/blog-single/{id}', 'Publict\PublicArticleController@blog
 Route::post('/blog/store', 'Publict\PublicArticleController@storekomentar')->name('blog.store.komentar');
 Route::get('/contact', 'Publict\PublicArticleController@contact')->name('blog.contact.kontak');
 
-// PLAGIASI
-Route::get('/Cek-Plagiasi', 'Publict\PublicPlagiasiController@index')->name('cek.plagiasi.public');
-Route::post('/Cek-Plagiasi/proses', 'Publict\PublicPlagiasiController@uploadFile')->name('cek.plagiasi.proses');
-
 // SCOPUS KAFE PUBLIC
 Route::get('/Scopus-Kafe', 'Publict\PublicScopusKafeController@public')->name('public.scopuskafe.index');
 Route::get('/Scopus-Kafe/Form-Pendaftaran', 'Publict\PublicScopusKafeController@FormPendaftaran')->name('public.scopuskafe.formpendaftaran');
