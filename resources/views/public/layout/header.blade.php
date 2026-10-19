@@ -65,12 +65,43 @@
 
             background: #fff;
             border-bottom: 1px solid var(--kop-garis);
+            padding: 14px 0;
+        }
+        #header > .container-fluid { gap: 18px; }
+
+        /* Tingginya yang dipatok, lebarnya auto — supaya nisbahnya utuh.
+           max-height: none wajib: aturan templat memasangnya 40px, dan
+           dengan height 46px yang menang justru batas atasnya. */
+        #header .logo img {
+            height: 46px; width: auto;
+            max-height: none; margin-right: 0;
         }
         .header.header-scrolled {
             box-shadow: 0 6px 24px rgba(22, 35, 63, .08);
         }
 
         /* --------------------------------------------- menu layar lebar */
+        /* Tautannya dikumpulkan dalam satu pil krem.
+
+           Sebelumnya enam kata mengambang di bidang putih tanpa satu pun
+           bentuk yang mengikatnya, jadi jarak antara logo, menu, dan tombol
+           terbaca kebetulan. Dengan pil ini menunya jadi SATU benda yang
+           punya tepi, dan ketiganya berdiri sebagai tiga bagian yang jelas.
+
+           Tombol masuknya tetap di dalam <ul> yang sama — memindahkannya
+           keluar akan membuatnya hilang dari panel menu ponsel, yang
+           dirakit templat dari <ul> itu juga. Ia didorong keluar pil lewat
+           margin negatif. */
+        @media (min-width: 1201px) {
+            #navbar > ul {
+                gap: 2px; padding: 5px 7px;
+                background: var(--kop-kertas);
+                border: 1px solid var(--kop-garis);
+                border-radius: 999px;
+            }
+            #navbar > ul > li:last-child { margin: -6px -8px -6px 10px; }
+        }
+
         #navbar a,
         #navbar a:focus {
             padding: 9px 14px;
@@ -308,8 +339,18 @@
         <div class="container-fluid container-xl d-flex align-items-center justify-content-between">
 
             <!-- Logo -->
+            {{-- Lebarnya TIDAK lagi dipatok di atribut style=.
+
+                 Gaya sebaris width: 180px bertabrakan dengan max-height: 40px
+                 milik templat: keduanya berlaku, jadi gambarnya digambar
+                 180x40 padahal nisbah aslinya 1906x470 — terukur 4,5 lawan
+                 4,055, meregang sekitar sebelas persen. Logo yang teregang
+                 terbaca "dipaksa" walau tidak ada yang bisa menunjuk apa
+                 yang salah.
+
+                 Sekarang tingginya yang dipatok dan lebarnya mengikuti. --}}
             <a href="{{ url('/') }}" class="logo d-flex align-items-center">
-                <img style="width: 180px;" src="{{ asset('assets/img/LogoRSC.png') }}" alt="Rumah Scopus">
+                <img src="{{ asset('assets/img/LogoRSC.png') }}" alt="Rumah Scopus Foundation">
             </a>
 
             <!-- Navbar -->
