@@ -288,6 +288,42 @@ class BerandaTest extends TestCase
     }
 
     #[Test]
+    public function jingga_halamannya_jingga_logo_dan_tulisannya_terbaca(): void
+    {
+        /*
+         * DUA hal sekaligus, dan keduanya diam kalau rusak.
+         *
+         * 1. Jingganya #e76d20 — diambil dari berkas logonya sendiri, bukan
+         *    dikira-kira. Jingga yang "kurang lebih mirip" tidak terlihat
+         *    salah sampai diletakkan bersebelahan dengan logonya di kepala
+         *    situs.
+         *
+         * 2. Tulisan di atas jingga itu TINTA, bukan putih. Putih di atas
+         *    #e76d20 berasio 3,18 — di bawah ambang 4,5 untuk tulisan
+         *    seukuran tombol, sementara tinta berasio 4,91. Putih di atas
+         *    jingga TERLIHAT baik-baik saja bagi mata yang sehat di layar
+         *    yang terang; yang menanggung orang lain.
+         */
+        $sumber = (string) preg_replace(
+            ['#/\*.*?\*/#s', '#\{\{--.*?--\}\}#s'], '',
+            (string) file_get_contents(base_path(self::TAMPILAN))
+        );
+
+        $this->assertStringContainsString('--jingga: #e76d20;', $sumber,
+            'Jingga halamannya bukan lagi warna logo. Diambil dari LogoRSC.png '
+            . 'dan Icon-RS.png, keduanya memulangkan #e76d20 / #e86d20.');
+
+        $cocok = preg_match('/\.bnd-tombol-utama \{[^}]*\}/s', $sumber, $tangkap);
+
+        $this->assertSame(1, $cocok, 'Aturan .bnd-tombol-utama tidak ditemukan.');
+
+        $this->assertStringContainsString('color: var(--tinta)', $tangkap[0],
+            'Tombol utamanya kembali bertulisan putih di atas jingga. Rasionya '
+            . '3,18 — di bawah ambang keterbacaan, dan tidak ada galat yang '
+            . 'memberitahukannya.');
+    }
+
+    #[Test]
     public function tidak_ada_paragraf_rata_kiri_kanan(): void
     {
         /*
