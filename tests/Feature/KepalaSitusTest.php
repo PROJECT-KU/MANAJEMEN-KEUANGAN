@@ -285,6 +285,42 @@ class KepalaSitusTest extends TestCase
     }
 
     #[Test]
+    public function nomor_yang_tertulis_di_kaki_sama_dengan_yang_dihubungi(): void
+    {
+        /*
+         * Nomor di kaki halaman dulu diketik DUA KALI di satu baris: sekali
+         * di href="tel:", sekali sebagai tulisan yang dibaca orang.
+         *
+         * Yang mengganti salah satunya saja menghasilkan baris yang TERBACA
+         * benar tetapi MENELEPON nomor lama. Tidak ada galat, tidak ada yang
+         * berubah di layar, dan yang menanggungnya orang yang menekannya —
+         * lalu mengira perusahaannya yang salah memberi nomor.
+         *
+         * Keduanya sekarang dari config('panitia.whatsapp'), dan uji ini
+         * memastikan keduanya tetap berasal dari sana: dibandingkan setelah
+         * tanda bacanya dibuang, sebab bentuk tulisnya memang berbeda
+         * (+62... lawan 0889-...).
+         */
+        $kaki = $this->kaki();
+
+        $cocok = preg_match('#<a[^>]*href="tel:([^"]+)"[^>]*>(.*?)</a>#s', $kaki, $tangkap);
+
+        $this->assertSame(1, $cocok,
+            'Kaki halaman tidak lagi punya nomor yang bisa ditelepon.');
+
+        $rujukan = \App\Support\NomorTelepon::rapikan(config('panitia.whatsapp'));
+
+        $this->assertSame($rujukan, \App\Support\NomorTelepon::rapikan($tangkap[1]),
+            'Nomor di href="tel:" bukan nomor panitia yang tersimpan di config. '
+            . 'Yang menekannya menelepon nomor yang salah.');
+
+        $this->assertSame($rujukan, \App\Support\NomorTelepon::rapikan(strip_tags($tangkap[2])),
+            'Nomor yang TERTULIS berbeda dari nomor yang DIHUBUNGI tautannya. '
+            . 'Tertulis "' . trim(strip_tags($tangkap[2])) . '", menghubungi "'
+            . $tangkap[1] . '".');
+    }
+
+    #[Test]
     public function tiap_halaman_publik_punya_jalan_ke_whatsapp(): void
     {
         /*
