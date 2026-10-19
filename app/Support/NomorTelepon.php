@@ -47,6 +47,38 @@ class NomorTelepon
     }
 
     /**
+     * Bentuk yang dibaca orang Indonesia: 6288983567819 -> 0889-8356-7819.
+     *
+     * Nomornya disimpan format internasional tanpa plus karena itu yang
+     * diminta tautan WhatsApp, dan bentuk itu TIDAK dikenali orang di sini —
+     * "6288983567819" dibaca sebagai deretan angka, bukan sebagai nomor yang
+     * bisa ia cocokkan dengan yang ada di ponselnya.
+     *
+     * Rumusnya sudah dipakai di dua tempat sebelum ada fungsi ini (pesan
+     * WhatsApp panitia dan dokumen PDF pendaftaran), ditulis ulang di
+     * masing-masing. Yang ketiga ditaruh di sini supaya ketiganya tidak
+     * berbeda perlahan — dan yang berbeda adalah nomor yang dipakai orang
+     * untuk memastikan ia tidak sedang ditipu.
+     *
+     * String kosong kalau tidak ada angka sama sekali, sama seperti
+     * rapikan(): pemanggilnya yang memutuskan apa artinya.
+     */
+    public static function tampil(?string $nomor): string
+    {
+        $angka = self::rapikan($nomor);
+
+        if ($angka === '') {
+            return '';
+        }
+
+        // Kembali ke awalan 0 dulu: dikelompokkan dari bentuk 62..., angka
+        // pertamanya meleset satu dan kelompoknya jadi "6288-9835-67819".
+        $lokal = preg_replace('/^62/', '0', $angka);
+
+        return trim(chunk_split((string) $lokal, 4, '-'), '-');
+    }
+
+    /**
      * Semua bentuk yang mungkin tersimpan di basis data untuk satu nomor.
      *
      * Kolomnya diisi bertahun-tahun oleh layar yang berbeda, jadi satu orang
