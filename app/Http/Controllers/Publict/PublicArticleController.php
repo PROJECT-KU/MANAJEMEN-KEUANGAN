@@ -171,6 +171,58 @@ class PublicArticleController extends Controller
             ->header('Content-Type', 'application/rss+xml; charset=UTF-8');
     }
 
+    /**
+     * Peta situs.
+     *
+     * /sitemap.xml memulangkan 404 sebelum ini. robots.txt ada dan terbuka,
+     * tetapi tidak ada yang menuntun mesin pencari ke kedua belas tulisan —
+     * ia harus menemukannya sendiri dengan menelusuri tautan.
+     *
+     * Halaman layanan ikut didaftar, bukan cuma blog: peta situs memang
+     * untuk seluruh situs, dan halaman-halaman itulah yang menjual.
+     */
+    public function sitemap()
+    {
+        $artikel = DB::table('artikel')
+            ->select('id', 'created_at', 'updated_at')
+            ->where('status', 'publish')
+            ->orderBy('created_at', 'DESC')
+            ->get();
+
+        $kategori = DB::table('categories_artikel')
+            ->join('artikel', function ($gabung) {
+                $gabung->on('categories_artikel.id', '=', 'artikel.categories_artikel_id')
+                    ->where('artikel.status', '=', 'publish');
+            })
+            ->select('categories_artikel.id')
+            ->distinct()
+            ->pluck('categories_artikel.id');
+
+        /*
+         * Halaman tetap ditulis sebagai jalur, bukan dirakit dari daftar
+         * rute: tidak semua rute pantas masuk peta situs — borang
+         * pendaftaran, halaman status ber-UUID, dan alur pembayaran justru
+         * tidak boleh diindeks.
+         */
+        $halaman = [
+            ['/', '1.0', 'daily'],
+            ['/blog', '0.9', 'daily'],
+            ['/Scopus-Camp', '0.9', 'weekly'],
+            ['/Webinar-Eksklusif', '0.9', 'weekly'],
+            ['/Analisis-Bibliometrik', '0.8', 'weekly'],
+            ['/Scopus-Kafe', '0.8', 'weekly'],
+            ['/Clinik-Scopus', '0.8', 'weekly'],
+            ['/Refrensi-Paper', '0.6', 'weekly'],
+            ['/paperisasi/public/data', '0.5', 'monthly'],
+            ['/contact', '0.5', 'monthly'],
+            ['/ketentuan-layanan', '0.3', 'yearly'],
+        ];
+
+        return response()
+            ->view('public.article.sitemap', compact('artikel', 'kategori', 'halaman'))
+            ->header('Content-Type', 'application/xml; charset=UTF-8');
+    }
+
     // MENAMPILKAN ARTIKEL BERDASARKAN KATEGORI
     public function publickategori(Request $request, $categories_artikel_id)
     {
@@ -236,6 +288,10 @@ class PublicArticleController extends Controller
         $artikel_komentar = DB::table('artikel_komentar')
             ->select('artikel_komentar.id', 'artikel_komentar.categories_artikel_id', 'artikel_komentar.artikel_id', 'artikel_komentar.reply', 'artikel_komentar.token', 'artikel_komentar.nama', 'artikel_komentar.email', 'artikel_komentar.link_website', 'artikel_komentar.komentar', 'artikel_komentar.created_at')
             ->join('artikel', 'artikel_komentar.artikel_id', '=', 'artikel.id')
+            // Hanya yang sudah dilepas orang dalam. Tanpa saringan ini,
+            // kolom status yang baru ditambahkan tidak mengubah apa pun:
+            // komentar tetap tampil seketika seperti sebelumnya.
+            ->where('artikel_komentar.status', 'terbit')
             ->orderBy('artikel_komentar.created_at', 'DESC')
             ->get();
 
@@ -268,34 +324,114 @@ class PublicArticleController extends Controller
          */
         DB::table('artikel')->where('id', $artikel->id)->increment('dilihat');
 
-        return view('public.article.blogsingle', compact('artikel', 'datas', 'categories_artikel', 'artikel_komentar'));
+        /*
+         * Tulisan sebidang, untuk ditawarkan di akhir bacaan.
+         *
+         * Sebelumnya yang ada cuma "Tulisan terbaru" di bilah samping —
+         * daftar yang SAMA PERSIS di kedua belas halaman. Orang yang baru
+         * selesai membaca soal jurnal predator tidak pernah ditawari tulisan
+         * lain tentang jurnal.
+         *
+         * Kalau kategorinya belum cukup isinya, sisanya diisi tulisan
+         * terbaru mana pun: tiga kotak kosong lebih buruk daripada tiga
+         * kotak yang salah satunya kurang nyambung.
+         */
+        $terkait = DB::table('artikel')
+            ->select('artikel.id', 'artikel.judul', 'artikel.gambar_depan', 'artikel.created_at', 'categories_artikel.kategori')
+            ->leftJoin('categories_artikel', 'artikel.categories_artikel_id', '=', 'categories_artikel.id')
+            ->where('artikel.status', 'publish')
+            ->where('artikel.id', '!=', $artikel->id)
+            ->where('artikel.categories_artikel_id', $artikel->categories_artikel_id)
+            ->orderByDesc('artikel.created_at')
+            ->limit(3)
+            ->get();
+
+        if ($terkait->count() < 3) {
+            $sudah = $terkait->pluck('id')->push($artikel->id)->all();
+
+            $terkait = $terkait->concat(
+                DB::table('artikel')
+                    ->select('artikel.id', 'artikel.judul', 'artikel.gambar_depan', 'artikel.created_at', 'categories_artikel.kategori')
+                    ->leftJoin('categories_artikel', 'artikel.categories_artikel_id', '=', 'categories_artikel.id')
+                    ->where('artikel.status', 'publish')
+                    ->whereNotIn('artikel.id', $sudah)
+                    ->orderByDesc('artikel.created_at')
+                    ->limit(3 - $terkait->count())
+                    ->get()
+            );
+        }
+
+        return view('public.article.blogsingle', compact('artikel', 'datas', 'categories_artikel', 'artikel_komentar', 'terkait'));
     }
 
     // MENAMBAH DATA KOMENTAR
+    /**
+     * Menyimpan komentar dari pengunjung.
+     *
+     * Sampai 22 Okt 2026 metode ini menerima kiriman siapa pun apa adanya:
+     * nol validasi, rutenya tanpa batas laju, langsung tampil di halaman,
+     * dan tidak ada satu pun layar untuk menghapusnya kembali.
+     *
+     * Yang paling halus dari semuanya: `user_id` diambil dari
+     * $request->input('user_id') — isian borang, bukan sesi. Siapa pun bisa
+     * mengirim komentar atas nama id pengguna mana pun, dan di layar ia
+     * tampil lengkap dengan nama serta foto orang itu.
+     */
     public function storekomentar(Request $request)
     {
-        $user = Auth::user();
-        $token = $this->generateRandomToken(30);
-
-        $save = ArtikelKomentar::create([
-            'user_id'                        => $request->input('user_id'),
-            'categories_artikel_id'          => $request->input('categories_artikel_id'),
-            'artikel_id'                     => $request->input('artikel_id'),
-            'reply'                          => $request->input('reply'),
-            'token'                          => $token,
-            'nama'                           => $request->input('nama'),
-            'email'                          => $request->input('email'),
-            'link_website'                   => $request->input('link_website'),
-            'komentar'                       => $request->input('komentar'),
+        $data = $request->validate([
+            'artikel_id' => ['required', 'integer', 'exists:artikel,id'],
+            'reply' => ['nullable', 'integer', 'exists:artikel_komentar,id'],
+            'nama' => ['required', 'string', 'min:2', 'max:80'],
+            'email' => ['required', 'email:rfc', 'max:120'],
+            'link_website' => ['nullable', 'string', 'max:160'],
+            'komentar' => ['required', 'string', 'min:3', 'max:3000'],
+        ], [
+            'artikel_id.exists' => 'Tulisan yang dikomentari tidak ditemukan.',
+            'nama.required' => 'Namanya diisi dulu ya.',
+            'email.email' => 'Alamat emailnya belum benar.',
+            'komentar.required' => 'Komentarnya masih kosong.',
+            'komentar.max' => 'Komentarnya kepanjangan, maksimal 3.000 huruf.',
         ]);
 
-
-        if ($save) {
-            return redirect()->back()->with('success', 'Komentar Anda Berhasil Disimpan!');
-        } else {
-            return redirect()->back()->with('error', 'Komentar Anda Gagal Disimpan!');
+        /*
+         * Perangkap lebah: isian yang TIDAK terlihat orang. Peramban biasa
+         * membiarkannya kosong; bot pengisi borang mengisi semua yang
+         * ditemukannya.
+         *
+         * Dijawab dengan pesan sukses yang sama persis, bukan dengan
+         * penolakan: bot yang diberi tahu ia tertangkap akan dicoba lagi
+         * dengan cara lain.
+         */
+        if (trim((string) $request->input('alamat_kantor')) !== '') {
+            return redirect()->back()->with('success', self::PESAN_KOMENTAR);
         }
+
+        ArtikelKomentar::create([
+            // Dari SESI, bukan dari borang. Tamu menyimpan null, dan
+            // namanya diambil dari isian seperti biasa.
+            'user_id' => Auth::id(),
+            'categories_artikel_id' => DB::table('artikel')->where('id', $data['artikel_id'])->value('categories_artikel_id'),
+            'artikel_id' => $data['artikel_id'],
+            'reply' => $data['reply'] ?? null,
+            'token' => $this->generateRandomToken(30),
+            'nama' => $data['nama'],
+            'email' => $data['email'],
+            'link_website' => $data['link_website'] ?? null,
+            'komentar' => $data['komentar'],
+        ]);
+
+        /*
+         * `status` SENGAJA tidak ikut dikirim dan tidak ada di $fillable
+         * model: nilainya datang dari bawaan kolom ('tertahan'). Kalau suatu
+         * saat ada yang menulis create($request->all()) di sini, status
+         * tidak ikut bisa disetel dari luar.
+         */
+        return redirect()->back()->with('success', self::PESAN_KOMENTAR);
     }
+
+    /** Satu kalimat, dipakai jalur sukses dan jalur perangkap lebah. */
+    private const PESAN_KOMENTAR = 'Komentarmu sudah masuk dan akan tampil setelah dicek admin. Terima kasih!';
 
     public function contact()
     {

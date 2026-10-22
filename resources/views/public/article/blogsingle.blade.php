@@ -76,6 +76,50 @@
     /* END */
 </style>
 
+<script>
+    /*
+     * Salin tautan.
+     *
+     * navigator.clipboard HANYA ada di halaman aman (https atau localhost).
+     * Di http biasa ia undefined, dan tombolnya diam tanpa satu pun tanda —
+     * yang menekannya mengira sudah tersalin lalu menempel yang lama.
+     * Jalur cadangannya textarea + execCommand, yang usang tetapi masih
+     * jalan di semua peramban yang dipakai orang.
+     */
+    (function () {
+        var tombol = document.querySelector('[data-salin]');
+        if (!tombol) return;
+
+        function tandai() {
+            var semula = tombol.innerHTML;
+            tombol.classList.add('tersalin');
+            tombol.innerHTML = '<i class="bi bi-check-lg"></i>';
+            setTimeout(function () {
+                tombol.classList.remove('tersalin');
+                tombol.innerHTML = semula;
+            }, 1600);
+        }
+
+        tombol.addEventListener('click', function () {
+            var teks = tombol.dataset.salin;
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(teks).then(tandai);
+                return;
+            }
+
+            var kotak = document.createElement('textarea');
+            kotak.value = teks;
+            kotak.style.position = 'fixed';
+            kotak.style.left = '-9999px';
+            document.body.appendChild(kotak);
+            kotak.select();
+            try { document.execCommand('copy'); tandai(); } catch (e) {}
+            document.body.removeChild(kotak);
+        });
+    })();
+</script>
+
 @section('konten')
 @csrf
 @include('public.article.partials.gaya')
@@ -124,8 +168,7 @@
     }
     /* Judulnya dibungkus <a href=""> di markah lama. Tautan tanpa tujuan tidak
        boleh terlihat seperti tautan. */
-    #main.blg-artikel .entry-title a { color: var(--tinta); text-decoration: none; cursor: default; }
-
+    
     #main.blg-artikel .entry-meta { padding: 0; margin-bottom: 24px; }
     #main.blg-artikel .entry-meta ul {
         display: flex; flex-wrap: wrap; gap: 8px 20px;
@@ -260,6 +303,72 @@
     }
     #main.blg-artikel .tags a:hover { background: var(--jingga); color: #fff; }
 
+    /* ============================================================ bagikan */
+    #main.blg-artikel .blg-bagikan { display: flex; align-items: center; gap: 9px; margin: 0; }
+    #main.blg-artikel .blg-bagikan a,
+    #main.blg-artikel .blg-bagikan button {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 38px; height: 38px; padding: 0; margin: 0;
+        background: var(--kertas-2); color: var(--tinta);
+        border: 2px solid var(--tinta); border-radius: 12px;
+        font-size: 1rem; cursor: pointer;
+        transition: background .17s ease, color .17s ease, transform .17s ease;
+    }
+    #main.blg-artikel .blg-bagikan a:hover,
+    #main.blg-artikel .blg-bagikan button:hover {
+        background: var(--jingga); color: #fff; transform: translateY(-2px);
+    }
+    #main.blg-artikel .blg-bagikan a:first-child:hover { background: #16a34a; }
+    #main.blg-artikel .blg-salin.tersalin { background: #16a34a; color: #fff; }
+    /* Ikonnya DIWARNAI terpisah dari tautannya.
+
+       Templat memberi `.social-links a i` warnanya sendiri — biru — dan
+       mewarnai <a>-nya saja tidak menembus ke <i> di dalamnya. Terukur:
+       keempat ikon tetap rgb(13,100,253) di atas keping krem, satu-satunya
+       biru yang tersisa di halaman ini. */
+    #main.blg-artikel .blg-bagikan a i,
+    #main.blg-artikel .blg-bagikan button i { color: inherit; }
+    #main.blg-artikel .blg-nama { font-weight: 800; }
+
+    /* ============================================================ terkait */
+    #main.blg-artikel .blg-terkait { margin-top: 38px; }
+    #main.blg-artikel .blg-terkait > h2 {
+        font-family: 'Fraunces', Georgia, serif; font-weight: 800;
+        font-size: 1.4rem; margin-bottom: 18px;
+    }
+    #main.blg-artikel .blg-terkait-kisi {
+        display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px;
+    }
+    #main.blg-artikel .blg-terkait-kartu {
+        display: flex; flex-direction: column;
+        background: var(--kertas-2);
+        border: 2px solid var(--tinta); border-radius: 16px;
+        overflow: hidden; color: var(--tinta); text-decoration: none;
+        transition: transform .18s ease, box-shadow .18s ease;
+    }
+    #main.blg-artikel .blg-terkait-kartu:hover {
+        color: var(--tinta);
+        transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--jingga-muda);
+    }
+    #main.blg-artikel .blg-terkait-gambar { display: block; aspect-ratio: 16 / 10; overflow: hidden; }
+    #main.blg-artikel .blg-terkait-gambar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    #main.blg-artikel .blg-terkait-isi {
+        display: flex; flex-direction: column; gap: 7px; padding: 13px 15px 15px;
+        border-top: 2px solid var(--tinta);
+    }
+    #main.blg-artikel .blg-terkait-tag {
+        align-self: flex-start; padding: 2px 9px; border-radius: 999px;
+        background: var(--tinta); color: var(--kertas);
+        font-size: .68rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase;
+    }
+    #main.blg-artikel .blg-terkait-isi h3 {
+        font-family: 'Fraunces', Georgia, serif; font-weight: 800;
+        font-size: .97rem; line-height: 1.33; margin: 0;
+    }
+    @media (max-width: 767.98px) {
+        #main.blg-artikel .blg-terkait-kisi { grid-template-columns: 1fr; }
+    }
+
     /* ============================================================ komentar
 
        Kelasnya .blog-comments dan .reply-form — BUKAN .comments dan
@@ -347,12 +456,21 @@
                     <!--================== ARTIKEL ==================-->
                     <article class="entry entry-single">
                         <div class="entry-img text-center"> <!-- Add 'text-center' class to center the image -->
-                            <img src="{{ asset('images/' . $artikel->gambar_cover) }}" alt="" class="img-fluid mt-3">
+                            <img src="{{ asset('images/' . $artikel->gambar_cover) }}" alt="Sampul tulisan: {{ $artikel->judul }}" class="img-fluid mt-3">
                         </div>
 
-                        <h2 class="entry-title">
-                            <a href="">{{ $artikel->judul }}</a>
-                        </h2>
+                        {{-- <h1>, bukan <h2>.
+
+                             Halaman artikel ini TIDAK punya satu pun h1: judul
+                             tulisannya dipasang sebagai h2 dan satu-satunya h1 di
+                             situs tinggal di beranda. Untuk halaman yang hidupnya
+                             dari pencarian dan pembaca layar, itu dokumen tanpa
+                             judul utama.
+
+                             Pembungkus <a href=""> ikut dibuang: tautan tanpa
+                             tujuan terbaca sebagai tautan oleh pembaca layar, dan
+                             ditekan ia memuat ulang halaman yang sama. --}}
+                        <h1 class="entry-title">{{ $artikel->judul }}</h1>
                         <div class="entry-meta">
                             <ul>
 
@@ -369,9 +487,9 @@
 
                                 <li class="d-flex align-items-center">
                                     @if ($user->gambar == null)
-                                    <img src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="rounded-circle float-left" style="width: 25px; height: 25px;" alt="">
+                                    <img src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="rounded-circle float-left" style="width: 25px; height: 25px;" alt="Foto {{ $user->full_name }}">
                                     @else
-                                    <img src="{{ \App\Support\FotoProfil::url($user->gambar) }}" class="rounded-circle float-left" style="width: 25px; height: 25px;" alt="">
+                                    <img src="{{ \App\Support\FotoProfil::url($user->gambar) }}" class="rounded-circle float-left" style="width: 25px; height: 25px;" alt="Foto {{ $user->full_name }}">
                                     @endif
                                     <a href="" style="margin-left: 10px;">{{ $user->full_name }}</a>
                                 </li>
@@ -413,19 +531,75 @@
                             </style>
                         </div>
 
+                        {{-- Tombol berbagi.
+
+                             WhatsApp DITAMBAHKAN dan ditaruh pertama: itu saluran
+                             yang benar-benar dipakai pembaca di sini, dan
+                             sebelumnya tidak ada sama sekali.
+
+                             Tombol Instagram DIBUANG. Alamatnya
+                             https://www.instagram.com/ — beranda Instagram, bukan
+                             berbagi apa pun; Instagram memang tidak punya alamat
+                             berbagi web. Yang menekannya meninggalkan tulisan ini
+                             dan tidak membagikan apa pun. Diganti "Salin tautan",
+                             yang justru cara orang membagikannya ke sana. --}}
                         <div class="entry-footer">
                             <div class="author-social">
-                                <p style="margin-right: 10px;">Share</p>
-                                <div class="social-links" style="margin-top: -10px;">
-                                    <a href="https://twitter.com/share?url={{ urlencode(route('blog.topic.blog-single', ['id' => $artikel->id])) }}" target="_blank"><i class="bi bi-twitter" style="color: gray;"></i></a>
-                                    <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(route('blog.topic.blog-single', ['id' => $artikel->id])) }}" target="_blank"><i class="bi bi-facebook" style="color: gray;"></i></a>
-                                    <a href="https://www.instagram.com/" target="_blank"><i class="biu bi-instagram" style="color: gray;"></i></a>
+                                <p style="margin-right: 10px;">Bagikan</p>
+                                {{-- Blok, bukan bentuk sebaris berkurung: yang
+                                     sebaris menghitung kurungnya sendiri dan
+                                     berhenti di tempat salah begitu ada kurung
+                                     bersarang, lalu melempar galat yang menunjuk
+                                     baris yang tidak bersalah. --}}
+                                @php
+                                    $alamatTulisan = route('blog.topic.blog-single', ['id' => $artikel->id]);
+                                @endphp
+                                <div class="social-links blg-bagikan">
+                                    <a href="https://api.whatsapp.com/send?text={{ rawurlencode($artikel->judul . ' — ' . $alamatTulisan) }}"
+                                        target="_blank" rel="noopener" aria-label="Bagikan lewat WhatsApp" title="WhatsApp">
+                                        <i class="bi bi-whatsapp"></i>
+                                    </a>
+                                    <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode($alamatTulisan) }}"
+                                        target="_blank" rel="noopener" aria-label="Bagikan ke Facebook" title="Facebook">
+                                        <i class="bi bi-facebook"></i>
+                                    </a>
+                                    <a href="https://twitter.com/intent/tweet?url={{ urlencode($alamatTulisan) }}&text={{ rawurlencode($artikel->judul) }}"
+                                        target="_blank" rel="noopener" aria-label="Bagikan ke X" title="X">
+                                        <i class="bi bi-twitter-x"></i>
+                                    </a>
+                                    <button type="button" class="blg-salin" data-salin="{{ $alamatTulisan }}"
+                                        aria-label="Salin tautan tulisan" title="Salin tautan">
+                                        <i class="bi bi-link-45deg"></i>
+                                    </button>
                                 </div>
                             </div>
                         </div>
 
                     </article>
                     <!--================== END ==================-->
+
+                    {{-- ------------------------------------------- terkait --}}
+                    @if ($terkait->isNotEmpty())
+                        <section class="blg-terkait">
+                            <h2>Bacaan lain yang sebidang</h2>
+                            <div class="blg-terkait-kisi">
+                                @foreach ($terkait as $lain)
+                                    <a href="{{ route('blog.topic.blog-single', ['id' => $lain->id]) }}" class="blg-terkait-kartu">
+                                        <span class="blg-terkait-gambar">
+                                            <img src="{{ asset('images/' . $lain->gambar_depan) }}"
+                                                alt="Sampul: {{ $lain->judul }}" loading="lazy" decoding="async">
+                                        </span>
+                                        <span class="blg-terkait-isi">
+                                            @if ($lain->kategori)
+                                                <span class="blg-terkait-tag">{{ $lain->kategori }}</span>
+                                            @endif
+                                            <h3>{{ $lain->judul }}</h3>
+                                        </span>
+                                    </a>
+                                @endforeach
+                            </div>
+                        </section>
+                    @endif
 
                     <!--================== KOMENTAR ==================-->
                     <div class="blog-comments">
@@ -446,14 +620,14 @@
                                     @if($user && $user->gambar)
                                     <img src="{{ asset('images/' . $user->gambar) }}" class="rounded-circle" alt="">
                                     @else
-                                    <img src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="rounded-circle" alt="">
+                                    <img src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="rounded-circle" alt="" aria-hidden="true" loading="lazy">
                                     @endif
                                 </div>
 
                                 <div>
-                                    <h5><a href="">{{ $komentar->nama }}</a> <a href="#" class="reply" onclick="showReplyForm(event, {{ $komentar->id }})"><i class="bi bi-reply-fill"></i> Reply</a></h5>
+                                    <h5><span class="blg-nama">{{ $komentar->nama }}</span> <a href="#" class="reply" onclick="showReplyForm(event, {{ $komentar->id }})"><i class="bi bi-reply-fill"></i> Balas</a></h5>
                                     <time datetime="{{ \Carbon\Carbon::parse($komentar->created_at)->toIso8601String() }}">
-                                        {{ \Carbon\Carbon::parse($komentar->created_at)->format('l, j F Y H:i') }}
+                                        {{ \Carbon\Carbon::parse($komentar->created_at)->locale('id')->translatedFormat('l, j F Y H:i') }}
                                     </time>
                                     <p>
                                         {{ $komentar->komentar }}
@@ -466,49 +640,7 @@
                         <!--================== FORM KOMENTAR AWAL UNTUK REPLY ==================-->
                         <div id="reply-form-{{ $komentar->id }}" class="reply-form" style="display: none;">
                             <h4>Masukkan Balasan</h4>
-                            <p>Alamat email Anda tidak akan dipublikasikan. Bidang yang wajib diisi ditandai <span style="color: red;">*</span></p>
-                            <form action="{{ route('blog.store.komentar') }}" method="POST" enctype="multipart/form-data">
-                                @csrf
-                                <div class="row">
-                                    <div class="col-md-6 form-group">
-                                        <label style="font-size: 15px;">Masukkan Nama Anda <span style="color: red;">*</span></label>
-                                        <input name="nama" type="text" class="form-control" placeholder="Masukkan Nama Anda" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z ]/i.test(event.key)" required>
-                                    </div>
-                                    <div class="col-md-6 form-group">
-                                        <label style="font-size: 15px;">Masukkan Email Anda <span style="color: red;">*</span></label>
-                                        <input name="email" type="text" class="form-control" placeholder="Masukkan Email Anda" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" required>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col form-group">
-                                        <label style="font-size: 15px;">Masukkan Website Anda</label>
-                                        <input name="link_website" type="text" class="form-control" placeholder="Masukkan Website Anda">
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col form-group">
-                                        <label style="font-size: 15px;">Masukkan Komentar Anda <span style="color: red;">*</span></label>
-                                        <textarea name="komentar" class="form-control" placeholder="Masukkan Komentar" required></textarea>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-4 form-group">
-                                        <input name="artikel_id" value="{{ $artikel->id }}" type="text" class="form-control" hidden>
-                                    </div>
-                                    <div class="col-md-4 form-group">
-                                        <input name="categories_artikel_id" value="{{ $artikel->categories_artikel_id }}" type="text" class="form-control" hidden>
-                                    </div>
-                                    <div class="col-md-4 form-group">
-                                        <input name="user_id" value="{{ $artikel->user_id }}" type="text" class="form-control" hidden>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-12 form-group">
-                                        <input name="reply" value="{{ $komentar->id }}" type="text" class="form-control" hidden>
-                                    </div>
-                                </div>
-                                <button type="submit" class="btn btn-primary">Kirim</button>
-                            </form>
+                            @include('public.article.partials.borang-komentar', ['artikel' => $artikel, 'balasKe' => $komentar->id])
                         </div>
                         <!--================== END ==================-->
 
@@ -526,7 +658,7 @@
                                     @if($user && $user->gambar)
                                     <img src="{{ asset('images/' . $user->gambar) }}" class="rounded-circle" alt="">
                                     @else
-                                    <img src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="rounded-circle" alt="">
+                                    <img src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="rounded-circle" alt="" aria-hidden="true" loading="lazy">
                                     @endif
                                 </div>
 
@@ -539,9 +671,9 @@
                                         <i class="fas fa-play" style="font-size: 0.75em;"></i>
                                         {{ $parentReply->nama }}
                                         @endif
-                                        <a href="#" class="reply" onclick="showReplyForm(event, {{ $reply->id }})"><i class="bi bi-reply-fill"></i> Reply</a>
+                                        <a href="#" class="reply" onclick="showReplyForm(event, {{ $reply->id }})"><i class="bi bi-reply-fill"></i> Balas</a>
                                     </h5>
-                                    <time datetime="{{ $reply->created_at }}">{{ \Carbon\Carbon::parse($reply->created_at)->format('l, j F Y H:i') }}</time>
+                                    <time datetime="{{ $reply->created_at }}">{{ \Carbon\Carbon::parse($reply->created_at)->locale('id')->translatedFormat('l, j F Y H:i') }}</time>
                                     <p>
                                         {{ $reply->komentar }}
                                     </p>
@@ -553,49 +685,7 @@
                         <!--================== FORM KOMENTAR YANG DI-REPLY ==================-->
                         <div id="reply-form-{{ $reply->id }}" class="reply-form" style="display: none;">
                             <h4>Masukkan Balasan</h4>
-                            <p>Alamat email Anda tidak akan dipublikasikan. Bidang yang wajib diisi ditandai <span style="color: red;">*</span></p>
-                            <form action="{{ route('blog.store.komentar') }}" method="POST" enctype="multipart/form-data">
-                                @csrf
-                                <div class="row">
-                                    <div class="col-md-6 form-group">
-                                        <label style="font-size: 15px;">Masukkan Nama Anda <span style="color: red;">*</span></label>
-                                        <input name="nama" type="text" class="form-control" placeholder="Masukkan Nama Anda" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z ]/i.test(event.key)" required>
-                                    </div>
-                                    <div class="col-md-6 form-group">
-                                        <label style="font-size: 15px;">Masukkan Email Anda <span style="color: red;">*</span></label>
-                                        <input name="email" type="text" class="form-control" placeholder="Masukkan Email Anda" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" required>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col form-group">
-                                        <label style="font-size: 15px;">Masukkan Website Anda</label>
-                                        <input name="link_website" type="text" class="form-control" placeholder="Masukkan Website Anda">
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col form-group">
-                                        <label style="font-size: 15px;">Masukkan Komentar Anda <span style="color: red;">*</span></label>
-                                        <textarea name="komentar" class="form-control" placeholder="Masukkan Komentar" required></textarea>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-4 form-group">
-                                        <input name="artikel_id" value="{{ $artikel->id }}" type="text" class="form-control" hidden>
-                                    </div>
-                                    <div class="col-md-4 form-group">
-                                        <input name="categories_artikel_id" value="{{ $artikel->categories_artikel_id }}" type="text" class="form-control" hidden>
-                                    </div>
-                                    <div class="col-md-4 form-group">
-                                        <input name="user_id" value="{{ $artikel->user_id }}" type="text" class="form-control" hidden>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-12 form-group">
-                                        <input name="reply" value="{{ $reply->id }}" type="text" class="form-control" hidden>
-                                    </div>
-                                </div>
-                                <button type="submit" class="btn btn-primary">Kirim</button>
-                            </form>
+                            @include('public.article.partials.borang-komentar', ['artikel' => $artikel, 'balasKe' => $reply->id])
                         </div>
                         <!--================== END ==================-->
 
@@ -613,7 +703,7 @@
                                     @if($user && $user->gambar)
                                     <img src="{{ asset('images/' . $user->gambar) }}" class="rounded-circle" alt="">
                                     @else
-                                    <img src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="rounded-circle" alt="">
+                                    <img src="{{ asset('assets/img/avatar/avatar-1.png') }}" class="rounded-circle" alt="" aria-hidden="true" loading="lazy">
                                     @endif
                                 </div>
 
@@ -627,7 +717,7 @@
                                         {{ $parentReply->nama }}
                                         @endif
                                     </h5>
-                                    <time datetime="{{ $nestedReply->created_at }}">{{ \Carbon\Carbon::parse($nestedReply->created_at)->format('l, j F Y H:i') }}</time>
+                                    <time datetime="{{ $nestedReply->created_at }}">{{ \Carbon\Carbon::parse($nestedReply->created_at)->locale('id')->translatedFormat('l, j F Y H:i') }}</time>
                                     <p>
                                         {{ $nestedReply->komentar }}
                                     </p>
@@ -639,49 +729,7 @@
                         <!--================== FORM KOMENTAR YANG DI-REPLY KEMBALI ==================-->
                         <div id="reply-form-{{ $nestedReply->id }}" class="reply-form" style="display: none;">
                             <h4>Masukkan Balasan</h4>
-                            <p>Alamat email Anda tidak akan dipublikasikan. Bidang yang wajib diisi ditandai <span style="color: red;">*</span></p>
-                            <form action="{{ route('blog.store.komentar') }}" method="POST" enctype="multipart/form-data">
-                                @csrf
-                                <div class="row">
-                                    <div class="col-md-6 form-group">
-                                        <label style="font-size: 15px;">Masukkan Nama Anda <span style="color: red;">*</span></label>
-                                        <input name="nama" type="text" class="form-control" placeholder="Masukkan Nama Anda" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z ]/i.test(event.key)" required>
-                                    </div>
-                                    <div class="col-md-6 form-group">
-                                        <label style="font-size: 15px;">Masukkan Email Anda <span style="color: red;">*</span></label>
-                                        <input name="email" type="text" class="form-control" placeholder="Masukkan Email Anda" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" required>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col form-group">
-                                        <label style="font-size: 15px;">Masukkan Website Anda</label>
-                                        <input name="link_website" type="text" class="form-control" placeholder="Masukkan Website Anda">
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col form-group">
-                                        <label style="font-size: 15px;">Masukkan Komentar Anda <span style="color: red;">*</span></label>
-                                        <textarea name="komentar" class="form-control" placeholder="Masukkan Komentar" required></textarea>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-4 form-group">
-                                        <input name="artikel_id" value="{{ $artikel->id }}" type="text" class="form-control" hidden>
-                                    </div>
-                                    <div class="col-md-4 form-group">
-                                        <input name="categories_artikel_id" value="{{ $artikel->categories_artikel_id }}" type="text" class="form-control" hidden>
-                                    </div>
-                                    <div class="col-md-4 form-group">
-                                        <input name="user_id" value="{{ $artikel->user_id }}" type="text" class="form-control" hidden>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-12 form-group">
-                                        <input name="reply" value="{{ $nestedReply->id }}" type="text" class="form-control" hidden>
-                                    </div>
-                                </div>
-                                <button type="submit" class="btn btn-primary">Kirim</button>
-                            </form>
+                            @include('public.article.partials.borang-komentar', ['artikel' => $artikel, 'balasKe' => $nestedReply->id])
                         </div>
                         <!--================== END ==================-->
                         @endif
@@ -695,44 +743,7 @@
                         <!--================== FORM KOMENTAR ==================-->
                         <div class="reply-form">
                             <h4>Masukkan Komentar</h4>
-                            <p>Alamat email Anda tidak akan dipublikasikan. Bidang yang wajib diisi ditandai <span style="color: red;">*</span></p>
-                            <form action="{{ route('blog.store.komentar') }}" method="POST" enctype="multipart/form-data">
-                                @csrf
-                                <div class="row">
-                                    <div class="col-md-6 form-group">
-                                        <label style="font-size: 15px;">Masukkan Nama Anda <span style="color: red;">*</span></label>
-                                        <input name="nama" type="text" class="form-control" placeholder="Masukkan Nama Anda" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z ]/i.test(event.key)" required>
-                                    </div>
-                                    <div class="col-md-6 form-group">
-                                        <label style="font-size: 15px;">Masukkan Email Anda <span style="color: red;">*</span></label>
-                                        <input name="email" type="text" class="form-control" placeholder="Masukkan Email Anda" maxlength="30" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" required>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col form-group">
-                                        <label style="font-size: 15px;">Masukkan Website Anda</label>
-                                        <input name="link_website" type="text" class="form-control" placeholder="Masukkan Website Anda">
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col form-group">
-                                        <label style="font-size: 15px;">Masukkan Komentar Anda <span style="color: red;">*</span></label>
-                                        <textarea name="komentar" class="form-control" placeholder="Masukkan Komentar" required></textarea>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-4 form-group">
-                                        <input name="artikel_id" value="{{ $artikel->id }}" type="text" class="form-control" hidden>
-                                    </div>
-                                    <div class="col-md-4 form-group">
-                                        <input name="categories_artikel_id" value="{{ $artikel->categories_artikel_id }}" type="text" class="form-control" hidden>
-                                    </div>
-                                    <div class="col-md-4 form-group">
-                                        <input name="user_id" value="{{ $artikel->user_id }}" type="text" class="form-control" hidden>
-                                    </div>
-                                </div>
-                                <button type="submit" class="btn btn-primary">Kirim</button>
-                            </form>
+                            @include('public.article.partials.borang-komentar', ['artikel' => $artikel])
                         </div>
                         <!--================== END ==================-->
 
@@ -774,7 +785,7 @@
                             @foreach ($datas->take(5) as $article)
                             @if($article->status == 'publish')
                             <div class="post-item clearfix">
-                                <img src="{{ asset('images/' . $article->gambar_depan) }}" alt="">
+                                <img src="{{ asset('images/' . $article->gambar_depan) }}" alt="Sampul: {{ $article->judul }}" loading="lazy">
                                 <a href="{{ route('blog.topic.blog-single', ['id' => $article->id]) }}">
                                     <h4>{{ $article->judul }}</h4>
                                 </a>
