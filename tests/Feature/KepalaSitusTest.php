@@ -321,6 +321,29 @@ class KepalaSitusTest extends TestCase
     }
 
     #[Test]
+    public function halamannya_mengaku_berbahasa_indonesia(): void
+    {
+        /*
+         * <html lang="en"> padahal seluruh isi situs Bahasa Indonesia.
+         *
+         * Pembaca layar memakai atribut itu untuk memilih suaranya: dengan
+         * "en" ia melafalkan "naskah", "jurnal", dan "pendaftaran" memakai
+         * fonetik Inggris — bukan sekadar terdengar aneh, melainkan tidak
+         * bisa dipahami. Peramban juga memakainya untuk kamus pemenggalan
+         * kata dan tawaran terjemahan.
+         */
+        foreach (['/', '/blog', '/contact'] as $jalur) {
+            $isi = (string) $this->get($jalur)->assertOk()->getContent();
+
+            preg_match('/<html[^>]*\blang="([^"]*)"/i', $isi, $tangkap);
+
+            $this->assertSame('id', $tangkap[1] ?? '',
+                'Halaman ' . $jalur . ' mengaku berbahasa "' . ($tangkap[1] ?? 'kosong')
+                . '", padahal isinya Bahasa Indonesia.');
+        }
+    }
+
+    #[Test]
     public function tiap_halaman_publik_punya_jalan_ke_whatsapp(): void
     {
         /*

@@ -105,6 +105,48 @@
         font-size: .74rem; font-weight: 800; text-align: center;
     }
 
+    /* ====================================================== pencarian */
+    .blg-cari {
+        display: flex; align-items: center; gap: 10px;
+        max-width: 560px; margin: 24px auto 0;
+        padding: 7px 7px 7px 17px;
+        background: var(--kertas);
+        border: 2px solid var(--tinta); border-radius: 999px;
+        box-shadow: 4px 4px 0 var(--jingga-muda);
+    }
+    .blg-cari:focus-within { box-shadow: 6px 6px 0 var(--jingga); }
+    .blg-cari > i { flex: 0 0 auto; color: var(--jingga); }
+
+    .blg-cari input {
+        flex: 1 1 auto; min-width: 0;
+        padding: 9px 0; border: none; background: transparent;
+        color: var(--tinta); font-size: .96rem; font-weight: 600;
+    }
+    .blg-cari input::placeholder { color: var(--tinta-2); font-weight: 500; }
+    /* Tanpa ini peramban menggambar cincin biru bawaannya di dalam pil —
+       satu-satunya biru di halaman, dan posisinya meleset dari tepi pil. */
+    .blg-cari input:focus { outline: none; }
+    /* Silang bawaan Safari/Chrome dibuang: kita punya tombol hapus sendiri
+       yang juga membersihkan alamatnya, bukan cuma isian kotaknya. */
+    .blg-cari input::-webkit-search-cancel-button { display: none; }
+
+    .blg-cari-hapus {
+        flex: 0 0 auto;
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 30px; height: 30px; border-radius: 50%;
+        background: var(--kertas-2); color: var(--tinta-2); font-size: .8rem;
+    }
+    .blg-cari-hapus:hover { background: var(--tinta); color: var(--kertas); }
+
+    .blg-cari button {
+        flex: 0 0 auto;
+        padding: 10px 21px;
+        background: var(--jingga-kuat); color: #fff;
+        border: 2px solid var(--tinta); border-radius: 999px;
+        font-weight: 800; font-size: .92rem;
+    }
+    .blg-cari button:hover { background: var(--tinta); }
+
     .blg-bagian { padding: 58px 0; }
 
     .blg .blg-judul-kecil {
@@ -231,6 +273,17 @@
     .blg .blg-ajakan p {
         max-width: 52ch; margin: 13px auto 0; color: rgba(255, 255, 255, .93);
     }
+    .blg .blg-umpan {
+        margin-top: 22px; color: rgba(255, 255, 255, .9);
+        font-size: .92rem; font-weight: 600;
+    }
+    .blg-umpan a {
+        display: inline-flex; align-items: center; gap: 7px; margin-left: 6px;
+        color: #fff; font-weight: 800; text-decoration: underline;
+        text-underline-offset: 3px;
+    }
+    .blg-umpan a:hover { color: var(--stabilo); }
+
     .blg-aksi {
         display: flex; flex-wrap: wrap; justify-content: center; gap: 13px;
         margin-top: 26px;
