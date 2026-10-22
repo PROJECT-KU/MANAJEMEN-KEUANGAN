@@ -196,6 +196,61 @@ class ScopusCampDaftarTest extends TestCase
     }
 
     #[Test]
+    public function hanya_ada_satu_ajakan_daftar_yang_terlihat(): void
+    {
+        /*
+         * Rombakan pertama memasang tombol "Daftar sekarang" DUA KALI — atas
+         * dan bawah — supaya tidak perlu dicari dengan menggulung. Pemiliknya
+         * menyebutnya apa adanya: tombolnya ada dua.
+         *
+         * Bagi pembaca yang jadi sasaran halaman ini, dua tombol serupa
+         * menimbulkan pertanyaan yang tidak perlu — yang mana yang benar, dan
+         * apakah yang tadi sudah tertekan.
+         *
+         * Jangkauannya tetap dijaga lewat pita di dasar layar, tetapi pita
+         * itu HARUS bersyarat: ia muncul justru ketika tombol di atas sudah
+         * lewat dari layar. Tanpa syarat itu, dua jalan masuk kembali
+         * terlihat bersamaan — dan halamannya tetap 200, jadi tidak ada yang
+         * memberi tahu.
+         */
+        $a = $this->angkatan();
+        $isi = $this->detail($a);
+
+        /* Dihitung dari atribut class=, bukan dari kemunculan katanya:
+           nama kelas yang sama juga muncul di blok <style> dan di pemilih
+           JavaScript, jadi substr_count memulangkan tiga untuk satu tombol. */
+        $diIsi = preg_match_all('/class="[^"]*\bcmp-tombol-atas\b[^"]*"/', $isi);
+        $this->assertSame(1, $diIsi,
+            'Ada ' . $diIsi . ' tombol daftar di badan halaman; seharusnya satu.');
+
+        $semua = preg_match_all('/class="[^"]*\bcmp-tombol\b[^"]*"/', $isi);
+        $this->assertSame(2, $semua,
+            'Ada ' . $semua . ' tombol daftar di halaman ini; yang sah cuma dua — '
+            . 'satu di badan halaman dan satu di pita, dan keduanya tidak pernah '
+            . 'terlihat bersamaan.');
+
+        /*
+         * Yang dipin: pengamatnya benar-benar DIPASANG pada tombol itu.
+         *
+         * Versi pertama penjaga ini cuma memeriksa kata "IntersectionObserver"
+         * muncul di halaman — dan terbukti kosong: pengamatnya saya lumpuhkan
+         * sampai pitanya tampil terus, kata itu tetap ada, dan ujinya tetap
+         * hijau.
+         *
+         * Ini tetap pin kontrak, bukan bukti perilaku: PHPUnit tidak
+         * menjalankan JavaScript. Akibat sebenarnya — tidak pernah dua ajakan
+         * terlihat bersamaan — diukur di peramban pada gulir 0, 400, 900, dan
+         * 1800; semuanya memulangkan tepat satu.
+         */
+        $this->assertStringContainsString('.observe(tombolAtas)', $isi,
+            'Pengamat pitanya tidak dipasang pada tombol daftar; pita akan tampil '
+            . 'bersamaan dengan tombol di badan halaman.');
+
+        $this->assertStringContainsString('cmp-pita-tampil', $isi,
+            'Kelas penanda pita hilang; pitanya tidak punya keadaan tersembunyi.');
+    }
+
+    #[Test]
     public function nomor_rekening_tidak_bisa_disembunyikan_tak_sengaja(): void
     {
         /*
