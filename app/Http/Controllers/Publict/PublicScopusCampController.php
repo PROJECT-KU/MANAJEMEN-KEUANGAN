@@ -106,7 +106,32 @@ class PublicScopusCampController extends Controller
     public function selengkapnya($id)
     {
         $item = CategoriesScopusCamp::findOrFail($id);
-        $terbaru = CategoriesScopusCamp::orderBy('created_at', 'desc')->take(6)->get();
+
+        /*
+         * Daftar di bilah kanan dulu `orderBy('created_at','desc')->take(6)`
+         * — tanpa saringan apa pun.
+         *
+         * Akibatnya tiga hal yang semuanya terlihat di layar: angkatan yang
+         * kuotanya sudah habis ikut ditawarkan, angkatan yang tanggalnya sudah
+         * lewat ikut ditawarkan, dan angkatan yang SEDANG DIBUKA kalah urutan
+         * oleh baris yang paling baru dibuat. Diurut menurut tanggal
+         * acaranya, bukan tanggal pembuatan barisnya: yang dicari orang
+         * "kapan yang berikutnya", bukan "mana yang terakhir diketik admin".
+         */
+        $terbaru = CategoriesScopusCamp::where('layanan', 'scopus_camp')
+            ->where('status', 'active')
+            ->whereDate('mulai', '>', now()->toDateString())
+            ->where(function ($kueri) {
+                $kueri->whereNull('total_kuota')->orWhere('sisa_kuota', '>', 0);
+            })
+            ->whereKeyNot($item->getKey())
+            ->orderBy('mulai')
+            ->take(5)
+            ->get();
+
+        // Tanpa ini, harga di bilah kanan memakai harga penuh sementara
+        // halaman daftarnya menjanjikan harga promo.
+        \App\Support\PromoAngkatan::muat($terbaru);
 
         return view('public.scopus_camp.selengkapnya', compact('item', 'terbaru'));
     }

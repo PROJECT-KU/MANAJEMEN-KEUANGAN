@@ -199,6 +199,68 @@ Form Pendaftaran Scopus Camp | Rumah Scopus
     /* =========================================
        ACCORDION KACA (Untuk Bank)
        ========================================= */
+    /* ============================ rombakan 22 Okt 2026 — pembaca lanjut usia
+
+       Sasarannya orang berusia lanjut, jadi yang dikejar SEDIKIT ISIAN dan
+       HURUF BESAR. Angka di bawah dipilih dari patokan sasaran sentuh 44px,
+       bukan dari selera: isian 56px, huruf 18px. */
+    .daf-ringkas {
+        display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px 22px; margin: 0 0 22px; padding: 0;
+    }
+    @media (max-width: 575.98px) { .daf-ringkas { grid-template-columns: 1fr; } }
+
+    .daf-ringkas dt {
+        color: #64748b; font-size: .82rem; font-weight: 700;
+        letter-spacing: .05em; text-transform: uppercase; margin: 0 0 2px;
+    }
+    .daf-ringkas dd {
+        margin: 0; color: #0f172a; font-size: 1.08rem; font-weight: 700;
+        line-height: 1.4;
+    }
+    .daf-coret { color: #94a3b8; font-weight: 500; font-size: .92rem; margin-right: 6px; }
+    .daf-opsional { color: #64748b; font-weight: 500; font-size: .86rem; }
+    .daf-diskon { margin-top: 4px; }
+
+    /* Isian yang BENAR-BENAR diisi dibuat besar. */
+    .glass-card .form-control-glass,
+    .glass-card select.form-control-glass {
+        min-height: 56px; font-size: 1.05rem;
+    }
+    .glass-card .form-group label {
+        font-size: 1rem; font-weight: 700; color: #0f172a; margin-bottom: 7px;
+    }
+    .file-upload-glass { min-height: 64px; font-size: 1.05rem; }
+
+    .daf-rekening {
+        padding: 20px; text-align: center;
+        background: #fff;
+        border: 2px solid #e2e8f0; border-radius: 16px;
+    }
+    .daf-rekening-bank {
+        display: flex; align-items: center; justify-content: center; gap: 12px;
+        padding-bottom: 14px; margin-bottom: 14px;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 1.08rem; color: #0f172a;
+    }
+    .daf-rekening-label {
+        margin: 0 0 4px; color: #64748b; font-size: .82rem; font-weight: 700;
+        letter-spacing: .06em; text-transform: uppercase;
+    }
+    .daf-rekening-nomor {
+        margin: 0 0 6px; color: #0f172a;
+        font-size: 1.62rem; font-weight: 800; letter-spacing: 2px;
+    }
+    .daf-rekening-nama { margin: 0 0 16px; color: #475569; font-size: 1rem; }
+    .daf-salin {
+        display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+        width: 100%; min-height: 52px; padding: 13px 20px;
+        background: #0f172a; color: #fff;
+        border: none; border-radius: 999px;
+        font-size: 1.02rem; font-weight: 700; cursor: pointer;
+    }
+    .daf-salin:hover { background: #1e293b; }
+
     .accordion-glass .accordion-item {
         background: rgba(255, 255, 255, 0.6);
         border: 1px solid rgba(255, 255, 255, 0.9);
@@ -335,83 +397,90 @@ Form Pendaftaran Scopus Camp | Rumah Scopus
 
                 <div class="grid-main">
 
+                    {{-- RINGKASAN, bukan tujuh kotak isian.
+
+                         Kartu ini dulu berisi tujuh <input readonly>: Batch,
+                         Lokasi, Sisa Kuota, Mulai, Selesai, Biaya, dan Kode
+                         Unik — ditambah Jumlah Pendaftar yang juga readonly
+                         bernilai 1. Semuanya tampak seperti isian yang
+                         menunggu diisi, padahal tidak satu pun bisa diubah,
+                         dan peladen pun mengabaikan lima di antaranya.
+
+                         Bagi pembaca berusia lanjut itu tujuh kotak abu-abu
+                         yang harus ditafsirkan dulu sebelum sampai ke empat
+                         isian yang benar-benar perlu diisi. Sekarang
+                         keterangan tetap jadi teks, dan yang tersisa sebagai
+                         isian cuma kode diskon.
+
+                         Nilai yang dibaca JavaScript tetap ada sebagai
+                         <input type="hidden"> dengan id yang sama persis —
+                         biaya, kodeUnik, dan jumlahPendaftar — supaya
+                         perhitungan totalnya tidak putus. --}}
                     <div class="glass-card">
                         <div class="glass-header">
-                            <i class="fas fa-layer-group text-primary"></i> Detail Batch
+                            <i class="fas fa-layer-group text-primary"></i> Kelas yang kamu daftar
                         </div>
 
-                        <div class="form-grid-3">
-                            <div class="form-group">
-                                <label>Batch</label>
-                                <input type="text" name="waktu_mulai" id="waktu_mulai" value="{{ $item->nama }} #{{ $item->nama_ke }}" class="form-control-glass" readonly>
-                            </div>
-                            <div class="form-group">
-                                <label>Lokasi</label>
-                                <input type="text" name="lokasi" id="lokasi" value="{{ $item->lokasi }}" class="form-control-glass" readonly>
-                            </div>
-                            <div class="form-group">
-                                <label>Sisa Kuota</label>
-                                <input type="text" value="{{ $item->sisa_kuota ?? 0 }}" class="form-control-glass" readonly style="color: #ef4444; font-weight: 800;">
-                            </div>
-                        </div>
+                        @php
+                            $fMulai = \Carbon\Carbon::parse($item->mulai)->locale('id');
+                            $fSelesai = $item->selesai ? \Carbon\Carbon::parse($item->selesai) : null;
+                            $fSisa = $item->total_kuota === null ? null : (int) $item->sisa_kuota;
+                        @endphp
 
-                        <div class="form-grid-2">
-                            <div class="form-group">
-                                <label>Mulai Pelaksanaan</label>
-                                <input type="text" name="waktu_mulai" id="waktu_mulai" value="{{ date('d M Y', strtotime($item->mulai)) }}" class="form-control-glass" readonly>
+                        <dl class="daf-ringkas">
+                            <div>
+                                <dt>Kelas</dt>
+                                <dd>{{ $item->nama }} @if ($item->nama_ke)#{{ $item->nama_ke }}@endif</dd>
                             </div>
-                            <div class="form-group">
-                                <label>Selesai Pelaksanaan</label>
-                                <input type="text" name="waktu_selesai" id="waktu_selesai" value="{{ date('d M Y', strtotime($item->selesai)) }}" class="form-control-glass" readonly>
+                            <div>
+                                <dt>Tanggal</dt>
+                                <dd>{{ \App\Support\RentangTanggal::tulis($fMulai, $fSelesai) }}</dd>
                             </div>
-                        </div>
+                            <div>
+                                <dt>Lokasi</dt>
+                                <dd>{{ $item->lokasi ?: 'Akan dikabari panitia' }}</dd>
+                            </div>
+                            <div>
+                                <dt>Sisa kursi</dt>
+                                <dd>{{ $fSisa === null ? 'Tidak dibatasi' : $fSisa . ' kursi' }}</dd>
+                            </div>
+                            <div>
+                                <dt>Biaya per orang</dt>
+                                <dd>
+                                    @if ($item->harga_sebelum_promo > $item->harga_setelah_promo)
+                                        <s class="daf-coret">Rp {{ number_format($item->harga_sebelum_promo, 0, ',', '.') }}</s>
+                                    @endif
+                                    Rp {{ number_format($item->harga_setelah_promo, 0, ',', '.') }}
+                                </dd>
+                            </div>
+                            <div>
+                                <dt>Jumlah peserta</dt>
+                                <dd>1 orang</dd>
+                            </div>
+                        </dl>
 
-                        <div class="form-grid-2">
-                            <div class="form-group">
-                                <label>Biaya Per Sesi</label>
-                                <div class="input-group-glass readonly">
-                                    <span class="input-group-text">Rp</span>
-                                    {{-- harga_setelah_promo, BUKAN $item->biaya.
+                        {{-- harga_setelah_promo, BUKAN $item->biaya.
 
-                                         Halaman daftarnya MENCORET `biaya` dan
-                                         menjanjikan `total_biaya`; borang ini dulu
-                                         menagih angka yang dicoret itu. Terukur 18
-                                         angkatan terkena — Scopus Camp Padang
-                                         menjanjikan Rp 5.060.000 lalu menagih
-                                         Rp 5.500.000. Lihat App\Support\HargaUmum. --}}
-                                    <input type="text" name="biaya" id="biaya" value="{{ number_format($item->harga_setelah_promo, 0, ',', '.') }}" class="form-control-glass currency" readonly>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label>Kode Unik Pembayaran</label>
-                                <div class="input-group-glass readonly">
-                                    <span class="input-group-text">Rp</span>
-                                    <input type="text" name="kode_unik" id="kodeUnik" value="{{ old('kode_unik') }}" placeholder="0" class="form-control-glass" readonly style="color: #f59e0b;">
-                                </div>
-                            </div>
-                        </div>
+                             Halaman daftarnya MENCORET `biaya` dan menjanjikan
+                             `total_biaya`; borang ini dulu menagih angka yang
+                             dicoret itu. Terukur 18 angkatan terkena — Scopus
+                             Camp Padang menjanjikan Rp 5.060.000 lalu menagih
+                             Rp 5.500.000. Lihat App\Support\HargaUmum. --}}
+                        <input type="hidden" name="biaya" id="biaya" value="{{ number_format($item->harga_setelah_promo, 0, ',', '.') }}">
+                        <input type="hidden" name="kode_unik" id="kodeUnik" value="{{ old('kode_unik') }}">
+                        <input type="hidden" name="jumlah_pendaftar" id="jumlahPendaftar" value="1"
+                            data-sisa-kuota="{{ $item->sisa_kuota ?? 0 }}">
 
-                        <div class="form-grid-2">
-                            <div class="form-group">
-                                <label>Jumlah Pendaftar <span class="text-danger">*</span></label>
-                                <input type="number" name="jumlah_pendaftar" id="jumlahPendaftar" class="form-control-glass" required
-                                    value="1"
-                                    readonly
-                                    data-sisa-kuota="{{ $item->sisa_kuota ?? 0 }}"
-                                    style="font-weight: bold; color: #ef4444; text-align: center;">
+                        <div class="form-group daf-diskon">
+                            <label for="kodeDiskon">Punya kode diskon? <span class="daf-opsional">boleh dikosongkan</span></label>
+                            <div class="input-group-glass" style="background: #fff; padding: 5px;">
+                                <input type="text" name="kode_diskon_input" id="kodeDiskon" class="form-control-glass" placeholder="Ketik kode diskon" style="border: none; background: transparent; box-shadow: none; padding-left: 15px;">
+                                <button type="button" class="btn-check-discount" id="btnCekDiskon" data-id="{{ $item->id }}">
+                                    <i class="fas fa-tags"></i> Cek
+                                </button>
                             </div>
-
-                            <div class="form-group">
-                                <label>Diskon (Jika Ada)</label>
-                                <div class="input-group-glass" style="background: #fff; padding: 5px;">
-                                    <input type="text" name="kode_diskon_input" id="kodeDiskon" class="form-control-glass" placeholder="KODE DISKON..." style="border: none; background: transparent; box-shadow: none; padding-left: 15px;">
-                                    <button type="button" class="btn-check-discount" id="btnCekDiskon" data-id="{{ $item->id }}">
-                                        <i class="fas fa-tags"></i> CEK
-                                    </button>
-                                </div>
-                                <input type="hidden" name="kode_diskon" id="hiddenKodeDiskon">
-                                <small id="diskonMessage" class="text-success mt-1 d-block font-weight-bold"></small>
-                            </div>
+                            <input type="hidden" name="kode_diskon" id="hiddenKodeDiskon">
+                            <small id="diskonMessage" class="text-success mt-1 d-block font-weight-bold"></small>
                         </div>
                     </div>
 
@@ -450,25 +519,29 @@ Form Pendaftaran Scopus Camp | Rumah Scopus
                             <i class="fas fa-wallet text-primary"></i> Pembayaran
                         </div>
 
-                        <div class="accordion accordion-glass" id="accordionExample">
-                            <div class="accordion-item">
-                                <h2 class="accordion-header" id="headingOne">
-                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                                        <img src="{{ asset('assets/img/bri.jpg') }}" alt="BRI" style="width: 45px; height: auto; margin-right:15px; border-radius:4px;"> BANK BRI
-                                    </button>
-                                </h2>
-                                <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
-                                    <div class="accordion-body text-center">
-                                        <p class="mb-2 text-muted small font-weight-bold">NOMOR REKENING</p>
-                                        <h4 id="nomor-rekening" class="font-weight-900 text-dark mb-3" style="letter-spacing: 2px;">216401000467563</h4>
-                                        <p class="mb-3">a.n. <strong>Rumah Scopus Akademi</strong></p>
-                                        <button type="button" onclick="copyToClipboard('nomor-rekening')" class="btn btn-outline-primary btn-sm w-100 rounded-pill font-weight-bold">
-                                            <i class="fas fa-copy"></i> Salin Rekening
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
+                    {{-- Kartu rekening BIASA, bukan akordeon.
+
+                         Nomor rekeningnya dulu duduk di dalam akordeon yang
+                         memang terbuka secara bawaan — tetapi tombolnya tetap
+                         bisa ditekan, dan sekali tertekan nomornya menghilang.
+                         Di halaman yang satu-satunya tujuannya mentransfer
+                         uang, tidak ada alasan menyembunyikan nomor rekening
+                         di balik tombol yang bisa salah tekan. --}}
+                    <div class="daf-rekening">
+                        <div class="daf-rekening-bank">
+                            <img src="{{ asset('assets/img/bri.jpg') }}" alt="Logo Bank BRI"
+                                style="width: 48px; height: auto; border-radius: 5px;">
+                            <strong>Bank BRI</strong>
                         </div>
+
+                        <p class="daf-rekening-label">Nomor rekening</p>
+                        <p id="nomor-rekening" class="daf-rekening-nomor">216401000467563</p>
+                        <p class="daf-rekening-nama">a.n. <strong>Rumah Scopus Akademi</strong></p>
+
+                        <button type="button" onclick="copyToClipboard('nomor-rekening')" class="daf-salin">
+                            <i class="fas fa-copy"></i> Salin nomor rekening
+                        </button>
+                    </div>
 
                         <hr style="border-top: 2px dashed rgba(148, 163, 184, 0.3); margin: 25px 0;">
 
@@ -483,7 +556,14 @@ Form Pendaftaran Scopus Camp | Rumah Scopus
                             @enderror
                         </div>
 
-                        <div class="image-preview-container">
+                        {{-- Disembunyikan selama belum ada yang dipilih.
+
+                             Kotaknya setinggi 180px dan selalu tergambar,
+                             jadi sebelum orang memilih berkas apa pun yang
+                             terlihat adalah kotak abu-abu kosong tepat di
+                             bawah tombol unggah — terbaca sebagai tempat
+                             yang gagal memuat gambarnya. --}}
+                        <div class="image-preview-container" id="wadahPratinjau" style="display: none;">
                             <div id="imagePreview" class="image-preview"></div>
                             <span id="file-selected" class="small text-muted mt-2 d-block text-center font-weight-bold"></span>
                         </div>
@@ -516,6 +596,20 @@ Form Pendaftaran Scopus Camp | Rumah Scopus
                                     <span>Rp</span> <span>{{ number_format($item->harga_setelah_promo, 0, ',', '.') }}</span>
                                 </div>
                                 <input type="hidden" name="subtotal" id="subtotalInput" value="{{ $item->harga_setelah_promo }}">
+                            </div>
+
+                            {{-- Kode unik dipajang DI SINI, bukan di kartu kiri.
+
+                                 Ia bagian dari nominal yang harus ditransfer, jadi
+                                 tempatnya di sebelah totalnya — bukan di antara
+                                 keterangan kelas. Diperbarui JavaScript bersama
+                                 totalnya; isian tersembunyi #kodeUnik tetap yang
+                                 dikirim ke peladen. --}}
+                            <div class="summary-row">
+                                <span>Kode unik</span>
+                                <div>
+                                    <span>Rp</span> <span id="kodeUnikTeks">0</span>
+                                </div>
                             </div>
 
                             <div class="summary-row">
@@ -737,10 +831,16 @@ Form Pendaftaran Scopus Camp | Rumah Scopus
             const subtotal = (jumlah * biaya) + kodeUnik - potonganDiskon + jumlahPPN;
 
             kodeUnikInput.value = formatRupiah(kodeUnik);
+            // Isian #kodeUnik kini tersembunyi; angkanya tetap harus terlihat
+            // orang karena ikut menentukan nominal transfernya.
+            var kodeUnikTeks = document.getElementById('kodeUnikTeks');
+            if (kodeUnikTeks) kodeUnikTeks.textContent = formatRupiah(kodeUnik);
             totalPembayaranDisplay.textContent = formatRupiah(subtotal);
             document.getElementById('totalPembayaranInput').value = subtotal;
         } else {
             kodeUnikInput.value = '0';
+            var kodeUnikTeksKosong = document.getElementById('kodeUnikTeks');
+            if (kodeUnikTeksKosong) kodeUnikTeksKosong.textContent = '0';
             totalPembayaranDisplay.textContent = '0';
             document.getElementById('totalPembayaranInput').value = 0;
         }
@@ -759,8 +859,20 @@ Form Pendaftaran Scopus Camp | Rumah Scopus
 </script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        /*
+         * Kotak pratinjaunya DIKOSONGKAN, bukan diisi gambar cadangan.
+         *
+         * Baris ini dulu menyuntikkan <img src=".../meme/no-image.jpg">, dan
+         * berkas itu TIDAK ADA di proyek ini — jadi yang tampil sebelum orang
+         * memilih apa pun adalah ikon gambar rusak bertuliskan "No Image".
+         * Di halaman yang meminta bukti transfer, gambar rusak terbaca
+         * sebagai unggahannya yang gagal.
+         */
         var output = document.getElementById('imagePreview');
-        output.innerHTML = `<img src="{{ asset('assets/img/meme/no-image.jpg') }}" alt="No Image">`;
+        output.innerHTML = '';
+
+        var wadah = document.getElementById('wadahPratinjau');
+        if (wadah) wadah.style.display = 'none';
     });
 
     document.getElementById('gambar').addEventListener('change', function(event) {
@@ -793,13 +905,26 @@ Form Pendaftaran Scopus Camp | Rumah Scopus
         document.getElementById('file-selected').innerHTML = fileName + ' (' + fileSize + ' KB)';
         var reader = new FileReader();
         reader.onload = function() {
-            document.getElementById('imagePreview').innerHTML = `<img src="${reader.result}" alt="Preview">`;
+            document.getElementById('imagePreview').innerHTML =
+                `<img src="${reader.result}" alt="Pratinjau bukti transfer yang dipilih">`;
+
+            var wadah = document.getElementById('wadahPratinjau');
+            if (wadah) wadah.style.display = '';
         };
         reader.readAsDataURL(file);
     });
 
     function resetImagePreview() {
-        document.getElementById('imagePreview').innerHTML = `<img src="{{ asset('assets/img/meme/no-image.jpg') }}" alt="No Image">`;
+        /* Dikosongkan, bukan diisi gambar cadangan: berkas
+           assets/img/meme/no-image.jpg TIDAK ADA di proyek ini, jadi yang
+           tampil sesudah unggahan ditolak adalah ikon gambar rusak
+           bertuliskan "No Image" — tepat di tempat orang mengira
+           unggahannya baru saja tersimpan. */
+        document.getElementById('imagePreview').innerHTML = '';
+
+        var wadahReset = document.getElementById('wadahPratinjau');
+        if (wadahReset) wadahReset.style.display = 'none';
+
         document.getElementById('file-selected').innerHTML = '';
         document.getElementById('gambar').value = "";
     }
