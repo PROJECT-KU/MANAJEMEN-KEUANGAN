@@ -195,22 +195,47 @@
     .cmp-lain-kosong { color: var(--tinta-2); font-size: .93rem; }
 
     /* ============================================= pita ajakan ponsel */
-    .cmp-pita { display: none; }
+    /* Pita ajakan: tersembunyi sampai tombol di atas lewat dari layar.
+
+       Ditandai lewat kelas .cmp-pita-tampil yang dipasang IntersectionObserver
+       di bawah, bukan lewat lebar layar — sebab yang menentukan bukan ukuran
+       perangkatnya, melainkan apakah orangnya masih bisa melihat tombolnya. */
+    .cmp-pita {
+        position: fixed; left: 0; right: 0; bottom: 0; z-index: 99998;
+        padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+        background: var(--kertas);
+        border-top: 2px solid var(--tinta);
+        box-shadow: 0 -4px 18px rgba(22, 35, 63, .12);
+
+        /* Diturunkan keluar layar, bukan display:none — supaya munculnya
+           meluncur, tidak mengagetkan dengan melompat. */
+        transform: translateY(110%);
+        transition: transform .22s ease;
+    }
+    .cmp-pita-tampil { transform: translateY(0); }
+
+    /* Ruang di dasar halaman, di SEMUA lebar.
+
+       Pitanya melayang di atas isi, dan terukur ia menutupi 97px terakhir
+       kaki halaman di layar 1440 — baris hak cipta dan sebagian tautan
+       terakhir hilang di baliknya. Ruang ini tetap dipesan walau pitanya
+       sedang tersembunyi: memberinya hanya saat pita muncul membuat seluruh
+       halaman melompat 92px tepat ketika orang sedang menggulung. */
+    body { padding-bottom: 92px; }
+
+    @media (min-width: 992px) {
+        /* Di layar lebar pitanya dibatasi lebarnya dan diletakkan di tengah,
+           supaya tidak jadi palang selebar layar. */
+        .cmp-pita { left: 50%; right: auto; width: min(560px, 92vw); margin-left: calc(min(560px, 92vw) / -2); border-radius: 18px 18px 0 0; border: 2px solid var(--tinta); border-bottom: none; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .cmp-pita { transition: none; }
+    }
     @media (max-width: 991.98px) {
         .cmp-kisi { grid-template-columns: 1fr; gap: 28px; }
         .cmp-pokok { grid-template-columns: 1fr; }
 
-        /* Tombol daftarnya SELALU terlihat di ponsel. Tanpa ini, orang yang
-           sudah yakin di tengah halaman harus menggulung mencari tombolnya
-           — dan halaman ini panjang karena deskripsinya panjang. */
-        .cmp-pita {
-            position: fixed; left: 0; right: 0; bottom: 0; z-index: 99998;
-            display: block; padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
-            background: var(--kertas);
-            border-top: 2px solid var(--tinta);
-            box-shadow: 0 -4px 18px rgba(22, 35, 63, .12);
-        }
-        body { padding-bottom: 86px; }
         .kaki-wa { display: none !important; }
         .back-to-top { bottom: 96px !important; }
     }
@@ -340,17 +365,21 @@
                                 <p class="cmp-uraian">{{ $item->desc_promo }}</p>
                             @endif
 
-                            <div style="margin-top: 30px;">
-                                @if ($penuh)
-                                    <span class="cmp-tombol cmp-tombol-mati">
-                                        <i class="bi bi-lock-fill"></i> Kursinya sudah habis
-                                    </span>
-                                @else
-                                    <a href="{{ $tautanDaftar }}" class="cmp-tombol">
-                                        <i class="bi bi-pencil-square"></i> Daftar sekarang
-                                    </a>
-                                @endif
-                            </div>
+                            {{-- TIDAK ada tombol daftar kedua di sini.
+
+                                 Versi pertama rombakan ini memasangnya dua kali
+                                 — atas dan bawah — supaya tidak perlu dicari
+                                 dengan menggulung. Pemiliknya menyebutnya apa
+                                 adanya: tombolnya ada dua. Bagi pembaca yang
+                                 jadi sasaran halaman ini, dua tombol serupa di
+                                 satu halaman menimbulkan pertanyaan yang tidak
+                                 perlu — yang mana yang benar, dan apakah yang
+                                 tadi sudah tertekan.
+
+                                 Jangkauannya tetap dijaga lewat pita di bawah
+                                 layar, yang baru muncul justru ketika tombol di
+                                 atas sudah tidak terlihat. Jadi selalu ada satu
+                                 jalan masuk, dan tidak pernah dua sekaligus. --}}
                         </div>
                     </article>
                 </div>
@@ -400,7 +429,7 @@
     </section>
 
     {{-- Pita ajakan yang menempel di bawah layar ponsel. --}}
-    <div class="cmp-pita">
+    <div class="cmp-pita" id="cmpPita" aria-hidden="true">
         @if ($penuh)
             <span class="cmp-tombol cmp-tombol-mati"><i class="bi bi-lock-fill"></i> Kursinya sudah habis</span>
         @else
@@ -411,4 +440,40 @@
     </div>
 
 </div>
+
+<script>
+    /*
+     * Pita ajakan muncul HANYA saat tombol daftar di atas sudah lewat dari
+     * layar — jadi tidak pernah ada dua jalan masuk yang terlihat bersamaan.
+     *
+     * IntersectionObserver, bukan penghitung posisi pada tiap gulir:
+     * perhitungan manual memanggil getBoundingClientRect() puluhan kali per
+     * detik dan membuat gulirannya tersendat di perangkat lama — persis
+     * perangkat yang dipakai sebagian pembaca halaman ini.
+     */
+    (function () {
+        var pita = document.getElementById('cmpPita');
+        var tombolAtas = document.querySelector('.cmp-tombol-atas');
+
+        if (!pita || !tombolAtas) return;
+
+        function tampilkan(ya) {
+            pita.classList.toggle('cmp-pita-tampil', ya);
+            pita.setAttribute('aria-hidden', ya ? 'false' : 'true');
+        }
+
+        if (!('IntersectionObserver' in window)) {
+            // Peramban lama: pitanya dibiarkan tampil terus. Satu tombol
+            // tambahan jauh lebih baik daripada tidak ada jalan masuk sama
+            // sekali di halaman sepanjang ini.
+            tampilkan(true);
+
+            return;
+        }
+
+        new IntersectionObserver(function (entri) {
+            tampilkan(!entri[0].isIntersecting);
+        }, { threshold: 0 }).observe(tombolAtas);
+    })();
+</script>
 @stop
