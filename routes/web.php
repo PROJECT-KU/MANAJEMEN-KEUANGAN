@@ -23,9 +23,14 @@ Route::get('/', 'Publict\PublicHomeController@home')->name('home');
 // ARTIKEL PUBLIC
 Route::get('/blog', 'Publict\PublicArticleController@public')->name('blog.artikel.blog');
 Route::get('/blog/rss.xml', 'Publict\PublicArticleController@rss')->name('blog.rss');
+Route::get('/sitemap.xml', 'Publict\PublicArticleController@sitemap')->name('sitemap');
 Route::get('/blog/topic/{categories_artikel_id}', 'Publict\PublicArticleController@publickategori')->name('blog.topic.kategori');
 Route::get('/blog/topic/blog-single/{id}', 'Publict\PublicArticleController@blogsingle')->name('blog.topic.blog-single');
-Route::post('/blog/store', 'Publict\PublicArticleController@storekomentar')->name('blog.store.komentar');
+// Batas laju: lima komentar per menit per IP. Rutenya dulu polos, jadi satu
+// skrip bisa mengisi tabelnya semalaman tanpa satu pun yang menahannya.
+Route::post('/blog/store', 'Publict\PublicArticleController@storekomentar')
+    ->middleware('throttle:5,1')
+    ->name('blog.store.komentar');
 Route::get('/contact', 'Publict\PublicArticleController@contact')->name('blog.contact.kontak');
 
 // SCOPUS KAFE PUBLIC
@@ -749,6 +754,18 @@ Route::prefix('account')
             Route::get('/kategori-layanan/cetak/excel', 'account\KategoriLayananController@cetakExcel')->name('account.kategori-layanan.excel');
             Route::post('/kategori-layanan/{angkatan}', 'account\KategoriLayananController@update')->name('account.kategori-layanan.update');
             Route::delete('/kategori-layanan/{angkatan}', 'account\KategoriLayananController@destroy')->name('account.kategori-layanan.destroy');
+
+            /*
+             * Moderasi komentar blog.
+             *
+             * Layar ini tidak pernah ada: pengendalinya sudah ditulis tetapi
+             * berkasnya bernama ...Controller.php.php — berakhiran ganda, jadi
+             * kelasnya tak pernah bisa dimuat dan nol rute menunjuknya.
+             * Komentar yang masuk tidak bisa dihapus dari mana pun.
+             */
+            Route::get('/komentar-artikel', 'account\ArtikelKomentarController@index')->name('account.komentar-artikel.index');
+            Route::post('/komentar-artikel/{id}/status', 'account\ArtikelKomentarController@status')->name('account.komentar-artikel.status');
+            Route::delete('/komentar-artikel/{id}', 'account\ArtikelKomentarController@destroy')->name('account.komentar-artikel.destroy');
 
             // Galeri foto per layanan. Unggahannya langsung jadi WebP di
             // storage; berkas aslinya dihapus.
