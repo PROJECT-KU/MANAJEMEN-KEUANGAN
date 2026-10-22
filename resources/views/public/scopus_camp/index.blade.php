@@ -1,195 +1,440 @@
 @extends('public.layout.header')
 
-@section('title', 'Scopus Camp | Rumah Scopus')
+@section('title', 'Scopus Camp — kelas tatap muka | Rumah Scopus')
 
+@section('uraian', 'Tiga hari menulis artikel ilmiah sampai terkirim ke jurnal terindeks Scopus, ditemani pendamping yang sudah terbiasa menembusnya. Jadwal, biaya, dan sisa kursi tiap angkatan.')
+
+@push('kepala')
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600..900&family=Figtree:wght@400;500;700;800&display=swap">
+@endpush
+
+@section('konten')
+{{--
+    Scopus Camp — dirombak 22 Okt 2026 mengikuti beranda.
+
+    Yang diganti dan kenapa:
+
+      - PALETNYA. Gradien merah-jingga #ff3131 -> #ff914d di atas putih:
+        palet lama yang sudah ditinggalkan beranda dan blog justru karena
+        pemiliknya menyebutnya terlalu mirip situs lain.
+
+      - BLOK GAYANYA menggantung di luar @section, sama seperti berkas
+        kategori blog yang sudah dibetulkan: tetap tercetak, tetapi mendarat
+        sebelum <!doctype html>.
+
+      - SUSUNANNYA. Seluruh angkatan dicetak sebagai kartu poster di satu
+        halaman — terukur 294 kartu setinggi 22.711px. Dan posternya SAMA
+        PERSIS di tiap kartu, jadi halamannya jadi dinding berisi satu gambar
+        yang diulang ratusan kali. Sekarang posternya dipajang sekali di
+        kolom kiri bersama daftar fasilitas, dan angkatannya jadi baris
+        berisi tanggal, lokasi, harga, dan sisa kursi.
+
+      - TANGGALNYA memakai date('d M'), yang memulangkan "Oct" di halaman
+        berbahasa Indonesia.
+--}}
 <style>
-    .hero-bg {
-        position: relative;
-        background: url('/assets/artikel/img/hero-bg.png') no-repeat center center / cover;
-        padding: 120px 0 80px;
+    /* Palet dan huruf DISALIN dari beranda.
+
+       Ditulis lagi di sini, bukan menumpang .bnd: aturan beranda hidup di
+       dalam home.blade.php dan tidak ikut terkirim ke halaman ini.
+       Menumpangnya berarti halaman ini diam-diam kehilangan seluruh
+       warnanya pada hari beranda dirapikan. */
+    .kmp {
+        --kertas: #fdf5e8;  --kertas-2: #f8ead4;
+        --tinta: #16233f;   --tinta-2: #5c6b85;
+        --jingga: #e76d20;  --jingga-muda: #fb8c3d; --jingga-tua: #ad4d12;
+        --jingga-kuat: #b85213;
+        --stabilo: #ffd84d;
+        --rumput: #0f766e;  --ungu: #5b3fd6;
+
+        background: var(--kertas);
+        color: var(--tinta);
+        font-family: 'Figtree', system-ui, sans-serif;
+        overflow-x: clip;
+    }
+    .kmp h1, .kmp h2, .kmp h3 {
+        font-family: 'Fraunces', Georgia, serif;
+        font-weight: 800; color: var(--tinta); margin: 0; letter-spacing: -.01em;
+    }
+    .kmp p { margin: 0; color: var(--tinta-2); line-height: 1.68; }
+    .kmp a { text-decoration: none; }
+
+    /* ========================================================= kepala */
+    /* 124px di atas, sama dengan hero beranda: kepala situs berposisi fixed
+       setinggi 82px dan tidak memesan ruang untuk dirinya sendiri. */
+    .kmp-kepala {
+        padding: 124px 0 50px;
+        background: linear-gradient(180deg, var(--kertas-2) 0%, var(--kertas) 100%);
+        text-align: center;
+    }
+    .kmp-stiker {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 7px 17px; margin-bottom: 18px;
+        background: var(--tinta); color: var(--kertas);
+        border-radius: 999px; font-weight: 800; font-size: .84rem;
+    }
+    .kmp-stiker i { color: var(--stabilo); }
+
+    .kmp .kmp-judul { font-size: clamp(1.9rem, 4.2vw, 3rem); line-height: 1.12; max-width: 20ch; margin: 0 auto; }
+
+    .kmp-stabilo { position: relative; display: inline-block; z-index: 0; }
+    .kmp-stabilo::after {
+        content: ''; position: absolute; z-index: -1;
+        left: -5px; right: -5px; bottom: .06em; height: .42em;
+        background: var(--stabilo); border-radius: 3px;
+        transform: rotate(-1.1deg) skewX(-9deg);
     }
 
-    .scopus-card {
-        border-radius: 16px;
-        padding: 20px;
-        background-color: white;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
-        border: 1px solid #f1f5f9;
+    .kmp p.kmp-sub { max-width: 56ch; margin: 17px auto 0; font-size: 1.04rem; }
+
+    /* ========================================================== isi */
+    .kmp-bagian { padding: 54px 0; }
+
+    /* Dua kolom TAK SAMA: keterangan tetap di kiri, daftar angkatan di
+       kanan — bentuk yang sama dengan bagian jadwal di beranda. */
+    .kmp-kisi {
+        display: grid; grid-template-columns: 330px minmax(0, 1fr); gap: 48px;
     }
 
-    .scopus-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+    /* TIDAK ada position: sticky di panel ini, dan itu hasil pengukuran,
+       bukan selera.
+
+       Panelnya sempat dibuat menempel dengan top: 104px. Terukur di
+       peramban: di gulir 0 ia turun TEPAT 104px dari baris pertama — celah
+       yang terlihat jelas — lalu saat digulung ia TIDAK menempel sama
+       sekali, tepi atasnya terus naik sampai -933px. Jadi aturan itu nol
+       guna dan berbiaya: satu-satunya akibatnya celah di layar pertama.
+
+       Dicoba empat bentuk (sticky di item kisi, di kartu dalam, dengan
+       bungkus blok biasa, dan dengan bungkus setinggi penuh); yang
+       menghilangkan celahnya juga menghilangkan kemenempelannya. Sticky di
+       blok biasa pada halaman yang SAMA bergeser 0px, jadi pemicunya
+       konteks kisi, bukan gaya halaman ini. */
+
+    .kmp-panel-kartu {
+        padding: 22px;
+        background: var(--kertas-2);
+        border: 2px solid var(--tinta); border-radius: 22px;
+        box-shadow: 7px 7px 0 var(--jingga);
+    }
+    .kmp-poster {
+        display: block; width: 100%; margin-bottom: 18px;
+        border: 2px solid var(--tinta); border-radius: 14px;
+        overflow: hidden; background: #fff;
+    }
+    .kmp-poster img { width: 100%; height: auto; display: block; }
+
+    .kmp .kmp-panel-kartu h2 { font-size: 1.12rem; margin-bottom: 12px; }
+    .kmp-fasilitas { list-style: none; padding: 0; margin: 0; }
+    .kmp-fasilitas li {
+        display: flex; gap: 9px; padding: 6px 0;
+        color: var(--tinta); font-size: .92rem; line-height: 1.5;
+    }
+    .kmp-fasilitas i { flex: 0 0 auto; margin-top: 4px; color: var(--rumput); }
+
+    /* ====================================================== angkatan */
+    .kmp-deret { display: flex; flex-direction: column; gap: 15px; }
+
+    .kmp-baris {
+        display: grid; grid-template-columns: 74px minmax(0, 1fr) auto;
+        gap: 20px; align-items: center;
+        padding: 17px 21px;
+        background: var(--kertas);
+        border: 2px solid var(--tinta); border-radius: 18px;
+        box-shadow: 5px 5px 0 var(--jingga);
+        color: var(--tinta);
+        transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .kmp-baris:hover {
+        color: var(--tinta);
+        transform: translate(-3px, -3px); box-shadow: 9px 9px 0 var(--jingga);
+    }
+    /* Yang kuotanya habis tidak boleh terlihat sama menariknya dengan yang
+       masih bisa didaftari. */
+    .kmp-baris.kmp-penuh {
+        background: var(--kertas-2); box-shadow: 5px 5px 0 rgba(22, 35, 63, .2);
+        opacity: .72;
+    }
+    .kmp-baris.kmp-penuh:hover { transform: none; box-shadow: 5px 5px 0 rgba(22, 35, 63, .2); }
+
+    .kmp-tgl {
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        padding: 9px 4px; border-radius: 13px;
+        background: var(--jingga); color: #fff; line-height: 1;
+    }
+    .kmp-penuh .kmp-tgl { background: var(--tinta-2); }
+    .kmp-tgl strong { font-family: 'Fraunces', serif; font-weight: 900; font-size: 1.68rem; }
+    .kmp-tgl span {
+        margin-top: 4px; font-size: .72rem; font-weight: 800;
+        letter-spacing: .1em; text-transform: uppercase;
     }
 
-    .card-img-wrapper {
-        border-radius: 12px;
-        overflow: hidden;
-        margin-bottom: 15px;
+    .kmp-isi { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+    .kmp-nama { font-family: 'Fraunces', serif; font-weight: 800; font-size: 1.1rem; line-height: 1.3; }
+    .kmp-rinci {
+        display: flex; flex-wrap: wrap; gap: 4px 16px;
+        color: var(--tinta-2); font-size: .85rem; font-weight: 600;
+    }
+    .kmp-rinci i { margin-right: 4px; color: var(--jingga); }
+
+    .kmp-kanan {
+        display: flex; flex-direction: column; align-items: flex-end; gap: 4px;
+        text-align: right; white-space: nowrap;
+    }
+    .kmp-coret { color: var(--tinta-2); font-size: .82rem; font-weight: 600; }
+    .kmp-harga { font-family: 'Fraunces', serif; font-weight: 800; font-size: 1.12rem; }
+    .kmp-hemat {
+        padding: 1px 9px; border-radius: 999px;
+        background: var(--stabilo); color: var(--tinta);
+        font-size: .72rem; font-weight: 800;
+    }
+    .kmp-sisa {
+        padding: 1px 9px; border-radius: 999px;
+        background: var(--jingga-kuat); color: #fff;
+        font-size: .72rem; font-weight: 800;
+    }
+    .kmp-tutup {
+        padding: 2px 11px; border-radius: 999px;
+        background: var(--tinta-2); color: #fff;
+        font-size: .74rem; font-weight: 800;
+    }
+    .kmp-ajak {
+        display: inline-flex; align-items: center; gap: 7px; margin-top: 3px;
+        color: var(--jingga-tua); font-weight: 800; font-size: .9rem;
+        transition: gap .2s ease;
+    }
+    .kmp-baris:hover .kmp-ajak { gap: 13px; }
+
+    .kmp-halaman { display: flex; justify-content: center; margin-top: 34px; }
+    .kmp-halaman .pagination { gap: 8px; margin: 0; flex-wrap: wrap; }
+    .kmp-halaman .page-item .page-link {
+        min-width: 42px; padding: 9px 14px;
+        background: var(--kertas); color: var(--tinta);
+        border: 2px solid var(--tinta); border-radius: 13px;
+        box-shadow: 3px 3px 0 rgba(22, 35, 63, .16);
+        font-weight: 800; text-align: center;
+    }
+    .kmp-halaman .page-item.active .page-link {
+        background: var(--jingga-kuat); color: #fff; box-shadow: 3px 3px 0 var(--tinta);
+    }
+    .kmp-halaman .page-item.disabled .page-link {
+        background: var(--kertas-2); color: var(--tinta-2);
+        border-color: rgba(22, 35, 63, .25); box-shadow: none;
     }
 
-    .img-fluid-custom {
-        width: 100%;
-        height: auto;
-        display: block;
-        object-fit: contain;
+    .kmp-kosong {
+        max-width: 48ch; margin: 0 auto; padding: 48px 30px; text-align: center;
+        background: var(--kertas-2);
+        border: 2px dashed rgba(22, 35, 63, .28); border-radius: 22px;
+    }
+    .kmp-kosong i { font-size: 2.2rem; color: var(--jingga); }
+    .kmp .kmp-kosong h2 { margin: 14px 0 9px; font-size: 1.3rem; }
+
+    .kmp-tombol {
+        display: inline-flex; align-items: center; gap: 9px;
+        padding: 12px 22px; margin-top: 20px;
+        background: var(--jingga-kuat); color: #fff;
+        border: 2px solid var(--tinta); border-radius: 999px;
+        box-shadow: 4px 4px 0 var(--tinta); font-weight: 800;
+    }
+    .kmp-tombol:hover { color: #fff; background: var(--tinta); }
+
+    @media (max-width: 992px) {
+        .kmp-kisi { grid-template-columns: 1fr; gap: 30px; }
+    }
+    @media (max-width: 600px) {
+        .kmp-kepala { padding: 104px 0 40px; }
+        .kmp-baris { grid-template-columns: 58px minmax(0, 1fr); gap: 14px; padding: 15px 16px; }
+        .kmp-kanan {
+            grid-column: 1 / -1;
+            flex-direction: row; align-items: center; justify-content: flex-start;
+            flex-wrap: wrap; gap: 6px 12px;
+            padding-top: 11px; border-top: 2px dashed rgba(22, 35, 63, .14);
+        }
+        .kmp-ajak { margin-top: 0; margin-left: auto; }
     }
 
-    /* --- UPDATE BUTTON STYLE --- */
-    .btn-register {
-        font-size: 16px;
-        width: 100%;
-        border: none;
-        padding: 14px;
-        /* Sedikit lebih tebal */
-        border-radius: 0 0 16px 16px;
-        font-weight: 700;
-        transition: all 0.3s ease;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-    }
-
-    .btn-active {
-        background: linear-gradient(135deg, #ff3131, #ff914d);
-        /* Warna senada Label Hemat */
-        color: white;
-        /* Efek Timbul & Bayangan */
-        box-shadow: 0 4px 15px rgba(255, 49, 49, 0.4);
-        border-top: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .btn-active:hover {
-        background: linear-gradient(135deg, #ff4141, #ffa15d);
-        box-shadow: 0 6px 20px rgba(255, 49, 49, 0.6);
-        transform: scale(1.02);
-        /* Sedikit membesar saat hover */
-    }
-
-    .btn-active:active {
-        transform: scale(0.98);
-        /* Efek tertekan saat diklik */
-        box-shadow: 0 2px 10px rgba(255, 49, 49, 0.3);
-    }
-
-    .btn-disabled {
-        background-color: #94a3b8;
-        color: white;
-        cursor: not-allowed;
-    }
-
-    /* --------------------------- */
-
-    .text-gradient {
-        background: linear-gradient(to right, #ff3131, #ff914d);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+    @media (prefers-reduced-motion: reduce) {
+        .kmp *, .kmp *::before, .kmp *::after { transition: none !important; }
     }
 </style>
 
-@section('konten')
-<section id="hero" class="hero-bg d-flex align-items-center">
-    <div class="container mb-5">
-        <div class="col-lg-12 text-center mb-5" data-aos="fade-down">
-            <h1 style="font-size: clamp(32px, 5vw, 48px); font-weight: 800; color: #0f172a; line-height: 1.2;">
-                Tingkatkan Peluang Tembus <span class="text-gradient">Scopus</span> <br>
-                Bersama <span class="text-gradient">Scopus Camp</span>
+<div class="kmp">
+
+    {{-- ==================================================== kepala ===== --}}
+    <section class="kmp-kepala">
+        <div class="container">
+            <span class="kmp-stiker"><i class="bi bi-geo-alt-fill"></i> Kelas tatap muka · 3 hari</span>
+
+            <h1 class="kmp-judul">
+                Datang bawa data, pulang naskahmu sudah <span class="kmp-stabilo">terkirim</span>
             </h1>
+
+            <p class="kmp-sub">
+                Tiga hari menulis bareng pendamping yang sudah terbiasa menembus
+                jurnal terindeks Scopus. Bukan duduk mendengarkan ceramah —
+                naskahmu sendiri yang dikerjakan.
+                @if ($categories->total() > 0)
+                    Ada {{ $categories->total() }} angkatan yang sedang dibuka.
+                @endif
+            </p>
         </div>
+    </section>
 
-        <div class="row justify-content-center">
-            @forelse($categories as $item)
-            @php
-            $kuotaHabis = $item->sisa_kuota === null || $item->sisa_kuota <= 0;
-                /*
-                 * Harga asal lawan harga yang benar-benar ditagih.
-                 *
-                 * Dibandingkan dari harga_setelah_promo, bukan total_biaya:
-                 * sejak promo jadi fiturnya sendiri, potongan bisa datang dari
-                 * DUA sumber — diskon angkatannya dan promo yang menaunginya.
-                 * Dibaca dari total_biaya saja, promo tidak pernah terlihat di
-                 * halaman ini dan pengunjung melihat harga yang lebih mahal
-                 * daripada yang akan ditagih borangnya.
-                 */
-                $hargaAsal = (int) $item->biaya;
-                $hargaBayar = (int) $item->harga_setelah_promo;
-                $adaDiskon = $hargaAsal > $hargaBayar && $hargaBayar > 0;
-                $hematPersen = $adaDiskon ? round((($hargaAsal - $hargaBayar) / $hargaAsal) * 100) : 0;
-                @endphp
+    {{-- ================================================== angkatan ===== --}}
+    <section class="kmp-bagian">
+        <div class="container">
+            @if ($categories->isEmpty())
+                <div class="kmp-kosong">
+                    <i class="bi bi-calendar-x"></i>
+                    <h2>Belum ada angkatan yang dibuka</h2>
+                    <p>
+                        Jadwal berikutnya biasanya diumumkan beberapa minggu sebelum
+                        acaranya. Kabari admin kalau mau diberi tahu duluan.
+                    </p>
+                    <a href="{{ route('blog.contact.kontak') }}" class="kmp-tombol">
+                        <i class="bi bi-chat-dots-fill"></i> Hubungi admin
+                    </a>
+                </div>
+            @else
+                <div class="kmp-kisi">
 
-                <div class="col-md-4 col-lg-3 mb-4 d-flex" data-aos="fade-up">
-                    <div class="scopus-card d-flex flex-column w-100">
+                    {{-- Poster dan fasilitasnya SEKALI di sini, bukan di tiap
+                         kartu: flyer-nya sama persis untuk semua angkatan. --}}
+                    <div class="kmp-panel">
+                        <div class="kmp-panel-kartu">
+                            @php
+                                $contoh = $categories->first();
+                                $poster = \App\Support\AlamatGambar::url($contoh->gambar ?? null, 'ScopusCamp');
+                            @endphp
 
-                        @if($adaDiskon && $hematPersen > 0)
-                        <div style="position: absolute; top: 0; right: 0; background: linear-gradient(135deg, #ff3131, #ff6b6b); color: white; padding: 6px 15px; border-radius: 0 16px 0 16px; font-size: 13px; font-weight: 700; z-index: 10;">
-                            Hemat {{ $hematPersen }}%
-                        </div>
-                        @endif
+                            @if ($poster)
+                                <span class="kmp-poster">
+                                    <img src="{{ $poster }}" alt="Flyer Scopus Camp" loading="lazy" decoding="async">
+                                </span>
+                            @endif
 
-                        <div class="card-img-wrapper">
-                            <img src="{{ \App\Support\AlamatGambar::url($item->gambar ?? null, 'ScopusCamp') ?: asset('ScopusCamp/no-image.jpg') }}"
-                                class="img-fluid-custom" alt="Scopus Camp">
-                        </div>
-
-                        <div class="flex-grow-1 text-center">
-                            <h5 style="font-weight: 700; color: #1e293b; display: flex; align-items: center; justify-content: center;">
-                                {{ strtoupper($item->nama) }} #{{ $item->nama_ke }}
-                            </h5>
-
-                            <div class="mb-3">
-                                @if($adaDiskon)
-                                <small class="text-muted text-decoration-line-through" style="font-size: 15px;">Rp {{ number_format($hargaAsal, 0, ',', '.') }}</small>
-                                @endif
-                                <div class="mt-1">
-                                    <span style="font-size: 20px; font-weight: 800; color: #ff3131;">
-                                        Rp {{ number_format($hargaBayar, 0, ',', '.') }}
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div class="d-flex justify-content-center align-items-center mb-4 text-muted" style="font-size: 13px;">
-                                <i class="fas fa-calendar-alt me-2"></i>
-                                {{ date('d M', strtotime($item->mulai)) }} - {{ date('d M Y', strtotime($item->selesai)) }}
-                            </div>
-                        </div>
-
-                        <div style="margin: 0 -20px -20px -20px;">
-                            @if($kuotaHabis)
-                            <button class="btn-register btn-disabled" disabled>
-                                <i class="fa fa-lock"></i> Pendaftaran Ditutup
-                            </button>
-                            @else
-                            <a href="{{ route('public.scopuscamp.Selengkapnya', ['id' => $item->id]) }}" class="text-decoration-none">
-                                <button class="btn-register btn-active">
-                                    <i class="fa fa-paper-plane"></i> Daftar Sekarang
-                                </button>
-                            </a>
+                            @if (! empty($fasilitas))
+                                <h2>Yang kamu dapat</h2>
+                                <ul class="kmp-fasilitas">
+                                    @foreach ($fasilitas as $butir)
+                                        <li><i class="bi bi-check-circle-fill"></i> <span>{{ $butir }}</span></li>
+                                    @endforeach
+                                </ul>
                             @endif
                         </div>
                     </div>
-                </div>
-                @empty
-                <div class="col-lg-12 d-flex justify-content-center py-5" data-aos="fade-up">
-                    <div
-                        style="background: #ffffff; border-radius: 16px; padding: 40px 32px; max-width: 720px; width: 100%; text-align: center; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12), 0 20px 40px rgba(0, 0, 0, 0.08);">
-                        <h4 style="font-weight: 700; color: #0f172a; font-size: clamp(20px, 3vw, 26px); margin-bottom: 14px;">Kelas Belum Tersedia</h4>
-                        <p style="color: #64748b; font-size: clamp(14px, 2.5vw, 16px); max-width: 560px; margin: 0 auto 28px; line-height: 1.6;">Saat ini belum ada kelas Scopus Camp yang dibuka. Silakan cek kembali dalam waktu dekat atau hubungi kami untuk informasi terbaru.</p>
-                        <a href="{{ route('blog.contact.kontak') }}"
-                            style="display: inline-block; background: linear-gradient(to right, #ff3131, #ff914d); color: #fff; border-radius: 10px; padding: 12px 30px; font-weight: 600; font-size: 15px; text-decoration: none; transition: transform .2s ease, box-shadow .2s ease;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 12px 24px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">Hubungi Admin</a>
-                    </div>
-                </div>
-                @endforelse
-        </div>
-    </div>
-</section>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                    <div class="kmp-deret">
+                        @foreach ($categories as $i => $item)
+                            @php
+                                /*
+                                 * Kuota NULL berarti TIDAK DIBATASI, bukan nol.
+                                 *
+                                 * Syarat lamanya `sisa_kuota === null || <= 0`,
+                                 * jadi angkatan tanpa batas kuota dipajang
+                                 * "Pendaftaran Ditutup". Belum pernah terasa
+                                 * karena kebetulan semua angkatan yang ada
+                                 * mengisi kuotanya.
+                                 */
+                                $penuh = $item->total_kuota !== null && (int) $item->sisa_kuota < 1;
+
+                                $hargaAsal = (int) $item->harga_sebelum_promo;
+                                $hargaBayar = (int) $item->harga_setelah_promo;
+                                $adaDiskon = $hargaAsal > $hargaBayar && $hargaBayar > 0;
+                                $hematPersen = $adaDiskon ? (int) round((($hargaAsal - $hargaBayar) / $hargaAsal) * 100) : 0;
+
+                                $mulai = \Carbon\Carbon::parse($item->mulai)->locale('id');
+                                $selesai = $item->selesai ? \Carbon\Carbon::parse($item->selesai) : null;
+                            @endphp
+
+                            @if ($penuh)
+                                <div class="kmp-baris kmp-penuh">
+                            @else
+                                <a href="{{ route('public.scopuscamp.Selengkapnya', ['id' => $item->id]) }}"
+                                    class="kmp-baris" data-aos="fade-up" data-aos-delay="{{ ($i % 4) * 80 }}">
+                            @endif
+
+                                <span class="kmp-tgl">
+                                    <strong>{{ $mulai->translatedFormat('j') }}</strong>
+                                    <span>{{ $mulai->translatedFormat('M') }}</span>
+                                </span>
+
+                                <span class="kmp-isi">
+                                    <span class="kmp-nama">
+                                        {{ $item->nama }}@if ($item->nama_ke) <span style="color: var(--tinta-2);">#{{ $item->nama_ke }}</span>@endif
+                                    </span>
+                                    <span class="kmp-rinci">
+                                        <span><i class="bi bi-calendar3"></i>
+                                            {{ \App\Support\RentangTanggal::tulis($mulai, $selesai, true) }}</span>
+                                        @if ($item->lokasi)
+                                            <span><i class="bi bi-geo-alt"></i> {{ $item->lokasi }}</span>
+                                        @endif
+                                        @if ($item->total_kuota !== null && ! $penuh)
+                                            <span><i class="bi bi-people"></i> kuota {{ $item->total_kuota }}</span>
+                                        @endif
+                                    </span>
+                                </span>
+
+                                <span class="kmp-kanan">
+                                    @if ($penuh)
+                                        <span class="kmp-tutup"><i class="bi bi-lock-fill"></i> Kursinya habis</span>
+                                    @else
+                                        {{-- Harga nol DIAM, tidak jadi "Rp 0".
+
+                                             Terukur ada angkatan yang biayanya
+                                             memang 0 di basis data; "Rp 0" di
+                                             samping angkatan lain yang 5,5 juta
+                                             terbaca sebagai sistem yang rusak,
+                                             bukan sebagai kelas gratis. --}}
+                                        @if ($hargaBayar > 0)
+                                            @if ($adaDiskon)
+                                                <s class="kmp-coret">Rp {{ number_format($hargaAsal, 0, ',', '.') }}</s>
+                                            @endif
+                                            <span class="kmp-harga">Rp {{ number_format($hargaBayar, 0, ',', '.') }}</span>
+
+                                            @if ($hematPersen > 0)
+                                                <span class="kmp-hemat">hemat {{ $hematPersen }}%</span>
+                                            @endif
+                                        @endif
+
+                                        {{-- Sisa kursi disebut hanya kalau tinggal
+                                             sedikit. "20 kursi" tidak mendesak siapa
+                                             pun; menyebutnya saat masih longgar
+                                             membuat angka itu kehilangan arti waktu
+                                             benar-benar sempit. --}}
+                                        @if ($item->total_kuota !== null && (int) $item->sisa_kuota <= 5)
+                                            <span class="kmp-sisa">sisa {{ (int) $item->sisa_kuota }} kursi</span>
+                                        @endif
+
+                                        <span class="kmp-ajak">Lihat & daftar <i class="bi bi-arrow-right"></i></span>
+                                    @endif
+                                </span>
+
+                            @if ($penuh)
+                                </div>
+                            @else
+                                </a>
+                            @endif
+                        @endforeach
+
+                        @if ($categories->hasPages())
+                            <div class="kmp-halaman">{{ $categories->links() }}</div>
+                        @endif
+                    </div>
+
+                </div>
+            @endif
+        </div>
+    </section>
+
+</div>
+
 @if (session()->has('success'))
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     Swal.fire({
         icon: 'success',
