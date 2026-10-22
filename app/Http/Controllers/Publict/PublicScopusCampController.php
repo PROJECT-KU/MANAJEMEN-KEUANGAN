@@ -57,15 +57,48 @@ class PublicScopusCampController extends Controller
         \App\Support\PromoAngkatan::muat($categories->getCollection());
 
         /*
-         * Fasilitasnya sama untuk seluruh angkatan — datang dari tarif
-         * induknya. Dipajang SEKALI di kolom kiri, bukan diulang di tiap
-         * kartu: flyer yang sama persis terpasang di semua angkatan, dan
-         * mencetaknya berulang kali membuat halaman ini jadi dinding poster
-         * yang isinya satu gambar.
+         * Fasilitasnya TIDAK sama untuk semua angkatan, dan itu sempat salah
+         * di halaman ini.
+         *
+         * Versi pertama rombakan ini memajang satu daftar fasilitas di kolom
+         * kiri, diambil dari angkatan PERTAMA pada halaman itu. Terukur di
+         * tarif yang berlaku, selisihnya nyata:
+         *
+         *   Pulau Jawa      Rp 5.500.000 — 7 butir, termasuk penginapan di
+         *                   tempat acara serta mushola, kolam renang, dan
+         *                   treadmill;
+         *   Luar Pulau Jawa Rp 6.500.000 — 5 butir, TANPA keduanya.
+         *
+         * Jadi satu daftar untuk semuanya menjanjikan penginapan dan kolam
+         * renang kepada peserta luar Jawa — yang justru membayar satu juta
+         * lebih mahal. Tidak ada galat; yang menanggungnya panitia yang
+         * harus menjelaskan saat orangnya sudah sampai di lokasi.
+         *
+         * Dikelompokkan menurut ISI daftarnya, bukan menurut kode variannya:
+         * angkatan boleh menyimpan salinan fasilitasnya sendiri yang berbeda
+         * dari tarif induk, dan pengelompokan menurut kode akan menyatukan
+         * dua daftar yang sebenarnya tidak sama.
          */
-        $fasilitas = optional($categories->getCollection()->first())->daftar_fasilitas ?? [];
+        $namaVarian = collect(optional(\App\Layanan::where('kode', 'scopus_camp')->first())->varian ?? [])
+            ->pluck('nama', 'kode');
 
-        return view('public.scopus_camp.index', compact('categories', 'fasilitas'));
+        $paket = $categories->getCollection()
+            ->groupBy(fn ($a) => json_encode($a->daftar_fasilitas))
+            ->map(function ($kelompok) use ($namaVarian) {
+                $varian = $kelompok->pluck('varian')->filter()->unique()->values();
+
+                return [
+                    'fasilitas' => $kelompok->first()->daftar_fasilitas,
+                    'label' => $varian
+                        ->map(fn ($v) => $namaVarian[$v] ?? \Illuminate\Support\Str::title(str_replace('_', ' ', $v)))
+                        ->implode(' & '),
+                    'jumlah' => $kelompok->count(),
+                ];
+            })
+            ->filter(fn ($p) => ! empty($p['fasilitas']))
+            ->values();
+
+        return view('public.scopus_camp.index', compact('categories', 'paket', 'namaVarian'));
     }
     // <!--================== END ==================-->
 
