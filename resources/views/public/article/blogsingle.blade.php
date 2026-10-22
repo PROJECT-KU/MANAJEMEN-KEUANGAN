@@ -260,10 +260,16 @@
     }
     #main.blg-artikel .tags a:hover { background: var(--jingga); color: #fff; }
 
-    /* ============================================================ komentar */
-    #main.blg-artikel .comments { margin-top: 10px; }
+    /* ============================================================ komentar
+
+       Kelasnya .blog-comments dan .reply-form — BUKAN .comments dan
+       .comment-form. Versi pertama gaya ini menebak nama yang lazim dipakai
+       templat sejenis, dan keduanya tidak ada di markah ini: borang
+       komentarnya terlewat sama sekali, tanpa galat, dan tidak kelihatan
+       karena artikel yang dipakai memeriksa kebetulan belum punya komentar. */
+    #main.blg-artikel .blog-comments { margin-top: 10px; }
     #main.blg-artikel .comments-count,
-    #main.blg-artikel .comments h4 {
+    #main.blg-artikel .blog-comments h4 {
         font-family: 'Fraunces', Georgia, serif; font-weight: 800; color: var(--tinta);
     }
     #main.blg-artikel .comment {
@@ -275,32 +281,32 @@
     #main.blg-artikel .comment h5 { font-weight: 800; font-size: 1rem; }
     #main.blg-artikel .comment .comment-img img { border: 2px solid var(--tinta); }
 
-    #main.blg-artikel .comment-form {
+    #main.blg-artikel .reply-form {
         padding: 26px 24px; margin-top: 10px;
         background: var(--kertas-2);
         border: 2px solid var(--tinta); border-radius: 22px;
         box-shadow: 7px 7px 0 rgba(22, 35, 63, .14);
     }
-    #main.blg-artikel .comment-form input,
-    #main.blg-artikel .comment-form textarea {
+    #main.blg-artikel .reply-form input,
+    #main.blg-artikel .reply-form textarea {
         background: var(--kertas); color: var(--tinta);
         border: 2px solid var(--tinta); border-radius: 13px;
         box-shadow: none; padding: 11px 14px;
     }
-    #main.blg-artikel .comment-form input:focus,
-    #main.blg-artikel .comment-form textarea:focus {
+    #main.blg-artikel .reply-form input:focus,
+    #main.blg-artikel .reply-form textarea:focus {
         outline: none; border-color: var(--jingga); box-shadow: 0 0 0 3px rgba(231, 109, 32, .18);
     }
-    #main.blg-artikel .comment-form .btn-primary,
-    #main.blg-artikel .comment-form button[type="submit"] {
+    #main.blg-artikel .reply-form .btn-primary,
+    #main.blg-artikel .reply-form button[type="submit"] {
         padding: 12px 24px;
         background: var(--jingga-kuat); color: #fff;
         border: 2px solid var(--tinta); border-radius: 999px;
         box-shadow: 4px 4px 0 var(--tinta);
         font-weight: 800;
     }
-    #main.blg-artikel .comment-form .btn-primary:hover,
-    #main.blg-artikel .comment-form button[type="submit"]:hover { background: var(--tinta); }
+    #main.blg-artikel .reply-form .btn-primary:hover,
+    #main.blg-artikel .reply-form button[type="submit"]:hover { background: var(--tinta); }
 
     @media (max-width: 991.98px) {
         #main.blg-artikel .sidebar { margin-top: 34px; }
@@ -423,7 +429,7 @@
 
                     <!--================== KOMENTAR ==================-->
                     <div class="blog-comments">
-                        <h4 class="comments-count">{{ $jumlah_komentar }} Comments</h4>
+                        <h4 class="comments-count">{{ $jumlah_komentar }} komentar</h4>
 
                         @foreach($artikel_komentar as $komentar)
                         @if($komentar->artikel_id == $artikel->id && $komentar->reply == null)
