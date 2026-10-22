@@ -148,8 +148,20 @@ class HargaUmumTest extends TestCase
     #[Test]
     public function halaman_daftar_umum_memajang_harga_sesudah_promo(): void
     {
+        /*
+         * `mulai` SENGAJA besok, bukan sebulan lagi.
+         *
+         * Halaman daftarnya dipaginasi 12 per halaman dan diurut dari
+         * tanggal terdekat sejak 22 Okt 2026. Angkatan yang berjarak sebulan
+         * mendarat di halaman keberapa pun — dan ujinya merah bukan karena
+         * harga promonya salah, melainkan karena barisnya memang tidak ada di
+         * halaman yang dibuka. Besok adalah tanggal paling awal yang masih
+         * lolos saringan "belum mulai", jadi ia selalu di kelompok teratas.
+         */
         $a = $this->angkatan([
             'biaya' => '4000000', 'total_biaya' => '4000000', 'status' => 'active',
+            'mulai' => now()->addDay()->toDateString(),
+            'selesai' => now()->addDays(3)->toDateString(),
         ], CategoriesScopusCamp::class);
 
         $this->promo($a, ['tipe' => 'persen', 'persen' => 50]);
@@ -157,7 +169,9 @@ class HargaUmumTest extends TestCase
         $this->get(route('public.scopuscamp.index'))
             ->assertOk()
             ->assertSee('Rp 2.000.000')
-            ->assertSee('Hemat 50%');
+            // Huruf kecil sejak halamannya dirombak; yang dijaga potongannya
+            // tetap disebut, bukan besar-kecil hurufnya.
+            ->assertSee('hemat 50%');
     }
 
     // ------------------------------------------------- yang benar-benar ditagih

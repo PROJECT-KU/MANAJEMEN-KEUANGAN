@@ -30,14 +30,42 @@ class PublicScopusCampController extends Controller
          * Promonya dimuat berkelompok di bawah: satu kueri untuk seluruh
          * daftar, bukan satu per kartu.
          */
-        $categories = CategoriesScopusCamp::where('layanan', 'scopus_camp')
+        $kueri = CategoriesScopusCamp::where('layanan', 'scopus_camp')
             ->where('status', 'active')
-            ->orderBy('mulai', 'asc') // Mengurutkan berdasarkan kolom 'mulai' dari tanggal terawal ke akhir
-            ->get();
+            /*
+             * Yang tanggal mulainya SUDAH TIBA tidak ikut dipajang.
+             *
+             * KategoriLayanan::tanggalMulaiSudahTiba() menyebut angkatan
+             * begitu sudah tertutup sejak 5 Okt 2026, atas permintaan
+             * pemiliknya. Terukur di halaman ini: tiga angkatan yang sudah
+             * berjalan masih terpampang lengkap dengan tombol "Daftar
+             * Sekarang" — orang membayar acara yang sudah separuh jalan,
+             * dan tidak ada galat apa pun yang memberi tahu.
+             */
+            ->whereDate('mulai', '>', now()->toDateString())
+            ->orderBy('mulai', 'asc');
 
-        \App\Support\PromoAngkatan::muat($categories);
+        /*
+         * Dipaginasi. Seluruhnya dulu dicetak di satu halaman: terukur 294
+         * kartu setinggi 22.711px dengan markah 627 KB. Angka itu memang
+         * sebagian besar baris uji di basis data lokal, tetapi batasnya tetap
+         * perlu — tanpa itu halaman ini tumbuh selamanya mengikuti jumlah
+         * angkatan yang pernah dibuka.
+         */
+        $categories = $kueri->paginate(12)->withQueryString();
 
-        return view('public.scopus_camp.index', compact('categories'));
+        \App\Support\PromoAngkatan::muat($categories->getCollection());
+
+        /*
+         * Fasilitasnya sama untuk seluruh angkatan — datang dari tarif
+         * induknya. Dipajang SEKALI di kolom kiri, bukan diulang di tiap
+         * kartu: flyer yang sama persis terpasang di semua angkatan, dan
+         * mencetaknya berulang kali membuat halaman ini jadi dinding poster
+         * yang isinya satu gambar.
+         */
+        $fasilitas = optional($categories->getCollection()->first())->daftar_fasilitas ?? [];
+
+        return view('public.scopus_camp.index', compact('categories', 'fasilitas'));
     }
     // <!--================== END ==================-->
 
