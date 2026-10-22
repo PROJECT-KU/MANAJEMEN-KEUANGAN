@@ -22,6 +22,7 @@ Route::get('/', 'Publict\PublicHomeController@home')->name('home');
 
 // ARTIKEL PUBLIC
 Route::get('/blog', 'Publict\PublicArticleController@public')->name('blog.artikel.blog');
+Route::get('/blog/rss.xml', 'Publict\PublicArticleController@rss')->name('blog.rss');
 Route::get('/blog/topic/{categories_artikel_id}', 'Publict\PublicArticleController@publickategori')->name('blog.topic.kategori');
 Route::get('/blog/topic/blog-single/{id}', 'Publict\PublicArticleController@blogsingle')->name('blog.topic.blog-single');
 Route::post('/blog/store', 'Publict\PublicArticleController@storekomentar')->name('blog.store.komentar');

@@ -2,6 +2,8 @@
 
 @section('title', 'Blog | Rumah Scopus')
 
+@section('uraian', 'Catatan soal nulis artikel ilmiah, milih jurnal, ngolah data, sampai hal-hal yang sering bikin naskah balik lagi dari reviewer. Gratis dibaca siapa saja.')
+
 @push('kepala')
 {{-- Huruf yang SAMA dengan beranda: Fraunces untuk judul, Figtree untuk
      teks. Tanpa ini halaman blog berganti rupa begitu orang menekan menu
@@ -55,8 +57,24 @@
             <p class="blg-sub">
                 Catatan soal nulis artikel, milih jurnal, ngolah data, sampai
                 hal-hal kecil yang sering bikin naskah balik lagi dari reviewer.
-                {{ $artikel->count() }} tulisan, semuanya boleh dibaca siapa saja.
+                {{ $halaman->total() }} tulisan, semuanya boleh dibaca siapa saja.
             </p>
+
+            {{-- Satu-satunya cara menyaring sebelumnya cuma lima keripik
+                 kategori. Dua belas tulisan masih bisa dipindai mata; lima
+                 puluh tidak. --}}
+            <form class="blg-cari" method="GET" action="{{ url('/blog') }}" role="search">
+                <i class="bi bi-search"></i>
+                <input type="search" name="cari" value="{{ $cari }}"
+                    placeholder="Cari tulisan — misalnya sitasi, reviewer, jurnal predator"
+                    aria-label="Cari tulisan">
+                @if ($cari !== '')
+                    <a href="{{ url('/blog') }}" class="blg-cari-hapus" aria-label="Hapus pencarian">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
+                @endif
+                <button type="submit">Cari</button>
+            </form>
 
             @if ($categories_artikel->isNotEmpty())
                 {{-- Keripik kategori, bukan tab: tiap satunya halaman sendiri
@@ -77,8 +95,18 @@
     </section>
 
     @php
-        $sorotan = $artikel->first();
-        $sisanya = $artikel->skip(1);
+        /*
+         * Sorotan cuma di halaman pertama daftar biasa.
+         *
+         * Pada hasil pencarian, membesarkan yang teratas berarti menjanjikan
+         * bahwa ia paling cocok — padahal urutannya menurut tanggal, bukan
+         * menurut kecocokan. Pada halaman kedua dan seterusnya, "Terbaru"
+         * jelas salah.
+         */
+        $halamanPertama = $halaman->currentPage() === 1 && $cari === '';
+
+        $sorotan = $halamanPertama ? $artikel->first() : null;
+        $sisanya = $halamanPertama ? $artikel->skip(1) : $artikel;
 
         /*
          * Lama baca dihitung dari isinya, bukan ditulis admin.
@@ -124,6 +152,9 @@
                             <span><i class="bi bi-calendar3"></i>
                                 {{ \Carbon\Carbon::parse($sorotan->created_at)->locale('id')->translatedFormat('j M Y') }}</span>
                             <span><i class="bi bi-clock"></i> {{ $lamaBaca($sorotan->isi) }} menit baca</span>
+                            @if ($sorotan->dilihat > 0)
+                                <span><i class="bi bi-eye"></i> dibaca {{ number_format($sorotan->dilihat, 0, ',', '.') }} kali</span>
+                            @endif
                         </span>
 
                         <span class="blg-ajak">Baca sekarang <i class="bi bi-arrow-right"></i></span>
@@ -137,7 +168,15 @@
     @if ($sisanya->isNotEmpty())
         <section class="blg-bagian" style="background: var(--kertas-2); padding-top: 62px;">
             <div class="container">
-                <h2 class="blg-judul-kecil">Tulisan lainnya</h2>
+                <h2 class="blg-judul-kecil">
+                    @if ($cari !== '')
+                        {{ $halaman->total() }} hasil untuk "{{ $cari }}"
+                    @elseif ($halamanPertama)
+                        Tulisan lainnya
+                    @else
+                        Halaman {{ $halaman->currentPage() }} dari {{ $halaman->lastPage() }}
+                    @endif
+                </h2>
 
                 <div class="blg-kisi">
                     @foreach ($sisanya as $i => $artikelnya)
@@ -156,6 +195,9 @@
                                     <span><i class="bi bi-calendar3"></i>
                                         {{ \Carbon\Carbon::parse($artikelnya->created_at)->locale('id')->translatedFormat('j M Y') }}</span>
                                     <span><i class="bi bi-clock"></i> {{ $lamaBaca($artikelnya->isi) }} menit</span>
+                                    @if ($artikelnya->dilihat > 0)
+                                        <span><i class="bi bi-eye"></i> {{ number_format($artikelnya->dilihat, 0, ',', '.') }}</span>
+                                    @endif
                                 </span>
 
                                 <h3>{{ $artikelnya->judul }}</h3>
@@ -171,6 +213,39 @@
                             </span>
                         </a>
                     @endforeach
+                </div>
+
+                @if ($halaman->hasPages())
+                    <div class="blg-halaman">
+                        {{ $halaman->links() }}
+                    </div>
+                @endif
+            </div>
+        </section>
+    @endif
+
+    {{-- Daftarnya KOSONG — karena dicari dan tidak ketemu, atau karena
+         memang belum ada tulisan terbit sama sekali. Kisi kosong tanpa
+         kalimat terbaca sebagai halaman yang gagal dimuat, bukan sebagai
+         jawaban. --}}
+    @if ($sorotan === null && $sisanya->isEmpty())
+        <section class="blg-bagian" style="background: var(--kertas-2);">
+            <div class="container">
+                <div class="blg-kosong">
+                    <i class="bi bi-search"></i>
+                    @if ($cari !== '')
+                        <h2>Nggak ketemu</h2>
+                        <p>Nggak ada tulisan yang memuat "{{ $cari }}". Coba kata lain, atau lihat semuanya.</p>
+                        <a href="{{ url('/blog') }}" class="blg-tombol blg-tombol-kedua">
+                            <i class="bi bi-arrow-left"></i> Lihat semua tulisan
+                        </a>
+                    @else
+                        <h2>Belum ada tulisan</h2>
+                        <p>Blognya masih kosong. Sementara ini, kelasnya yang bisa dilihat dulu.</p>
+                        <a href="{{ url('/#jadwal') }}" class="blg-tombol blg-tombol-kedua">
+                            Lihat jadwal kelas <i class="bi bi-arrow-right"></i>
+                        </a>
+                    @endif
                 </div>
             </div>
         </section>
@@ -193,6 +268,14 @@
                         <i class="bi bi-chat-dots-fill"></i> Tanya dulu
                     </a>
                 </div>
+
+                {{-- Satu-satunya cara "berlangganan" dulu adalah tombol yang
+                     berbunyi "Langganan Update Artikel" lalu membuka kanal
+                     YouTube — bukan tempat tulisannya terbit. --}}
+                <p class="blg-umpan">
+                    Mau dikabari tiap ada tulisan baru?
+                    <a href="{{ route('blog.rss') }}"><i class="bi bi-rss-fill"></i> Langganan lewat RSS</a>
+                </p>
             </div>
         </div>
     </section>

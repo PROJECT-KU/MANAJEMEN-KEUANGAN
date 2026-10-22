@@ -1,13 +1,71 @@
 <!DOCTYPE html>
-<html lang="en">
+{{-- lang="id", bukan "en".
+
+     Seluruh isi situs ini Bahasa Indonesia. Dengan lang="en", pembaca layar
+     melafalkan "naskah", "jurnal", dan "pendaftaran" memakai fonetik Inggris
+     — yang terdengar bukan sekadar aneh, melainkan tidak bisa dipahami.
+     Peramban juga memakainya untuk memilih kamus pemenggalan kata dan tawaran
+     terjemahan. --}}
+<html lang="id">
 
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-    <title>@yield('title')</title>
-    <meta content="" name="description">
-    <meta content="" name="keywords">
+    {{-- Blok, bukan bentuk sebaris yang berkurung.
+
+         Bentuk sebarisnya menghitung kurung sendiri untuk tahu di mana
+         direktifnya berakhir, dan tiga lapis kurung bersarang membuatnya
+         berhenti di tempat yang salah: galatnya menyebut "unexpected token
+         else" dan menunjuk baris yang tidak ada hubungannya sama sekali.
+
+         Keterangan ini juga sengaja TIDAK menyebut nama direktifnya.
+         Menyebutnya di dalam komentar pun ikut dikompilasi — komentar yang
+         memuatnya menelan dirinya sendiri, blok di bawahnya, DAN baris
+         <title> sesudahnya. Yang hilang tidak disebut galat apa pun; yang
+         muncul cuma "Undefined variable", menunjuk akibat, bukan sebab. --}}
+    @php
+        $judulHalaman = trim($__env->yieldContent('title', 'Rumah Scopus Foundation'));
+
+        $uraianBawaan = 'Pendampingan penyusunan artikel ilmiah dan publikasi ke jurnal terindeks Scopus.';
+        $uraianHalaman = trim($__env->yieldContent('uraian', $uraianBawaan));
+
+        $gambarBawaan = asset('assets/img/LogoRSC.png');
+        $gambarHalaman = trim($__env->yieldContent('gambar', $gambarBawaan));
+    @endphp
+
+    <title>{{ $judulHalaman }}</title>
+
+    {{-- Uraian dan gambar ini dulu KOSONG — content="" — di setiap halaman,
+         dan tidak ada satu pun tag og:. Tautan yang dibagikan ke WhatsApp
+         muncul tanpa judul, tanpa gambar, tanpa kalimat: sepotong alamat
+         mentah yang tidak memberi alasan apa pun untuk ditekan.
+
+         Halaman yang punya uraiannya sendiri mengisi @section('uraian');
+         yang tidak, memakai kalimat bawaan di atas. Tidak ada halaman yang
+         kembali kosong. --}}
+    <meta name="description" content="{{ $uraianHalaman }}">
+    <meta name="keywords" content="@yield('katakunci', 'rumah scopus, publikasi jurnal, artikel ilmiah, scopus, pendampingan riset')">
+    <link rel="canonical" href="{{ url()->current() }}">
+
+    {{-- Penanda umpan. Tanpa baris ini, pembaca RSS yang diarahkan ke
+         alamat situs tidak menemukan umpannya dan menyatakan situs ini
+         tidak punya — padahal ada. --}}
+    <link rel="alternate" type="application/rss+xml"
+        title="Blog Rumah Scopus Foundation" href="{{ route('blog.rss') }}">
+
+    <meta property="og:type" content="@yield('ogtipe', 'website')">
+    <meta property="og:site_name" content="Rumah Scopus Foundation">
+    <meta property="og:locale" content="id_ID">
+    <meta property="og:title" content="{{ $judulHalaman }}">
+    <meta property="og:description" content="{{ $uraianHalaman }}">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:image" content="{{ $gambarHalaman }}">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $judulHalaman }}">
+    <meta name="twitter:description" content="{{ $uraianHalaman }}">
+    <meta name="twitter:image" content="{{ $gambarHalaman }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- Favicons -->
     <link href="{{ asset('assets/img/Icon-RS.png') }}" rel="icon">
