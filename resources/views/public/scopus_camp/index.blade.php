@@ -120,14 +120,23 @@
         border: 2px solid var(--tinta); border-radius: 22px;
         box-shadow: 7px 7px 0 var(--jingga);
     }
-    .kmp-poster {
-        display: block; width: 100%; margin-bottom: 18px;
-        border: 2px solid var(--tinta); border-radius: 14px;
-        overflow: hidden; background: #fff;
-    }
-    .kmp-poster img { width: 100%; height: auto; display: block; }
 
     .kmp .kmp-panel-kartu h2 { font-size: 1.12rem; margin-bottom: 12px; }
+    .kmp-paket + .kmp-paket {
+        margin-top: 18px; padding-top: 18px;
+        border-top: 2px dashed rgba(22, 35, 63, .18);
+    }
+    .kmp-paket-tanda {
+        display: inline-block; margin-left: 6px; padding: 2px 10px;
+        border-radius: 999px; background: var(--jingga); color: #fff;
+        font-family: 'Figtree', sans-serif; font-size: .72rem; font-weight: 800;
+        vertical-align: middle;
+    }
+    .kmp-varian {
+        padding: 1px 9px; border-radius: 999px;
+        background: color-mix(in srgb, var(--ungu) 14%, transparent);
+        color: var(--ungu); font-size: .76rem; font-weight: 800;
+    }
     .kmp-fasilitas { list-style: none; padding: 0; margin: 0; }
     .kmp-fasilitas li {
         display: flex; gap: 9px; padding: 6px 0;
@@ -306,27 +315,67 @@
                          kartu: flyer-nya sama persis untuk semua angkatan. --}}
                     <div class="kmp-panel">
                         <div class="kmp-panel-kartu">
-                            @php
-                                $contoh = $categories->first();
-                                $poster = \App\Support\AlamatGambar::url($contoh->gambar ?? null, 'ScopusCamp');
-                            @endphp
+                            {{-- POSTER TIDAK DIPAJANG di sini, dan itu keputusan.
 
-                            @if ($poster)
-                                <span class="kmp-poster">
-                                    <img src="{{ $poster }}" alt="Flyer Scopus Camp" loading="lazy" decoding="async">
-                                </span>
-                            @endif
+                                 Versi pertama rombakan ini memasangnya sekali di
+                                 panel, diambil dari angkatan pertama. Begitu
+                                 halaman ini memuat Jawa bersama luar Jawa, satu
+                                 flyer berdiri di atas dua paket yang isinya
+                                 berbeda — dan flyer itu mewakili salah satunya
+                                 saja.
 
-                            @if (! empty($fasilitas))
-                                <h2>Yang kamu dapat</h2>
-                                <ul class="kmp-fasilitas">
-                                    @foreach ($fasilitas as $butir)
-                                        <li><i class="bi bi-check-circle-fill"></i> <span>{{ $butir }}</span></li>
-                                    @endforeach
-                                </ul>
-                            @endif
+                                 Sempat dicoba menampilkannya hanya kalau seluruh
+                                 angkatan memakai gambar yang sama; terukur dengan
+                                 data sebenarnya ia nyaris tidak pernah lolos,
+                                 sebab sebagian angkatan memang tidak berflyer.
+                                 Aturan yang hampir selalu salah lebih baik
+                                 dibuang daripada dipelihara.
+
+                                 Yang dibutuhkan orang di halaman daftar adalah
+                                 APA YANG DIDAPAT, dan itu ada di bawah ini.
+                                 Flyer tiap angkatan tetap tampil di halaman
+                                 detailnya masing-masing. --}}
+
+                            {{-- Satu blok per PAKET fasilitas, bukan satu daftar
+                                 untuk semuanya.
+
+                                 Versi pertama rombakan ini memajang daftar milik
+                                 angkatan pertama saja. Terukur di tarif yang
+                                 berlaku: Pulau Jawa berisi penginapan serta
+                                 mushola, kolam renang, dan treadmill; Luar Pulau
+                                 Jawa TIDAK — padahal harganya satu juta lebih
+                                 mahal. Jadi satu daftar menjanjikan kamar dan
+                                 kolam renang kepada orang yang tidak akan
+                                 mendapatkannya, dan yang menanggungnya panitia
+                                 saat orangnya sudah sampai di lokasi. --}}
+                            @foreach ($paket as $p)
+                                <div class="kmp-paket">
+                                    <h2>
+                                        Yang kamu dapat
+                                        @if ($paket->count() > 1 && $p['label'])
+                                            <span class="kmp-paket-tanda">{{ $p['label'] }}</span>
+                                        @endif
+                                    </h2>
+                                    <ul class="kmp-fasilitas">
+                                        @foreach ($p['fasilitas'] as $butir)
+                                            <li><i class="bi bi-check-circle-fill"></i> <span>{{ $butir }}</span></li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endforeach
                         </div>
                     </div>
+
+                    @php
+                        /*
+                         * Penanda varian hanya muncul kalau halaman ini memang
+                         * memuat lebih dari satu. Dengan satu varian saja,
+                         * lencana "Pulau Jawa" di tiap baris cuma pengulangan
+                         * yang tidak membedakan apa pun.
+                         */
+                        $banyakVarian = $categories->getCollection()
+                            ->pluck('varian')->filter()->unique()->count() > 1;
+                    @endphp
 
                     <div class="kmp-deret">
                         @foreach ($categories as $i => $item)
@@ -372,6 +421,11 @@
                                             {{ \App\Support\RentangTanggal::tulis($mulai, $selesai, true) }}</span>
                                         @if ($item->lokasi)
                                             <span><i class="bi bi-geo-alt"></i> {{ $item->lokasi }}</span>
+                                        @endif
+                                        @if ($banyakVarian && $item->varian)
+                                            <span class="kmp-varian">
+                                                {{ $namaVarian[$item->varian] ?? \Illuminate\Support\Str::title(str_replace('_', ' ', $item->varian)) }}
+                                            </span>
                                         @endif
                                         @if ($item->total_kuota !== null && ! $penuh)
                                             <span><i class="bi bi-people"></i> kuota {{ $item->total_kuota }}</span>
