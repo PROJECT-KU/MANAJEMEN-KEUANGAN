@@ -629,13 +629,13 @@ Beranda | Rumah Scopus
         align-items: start;
     }
 
-    /* Kepalanya ikut menggulung sampai daftarnya habis. Daftar empat baris
-       lebih tinggi daripada kepalanya, dan tanpa ini kolom kiri jadi ruang
-       kosong memanjang — persis keluhan "bagian tengah kosong" yang sudah
-       pernah muncul di bagian testimoni. */
-    @media (min-width: 993px) {
-        .bnd-jadwal-kepala { position: sticky; top: 104px; }
-    }
+    /* Kepalanya TIDAK dibuat menempel, dan itu hasil pengukuran.
+
+       Aturan sticky top: 104px sempat berdiri di sini. Terukur 22 Okt 2026:
+       di gulir 0 kepalanya turun TEPAT 104px dari baris jadwal pertama, dan
+       saat digulung ia tidak menempel sama sekali. Jadi yang tersisa cuma
+       celahnya. Keterangan lengkap percobaannya ada di halaman Scopus Camp,
+       yang memakai bentuk kisi yang sama. */
     .bnd-jadwal-kepala .bnd-tombol { margin-top: 24px; }
 
     .bnd-jadwal-deret { display: flex; flex-direction: column; gap: 16px; }
