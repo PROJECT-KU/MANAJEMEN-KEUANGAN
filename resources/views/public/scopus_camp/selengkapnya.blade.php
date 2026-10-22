@@ -44,8 +44,8 @@
 
         background: var(--kertas); color: var(--tinta);
         font-family: 'Figtree', system-ui, sans-serif;
-        /* 18px, bukan 16px. Pembacanya rata-rata berusia lanjut; ukuran
-           bawaan templat terbaca kecil di layar laptop mereka. */
+        /* 18px, bukan 16px bawaan templat: pembacanya rata-rata berusia
+           lanjut, dan ukuran bawaannya terbaca kecil di layar mereka. */
         font-size: 18px;
         overflow-x: clip;
     }
@@ -56,101 +56,69 @@
     .cmp p { margin: 0; color: var(--tinta-2); line-height: 1.7; }
     .cmp a { text-decoration: none; }
 
-    .cmp-kepala {
-        padding: 118px 0 34px;
+    /* ========================================================== hero */
+    .cmp-hero {
+        padding: 112px 0 52px;
         background: linear-gradient(180deg, var(--kertas-2) 0%, var(--kertas) 100%);
     }
     .cmp-balik {
-        display: inline-flex; align-items: center; gap: 8px; margin-bottom: 14px;
+        display: inline-flex; align-items: center; gap: 8px; margin-bottom: 18px;
         color: var(--tinta-2); font-weight: 700; font-size: .95rem;
         transition: gap .2s ease, color .2s ease;
     }
     .cmp-balik:hover { color: var(--jingga-tua); gap: 13px; }
-    .cmp .cmp-judul { font-size: clamp(1.7rem, 3.6vw, 2.5rem); line-height: 1.16; }
+
+    /* Dua kolom TAK SAMA: keterangan lebih lebar daripada flyernya. */
+    .cmp-hero-kisi {
+        display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 46px;
+        align-items: start;
+    }
+
     .cmp-tanda {
-        display: inline-flex; align-items: center; gap: 7px;
-        margin-top: 12px; padding: 5px 14px; border-radius: 999px;
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 6px 15px; margin-bottom: 14px;
         background: var(--tinta); color: var(--kertas);
-        font-size: .86rem; font-weight: 800;
+        border-radius: 999px; font-size: .84rem; font-weight: 800;
     }
+    .cmp-tanda i { color: var(--stabilo); }
 
-    .cmp-bagian { padding: 10px 0 56px; }
-    .cmp-kisi { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 40px; }
+    .cmp .cmp-judul { font-size: clamp(1.75rem, 3.6vw, 2.6rem); line-height: 1.14; }
+    .cmp-nomor { color: var(--tinta-2); }
 
-    .cmp-kartu {
-        background: var(--kertas-2);
-        border: 2px solid var(--tinta); border-radius: 24px;
-        box-shadow: 8px 8px 0 var(--jingga);
-        overflow: hidden;
+    /* Empat keterangan pokok, SEBELUM tombolnya dan di layar pertama.
+       Dulu tiga di antaranya baru muncul di 991px, di balik flyer setinggi
+       588px — tiga hal yang justru paling dicari orang. */
+    .cmp-fakta {
+        display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px; margin: 22px 0 26px;
     }
-    /* Nisbah sampulnya DIBIARKAN apa adanya.
-
-       Sempat dipatok 16/9 dengan object-fit: cover, dan flyer Scopus Camp
-       berbentuk potret — jadi yang tampil cuma pita tengahnya: judulnya
-       terpotong di atas, nomor kontaknya terpotong di bawah. Yang
-       dipotong justru bagian yang paling dicari orang. */
-    .cmp-sampul {
-        display: flex; justify-content: center;
-        padding: 14px; background: var(--kertas);
-    }
-    .cmp-sampul img {
-        max-width: 100%; max-height: 560px; width: auto; height: auto;
-        display: block; border-radius: 12px;
-    }
-
-    .cmp-isi { padding: 26px 28px 30px; }
-
-    /* Tiga keterangan pokok, masing-masing sebesar kartu sendiri. */
-    .cmp-pokok {
-        display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px;
-        margin-bottom: 26px;
-    }
-    .cmp-pokok-butir {
+    .cmp-fakta-butir {
         display: flex; align-items: flex-start; gap: 12px;
-        padding: 16px 16px;
+        padding: 14px 16px;
         background: var(--kertas);
         border: 2px solid var(--tinta); border-radius: 16px;
+        box-shadow: 4px 4px 0 var(--c, var(--jingga));
     }
-    .cmp-pokok-ikon {
+    .cmp-fakta-ikon {
         flex: 0 0 auto;
         display: inline-flex; align-items: center; justify-content: center;
-        width: 42px; height: 42px; border-radius: 12px;
-        background: var(--c, var(--jingga)); color: #fff; font-size: 1.05rem;
+        width: 40px; height: 40px; border-radius: 12px;
+        background: var(--c, var(--jingga)); color: #fff; font-size: 1rem;
     }
-    .cmp-pokok-teks { display: flex; flex-direction: column; min-width: 0; }
-    .cmp-pokok-label {
-        color: var(--tinta-2); font-size: .8rem; font-weight: 700;
+    .cmp-fakta-label {
+        display: block; color: var(--tinta-2); font-size: .78rem; font-weight: 700;
         letter-spacing: .06em; text-transform: uppercase;
     }
-    .cmp-pokok-nilai { font-weight: 800; font-size: 1.02rem; line-height: 1.35; }
-    .cmp-coret { color: var(--tinta-2); font-weight: 600; font-size: .86rem; }
+    .cmp-fakta-nilai { display: block; font-weight: 800; font-size: 1.02rem; line-height: 1.35; }
+    .cmp-coret { color: var(--tinta-2); font-weight: 600; font-size: .85rem; margin-right: 5px; }
 
-    .cmp .cmp-sub-judul {
-        display: flex; align-items: center; gap: 10px;
-        font-size: 1.22rem; margin: 30px 0 14px;
-    }
-    .cmp .cmp-sub-judul i { color: var(--jingga); }
-
-    .cmp-fasilitas { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
-    @media (min-width: 700px) { .cmp-fasilitas { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-    .cmp-fasilitas li {
-        display: flex; gap: 10px; align-items: flex-start;
-        padding: 12px 14px;
-        background: var(--kertas); border: 2px solid rgba(22, 35, 63, .14);
-        border-radius: 13px; line-height: 1.45;
-    }
-    .cmp-fasilitas i { flex: 0 0 auto; margin-top: 4px; color: var(--rumput); }
-
-    .cmp-uraian { white-space: pre-line; line-height: 1.75; }
-
-    /* ======================================================== tombol */
     .cmp-tombol {
         display: inline-flex; align-items: center; justify-content: center; gap: 11px;
-        width: 100%; min-height: 56px; padding: 15px 26px;
+        width: 100%; min-height: 58px; padding: 16px 26px;
         background: var(--jingga-kuat); color: #fff;
         border: 2px solid var(--tinta); border-radius: 999px;
         box-shadow: 5px 5px 0 var(--tinta);
-        font-weight: 800; font-size: 1.08rem;
+        font-weight: 800; font-size: 1.1rem;
         transition: transform .17s ease, box-shadow .17s ease;
     }
     .cmp-tombol:hover {
@@ -162,7 +130,83 @@
         box-shadow: none; cursor: not-allowed;
     }
     .cmp-tombol-mati:hover { background: var(--tinta-2); transform: none; box-shadow: none; }
-    .cmp-tombol-atas { margin-bottom: 24px; }
+
+    .cmp .cmp-tenang {
+        display: flex; align-items: flex-start; gap: 9px;
+        margin-top: 14px; font-size: .94rem;
+    }
+    .cmp-tenang i { margin-top: 4px; color: var(--rumput); }
+
+    /* Flyer dimiringkan dengan bayangan padat — bahasa rupa yang sama
+       dengan polaroid testimoni di beranda. */
+    .cmp-flyer {
+        margin: 0; padding: 12px;
+        background: var(--kertas);
+        border: 2px solid var(--tinta); border-radius: 18px;
+        box-shadow: 9px 9px 0 var(--jingga);
+        transform: rotate(1.4deg);
+    }
+    .cmp-flyer img { width: 100%; height: auto; display: block; border-radius: 10px; }
+
+    /* ==================================================== pita tinta */
+    .cmp-pita-tinta { padding: 52px 0; background: var(--tinta); }
+    .cmp .cmp-judul-pita {
+        color: var(--kertas); font-size: 1.6rem; margin-bottom: 22px; text-align: center;
+    }
+    .cmp-fasilitas {
+        list-style: none; padding: 0; margin: 0;
+        display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px;
+    }
+    .cmp-fasilitas li {
+        display: flex; gap: 11px; align-items: flex-start;
+        padding: 14px 16px;
+        background: rgba(251, 245, 233, .07);
+        border: 1px solid rgba(251, 245, 233, .18);
+        border-radius: 14px;
+        color: var(--kertas); line-height: 1.45; font-size: .98rem;
+    }
+    .cmp-fasilitas i { flex: 0 0 auto; margin-top: 3px; color: var(--stabilo); }
+
+    /* ========================================================== isi */
+    .cmp-bagian { padding: 52px 0; }
+    .cmp-kisi { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 40px; }
+
+    .cmp-kartu {
+        padding: 26px 28px;
+        background: var(--kertas-2);
+        border: 2px solid var(--tinta); border-radius: 22px;
+        box-shadow: 7px 7px 0 var(--jingga-muda);
+    }
+    .cmp .cmp-sub-judul {
+        display: flex; align-items: center; gap: 10px;
+        font-size: 1.22rem; margin-bottom: 14px;
+    }
+    .cmp .cmp-sub-judul i { color: var(--jingga); }
+    .cmp-uraian { white-space: pre-line; line-height: 1.75; }
+
+    /* ===================================================== langkah */
+    .cmp-bagian-langkah { padding-top: 0; background: var(--kertas-2); padding-bottom: 54px; padding-top: 44px; }
+    .cmp-langkah ol {
+        list-style: none; padding: 0; margin: 0;
+        display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px;
+        align-items: stretch;
+    }
+    .cmp-langkah li {
+        display: flex; align-items: flex-start; gap: 14px;
+        padding: 16px 18px;
+        background: var(--kertas);
+        border: 2px solid var(--tinta); border-radius: 16px;
+    }
+    .cmp-langkah-nomor {
+        flex: 0 0 auto;
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 38px; height: 38px; border-radius: 50%;
+        background: var(--jingga); color: #fff;
+        font-family: 'Fraunces', serif; font-weight: 900; font-size: 1.1rem;
+    }
+    .cmp-langkah li strong { display: block; margin-bottom: 3px; font-size: 1.02rem; }
+    .cmp-langkah li strong i { margin-right: 7px; color: var(--jingga-tua); }
+    .cmp-langkah li > span > span { color: var(--tinta-2); font-size: .95rem; line-height: 1.55; }
 
     /* ================================================== bilah kanan */
     .cmp-panel {
@@ -172,7 +216,6 @@
         box-shadow: 6px 6px 0 rgba(22, 35, 63, .16);
     }
     .cmp .cmp-panel h2 { font-size: 1.1rem; margin-bottom: 14px; }
-
     .cmp-lain { display: flex; flex-direction: column; gap: 10px; }
     .cmp-lain-butir {
         display: grid; grid-template-columns: 58px minmax(0, 1fr); gap: 12px;
@@ -194,12 +237,7 @@
     .cmp-lain-rinci { color: var(--tinta-2); font-size: .83rem; font-weight: 600; }
     .cmp-lain-kosong { color: var(--tinta-2); font-size: .93rem; }
 
-    /* ============================================= pita ajakan ponsel */
-    /* Pita ajakan: tersembunyi sampai tombol di atas lewat dari layar.
-
-       Ditandai lewat kelas .cmp-pita-tampil yang dipasang IntersectionObserver
-       di bawah, bukan lewat lebar layar — sebab yang menentukan bukan ukuran
-       perangkatnya, melainkan apakah orangnya masih bisa melihat tombolnya. */
+    /* ============================================ pita ajakan bawah */
     .cmp-pita {
         position: fixed; left: 0; right: 0; bottom: 0; z-index: 99998;
         padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
@@ -208,7 +246,7 @@
         box-shadow: 0 -4px 18px rgba(22, 35, 63, .12);
 
         /* Diturunkan keluar layar, bukan display:none — supaya munculnya
-           meluncur, tidak mengagetkan dengan melompat. */
+           meluncur, tidak melompat. */
         transform: translateY(110%);
         transition: transform .22s ease;
     }
@@ -217,31 +255,33 @@
     /* Ruang di dasar halaman, di SEMUA lebar.
 
        Pitanya melayang di atas isi, dan terukur ia menutupi 97px terakhir
-       kaki halaman di layar 1440 — baris hak cipta dan sebagian tautan
-       terakhir hilang di baliknya. Ruang ini tetap dipesan walau pitanya
+       kaki halaman di layar 1440. Ruang ini tetap dipesan walau pitanya
        sedang tersembunyi: memberinya hanya saat pita muncul membuat seluruh
        halaman melompat 92px tepat ketika orang sedang menggulung. */
     body { padding-bottom: 92px; }
 
     @media (min-width: 992px) {
-        /* Di layar lebar pitanya dibatasi lebarnya dan diletakkan di tengah,
-           supaya tidak jadi palang selebar layar. */
-        .cmp-pita { left: 50%; right: auto; width: min(560px, 92vw); margin-left: calc(min(560px, 92vw) / -2); border-radius: 18px 18px 0 0; border: 2px solid var(--tinta); border-bottom: none; }
+        .cmp-pita {
+            left: 50%; right: auto; width: min(560px, 92vw);
+            margin-left: calc(min(560px, 92vw) / -2);
+            border: 2px solid var(--tinta); border-bottom: none;
+            border-radius: 18px 18px 0 0;
+        }
     }
 
-    @media (prefers-reduced-motion: reduce) {
-        .cmp-pita { transition: none; }
-    }
     @media (max-width: 991.98px) {
-        .cmp-kisi { grid-template-columns: 1fr; gap: 28px; }
-        .cmp-pokok { grid-template-columns: 1fr; }
-
+        .cmp-hero-kisi, .cmp-kisi { grid-template-columns: 1fr; gap: 30px; }
+        .cmp-langkah ol { grid-template-columns: 1fr; }
+        .cmp-flyer { max-width: 420px; margin: 0 auto; transform: none; }
+        .cmp-fasilitas { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         .kaki-wa { display: none !important; }
         .back-to-top { bottom: 96px !important; }
     }
     @media (max-width: 600px) {
-        .cmp-kepala { padding: 98px 0 28px; }
-        .cmp-isi { padding: 20px 18px 24px; }
+        .cmp-hero { padding: 96px 0 40px; }
+        .cmp-fakta { grid-template-columns: 1fr; }
+        .cmp-fasilitas { grid-template-columns: 1fr; }
+        .cmp-kartu { padding: 20px 18px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -270,29 +310,84 @@
 
 <div class="cmp">
 
-    {{-- ==================================================== kepala ===== --}}
-    <section class="cmp-kepala">
+    {{-- ====================================================== hero =====
+
+         Susunannya DIBALIK dari versi sebelumnya, dan itu hasil pengukuran.
+
+         Dulu urutannya: judul (0px), tombol (291px), flyer setinggi 588px,
+         lalu BARU tanggal/biaya/lokasi di 991px. Artinya tiga keterangan
+         yang paling dicari orang — kapan, berapa, di mana — berada di bawah
+         lipatan layar, di balik gambar yang isinya mengulang daftar
+         fasilitas yang juga sudah tertulis di bawahnya.
+
+         Sekarang keempatnya duduk di layar pertama bersama tombolnya, dan
+         flyernya jadi pendamping di sebelah kanan — bukan palang setinggi
+         setengah layar yang harus dilewati dulu. --}}
+    <section class="cmp-hero">
         <div class="container">
             <a href="{{ url('/Scopus-Camp') }}" class="cmp-balik">
                 <i class="bi bi-arrow-left"></i> Semua jadwal Scopus Camp
             </a>
 
-            <h1 class="cmp-judul">{{ $item->nama }} @if ($item->nama_ke)<span style="color: var(--tinta-2);">#{{ $item->nama_ke }}</span>@endif</h1>
-
-            <span class="cmp-tanda">
-                <i class="bi bi-geo-alt-fill" style="color: var(--stabilo);"></i>
-                Kelas tatap muka · {{ RentangTanggal::tulis($mulai, $selesai) }}
-            </span>
-        </div>
-    </section>
-
-    {{-- ======================================================= isi ===== --}}
-    <section class="cmp-bagian">
-        <div class="container">
-            <div class="cmp-kisi">
-
+            <div class="cmp-hero-kisi">
                 <div>
-                    {{-- Tombol daftar DI ATAS, sebelum orang menggulung apa pun. --}}
+                    <span class="cmp-tanda">
+                        <i class="bi bi-geo-alt-fill"></i> Kelas tatap muka · 3 hari
+                    </span>
+
+                    <h1 class="cmp-judul">{{ $item->nama }}@if ($item->nama_ke) <span class="cmp-nomor">#{{ $item->nama_ke }}</span>@endif</h1>
+
+                    <div class="cmp-fakta">
+                        <div class="cmp-fakta-butir" style="--c: var(--jingga);">
+                            <span class="cmp-fakta-ikon"><i class="bi bi-calendar3"></i></span>
+                            <span>
+                                <span class="cmp-fakta-label">Tanggal</span>
+                                <span class="cmp-fakta-nilai">{{ \App\Support\RentangTanggal::tulis($mulai, $selesai) }}</span>
+                            </span>
+                        </div>
+
+                        <div class="cmp-fakta-butir" style="--c: var(--rumput);">
+                            <span class="cmp-fakta-ikon"><i class="bi bi-cash-coin"></i></span>
+                            <span>
+                                <span class="cmp-fakta-label">Biaya per orang</span>
+                                <span class="cmp-fakta-nilai">
+                                    @if ($hargaBayar > 0)
+                                        @if ($adaDiskon)
+                                            <s class="cmp-coret">Rp {{ number_format($hargaAsal, 0, ',', '.') }}</s>
+                                        @endif
+                                        Rp {{ number_format($hargaBayar, 0, ',', '.') }}
+                                    @else
+                                        Hubungi admin
+                                    @endif
+                                </span>
+                            </span>
+                        </div>
+
+                        <div class="cmp-fakta-butir" style="--c: var(--ungu);">
+                            <span class="cmp-fakta-ikon"><i class="bi bi-geo-alt"></i></span>
+                            <span>
+                                <span class="cmp-fakta-label">Lokasi</span>
+                                <span class="cmp-fakta-nilai">{{ $item->lokasi ?: 'Akan dikabari panitia' }}</span>
+                            </span>
+                        </div>
+
+                        <div class="cmp-fakta-butir" style="--c: {{ $penuh ? 'var(--tinta-2)' : 'var(--jingga-kuat)' }};">
+                            <span class="cmp-fakta-ikon"><i class="bi bi-people"></i></span>
+                            <span>
+                                <span class="cmp-fakta-label">Sisa kursi</span>
+                                <span class="cmp-fakta-nilai">
+                                    @if ($item->total_kuota === null)
+                                        Tidak dibatasi
+                                    @elseif ($penuh)
+                                        Sudah habis
+                                    @else
+                                        {{ (int) $item->sisa_kuota }} dari {{ (int) $item->total_kuota }}
+                                    @endif
+                                </span>
+                            </span>
+                        </div>
+                    </div>
+
                     @if ($penuh)
                         <span class="cmp-tombol cmp-tombol-mati cmp-tombol-atas">
                             <i class="bi bi-lock-fill"></i> Kursinya sudah habis
@@ -303,88 +398,62 @@
                         </a>
                     @endif
 
-                    <article class="cmp-kartu">
-                        <span class="cmp-sampul">
-                            <img src="{{ \App\Support\AlamatGambar::url($item->gambar ?? null, 'ScopusCamp') ?: asset('assets/img/public/scopuscamp.png') }}"
-                                alt="Sampul {{ $item->nama }}">
-                        </span>
-
-                        <div class="cmp-isi">
-                            <div class="cmp-pokok">
-                                <div class="cmp-pokok-butir" style="--c: var(--jingga);">
-                                    <span class="cmp-pokok-ikon"><i class="bi bi-calendar3"></i></span>
-                                    <span class="cmp-pokok-teks">
-                                        <span class="cmp-pokok-label">Tanggal</span>
-                                        <span class="cmp-pokok-nilai">{{ RentangTanggal::tulis($mulai, $selesai) }}</span>
-                                    </span>
-                                </div>
-
-                                <div class="cmp-pokok-butir" style="--c: var(--rumput);">
-                                    <span class="cmp-pokok-ikon"><i class="bi bi-cash-coin"></i></span>
-                                    <span class="cmp-pokok-teks">
-                                        <span class="cmp-pokok-label">Biaya</span>
-                                        <span class="cmp-pokok-nilai">
-                                            @if ($hargaBayar > 0)
-                                                @if ($adaDiskon)
-                                                    <s class="cmp-coret">Rp {{ number_format($hargaAsal, 0, ',', '.') }}</s><br>
-                                                @endif
-                                                Rp {{ number_format($hargaBayar, 0, ',', '.') }}
-                                            @else
-                                                Hubungi admin
-                                            @endif
-                                        </span>
-                                    </span>
-                                </div>
-
-                                <div class="cmp-pokok-butir" style="--c: var(--ungu);">
-                                    <span class="cmp-pokok-ikon"><i class="bi bi-geo-alt"></i></span>
-                                    <span class="cmp-pokok-teks">
-                                        <span class="cmp-pokok-label">Lokasi</span>
-                                        <span class="cmp-pokok-nilai">{{ $item->lokasi ?: 'Akan dikabari panitia' }}</span>
-                                    </span>
-                                </div>
-                            </div>
-
-                            {{-- Fasilitas dipajang DI SINI, bukan cuma di halaman
-                                 daftar — dan diambil dari angkatan ini sendiri,
-                                 jadi angkatan luar Jawa menampilkan paketnya
-                                 sendiri yang memang tidak memuat penginapan. --}}
-                            @if (! empty($item->daftar_fasilitas))
-                                <h2 class="cmp-sub-judul"><i class="bi bi-check2-circle"></i> Yang kamu dapat</h2>
-                                <ul class="cmp-fasilitas">
-                                    @foreach ($item->daftar_fasilitas as $butir)
-                                        <li><i class="bi bi-check-circle-fill"></i> <span>{{ $butir }}</span></li>
-                                    @endforeach
-                                </ul>
-                            @endif
-
-                            @if (trim((string) $item->desc_promo) !== '')
-                                <h2 class="cmp-sub-judul"><i class="bi bi-info-circle"></i> Keterangan kegiatan</h2>
-                                {{-- desc_promo: harga di dalam naskahnya ikut
-                                     menyesuaikan promo yang sedang berjalan. --}}
-                                <p class="cmp-uraian">{{ $item->desc_promo }}</p>
-                            @endif
-
-                            {{-- TIDAK ada tombol daftar kedua di sini.
-
-                                 Versi pertama rombakan ini memasangnya dua kali
-                                 — atas dan bawah — supaya tidak perlu dicari
-                                 dengan menggulung. Pemiliknya menyebutnya apa
-                                 adanya: tombolnya ada dua. Bagi pembaca yang
-                                 jadi sasaran halaman ini, dua tombol serupa di
-                                 satu halaman menimbulkan pertanyaan yang tidak
-                                 perlu — yang mana yang benar, dan apakah yang
-                                 tadi sudah tertekan.
-
-                                 Jangkauannya tetap dijaga lewat pita di bawah
-                                 layar, yang baru muncul justru ketika tombol di
-                                 atas sudah tidak terlihat. Jadi selalu ada satu
-                                 jalan masuk, dan tidak pernah dua sekaligus. --}}
-                        </div>
-                    </article>
+                    <p class="cmp-tenang">
+                        <i class="bi bi-shield-check"></i>
+                        Isi borangnya sebentar saja, lalu transfer. Kalau bingung,
+                        tekan tombol WhatsApp di pojok dan tanya admin dulu.
+                    </p>
                 </div>
 
-                {{-- =============================================== bilah --}}
+                {{-- Flyer jadi PENDAMPING, bukan palang. Dimiringkan sedikit
+                     dengan bayangan padat — bahasa rupa yang sama dengan
+                     polaroid testimoni di beranda. --}}
+                <figure class="cmp-flyer">
+                    <img src="{{ \App\Support\AlamatGambar::url($item->gambar ?? null, 'ScopusCamp') ?: asset('assets/img/public/scopuscamp.png') }}"
+                        alt="Flyer {{ $item->nama }}" loading="lazy" decoding="async">
+                </figure>
+            </div>
+        </div>
+    </section>
+
+    {{-- ================================================== fasilitas ====
+
+         Pita TINTA, bukan krem lagi.
+
+         Seluruh halaman ini satu kolom krem dari atas sampai bawah, dan
+         sesudah layar kedua mata berhenti membedakan bagian satu dari yang
+         lain. Satu pita gelap di tengah memutus kemonotonan itu — dan yang
+         dipilih untuk dipitakan adalah bagian yang paling menjual. --}}
+    @if (! empty($item->daftar_fasilitas))
+        <section class="cmp-pita-tinta">
+            <div class="container">
+                <h2 class="cmp-judul-pita">Yang kamu dapat</h2>
+                <ul class="cmp-fasilitas">
+                    @foreach ($item->daftar_fasilitas as $butir)
+                        <li><i class="bi bi-check-circle-fill"></i> <span>{{ $butir }}</span></li>
+                    @endforeach
+                </ul>
+            </div>
+        </section>
+    @endif
+
+    {{-- ======================================================= isi ===== --}}
+    <section class="cmp-bagian">
+        <div class="container">
+            <div class="cmp-kisi">
+
+                <div>
+                    @if (trim((string) $item->desc_promo) !== '')
+                        <article class="cmp-kartu">
+                            <h2 class="cmp-sub-judul"><i class="bi bi-info-circle"></i> Keterangan kegiatan</h2>
+                            {{-- desc_promo: harga di dalam naskahnya ikut
+                                 menyesuaikan promo yang sedang berjalan. --}}
+                            <p class="cmp-uraian">{{ $item->desc_promo }}</p>
+                        </article>
+                    @endif
+
+                </div>
+
                 <aside>
                     <div class="cmp-panel">
                         <h2>Jadwal lain yang masih dibuka</h2>
@@ -413,7 +482,7 @@
                                         <span>
                                             <span class="cmp-lain-nama">{{ $lain->nama }}</span><br>
                                             <span class="cmp-lain-rinci">
-                                                {{ RentangTanggal::tulis($lainMulai, $lainSelesai, true) }}
+                                                {{ \App\Support\RentangTanggal::tulis($lainMulai, $lainSelesai, true) }}
                                                 @if ($lain->lokasi) · {{ $lain->lokasi }} @endif
                                             </span>
                                         </span>
@@ -428,7 +497,44 @@
         </div>
     </section>
 
-    {{-- Pita ajakan yang menempel di bawah layar ponsel. --}}
+    {{-- ================================================== langkah =====
+
+         DI LUAR kisi dua kolom, melebar penuh.
+
+         Sebelumnya ia duduk di kolom kiri bersama keterangan kegiatan,
+         sementara bilah kanan sudah habis jauh di atasnya — sisi kanan
+         halaman jadi krem kosong memanjang sepanjang bagian ini. Di lebar
+         penuh, ketiga langkahnya berjajar dan ruangnya terpakai. --}}
+    <section class="cmp-bagian cmp-bagian-langkah">
+        <div class="container">
+            {{-- Tiga langkah sesudah menekan daftar.
+
+                 Pembacanya berusia lanjut, dan yang paling membuat ragu
+                 bukan harganya melainkan ketidaktahuan apa yang terjadi
+                 sesudah tombolnya ditekan. --}}
+            <div class="cmp-langkah">
+                <h2 class="cmp-sub-judul"><i class="bi bi-signpost-split"></i> Sesudah menekan daftar</h2>
+                <ol>
+                    @foreach ([
+                        ['bi-pencil-square', 'Isi borangnya', 'Nama, email, asal instansi, dan nomor WhatsApp. Empat isian saja.'],
+                        ['bi-bank', 'Transfer biayanya', 'Nomor rekening dan nominal persisnya tertulis di halaman borang.'],
+                        ['bi-chat-dots', 'Tunggu dikabari', 'Panitia mengecek bukti transfermu, lalu menghubungi lewat WhatsApp.'],
+                    ] as $i => [$ikon, $judul, $ket])
+                        <li>
+                            <span class="cmp-langkah-nomor">{{ $i + 1 }}</span>
+                            <span>
+                        <strong><i class="bi {{ $ikon }}"></i> {{ $judul }}</strong>
+                        <span>{{ $ket }}</span>
+                            </span>
+                        </li>
+                    @endforeach
+                </ol>
+            </div>
+        </div>
+    </section>
+
+    {{-- Pita ajakan: muncul justru ketika tombol di atas sudah lewat layar,
+         jadi tidak pernah ada dua jalan masuk yang terlihat bersamaan. --}}
     <div class="cmp-pita" id="cmpPita" aria-hidden="true">
         @if ($penuh)
             <span class="cmp-tombol cmp-tombol-mati"><i class="bi bi-lock-fill"></i> Kursinya sudah habis</span>
