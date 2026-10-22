@@ -1,8 +1,8 @@
 @extends('public.layout.header')
 
-@section('title')
-{{ $kategoriIni?->kategori ?? 'Kategori' }} | Blog Rumah Scopus
-@stop
+@section('title', ($kategoriIni?->kategori ?? 'Kategori') . ' | Blog Rumah Scopus')
+
+@section('uraian', $totalArticles . ' tulisan Rumah Scopus tentang ' . ($kategoriIni?->kategori ?? 'topik ini') . ' — seputar penulisan artikel ilmiah dan publikasi ke jurnal terindeks Scopus.')
 
 @push('kepala')
 <link rel="preconnect" href="https://fonts.googleapis.com">

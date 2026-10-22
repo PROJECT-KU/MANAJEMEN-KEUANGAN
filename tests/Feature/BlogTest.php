@@ -84,7 +84,7 @@ class BlogTest extends TestCase
     }
 
     #[Test]
-    public function semua_tulisan_terbit_muncul_di_daftarnya(): void
+    public function daftarnya_tidak_diam_diam_memotong_tulisan(): void
     {
         /*
          * Tampilannya dulu mengelompokkan per kategori lalu take(3). Kategori
@@ -94,15 +94,31 @@ class BlogTest extends TestCase
          *
          * Hilangnya tidak bergejala: halamannya tetap penuh dan rapi, dan
          * yang menulisnya mengira tulisannya sudah tayang.
+         *
+         * Daftarnya SEKARANG berhalaman, jadi yang dijaga bukan lagi "semua
+         * muncul sekaligus" melainkan dua hal yang lebih tepat: jumlah yang
+         * DIAKUI halamannya sama dengan jumlah tulisan terbit, dan halaman
+         * pertamanya benar-benar terisi penuh. Potongan diam-diam melanggar
+         * salah satunya.
          */
-        $baru = collect(range(1, 4))->map(fn () => $this->tulisan());
+        collect(range(1, 4))->each(fn () => $this->tulisan());
+
+        $terbit = \App\Artikel::where('status', 'publish')->count();
 
         $isi = (string) $this->get('/blog')->assertOk()->getContent();
+        $teks = (string) preg_replace('/\s+/', ' ', strip_tags($isi));
 
-        $hilang = $baru->pluck('judul')->reject(fn ($j) => str_contains($isi, $j))->values();
+        $this->assertStringContainsString($terbit . ' tulisan', $teks,
+            'Halaman tidak mengakui seluruh ' . $terbit . ' tulisan terbit yang ada.');
 
-        $this->assertSame([], $hilang->all(),
-            "Tulisan terbit ini tidak muncul di /blog:\n- " . $hilang->implode("\n- "));
+        // Satu disorot, sisanya berkartu — jadi kartunya satu kurang dari
+        // isi halamannya.
+        $perHalaman = min($terbit, 9);
+        $kartu = substr_count($isi, 'class="blg-kartu"');
+
+        $this->assertSame($perHalaman - 1, $kartu,
+            'Halaman pertama memajang ' . $kartu . ' kartu, seharusnya '
+            . ($perHalaman - 1) . ' (satu lagi jadi sorotan).');
     }
 
     #[Test]
@@ -166,6 +182,208 @@ class BlogTest extends TestCase
             $this->assertStringContainsString('--kertas: #fdf5e8', $h['blog'],
                 $h['nama'] . ' kehilangan palet blognya.');
         }
+    }
+
+    #[Test]
+    public function tiap_tulisan_punya_judul_halamannya_sendiri(): void
+    {
+        /*
+         * <title> setiap halaman artikel dulu berbunyi "Artikel | Rumah
+         * Scopus" — sama persis untuk kedua belas tulisan. Judul tulisannya
+         * sendiri tidak pernah masuk ke sana.
+         *
+         * Dua akibatnya, dan keduanya diam: tautan yang dibagikan ke
+         * WhatsApp muncul sebagai "Artikel | Rumah Scopus" tanpa gambar dan
+         * tanpa kalimat, dan di mesin pencari kedua belas tulisan saling
+         * bertumpuk sebagai hasil yang kelihatan identik. Halamannya tetap
+         * 200, isinya tetap benar, dan tidak ada yang melapor.
+         */
+        $dua = \App\Artikel::where('status', 'publish')->take(2)->get();
+
+        if ($dua->count() < 2) {
+            $this->markTestSkipped('Butuh dua tulisan terbit untuk membandingkan judulnya.');
+        }
+
+        $judul = [];
+
+        foreach ($dua as $tulisan) {
+            $isi = (string) $this->get(route('blog.topic.blog-single', ['id' => $tulisan->id]))
+                ->assertOk()->getContent();
+
+            preg_match('#<title>(.*?)</title>#s', $isi, $tangkap);
+            $judul[] = trim($tangkap[1] ?? '');
+
+            $this->assertStringContainsString($tulisan->judul, $tangkap[1] ?? '',
+                'Judul halaman tidak memuat judul tulisannya: "' . ($tangkap[1] ?? '') . '"');
+        }
+
+        $this->assertNotSame($judul[0], $judul[1],
+            'Dua tulisan berbeda memakai judul halaman yang sama persis: "' . $judul[0] . '"');
+    }
+
+    #[Test]
+    public function tiap_halaman_blog_punya_uraian_dan_pratinjau_bagikan(): void
+    {
+        /*
+         * meta description dan keywords dulu content="" di SELURUH situs,
+         * dan tidak ada satu pun tag og:. Tautan yang dibagikan muncul
+         * sebagai sepotong alamat mentah: tanpa judul, tanpa gambar, tanpa
+         * kalimat — tidak memberi alasan apa pun untuk ditekan.
+         */
+        $tulisan = \App\Artikel::where('status', 'publish')->first();
+
+        $jalur = ['/blog'];
+
+        if ($tulisan) {
+            $jalur[] = route('blog.topic.blog-single', ['id' => $tulisan->id]);
+        }
+
+        foreach ($jalur as $alamat) {
+            $isi = (string) $this->get($alamat)->assertOk()->getContent();
+
+            foreach ([
+                'meta name="description"' => '#<meta name="description" content="([^"]*)"#',
+                'meta property="og:title"' => '#<meta property="og:title" content="([^"]*)"#',
+                'meta property="og:image"' => '#<meta property="og:image" content="([^"]*)"#',
+            ] as $nama => $pola) {
+                preg_match($pola, $isi, $tangkap);
+
+                $this->assertNotSame('', trim($tangkap[1] ?? ''),
+                    $alamat . ' mengirim ' . $nama . ' yang KOSONG. Tautannya dibagikan '
+                    . 'tanpa pratinjau apa pun.');
+            }
+        }
+    }
+
+    #[Test]
+    public function pencarian_menemukan_kata_di_badan_tulisan(): void
+    {
+        /*
+         * Sebelum ini /blog tidak punya pencarian sama sekali, dan satu-
+         * satunya yang ada — kotak di bilah samping halaman artikel —
+         * ber-action="" dengan <input> TANPA atribut name: ditekan, ia
+         * memuat ulang halaman yang sama tanpa membawa apa pun. Tidak pernah
+         * bisa mencari sejak dipasang, dan yang memakainya menyimpulkan
+         * tulisan yang dicarinya memang tidak ada.
+         */
+        $kata = 'Zebrafosfat' . Str::random(5);
+
+        $tulisan = $this->tulisan([
+            'judul' => 'UJI Cari ' . Str::random(6),
+            'isi' => '<p>Kalimat pembuka. ' . $kata . ' ada di badan tulisan, bukan di judulnya.</p>',
+        ]);
+
+        $isi = (string) $this->get('/blog?cari=' . urlencode($kata))->assertOk()->getContent();
+
+        $this->assertStringContainsString($tulisan->judul, $isi,
+            'Pencarian tidak menemukan kata yang ada di badan tulisan. Judul saja '
+            . 'tidak cukup: orang mencari "reviewer" atau "sitasi", kata yang hampir '
+            . 'selalu ada di isi dan hampir tidak pernah di judul.');
+    }
+
+    #[Test]
+    public function tanda_persen_tidak_memulangkan_seluruh_tulisan(): void
+    {
+        /*
+         * % dan _ adalah jokernya LIKE. Tanpa di-escape, mengetik satu tanda
+         * persen memulangkan SELURUH tulisan — dan yang mengetiknya
+         * menyimpulkan pencariannya rusak, bukan bahwa ia baru saja menulis
+         * joker.
+         */
+        $semua = \App\Artikel::where('status', 'publish')->count();
+
+        $isi = (string) $this->get('/blog?cari=%25')->assertOk()->getContent();
+
+        preg_match('/(\d+)\s+hasil untuk/', strip_tags($isi), $tangkap);
+
+        $this->assertNotNull($tangkap[1] ?? null, 'Halaman hasil tidak menyebut jumlahnya.');
+
+        $this->assertLessThan($semua, (int) $tangkap[1],
+            'Mencari "%" memulangkan seluruh ' . $semua . ' tulisan; jokernya tidak di-escape.');
+    }
+
+    #[Test]
+    public function penghitung_baca_benar_benar_naik(): void
+    {
+        /*
+         * Kolom `dilihat` berisi angka sungguhan — 2.783, 2.088, 1.728 —
+         * tetapi tidak ada satu baris kode pun yang menaikkannya; ia cuma
+         * terdaftar di $fillable. Angkanya beku di nilai yang ditinggal
+         * sistem lama, dan tidak ada yang tahu sebab tidak ada yang
+         * memajangnya.
+         */
+        $tulisan = $this->tulisan(['dilihat' => 7]);
+
+        $this->get(route('blog.topic.blog-single', ['id' => $tulisan->id]))->assertOk();
+
+        $this->assertSame(8, (int) DB::table('artikel')->where('id', $tulisan->id)->value('dilihat'),
+            'Membuka tulisan tidak menaikkan penghitung bacanya.');
+    }
+
+    #[Test]
+    public function umpan_rss_sah_dan_hanya_memuat_yang_terbit(): void
+    {
+        $draf = $this->tulisan(['status' => 'draft', 'judul' => 'RAHASIA RSS ' . Str::random(6)]);
+        $terbit = $this->tulisan(['judul' => 'UJI RSS ' . Str::random(6)]);
+
+        $jawaban = $this->get(route('blog.rss'))->assertOk();
+
+        $jawaban->assertHeader('Content-Type', 'application/rss+xml; charset=UTF-8');
+
+        $xml = (string) $jawaban->getContent();
+
+        /*
+         * Diurai sungguhan, bukan dicocokkan teks: satu tanda & yang tidak
+         * di-escape di dalam tulisan sudah cukup membuat seluruh umpan
+         * ditolak pembacanya — dan pencocokan teks tetap hijau.
+         */
+        $sebelumnya = libxml_use_internal_errors(true);
+        $akar = simplexml_load_string($xml);
+        libxml_use_internal_errors($sebelumnya);
+
+        $this->assertNotFalse($akar, 'Umpan RSS bukan XML yang sah; pembaca umpan menolaknya.');
+
+        $this->assertStringContainsString($terbit->judul, $xml, 'Tulisan terbit tidak masuk umpan.');
+        $this->assertStringNotContainsString($draf->judul, $xml, 'Draf ikut masuk umpan RSS.');
+    }
+
+    #[Test]
+    public function tampilan_blog_tidak_memakai_strftime(): void
+    {
+        /*
+         * strftime() sudah usang sejak PHP 8.1 dan DIBUANG di PHP 9 —
+         * peladen ini sudah menjalankan 8.4. Ia juga mengabaikan locale
+         * Carbon, jadi keluarannya "Friday, 11 July 2025" di halaman yang
+         * seluruh kalimatnya Bahasa Indonesia.
+         *
+         * Dijaga untuk tampilan blog saja. Terukur 19 Okt 2026: fungsi itu
+         * masih dipakai di sekitar 47 berkas lain — surat, tagihan, dan
+         * layar sisi akun — dan itu pekerjaan tersendiri.
+         */
+        $berkas = [
+            'resources/views/public/article/public.blade.php',
+            'resources/views/public/article/publickategori.blade.php',
+            'resources/views/public/article/blogsingle.blade.php',
+            'resources/views/public/article/rss.blade.php',
+            'resources/views/public/article/partials/gaya.blade.php',
+        ];
+
+        $kena = [];
+
+        foreach ($berkas as $b) {
+            $isi = (string) preg_replace(
+                ['#/\*.*?\*/#s', '#\{\{--.*?--\}\}#s'], '',
+                (string) file_get_contents(base_path($b))
+            );
+
+            if (preg_match('/(?<![\w:>$-])strftime\s*\(/', $isi)) {
+                $kena[] = $b;
+            }
+        }
+
+        $this->assertSame([], $kena,
+            "Tampilan blog ini memakai strftime(), yang dibuang di PHP 9:\n- "
+            . implode("\n- ", $kena));
     }
 
     #[Test]
