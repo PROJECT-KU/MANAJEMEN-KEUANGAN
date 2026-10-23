@@ -33,9 +33,64 @@ class HargaUmumTest extends TestCase
 {
     use DatabaseTransactions;
 
+    /**
+     * Berkas bukti bayar yang sudah ada SEBELUM uji ini jalan.
+     *
+     * DatabaseTransactions mengembalikan barisnya, TETAPI TIDAK mengembalikan
+     * berkasnya: pengendali memindahkan unggahan ke public/ScopusCamp, dan
+     * folder itu memuat 2.376 bukti pembayaran sungguhan. Terukur 23 Okt
+     * 2026: tiap kali rangkaian ini jalan, tiga berkas 0 byte tertinggal di
+     * sana selamanya.
+     *
+     * Yang dihapus HANYA yang muncul selama uji ini — daftar ini yang jadi
+     * batasnya. Menyapu folder menurut pola nama atau menurut umur berkas
+     * akan menghapus bukti bayar orang.
+     *
+     * Dua folder, bukan satu: uji ini mengirim borang Scopus Camp DAN borang
+     * Analisis Bibliometrik, dan keduanya memindahkan unggahannya ke folder
+     * yang berbeda. Terukur: dengan satu folder saja, tiga berkas 0 byte
+     * tertinggal di public/bibliometrik tiap kali rangkaian ini jalan.
+     *
+     * @var array<string, array<int, string>>
+     */
+    private array $buktiSebelumnya = [];
+
+    /** @var array<int, string> */
+    private const FOLDER_BUKTI = ['ScopusCamp', 'bibliometrik'];
+
+    protected function tearDown(): void
+    {
+        foreach (self::FOLDER_BUKTI as $folder) {
+            $baru = array_diff(
+                $this->isiFolderBukti($folder),
+                $this->buktiSebelumnya[$folder] ?? []
+            );
+
+            foreach ($baru as $berkas) {
+                @unlink(public_path($folder . '/' . $berkas));
+            }
+        }
+
+        parent::tearDown();
+    }
+
+    /** @return array<int, string> */
+    private function isiFolderBukti(string $folder): array
+    {
+        $jalur = public_path($folder);
+
+        return is_dir($jalur)
+            ? array_values(array_diff(scandir($jalur) ?: [], ['.', '..']))
+            : [];
+    }
+
     protected function setUp(): void
     {
         parent::setUp();
+
+        foreach (self::FOLDER_BUKTI as $folder) {
+            $this->buktiSebelumnya[$folder] = $this->isiFolderBukti($folder);
+        }
 
         PromoAngkatan::lupakan();
         DampakPromo::lupakan();
@@ -193,6 +248,14 @@ class HargaUmumTest extends TestCase
             'nama' => 'Penawar Nakal', 'email' => Str::random(6) . '@contoh.test',
             'telp' => '0811-0000-0007', 'affiliasi' => 'Uji',
             'jumlah_pendaftar' => 1,
+            // Centang ketentuan dan bukti transfer sama-sama wajib sejak
+            // 23 Okt 2026. Uji ini memeriksa HARGA, bukan penjagaannya,
+            // jadi ia memenuhi keduanya seperti pendaftar sungguhan — dan
+            // jalur yang dilaluinya tetap transfer manual, sebab rangkaian
+            // uji memang mematikan gerbang pembayaran.
+            'setuju' => '1',
+            'gambar' => \Illuminate\Http\UploadedFile::fake()
+                ->create('bukti.jpg', 40, 'image/jpeg'),
             'kode_unik' => '572',
             'ppn' => '0',
             'total_pembayaran' => '1',
@@ -218,6 +281,14 @@ class HargaUmumTest extends TestCase
             'nama' => 'Pendaftar Promo', 'email' => Str::random(6) . '@contoh.test',
             'telp' => '0811-0000-0008', 'affiliasi' => 'Uji',
             'jumlah_pendaftar' => 2, 'kode_unik' => '550', 'ppn' => '0',
+            // Centang ketentuan dan bukti transfer sama-sama wajib sejak
+            // 23 Okt 2026. Uji ini memeriksa HARGA, bukan penjagaannya,
+            // jadi ia memenuhi keduanya seperti pendaftar sungguhan — dan
+            // jalur yang dilaluinya tetap transfer manual, sebab rangkaian
+            // uji memang mematikan gerbang pembayaran.
+            'setuju' => '1',
+            'gambar' => \Illuminate\Http\UploadedFile::fake()
+                ->create('bukti.jpg', 40, 'image/jpeg'),
             'total_pembayaran' => '999',
         ]);
 
@@ -246,6 +317,14 @@ class HargaUmumTest extends TestCase
             'nama' => 'Pendaftar Biblio', 'email' => Str::random(6) . '@contoh.test',
             'telp' => '0811-0000-0009', 'affiliasi' => 'Uji',
             'jumlah_pendaftar' => 1, 'kode_unik' => '533', 'ppn' => '0',
+            // Centang ketentuan dan bukti transfer sama-sama wajib sejak
+            // 23 Okt 2026. Uji ini memeriksa HARGA, bukan penjagaannya,
+            // jadi ia memenuhi keduanya seperti pendaftar sungguhan — dan
+            // jalur yang dilaluinya tetap transfer manual, sebab rangkaian
+            // uji memang mematikan gerbang pembayaran.
+            'setuju' => '1',
+            'gambar' => \Illuminate\Http\UploadedFile::fake()
+                ->create('bukti.jpg', 40, 'image/jpeg'),
             'total_pembayaran' => '5',
         ]);
 
@@ -273,6 +352,14 @@ class HargaUmumTest extends TestCase
             'nama' => 'Pendaftar Terhitung', 'email' => Str::random(6) . '@contoh.test',
             'telp' => '0811-0000-0010', 'affiliasi' => 'Uji',
             'jumlah_pendaftar' => 3, 'kode_unik' => '521', 'ppn' => '0',
+            // Centang ketentuan dan bukti transfer sama-sama wajib sejak
+            // 23 Okt 2026. Uji ini memeriksa HARGA, bukan penjagaannya,
+            // jadi ia memenuhi keduanya seperti pendaftar sungguhan — dan
+            // jalur yang dilaluinya tetap transfer manual, sebab rangkaian
+            // uji memang mematikan gerbang pembayaran.
+            'setuju' => '1',
+            'gambar' => \Illuminate\Http\UploadedFile::fake()
+                ->create('bukti.jpg', 40, 'image/jpeg'),
             'total_pembayaran' => '0',
         ]);
 

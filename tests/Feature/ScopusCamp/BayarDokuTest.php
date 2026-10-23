@@ -73,6 +73,9 @@ class BayarDokuTest extends TestCase
             'telp' => '081234567890',
             'affiliasi' => 'Universitas Uji',
             'jumlah_pendaftar' => 1,
+            // Centang ketentuan wajib sejak 23 Okt 2026; penjagaannya sendiri
+            // diuji di PenjagaanBorangTest, bukan di sini.
+            'setuju' => '1',
         ], $ganti);
     }
 

@@ -132,6 +132,69 @@
         font-size: .88rem; line-height: 1.5; color: var(--tinta-2);
     }
 
+    /* ================================================== ringkasan galat */
+    .daf-galat {
+        margin-top: 22px; border-color: #e3b7b1; background: #fdf1ef;
+    }
+    .daf-galat p { color: #a3281c; font-weight: 700; margin: 0; }
+    .daf-galat p i { margin-right: 7px; }
+    .daf-galat ul {
+        margin: 10px 0 0; padding-left: 26px;
+        color: #a3281c; font-size: .95rem; line-height: 1.7;
+    }
+
+    /* Angka sisa kursi yang tinggal sedikit disebut dengan warna,
+       bukan dengan tanda seru: yang membacanya orang berusia lanjut. */
+    .daf-tipis { color: #a3281c; font-weight: 800; }
+
+    /* ================================================== jumlah peserta */
+    .daf-jumlah { margin-top: 20px; }
+    .daf-jumlah-baris { display: flex; align-items: stretch; gap: 10px; }
+    .daf-jumlah-baris .daf-isian {
+        flex: 1 1 auto; min-width: 0; text-align: center;
+        font-size: 1.15rem; font-weight: 800;
+    }
+    .daf-langkah {
+        /* 54px, bukan sekadar cukup untuk angkanya: patokan sasaran sentuh
+           44px, dan pembacanya rata-rata berusia lanjut. */
+        flex: 0 0 auto; width: 54px; min-height: 54px;
+        border: 2px solid var(--garis); border-radius: 14px;
+        background: #fff; color: var(--tinta);
+        font-family: inherit; font-size: 1.5rem; font-weight: 800;
+        line-height: 1; cursor: pointer;
+        transition: border-color .18s ease, color .18s ease;
+    }
+    .daf-langkah:hover { border-color: var(--jingga); color: var(--jingga-tua); }
+    .daf-langkah:disabled { opacity: .4; cursor: not-allowed; }
+
+    /* ================================================== persetujuan */
+    .daf-setuju {
+        display: flex; align-items: flex-start; gap: 11px;
+        margin: 22px 0 0; padding: 14px 15px;
+        background: var(--kertas); border: 1px solid var(--garis); border-radius: 14px;
+        font-size: .93rem; line-height: 1.55; color: var(--tinta);
+        font-weight: 600; cursor: pointer;
+    }
+    .daf-setuju input {
+        /* 22px, bukan bawaan 13px: kotak centang bawaan terlalu kecil untuk
+           jari, dan ini satu-satunya centang yang menghalangi pengiriman. */
+        flex: 0 0 auto; width: 22px; height: 22px; margin-top: 1px;
+        accent-color: var(--jingga);
+    }
+    .daf-setuju a {
+        color: var(--jingga-tua); text-decoration: underline;
+        /* Padding tegak pada tautan sebaris MELEBARKAN daerah sentuhnya
+           tanpa menggeser barisnya — kotak barisnya tidak ikut tinggi.
+           Tidak sampai 44px; tautan di tengah kalimat tidak bisa setinggi
+           itu tanpa merusak kalimatnya, dan ini tautan pendamping, bukan
+           tombol utama. */
+        padding: 7px 0;
+    }
+
+    /* Sasaran sentuh tautan "Kembali ke rincian kelas": terukur 23px
+       sebelum ini, di bawah patokan 44px. */
+    .daf-balik { padding: 11px 0; }
+
     /* ================================================== isi otomatis */
     .daf-kabar-isi {
         display: flex; align-items: flex-start; flex-wrap: wrap; gap: 9px;
@@ -290,7 +353,10 @@
 
         <h1 class="daf-judul">Formulir pendaftaran</h1>
         <p class="daf-anak">
-            Isi empat keterangan di bawah, lalu
+            {{-- "Empat" tidak lagi benar sejak jumlah peserta dan centang
+                 ketentuan ditambahkan; angka yang meleset di kalimat pembuka
+                 membuat sisa halaman ikut terbaca tidak bisa dipercaya. --}}
+            Isi data di bawah, lalu
             {{-- Dirakit sebagai ungkapan, bukan sebagai percabangan sebaris:
                  cabang sebaris meninggalkan spasi tepat sebelum titiknya,
                  jadi yang tercetak "lanjutkan ke pembayaran ." --}}
@@ -299,8 +365,27 @@
         </p>
 
         @if (session('error'))
-            <div class="daf-kartu" style="margin-top: 22px; border-color: #e3b7b1; background: #fdf1ef;">
-                <p style="color: #a3281c; font-weight: 700;">{{ session('error') }}</p>
+            <div class="daf-kartu daf-galat" role="alert">
+                <p><i class="fas fa-exclamation-circle"></i> {{ session('error') }}</p>
+            </div>
+        @endif
+
+        {{-- RINGKASAN GALAT, dan sampai 23 Okt 2026 tidak ada sama sekali.
+
+             Peladen tidak memvalidasi apa pun, jadi memang tidak pernah ada
+             yang perlu ditampilkan. Begitu validasinya dipasang, kiriman yang
+             ditolak memulangkan halaman yang sama — dan tanpa kotak ini
+             orangnya cuma melihat borang yang sama tanpa satu tanda pun bahwa
+             ada yang salah, lalu menekan tombolnya lagi. --}}
+        @if ($errors->any())
+            <div class="daf-kartu daf-galat" role="alert">
+                <p><i class="fas fa-exclamation-circle"></i>
+                    Ada {{ $errors->count() }} isian yang perlu diperbaiki dulu:</p>
+                <ul>
+                    @foreach ($errors->all() as $pesan)
+                        <li>{{ $pesan }}</li>
+                    @endforeach
+                </ul>
             </div>
         @endif
 
@@ -354,6 +439,25 @@
                                 <dd>{{ $item->lokasi ?: 'Akan dikabari panitia' }}</dd>
                             </div>
                             <div>
+                                {{-- SISA KURSI, dan sebelumnya tidak disebut
+                                     di halaman ini sama sekali.
+
+                                     Dua akibatnya: tidak ada alasan untuk
+                                     bergegas, dan orang bisa mengisi seluruh
+                                     borang lalu baru ditolak saat menekan
+                                     tombol. --}}
+                                <dt>Sisa kursi</dt>
+                                <dd>
+                                    @if ($sisaKursi === null)
+                                        Tidak dibatasi
+                                    @elseif ($sisaKursi <= 3)
+                                        <span class="daf-tipis">{{ $sisaKursi }} kursi lagi</span>
+                                    @else
+                                        {{ $sisaKursi }} kursi
+                                    @endif
+                                </dd>
+                            </div>
+                            <div>
                                 <dt>Biaya per orang</dt>
                                 <dd>
                                     @if ($item->harga_sebelum_promo > $item->harga_setelah_promo)
@@ -374,8 +478,36 @@
                         <input type="hidden" name="biaya" id="biaya"
                             value="{{ number_format($item->harga_setelah_promo, 0, ',', '.') }}">
                         <input type="hidden" name="kode_unik" id="kodeUnik" value="{{ old('kode_unik') }}">
-                        <input type="hidden" name="jumlah_pendaftar" id="jumlahPendaftar" value="1"
-                            data-sisa-kuota="{{ $item->sisa_kuota ?? 0 }}">
+                        {{-- JUMLAH PESERTA, dan dulu ia isian tersembunyi
+                             bernilai 1 yang tidak bisa diubah siapa pun.
+
+                             Padahal peladen dan rumus harganya sudah
+                             mendukung lebih dari satu sejak awal: satu kantor
+                             yang mengirim tiga orang harus mengisi borang ini
+                             tiga kali, dengan tiga pembayaran terpisah yang
+                             harus dicocokkan panitia satu per satu.
+
+                             Batas atasnya sisa kursi yang benar-benar ada,
+                             bukan angka tetap — dan peladen memeriksanya lagi
+                             di dalam kunci baris, sebab nilai di sini bisa
+                             disunting siapa saja sebelum dikirim. --}}
+                        <div class="daf-medan daf-jumlah">
+                            <label for="jumlahPendaftar">Jumlah peserta</label>
+                            <div class="daf-jumlah-baris">
+                                <button type="button" class="daf-langkah" data-ubah="-1"
+                                    aria-label="Kurangi satu peserta">&minus;</button>
+                                <input type="number" name="jumlah_pendaftar" id="jumlahPendaftar"
+                                    class="daf-isian" value="{{ old('jumlah_pendaftar', 1) }}"
+                                    min="1" max="{{ $sisaKursi === null ? 20 : min(20, max(1, $sisaKursi)) }}"
+                                    inputmode="numeric" required>
+                                <button type="button" class="daf-langkah" data-ubah="1"
+                                    aria-label="Tambah satu peserta">+</button>
+                            </div>
+                            <small class="daf-bantu">
+                                Mendaftarkan beberapa orang sekaligus? Ubah angkanya —
+                                satu pembayaran untuk semuanya.
+                            </small>
+                        </div>
                         <input type="hidden" name="subtotal" id="subtotalInput" value="{{ $item->harga_setelah_promo }}">
                         <input type="hidden" name="ppn" id="jumlahPPN" value="{{ $jumlahPPN }}">
                     </div>
@@ -520,8 +652,12 @@
 
                         <div style="margin-top: 22px;">
                             <div class="daf-baris">
-                                <span>Biaya kelas</span>
-                                <b>Rp {{ number_format($item->harga_setelah_promo, 0, ',', '.') }}</b>
+                                {{-- Jumlah pesertanya ikut disebut di barisnya,
+                                     bukan cuma di isiannya: begitu angkanya lebih
+                                     dari satu, "Biaya kelas Rp 5.479.000" di sebelah
+                                     total Rp 10.958.000 terbaca seperti salah hitung. --}}
+                                <span>Biaya kelas <span id="rincianJumlah"></span></span>
+                                <b>Rp <span id="rincianSubtotal">{{ number_format($item->harga_setelah_promo, 0, ',', '.') }}</span></b>
                             </div>
 
                             {{-- Kode unik dipajang DI SEBELAH totalnya, bukan di antara
@@ -561,6 +697,24 @@
 
                         <input type="hidden" name="total_keseluruhan_pembayaran" id="totalKeseluruhanPembayaranhidden">
 
+                        {{-- PERSETUJUAN KETENTUAN, dan borang ini belum
+                             pernah punya satu pun.
+
+                             Borang Webinar Eksklusif sudah memakainya sejak
+                             lama. Tanpa ini tidak ada jejak bahwa pendaftar
+                             pernah diberi tahu aturan pembatalannya — dan
+                             yang menanggung perdebatannya panitia, saat
+                             uangnya sudah masuk. --}}
+                        <label class="daf-setuju">
+                            <input type="checkbox" name="setuju" id="setuju" value="1"
+                                {{ old('setuju') ? 'checked' : '' }} required>
+                            <span>
+                                Saya sudah membaca dan menyetujui
+                                <a href="{{ url('/ketentuan-layanan') }}" target="_blank" rel="noopener">ketentuan layanan</a>,
+                                termasuk aturan pembatalan dan pengembalian dana.
+                            </span>
+                        </label>
+
                         <button type="submit" class="daf-kirim" id="btnSubmit"
                             data-bayar-daring="{{ $bayarDaring ? '1' : '0' }}">
                             @if ($bayarDaring)
@@ -576,6 +730,20 @@
                                 <span>Pembayaran diproses DOKU. Setelah membayar, status
                                     pendaftaran Anda berpindah sendiri — tidak perlu
                                     mengirim bukti transfer.</span>
+                            </div>
+
+                            {{-- TENGGATNYA DISEBUT di sini, bukan baru
+                                 ditemukan orangnya saat tagihannya sudah mati.
+
+                                 Satu-satunya kata "menit" di halaman ini
+                                 sebelumnya adalah "butuh sekitar dua menit" —
+                                 tentang mengisi borang, bukan tentang
+                                 membayar. --}}
+                            <div class="daf-aman">
+                                <i class="fas fa-hourglass-half" style="color: var(--jingga);"></i>
+                                <span>Tagihannya berlaku <strong>{{ $menitBayar }} menit</strong>.
+                                    Lewat dari itu kursinya dilepas lagi, dan Anda perlu
+                                    mendaftar ulang.</span>
                             </div>
 
                             <p style="margin-top: 14px; font-size: .88rem; font-weight: 700; color: var(--tinta);">
@@ -798,6 +966,17 @@
         var kodeUnik = generateUniqueCode();
         var total = (jumlah * biaya) + kodeUnik - potonganDiskon + jumlahPPN;
 
+        // Barisnya ikut menyebut berapa orang, dan subtotalnya dikalikan.
+        var rincianJumlah = document.getElementById('rincianJumlah');
+        if (rincianJumlah) {
+            rincianJumlah.textContent = jumlah > 1 ? '\u00d7 ' + jumlah + ' orang' : '';
+        }
+
+        var rincianSubtotal = document.getElementById('rincianSubtotal');
+        if (rincianSubtotal) {
+            rincianSubtotal.textContent = formatRupiah(jumlah * biaya);
+        }
+
         kodeUnikInput.value = formatRupiah(kodeUnik);
         // Isian #kodeUnik tersembunyi; angkanya tetap harus terlihat orang
         // karena ikut menentukan nominal yang dibayar.
@@ -820,6 +999,55 @@
      * blok ini, jadi semuanya sudah ada saat baris ini jalan.
      */
     hitungTotalPembayaran();
+    /*
+     * Tombol +/- dan pengetikan langsung sama-sama menghitung ulang.
+     *
+     * Angkanya DIJEPIT ke rentang min/max isiannya di sini juga, bukan hanya
+     * lewat atribut: atribut `max` cuma menghalangi tombol panah peramban —
+     * angka yang diketik tangan lolos begitu saja, dan orangnya baru ditolak
+     * sesudah menekan tombol kirim. Peladen tetap memeriksanya sekali lagi di
+     * dalam kunci baris; yang di sini supaya tidak perlu sampai ke sana.
+     */
+    (function () {
+        var kotak = document.getElementById('jumlahPendaftar');
+
+        if (! kotak) {
+            return;
+        }
+
+        var batasBawah = parseInt(kotak.min, 10) || 1;
+        var batasAtas = parseInt(kotak.max, 10) || 20;
+        var langkah = document.querySelectorAll('.daf-langkah');
+
+        function rapikan() {
+            var n = parseInt(kotak.value, 10);
+
+            if (isNaN(n) || n < batasBawah) { n = batasBawah; }
+            if (n > batasAtas) { n = batasAtas; }
+
+            kotak.value = n;
+
+            Array.prototype.forEach.call(langkah, function (t) {
+                var arah = parseInt(t.dataset.ubah, 10);
+                t.disabled = arah < 0 ? n <= batasBawah : n >= batasAtas;
+            });
+
+            hitungTotalPembayaran();
+        }
+
+        Array.prototype.forEach.call(langkah, function (t) {
+            t.addEventListener('click', function () {
+                kotak.value = (parseInt(kotak.value, 10) || batasBawah)
+                    + parseInt(t.dataset.ubah, 10);
+                rapikan();
+            });
+        });
+
+        kotak.addEventListener('input', rapikan);
+        kotak.addEventListener('change', rapikan);
+
+        rapikan();
+    })();
 </script>
 
 @unless ($bayarDaring)
