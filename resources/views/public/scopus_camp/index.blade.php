@@ -132,6 +132,27 @@
         font-family: 'Figtree', sans-serif; font-size: .72rem; font-weight: 800;
         vertical-align: middle;
     }
+    .kmp-beda {
+        margin-top: 20px; padding-top: 18px;
+        border-top: 2px dashed rgba(22, 35, 63, .2);
+    }
+    .kmp-beda-butir + .kmp-beda-butir { margin-top: 14px; }
+    .kmp-beda-label {
+        display: inline-block; margin-bottom: 8px; padding: 3px 11px;
+        border-radius: 999px; background: var(--jingga); color: #fff;
+        font-family: 'Figtree', sans-serif; font-size: .78rem; font-weight: 800;
+    }
+    /* Pemilihnya `.kmp-beda .kmp-fasilitas-tambah i` — (0,3,0), bukan
+       (0,2,0).
+
+       Ditulis `.kmp-fasilitas-tambah i` saja, bobotnya SAMA dengan
+       `.kmp-fasilitas i` yang kebetulan berdiri belakangan di berkas ini,
+       jadi yang menang aturan hijau itu. Terukur: kedua ikon memulangkan
+       rgb(15,118,110), dan tanda "+" tidak bisa dibedakan dari tanda
+       centang — padahal justru selisih itu yang jadi inti bagian ini. */
+    .kmp-beda .kmp-fasilitas-tambah i { color: var(--jingga); }
+    .kmp-beda-nihil { color: var(--tinta-2); font-size: .9rem; margin: 0; }
+
     .kmp-varian {
         padding: 1px 9px; border-radius: 999px;
         background: color-mix(in srgb, var(--ungu) 14%, transparent);
@@ -336,33 +357,70 @@
                                  Flyer tiap angkatan tetap tampil di halaman
                                  detailnya masing-masing. --}}
 
-                            {{-- Satu blok per PAKET fasilitas, bukan satu daftar
-                                 untuk semuanya.
+                            {{-- Yang SAMA ditulis sekali, selisihnya disebut
+                                 terpisah.
 
-                                 Versi pertama rombakan ini memajang daftar milik
-                                 angkatan pertama saja. Terukur di tarif yang
-                                 berlaku: Pulau Jawa berisi penginapan serta
-                                 mushola, kolam renang, dan treadmill; Luar Pulau
-                                 Jawa TIDAK — padahal harganya satu juta lebih
-                                 mahal. Jadi satu daftar menjanjikan kamar dan
-                                 kolam renang kepada orang yang tidak akan
-                                 mendapatkannya, dan yang menanggungnya panitia
-                                 saat orangnya sudah sampai di lokasi. --}}
-                            @foreach ($paket as $p)
-                                <div class="kmp-paket">
-                                    <h2>
-                                        Yang kamu dapat
-                                        @if ($paket->count() > 1 && $p['label'])
-                                            <span class="kmp-paket-tanda">{{ $p['label'] }}</span>
-                                        @endif
-                                    </h2>
-                                    <ul class="kmp-fasilitas">
-                                        @foreach ($p['fasilitas'] as $butir)
-                                            <li><i class="bi bi-check-circle-fill"></i> <span>{{ $butir }}</span></li>
-                                        @endforeach
-                                    </ul>
+                                 Bentuk sebelumnya memajang dua daftar utuh
+                                 berdampingan — dan terukur, keduanya mengulang
+                                 5 dari 7 butir yang sama. Untuk tahu bedanya,
+                                 pembaca harus membandingkan dua daftar baris
+                                 per baris. Sasaran halaman ini orang berusia
+                                 lanjut, dan yang mereka cari cuma satu hal:
+                                 apa bedanya.
+
+                                 Sebelum itu pun pernah lebih buruk: SATU daftar
+                                 untuk semua varian, diambil dari angkatan
+                                 pertama — jadi peserta luar Jawa dijanjikan
+                                 penginapan dan kolam renang yang tidak akan ia
+                                 dapatkan, padahal membayar satu juta lebih
+                                 mahal. --}}
+                            @if ($pisahkan)
+                                <h2>Yang kamu dapat</h2>
+                                <ul class="kmp-fasilitas">
+                                    @foreach ($fasilitasUmum as $butir)
+                                        <li><i class="bi bi-check-circle-fill"></i> <span>{{ $butir }}</span></li>
+                                    @endforeach
+                                </ul>
+
+                                <div class="kmp-beda">
+                                    <h2>Bedanya</h2>
+
+                                    @foreach ($paket as $p)
+                                        <div class="kmp-beda-butir">
+                                            <span class="kmp-beda-label">{{ $p['label'] ?: 'Paket lain' }}</span>
+
+                                            @if (! empty($p['khusus']))
+                                                <ul class="kmp-fasilitas kmp-fasilitas-tambah">
+                                                    @foreach ($p['khusus'] as $butir)
+                                                        <li><i class="bi bi-plus-circle-fill"></i> <span>{{ $butir }}</span></li>
+                                                    @endforeach
+                                                </ul>
+                                            @else
+                                                {{-- Disebut, bukan didiamkan: paket yang tidak
+                                                     muncul di daftar "bedanya" membuat
+                                                     pembacanya menebak apakah ia terlewat. --}}
+                                                <p class="kmp-beda-nihil">Yang di atas saja, tanpa tambahan.</p>
+                                            @endif
+                                        </div>
+                                    @endforeach
                                 </div>
-                            @endforeach
+                            @else
+                                @foreach ($paket as $p)
+                                    <div class="kmp-paket">
+                                        <h2>
+                                            Yang kamu dapat
+                                            @if ($paket->count() > 1 && $p['label'])
+                                                <span class="kmp-paket-tanda">{{ $p['label'] }}</span>
+                                            @endif
+                                        </h2>
+                                        <ul class="kmp-fasilitas">
+                                            @foreach ($p['fasilitas'] as $butir)
+                                                <li><i class="bi bi-check-circle-fill"></i> <span>{{ $butir }}</span></li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                @endforeach
+                            @endif
                         </div>
                     </div>
 

@@ -98,7 +98,40 @@ class PublicScopusCampController extends Controller
             ->filter(fn ($p) => ! empty($p['fasilitas']))
             ->values();
 
-        return view('public.scopus_camp.index', compact('categories', 'paket', 'namaVarian'));
+        /*
+         * Yang SAMA ditulis sekali, selisihnya disebut per varian.
+         *
+         * Bentuk sebelumnya memajang dua daftar utuh berdampingan — dan
+         * terukur, keduanya mengulang 5 dari 7 butir yang sama. Untuk tahu
+         * bedanya, pembaca harus membandingkan dua daftar baris per baris.
+         * Sasaran halaman ini orang berusia lanjut, dan yang mereka cari
+         * cuma satu hal: apa bedanya.
+         *
+         * Pemisahan ini HANYA dipakai kalau ada lebih dari satu paket DAN
+         * irisannya benar-benar ada. Dengan satu paket, "yang sama" tidak
+         * punya lawan; tanpa irisan, memisahkannya cuma menambah satu
+         * judul tanpa mengurangi apa pun yang harus dibaca.
+         */
+        $fasilitasUmum = [];
+
+        if ($paket->count() > 1) {
+            $semua = $paket->pluck('fasilitas')->all();
+            $fasilitasUmum = array_values(array_intersect(...$semua));
+        }
+
+        $pisahkan = $fasilitasUmum !== [];
+
+        if ($pisahkan) {
+            $paket = $paket->map(function ($p) use ($fasilitasUmum) {
+                $p['khusus'] = array_values(array_diff($p['fasilitas'], $fasilitasUmum));
+
+                return $p;
+            });
+        }
+
+        return view('public.scopus_camp.index', compact(
+            'categories', 'paket', 'namaVarian', 'fasilitasUmum', 'pisahkan'
+        ));
     }
     // <!--================== END ==================-->
 
