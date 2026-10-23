@@ -213,9 +213,66 @@ class PublicScopusCampController extends Controller
          * sendiri, borang bisa menuntut bukti transfer sementara peladen
          * mengarahkan ke DOKU.
          */
+        /*
+         * Yang SUDAH masuk akun tidak perlu mengetik apa pun.
+         *
+         * Dirender terisi dari peladen, bukan lewat pencarian nomor: datanya
+         * sudah ada di sesi, dan menunggu ia mengetik nomornya sendiri dulu
+         * berarti meminta keterangan yang kita pegang.
+         */
+        $akun = auth()->user();
+
         return view('public.scopus_camp.form_pendaftaran', [
             'item' => $item,
             'bayarDaring' => $this->doku->siap(),
+            'isiAwal' => $akun === null ? [] : array_filter([
+                'nama' => $akun->full_name,
+                'email' => $akun->email,
+                'telp' => $akun->telp,
+                'affiliasi' => $akun->company,
+            ]),
+        ]);
+    }
+
+    /**
+     * Data diri pemilik satu nomor WhatsApp, untuk mengisi borang otomatis.
+     *
+     * Alamat ini MENUKAR NOMOR JADI NAMA DAN EMAIL. Siapa pun bisa
+     * memanggilnya, jadi siapa pun bisa memanen keduanya dengan mencoba nomor
+     * satu per satu. Itu diterima sebagai harga kemudahan ini — keputusan
+     * yang sudah diambil saat jalur yang sama dibuat untuk Webinar Eksklusif
+     * — dengan dua syarat yang tidak boleh dilepas: alamatnya dibatasi
+     * jumlah permintaan per menit per IP di routes/web.php, dan nomornya
+     * dicatat TERSAMAR di bawah, tidak pernah utuh.
+     */
+    public function cariPendaftar(Request $request, \App\Support\IsiOtomatisDariNomor $pencari)
+    {
+        $data = $request->validate([
+            'telp' => ['required', 'string', 'max:30'],
+        ]);
+
+        $ketemu = $pencari->cari($data['telp']);
+
+        if ($ketemu === null) {
+            // Jawaban yang SAMA untuk nomor yang tidak masuk akal dan nomor
+            // yang memang belum pernah memesan. Membedakannya memberi tahu
+            // pemanen mana nomor yang benar-benar ada di sini.
+            return response()->json(['ditemukan' => false]);
+        }
+
+        $nomor = \App\Support\NomorTelepon::rapikan($data['telp']);
+
+        Log::info('Isi otomatis borang Scopus Camp', [
+            'nomor' => substr($nomor, 0, 5) . '***' . substr($nomor, -3),
+            'ip' => $request->ip(),
+            'sumber' => $ketemu['sumber'],
+        ]);
+
+        return response()->json([
+            'ditemukan' => true,
+            'nama' => $ketemu['nama'],
+            'email' => $ketemu['email'],
+            'affiliasi' => $ketemu['affiliasi'],
         ]);
     }
     // <!--================== END ==================-->

@@ -127,6 +127,41 @@
 
     .daf-dua { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 
+    .daf-bantu {
+        display: block; margin-top: 7px;
+        font-size: .88rem; line-height: 1.5; color: var(--tinta-2);
+    }
+
+    /* ================================================== isi otomatis */
+    .daf-kabar-isi {
+        display: flex; align-items: flex-start; flex-wrap: wrap; gap: 9px;
+        margin: 0 0 20px; padding: 13px 15px;
+        background: #e8f5f2; border: 1px solid #bfe3db; border-radius: 13px;
+        font-size: .92rem; line-height: 1.55; color: #0b5a53;
+    }
+    /* [hidden] kalah oleh display:flex di atas — bobotnya sama (0,1,0) dan
+       aturan ini berdiri belakangan — jadi kotaknya tetap tergambar walau
+       atribut hidden-nya ada. Dinyatakan sendiri, bukan diandaikan. */
+    .daf-kabar-isi[hidden] { display: none; }
+    .daf-kabar-isi i { margin-top: 3px; color: var(--rumput); }
+    .daf-kabar-isi span { flex: 1 1 180px; min-width: 0; }
+    .daf-kabar-isi button {
+        flex: 0 0 auto; border: 0; border-radius: 10px; padding: 7px 14px;
+        background: #0b5a53; color: #fff; font-family: inherit;
+        font-size: .86rem; font-weight: 800; cursor: pointer;
+    }
+    .daf-kabar-isi button:hover { background: #09443f; }
+
+    /* Isian yang baru saja diisikan sendiri DITANDAI.
+
+       Tanpa tanda, tiga kotak yang mendadak terisi tanpa disentuh terbaca
+       seperti halaman yang berkelakuan aneh — dan yang paling mungkin
+       merasa begitu justru pembaca yang jadi sasaran layanan ini. */
+    .daf-isian.daf-baru-diisi {
+        border-color: #58b5a5;
+        background: #f2fbf9;
+    }
+
     /* ==================================================== kode diskon */
     .daf-diskon-baris { display: flex; gap: 10px; }
     .daf-diskon-baris .daf-isian { flex: 1 1 auto; min-width: 0; }
@@ -345,38 +380,66 @@
                         <input type="hidden" name="ppn" id="jumlahPPN" value="{{ $jumlahPPN }}">
                     </div>
 
+                    {{-- NOMOR WHATSAPP DULU, baru sisanya.
+
+                         Diminta pemiliknya 23 Okt 2026: yang pernah memesan
+                         cukup mengetik nomornya, dan nama, email, serta asal
+                         instansinya terisi sendiri dari pesanan terakhirnya.
+
+                         Urutannya ikut berubah, dan itu bukan soal rupa:
+                         nomor yang duduk di kotak TERAKHIR berarti orangnya
+                         sudah terlanjur mengetik ketiga isian lain sebelum
+                         pengisian otomatisnya sempat menolong — dan isian
+                         yang sudah terisi tidak pernah ditimpa. --}}
                     <div class="daf-kartu">
                         <div class="daf-kepala">
                             <i class="fas fa-user"></i> Data diri peserta
                         </div>
 
+                        <div class="daf-medan">
+                            <label for="telp">Nomor WhatsApp <span class="daf-wajib">*</span></label>
+                            <input type="text" name="telp" id="telp"
+                                value="{{ old('telp', $isiAwal['telp'] ?? '') }}"
+                                placeholder="0812-3456-7890" class="daf-isian"
+                                inputmode="numeric" maxlength="20" minlength="8"
+                                autocomplete="tel"
+                                oninput="formatPhoneNumber(this)" required>
+                            <small class="daf-bantu">
+                                Isi nomor Anda dulu. Kalau pernah memesan di Rumah Scopus,
+                                sisanya kami isikan sendiri.
+                            </small>
+                        </div>
+
+                        {{-- role="status" + aria-live: pembaca layar harus ikut
+                             diberi tahu bahwa tiga isian baru saja berubah
+                             sendiri, bukan cuma yang melihat layarnya. --}}
+                        <p class="daf-kabar-isi" id="daf-kabar-isi" role="status"
+                            aria-live="polite" hidden></p>
+
                         <div class="daf-dua">
                             <div class="daf-medan">
                                 <label for="nama">Nama lengkap &amp; gelar <span class="daf-wajib">*</span></label>
-                                <input type="text" name="nama" id="nama" value="{{ old('nama') }}"
-                                    placeholder="John Doe, S.Kom." class="daf-isian" required>
+                                <input type="text" name="nama" id="nama"
+                                    value="{{ old('nama', $isiAwal['nama'] ?? '') }}"
+                                    placeholder="John Doe, S.Kom." class="daf-isian"
+                                    autocomplete="name" required>
                             </div>
                             <div class="daf-medan">
                                 <label for="email">Email aktif <span class="daf-wajib">*</span></label>
-                                <input type="email" name="email" id="email" value="{{ old('email') }}"
+                                <input type="email" name="email" id="email"
+                                    value="{{ old('email', $isiAwal['email'] ?? '') }}"
                                     placeholder="email@domain.com" class="daf-isian"
-                                    maxlength="100" minlength="5" required>
+                                    maxlength="100" minlength="5"
+                                    autocomplete="email" required>
                             </div>
                         </div>
 
-                        <div class="daf-dua" style="margin-top: 20px;">
-                            <div class="daf-medan">
-                                <label for="affiliasi">Asal instansi <span class="daf-wajib">*</span></label>
-                                <input type="text" name="affiliasi" id="affiliasi" value="{{ old('affiliasi') }}"
-                                    placeholder="Universitas / Instansi" class="daf-isian" minlength="3" required>
-                            </div>
-                            <div class="daf-medan">
-                                <label for="telp">Nomor WhatsApp <span class="daf-wajib">*</span></label>
-                                <input type="text" name="telp" id="telp" value="{{ old('telp') }}"
-                                    placeholder="0812-3456-7890" class="daf-isian"
-                                    inputmode="numeric" maxlength="20" minlength="8"
-                                    oninput="formatPhoneNumber(this)" required>
-                            </div>
+                        <div class="daf-medan" style="margin-top: 20px;">
+                            <label for="affiliasi">Asal instansi <span class="daf-wajib">*</span></label>
+                            <input type="text" name="affiliasi" id="affiliasi"
+                                value="{{ old('affiliasi', $isiAwal['affiliasi'] ?? '') }}"
+                                placeholder="Universitas / Instansi" class="daf-isian"
+                                autocomplete="organization" minlength="3" required>
                         </div>
                     </div>
 
@@ -839,6 +902,189 @@
     }
 </script>
 @endunless
+
+<script>
+    /*
+     * ISI OTOMATIS DARI NOMOR WHATSAPP.
+     *
+     * Yang sudah masuk akun tidak lewat sini — borangnya sudah dirender
+     * terisi oleh peladen. Ini untuk tamu yang pernah memesan.
+     *
+     * Aturannya dijaga supaya tidak menyebalkan:
+     *   - hanya saat nomornya LENGKAP (9-15 angka), bukan tiap ketukan;
+     *   - isian yang SUDAH diisi orangnya tidak pernah ditimpa;
+     *   - nomor yang sama tidak dicari dua kali;
+     *   - selalu bisa dibatalkan, dan pembatalan hanya mengosongkan yang
+     *     memang diisikan skrip — bukan yang diketik orangnya sendiri.
+     */
+    (function () {
+        var telp = document.getElementById('telp');
+        var kabar = document.getElementById('daf-kabar-isi');
+
+        if (! telp || ! kabar || ! window.fetch) {
+            return;
+        }
+
+        var ALAMAT = @json(route('public.scopuscamp.caripendaftar'));
+        var CSRF = document.querySelector('meta[name=csrf-token]');
+
+        var medan = {
+            nama: document.getElementById('nama'),
+            email: document.getElementById('email'),
+            affiliasi: document.getElementById('affiliasi')
+        };
+
+        var nomorTerakhir = '';
+        var diisiSkrip = [];
+
+        function angkaSaja(n) {
+            return (n || '').replace(/\D+/g, '');
+        }
+
+        function bersihkanTanda() {
+            Object.keys(medan).forEach(function (k) {
+                if (medan[k]) {
+                    medan[k].classList.remove('daf-baru-diisi');
+                }
+            });
+        }
+
+        function batalkan() {
+            /*
+             * HANYA yang diisikan skrip yang dikosongkan. Mengosongkan
+             * semuanya akan membuang nama yang mungkin sudah diketik
+             * orangnya sendiri sebelum nomornya diisi.
+             */
+            diisiSkrip.forEach(function (k) {
+                if (medan[k]) {
+                    medan[k].value = '';
+                }
+            });
+
+            diisiSkrip = [];
+            bersihkanTanda();
+            kabar.hidden = true;
+
+            if (medan.nama) {
+                medan.nama.focus();
+            }
+        }
+
+        function tampilkanKabar(jumlah) {
+            kabar.innerHTML = '';
+
+            var ikon = document.createElement('i');
+            // fa-magic, bukan padanannya di Font Awesome 6: yang dimuat
+            // aplikasi ini versi 5, dan nama ikon yang tidak ada di sana
+            // tetap menyisakan kotak kosong tanpa galat apa pun.
+            ikon.className = 'fas fa-magic';
+            ikon.setAttribute('aria-hidden', 'true');
+
+            var teks = document.createElement('span');
+            teks.textContent = jumlah + ' isian kami isikan dari pesanan Anda sebelumnya. '
+                + 'Periksa dulu, ubah kalau ada yang berbeda.';
+
+            var batal = document.createElement('button');
+            batal.type = 'button';
+            batal.textContent = 'Kosongkan';
+            batal.addEventListener('click', batalkan);
+
+            kabar.appendChild(ikon);
+            kabar.appendChild(teks);
+            kabar.appendChild(batal);
+            kabar.hidden = false;
+        }
+
+        function isikan(data) {
+            diisiSkrip = [];
+            bersihkanTanda();
+
+            Object.keys(medan).forEach(function (k) {
+                var e = medan[k];
+
+                // Yang sudah ada isinya DIBIARKAN: orangnya mungkin sengaja
+                // memakai nama atau email yang berbeda kali ini.
+                if (! e || ! data[k] || e.value.trim() !== '') {
+                    return;
+                }
+
+                e.value = data[k];
+                e.classList.add('daf-baru-diisi');
+                diisiSkrip.push(k);
+            });
+
+            if (diisiSkrip.length === 0) {
+                kabar.hidden = true;
+
+                return;
+            }
+
+            tampilkanKabar(diisiSkrip.length);
+        }
+
+        function cari() {
+            var nomor = angkaSaja(telp.value);
+
+            if (nomor.length < 9 || nomor.length > 15) {
+                nomorTerakhir = '';
+
+                return;
+            }
+
+            // Nomor yang sama tidak dicari ulang: orang sering keluar masuk
+            // isian ini saat memeriksa kembali isiannya.
+            if (nomor === nomorTerakhir) {
+                return;
+            }
+
+            nomorTerakhir = nomor;
+
+            fetch(ALAMAT, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': CSRF ? CSRF.getAttribute('content') : ''
+                },
+                body: JSON.stringify({ telp: telp.value })
+            })
+                .then(function (r) { return r.ok ? r.json() : null; })
+                .then(function (d) { if (d && d.ditemukan) { isikan(d); } })
+                .catch(function () {
+                    /*
+                     * Didiamkan dengan sengaja. Ini kemudahan, bukan syarat —
+                     * jaringan yang bermasalah tidak boleh memunculkan pesan
+                     * galat di borang yang sebenarnya masih bisa diisi tangan.
+                     */
+                });
+        }
+
+        /*
+         * Dicari saat mengetiknya BERHENTI sejenak, bukan hanya saat
+         * berpindah isian.
+         *
+         * Nomornya kini isian pertama. Kalau menunggu change/blur, sisanya
+         * baru terisi setelah orangnya sudah berpindah ke isian Nama — dan
+         * isian yang terisi sendiri tepat saat kursornya ada di sana justru
+         * mengagetkan. Dengan jeda, borangnya sudah lengkap sebelum ia
+         * menyentuh isian berikutnya.
+         *
+         * 600 ms: cukup lama untuk tidak mencari di tengah pengetikan nomor,
+         * cukup singkat untuk selesai sebelum orangnya berpindah.
+         */
+        var jadwal = null;
+
+        telp.addEventListener('input', function () {
+            clearTimeout(jadwal);
+            jadwal = setTimeout(cari, 600);
+        });
+
+        // Jaring pengaman: tempel dari papan klip dan isian otomatis peramban
+        // tidak selalu memicu 'input' di semua peramban.
+        telp.addEventListener('change', cari);
+        telp.addEventListener('blur', cari);
+    })();
+</script>
 
 <script>
     function formatPhoneNumber(isian) {
