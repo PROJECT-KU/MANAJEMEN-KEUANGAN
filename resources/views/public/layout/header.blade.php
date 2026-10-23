@@ -441,7 +441,25 @@
         #footer ul.kaki-kontak i { color: var(--kaki-jingga); }
         #footer ul.kaki-kontak a {
             color: var(--kaki-redup); text-decoration: none; transition: color .18s ease;
+
+            /*
+             * Alamat suratnya BOLEH dipenggal.
+             *
+             * info@rumahscopusfoundation.com selebar 237px tidak muat di
+             * kolom 240px yang sudah terpakai ikon dan jaraknya — dan
+             * karena ia satu kata tanpa spasi, ia tidak pernah membungkus
+             * sendiri. Terukur di lebar 992px: halamannya bisa digulir ke
+             * samping sejauh 17px, di SEMUA halaman yang memakai kaki ini.
+             *
+             * `anywhere`, bukan `break-word`: break-word hanya memenggal
+             * kalau barisnya memang sudah penuh, dan di kotak selentur ini
+             * ia justru melebarkan kotaknya dulu.
+             */
+            overflow-wrap: anywhere;
         }
+        /* Kotaknya pun tidak boleh ikut melebar oleh isinya; tanpa ini
+           butir flex di atasnya tetap memakai lebar alaminya. */
+        #footer ul.kaki-kontak li a { min-width: 0; }
         #footer ul.kaki-kontak a:hover { color: var(--kaki-jingga-muda); }
 
         #footer .copyright {

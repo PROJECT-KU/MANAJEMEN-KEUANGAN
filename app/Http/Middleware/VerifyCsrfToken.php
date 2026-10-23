@@ -30,5 +30,6 @@ class VerifyCsrfToken extends Middleware
          * sebelum satu pun status diubah.
          */
         'Webinar-Eksklusif/pemberitahuan/doku',
+        'Scopus-Camp/pemberitahuan/doku',
     ];
 }

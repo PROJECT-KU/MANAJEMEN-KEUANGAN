@@ -62,6 +62,22 @@ Route::get('/Scopus-Camp/Form-Pendaftaran/{id}', 'Publict\PublicScopusCampContro
 Route::get('/Scopus-Camp/cek-kode-diskon/{id}', 'Publict\PublicScopusCampController@cekKodeDiskon')->name('public.scopuscamp.cekkodediskon');
 Route::post('/Scopus-Camp/store', 'Publict\PublicScopusCampController@store')->name('public.scopuscamp.store');
 
+/*
+ * UUID saja, tanpa token.
+ *
+ * Kuncinya bukan rahasia tambahan melainkan bentuk nomornya sendiri: UUID
+ * acak tidak bisa ditebak, sedangkan nomor urut akan membuat pendaftaran
+ * orang lain terbuka cukup dengan menaikkan satu angka.
+ */
+Route::get('/Scopus-Camp/Status/{id}', 'Publict\PublicScopusCampController@status')->name('public.scopuscamp.status');
+Route::get('/Scopus-Camp/Status/{id}/keadaan', 'Publict\PublicScopusCampController@keadaan')->name('public.scopuscamp.keadaan');
+
+/*
+ * Pemberitahuan balik dari DOKU; dikecualikan dari CSRF di VerifyCsrfToken.
+ * Penjagaannya tanda tangan HMAC, diperiksa sebelum satu pun status diubah.
+ */
+Route::post('/Scopus-Camp/pemberitahuan/doku', 'Publict\PublicScopusCampController@pemberitahuan')->name('public.scopuscamp.pemberitahuan');
+
 // WEBINAR EKSKLUSIF
 // Halaman pemasarannya ada di subdomain tersendiri dan mengambil datanya
 // lewat /api/webinar-eksklusif; yang di sini bagian yang menulis ke basis data.

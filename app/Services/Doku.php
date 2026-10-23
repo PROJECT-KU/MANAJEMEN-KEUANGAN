@@ -99,6 +99,28 @@ class Doku
             ];
         }
 
+        /*
+         * PPN dikirim sebagai BARIS TERSENDIRI, bukan dilipat ke harga
+         * satuannya.
+         *
+         * Scopus Camp menghitungnya dari SATU kursi, bukan dari subtotal
+         * (lihat App\Support\HargaUmum) — jadi melipatnya ke harga satuan
+         * membuat rinciannya meleset begitu pesertanya lebih dari satu, dan
+         * DOKU menolak seluruh tagihan dengan "AMOUNT NOT MATCH". Yang
+         * menanggungnya pendaftar yang melihat "pembayaran daring sedang
+         * bermasalah" tanpa petunjuk apa pun.
+         *
+         * Nol untuk Webinar Eksklusif, yang memang tidak memakai PPN; baris
+         * ini tidak digambar sama sekali di sana.
+         */
+        if ((int) ($pesanan['ppn'] ?? 0) > 0) {
+            $baris[] = [
+                'name' => 'PPN',
+                'price' => (int) $pesanan['ppn'],
+                'quantity' => 1,
+            ];
+        }
+
         // Kode unik transfer biasanya 0 di jalur DOKU — pencocokannya memakai
         // nomor rujukan. Tetap dihitung di sini supaya rinciannya tidak
         // pernah meleset kalau suatu saat dipakai juga.
