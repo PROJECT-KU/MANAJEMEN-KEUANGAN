@@ -171,23 +171,43 @@ class ScopusCampPublikTest extends TestCase
 
         $isi = (string) $this->get('/Scopus-Camp')->assertOk()->getContent();
 
-        // Dua paket, bukan satu daftar untuk semuanya.
-        $this->assertSame(2, substr_count($isi, 'class="kmp-paket"'),
-            'Halaman ini memajang ' . substr_count($isi, 'class="kmp-paket"') . ' daftar fasilitas '
-            . 'untuk dua varian yang fasilitasnya berbeda.');
+        /*
+         * Bentuknya: yang SAMA ditulis sekali di "Yang kamu dapat", lalu
+         * selisihnya disebut per varian di bawah judul "Bedanya".
+         *
+         * Yang dijaga tetap aturan usahanya, bukan markahnya: butir yang
+         * cuma ada di paket Jawa tidak boleh muncul sebagai sesuatu yang
+         * didapat peserta luar Jawa — baik lewat daftar umum maupun lewat
+         * blok selisihnya.
+         */
+        $awalBeda = strpos($isi, 'class="kmp-beda"');
 
-        // Blok luar Jawa TIDAK boleh memuat butir yang cuma ada di Jawa.
-        $cocok = preg_match(
-            '#<div class="kmp-paket">(?:(?!</div>).)*?Luar Pulau Jawa(.*?)</div>#s',
-            $isi, $tangkap
-        );
+        $this->assertNotFalse($awalBeda,
+            'Bagian "Bedanya" tidak tergambar, padahal halaman ini memuat dua '
+            . 'varian yang fasilitasnya berbeda.');
 
-        $this->assertSame(1, $cocok, 'Blok fasilitas Luar Pulau Jawa tidak ditemukan.');
+        $umum = substr($isi, 0, $awalBeda);
+        $beda = substr($isi, $awalBeda);
 
         foreach ($hanyaDiJawa as $butir) {
-            $this->assertStringNotContainsString($butir, $tangkap[1],
-                'Daftar fasilitas Luar Pulau Jawa menjanjikan "' . $butir . '", '
-                . 'yang hanya ada di paket Pulau Jawa.');
+            $this->assertStringNotContainsString($butir, $umum,
+                'Butir "' . $butir . '" ditulis sebagai fasilitas yang didapat SEMUA '
+                . 'peserta, padahal ia hanya ada di paket Pulau Jawa.');
+        }
+
+        // Dan di blok selisih, butir itu harus berada di bawah label Jawa —
+        // bukan di bawah label luar Jawa.
+        $potongLuar = strpos($beda, 'Luar Pulau Jawa');
+
+        $this->assertNotFalse($potongLuar, 'Label paket Luar Pulau Jawa tidak ditemukan.');
+
+        foreach ($hanyaDiJawa as $butir) {
+            $this->assertStringNotContainsString($butir, substr($beda, $potongLuar),
+                'Paket Luar Pulau Jawa menjanjikan "' . $butir . '", yang hanya ada '
+                . 'di paket Pulau Jawa.');
+
+            $this->assertStringContainsString($butir, substr($beda, 0, $potongLuar),
+                'Butir "' . $butir . '" tidak disebut sebagai kelebihan paket Pulau Jawa.');
         }
     }
 
