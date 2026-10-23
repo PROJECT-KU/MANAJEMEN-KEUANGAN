@@ -497,12 +497,27 @@ class PublicScopusCampController extends Controller
              */
             'peserta' => ['array', 'max:19'],
             'peserta.*.nama' => ['required', 'string', 'min:3', 'max:120'],
-            'peserta.*.email' => ['nullable', 'email:rfc', 'max:120'],
+
+            /*
+             * NOMOR WHATSAPP, bukan email — keputusan pemiliknya 23 Okt 2026.
+             *
+             * Itu juga yang sudah dipakai jalur panitia: kotak daftar peserta
+             * di layar rincian berbentuk "Budi Santoso, 081234567890", dan
+             * ketujuh baris peserta yang sudah ada di basis data punya `telp`
+             * terisi dengan `email` NULL bertujuh. Meminta email di borang
+             * umum berarti mengisi kolom yang tidak dibaca siapa pun,
+             * sementara kolom yang dipakai panitia tetap kosong.
+             *
+             * Boleh dikosongkan, sama seperti di layar panitia: yang
+             * mendaftarkan rombongan belum tentu memegang nomor semua
+             * orangnya saat itu juga, dan memaksakannya membuat orang
+             * mengarang nomor — yang jauh lebih buruk daripada kolom kosong.
+             */
+            'peserta.*.telp' => ['nullable', 'string', 'max:25'],
         ], [
             'setuju.accepted' => 'Centang dulu persetujuan ketentuannya.',
             'peserta.*.nama.required' => 'Nama tiap peserta diisi dulu, ya — '
                 . 'sertifikatnya atas nama mereka.',
-            'peserta.*.email.email' => 'Ada alamat email peserta yang belum benar.',
         ]);
 
         /*
@@ -533,22 +548,46 @@ class PublicScopusCampController extends Controller
         }
 
         /*
-         * Email peserta tidak boleh kembar, baik sesama peserta maupun
-         * dengan pendaftar utamanya. Dua orang beremail sama berarti satu di
-         * antaranya tidak akan pernah menerima apa pun, dan yang ketahuan
-         * belakangan hanyalah "sertifikat saya tidak sampai".
+         * Nomornya DINORMALKAN sekarang juga, sebelum diperiksa kembar.
+         *
+         * "0812-3456-7890" dan "081234567890" adalah nomor yang SAMA, tetapi
+         * sebagai untaian keduanya berbeda — jadi memeriksa kembarnya pada
+         * teks mentah akan meloloskan dua peserta bernomor sama yang cuma
+         * beda tanda hubung.
          */
-        $surel = array_filter(array_map(
-            fn ($o) => mb_strtolower(trim((string) ($o['email'] ?? ''))),
-            $data['peserta']
-        ));
+        foreach ($data['peserta'] as $i => $orang) {
+            $data['peserta'][$i]['telp'] = \App\Support\NomorTelepon::rapikan(
+                (string) ($orang['telp'] ?? '')
+            );
+        }
 
-        $surel[] = mb_strtolower(trim($data['email']));
+        /*
+         * Nomor yang diisi harus MASUK AKAL. Nomor sepotong seperti "0812"
+         * tersimpan apa adanya dan baru ketahuan saat panitia menekannya dan
+         * tidak ada yang menjawab.
+         */
+        foreach ($data['peserta'] as $orang) {
+            if ($orang['telp'] !== '' && ! \App\Support\NomorTelepon::masukAkal($orang['telp'])) {
+                return back()->withInput()->withErrors([
+                    'peserta' => 'Ada nomor WhatsApp peserta yang belum benar. '
+                        . 'Periksa lagi, atau kosongkan saja yang belum diketahui.',
+                ]);
+            }
+        }
 
-        if (count($surel) !== count(array_unique($surel))) {
+        /*
+         * Nomor peserta tidak boleh kembar, baik sesama peserta maupun dengan
+         * pendaftar utamanya. Dua orang bernomor sama berarti satu di
+         * antaranya tidak akan pernah dihubungi, dan yang ketahuan belakangan
+         * hanyalah "saya tidak pernah dimasukkan ke grup".
+         */
+        $nomor = array_filter(array_column($data['peserta'], 'telp'));
+        $nomor[] = \App\Support\NomorTelepon::rapikan($data['telp']);
+
+        if (count($nomor) !== count(array_unique($nomor))) {
             return back()->withInput()->withErrors([
-                'peserta' => 'Ada email yang dipakai dua kali. Tiap peserta perlu email '
-                    . 'sendiri, atau kosongkan saja yang tidak punya.',
+                'peserta' => 'Ada nomor WhatsApp yang dipakai dua kali. Tiap peserta '
+                    . 'perlu nomor sendiri, atau kosongkan saja yang belum diketahui.',
             ]);
         }
 
@@ -742,13 +781,25 @@ class PublicScopusCampController extends Controller
                  * baris peserta yang induknya tidak ada — dan tidak ada satu
                  * pun layar yang memperlihatkannya.
                  */
-                foreach ($data['peserta'] as $urutan => $orang) {
+                foreach ($data['peserta'] as $ke => $orang) {
                     $baris->pesertaLain()->create([
-                        'urutan' => $urutan,
+                        /*
+                         * Mulai dari SATU, bukan nol.
+                         *
+                         * Urutan 0 dipegang pendaftar utamanya, yang tersimpan
+                         * di baris pendaftarannya sendiri — itu perjanjian
+                         * yang sudah dipakai jalur panitia, dan ketujuh baris
+                         * yang sudah ada di basis data bernomor 1 sampai 7.
+                         * Menulis dari nol membuat layar panitia memasangkan
+                         * baris yang salah saat daftarnya disunting ulang.
+                         */
+                        'urutan' => $ke + 1,
                         'nama' => trim($orang['nama']),
-                        'email' => isset($orang['email']) && trim((string) $orang['email']) !== ''
-                            ? mb_strtolower(trim($orang['email']))
-                            : null,
+
+                        // Kosong disimpan null, bukan untaian kosong: dua
+                        // penanda "tidak ada nomor" di satu kolom membuat
+                        // tiap pembacanya harus memeriksa keduanya.
+                        'telp' => $orang['telp'] !== '' ? $orang['telp'] : null,
                     ]);
                 }
 

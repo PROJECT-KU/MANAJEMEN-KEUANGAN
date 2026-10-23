@@ -614,7 +614,8 @@
 
                         <p class="daf-bantu" style="margin: -8px 0 18px;">
                             Nama di sini dipakai untuk daftar hadir dan sertifikat.
-                            Emailnya boleh dikosongkan kalau belum tahu.
+                            Nomornya dipakai panitia memasukkan mereka ke grup —
+                            boleh dikosongkan kalau belum tahu.
                         </p>
 
                         @error('peserta')
@@ -633,10 +634,12 @@
                                                 class="daf-isian" placeholder="Nama peserta" required>
                                         </div>
                                         <div class="daf-medan">
-                                            <label>Email <span class="daf-opsional">— boleh dikosongkan</span></label>
-                                            <input type="email" name="peserta[{{ $i }}][email]"
-                                                value="{{ $orang['email'] ?? '' }}"
-                                                class="daf-isian" placeholder="email@domain.com">
+                                            <label>Nomor WhatsApp <span class="daf-opsional">— boleh dikosongkan</span></label>
+                                            <input type="text" name="peserta[{{ $i }}][telp]"
+                                                value="{{ $orang['telp'] ?? '' }}"
+                                                class="daf-isian" placeholder="0812-3456-7890"
+                                                inputmode="numeric" maxlength="20"
+                                                oninput="formatPhoneNumber(this)">
                                         </div>
                                     </div>
                                 </div>
@@ -1137,7 +1140,7 @@
             var dua = document.createElement('div');
             dua.className = 'daf-dua';
             dua.appendChild(medanPeserta(i, 'nama', 'Nama lengkap & gelar', true));
-            dua.appendChild(medanPeserta(i, 'email', 'Email', false));
+            dua.appendChild(medanPeserta(i, 'telp', 'Nomor WhatsApp', false));
 
             baris.appendChild(nomor);
             baris.appendChild(dua);
@@ -1165,10 +1168,20 @@
             label.appendChild(tanda);
 
             var isian = document.createElement('input');
-            isian.type = kunci === 'email' ? 'email' : 'text';
+            isian.type = 'text';
             isian.name = 'peserta[' + i + '][' + kunci + ']';
             isian.className = 'daf-isian';
-            isian.placeholder = kunci === 'email' ? 'email@domain.com' : 'Nama peserta';
+
+            if (kunci === 'telp') {
+                isian.placeholder = '0812-3456-7890';
+                isian.inputMode = 'numeric';
+                isian.maxLength = 20;
+                // Dirapikan sama persis dengan nomor pendaftar utamanya,
+                // supaya yang terbaca di layar panitia satu bentuk saja.
+                isian.addEventListener('input', function () { formatPhoneNumber(isian); });
+            } else {
+                isian.placeholder = 'Nama peserta';
+            }
 
             if (wajib) {
                 isian.required = true;
