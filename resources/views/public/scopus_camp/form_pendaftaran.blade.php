@@ -167,6 +167,24 @@
     .daf-langkah:hover { border-color: var(--jingga); color: var(--jingga-tua); }
     .daf-langkah:disabled { opacity: .4; cursor: not-allowed; }
 
+    /* ================================================== peserta lain */
+    .daf-peserta {
+        display: grid; grid-template-columns: 38px minmax(0, 1fr); gap: 14px;
+        align-items: start; padding: 16px 0;
+        border-top: 1px dashed var(--garis);
+    }
+    .daf-peserta:first-child { border-top: 0; padding-top: 0; }
+    .daf-peserta-nomor {
+        display: flex; align-items: center; justify-content: center;
+        width: 38px; height: 38px; margin-top: 26px;
+        border-radius: 50%; background: var(--kertas-2);
+        color: var(--tinta); font-weight: 800; font-size: .95rem;
+    }
+    @media (max-width: 575.98px) {
+        .daf-peserta { grid-template-columns: 1fr; gap: 8px; }
+        .daf-peserta-nomor { margin-top: 0; }
+    }
+
     /* ================================================== persetujuan */
     .daf-setuju {
         display: flex; align-items: flex-start; gap: 11px;
@@ -572,6 +590,57 @@
                                 value="{{ old('affiliasi', $isiAwal['affiliasi'] ?? '') }}"
                                 placeholder="Universitas / Instansi" class="daf-isian"
                                 autocomplete="organization" minlength="3" required>
+                        </div>
+                    </div>
+
+                    {{-- PESERTA LAINNYA.
+
+                         Tanpa bagian ini, mendaftarkan lima orang menagih
+                         biaya lima orang lalu menyimpan SATU nama — panitia
+                         memegang daftar hadir berisi satu, dan empat
+                         sertifikat tidak bisa diterbitkan atas nama siapa
+                         pun. Sisanya harus dikejar lewat WhatsApp satu per
+                         satu.
+
+                         Barisnya dirakit JavaScript mengikuti jumlah peserta,
+                         TETAPI yang sudah diketik dirender ulang peladen dari
+                         old(): kiriman yang ditolak validasi memulangkan
+                         halaman yang sama, dan tanpa itu seluruh nama yang
+                         sudah diketik hilang. --}}
+                    <div class="daf-kartu" id="kartuPesertaLain" hidden>
+                        <div class="daf-kepala">
+                            <i class="fas fa-users"></i> Peserta lainnya
+                        </div>
+
+                        <p class="daf-bantu" style="margin: -8px 0 18px;">
+                            Nama di sini dipakai untuk daftar hadir dan sertifikat.
+                            Emailnya boleh dikosongkan kalau belum tahu.
+                        </p>
+
+                        @error('peserta')
+                            <p class="daf-pesan gagal" style="margin-bottom: 16px;">{{ $message }}</p>
+                        @enderror
+
+                        <div id="daftarPesertaLain">
+                            @foreach (old('peserta', []) as $i => $orang)
+                                <div class="daf-peserta" data-baris="{{ $i }}">
+                                    <span class="daf-peserta-nomor">{{ $i + 2 }}</span>
+                                    <div class="daf-dua">
+                                        <div class="daf-medan">
+                                            <label>Nama lengkap &amp; gelar <span class="daf-wajib">*</span></label>
+                                            <input type="text" name="peserta[{{ $i }}][nama]"
+                                                value="{{ $orang['nama'] ?? '' }}"
+                                                class="daf-isian" placeholder="Nama peserta" required>
+                                        </div>
+                                        <div class="daf-medan">
+                                            <label>Email <span class="daf-opsional">— boleh dikosongkan</span></label>
+                                            <input type="email" name="peserta[{{ $i }}][email]"
+                                                value="{{ $orang['email'] ?? '' }}"
+                                                class="daf-isian" placeholder="email@domain.com">
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
                         </div>
                     </div>
 
@@ -1043,10 +1112,112 @@
             });
         });
 
+        /*
+         * Baris nama peserta dirakit MENGIKUTI jumlahnya, dan yang sudah
+         * diketik TIDAK dibuang saat angkanya naik-turun.
+         *
+         * Membangun ulang seluruh daftar tiap kali angkanya berubah akan
+         * menghapus nama yang sudah diketik begitu orangnya menekan "−" lalu
+         * "+" sekali — dan di borang berisi sepuluh nama, itu kerugian yang
+         * tidak bisa dibatalkan.
+         */
+        var wadah = document.getElementById('daftarPesertaLain');
+        var kartu = document.getElementById('kartuPesertaLain');
+
+        function barisPeserta(i) {
+            var baris = document.createElement('div');
+            baris.className = 'daf-peserta';
+            baris.dataset.baris = String(i);
+
+            var nomor = document.createElement('span');
+            nomor.className = 'daf-peserta-nomor';
+            // i+2: peserta pertama adalah pendaftar utamanya sendiri.
+            nomor.textContent = String(i + 2);
+
+            var dua = document.createElement('div');
+            dua.className = 'daf-dua';
+            dua.appendChild(medanPeserta(i, 'nama', 'Nama lengkap & gelar', true));
+            dua.appendChild(medanPeserta(i, 'email', 'Email', false));
+
+            baris.appendChild(nomor);
+            baris.appendChild(dua);
+
+            return baris;
+        }
+
+        function medanPeserta(i, kunci, judul, wajib) {
+            var bungkus = document.createElement('div');
+            bungkus.className = 'daf-medan';
+
+            var label = document.createElement('label');
+            label.textContent = judul + ' ';
+
+            var tanda = document.createElement('span');
+
+            if (wajib) {
+                tanda.className = 'daf-wajib';
+                tanda.textContent = '*';
+            } else {
+                tanda.className = 'daf-opsional';
+                tanda.textContent = '— boleh dikosongkan';
+            }
+
+            label.appendChild(tanda);
+
+            var isian = document.createElement('input');
+            isian.type = kunci === 'email' ? 'email' : 'text';
+            isian.name = 'peserta[' + i + '][' + kunci + ']';
+            isian.className = 'daf-isian';
+            isian.placeholder = kunci === 'email' ? 'email@domain.com' : 'Nama peserta';
+
+            if (wajib) {
+                isian.required = true;
+            }
+
+            bungkus.appendChild(label);
+            bungkus.appendChild(isian);
+
+            return bungkus;
+        }
+
+        function susunPeserta() {
+            var perlu = Math.max(0, (parseInt(kotak.value, 10) || 1) - 1);
+            var ada = wadah.children.length;
+
+            // Hanya selisihnya yang disentuh, bukan seluruh daftarnya.
+            for (var i = ada; i < perlu; i++) {
+                wadah.appendChild(barisPeserta(i));
+            }
+
+            for (var j = ada; j > perlu; j--) {
+                wadah.removeChild(wadah.lastElementChild);
+            }
+
+            kartu.hidden = perlu === 0;
+        }
+
         kotak.addEventListener('input', rapikan);
         kotak.addEventListener('change', rapikan);
 
+        /*
+         * susunPeserta() dipasang sebagai pendengar TERSENDIRI, bukan
+         * dipanggil dari dalam rapikan().
+         *
+         * rapikan() sudah terlanjur terpasang sebagai pendengar di atas;
+         * membungkusnya belakangan tidak mengubah fungsi yang sudah
+         * terdaftar, jadi pembungkus itu tidak akan pernah terpanggil —
+         * cacat yang tidak mengeluarkan galat, cuma baris peserta yang
+         * tidak pernah muncul.
+         */
+        kotak.addEventListener('input', susunPeserta);
+        kotak.addEventListener('change', susunPeserta);
+
+        Array.prototype.forEach.call(langkah, function (t) {
+            t.addEventListener('click', susunPeserta);
+        });
+
         rapikan();
+        susunPeserta();
     })();
 </script>
 
