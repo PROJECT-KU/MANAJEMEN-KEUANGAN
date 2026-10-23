@@ -49,7 +49,24 @@ class PublicScopusCampController extends Controller
              * dan tidak ada galat apa pun yang memberi tahu.
              */
             ->whereDate('mulai', '>', now()->toDateString())
-            ->orderBy('mulai', 'asc');
+            ->orderBy('mulai', 'asc')
+
+            /*
+             * PEMUTUS SERI, dan ia bukan kerapian.
+             *
+             * Angkatan yang tanggal mulainya SAMA — dan itu wajar: satu
+             * gelombang Scopus Camp dibuka di beberapa kota pada tanggal
+             * yang sama — tidak punya urutan yang ditentukan tanpa baris
+             * ini. MySQL boleh memulangkannya dalam urutan apa pun, dan
+             * urutan itu boleh berubah antar permintaan.
+             *
+             * Akibatnya terlihat di bagian "Bedanya": paket mana yang
+             * dijelaskan lebih dulu berganti-ganti tiap halaman dimuat.
+             * Tertangkap 23 Okt 2026 sebagai uji yang kadang hijau kadang
+             * merah pada kode yang sama persis — tiga kali jalan, dua
+             * merah satu hijau.
+             */
+            ->orderBy('id', 'asc');
 
         /*
          * Dipaginasi. Seluruhnya dulu dicetak di satu halaman: terukur 294
@@ -494,6 +511,18 @@ class PublicScopusCampController extends Controller
             'email' => $pendaftaran->email,
             'telp' => $pendaftaran->telp,
             'kembali' => route('public.scopuscamp.status', $pendaftaran->getKey()),
+
+            /*
+             * HANYA QRIS dan Virtual Account, atas keputusan pemiliknya
+             * 23 Okt 2026.
+             *
+             * Dibatasi di permintaan tagihannya, bukan cuma di daftar yang
+             * dipajang borang. Daftar di borang itu janji; yang menentukan
+             * pilihan sebenarnya halaman DOKU, dan tanpa medan ini ia tetap
+             * memajang kartu, e-wallet, dan gerai — persis yang tidak jadi
+             * diterima.
+             */
+            'kanal' => Doku::KANAL_QRIS_DAN_VA,
         ]);
 
         if (! $hasil['berhasil'] || ! $hasil['url']) {

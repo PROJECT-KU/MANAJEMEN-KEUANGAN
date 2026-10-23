@@ -518,14 +518,17 @@
                             <p style="margin-top: 14px; font-size: .88rem; font-weight: 700; color: var(--tinta);">
                                 Bisa dibayar lewat
                             </p>
+                            {{-- QRIS dan Virtual Account SAJA, keputusan
+                                 pemiliknya 23 Okt 2026.
+
+                                 Daftar ini cuma janji: yang menentukan pilihan
+                                 sebenarnya halaman DOKU. Jadi pembatasannya
+                                 ikut dikirim bersama tagihannya — lihat
+                                 Doku::KANAL_QRIS_DAN_VA — supaya yang dibaca
+                                 di sini sama dengan yang ditemukan di sana. --}}
                             <div class="daf-kanal">
                                 <span>QRIS</span>
                                 <span>Virtual Account</span>
-                                <span>Kartu kredit</span>
-                                <span>OVO</span>
-                                <span>DANA</span>
-                                <span>ShopeePay</span>
-                                <span>Alfamart / Indomaret</span>
                             </div>
                         @else
                             <div class="daf-aman">

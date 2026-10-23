@@ -195,18 +195,53 @@ class ScopusCampPublikTest extends TestCase
                 . 'peserta, padahal ia hanya ada di paket Pulau Jawa.');
         }
 
-        // Dan di blok selisih, butir itu harus berada di bawah label Jawa —
-        // bukan di bawah label luar Jawa.
-        $potongLuar = strpos($beda, 'Luar Pulau Jawa');
+        /*
+         * Blok selisihnya dipotong PER PAKET, bukan dibelah di tempat label
+         * "Luar Pulau Jawa" muncul.
+         *
+         * Versi sebelumnya membelah dengan satu strpos dan menganggap blok
+         * Jawa selalu digambar lebih dulu. Halaman ini tidak pernah
+         * menjanjikan urutan itu: kedua angkatan uji punya tanggal mulai
+         * yang SAMA, dan urutan baris bertanggal sama ditentukan basis data.
+         * Hasilnya uji yang kadang hijau kadang merah pada kode yang sama
+         * persis — terukur 23 Okt 2026, tiga kali jalan, dua merah satu
+         * hijau, dan merahnya menuduh halaman menjanjikan fasilitas yang
+         * salah padahal tidak.
+         *
+         * Kuerinya sudah diberi pemutus seri supaya urutannya tetap. Uji ini
+         * tetap dibuat tidak bergantung urutan: yang dijaga aturan usahanya —
+         * butir khusus Jawa ada di blok Jawa dan tidak ada di blok luar Jawa
+         * — bukan paket mana yang kebetulan digambar duluan.
+         */
+        preg_match_all(
+            '#<div class="kmp-beda-butir">(.*?)</div>#s',
+            $beda,
+            $blok
+        );
 
-        $this->assertNotFalse($potongLuar, 'Label paket Luar Pulau Jawa tidak ditemukan.');
+        $this->assertGreaterThanOrEqual(2, count($blok[1]),
+            'Blok "Bedanya" tidak memuat dua paket.');
+
+        $blokLuar = null;
+        $blokJawa = null;
+
+        foreach ($blok[1] as $satu) {
+            if (str_contains($satu, 'Luar Pulau Jawa')) {
+                $blokLuar = $satu;
+            } elseif (str_contains($satu, 'Pulau Jawa')) {
+                $blokJawa = $satu;
+            }
+        }
+
+        $this->assertNotNull($blokLuar, 'Blok paket Luar Pulau Jawa tidak ditemukan.');
+        $this->assertNotNull($blokJawa, 'Blok paket Pulau Jawa tidak ditemukan.');
 
         foreach ($hanyaDiJawa as $butir) {
-            $this->assertStringNotContainsString($butir, substr($beda, $potongLuar),
+            $this->assertStringNotContainsString($butir, $blokLuar,
                 'Paket Luar Pulau Jawa menjanjikan "' . $butir . '", yang hanya ada '
                 . 'di paket Pulau Jawa.');
 
-            $this->assertStringContainsString($butir, substr($beda, 0, $potongLuar),
+            $this->assertStringContainsString($butir, $blokJawa,
                 'Butir "' . $butir . '" tidak disebut sebagai kelebihan paket Pulau Jawa.');
         }
     }

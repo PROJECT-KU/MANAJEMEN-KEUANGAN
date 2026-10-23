@@ -28,6 +28,48 @@ class Doku
     /** Berapa lama tagihan berlaku, dalam MENIT. */
     public const MENIT_KEDALUWARSA = 60;
 
+    /**
+     * Kanal pembayaran untuk layanan yang hanya menerima QRIS dan Virtual
+     * Account — keputusan pemiliknya 23 Okt 2026 untuk Scopus Camp.
+     *
+     * Virtual Account-nya DISEBUT SATU PER SATU PER BANK, bukan sebagai satu
+     * nama "VIRTUAL_ACCOUNT". DOKU tidak mengenal nama payung itu di
+     * payment_method_types; yang ia terima nama per bank, dan nama payungnya
+     * ditolak dengan "PAYMENT CHANNEL IS INACTIVE" — pesan yang terbaca
+     * seperti kanalnya dimatikan, bukan seperti namanya salah.
+     *
+     * ---------------------------------------------------------------------
+     * QRIS ada di daftar ini, tetapi BELUM AKTIF di akunnya
+     * ---------------------------------------------------------------------
+     *
+     * Diukur langsung ke DOKU 23 Okt 2026, satu kanal per permintaan: semua
+     * Virtual Account di bawah menjawab 200, sedangkan QRIS dan EMONEY_QRIS
+     * menjawab 400 "PAYMENT CHANNEL IS INACTIVE". Jadi selama kanalnya belum
+     * dinyalakan di dasbor DOKU, halaman bayarnya hanya memajang Virtual
+     * Account walau QRIS diminta di sini.
+     *
+     * Tetap dicantumkan, dan itu disengaja: begitu kanalnya dinyalakan di
+     * dasbor, ia langsung ikut muncul tanpa satu baris pun yang perlu
+     * diubah di sini. Mencantumkan kanal yang mati tidak membuat tagihannya
+     * ditolak — sudah diuji — selama ada satu kanal lain yang hidup.
+     *
+     * Yang TIDAK boleh terjadi: daftar ini seluruhnya berisi kanal mati.
+     * Jawabannya 400, dan SETIAP pendaftaran berakhir di halaman "pembayaran
+     * daring sedang bermasalah".
+     */
+    public const KANAL_QRIS_DAN_VA = [
+        'QRIS',
+        'VIRTUAL_ACCOUNT_BCA',
+        'VIRTUAL_ACCOUNT_BANK_MANDIRI',
+        'VIRTUAL_ACCOUNT_BRI',
+        'VIRTUAL_ACCOUNT_BNI',
+        'VIRTUAL_ACCOUNT_BANK_PERMATA',
+        'VIRTUAL_ACCOUNT_BANK_CIMB',
+        'VIRTUAL_ACCOUNT_BANK_SYARIAH_MANDIRI',
+        'VIRTUAL_ACCOUNT_BANK_DANAMON',
+        'VIRTUAL_ACCOUNT_DOKU',
+    ];
+
     public function siap(): bool
     {
         return $this->clientId() !== '' && $this->rahasia() !== '';
@@ -196,6 +238,19 @@ class Doku
                 'phone' => $pesanan['telp'],
             ],
         ];
+
+        /*
+         * Kanalnya dibatasi HANYA kalau pemanggilnya meminta.
+         *
+         * Tanpa medan ini DOKU memajang seluruh kanal yang aktif di akunnya —
+         * kartu, e-wallet, gerai, PayLater. Itu yang berlaku untuk Webinar
+         * Eksklusif, dan sengaja tidak diubah: yang meminta pembatasan cuma
+         * Scopus Camp, dan menyeragamkannya dari sini berarti mencabut cara
+         * bayar dari layanan yang tidak pernah memintanya.
+         */
+        if (! empty($pesanan['kanal'])) {
+            $isi['payment']['payment_method_types'] = array_values((array) $pesanan['kanal']);
+        }
 
         $json = json_encode($isi, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 
