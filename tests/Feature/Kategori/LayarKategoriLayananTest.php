@@ -154,10 +154,30 @@ class LayarKategoriLayananTest extends TestCase
         $admin = $this->akun(User::PERAN_ADMINISTRATOR);
         $tarif = (int) \App\ClinikScopusBiayaPersesi::berlaku('scopus_camp', 'jawa')->biaya_persesi;
 
-        $this->actingAs($admin)->post(route('account.kategori-layanan.store'),
-            $this->isian(['nama_ke' => '204', 'biaya' => '99.999']));
+        /*
+         * Nomor angkatannya DIACAK, dan barisnya dicari sebagai yang
+         * TERBARU — bukan lewat where('nama_ke', '204')->first().
+         *
+         * `nama_ke` tidak unik: nomor yang sama boleh dipakai lokasi dan
+         * varian berbeda, dan basis data lokal memang berisi angkatan
+         * bernomor itu. Pencarian lewat kolom itu memulangkan baris milik
+         * orang lain, lalu ujinya merah dengan membandingkan harga angkatan
+         * yang sama sekali tidak dibuatnya — merah karena pencariannya,
+         * bukan karena harganya salah dipotret.
+         */
+        $nomor = (string) random_int(70000, 79999);
 
-        $baru = KategoriLayanan::where('nama_ke', '204')->first();
+        $sebelum = KategoriLayanan::max('id');
+
+        $this->actingAs($admin)->post(route('account.kategori-layanan.store'),
+            $this->isian(['nama_ke' => $nomor, 'biaya' => '99.999']));
+
+        $baru = KategoriLayanan::where('nama_ke', $nomor)
+            ->when($sebelum !== null, fn ($k) => $k->where('id', '!=', $sebelum))
+            ->latest('created_at')
+            ->first();
+
+        $this->assertNotNull($baru, 'Angkatan baru tidak tersimpan.');
 
         $this->assertSame((string) $tarif, (string) $baru->biaya);
         // Tanpa promo, total sama dengan biayanya — itulah angka yang dipakai
