@@ -88,8 +88,13 @@
     /* Empat keterangan pokok, SEBELUM tombolnya dan di layar pertama.
        Dulu tiga di antaranya baru muncul di 991px, di balik flyer setinggi
        588px — tiga hal yang justru paling dicari orang. */
+    /* TIGA kolom, bukan dua.
+
+       Kartunya tinggal tiga sesudah "Sisa kursi" dibuang; dibiarkan dua
+       kolom, satu sel menganga kosong di kanan bawah — dan sel kosong di
+       antara kartu berbingkai tebal terbaca seperti ada yang gagal dimuat. */
     .cmp-fakta {
-        display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+        display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 12px; margin: 22px 0 26px;
     }
     .cmp-fakta-butir {
@@ -280,17 +285,31 @@
         body { padding-bottom: 92px; }
     }
 
-    @media (max-width: 991.98px) {
-        .cmp-hero-kisi, .cmp-kisi { grid-template-columns: 1fr; gap: 30px; }
-        .cmp-langkah ol { grid-template-columns: 1fr; }
+    /* Hero menumpuk di bawah 1200px, bukan 992px.
+
+       Dengan tiga kartu fakta, rentang 992–1199 jadi masalahnya sendiri:
+       kolom kiri masih menyempit karena flyernya di sebelah, jadi ketiga
+       kartu itu turun ke dua kolom dan satu sel menganga. Dinaikkan ke
+       1200, flyernya pindah ke bawah lebih awal dan ketiga kartu dapat
+       lebar penuh. */
+    @media (max-width: 1199.98px) {
+        .cmp-hero-kisi { grid-template-columns: 1fr; gap: 30px; }
         .cmp-flyer { max-width: 420px; margin: 0 auto; transform: none; }
+    }
+
+    @media (max-width: 991.98px) {
+        .cmp-kisi { grid-template-columns: 1fr; gap: 30px; }
+        .cmp-langkah ol { grid-template-columns: 1fr; }
         .cmp-fasilitas { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         .kaki-wa { display: none !important; }
         .back-to-top { bottom: 96px !important; }
     }
+    @media (max-width: 767.98px) {
+        .cmp-fakta { grid-template-columns: 1fr; }
+    }
+
     @media (max-width: 600px) {
         .cmp-hero { padding: 96px 0 40px; }
-        .cmp-fakta { grid-template-columns: 1fr; }
         .cmp-fasilitas { grid-template-columns: 1fr; }
         .cmp-kartu { padding: 20px 18px; }
     }
@@ -382,21 +401,13 @@
                             </span>
                         </div>
 
-                        <div class="cmp-fakta-butir" style="--c: {{ $penuh ? 'var(--tinta-2)' : 'var(--jingga-kuat)' }};">
-                            <span class="cmp-fakta-ikon"><i class="bi bi-people"></i></span>
-                            <span>
-                                <span class="cmp-fakta-label">Sisa kursi</span>
-                                <span class="cmp-fakta-nilai">
-                                    @if ($item->total_kuota === null)
-                                        Tidak dibatasi
-                                    @elseif ($penuh)
-                                        Sudah habis
-                                    @else
-                                        {{ (int) $item->sisa_kuota }} dari {{ (int) $item->total_kuota }}
-                                    @endif
-                                </span>
-                            </span>
-                        </div>
+                        {{-- Kartu "Sisa kursi" DIBUANG atas permintaan pemiliknya.
+
+                             Keadaan penuhnya tidak ikut hilang: tombol daftarnya
+                             berubah jadi "Kursinya sudah habis" dan mati, dan
+                             angkatan yang kuotanya habis memang sudah tidak
+                             ditawarkan di halaman daftarnya. Jadi yang hilang
+                             cuma angkanya, bukan kabarnya. --}}
                     </div>
 
                     @if ($penuh)
