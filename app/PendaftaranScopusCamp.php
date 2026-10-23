@@ -76,6 +76,53 @@ class PendaftaranScopusCamp extends Model
     }
 
     /**
+     * Peserta kedua dan seterusnya dalam satu pendaftaran rombongan.
+     *
+     * Peserta PERTAMA tidak ada di sini — ia di kolom nama/email pendaftaran
+     * ini sendiri, sebab dialah yang dihubungi dan yang membayar.
+     *
+     * Tabelnya BERSAMA kelima layanan, bukan tabel sendiri: panitia sudah
+     * mencatat nama rombongan ke sana lewat layarnya, dan dua tabel untuk
+     * satu hal yang sama berarti dua tempat yang harus diubah bersamaan
+     * selamanya. Terukur 23 Okt 2026: 7 baris scopus_camp sudah ada di sana,
+     * seluruhnya ditulis jalur panitia.
+     */
+    public function pesertaLain(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        /*
+         * withAttributes(), BUKAN where(): keduanya menyaring sama, tetapi
+         * where() tidak menyetel kolomnya saat baris dibuat lewat relasi ini
+         * — barisnya ditolak MySQL dengan "Field 'layanan' doesn't have a
+         * default value".
+         */
+        return $this->hasMany(PendaftaranPeserta::class, 'pendaftaran_id')
+            ->withAttributes(['layanan' => 'scopus_camp'])
+            // Terurut seperti yang diketik; created_at tidak bisa dipakai,
+            // beberapa baris lahir di detik yang sama.
+            ->orderBy('urutan');
+    }
+
+    /**
+     * Semua nama peserta, pendaftar utama lebih dulu.
+     *
+     * @return list<array{nama:string, email:?string, utama:bool}>
+     */
+    public function semuaPeserta(): array
+    {
+        $daftar = [[
+            'nama' => (string) $this->nama,
+            'email' => (string) $this->email,
+            'utama' => true,
+        ]];
+
+        foreach ($this->pesertaLain as $p) {
+            $daftar[] = ['nama' => (string) $p->nama, 'email' => $p->email, 'utama' => false];
+        }
+
+        return $daftar;
+    }
+
+    /**
      * The data type of the primary key.
      *
      * @var string

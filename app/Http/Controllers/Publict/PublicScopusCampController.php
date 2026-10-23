@@ -485,9 +485,72 @@ class PublicScopusCampController extends Controller
                     'jumlah_pendaftar' => ['required', 'integer', 'min:1', 'max:20'],
                     'kode_diskon' => ['nullable', 'string', 'max:50'],
             'setuju' => ['accepted'],
+
+            /*
+             * Nama peserta kedua dan seterusnya.
+             *
+             * Wajib sebanyak peserta yang dipesan DIKURANGI SATU — yang
+             * pertama sudah terisi di medan nama. Tanpa ini, pendaftaran
+             * rombongan hanya menyisakan satu nama: panitia menagih biaya
+             * untuk lima orang lalu memegang daftar hadir berisi satu, dan
+             * sisanya harus dikejar lewat WhatsApp satu per satu.
+             */
+            'peserta' => ['array', 'max:19'],
+            'peserta.*.nama' => ['required', 'string', 'min:3', 'max:120'],
+            'peserta.*.email' => ['nullable', 'email:rfc', 'max:120'],
         ], [
             'setuju.accepted' => 'Centang dulu persetujuan ketentuannya.',
+            'peserta.*.nama.required' => 'Nama tiap peserta diisi dulu, ya — '
+                . 'sertifikatnya atas nama mereka.',
+            'peserta.*.email.email' => 'Ada alamat email peserta yang belum benar.',
         ]);
+
+        /*
+         * validate() TIDAK memuat kunci yang tidak dikirim peramban. Dibaca
+         * langsung, $data['peserta'] melempar "Undefined array key" pada
+         * SETIAP pendaftaran satu orang — yaitu hampir semuanya.
+         */
+        $data['peserta'] = array_values($data['peserta'] ?? []);
+
+        /*
+         * Jumlah namanya diperiksa TERPISAH, sebab yang diperiksa hubungan
+         * antar-medan: sebanyak peserta yang dipesan, dikurangi pendaftar
+         * utamanya.
+         *
+         * Di peladen, bukan hanya di peramban: borang yang dikirim tanpa
+         * JavaScript akan lolos begitu saja, dan yang tersimpan pendaftaran
+         * sepuluh orang dengan satu nama.
+         */
+        $perluNama = max(0, (int) $data['jumlah_pendaftar'] - 1);
+
+        if (count($data['peserta']) !== $perluNama) {
+            return back()->withInput()->withErrors([
+                'peserta' => $perluNama === 0
+                    ? 'Jumlah pesertanya satu, jadi tidak perlu nama tambahan.'
+                    : 'Isi nama ' . $perluNama . ' peserta lainnya — sertifikatnya '
+                        . 'atas nama mereka.',
+            ]);
+        }
+
+        /*
+         * Email peserta tidak boleh kembar, baik sesama peserta maupun
+         * dengan pendaftar utamanya. Dua orang beremail sama berarti satu di
+         * antaranya tidak akan pernah menerima apa pun, dan yang ketahuan
+         * belakangan hanyalah "sertifikat saya tidak sampai".
+         */
+        $surel = array_filter(array_map(
+            fn ($o) => mb_strtolower(trim((string) ($o['email'] ?? ''))),
+            $data['peserta']
+        ));
+
+        $surel[] = mb_strtolower(trim($data['email']));
+
+        if (count($surel) !== count(array_unique($surel))) {
+            return back()->withInput()->withErrors([
+                'peserta' => 'Ada email yang dipakai dua kali. Tiap peserta perlu email '
+                    . 'sendiri, atau kosongkan saja yang tidak punya.',
+            ]);
+        }
 
         $kategori = CategoriesScopusCamp::findOrFail($data['kategori_id']);
 
@@ -671,6 +734,23 @@ class PublicScopusCampController extends Controller
                      * Borangnya sendiri memang tidak pernah punya medan itu.
                      */
                 ]);
+
+                /*
+                 * Nama peserta lainnya disimpan DI DALAM transaksi yang sama.
+                 *
+                 * Di luarnya, pendaftaran yang gagal di tengah meninggalkan
+                 * baris peserta yang induknya tidak ada — dan tidak ada satu
+                 * pun layar yang memperlihatkannya.
+                 */
+                foreach ($data['peserta'] as $urutan => $orang) {
+                    $baris->pesertaLain()->create([
+                        'urutan' => $urutan,
+                        'nama' => trim($orang['nama']),
+                        'email' => isset($orang['email']) && trim((string) $orang['email']) !== ''
+                            ? mb_strtolower(trim($orang['email']))
+                            : null,
+                    ]);
+                }
 
                 /*
                  * `sisa_kuota` disetel ulang dari hitungan yang BARU —
