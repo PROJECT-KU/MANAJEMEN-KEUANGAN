@@ -312,26 +312,106 @@ class PenjagaanBorangTest extends TestCase
         $this->post(route('public.scopuscamp.store'), $this->isian($a, [
             'nama' => 'Ketua Rombongan',
             'jumlah_pendaftar' => 3,
+            // Nomornya SENGAJA berbeda dari nomor ketua di isian(): nomor
+            // kembar memang ditolak, dan aturannya diuji tersendiri di bawah.
             'peserta' => [
-                ['nama' => 'Peserta Dua', 'email' => 'dua' . Str::random(4) . '@contoh.test'],
-                ['nama' => 'Peserta Tiga', 'email' => ''],
+                ['nama' => 'Peserta Dua', 'telp' => '0857-1111-2222'],
+                ['nama' => 'Peserta Tiga', 'telp' => ''],
             ],
         ]));
 
         $p = PendaftaranScopusCamp::where('kategori_id', $a->getKey())->firstOrFail();
+        $lain = \App\PendaftaranPeserta::milik('scopus_camp', (string) $p->getKey())
+            ->terurut()->get();
+
+        $this->assertCount(2, $lain, 'Nama peserta rombongannya tidak tersimpan.');
+
+        $this->assertSame('Peserta Dua', $lain[0]->nama);
+        $this->assertSame('Peserta Tiga', $lain[1]->nama);
+
+        /*
+         * Nomornya DINORMALKAN ke bentuk 62…, sama seperti nomor pendaftar
+         * utamanya dan sama seperti ketujuh baris yang sudah ditulis jalur
+         * panitia. Dua bentuk di satu kolom membuat tiap pembacanya harus
+         * memeriksa keduanya.
+         */
+        $this->assertSame('6285711112222', $lain[0]->telp);
+
+        // Kosong disimpan NULL, bukan untaian kosong.
+        $this->assertNull($lain[1]->telp);
+
+        /*
+         * Urutannya mulai dari SATU. Urutan 0 dipegang pendaftar utamanya,
+         * yang tersimpan di baris pendaftarannya sendiri — perjanjian yang
+         * sudah dipakai jalur panitia saat menyunting daftar peserta, dan
+         * ketujuh baris yang sudah ada di basis data bernomor 1 sampai 7.
+         */
+        $this->assertSame(1, (int) $lain[0]->urutan);
+        $this->assertSame(2, (int) $lain[1]->urutan);
+
+        // Pendaftar utamanya tetap jadi peserta pertama di daftar gabungannya.
         $semua = $p->semuaPeserta();
-
-        $this->assertCount(3, $semua,
-            'Nama peserta rombongannya tidak tersimpan.');
-
+        $this->assertCount(3, $semua);
         $this->assertSame('Ketua Rombongan', $semua[0]['nama']);
         $this->assertTrue($semua[0]['utama']);
-        $this->assertSame('Peserta Dua', $semua[1]['nama']);
-        $this->assertSame('Peserta Tiga', $semua[2]['nama']);
+    }
 
-        // Email boleh kosong — tidak semua peserta punya, dan memaksakannya
-        // membuat orang mengarang alamat.
-        $this->assertNull($semua[2]['email']);
+    #[Test]
+    public function nomor_peserta_yang_tidak_masuk_akal_ditolak(): void
+    {
+        /*
+         * Nomor sepotong seperti "0812" tersimpan apa adanya dan baru
+         * ketahuan saat panitia menekannya dan tidak ada yang menjawab.
+         */
+        $a = $this->angkatan();
+
+        $this->post(route('public.scopuscamp.store'), $this->isian($a, [
+            'jumlah_pendaftar' => 2,
+            'peserta' => [['nama' => 'Peserta Dua', 'telp' => '0812']],
+        ]))->assertSessionHasErrors(['peserta']);
+
+        $this->assertSame(0, $this->jumlahBaris($a));
+    }
+
+    #[Test]
+    public function nomor_peserta_tidak_boleh_kembar_walau_beda_tanda_hubung(): void
+    {
+        /*
+         * "0812-3456-7890" dan "081234567890" adalah nomor yang SAMA, tetapi
+         * sebagai untaian keduanya berbeda — jadi memeriksa kembarnya pada
+         * teks mentah akan meloloskan dua peserta bernomor sama yang cuma
+         * beda tanda hubung, dan satu di antaranya tidak akan pernah
+         * dihubungi.
+         */
+        $a = $this->angkatan();
+
+        $this->post(route('public.scopuscamp.store'), $this->isian($a, [
+            'telp' => '081234567890',
+            'jumlah_pendaftar' => 2,
+            'peserta' => [['nama' => 'Peserta Dua', 'telp' => '0812-3456-7890']],
+        ]))->assertSessionHasErrors(['peserta']);
+
+        $this->assertSame(0, $this->jumlahBaris($a));
+    }
+
+    #[Test]
+    public function borang_meminta_nomor_peserta_bukan_emailnya(): void
+    {
+        /*
+         * Keputusan pemiliknya 23 Okt 2026, dan itu juga yang sudah dipakai
+         * jalur panitia: kotak daftar pesertanya berbentuk "Budi Santoso,
+         * 081234567890", dan ketujuh baris peserta yang ada di basis data
+         * punya `telp` terisi dengan `email` NULL bertujuh. Meminta email di
+         * borang umum berarti mengisi kolom yang tidak dibaca siapa pun.
+         */
+        $isi = (string) $this->get(route('public.scopuscamp.formpendaftaran',
+            ['id' => $this->angkatan()->getKey()]))->assertOk()->getContent();
+
+        $this->assertStringNotContainsString("peserta[' + i + '][email]", $isi,
+            'Borangnya masih meminta email peserta.');
+
+        $this->assertStringContainsString("'telp', 'Nomor WhatsApp'", $isi,
+            'Baris pesertanya tidak lagi meminta nomor WhatsApp.');
     }
 
     #[Test]
@@ -375,32 +455,13 @@ class PenjagaanBorangTest extends TestCase
     }
 
     #[Test]
-    public function email_peserta_tidak_boleh_kembar(): void
-    {
-        /*
-         * Dua orang beremail sama berarti satu di antaranya tidak akan pernah
-         * menerima apa pun, dan yang ketahuan belakangan hanyalah
-         * "sertifikat saya tidak sampai".
-         */
-        $a = $this->angkatan();
-
-        $this->post(route('public.scopuscamp.store'), $this->isian($a, [
-            'email' => 'ketua@contoh.test',
-            'jumlah_pendaftar' => 2,
-            'peserta' => [['nama' => 'Peserta Dua', 'email' => 'ketua@contoh.test']],
-        ]))->assertSessionHasErrors(['peserta']);
-
-        $this->assertSame(0, $this->jumlahBaris($a));
-    }
-
-    #[Test]
     public function nama_peserta_kosong_ditolak(): void
     {
         $a = $this->angkatan();
 
         $this->post(route('public.scopuscamp.store'), $this->isian($a, [
             'jumlah_pendaftar' => 2,
-            'peserta' => [['nama' => '', 'email' => 'dua@contoh.test']],
+            'peserta' => [['nama' => '', 'telp' => '0812-3456-7890']],
         ]))->assertSessionHasErrors();
 
         $this->assertSame(0, $this->jumlahBaris($a));
