@@ -248,6 +248,33 @@ class ScopusCampDaftarTest extends TestCase
 
         $this->assertStringContainsString('cmp-pita-tampil', $isi,
             'Kelas penanda pita hilang; pitanya tidak punya keadaan tersembunyi.');
+
+        /*
+         * Pitanya TIDAK boleh muncul di layar lebar — diminta pemiliknya,
+         * dan ia benar: di sana pita itu tidak menyelesaikan apa pun.
+         * Halaman selebar 1440 memuat tombol daftar, keempat fakta pokok,
+         * dan bilah jadwal lain sekaligus, jadi tombolnya tidak pernah jauh.
+         * Pita melayang yang menutupi isi hanya menukar satu masalah yang
+         * tidak ada dengan satu masalah yang nyata.
+         *
+         * Dipin lewat bawaannya: .cmp-pita display:none, lalu dihidupkan
+         * HANYA di dalam media lebar sempit. Dibalik — tampil secara bawaan
+         * lalu disembunyikan di media lebar — satu media query yang terlewat
+         * membuatnya kembali ke semua layar.
+         */
+        $sumber = (string) preg_replace(
+            ['#/\*.*?\*/#s', '#\{\{--.*?--\}\}#s'], '',
+            (string) file_get_contents(base_path('resources/views/public/scopus_camp/selengkapnya.blade.php'))
+        );
+
+        $this->assertMatchesRegularExpression('/\.cmp-pita\s*\{\s*display:\s*none/s', $sumber,
+            'Pita ajakan tidak lagi tersembunyi secara bawaan; ia akan muncul juga '
+            . 'di layar lebar, tempat tombol daftarnya sudah terlihat tanpa pita.');
+
+        $this->assertMatchesRegularExpression(
+            '/@media \(max-width: 991\.98px\) \{[^@]*\.cmp-pita \{[^}]*display:\s*block/s', $sumber,
+            'Pita ajakan tidak lagi dihidupkan di media layar sempit; di ponsel '
+            . 'orang yang sudah yakin di tengah halaman harus menggulung balik ke atas.');
     }
 
     #[Test]
