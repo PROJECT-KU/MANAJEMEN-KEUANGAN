@@ -928,9 +928,12 @@ Angkatan Layanan | MIS
                                              perlu dicek"; perinciannya menyusul di tooltip
                                              dan di halaman rincian. --}}
                                         {{-- Alasannya dihitung di model, BUKAN di blok
-                                             @php di sini: blok seperti itu akan dipasangkan
-                                             Blade dengan @php(...) sebaris yang sudah ada di
-                                             atas, dan semua di antaranya ikut tertelan. --}}
+                                             PHP di sini: blok seperti itu akan dipasangkan
+                                             Blade dengan penanda sebaris yang sudah ada di
+                                             atas, dan semua di antaranya ikut tertelan.
+
+                                             Penandanya sengaja tidak dieja di komentar ini;
+                                             menyebutnya di sini memicu jebakan yang sama. --}}
                                         @if ($a->perlu_dicek_lain)
                                             <span class="mis-pil mis-pil-merah">
                                                 <i class="fas fa-exclamation-triangle"></i>

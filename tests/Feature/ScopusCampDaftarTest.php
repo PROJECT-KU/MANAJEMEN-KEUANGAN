@@ -299,4 +299,36 @@ class ScopusCampDaftarTest extends TestCase
             'Ada bagian borang yang bisa dilipat; nomor rekening tidak boleh '
             . 'berada di balik tombol yang bisa salah tekan.');
     }
+
+    #[Test]
+    public function total_tidak_menunggu_seluruh_halaman_selesai_dimuat(): void
+    {
+        /*
+         * Totalnya dulu baru dihitung pada DOMContentLoaded.
+         *
+         * Tata letak publik memuat SEMBILAN skrip yang menahan penguraian
+         * halaman, satu di antaranya dari CDN di luar. Terukur lewat Chrome
+         * DevTools: empat detik sesudah halaman dibuka document.readyState
+         * masih "loading" — dan selama itu "Total bayar" terbaca Rp 0 pada
+         * halaman yang sedang menagih lima juta rupiah. Tidak ada galat;
+         * yang membacanya menyangka kelasnya gratis atau halamannya rusak.
+         *
+         * Sesudah dipindah ke panggilan biasa: totalnya sudah benar saat
+         * readyState masih "loading", pada ketiga pengukuran.
+         *
+         * Diperiksa di SUMBERNYA. Penjaga berbasis permintaan HTTP tidak
+         * menjalankan JavaScript sama sekali, jadi ia tidak bisa membedakan
+         * kapan perhitungannya terjadi.
+         */
+        $sumber = file_get_contents(base_path(self::BORANG));
+
+        $this->assertStringNotContainsString(
+            "addEventListener('DOMContentLoaded', hitungTotalPembayaran)", $sumber,
+            'Perhitungan totalnya kembali menunggu seluruh halaman selesai dimuat; '
+            . 'selama itu "Total bayar" terbaca Rp 0.');
+
+        $this->assertMatchesRegularExpression('/^\s*hitungTotalPembayaran\(\);\s*$/m', $sumber,
+            'Tidak ada panggilan hitungTotalPembayaran() yang langsung jalan, jadi '
+            . 'totalnya tidak pernah terisi sampai ada yang menyentuh borangnya.');
+    }
 }
