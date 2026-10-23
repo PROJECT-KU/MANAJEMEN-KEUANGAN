@@ -29,6 +29,36 @@ class RouteServiceProvider extends ServiceProvider
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });
 
+        /*
+         * PEMBATAS BERNAMA, dan ini bukan kerapian.
+         *
+         * `throttle:10,1` tanpa nama TIDAK memberi rute itu jatahnya sendiri.
+         * Kuncinya dirakit ThrottleRequests dari DOMAIN dan ALAMAT IP saja —
+         * alamat rutenya tidak ikut — jadi SELURUH rute ber-throttle di
+         * aplikasi ini berbagi satu penghitung per pengunjung. Angkanya saja
+         * yang berbeda.
+         *
+         * Akibatnya nyata: sepuluh kali memakai isi otomatis borang langsung
+         * menghabiskan jatah rute pendaftaran yang batasnya enam, dan orang
+         * berikutnya di jaringan yang sama — satu kantor, satu kampus, satu
+         * sambungan bersama — ditolak 429 saat menekan "Daftar". Tertangkap
+         * 23 Okt 2026 sebagai uji pembatas laju Webinar Eksklusif yang merah
+         * HANYA di rangkaian penuh, dan hijau saat dijalankan sendiri.
+         *
+         * Dengan nama, kuncinya diawali nama ini, jadi kedua jalur isi
+         * otomatis punya penghitungnya sendiri — terpisah dari borang
+         * pendaftaran, dan tetap berbagi satu sama lain karena memang satu
+         * fitur yang sama.
+         *
+         * Tujuh rute ber-throttle lainnya MASIH berbagi satu penghitung.
+         * Dibiarkan apa adanya di sini: memberi masing-masing nama sendiri
+         * mengubah perilaku tujuh jalur sekaligus, dan itu perubahan yang
+         * perlu diputuskan tersendiri.
+         */
+        RateLimiter::for('isi-otomatis', function (Request $request) {
+            return Limit::perMinute(10)->by($request->ip());
+        });
+
         $this->routes(function () {
             // Tanpa namespace: isinya komponen Livewire & controller ber-FQCN.
             Route::middleware('web')

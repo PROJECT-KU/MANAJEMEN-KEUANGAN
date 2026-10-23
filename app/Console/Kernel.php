@@ -89,6 +89,21 @@ class Kernel extends ConsoleKernel
         $tugas('webinar-eksklusif:kedaluwarsakan')->everyTenMinutes();
 
         /*
+         * Hal yang sama untuk Scopus Camp — baru ada 23 Okt 2026.
+         *
+         * `kedaluwarsa_pada` sudah ditulis sejak jalur DOKU dipasang, tetapi
+         * tidak ada satu pun yang membacanya, jadi pendaftaran yang
+         * ditinggalkan di tengah jalan menahan kursinya selamanya.
+         *
+         * Perintah ini SEKALIAN menghitung ulang `sisa_kuota` tiap angkatan:
+         * rumus lamanya ikut menghitung kursi pendaftaran yang sudah
+         * dibatalkan, dan terukur 23 kursi di 5 angkatan tertahan karenanya.
+         * Tiap sepuluh menit cukup murah — kueri hitungnya satu per angkatan
+         * dan hanya yang berkuota.
+         */
+        $tugas('scopus-camp:kedaluwarsakan')->everyTenMinutes();
+
+        /*
          * Pengingat H-1, pagi hari. Jam 08:00, bukan tengah malam: surat yang
          * tiba pukul 00:05 tenggelam di antara surat semalam, dan yang
          * membacanya pagi-pagi sudah melewatkan satu kesempatan mengingat.
