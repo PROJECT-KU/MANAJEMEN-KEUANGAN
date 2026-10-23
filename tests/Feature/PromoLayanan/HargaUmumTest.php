@@ -281,6 +281,9 @@ class HargaUmumTest extends TestCase
             'nama' => 'Pendaftar Promo', 'email' => Str::random(6) . '@contoh.test',
             'telp' => '0811-0000-0008', 'affiliasi' => 'Uji',
             'jumlah_pendaftar' => 2, 'kode_unik' => '550', 'ppn' => '0',
+            // Nama peserta lainnya kini WAJIB sebanyak yang dipesan
+            // dikurangi satu; aturannya diuji di PenjagaanBorangTest.
+            'peserta' => [['nama' => 'Peserta Dua']],
             // Centang ketentuan dan bukti transfer sama-sama wajib sejak
             // 23 Okt 2026. Uji ini memeriksa HARGA, bukan penjagaannya,
             // jadi ia memenuhi keduanya seperti pendaftar sungguhan — dan
@@ -352,6 +355,9 @@ class HargaUmumTest extends TestCase
             'nama' => 'Pendaftar Terhitung', 'email' => Str::random(6) . '@contoh.test',
             'telp' => '0811-0000-0010', 'affiliasi' => 'Uji',
             'jumlah_pendaftar' => 3, 'kode_unik' => '521', 'ppn' => '0',
+            // Nama peserta lainnya kini WAJIB sebanyak yang dipesan
+            // dikurangi satu; aturannya diuji di PenjagaanBorangTest.
+            'peserta' => [['nama' => 'Peserta Dua'], ['nama' => 'Peserta Tiga']],
             // Centang ketentuan dan bukti transfer sama-sama wajib sejak
             // 23 Okt 2026. Uji ini memeriksa HARGA, bukan penjagaannya,
             // jadi ia memenuhi keduanya seperti pendaftar sungguhan — dan

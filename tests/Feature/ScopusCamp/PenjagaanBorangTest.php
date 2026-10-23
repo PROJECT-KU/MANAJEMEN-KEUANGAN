@@ -274,8 +274,15 @@ class PenjagaanBorangTest extends TestCase
          */
         $a = $this->angkatan();
 
-        $this->post(route('public.scopuscamp.store'),
-            $this->isian($a, ['jumlah_pendaftar' => 3]));
+        $this->post(route('public.scopuscamp.store'), $this->isian($a, [
+            'jumlah_pendaftar' => 3,
+            // Nama peserta lainnya kini WAJIB sebanyak yang dipesan dikurangi
+            // satu; aturannya sendiri diuji di bawah.
+            'peserta' => [
+                ['nama' => 'Peserta Dua'],
+                ['nama' => 'Peserta Tiga'],
+            ],
+        ]));
 
         $p = PendaftaranScopusCamp::where('kategori_id', $a->getKey())->firstOrFail();
 
@@ -287,6 +294,150 @@ class PenjagaanBorangTest extends TestCase
 
         $this->assertSame(17, (int) $a->refresh()->sisa_kuota,
             'Kursinya tidak dipotong sebanyak pesertanya.');
+    }
+
+    // ------------------------------------------------ peserta rombongan
+
+    #[Test]
+    public function nama_peserta_lain_ikut_tersimpan(): void
+    {
+        /*
+         * Tanpa ini, mendaftarkan tiga orang menagih biaya tiga orang lalu
+         * menyimpan SATU nama. Panitia memegang daftar hadir berisi satu,
+         * dua sertifikat tidak bisa diterbitkan atas nama siapa pun, dan
+         * sisanya harus dikejar lewat WhatsApp satu per satu.
+         */
+        $a = $this->angkatan();
+
+        $this->post(route('public.scopuscamp.store'), $this->isian($a, [
+            'nama' => 'Ketua Rombongan',
+            'jumlah_pendaftar' => 3,
+            'peserta' => [
+                ['nama' => 'Peserta Dua', 'email' => 'dua' . Str::random(4) . '@contoh.test'],
+                ['nama' => 'Peserta Tiga', 'email' => ''],
+            ],
+        ]));
+
+        $p = PendaftaranScopusCamp::where('kategori_id', $a->getKey())->firstOrFail();
+        $semua = $p->semuaPeserta();
+
+        $this->assertCount(3, $semua,
+            'Nama peserta rombongannya tidak tersimpan.');
+
+        $this->assertSame('Ketua Rombongan', $semua[0]['nama']);
+        $this->assertTrue($semua[0]['utama']);
+        $this->assertSame('Peserta Dua', $semua[1]['nama']);
+        $this->assertSame('Peserta Tiga', $semua[2]['nama']);
+
+        // Email boleh kosong — tidak semua peserta punya, dan memaksakannya
+        // membuat orang mengarang alamat.
+        $this->assertNull($semua[2]['email']);
+    }
+
+    #[Test]
+    public function pesertanya_disimpan_untuk_layanan_yang_benar(): void
+    {
+        /*
+         * Tabelnya DIPAKAI BERSAMA kelima layanan dan dibedakan kolom
+         * `layanan`. Salah mengisinya membuat nama peserta Scopus Camp muncul
+         * di rincian pendaftaran layanan lain — dan hilang dari rinciannya
+         * sendiri.
+         */
+        $a = $this->angkatan();
+
+        $this->post(route('public.scopuscamp.store'), $this->isian($a, [
+            'jumlah_pendaftar' => 2,
+            'peserta' => [['nama' => 'Peserta Dua']],
+        ]));
+
+        $p = PendaftaranScopusCamp::where('kategori_id', $a->getKey())->firstOrFail();
+
+        $this->assertSame(1, \App\PendaftaranPeserta::milik('scopus_camp', (string) $p->getKey())->count());
+        $this->assertSame(0, \App\PendaftaranPeserta::milik('webinar_eksklusif', (string) $p->getKey())->count());
+    }
+
+    #[Test]
+    public function jumlah_nama_harus_sama_dengan_jumlah_peserta(): void
+    {
+        /*
+         * Diperiksa di PELADEN, bukan hanya di peramban: borang yang dikirim
+         * tanpa JavaScript lolos begitu saja, dan yang tersimpan pendaftaran
+         * tiga orang dengan satu nama.
+         */
+        $a = $this->angkatan();
+
+        $this->post(route('public.scopuscamp.store'), $this->isian($a, [
+            'jumlah_pendaftar' => 3,
+            'peserta' => [['nama' => 'Cuma Satu Nama']],
+        ]))->assertSessionHasErrors(['peserta']);
+
+        $this->assertSame(0, $this->jumlahBaris($a));
+    }
+
+    #[Test]
+    public function email_peserta_tidak_boleh_kembar(): void
+    {
+        /*
+         * Dua orang beremail sama berarti satu di antaranya tidak akan pernah
+         * menerima apa pun, dan yang ketahuan belakangan hanyalah
+         * "sertifikat saya tidak sampai".
+         */
+        $a = $this->angkatan();
+
+        $this->post(route('public.scopuscamp.store'), $this->isian($a, [
+            'email' => 'ketua@contoh.test',
+            'jumlah_pendaftar' => 2,
+            'peserta' => [['nama' => 'Peserta Dua', 'email' => 'ketua@contoh.test']],
+        ]))->assertSessionHasErrors(['peserta']);
+
+        $this->assertSame(0, $this->jumlahBaris($a));
+    }
+
+    #[Test]
+    public function nama_peserta_kosong_ditolak(): void
+    {
+        $a = $this->angkatan();
+
+        $this->post(route('public.scopuscamp.store'), $this->isian($a, [
+            'jumlah_pendaftar' => 2,
+            'peserta' => [['nama' => '', 'email' => 'dua@contoh.test']],
+        ]))->assertSessionHasErrors();
+
+        $this->assertSame(0, $this->jumlahBaris($a));
+    }
+
+    #[Test]
+    public function pendaftaran_satu_orang_tidak_menuntut_nama_tambahan(): void
+    {
+        // Sisi sebaliknya: pemeriksaan jumlah nama tidak boleh menghalangi
+        // pendaftaran satu orang, yaitu hampir semuanya.
+        $a = $this->angkatan();
+
+        $this->post(route('public.scopuscamp.store'), $this->isian($a))
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame(1, $this->jumlahBaris($a));
+    }
+
+    #[Test]
+    public function borang_menyediakan_tempat_mengisi_nama_peserta_lain(): void
+    {
+        /*
+         * Isian jumlah peserta tanpa tempat mengisi namanya adalah fitur
+         * setengah jadi: orangnya memesan lima kursi, membayar lima, lalu
+         * tidak pernah diminta menyebut siapa saja yang datang.
+         */
+        $isi = (string) $this->get(route('public.scopuscamp.formpendaftaran',
+            ['id' => $this->angkatan()->getKey()]))->assertOk()->getContent();
+
+        $this->assertStringContainsString('id="kartuPesertaLain"', $isi,
+            'Borangnya tidak punya bagian untuk nama peserta lainnya.');
+
+        $this->assertStringContainsString('daftarPesertaLain', $isi);
+
+        $this->assertMatchesRegularExpression("/peserta\[' \+ i \+ '\]\[' \+ kunci \+ '\]/", $isi,
+            'Barisnya tidak lagi dirakit dengan nama medan peserta[i][kunci]; '
+            . 'yang terkirim ke peladen tidak akan terbaca sebagai daftar peserta.');
     }
 
     // -------------------------------------------------------- ganda
