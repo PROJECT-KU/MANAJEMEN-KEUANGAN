@@ -43,7 +43,10 @@ class LayarKategoriLayananTest extends TestCase
             // Scopus Camp bervarian: fasilitas di Jawa dan luar Jawa berbeda.
             'varian' => 'jawa',
             'nama' => 'SCOPUS CAMP YOGYAKARTA',
-            'nama_ke' => '203',
+            // Diacak, bukan '203' tetap: `nama_ke` tidak unik, dan nomor
+            // tetap di sini pernah menabrak angkatan nyata bernomor sama di
+            // basis data pengembang.
+            'nama_ke' => (string) random_int(70000, 79999),
             'mulai' => '2026-11-06',
             'selesai' => '2026-11-08',
             'lokasi' => 'Yogyakarta',
@@ -113,13 +116,29 @@ class LayarKategoriLayananTest extends TestCase
          */
         $admin = $this->akun(User::PERAN_ADMINISTRATOR);
 
+        /*
+         * Nomor angkatannya DIACAK, dan barisnya diambil yang TERBARU.
+         *
+         * `nama_ke` tidak unik — nomor yang sama boleh dipakai lokasi dan
+         * layanan yang berbeda — jadi where('nama_ke', '203')->first()
+         * memulangkan baris mana pun yang kebetulan lebih dulu ada di basis
+         * data, bukan yang baru saja dibuat uji ini. Terjadi 23 Okt 2026:
+         * satu angkatan Makassar bernomor 203 dengan sisa kuota 14
+         * membuat penjaga ini merah tanpa ada satu pun kode yang rusak.
+         */
+        $nomor = (string) random_int(70000, 79999);
+        $sebelum = KategoriLayanan::max('id');
+
         $this->actingAs($admin)
-            ->post(route('account.kategori-layanan.store'), $this->isian())
+            ->post(route('account.kategori-layanan.store'), $this->isian(['nama_ke' => $nomor]))
             ->assertRedirect();
 
-        $baru = KategoriLayanan::where('nama_ke', '203')->first();
+        $baru = KategoriLayanan::where('nama_ke', $nomor)
+            ->when($sebelum !== null, fn ($k) => $k->where('id', '!=', $sebelum))
+            ->latest('created_at')
+            ->first();
 
-        $this->assertNotNull($baru);
+        $this->assertNotNull($baru, 'Angkatan baru tidak tersimpan.');
         $this->assertSame('20', (string) $baru->sisa_kuota);
         $this->assertNotEmpty($baru->token);
     }

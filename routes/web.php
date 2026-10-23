@@ -63,6 +63,17 @@ Route::get('/Scopus-Camp/cek-kode-diskon/{id}', 'Publict\PublicScopusCampControl
 Route::post('/Scopus-Camp/store', 'Publict\PublicScopusCampController@store')->name('public.scopuscamp.store');
 
 /*
+ * Pencarian data pendaftar dari nomor WhatsApp, untuk mengisi borang
+ * otomatis. Dibatasi 10 per menit per IP: jalur ini menukar nomor jadi nama
+ * dan email, jadi tanpa batas ia bisa dipakai memanen keduanya dengan
+ * mencoba nomor satu per satu. Sepuluh masih jauh lebih longgar daripada
+ * yang dibutuhkan orang yang sedang mengisi satu borang.
+ */
+Route::post('/Scopus-Camp/cari-pendaftar', 'Publict\PublicScopusCampController@cariPendaftar')
+    ->middleware('throttle:isi-otomatis')
+    ->name('public.scopuscamp.caripendaftar');
+
+/*
  * UUID saja, tanpa token.
  *
  * Kuncinya bukan rahasia tambahan melainkan bentuk nomornya sendiri: UUID
@@ -101,7 +112,16 @@ Route::get('/Webinar-Eksklusif/Daftar/{id}', 'Publict\PublicWebinarEksklusifCont
  * dan email, jadi yang perlu dihambat bukan salah ketik melainkan penyisiran.
  */
 Route::post('/Webinar-Eksklusif/cari-pendaftar', 'Publict\PublicWebinarEksklusifController@cariPendaftar')
-    ->middleware('throttle:10,1')
+    /*
+     * Pembatas BERNAMA, sama dengan jalur isi otomatis Scopus Camp.
+     *
+     * Dengan 'throttle:10,1' polos, jatahnya bukan milik rute ini: kuncinya
+     * cuma domain dan alamat IP, jadi ia berbagi satu penghitung dengan
+     * borang pendaftaran yang batasnya enam. Sepuluh kali memakai isi
+     * otomatis langsung menolak orang berikutnya yang menekan "Daftar" dari
+     * jaringan yang sama.
+     */
+    ->middleware('throttle:isi-otomatis')
     ->name('public.webinareksklusif.caripendaftar');
 
 // Pemeriksa kode diskon, supaya orangnya tahu kodenya dipakai SEBELUM

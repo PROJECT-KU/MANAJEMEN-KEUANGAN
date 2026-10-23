@@ -73,6 +73,9 @@ class BayarDokuTest extends TestCase
             'telp' => '081234567890',
             'affiliasi' => 'Universitas Uji',
             'jumlah_pendaftar' => 1,
+            // Centang ketentuan wajib sejak 23 Okt 2026; penjagaannya sendiri
+            // diuji di PenjagaanBorangTest, bukan di sini.
+            'setuju' => '1',
         ], $ganti);
     }
 
@@ -134,6 +137,33 @@ class BayarDokuTest extends TestCase
             . 'yang perlu diunggah.');
 
         $this->assertStringContainsString('Lanjut ke pembayaran', $isi);
+    }
+
+    #[Test]
+    public function borang_tidak_menjanjikan_cara_bayar_yang_tidak_diterima(): void
+    {
+        /*
+         * Daftar yang dipajang borang HARUS sama dengan yang benar-benar
+         * ditawarkan halaman DOKU. Yang menjanjikan kartu kredit lalu tidak
+         * menemukannya di halaman berikutnya berhenti di situ — dan tidak
+         * ada satu pun catatan yang menyebut ia pernah mencoba.
+         */
+        $isi = (string) $this->get(route('public.scopuscamp.formpendaftaran',
+            ['id' => $this->angkatan()->getKey()]))->assertOk()->getContent();
+
+        $daftar = (string) (preg_match('/<div class="daf-kanal">(.*?)<\/div>/s', $isi, $c)
+            ? $c[1] : '');
+
+        $this->assertNotSame('', $daftar, 'Daftar cara bayarnya hilang dari borang.');
+
+        foreach (['Kartu kredit', 'OVO', 'DANA', 'ShopeePay', 'Alfamart', 'Indomaret'] as $dicabut) {
+            $this->assertStringNotContainsString($dicabut, $daftar,
+                '"' . $dicabut . '" masih dijanjikan borangnya, padahal tagihannya '
+                . 'dibatasi ke QRIS dan Virtual Account saja.');
+        }
+
+        $this->assertStringContainsString('QRIS', $daftar);
+        $this->assertStringContainsString('Virtual Account', $daftar);
     }
 
     #[Test]
@@ -228,6 +258,118 @@ class BayarDokuTest extends TestCase
             $this->assertSame((int) $p->total_pembayaran, $jumlahRincian,
                 'Rincian tagihannya tidak berjumlah sama dengan totalnya — '
                 . 'DOKU menolaknya dengan AMOUNT NOT MATCH.');
+
+            return true;
+        });
+    }
+
+    #[Test]
+    public function tagihannya_hanya_menawarkan_qris_dan_virtual_account(): void
+    {
+        /*
+         * Daftar kanal di borangnya cuma JANJI. Yang menentukan pilihan
+         * sebenarnya halaman DOKU, dan tanpa pembatasan ini ia memajang
+         * seluruh kanal yang aktif di akunnya.
+         *
+         * Terukur langsung di halaman checkout sandbox 23 Okt 2026:
+         *
+         *   tanpa pembatasan  Bank Transfer, e-Wallet, Convenience Store,
+         *                     Cards, Digital Banking, PayLater, Internet
+         *                     Banking, Direct Debit
+         *   dengan pembatasan Bank Transfer saja
+         *
+         * Jadi tanpa baris ini, orang yang membaca "QRIS dan Virtual
+         * Account" di borang kita bisa membayar dengan kartu kredit di
+         * halaman berikutnya — dan tidak ada satu pun layar yang menyatakan
+         * ada yang salah.
+         */
+        Mail::fake();
+        $this->gerbangMenerima();
+
+        $a = $this->angkatan();
+
+        $this->post(route('public.scopuscamp.store'), $this->isian($a));
+
+        Http::assertSent(function ($permintaan) {
+            if (! str_contains($permintaan->url(), '/checkout/v1/payment')) {
+                return false;
+            }
+
+            $kanal = json_decode($permintaan->body(), true)['payment']['payment_method_types'] ?? null;
+
+            $this->assertIsArray($kanal,
+                'Tagihannya dikirim TANPA pembatasan kanal — halaman DOKU akan '
+                . 'memajang kartu, e-wallet, dan gerai, padahal borangnya '
+                . 'menjanjikan QRIS dan Virtual Account saja.');
+
+            $this->assertContains('QRIS', $kanal);
+
+            $this->assertNotEmpty(
+                array_filter($kanal, fn ($k) => str_starts_with($k, 'VIRTUAL_ACCOUNT_')),
+                'Tidak ada satu pun Virtual Account di daftarnya.'
+            );
+
+            foreach ($kanal as $satu) {
+                $this->assertTrue(
+                    $satu === 'QRIS' || str_starts_with($satu, 'VIRTUAL_ACCOUNT_'),
+                    'Kanal "' . $satu . '" bukan QRIS maupun Virtual Account.'
+                );
+            }
+
+            return true;
+        });
+    }
+
+    #[Test]
+    public function nama_virtual_accountnya_disebut_per_bank(): void
+    {
+        /*
+         * DOKU TIDAK mengenal nama payung "VIRTUAL_ACCOUNT" di
+         * payment_method_types. Yang ia terima nama per bank, dan nama
+         * payungnya ditolak 400 dengan "PAYMENT CHANNEL IS INACTIVE" —
+         * pesan yang terbaca seperti kanalnya dimatikan, bukan seperti
+         * namanya salah. Sudah diukur langsung ke sandbox 23 Okt 2026.
+         */
+        $this->assertNotContains('VIRTUAL_ACCOUNT', \App\Services\Doku::KANAL_QRIS_DAN_VA,
+            'Nama payung "VIRTUAL_ACCOUNT" dipakai; DOKU menolak seluruh '
+            . 'tagihannya dengan pesan yang menunjuk ke arah yang salah.');
+
+        $this->assertGreaterThanOrEqual(5,
+            count(array_filter(\App\Services\Doku::KANAL_QRIS_DAN_VA,
+                fn ($k) => str_starts_with($k, 'VIRTUAL_ACCOUNT_'))),
+            'Banknya terlalu sedikit; kalau yang tersisa kebetulan mati di '
+            . 'akunnya, SETIAP pendaftaran berakhir di halaman "pembayaran '
+            . 'daring sedang bermasalah".');
+    }
+
+    #[Test]
+    public function layanan_lain_tidak_ikut_dibatasi_kanalnya(): void
+    {
+        /*
+         * Yang meminta pembatasan cuma Scopus Camp. Webinar Eksklusif
+         * memakai kelas Doku yang SAMA, dan membatasi dari dalam kelas itu
+         * berarti mencabut cara bayar dari layanan yang tidak pernah
+         * memintanya — tanpa satu baris pun yang menyebutkannya.
+         */
+        Http::fake(['*/checkout/v1/payment' => Http::response([
+            'response' => ['payment' => ['url' => 'https://staging.doku.com/x'],
+                           'order' => ['invoice_number' => 'WE-UJI']],
+        ], 200)]);
+
+        app(\App\Services\Doku::class)->buatTagihan([
+            'nomor' => 'WE-UJI-0001', 'jumlah' => 129000,
+            'harga_satuan' => 129000, 'jumlah_peserta' => 1,
+            'potongan' => 0, 'kode_unik' => 0,
+            'judul' => 'Sesi Uji', 'nama' => 'Uji',
+            'email' => 'uji@contoh.test', 'telp' => '08123456789',
+            'kembali' => 'http://127.0.0.1:8000/',
+        ]);
+
+        Http::assertSent(function ($permintaan) {
+            $isi = json_decode($permintaan->body(), true);
+
+            $this->assertArrayNotHasKey('payment_method_types', $isi['payment'],
+                'Tagihan yang TIDAK meminta pembatasan ikut dibatasi kanalnya.');
 
             return true;
         });

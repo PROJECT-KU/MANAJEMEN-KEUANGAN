@@ -49,7 +49,24 @@ class PublicScopusCampController extends Controller
              * dan tidak ada galat apa pun yang memberi tahu.
              */
             ->whereDate('mulai', '>', now()->toDateString())
-            ->orderBy('mulai', 'asc');
+            ->orderBy('mulai', 'asc')
+
+            /*
+             * PEMUTUS SERI, dan ia bukan kerapian.
+             *
+             * Angkatan yang tanggal mulainya SAMA — dan itu wajar: satu
+             * gelombang Scopus Camp dibuka di beberapa kota pada tanggal
+             * yang sama — tidak punya urutan yang ditentukan tanpa baris
+             * ini. MySQL boleh memulangkannya dalam urutan apa pun, dan
+             * urutan itu boleh berubah antar permintaan.
+             *
+             * Akibatnya terlihat di bagian "Bedanya": paket mana yang
+             * dijelaskan lebih dulu berganti-ganti tiap halaman dimuat.
+             * Tertangkap 23 Okt 2026 sebagai uji yang kadang hijau kadang
+             * merah pada kode yang sama persis — tiga kali jalan, dua
+             * merah satu hijau.
+             */
+            ->orderBy('id', 'asc');
 
         /*
          * Dipaginasi. Seluruhnya dulu dicetak di satu halaman: terukur 294
@@ -182,6 +199,25 @@ class PublicScopusCampController extends Controller
         $item = CategoriesScopusCamp::findOrFail($id);
 
         /*
+         * Angkatan yang sudah tertutup TIDAK digambar borangnya.
+         *
+         * Halaman daftarnya memang menyembunyikannya, tetapi alamat borang
+         * ini tetap bisa dibuka dari tautan lama, surat, atau penanda buku —
+         * dan terukur 23 Okt 2026 ia menjawab 200 untuk ketiganya sekaligus:
+         * angkatan yang kursinya habis, yang tanggalnya sudah lewat, dan
+         * yang masih draft.
+         *
+         * Dicegat di sini, bukan hanya saat mengirim: membiarkan orang
+         * mengisi empat isian lalu menolaknya di akhir adalah cara paling
+         * buruk menyampaikan kabar yang sudah diketahui sejak awal.
+         */
+        $tertutup = $this->alasanTertutup($item);
+
+        if ($tertutup !== null) {
+            return redirect()->route('public.scopuscamp.index')->with('error', $tertutup);
+        }
+
+        /*
          * Borangnya BERCABANG menurut kesiapan gerbang pembayaran.
          *
          * Dengan gerbang siap, nomor rekening dan unggah bukti transfer
@@ -196,9 +232,79 @@ class PublicScopusCampController extends Controller
          * sendiri, borang bisa menuntut bukti transfer sementara peladen
          * mengarahkan ke DOKU.
          */
+        /*
+         * Yang SUDAH masuk akun tidak perlu mengetik apa pun.
+         *
+         * Dirender terisi dari peladen, bukan lewat pencarian nomor: datanya
+         * sudah ada di sesi, dan menunggu ia mengetik nomornya sendiri dulu
+         * berarti meminta keterangan yang kita pegang.
+         */
+        $akun = auth()->user();
+
         return view('public.scopus_camp.form_pendaftaran', [
             'item' => $item,
             'bayarDaring' => $this->doku->siap(),
+
+            /*
+             * Sisa kursi yang SEBENARNYA — sudah mengecualikan pendaftaran
+             * yang dibatalkan. `$item->sisa_kuota` tidak dipakai: kolom itu
+             * diisi hitungan lama yang ikut menghitung kursi orang yang
+             * sudah batal, dan terukur ia meleset sampai 15 kursi.
+             */
+            'sisaKursi' => $this->sisaKursi($item),
+
+            // Tenggat bayarnya disebut di borang, bukan baru ditemukan
+            // orangnya saat tagihannya sudah mati.
+            'menitBayar' => Doku::MENIT_KEDALUWARSA,
+
+            'isiAwal' => $akun === null ? [] : array_filter([
+                'nama' => $akun->full_name,
+                'email' => $akun->email,
+                'telp' => $akun->telp,
+                'affiliasi' => $akun->company,
+            ]),
+        ]);
+    }
+
+    /**
+     * Data diri pemilik satu nomor WhatsApp, untuk mengisi borang otomatis.
+     *
+     * Alamat ini MENUKAR NOMOR JADI NAMA DAN EMAIL. Siapa pun bisa
+     * memanggilnya, jadi siapa pun bisa memanen keduanya dengan mencoba nomor
+     * satu per satu. Itu diterima sebagai harga kemudahan ini — keputusan
+     * yang sudah diambil saat jalur yang sama dibuat untuk Webinar Eksklusif
+     * — dengan dua syarat yang tidak boleh dilepas: alamatnya dibatasi
+     * jumlah permintaan per menit per IP di routes/web.php, dan nomornya
+     * dicatat TERSAMAR di bawah, tidak pernah utuh.
+     */
+    public function cariPendaftar(Request $request, \App\Support\IsiOtomatisDariNomor $pencari)
+    {
+        $data = $request->validate([
+            'telp' => ['required', 'string', 'max:30'],
+        ]);
+
+        $ketemu = $pencari->cari($data['telp']);
+
+        if ($ketemu === null) {
+            // Jawaban yang SAMA untuk nomor yang tidak masuk akal dan nomor
+            // yang memang belum pernah memesan. Membedakannya memberi tahu
+            // pemanen mana nomor yang benar-benar ada di sini.
+            return response()->json(['ditemukan' => false]);
+        }
+
+        $nomor = \App\Support\NomorTelepon::rapikan($data['telp']);
+
+        Log::info('Isi otomatis borang Scopus Camp', [
+            'nomor' => substr($nomor, 0, 5) . '***' . substr($nomor, -3),
+            'ip' => $request->ip(),
+            'sumber' => $ketemu['sumber'],
+        ]);
+
+        return response()->json([
+            'ditemukan' => true,
+            'nama' => $ketemu['nama'],
+            'email' => $ketemu['email'],
+            'affiliasi' => $ketemu['affiliasi'],
         ]);
     }
     // <!--================== END ==================-->
@@ -242,7 +348,7 @@ class PublicScopusCampController extends Controller
         $casted = is_numeric($nominal) ? (int)$nominal : 0;
 
         return response()->json([
-            'status' => 'success',
+                    'status' => 'success',
             'kode_input' => $kode,
             'nominal_diskon' => $nominal,
             'casted_nominal_diskon' => $casted,
@@ -251,71 +357,188 @@ class PublicScopusCampController extends Controller
     // <!--================== END ==================-->
 
     // <!--================== KIRIM DATA PENDAFTARAN ==================-->
-    function generateRandomToken($length)
-    {
-        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!$&-_?';
-        $token = '';
+    /*
+     * generateRandomToken() dan generateRandomId() DIBUANG dari sini.
+     *
+     * Keduanya tidak dipanggil siapa pun lagi: nomor pendaftarannya dirakit
+     * PendaftaranSemuaLayanan::nomorBaru() dan tokennya Str::random(). Salinan
+     * yang sama masih hidup di empat pengendali lain, dan itu disengaja —
+     * membuangnya dari sana mengubah empat layanan sekaligus.
+     */
 
-        for ($i = 0; $i < $length; $i++) {
-            $token .= $characters[rand(0, strlen($characters) - 1)];
+    /**
+     * Status pendaftaran yang TIDAK lagi menahan kursi.
+     *
+     * Kuotanya dulu dihitung `sum(jumlah_pendaftar)` atas SELURUH baris,
+     * termasuk yang sudah dibatalkan, ditolak, dan direfund. Terukur di basis
+     * data 23 Okt 2026: 23 kursi tertahan di 5 angkatan — Scopus Camp
+     * Yogyakarta #199 terbaca "tinggal 4 kursi" padahal 15 dari 16 yang
+     * terpakai milik pendaftaran yang sudah batal. Itu kursi yang tidak
+     * terjual karena sistemnya salah hitung, dan tidak ada galat apa pun
+     * yang menunjukkannya.
+     */
+    private const STATUS_LEPAS_KURSI = [
+        'Pendaftaran Dibatalkan',
+        'Pendaftaran Ditolak',
+        'Pendaftaran Refund',
+    ];
+
+    /**
+     * Berapa kursi yang masih bisa dijual, menurut kolom `sisa_kuota`.
+     *
+     * Kolom itu yang dipakai SELURUH aplikasi — halaman daftar, layar
+     * panitia, dan ekspor — dan panitia bisa menyuntingnya sendiri untuk
+     * menutup angkatan lebih awal. Jadi ia yang jadi pegangan di sini juga;
+     * menghitungnya ulang saat dibaca akan diam-diam MEMBUKA KEMBALI
+     * angkatan yang sengaja ditutup panitia dengan menurunkan angkanya.
+     *
+     * Yang diperbaiki bukan pembacaannya melainkan PEMELIHARAANNYA — lihat
+     * hitungUlangSisaKursi().
+     */
+    private function sisaKursi(CategoriesScopusCamp $angkatan): ?int
+    {
+        if ($angkatan->total_kuota === null) {
+            return null;   // tidak dibatasi
         }
 
-        return $token;
+        return max(0, (int) $angkatan->sisa_kuota);
     }
 
-    public function generateRandomId($length)
+    /**
+     * Sisa kursi yang SEHARUSNYA, dihitung dari pendaftaran yang masih hidup.
+     *
+     * Dipakai saat menuliskan kembali kolomnya, bukan saat membacanya.
+     *
+     * Rumus lamanya `total_kuota - sum(jumlah_pendaftar)` atas SELURUH baris,
+     * termasuk yang sudah dibatalkan, ditolak, dan direfund. Terukur 23 Okt
+     * 2026: 23 kursi tertahan di 5 angkatan — Scopus Camp Yogyakarta #199
+     * terbaca "tinggal 4 kursi" padahal 15 dari 16 yang terpakai milik
+     * pendaftaran yang sudah batal. Itu kursi yang tidak terjual karena
+     * sistemnya salah hitung, dan tidak ada galat apa pun yang menunjukkannya.
+     */
+    public static function hitungUlangSisaKursi(CategoriesScopusCamp $angkatan): ?int
     {
-        $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        $id = '';
-        for ($i = 0; $i < $length; $i++) {
-            $id .= $characters[rand(0, strlen($characters) - 1)];
+        if ($angkatan->total_kuota === null) {
+            return null;
         }
-        return $id;
+
+        $terpakai = (int) PendaftaranScopusCamp::where('kategori_id', $angkatan->getKey())
+            ->whereNotIn('status', self::STATUS_LEPAS_KURSI)
+            ->sum('jumlah_pendaftar');
+
+        return max(0, (int) $angkatan->total_kuota - $terpakai);
+    }
+
+    /**
+     * Alasan satu angkatan TIDAK boleh menerima pendaftaran, atau null.
+     *
+     * Dipakai dua kali — saat borangnya dibuka dan saat borangnya dikirim —
+     * dan itu memang perlu keduanya: halaman daftarnya menyembunyikan
+     * angkatan yang sudah tertutup, tetapi alamat borangnya tetap bisa
+     * dibuka dari tautan lama, surat, atau penanda buku.
+     *
+     * Terukur 23 Okt 2026, sebelum ada pemeriksaan ini: borangnya menjawab
+     * 200 untuk angkatan yang kursinya habis, yang tanggalnya sudah lewat,
+     * DAN yang masih draft — dan kiriman ke angkatan draft yang sudah
+     * berjalan diterima lengkap dengan tagihan DOKU yang benar-benar terbit.
+     */
+    private function alasanTertutup(CategoriesScopusCamp $angkatan): ?string
+    {
+        if ($angkatan->status !== 'active') {
+            return 'Angkatan itu belum dibuka untuk pendaftaran umum.';
+        }
+
+        if ($angkatan->mulai !== null
+            && \Carbon\Carbon::parse($angkatan->mulai)->startOfDay()->lte(now()->startOfDay())) {
+            return 'Angkatan itu sudah berjalan, jadi pendaftarannya sudah ditutup.';
+        }
+
+        $sisa = $this->sisaKursi($angkatan);
+
+        if ($sisa !== null && $sisa <= 0) {
+            return 'Kursi angkatan itu sudah habis.';
+        }
+
+        return null;
     }
 
     public function store(Request $request)
     {
-        $token = $this->generateRandomToken(30);
         /*
-         * Nomornya dirakit di SATU tempat untuk kelima layanan.
+         * VALIDASI, dan sampai 23 Okt 2026 tidak ada satu pun di sini.
          *
-         * Dulu tiap pengendali umum punya salinan pembuat nomornya sendiri —
-         * lima aksara acak — sementara jalur panitia memakai pola berawalan
-         * dan bertanggal. Dua pembuat nomor untuk satu layanan berarti bentuk
-         * nomornya bergantung pada SIAPA yang mendaftarkan, dan itu persis
-         * yang tidak boleh terjadi: pendaftar yang mendaftar sendiri dan yang
-         * didaftarkan panitia harus menerima nomor yang sama bentuknya.
+         * Terukur: borang KOSONG SAMA SEKALI — tanpa nama, email, maupun
+         * nomor — diterima, tersimpan sebagai NULL bertiga, dan tagihan DOKU
+         * sungguhan terbit atasnya. `email=BUKAN-EMAIL` dan `telp=abc`
+         * tersimpan apa adanya. Yang menjaga cuma atribut `required` di
+         * peramban, dan itu hilang begitu orang memakai alat lain.
+         *
+         * Akibatnya panitia memegang pendaftaran yang tidak bisa dihubungi,
+         * dan surat buktinya tidak pernah sampai ke siapa pun.
          */
-        $id_transaksi = \App\Support\PendaftaranSemuaLayanan::nomorBaru('scopus_camp');
+        $data = $request->validate([
+            'kategori_id' => ['required', 'string'],
+            'nama' => ['required', 'string', 'min:3', 'max:150'],
+            'email' => ['required', 'email:rfc', 'max:100'],
+            'telp' => ['required', 'string', 'min:8', 'max:25'],
+            'affiliasi' => ['required', 'string', 'min:3', 'max:150'],
+                    'jumlah_pendaftar' => ['required', 'integer', 'min:1', 'max:20'],
+                    'kode_diskon' => ['nullable', 'string', 'max:50'],
+            'setuju' => ['accepted'],
+        ], [
+            'setuju.accepted' => 'Centang dulu persetujuan ketentuannya.',
+        ]);
 
-        // MENGHITUNG JUMLAH SISA KUOTA YANG TIDAK BOLEH MELEBIHI TOTAL KUOTA
-        $kategoriId = $request->input('kategori_id');
-        $kategori = CategoriesScopusCamp::findOrFail($kategoriId);
+        $kategori = CategoriesScopusCamp::findOrFail($data['kategori_id']);
 
-        // Hitung jumlah pendaftar saat ini
-        $jumlahPendaftarBaru = (int) $request->input('jumlah_pendaftar');
-        $totalTerdaftarSaatIni = PendaftaranScopusCamp::where('kategori_id', $kategoriId)
-            ->sum('jumlah_pendaftar');
+        $tertutup = $this->alasanTertutup($kategori);
 
-        $totalSetelahPendaftaran = $totalTerdaftarSaatIni + $jumlahPendaftarBaru;
-
-        if ($totalSetelahPendaftaran > $kategori->total_kuota) {
-            return back()->with('error', 'Pendaftaran gagal! Jumlah pendaftar melebihi kuota maksimal.');
+        if ($tertutup !== null) {
+            return redirect()->route('public.scopuscamp.index')->with('error', $tertutup);
         }
-        // END
+
+        $jumlahPendaftarBaru = (int) $data['jumlah_pendaftar'];
 
         /*
          * Lewat gerbang pembayaran kalau kredensialnya ada, kalau tidak
          * transfer manual seperti dulu.
          *
-         * Dipakai di EMPAT tempat di bawah — bukti transfer, cara_bayar,
-         * tenggat, dan tujuan akhirnya — jadi ditanyakan sekali lalu
-         * disimpan. Menanyakannya berulang membuka celah yang tidak akan
-         * pernah terlihat di mesin pengembang: kalau jawabannya sempat
-         * berubah di tengah, barisnya bisa tersimpan sebagai 'doku' tanpa
-         * tagihan, atau sebagai 'transfer' tanpa bukti.
+         * Ditanyakan SEKALI lalu disimpan: kalau jawabannya sempat berubah
+         * di tengah, barisnya bisa tersimpan sebagai 'doku' tanpa tagihan,
+         * atau sebagai 'transfer' tanpa bukti.
          */
         $bayarDaring = $this->doku->siap();
+
+        if (! $bayarDaring && ! $request->hasFile('gambar')) {
+            return back()->withInput()
+                ->withErrors(['gambar' => 'Bukti transfernya belum diunggah.']);
+        }
+
+        /*
+         * PENDAFTARAN GANDA ditolak sebelum barisnya dibuat.
+         *
+         * Orang menekan tombolnya dua kali karena mengira yang pertama
+         * gagal — halaman ini memang diam beberapa detik saat tagihannya
+         * dibuat — dan tanpa penjagaan ini ia mendapat DUA tagihan untuk
+         * satu kursi, lalu sebagian membayar keduanya.
+         *
+         * Yang dicegat diantar ke halaman status pendaftaran yang sudah ada,
+         * bukan ditolak dengan pesan galat: ia memang berhak atas kursinya,
+         * dan yang ia butuhkan tautan bayarnya — bukan pemberitahuan bahwa
+         * ia sudah mendaftar.
+         */
+        $sudahAda = PendaftaranScopusCamp::where('kategori_id', $kategori->getKey())
+            ->whereNotIn('status', self::STATUS_LEPAS_KURSI)
+            ->where('email', mb_strtolower(trim($data['email'])))
+            ->where('nama', trim($data['nama']))
+            ->latest('created_at')
+            ->first();
+
+        if ($sudahAda !== null) {
+            return redirect()->route('public.scopuscamp.status', $sudahAda->getKey())
+                ->with('error', 'Data ini sudah terdaftar di angkatan tersebut. '
+                    . 'Kursinya sudah ditahan untuk Anda — tidak perlu mendaftar lagi.');
+        }
 
         // SAVE IMAGE
         $imagePath = null;
@@ -323,23 +546,19 @@ class PublicScopusCampController extends Controller
         if (! $bayarDaring && $request->hasFile('gambar')) {
             $image = $request->file('gambar');
 
-            // Generate nama file dengan UUID
             $imageName = Str::uuid() . '_Bukti_TF_Scopus_Camp.' . $image->getClientOriginalExtension();
-
-            // Simpan path (jika ingin disimpan ke database)
             $imagePath = 'ScopusCamp/' . $imageName;
 
-            // Pindahkan file ke folder public/ScopusCamp
             $image->move(public_path('ScopusCamp'), $imageName);
         }
         // END
 
         // CEK APAKAH KODE DISKON NULL ATAU TIDAK
-        $kodeDiskon = $request->input('kode_diskon');
+        $kodeDiskon = $data['kode_diskon'] ?? null;
         $nominalDiskon = null;
 
-        if (!empty($kodeDiskon)) {
-            $nominalDiskon = str_replace('.', '', $request->input('nominal_diskon'));
+        if (! empty($kodeDiskon)) {
+            $nominalDiskon = str_replace('.', '', (string) $request->input('nominal_diskon'));
         }
         // END
 
@@ -364,23 +583,53 @@ class PublicScopusCampController extends Controller
         $cleanPPN = (string) $harga['ppn'];
         $cleanTotalPembayaran = (string) $harga['total'];
 
-        $save = PendaftaranScopusCamp::create([
-            'token'                                                     => $token,
-            'id_transaksi'                                              => $id_transaksi,
-            'kategori_id'                                   => $request->input('kategori_id'),
-            'email'                                                     => $request->input('email'),
-            'nama'                                                      => $request->input('nama'),
-            'telp'                                                      => $request->input('telp'),
-            'affiliasi'                                                 => $request->input('affiliasi'),
-            'ppn'                                                       => $cleanPPN,
-            'kode_unik'                                                 => $harga['kode_unik'],
-            'gambar'                                                    => $imagePath,
-            'jumlah_pendaftar'                                          => $jumlahPendaftarBaru,
-            'kode_diskon'                                               => $kodeDiskon,
-            'nominal_diskon'                                            => $nominalDiskon,
-            'total_pembayaran'                                          => $cleanTotalPembayaran,
+        /*
+         * KURSINYA DIKUNCI, lalu diperiksa lagi DI DALAM kunci.
+         *
+         * Pemeriksaan di atas dilakukan sebelum transaksi, jadi ia cuma
+         * menyaring lebih awal. Tanpa kunci baris, dua orang yang menekan
+         * "Lanjut ke pembayaran" pada detik yang sama sama-sama lolos
+         * pemeriksaan itu — keduanya membayar kursi terakhir yang sama, dan
+         * yang kalah baru tahu saat sudah sampai di lokasi.
+         *
+         * Pola ini disalin dari Webinar Eksklusif yang sudah memakainya.
+         */
+        try {
+            $save = DB::transaction(function () use (
+                $kategori, $data, $jumlahPendaftarBaru, $bayarDaring,
+                $imagePath, $kodeDiskon, $nominalDiskon, $harga,
+                $cleanPPN, $cleanTotalPembayaran, $request
+            ) {
+                $terkunci = CategoriesScopusCamp::whereKey($kategori->getKey())
+                    ->lockForUpdate()
+                    ->first();
+
+                $sisa = $this->sisaKursi($terkunci);
+
+                if ($sisa !== null && $sisa < $jumlahPendaftarBaru) {
+                    throw new \RuntimeException($sisa <= 0
+                        ? 'Kursi angkatan itu baru saja habis.'
+                        : 'Kursinya tinggal ' . $sisa . ', tidak cukup untuk '
+                            . $jumlahPendaftarBaru . ' orang.');
+                }
+
+                $baris = PendaftaranScopusCamp::create([
+                    'token'                                                     => \Illuminate\Support\Str::random(30),
+                    'id_transaksi'                                              => \App\Support\PendaftaranSemuaLayanan::nomorBaru('scopus_camp'),
+                    'kategori_id'                                               => $terkunci->getKey(),
+                    'email'                                                     => mb_strtolower(trim($data['email'])),
+                    'nama'                                                      => trim($data['nama']),
+                    'telp'                                                      => \App\Support\NomorTelepon::rapikan($data['telp']),
+                    'affiliasi'                                                 => trim($data['affiliasi']),
+                    'ppn'                                                       => $cleanPPN,
+                    'kode_unik'                                                 => $harga['kode_unik'],
+                    'gambar'                                                    => $imagePath,
+                    'jumlah_pendaftar'                                          => $jumlahPendaftarBaru,
+                    'kode_diskon'                                               => $kodeDiskon,
+                    'nominal_diskon'                                            => $nominalDiskon,
+                    'total_pembayaran'                                          => $cleanTotalPembayaran,
             // Tali ke promo yang memotong harganya; dibaca layar dampak promo.
-            'promo_id'                                                  => $harga['promo']?->getKey(),
+                    'promo_id'                                                  => $harga['promo']?->getKey(),
 
             /*
              * Statusnya DIPUTUSKAN DI SINI, tidak lagi diterima dari borang.
@@ -396,36 +645,54 @@ class PublicScopusCampController extends Controller
              * salinan kedua di sini akan berselisih diam-diam saat katalognya
              * berubah.
              */
-            'status'                                                    => \App\Support\PendaftaranSemuaLayanan::statusAwal('scopus_camp'),
+                    'status'                                                    => \App\Support\PendaftaranSemuaLayanan::statusAwal('scopus_camp'),
 
             // 'doku' atau 'transfer'; layar panitia membedakan keduanya,
             // dan hanya yang 'doku' punya tagihan untuk ditutup saat
             // pendaftarannya dibatalkan.
-            'cara_bayar'                                                => $bayarDaring ? 'doku' : 'transfer',
+                    'cara_bayar'                                                => $bayarDaring ? 'doku' : 'transfer',
 
             /*
              * Tenggat HANYA untuk yang lewat gerbang: tagihan DOKU memang
              * mati sendiri sesudah sekian menit, sedangkan transfer manual
              * tidak punya tenggat sama sekali di layanan ini.
              */
-            'kedaluwarsa_pada'                                          => $bayarDaring
+                    'kedaluwarsa_pada'                                          => $bayarDaring
                 ? now()->addMinutes(Doku::MENIT_KEDALUWARSA)
                 : null,
 
-            'note'                                                      => $request->input('note'),
-        ]);
+                    /*
+                     * `note` TIDAK lagi diambil dari kiriman borang.
+                     *
+                     * Kolom itu kolom catatan PANITIA — dibaca dan disunting
+                     * di layar Pendaftar Layanan — dan sampai sekarang isinya
+                     * bisa ditentukan siapa pun yang mengirim borang ini,
+                     * sebanyak apa pun, tanpa satu baris pun yang membatasinya.
+                     * Borangnya sendiri memang tidak pernah punya medan itu.
+                     */
+                ]);
+
+                /*
+                 * `sisa_kuota` disetel ulang dari hitungan yang BARU —
+                 * yang sudah mengecualikan pendaftaran batal. Sebelum ini
+                 * ia dihitung dari sum() atas seluruh baris, jadi tiap
+                 * pendaftaran baru menuliskan kembali angka yang keliru.
+                 */
+                if ($terkunci->total_kuota !== null) {
+                    $terkunci->forceFill([
+                        'sisa_kuota' => (string) self::hitungUlangSisaKursi($terkunci),
+                    ])->save();
+                }
+
+                return $baris;
+            });
+        } catch (\RuntimeException $e) {
+            return back()->withInput()->with('error', $e->getMessage());
+        }
 
         if ($save) {
-            // UPDATE SISA KUOTA
-            $totalTerdaftar = PendaftaranScopusCamp::where('kategori_id', $kategoriId)
-                ->sum('jumlah_pendaftar');
-
-            $kategori->sisa_kuota = max(0, $kategori->total_kuota - $totalTerdaftar);
-            $kategori->save();
-            // END
-
             $appName = 'Rumah Scopus Foundation';
-            $emailTo = $request->input('email');
+            $emailTo = $data['email'];
 
             /*
              * Surat buktinya tetap dikirim lebih dulu, lewat gerbang maupun
@@ -487,13 +754,25 @@ class PublicScopusCampController extends Controller
             'label_potongan' => $pendaftaran->kode_diskon
                 ? 'Potongan ' . $pendaftaran->kode_diskon
                 : 'Potongan',
-            'kode_unik' => (int) $pendaftaran->kode_unik,
-            'ppn' => (int) $pendaftaran->ppn,
+                    'kode_unik' => (int) $pendaftaran->kode_unik,
+                    'ppn' => (int) $pendaftaran->ppn,
             'judul' => trim($kategori->nama . ' ' . ($kategori->nama_ke ? '#' . $kategori->nama_ke : '')),
             'nama' => $pendaftaran->nama,
             'email' => $pendaftaran->email,
             'telp' => $pendaftaran->telp,
             'kembali' => route('public.scopuscamp.status', $pendaftaran->getKey()),
+
+            /*
+             * HANYA QRIS dan Virtual Account, atas keputusan pemiliknya
+             * 23 Okt 2026.
+             *
+             * Dibatasi di permintaan tagihannya, bukan cuma di daftar yang
+             * dipajang borang. Daftar di borang itu janji; yang menentukan
+             * pilihan sebenarnya halaman DOKU, dan tanpa medan ini ia tetap
+             * memajang kartu, e-wallet, dan gerai — persis yang tidak jadi
+             * diterima.
+             */
+            'kanal' => Doku::KANAL_QRIS_DAN_VA,
         ]);
 
         if (! $hasil['berhasil'] || ! $hasil['url']) {
@@ -675,7 +954,7 @@ class PublicScopusCampController extends Controller
          * satu pun ringkasan yang sudah ada.
          */
         $pendaftaran->forceFill([
-            'status' => 'Pendaftaran Diterima',
+                    'status' => 'Pendaftaran Diterima',
             'bayar_status' => $status !== '' ? $status : 'success',
             'bayar_pada' => now(),
 
