@@ -237,36 +237,47 @@
     .cmp-lain-rinci { color: var(--tinta-2); font-size: .83rem; font-weight: 600; }
     .cmp-lain-kosong { color: var(--tinta-2); font-size: .93rem; }
 
-    /* ============================================ pita ajakan bawah */
-    .cmp-pita {
-        position: fixed; left: 0; right: 0; bottom: 0; z-index: 99998;
-        padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
-        background: var(--kertas);
-        border-top: 2px solid var(--tinta);
-        box-shadow: 0 -4px 18px rgba(22, 35, 63, .12);
+    /* ============================================ pita ajakan bawah
 
-        /* Diturunkan keluar layar, bukan display:none — supaya munculnya
-           meluncur, tidak melompat. */
-        transform: translateY(110%);
-        transition: transform .22s ease;
-    }
-    .cmp-pita-tampil { transform: translateY(0); }
+       HANYA di layar sempit, dan itu permintaan pemiliknya: di layar lebar
+       pitanya mengganggu.
 
-    /* Ruang di dasar halaman, di SEMUA lebar.
+       Dan ia memang benar — di sana pita itu tidak menyelesaikan apa pun.
+       Halaman selebar 1440 memuat tombol daftar, keempat fakta pokok, dan
+       bilah jadwal lain sekaligus, jadi tombolnya tidak pernah jauh. Pita
+       melayang yang menutupi isi hanya menukar satu masalah yang tidak ada
+       dengan satu masalah yang nyata.
 
-       Pitanya melayang di atas isi, dan terukur ia menutupi 97px terakhir
-       kaki halaman di layar 1440. Ruang ini tetap dipesan walau pitanya
-       sedang tersembunyi: memberinya hanya saat pita muncul membuat seluruh
-       halaman melompat 92px tepat ketika orang sedang menggulung. */
-    body { padding-bottom: 92px; }
+       Di ponsel ia tetap dipakai: halaman ini 3.000px lebih, dan tanpa pita
+       orang yang sudah yakin di tengah harus menggulung balik ke atas. */
+    .cmp-pita { display: none; }
 
-    @media (min-width: 992px) {
+    @media (max-width: 991.98px) {
         .cmp-pita {
-            left: 50%; right: auto; width: min(560px, 92vw);
-            margin-left: calc(min(560px, 92vw) / -2);
-            border: 2px solid var(--tinta); border-bottom: none;
-            border-radius: 18px 18px 0 0;
+            display: block;
+            position: fixed; left: 0; right: 0; bottom: 0; z-index: 99998;
+            padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+            background: var(--kertas);
+            border-top: 2px solid var(--tinta);
+            box-shadow: 0 -4px 18px rgba(22, 35, 63, .12);
+
+            /* Diturunkan keluar layar, bukan display:none — supaya munculnya
+               meluncur, tidak melompat. */
+            transform: translateY(110%);
+            transition: transform .22s ease;
         }
+        .cmp-pita-tampil { transform: translateY(0); }
+
+        /* Ruang di dasar halaman, HANYA di lebar yang punya pita.
+
+           Pitanya melayang di atas isi; terukur ia menutupi 97px terakhir
+           kaki halaman. Ruangnya tetap dipesan walau pita sedang
+           tersembunyi: memberinya hanya saat pita muncul membuat seluruh
+           halaman melompat 92px tepat ketika orang sedang menggulung.
+
+           Di layar lebar ruang ini TIDAK dipesan — tanpa pita, 92px kosong
+           di bawah kaki halaman cuma celah yang tidak ada gunanya. */
+        body { padding-bottom: 92px; }
     }
 
     @media (max-width: 991.98px) {
