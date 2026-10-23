@@ -97,6 +97,12 @@ class PendaftaranSemuaLayanan
                 'promo' => 'promo_id',
                 'bukti' => 'gambar',
                 'cara_bayar' => 'cara_bayar',
+                // Kanal yang benar-benar dipakai lewat gerbang — VA Mandiri,
+                // QRIS, OVO. Tanpa ini layar Pendaftar Layanan cuma berbunyi
+                // "DOKU" untuk semua pembayaran daring, dan "lewat apa"
+                // justru pertanyaan pertama panitia saat satu pembayaran
+                // perlu ditelusuri.
+                'kanal_bayar' => 'bayar_kanal',
                 'catatan' => 'note',
                 'grup' => 'group_wa',
             ],

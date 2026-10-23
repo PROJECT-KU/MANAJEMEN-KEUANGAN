@@ -1,436 +1,314 @@
 @extends('public.layout.header')
 
-@section('title')
-Form Pendaftaran Scopus Camp | Rumah Scopus
-@stop
+@section('title', 'Pendaftaran ' . $item->nama . ' #' . $item->nama_ke . ' | Rumah Scopus')
 
+@push('kepala')
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600..900&family=Figtree:wght@400;500;700;800&display=swap">
+@endpush
+
+@section('konten')
+{{--
+    Borang pendaftaran Scopus Camp — dirombak 23 Okt 2026.
+
+    Dua hal sekaligus, dan keduanya diminta pemiliknya: tampilannya disamakan
+    dengan halaman daftar dan halaman detail, dan pembayarannya pindah ke
+    gerbang DOKU.
+
+    Yang HILANG dari versi lama, berikut sebabnya:
+
+      - palet ungu-indigo #6366f1 dengan kaca buram. Seluruh jalur Scopus
+        Camp sudah memakai kertas krem dan jingga; borang ini satu-satunya
+        layar yang berganti warna di tengah alur, tepat saat orangnya
+        hendak membayar;
+      - nomor rekening dan unggah bukti transfer, SELAMA gerbangnya siap.
+        Jalurnya: salin nomor, pindah ke aplikasi bank, kembali, potret
+        bukti, unggah, lalu menunggu panitia membuka gambarnya. Terukur di
+        basis data ini, enam bukti menunggu diperiksa 177, 127, 74, 28, 17,
+        dan 6 hari. Dengan gerbang, orangnya menekan satu tombol dan
+        statusnya berpindah sendiri;
+      - `position: sticky` pada kartu ringkasan. Di dalam butir CSS Grid ia
+        TIDAK PERNAH menempel — sudah diukur di halaman detail — tetapi
+        tetap menggeser kartunya sejauh nilai `top`-nya.
+
+    Jalur transfer manual TIDAK dibuang, cuma disembunyikan selama gerbangnya
+    siap: peladen yang kredensial DOKU-nya belum dipasang harus tetap punya
+    cara menerima uang. Yang menentukan $bayarDaring, dihitung sekali di
+    pengendali supaya borang dan penyimpanannya tidak bisa berselisih.
+--}}
 <style>
-    /* =========================================
-       BACKGROUND & GLASSMORPHISM BASE
-       ========================================= */
-    .hero-bg {
-        position: relative;
-        background-color: #f8fafc;
-        /* Default background jika hero-bg.png tidak ada */
-        background-image: radial-gradient(circle at top right, rgba(99, 102, 241, 0.15), transparent 40%),
-            radial-gradient(circle at bottom left, rgba(245, 158, 11, 0.15), transparent 40%),
-            url('/assets/artikel/img/hero-bg.png');
-        background-size: cover;
-        background-position: center;
-        background-attachment: fixed;
-        padding: 100px 0 80px 0;
-        min-height: 100vh;
-        z-index: 1;
+    .daf {
+        --kertas: #fdf5e8;  --kertas-2: #f8ead4;
+        --tinta: #16233f;   --tinta-2: #5c6b85;
+        --jingga: #e76d20;  --jingga-muda: #fb8c3d; --jingga-tua: #ad4d12;
+        --stabilo: #ffd84d; --rumput: #0f766e;
+        --garis: #e7dcc6;
+
+        background: var(--kertas); color: var(--tinta);
+        font-family: 'Figtree', system-ui, sans-serif;
+        /* 18px, bukan 16px bawaan templat: pembacanya rata-rata berusia
+           lanjut, dan ukuran bawaannya terbaca kecil di layar mereka. */
+        font-size: 18px;
+        padding: 112px 0 64px;
+        overflow-x: clip;
+    }
+    .daf h1, .daf h2, .daf h3 {
+        font-family: 'Fraunces', Georgia, serif;
+        font-weight: 800; color: var(--tinta); margin: 0; letter-spacing: -.01em;
+    }
+    .daf p { margin: 0; color: var(--tinta-2); line-height: 1.7; }
+    .daf a { text-decoration: none; }
+
+    .daf-balik {
+        display: inline-flex; align-items: center; gap: 8px; margin-bottom: 16px;
+        color: var(--tinta-2); font-weight: 700; font-size: .95rem;
+        transition: gap .2s ease, color .2s ease;
+    }
+    .daf-balik:hover { color: var(--jingga-tua); gap: 13px; }
+
+    .daf .daf-judul { font-size: clamp(1.6rem, 3.2vw, 2.3rem); line-height: 1.15; }
+    .daf-anak { margin-top: 8px; font-size: 1.02rem; }
+
+    /* ==================================================== susunan kolom */
+    .daf-kisi {
+        display: grid; grid-template-columns: minmax(0, 1fr) 390px; gap: 30px;
+        align-items: start; margin-top: 34px;
     }
 
-    /* Efek Kaca Utama untuk Card */
-    .glass-card {
-        background: rgba(255, 255, 255, 0.75);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 1);
-        border-radius: 24px;
-        padding: 30px;
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
-        margin-bottom: 30px;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    .daf-kartu {
+        background: #fff; border: 1px solid var(--garis); border-radius: 22px;
+        padding: 26px 26px 28px; margin-bottom: 24px;
+        box-shadow: 0 10px 28px rgba(22, 35, 63, .06);
     }
+    .daf-kartu:last-child { margin-bottom: 0; }
 
-    .glass-card:hover {
-        box-shadow: 0 20px 45px rgba(0, 0, 0, 0.08);
+    .daf-kepala {
+        display: flex; align-items: center; gap: 11px;
+        font-family: 'Fraunces', Georgia, serif; font-weight: 800;
+        font-size: 1.22rem; color: var(--tinta);
+        padding-bottom: 14px; margin-bottom: 20px;
+        border-bottom: 2px solid var(--kertas-2);
     }
+    .daf-kepala i { color: var(--jingga); }
 
-    .glass-header {
-        font-size: 20px;
-        font-weight: 800;
-        color: #1e293b;
-        margin-bottom: 25px;
-        padding-bottom: 15px;
-        border-bottom: 2px dashed rgba(148, 163, 184, 0.3);
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    /* =========================================
-       CSS GRID LAYOUT
-       ========================================= */
-    .registration-grid {
-        display: grid;
-        grid-template-columns: 1.8fr 1.2fr;
-        gap: 30px;
-        align-items: start;
-    }
-
-    .form-grid-2 {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
-        margin-bottom: 20px;
-    }
-
-    .form-grid-3 {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        gap: 20px;
-        margin-bottom: 20px;
-    }
-
-    /* =========================================
-       INPUT FORM GLOSSY
-       ========================================= */
-    .form-group label {
-        font-size: 13px;
-        font-weight: 700;
-        color: #475569;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 8px;
-        display: block;
-    }
-
-    .form-control-glass {
-        width: 100%;
-        background: rgba(255, 255, 255, 0.8);
-        border: 1.5px solid rgba(203, 213, 225, 0.6);
-        border-radius: 14px;
-        padding: 12px 18px;
-        font-size: 15px;
-        font-weight: 600;
-        color: #1e293b;
-        transition: all 0.3s ease;
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
-    }
-
-    .form-control-glass:focus {
-        background: #ffffff;
-        border-color: #6366f1;
-        outline: none;
-        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
-    }
-
-    .form-control-glass[readonly] {
-        background: rgba(241, 245, 249, 0.6);
-        color: #64748b;
-        cursor: not-allowed;
-        border-color: transparent;
-    }
-
-    /* Custom Input Group (Gabungan Rp dan Input) */
-    .input-group-glass {
-        display: flex;
-        align-items: center;
-        background: rgba(255, 255, 255, 0.8);
-        border: 1.5px solid rgba(203, 213, 225, 0.6);
-        border-radius: 14px;
-        overflow: hidden;
-        transition: all 0.3s ease;
-    }
-
-    .input-group-glass:focus-within {
-        border-color: #6366f1;
-        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
-    }
-
-    .input-group-glass.readonly {
-        background: rgba(241, 245, 249, 0.6);
-        border-color: transparent;
-    }
-
-    .input-group-glass .input-group-text {
-        background: transparent;
-        border: none;
-        font-weight: 800;
-        color: #475569;
-        padding: 12px 15px;
-    }
-
-    .input-group-glass .form-control-glass {
-        border: none;
-        border-radius: 0;
-        box-shadow: none;
-        background: transparent;
-        padding-left: 0;
-    }
-
-    /* =========================================
-       FILE UPLOAD KACA
-       ========================================= */
-    .file-upload-glass {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        width: 100%;
-        padding: 15px;
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
-        border: 2px dashed #818cf8;
-        border-radius: 16px;
-        color: #4f46e5;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-
-    .file-upload-glass:hover {
-        background: rgba(99, 102, 241, 0.15);
-        transform: translateY(-2px);
-    }
-
-    .image-preview {
-        width: 100%;
-        height: 180px;
-        border-radius: 16px;
-        overflow: hidden;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background: rgba(241, 245, 249, 0.6);
-        border: 1px solid rgba(255, 255, 255, 0.8);
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.05);
-    }
-
-    .image-preview img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    /* =========================================
-       ACCORDION KACA (Untuk Bank)
-       ========================================= */
-    /* ============================ rombakan 22 Okt 2026 — pembaca lanjut usia
-
-       Sasarannya orang berusia lanjut, jadi yang dikejar SEDIKIT ISIAN dan
-       HURUF BESAR. Angka di bawah dipilih dari patokan sasaran sentuh 44px,
-       bukan dari selera: isian 56px, huruf 18px. */
-    .daf-ringkas {
-        display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 14px 22px; margin: 0 0 22px; padding: 0;
-    }
-    @media (max-width: 575.98px) { .daf-ringkas { grid-template-columns: 1fr; } }
-
+    /* ==================================================== ringkasan kelas */
+    .daf-ringkas { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 24px; margin: 0; }
     .daf-ringkas dt {
-        color: #64748b; font-size: .82rem; font-weight: 700;
-        letter-spacing: .05em; text-transform: uppercase; margin: 0 0 2px;
+        font-size: .78rem; font-weight: 800; letter-spacing: .06em;
+        text-transform: uppercase; color: var(--tinta-2); margin-bottom: 3px;
     }
-    .daf-ringkas dd {
-        margin: 0; color: #0f172a; font-size: 1.08rem; font-weight: 700;
-        line-height: 1.4;
-    }
-    .daf-coret { color: #94a3b8; font-weight: 500; font-size: .92rem; margin-right: 6px; }
-    .daf-opsional { color: #64748b; font-weight: 500; font-size: .86rem; }
-    .daf-diskon { margin-top: 4px; }
+    .daf-ringkas dd { margin: 0; font-weight: 700; font-size: 1.04rem; color: var(--tinta); }
+    .daf-coret { color: var(--tinta-2); font-weight: 600; margin-right: 6px; }
 
-    /* Isian yang BENAR-BENAR diisi dibuat besar. */
-    .glass-card .form-control-glass,
-    .glass-card select.form-control-glass {
-        min-height: 56px; font-size: 1.05rem;
+    /* ==================================================== isian */
+    .daf-medan { margin-bottom: 20px; }
+    .daf-medan:last-child { margin-bottom: 0; }
+    .daf-medan label {
+        display: block; margin-bottom: 7px;
+        font-size: .88rem; font-weight: 800; color: var(--tinta);
     }
-    .glass-card .form-group label {
-        font-size: 1rem; font-weight: 700; color: #0f172a; margin-bottom: 7px;
-    }
-    .file-upload-glass { min-height: 64px; font-size: 1.05rem; }
+    .daf-wajib { color: #c0392b; }
+    .daf-opsional { font-weight: 600; color: var(--tinta-2); text-transform: none; letter-spacing: 0; }
 
+    .daf-isian {
+        width: 100%; background: #fff;
+        border: 2px solid var(--garis); border-radius: 14px;
+        padding: 13px 16px; font-size: 1.02rem; font-weight: 600;
+        color: var(--tinta); font-family: inherit;
+        transition: border-color .18s ease, box-shadow .18s ease;
+    }
+    .daf-isian::placeholder { color: #a9b3c4; font-weight: 500; }
+    .daf-isian:focus {
+        outline: none; border-color: var(--jingga);
+        box-shadow: 0 0 0 4px rgba(231, 109, 32, .15);
+    }
+
+    .daf-dua { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+
+    /* ==================================================== kode diskon */
+    .daf-diskon-baris { display: flex; gap: 10px; }
+    .daf-diskon-baris .daf-isian { flex: 1 1 auto; min-width: 0; }
+    .daf-cek {
+        flex: 0 0 auto; border: 0; border-radius: 14px; padding: 0 20px;
+        background: var(--tinta); color: #fff; font-weight: 800; font-size: .95rem;
+        font-family: inherit; cursor: pointer; transition: background .18s ease;
+    }
+    .daf-cek:hover { background: var(--jingga-tua); }
+    .daf-pesan { display: block; margin-top: 8px; font-size: .92rem; font-weight: 700; }
+    .daf-pesan.ok { color: var(--rumput); }
+    .daf-pesan.gagal { color: #c0392b; }
+
+    /* ==================================================== rincian biaya */
+    .daf-baris {
+        display: flex; align-items: baseline; justify-content: space-between;
+        gap: 14px; padding: 11px 0; border-bottom: 1px dashed var(--garis);
+        font-size: 1rem;
+    }
+    .daf-baris span:first-child { color: var(--tinta-2); font-weight: 600; }
+    .daf-baris b { font-weight: 800; color: var(--tinta); }
+    .daf-baris.potong b { color: var(--rumput); }
+
+    .daf-total {
+        display: flex; align-items: baseline; justify-content: space-between;
+        gap: 14px; margin-top: 16px; padding: 16px 18px;
+        background: var(--kertas-2); border-radius: 16px;
+    }
+    .daf-total span { font-weight: 800; font-size: 1rem; color: var(--tinta); }
+    .daf-total b {
+        font-family: 'Fraunces', Georgia, serif; font-size: 1.5rem;
+        font-weight: 900; color: var(--jingga-tua); line-height: 1.1;
+        /* Fraunces memakai angka gaya lama: tingginya tidak seragam dan
+           sebagian turun di bawah garis dasar. Pada nominal uang ia terbaca
+           seperti salah cetak di sebelah "Rp" yang setinggi huruf besar. */
+        font-variant-numeric: lining-nums tabular-nums;
+    }
+
+    /* ==================================================== tombol kirim */
+    .daf-kirim {
+        display: flex; align-items: center; justify-content: center; gap: 10px;
+        width: 100%; margin-top: 18px; padding: 0 22px;
+        /* 60px: di atas patokan sasaran sentuh 44px, sebab pembacanya
+           rata-rata berusia lanjut. */
+        min-height: 60px;
+        border: 0; border-radius: 16px; cursor: pointer;
+        background: linear-gradient(135deg, var(--jingga-muda), var(--jingga-tua));
+        color: #fff; font-family: 'Fraunces', Georgia, serif;
+        font-size: 1.1rem; font-weight: 800; line-height: 1.25;
+        box-shadow: 0 10px 24px rgba(231, 109, 32, .32);
+        transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .daf-kirim:hover { transform: translateY(-2px); box-shadow: 0 16px 32px rgba(231, 109, 32, .4); }
+    .daf-kirim:disabled { opacity: .72; cursor: wait; transform: none; }
+
+    .daf-aman {
+        display: flex; align-items: flex-start; gap: 9px;
+        margin-top: 14px; font-size: .9rem; line-height: 1.5; color: var(--tinta-2);
+    }
+    .daf-aman i { color: var(--rumput); margin-top: 3px; }
+
+    /* ==================================================== kanal bayar */
+    .daf-kanal { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+    .daf-kanal span {
+        padding: 6px 13px; border-radius: 999px;
+        background: var(--kertas-2); border: 1px solid var(--garis);
+        font-size: .86rem; font-weight: 700; color: var(--tinta);
+    }
+
+    /* ==================================================== transfer manual */
     .daf-rekening {
-        padding: 20px; text-align: center;
-        background: #fff;
-        border: 2px solid #e2e8f0; border-radius: 16px;
+        background: var(--kertas-2); border: 1px solid var(--garis);
+        border-radius: 18px; padding: 20px; text-align: center;
     }
     .daf-rekening-bank {
-        display: flex; align-items: center; justify-content: center; gap: 12px;
-        padding-bottom: 14px; margin-bottom: 14px;
-        border-bottom: 1px solid #e2e8f0;
-        font-size: 1.08rem; color: #0f172a;
+        display: flex; align-items: center; justify-content: center; gap: 10px;
+        margin-bottom: 14px; font-size: 1.05rem;
     }
     .daf-rekening-label {
-        margin: 0 0 4px; color: #64748b; font-size: .82rem; font-weight: 700;
-        letter-spacing: .06em; text-transform: uppercase;
+        font-size: .76rem; font-weight: 800; letter-spacing: .07em;
+        text-transform: uppercase; color: var(--tinta-2); margin-bottom: 2px;
     }
     .daf-rekening-nomor {
-        margin: 0 0 6px; color: #0f172a;
-        font-size: 1.62rem; font-weight: 800; letter-spacing: 2px;
+        font-family: 'Fraunces', Georgia, serif; font-size: 1.5rem; font-weight: 900;
+        color: var(--tinta); letter-spacing: .02em; margin-bottom: 2px;
     }
-    .daf-rekening-nama { margin: 0 0 16px; color: #475569; font-size: 1rem; }
+    .daf-rekening-nama { font-size: .95rem; margin-bottom: 14px; }
     .daf-salin {
-        display: inline-flex; align-items: center; justify-content: center; gap: 9px;
-        width: 100%; min-height: 52px; padding: 13px 20px;
-        background: #0f172a; color: #fff;
-        border: none; border-radius: 999px;
-        font-size: 1.02rem; font-weight: 700; cursor: pointer;
+        width: 100%; min-height: 50px; border: 0; border-radius: 13px;
+        background: var(--tinta); color: #fff; font-family: inherit;
+        font-size: .98rem; font-weight: 800; cursor: pointer;
     }
-    .daf-salin:hover { background: #1e293b; }
+    .daf-salin:hover { background: var(--jingga-tua); }
 
-    .accordion-glass .accordion-item {
-        background: rgba(255, 255, 255, 0.6);
-        border: 1px solid rgba(255, 255, 255, 0.9);
-        border-radius: 16px !important;
-        margin-bottom: 10px;
-        overflow: hidden;
+    .daf-unggah {
+        display: flex; align-items: center; justify-content: center; gap: 10px;
+        width: 100%; min-height: 56px; margin: 0;
+        border: 2px dashed var(--jingga); border-radius: 14px;
+        background: #fff; color: var(--jingga-tua);
+        font-weight: 800; cursor: pointer;
     }
+    .daf-unggah:hover { background: var(--kertas-2); }
+    .daf-pratinjau { margin-top: 14px; text-align: center; }
+    .daf-pratinjau img { max-width: 100%; border-radius: 12px; border: 1px solid var(--garis); }
+    .daf-berkas { display: block; margin-top: 8px; font-size: .88rem; font-weight: 700; color: var(--tinta-2); }
 
-    .accordion-glass .accordion-button {
-        background: transparent;
-        font-weight: 700;
-        color: #1e293b;
-        box-shadow: none;
-        padding: 15px 20px;
+    /* ==================================================== layar sempit */
+    @media (max-width: 991.98px) {
+        .daf-kisi { grid-template-columns: 1fr; gap: 24px; }
     }
-
-    .accordion-glass .accordion-button:not(.collapsed) {
-        background: rgba(99, 102, 241, 0.05);
-        color: #4f46e5;
-    }
-
-    .accordion-glass .accordion-body {
-        background: rgba(255, 255, 255, 0.8);
-        border-top: 1px solid rgba(255, 255, 255, 0.5);
-    }
-
-    /* =========================================
-       BUTTON CEK DISKON (PERBAIKAN MODERN)
-       ========================================= */
-    .btn-check-discount {
-        background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
-        /* Gradien Oranye Promo */
-        color: white;
-        border: none;
-        padding: 8px 20px;
-        font-weight: 800;
-        font-size: 13px;
-        letter-spacing: 1px;
-        border-radius: 10px;
-        /* Sudut melengkung mirip pill/kapsul */
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
-        cursor: pointer;
-        margin-right: 3px;
-    }
-
-    .btn-check-discount:hover {
-        background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
-        transform: translateY(-2px) scale(1.02);
-        /* Efek pop out */
-        box-shadow: 0 6px 18px rgba(234, 88, 12, 0.4);
-    }
-
-    .btn-check-discount:active {
-        transform: translateY(1px);
-        box-shadow: 0 2px 8px rgba(234, 88, 12, 0.2);
-    }
-
-    /* =========================================
-       BUTTON GLOSSY UTAMA (SUBMIT)
-       ========================================= */
-    .btn-glossy {
-        background: linear-gradient(135deg, #6366f1 0%, #3b82f6 100%);
-        color: white;
-        border: none;
-        padding: 16px;
-        border-radius: 16px;
-        font-weight: 800;
-        letter-spacing: 1px;
-        text-transform: uppercase;
-        width: 100%;
-        box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
-        transition: all 0.3s ease;
-    }
-
-    .btn-glossy:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 15px 25px rgba(99, 102, 241, 0.4);
-        color: white;
-    }
-
-    /* =========================================
-       RINGKASAN PEMBAYARAN
-       ========================================= */
-    .summary-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px 0;
-        font-size: 15px;
-        color: #475569;
-        font-weight: 600;
-    }
-
-    .summary-total {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 15px 0;
-        font-size: 22px;
-        font-weight: 900;
-        color: #ef4444;
-        border-top: 2px dashed rgba(148, 163, 184, 0.3);
-        margin-top: 10px;
-    }
-
-    @media (max-width: 991px) {
-        .registration-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .form-grid-3 {
-            grid-template-columns: 1fr;
-        }
-
-        .form-grid-2 {
-            grid-template-columns: 1fr;
-        }
+    @media (max-width: 575.98px) {
+        .daf { font-size: 17px; padding-top: 96px; }
+        .daf-kartu { padding: 22px 18px 24px; border-radius: 18px; }
+        .daf-ringkas, .daf-dua { grid-template-columns: 1fr; }
+        .daf-diskon-baris { flex-wrap: wrap; }
+        .daf-cek { width: 100%; min-height: 50px; }
     }
 </style>
 
-@section('konten')
-<section id="blog" class="hero-bg align-items-center">
+<section class="daf">
     <div class="container">
 
-        <form id="formKonfirmasi" method="POST" action="{{ route('public.scopuscamp.store') }}" enctype="multipart/form-data">
+        <a href="{{ route('public.scopuscamp.Selengkapnya', $item->id) }}" class="daf-balik">
+            <i class="fas fa-arrow-left"></i> Kembali ke rincian kelas
+        </a>
+
+        <h1 class="daf-judul">Formulir pendaftaran</h1>
+        <p class="daf-anak">
+            Isi empat keterangan di bawah, lalu
+            {{-- Dirakit sebagai ungkapan, bukan sebagai percabangan sebaris:
+                 cabang sebaris meninggalkan spasi tepat sebelum titiknya,
+                 jadi yang tercetak "lanjutkan ke pembayaran ." --}}
+            {{ $bayarDaring ? 'lanjutkan ke pembayaran' : 'kirim bukti transfernya' }}.
+            Butuh sekitar dua menit.
+        </p>
+
+        @if (session('error'))
+            <div class="daf-kartu" style="margin-top: 22px; border-color: #e3b7b1; background: #fdf1ef;">
+                <p style="color: #a3281c; font-weight: 700;">{{ session('error') }}</p>
+            </div>
+        @endif
+
+        <form id="formKonfirmasi" method="POST" action="{{ route('public.scopuscamp.store') }}"
+            enctype="multipart/form-data">
             @csrf
             <input type="hidden" name="kategori_id" id="scopusCampIdvalue" value="{{ $item->id }}">
 
-            <div class="registration-grid mt-4">
+            @php
+                $fMulai = \Carbon\Carbon::parse($item->mulai)->locale('id');
+                $fSelesai = $item->selesai ? \Carbon\Carbon::parse($item->selesai) : null;
 
-                <div class="grid-main">
+                /*
+                 * Dihitung dari SATU kursi, seperti sebelumnya, dan seperti
+                 * App\Support\HargaUmum menghitungnya di peladen. Kejanggalan
+                 * itu dipertahankan apa adanya: membetulkannya di sini berarti
+                 * mengubah nominal yang ditagihkan untuk alasan yang berbeda
+                 * dari perkara tampilan, dan dua perubahan uang dalam satu
+                 * langkah tidak bisa ditelusuri kalau salah satunya keliru.
+                 */
+                $jumlahPPN = ($item->ppn > 0) ? $item->harga_setelah_promo * ($item->ppn / 100) : 0;
+            @endphp
+
+            <div class="daf-kisi">
+
+                <div class="daf-kolom-kiri">
 
                     {{-- RINGKASAN, bukan tujuh kotak isian.
 
                          Kartu ini dulu berisi tujuh <input readonly>: Batch,
                          Lokasi, Sisa Kuota, Mulai, Selesai, Biaya, dan Kode
-                         Unik — ditambah Jumlah Pendaftar yang juga readonly
-                         bernilai 1. Semuanya tampak seperti isian yang
-                         menunggu diisi, padahal tidak satu pun bisa diubah,
-                         dan peladen pun mengabaikan lima di antaranya.
-
-                         Bagi pembaca berusia lanjut itu tujuh kotak abu-abu
-                         yang harus ditafsirkan dulu sebelum sampai ke empat
-                         isian yang benar-benar perlu diisi. Sekarang
-                         keterangan tetap jadi teks, dan yang tersisa sebagai
-                         isian cuma kode diskon.
-
-                         Nilai yang dibaca JavaScript tetap ada sebagai
-                         <input type="hidden"> dengan id yang sama persis —
-                         biaya, kodeUnik, dan jumlahPendaftar — supaya
-                         perhitungan totalnya tidak putus. --}}
-                    <div class="glass-card">
-                        <div class="glass-header">
-                            <i class="fas fa-layer-group text-primary"></i> Kelas yang kamu daftar
+                         Unik. Semuanya tampak seperti isian yang menunggu
+                         diisi, padahal tidak satu pun bisa diubah, dan
+                         peladen pun mengabaikan lima di antaranya. --}}
+                    <div class="daf-kartu">
+                        <div class="daf-kepala">
+                            <i class="fas fa-campground"></i> Kelas yang Anda daftarkan
                         </div>
-
-                        @php
-                            $fMulai = \Carbon\Carbon::parse($item->mulai)->locale('id');
-                            $fSelesai = $item->selesai ? \Carbon\Carbon::parse($item->selesai) : null;
-                            $fSisa = $item->total_kuota === null ? null : (int) $item->sisa_kuota;
-                        @endphp
 
                         <dl class="daf-ringkas">
                             <div>
                                 <dt>Kelas</dt>
-                                <dd>{{ $item->nama }} @if ($item->nama_ke)#{{ $item->nama_ke }}@endif</dd>
+                                <dd>{{ $item->nama }}@if ($item->nama_ke) #{{ $item->nama_ke }}@endif</dd>
                             </div>
                             <div>
                                 <dt>Tanggal</dt>
@@ -441,10 +319,6 @@ Form Pendaftaran Scopus Camp | Rumah Scopus
                                 <dd>{{ $item->lokasi ?: 'Akan dikabari panitia' }}</dd>
                             </div>
                             <div>
-                                <dt>Sisa kursi</dt>
-                                <dd>{{ $fSisa === null ? 'Tidak dibatasi' : $fSisa . ' kursi' }}</dd>
-                            </div>
-                            <div>
                                 <dt>Biaya per orang</dt>
                                 <dd>
                                     @if ($item->harga_sebelum_promo > $item->harga_setelah_promo)
@@ -453,200 +327,216 @@ Form Pendaftaran Scopus Camp | Rumah Scopus
                                     Rp {{ number_format($item->harga_setelah_promo, 0, ',', '.') }}
                                 </dd>
                             </div>
-                            <div>
-                                <dt>Jumlah peserta</dt>
-                                <dd>1 orang</dd>
-                            </div>
                         </dl>
 
                         {{-- harga_setelah_promo, BUKAN $item->biaya.
 
                              Halaman daftarnya MENCORET `biaya` dan menjanjikan
-                             `total_biaya`; borang ini dulu menagih angka yang
+                             harga promonya; borang ini dulu menagih angka yang
                              dicoret itu. Terukur 18 angkatan terkena — Scopus
                              Camp Padang menjanjikan Rp 5.060.000 lalu menagih
                              Rp 5.500.000. Lihat App\Support\HargaUmum. --}}
-                        <input type="hidden" name="biaya" id="biaya" value="{{ number_format($item->harga_setelah_promo, 0, ',', '.') }}">
+                        <input type="hidden" name="biaya" id="biaya"
+                            value="{{ number_format($item->harga_setelah_promo, 0, ',', '.') }}">
                         <input type="hidden" name="kode_unik" id="kodeUnik" value="{{ old('kode_unik') }}">
                         <input type="hidden" name="jumlah_pendaftar" id="jumlahPendaftar" value="1"
                             data-sisa-kuota="{{ $item->sisa_kuota ?? 0 }}">
+                        <input type="hidden" name="subtotal" id="subtotalInput" value="{{ $item->harga_setelah_promo }}">
+                        <input type="hidden" name="ppn" id="jumlahPPN" value="{{ $jumlahPPN }}">
+                    </div>
 
-                        <div class="form-group daf-diskon">
-                            <label for="kodeDiskon">Punya kode diskon? <span class="daf-opsional">boleh dikosongkan</span></label>
-                            <div class="input-group-glass" style="background: #fff; padding: 5px;">
-                                <input type="text" name="kode_diskon_input" id="kodeDiskon" class="form-control-glass" placeholder="Ketik kode diskon" style="border: none; background: transparent; box-shadow: none; padding-left: 15px;">
-                                <button type="button" class="btn-check-discount" id="btnCekDiskon" data-id="{{ $item->id }}">
-                                    <i class="fas fa-tags"></i> Cek
+                    <div class="daf-kartu">
+                        <div class="daf-kepala">
+                            <i class="fas fa-user"></i> Data diri peserta
+                        </div>
+
+                        <div class="daf-dua">
+                            <div class="daf-medan">
+                                <label for="nama">Nama lengkap &amp; gelar <span class="daf-wajib">*</span></label>
+                                <input type="text" name="nama" id="nama" value="{{ old('nama') }}"
+                                    placeholder="John Doe, S.Kom." class="daf-isian" required>
+                            </div>
+                            <div class="daf-medan">
+                                <label for="email">Email aktif <span class="daf-wajib">*</span></label>
+                                <input type="email" name="email" id="email" value="{{ old('email') }}"
+                                    placeholder="email@domain.com" class="daf-isian"
+                                    maxlength="100" minlength="5" required>
+                            </div>
+                        </div>
+
+                        <div class="daf-dua" style="margin-top: 20px;">
+                            <div class="daf-medan">
+                                <label for="affiliasi">Asal instansi <span class="daf-wajib">*</span></label>
+                                <input type="text" name="affiliasi" id="affiliasi" value="{{ old('affiliasi') }}"
+                                    placeholder="Universitas / Instansi" class="daf-isian" minlength="3" required>
+                            </div>
+                            <div class="daf-medan">
+                                <label for="telp">Nomor WhatsApp <span class="daf-wajib">*</span></label>
+                                <input type="text" name="telp" id="telp" value="{{ old('telp') }}"
+                                    placeholder="0812-3456-7890" class="daf-isian"
+                                    inputmode="numeric" maxlength="20" minlength="8"
+                                    oninput="formatPhoneNumber(this)" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    @unless ($bayarDaring)
+                        {{-- Kartu rekening BIASA, bukan akordeon.
+
+                             Nomor rekeningnya dulu duduk di dalam akordeon
+                             yang memang terbuka secara bawaan — tetapi
+                             tombolnya tetap bisa ditekan, dan sekali tertekan
+                             nomornya menghilang. Di halaman yang satu-satunya
+                             tujuannya mentransfer uang, tidak ada alasan
+                             menyembunyikan nomor rekening di balik tombol
+                             yang bisa salah tekan. --}}
+                        <div class="daf-kartu">
+                            <div class="daf-kepala">
+                                <i class="fas fa-university"></i> Transfer ke rekening ini
+                            </div>
+
+                            <div class="daf-rekening">
+                                <div class="daf-rekening-bank">
+                                    <img src="{{ asset('assets/img/bri.jpg') }}" alt="Logo Bank BRI"
+                                        style="width: 48px; height: auto; border-radius: 5px;">
+                                    <strong>Bank BRI</strong>
+                                </div>
+
+                                <p class="daf-rekening-label">Nomor rekening</p>
+                                <p id="nomor-rekening" class="daf-rekening-nomor">216401000467563</p>
+                                <p class="daf-rekening-nama">a.n. <strong>Rumah Scopus Akademi</strong></p>
+
+                                <button type="button" onclick="copyToClipboard('nomor-rekening')" class="daf-salin">
+                                    <i class="fas fa-copy"></i> Salin nomor rekening
+                                </button>
+                            </div>
+
+                            <div class="daf-medan" style="margin-top: 22px;">
+                                <label for="gambar">Unggah bukti transfer <span class="daf-wajib">*</span></label>
+                                <input type="file" name="gambar" id="gambar" style="display: none;"
+                                    accept="image/*" required>
+                                <label for="gambar" class="daf-unggah">
+                                    <i class="fas fa-cloud-upload-alt"></i> Pilih gambar
+                                </label>
+                                @error('gambar')
+                                    <span class="daf-pesan gagal">{{ $message }}</span>
+                                @enderror
+
+                                {{-- Disembunyikan selama belum ada yang dipilih: kotak
+                                     abu-abu kosong tepat di bawah tombol unggah terbaca
+                                     sebagai gambar yang gagal dimuat. --}}
+                                <div class="daf-pratinjau" id="wadahPratinjau" style="display: none;">
+                                    <div id="imagePreview"></div>
+                                    <span id="file-selected" class="daf-berkas"></span>
+                                </div>
+                            </div>
+                        </div>
+                    @endunless
+                </div>
+
+                <div class="daf-kolom-kanan">
+                    <div class="daf-kartu">
+                        <div class="daf-kepala">
+                            <i class="fas fa-receipt"></i> Rincian biaya
+                        </div>
+
+                        <div class="daf-medan">
+                            <label for="kodeDiskon">
+                                Punya kode diskon? <span class="daf-opsional">— boleh dikosongkan</span>
+                            </label>
+                            <div class="daf-diskon-baris">
+                                <input type="text" name="kode_diskon_input" id="kodeDiskon" class="daf-isian"
+                                    placeholder="Ketik kode diskon" autocomplete="off">
+                                <button type="button" class="daf-cek" id="btnCekDiskon" data-id="{{ $item->id }}">
+                                    <i class="fas fa-tag"></i> Cek
                                 </button>
                             </div>
                             <input type="hidden" name="kode_diskon" id="hiddenKodeDiskon">
-                            <small id="diskonMessage" class="text-success mt-1 d-block font-weight-bold"></small>
-                        </div>
-                    </div>
-
-                    <div class="glass-card">
-                        <div class="glass-header">
-                            <i class="fas fa-user-circle text-primary"></i> Data Diri Peserta
+                            <small id="diskonMessage" class="daf-pesan ok"></small>
                         </div>
 
-                        <div class="form-grid-2">
-                            <div class="form-group">
-                                <label>Nama Lengkap & Gelar <span class="text-danger">*</span></label>
-                                <input type="text" name="nama" id="nama" value="{{ old('nama') }}" placeholder="John Doe, S.Kom." class="form-control-glass" required style="background: #fff;">
-                            </div>
-                            <div class="form-group">
-                                <label>Email Aktif <span class="text-danger">*</span></label>
-                                <input type="email" name="email" id="email" value="{{ old('email') }}" placeholder="email@domain.com" class="form-control-glass" maxlength="100" minlength="5" onkeypress="return/[a-zA-Z0-9@.]/i.test(event.key)" required style="background: #fff;">
-                            </div>
-                        </div>
-
-                        <div class="form-grid-2">
-                            <div class="form-group">
-                                <label>Afiliasi <span class="text-danger">*</span></label>
-                                <input type="text" name="affiliasi" id="affiliasi" value="{{ old('affiliasi') }}" placeholder="Universitas / Instansi" class="form-control-glass" minlength="5" onkeypress="return/[a-zA-Z0-9@. ]/i.test(event.key)" required style="background: #fff;">
-                            </div>
-                            <div class="form-group">
-                                <label>WhatsApp <span class="text-danger">*</span></label>
-                                <input type="text" name="telp" id="telp" value="{{ old('telp') }}" placeholder="0812-3456-7890" class="form-control-glass" maxlength="20" minlength="8" onkeypress="return event.charCode >= 48 && event.charCode <=57" oninput="formatPhoneNumber(this)" required style="background: #fff;">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="grid-sidebar">
-
-                    <div class="glass-card">
-                        <div class="glass-header">
-                            <i class="fas fa-wallet text-primary"></i> Pembayaran
-                        </div>
-
-                    {{-- Kartu rekening BIASA, bukan akordeon.
-
-                         Nomor rekeningnya dulu duduk di dalam akordeon yang
-                         memang terbuka secara bawaan — tetapi tombolnya tetap
-                         bisa ditekan, dan sekali tertekan nomornya menghilang.
-                         Di halaman yang satu-satunya tujuannya mentransfer
-                         uang, tidak ada alasan menyembunyikan nomor rekening
-                         di balik tombol yang bisa salah tekan. --}}
-                    <div class="daf-rekening">
-                        <div class="daf-rekening-bank">
-                            <img src="{{ asset('assets/img/bri.jpg') }}" alt="Logo Bank BRI"
-                                style="width: 48px; height: auto; border-radius: 5px;">
-                            <strong>Bank BRI</strong>
-                        </div>
-
-                        <p class="daf-rekening-label">Nomor rekening</p>
-                        <p id="nomor-rekening" class="daf-rekening-nomor">216401000467563</p>
-                        <p class="daf-rekening-nama">a.n. <strong>Rumah Scopus Akademi</strong></p>
-
-                        <button type="button" onclick="copyToClipboard('nomor-rekening')" class="daf-salin">
-                            <i class="fas fa-copy"></i> Salin nomor rekening
-                        </button>
-                    </div>
-
-                        <hr style="border-top: 2px dashed rgba(148, 163, 184, 0.3); margin: 25px 0;">
-
-                        <div class="form-group mb-3">
-                            <label>Upload Bukti Transfer <span class="text-danger">*</span></label>
-                            <input type="file" name="gambar" id="gambar" style="display: none;" accept="image/*" required>
-                            <label for="gambar" class="file-upload-glass">
-                                <i class="fas fa-cloud-upload-alt fa-lg"></i> Pilih Gambar
-                            </label>
-                            @error('gambar')
-                            <span class="text-danger small mt-1 d-block">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- Disembunyikan selama belum ada yang dipilih.
-
-                             Kotaknya setinggi 180px dan selalu tergambar,
-                             jadi sebelum orang memilih berkas apa pun yang
-                             terlihat adalah kotak abu-abu kosong tepat di
-                             bawah tombol unggah — terbaca sebagai tempat
-                             yang gagal memuat gambarnya. --}}
-                        <div class="image-preview-container" id="wadahPratinjau" style="display: none;">
-                            <div id="imagePreview" class="image-preview"></div>
-                            <span id="file-selected" class="small text-muted mt-2 d-block text-center font-weight-bold"></span>
-                        </div>
-                    </div>
-
-                    <div class="glass-card" style="position: sticky; top: 100px;">
-                        <div class="glass-header">
-                            <i class="fas fa-receipt text-primary"></i> Ringkasan
-                        </div>
-
-                        @php
-                        // Dihitung dari SATU kursi, seperti sebelumnya. Kejanggalan itu
-                        // dipertahankan apa adanya: membetulkannya di sini berarti
-                        // mengubah nominal yang ditagihkan untuk alasan yang berbeda
-                        // dari perkara promo, dan dua perubahan uang dalam satu
-                        // langkah tidak bisa ditelusuri kalau salah satunya keliru.
-                        $jumlahPPN = ($item->ppn > 0) ? $item->harga_setelah_promo * ($item->ppn / 100) : 0;
-                        @endphp
-
-                        <div class="summary-container">
-                            <div class="summary-row">
-                                <span>Subtotal</span>
-                                <div>
-                                    @if ($item->harga_sebelum_promo > $item->harga_setelah_promo)
-                                        {{-- Harga asalnya dicoret, sama seperti di halaman
-                                             daftarnya — tanpa itu potongan promonya tidak
-                                             terlihat sama sekali di borang. --}}
-                                        <small class="text-muted text-decoration-line-through me-1">Rp {{ number_format($item->harga_sebelum_promo, 0, ',', '.') }}</small>
-                                    @endif
-                                    <span>Rp</span> <span>{{ number_format($item->harga_setelah_promo, 0, ',', '.') }}</span>
-                                </div>
-                                <input type="hidden" name="subtotal" id="subtotalInput" value="{{ $item->harga_setelah_promo }}">
+                        <div style="margin-top: 22px;">
+                            <div class="daf-baris">
+                                <span>Biaya kelas</span>
+                                <b>Rp {{ number_format($item->harga_setelah_promo, 0, ',', '.') }}</b>
                             </div>
 
-                            {{-- Kode unik dipajang DI SINI, bukan di kartu kiri.
-
-                                 Ia bagian dari nominal yang harus ditransfer, jadi
-                                 tempatnya di sebelah totalnya — bukan di antara
-                                 keterangan kelas. Diperbarui JavaScript bersama
-                                 totalnya; isian tersembunyi #kodeUnik tetap yang
-                                 dikirim ke peladen. --}}
-                            <div class="summary-row">
+                            {{-- Kode unik dipajang DI SEBELAH totalnya, bukan di antara
+                                 keterangan kelas: ia bagian dari nominal yang harus
+                                 dibayar. Diperbarui JavaScript bersama totalnya; isian
+                                 tersembunyi #kodeUnik tetap yang dikirim ke peladen. --}}
+                            <div class="daf-baris">
                                 <span>Kode unik</span>
-                                <div>
-                                    <span>Rp</span> <span id="kodeUnikTeks">0</span>
-                                </div>
+                                <b>Rp <span id="kodeUnikTeks">0</span></b>
                             </div>
 
-                            <div class="summary-row">
-                                <span>PPN</span>
-                                <div>
-                                    <span>Rp</span> <span>{{ number_format($jumlahPPN, 0, ',', '.') }}</span>
+                            @if ($jumlahPPN > 0)
+                                <div class="daf-baris">
+                                    <span>PPN</span>
+                                    <b>Rp {{ number_format($jumlahPPN, 0, ',', '.') }}</b>
                                 </div>
-                                <input type="hidden" name="ppn" id="jumlahPPN" value="{{ $jumlahPPN }}">
-                            </div>
+                            @endif
 
-                            <div class="summary-row" id="formDiskon">
+                            {{-- Disembunyikan selama belum ada potongan.
+
+                                 "Diskon — Rp 0" yang selalu terpampang di atas
+                                 totalnya terbaca sebagai potongan yang GAGAL
+                                 dipakai, bukan sebagai potongan yang memang
+                                 tidak diminta. --}}
+                            <div class="daf-baris potong" id="formDiskon" style="display: none;">
                                 <span>Diskon</span>
-                                <div class="text-success">
-                                    <span>- Rp</span> <span id="diskonText">0</span>
-                                </div>
+                                <b>&minus; Rp <span id="diskonText">0</span></b>
                                 <input type="hidden" name="nominal_diskon" id="potonganDiskon" value="0">
                             </div>
 
-                            <div class="summary-total">
-                                <span>Total</span>
-                                <div>
-                                    <span>Rp</span> <span id="TotalPembayaran">0</span>
-                                </div>
+                            <div class="daf-total">
+                                <span>Total bayar</span>
+                                <b>Rp <span id="TotalPembayaran">0</span></b>
                                 <input type="hidden" name="total_pembayaran" id="totalPembayaranInput">
                             </div>
                         </div>
 
-                        <input type="hidden" name="total_keseluruhan_pembayaran" id="totalKeseluruhanPembayaranhidden" readonly>
+                        <input type="hidden" name="total_keseluruhan_pembayaran" id="totalKeseluruhanPembayaranhidden">
 
-                        <div class="mt-4">
-                            <button type="submit" class="btn-glossy btn-submit" id="btnSubmit">
-                                <i class="fa fa-paper-plane mr-2"></i> Konfirmasi
-                            </button>
-                        </div>
+                        <button type="submit" class="daf-kirim" id="btnSubmit"
+                            data-bayar-daring="{{ $bayarDaring ? '1' : '0' }}">
+                            @if ($bayarDaring)
+                                <i class="fas fa-lock"></i> Lanjut ke pembayaran
+                            @else
+                                <i class="fas fa-paper-plane"></i> Kirim pendaftaran
+                            @endif
+                        </button>
+
+                        @if ($bayarDaring)
+                            <div class="daf-aman">
+                                <i class="fas fa-shield-alt"></i>
+                                <span>Pembayaran diproses DOKU. Setelah membayar, status
+                                    pendaftaran Anda berpindah sendiri — tidak perlu
+                                    mengirim bukti transfer.</span>
+                            </div>
+
+                            <p style="margin-top: 14px; font-size: .88rem; font-weight: 700; color: var(--tinta);">
+                                Bisa dibayar lewat
+                            </p>
+                            <div class="daf-kanal">
+                                <span>QRIS</span>
+                                <span>Virtual Account</span>
+                                <span>Kartu kredit</span>
+                                <span>OVO</span>
+                                <span>DANA</span>
+                                <span>ShopeePay</span>
+                                <span>Alfamart / Indomaret</span>
+                            </div>
+                        @else
+                            <div class="daf-aman">
+                                <i class="fas fa-clock"></i>
+                                <span>Panitia memeriksa bukti transfer Anda, lalu
+                                    mengirim kabarnya lewat email.</span>
+                            </div>
+                        @endif
                     </div>
-
                 </div>
+
             </div>
         </form>
 
@@ -654,159 +544,171 @@ Form Pendaftaran Scopus Camp | Rumah Scopus
 </section>
 
 <script>
-    document.getElementById('formKonfirmasi').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const form = this;
-        const btn = document.getElementById('btnSubmit');
+    (function () {
+        var borang = document.getElementById('formKonfirmasi');
+        var tombol = document.getElementById('btnSubmit');
 
-        Swal.fire({
-            title: 'Konfirmasi Data',
-            text: 'Pastikan semua data sudah sesuai sebelum mengirim.',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#4f46e5',
-            confirmButtonText: 'Ya, Kirim',
-            cancelButtonText: 'Batal',
-            reverseButtons: true
-        }).then((result) => {
-            if (result.isConfirmed) {
-                btn.disabled = true;
-                btn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> Mengirim...`;
+        /*
+         * Jalur bayarnya dibaca dari BORANGNYA, bukan ditulis ulang di sini.
+         *
+         * Yang menentukan satu-satunya jawaban ada di pengendali; menyalinnya
+         * ke JavaScript berarti dua sumber jawaban, dan yang kedua akan
+         * ketinggalan diam-diam — borang menuntut bukti transfer sementara
+         * peladen mengantar orangnya ke DOKU.
+         */
+        var bayarDaring = tombol.dataset.bayarDaring === '1';
+
+        var gambar = document.getElementById('gambar');
+
+        borang.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            /*
+             * Bukti transfer diperiksa di SINI, di dalam pengirimnya.
+             *
+             * Dulu pemeriksaannya menempel sebagai klik tersendiri pada
+             * tombolnya, dan tombolnya selalu ada — jadi begitu jalur
+             * unggahnya hilang (lewat DOKU), pemeriksaan itu akan menolak
+             * SETIAP pendaftaran dengan "bukti belum diunggah" untuk berkas
+             * yang memang tidak diminta.
+             */
+            if (! bayarDaring && gambar && gambar.files.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Bukti belum diunggah',
+                    text: 'Silakan unggah bukti pembayaran Anda dulu.'
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: 'Sudah benar semua?',
+                text: bayarDaring
+                    ? 'Setelah ini Anda dibawa ke halaman pembayaran.'
+                    : 'Pastikan data dan bukti transfernya sudah sesuai.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#e76d20',
+                confirmButtonText: bayarDaring ? 'Ya, lanjut bayar' : 'Ya, kirim',
+                cancelButtonText: 'Periksa lagi',
+                reverseButtons: true
+            }).then(function (hasil) {
+                if (! hasil.isConfirmed) {
+                    return;
+                }
+
+                tombol.disabled = true;
+                tombol.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' +
+                    (bayarDaring ? 'Menyiapkan pembayaran...' : 'Mengirim...');
 
                 Swal.fire({
-                    title: 'Memproses Pendaftaran...',
-                    html: 'Silakan tunggu, kwitansi sedang disiapkan.',
+                    title: bayarDaring ? 'Menyiapkan pembayaran' : 'Memproses pendaftaran',
+                    html: 'Mohon tunggu sebentar, jangan tutup halaman ini.',
                     allowOutsideClick: false,
                     allowEscapeKey: false,
                     showConfirmButton: false,
-                    didOpen: () => {
-                        Swal.showLoading()
-                    }
+                    didOpen: function () { Swal.showLoading(); }
                 });
 
-                setTimeout(() => {
-                    form.submit();
-                }, 300);
-            }
+                setTimeout(function () { borang.submit(); }, 250);
+            });
         });
-    });
+    })();
 </script>
 
 <script>
-    function cekKuota(input) {
-        const sisaKuota = parseInt(input.dataset.sisaKuota || 0);
-        const jumlahInput = parseInt(input.value || 0);
+    document.getElementById('btnCekDiskon').addEventListener('click', function () {
+        var id = this.dataset.id;
+        var kode = document.getElementById('kodeDiskon').value.trim();
 
-        if (jumlahInput > sisaKuota) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Kuota Tidak Cukup',
-                html: `Jumlah pendaftar melebihi batas.<br><strong>Sisa kuota tinggal ${sisaKuota} orang.</strong>`,
-                confirmButtonColor: '#f59e0b'
-            }).then(() => {
-                location.reload();
-            });
-        } else {
+        var pesan = document.getElementById('diskonMessage');
+        var tersembunyi = document.getElementById('hiddenKodeDiskon');
+        var potongan = document.getElementById('potonganDiskon');
+        var teksDiskon = document.getElementById('diskonText');
+
+        function kosongkan() {
+            tersembunyi.value = '';
+            potongan.value = 0;
+            teksDiskon.textContent = '0';
+            document.getElementById('formDiskon').style.display = 'none';
             hitungTotalPembayaran();
         }
-    }
-</script>
 
-<script>
-    document.getElementById('btnCekDiskon').addEventListener('click', function() {
-        const id = this.dataset.id;
-        const kode = document.getElementById('kodeDiskon').value.trim();
-
-        const messageEl = document.getElementById('diskonMessage');
-        const hiddenInput = document.getElementById('hiddenKodeDiskon');
-        const potonganInput = document.getElementById('potonganDiskon');
-        const diskonText = document.getElementById('diskonText');
-
-        if (!kode) {
-            hiddenInput.value = '';
-            potonganInput.value = 0;
-            diskonText.textContent = '0';
-            messageEl.textContent = '';
-            hitungTotalPembayaran();
+        if (! kode) {
+            kosongkan();
+            pesan.textContent = '';
             Swal.fire({
                 icon: 'warning',
-                title: 'Kode kosong',
-                text: 'Silakan masukkan kode diskon.'
+                title: 'Kode masih kosong',
+                text: 'Ketik dulu kode diskonnya, atau lewati bagian ini.'
             });
             return;
         }
 
-        fetch(`/Scopus-Camp/cek-kode-diskon/${encodeURIComponent(id)}?kode_diskon=${encodeURIComponent(kode)}`)
-            .then(response => response.json())
-            .then(data => {
+        fetch('/Scopus-Camp/cek-kode-diskon/' + encodeURIComponent(id) +
+                '?kode_diskon=' + encodeURIComponent(kode))
+            .then(function (jawab) { return jawab.json(); })
+            .then(function (data) {
                 if (data.status === 'success') {
-                    const nominalDiskon = Number(data.casted_nominal_diskon) || 0;
-                    hiddenInput.value = kode;
-                    potonganInput.value = nominalDiskon;
-                    diskonText.textContent = nominalDiskon.toLocaleString('id-ID');
-                    messageEl.textContent = `Diskon sebesar Rp ${nominalDiskon.toLocaleString('id-ID')}`;
-                    messageEl.classList.replace('text-danger', 'text-success');
+                    var nominal = Number(data.casted_nominal_diskon) || 0;
+                    tersembunyi.value = kode;
+                    potongan.value = nominal;
+                    teksDiskon.textContent = nominal.toLocaleString('id-ID');
+                    document.getElementById('formDiskon').style.display = nominal > 0 ? '' : 'none';
+                    pesan.textContent = 'Potongan Rp ' + nominal.toLocaleString('id-ID') + ' sudah dipakai.';
+                    pesan.className = 'daf-pesan ok';
                     hitungTotalPembayaran();
                     Swal.fire({
                         icon: 'success',
-                        title: 'Diskon Valid',
-                        text: 'Berhasil diterapkan.',
-                        timer: 2000,
+                        title: 'Kode diskon dipakai',
+                        timer: 1800,
                         showConfirmButton: false
                     });
                 } else {
-                    hiddenInput.value = '';
-                    potonganInput.value = 0;
-                    diskonText.textContent = '0';
-                    messageEl.textContent = data.message || 'Kode tidak valid';
-                    messageEl.classList.replace('text-success', 'text-danger');
-                    hitungTotalPembayaran();
+                    kosongkan();
+                    pesan.textContent = data.message || 'Kode itu tidak berlaku.';
+                    pesan.className = 'daf-pesan gagal';
                     Swal.fire({
                         icon: 'error',
-                        title: 'Tidak Valid',
-                        text: data.message || 'Kode tidak ditemukan.'
+                        title: 'Kode tidak berlaku',
+                        text: data.message || 'Kodenya tidak ditemukan.'
                     });
                 }
             })
-            .catch(error => {
-                console.error('Error:', error);
-                hiddenInput.value = '';
-                potonganInput.value = 0;
-                diskonText.textContent = '0';
-                messageEl.textContent = '';
-                hitungTotalPembayaran();
+            .catch(function () {
+                kosongkan();
+                pesan.textContent = '';
                 Swal.fire({
                     icon: 'error',
-                    title: 'Error',
-                    text: 'Gagal memeriksa kode diskon.'
+                    title: 'Gagal memeriksa',
+                    text: 'Kode diskonnya tidak bisa diperiksa sekarang.'
                 });
             });
     });
 </script>
 
 <script>
-    const jumlahPendaftarInput = document.getElementById('jumlahPendaftar');
-    const biayaInput = document.getElementById('biaya');
-    const kodeUnikInput = document.getElementById('kodeUnik');
-    const totalPembayaranDisplay = document.getElementById('TotalPembayaran');
-    const potonganDiskonInput = document.getElementById('potonganDiskon');
+    var jumlahPendaftarInput = document.getElementById('jumlahPendaftar');
+    var biayaInput = document.getElementById('biaya');
+    var kodeUnikInput = document.getElementById('kodeUnik');
+    var totalPembayaranDisplay = document.getElementById('TotalPembayaran');
+    var potonganDiskonInput = document.getElementById('potonganDiskon');
 
-    function formatRupiah(number) {
-        return Number(number).toLocaleString('id-ID');
+    function formatRupiah(angka) {
+        return Number(angka).toLocaleString('id-ID');
     }
 
-        /*
-         * Rentangnya SAMA untuk semua layanan: 500-1500.
-         *
-         * Dulu halaman ini membuat 1-100, sementara layanan lain memakai
-         * rentang yang berbeda-beda. Nominal transfer yang penanda uniknya
-         * bergantung pada layanan mana yang didaftar membuat panitia harus
-         * mengingat aturan berbeda untuk tiap layanan saat mencocokkan mutasi
-         * rekening.
-         *
-         * Angkanya diambil dari PendaftaranSemuaLayanan::KODE_UNIK supaya
-         * tidak ada dua tempat yang bisa berselisih.
-         */
+    /*
+     * Rentangnya SAMA untuk semua layanan: 500-1500.
+     *
+     * Dulu halaman ini membuat 1-100, sementara layanan lain memakai rentang
+     * yang berbeda-beda. Nominal yang penanda uniknya bergantung pada layanan
+     * mana yang didaftar membuat panitia harus mengingat aturan berbeda untuk
+     * tiap layanan saat mencocokkan mutasi rekening.
+     *
+     * Angkanya diambil dari PendaftaranSemuaLayanan::KODE_UNIK supaya tidak
+     * ada dua tempat yang bisa berselisih.
+     */
     function generateUniqueCode() {
         var r = @json(\App\Support\PendaftaranSemuaLayanan::KODE_UNIK);
 
@@ -814,51 +716,49 @@ Form Pendaftaran Scopus Camp | Rumah Scopus
     }
 
     function hitungTotalPembayaran() {
-        const jumlah = parseInt(jumlahPendaftarInput.value) || 0;
-        const biayaRaw = biayaInput.value.replace(/\./g, '').replace(/,/g, '');
-        const biaya = parseInt(biayaRaw) || 0;
+        var jumlah = parseInt(jumlahPendaftarInput.value) || 0;
+        var biaya = parseInt(biayaInput.value.replace(/\D/g, '')) || 0;
+        var potonganDiskon = parseInt(String(potonganDiskonInput.value).replace(/\D/g, '')) || 0;
+        var jumlahPPN = parseInt(document.getElementById('jumlahPPN').value) || 0;
 
-        let potonganDiskon = 0;
-        if (document.getElementById('formDiskon').style.display !== 'none') {
-            const diskonRaw = potonganDiskonInput.value.replace(/[^\d]/g, '').trim();
-            potonganDiskon = parseInt(diskonRaw) || 0;
-        }
-
-        const jumlahPPN = parseInt(document.getElementById('jumlahPPN')?.value || 0);
-
-        if (jumlah > 0) {
-            const kodeUnik = generateUniqueCode();
-            const subtotal = (jumlah * biaya) + kodeUnik - potonganDiskon + jumlahPPN;
-
-            kodeUnikInput.value = formatRupiah(kodeUnik);
-            // Isian #kodeUnik kini tersembunyi; angkanya tetap harus terlihat
-            // orang karena ikut menentukan nominal transfernya.
-            var kodeUnikTeks = document.getElementById('kodeUnikTeks');
-            if (kodeUnikTeks) kodeUnikTeks.textContent = formatRupiah(kodeUnik);
-            totalPembayaranDisplay.textContent = formatRupiah(subtotal);
-            document.getElementById('totalPembayaranInput').value = subtotal;
-        } else {
+        if (jumlah <= 0) {
             kodeUnikInput.value = '0';
-            var kodeUnikTeksKosong = document.getElementById('kodeUnikTeks');
-            if (kodeUnikTeksKosong) kodeUnikTeksKosong.textContent = '0';
+            document.getElementById('kodeUnikTeks').textContent = '0';
             totalPembayaranDisplay.textContent = '0';
             document.getElementById('totalPembayaranInput').value = 0;
+            return;
         }
+
+        var kodeUnik = generateUniqueCode();
+        var total = (jumlah * biaya) + kodeUnik - potonganDiskon + jumlahPPN;
+
+        kodeUnikInput.value = formatRupiah(kodeUnik);
+        // Isian #kodeUnik tersembunyi; angkanya tetap harus terlihat orang
+        // karena ikut menentukan nominal yang dibayar.
+        document.getElementById('kodeUnikTeks').textContent = formatRupiah(kodeUnik);
+        totalPembayaranDisplay.textContent = formatRupiah(total);
+        document.getElementById('totalPembayaranInput').value = total;
     }
 
-    // Tetap biarkan event listener ini berjaga-jaga
-    jumlahPendaftarInput.addEventListener('input', hitungTotalPembayaran);
-
-    // ==========================================
-    // TAMBAHKAN KODE INI
-    // ==========================================
-    // Otomatis jalankan perhitungan saat halaman pertama kali dibuka
-    document.addEventListener('DOMContentLoaded', function() {
-        hitungTotalPembayaran();
-    });
+    /*
+     * Dihitung SEKARANG JUGA, bukan menunggu DOMContentLoaded.
+     *
+     * Tata letak publik ini memuat sembilan skrip yang menahan penguraian
+     * halaman, salah satunya dari CDN di luar. Terukur: empat detik sesudah
+     * halaman dibuka, document.readyState masih "loading" — dan selama itu
+     * totalnya terbaca "Rp 0" pada halaman yang sedang menagih lima juta
+     * rupiah. Tidak ada galat; yang melihatnya menyangka kelasnya gratis
+     * atau halamannya rusak.
+     *
+     * Aman dipanggil di sini: seluruh unsur yang dibacanya digambar di atas
+     * blok ini, jadi semuanya sudah ada saat baris ini jalan.
+     */
+    hitungTotalPembayaran();
 </script>
+
+@unless ($bayarDaring)
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         /*
          * Kotak pratinjaunya DIKOSONGKAN, bukan diisi gambar cadangan.
          *
@@ -868,103 +768,88 @@ Form Pendaftaran Scopus Camp | Rumah Scopus
          * Di halaman yang meminta bukti transfer, gambar rusak terbaca
          * sebagai unggahannya yang gagal.
          */
-        var output = document.getElementById('imagePreview');
-        output.innerHTML = '';
-
-        var wadah = document.getElementById('wadahPratinjau');
-        if (wadah) wadah.style.display = 'none';
-    });
-
-    document.getElementById('gambar').addEventListener('change', function(event) {
-        var fileInput = event.target;
-        var file = fileInput.files[0];
-        var fileName = file.name;
-        var fileSize = (file.size / 1024).toFixed(2);
-        var allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
-
-        if (!allowedTypes.includes(file.type)) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Format Salah',
-                text: 'Hanya file PNG, JPEG, dan JPG yang diizinkan.'
-            });
-            resetImagePreview();
-            return;
-        }
-
-        if (fileSize > 2000) {
-            Swal.fire({
-                icon: 'error',
-                title: 'File Terlalu Besar',
-                text: 'Maksimum ukuran gambar adalah 2MB.'
-            });
-            resetImagePreview();
-            return;
-        }
-
-        document.getElementById('file-selected').innerHTML = fileName + ' (' + fileSize + ' KB)';
-        var reader = new FileReader();
-        reader.onload = function() {
-            document.getElementById('imagePreview').innerHTML =
-                `<img src="${reader.result}" alt="Pratinjau bukti transfer yang dipilih">`;
-
-            var wadah = document.getElementById('wadahPratinjau');
-            if (wadah) wadah.style.display = '';
-        };
-        reader.readAsDataURL(file);
-    });
-
-    function resetImagePreview() {
-        /* Dikosongkan, bukan diisi gambar cadangan: berkas
-           assets/img/meme/no-image.jpg TIDAK ADA di proyek ini, jadi yang
-           tampil sesudah unggahan ditolak adalah ikon gambar rusak
-           bertuliskan "No Image" — tepat di tempat orang mengira
-           unggahannya baru saja tersimpan. */
         document.getElementById('imagePreview').innerHTML = '';
+        document.getElementById('wadahPratinjau').style.display = 'none';
+    });
 
-        var wadahReset = document.getElementById('wadahPratinjau');
-        if (wadahReset) wadahReset.style.display = 'none';
+    document.getElementById('gambar').addEventListener('change', function (peristiwa) {
+        var berkas = peristiwa.target.files[0];
 
-        document.getElementById('file-selected').innerHTML = '';
-        document.getElementById('gambar').value = "";
+        if (! berkas) {
+            return;
+        }
+
+        var ukuran = berkas.size / 1024;
+        var diizinkan = ['image/png', 'image/jpeg', 'image/jpg'];
+
+        if (diizinkan.indexOf(berkas.type) === -1) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Format tidak didukung',
+                text: 'Yang bisa diunggah hanya PNG, JPEG, dan JPG.'
+            });
+            kosongkanPratinjau();
+            return;
+        }
+
+        if (ukuran > 2000) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Berkasnya terlalu besar',
+                text: 'Ukuran gambar paling besar 2 MB.'
+            });
+            kosongkanPratinjau();
+            return;
+        }
+
+        document.getElementById('file-selected').textContent =
+            berkas.name + ' (' + ukuran.toFixed(0) + ' KB)';
+
+        var pembaca = new FileReader();
+        pembaca.onload = function () {
+            document.getElementById('imagePreview').innerHTML =
+                '<img src="' + pembaca.result + '" alt="Pratinjau bukti transfer yang dipilih">';
+            document.getElementById('wadahPratinjau').style.display = '';
+        };
+        pembaca.readAsDataURL(berkas);
+    });
+
+    function kosongkanPratinjau() {
+        document.getElementById('imagePreview').innerHTML = '';
+        document.getElementById('wadahPratinjau').style.display = 'none';
+        document.getElementById('file-selected').textContent = '';
+        document.getElementById('gambar').value = '';
     }
 
-    document.querySelector('.btn-submit').addEventListener('click', function(event) {
-        const fileInput = document.getElementById('gambar');
-        if (!fileInput.files.length) {
-            event.preventDefault();
-            Swal.fire({
-                icon: 'warning',
-                title: 'Bukti Belum Diunggah',
-                text: 'Harap upload bukti pembayaran Anda.'
-            });
-        }
-    });
-</script>
+    function copyToClipboard(id) {
+        var teks = document.getElementById(id).innerText.replace(/\D/g, '');
 
-<script>
-    function copyToClipboard(elementId) {
-        let text = document.getElementById(elementId).innerText.replace(/[^\d]/g, '');
-        navigator.clipboard.writeText(text).then(() => {
+        navigator.clipboard.writeText(teks).then(function () {
             Swal.fire({
                 icon: 'success',
-                title: 'Disalin!',
-                text: 'Nomor rekening: ' + text,
+                title: 'Nomor rekening disalin',
+                text: teks,
                 timer: 2000,
                 showConfirmButton: false
             });
         });
     }
 </script>
+@endunless
 
 <script>
-    function formatPhoneNumber(input) {
-        var phoneNumber = input.value.replace(/\D/g, '');
-        var len = phoneNumber.length;
-        if (len === 11) phoneNumber = phoneNumber.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
-        else if (len === 12) phoneNumber = phoneNumber.replace(/(\d{4})(\d{4})(\d{4})/, '$1-$2-$3');
-        else if (len === 13) phoneNumber = phoneNumber.replace(/(\d{5})(\d{4})(\d{4})/, '$1-$2-$3');
-        input.value = phoneNumber;
+    function formatPhoneNumber(isian) {
+        var nomor = isian.value.replace(/\D/g, '');
+
+        if (nomor.length === 11) {
+            nomor = nomor.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+        } else if (nomor.length === 12) {
+            nomor = nomor.replace(/(\d{4})(\d{4})(\d{4})/, '$1-$2-$3');
+        } else if (nomor.length === 13) {
+            nomor = nomor.replace(/(\d{5})(\d{4})(\d{4})/, '$1-$2-$3');
+        }
+
+        isian.value = nomor;
     }
 </script>
 @stop

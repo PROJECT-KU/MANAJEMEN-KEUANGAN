@@ -39,6 +39,30 @@ class PendaftaranScopusCamp extends Model
         'created_at',
         'updated_at',
         'cara_bayar',
+
+        /*
+         * Tagihan di gerbang pembayaran (DOKU).
+         *
+         * Namanya MENYALIN Webinar Eksklusif persis, sebab layar Pendaftar
+         * Layanan membaca kelima layanan lewat satu UNION. Yang hilang dari
+         * daftar ini tidak akan pernah tersimpan dan tidak ada galat apa pun
+         * yang memberi tahu — nilainya cuma menguap saat create().
+         */
+        'bayar_rujukan',
+        'bayar_permintaan_id',
+        'bayar_url',
+        'bayar_status',
+        'bayar_kanal',
+        'bayar_pada',
+        'kedaluwarsa_pada',
+    ];
+
+    /**
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'bayar_pada' => 'datetime',
+        'kedaluwarsa_pada' => 'datetime',
     ];
     protected static function boot()
     {

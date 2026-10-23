@@ -159,9 +159,21 @@ class UbahStatusPendaftaran
      * tabnya masih terbuka bisa tetap membayar kursi yang sudah dikembalikan
      * ke kuota — lalu diberikan kepada orang lain.
      *
-     * Hanya Webinar Eksklusif: layanan lain belum memakai gerbang pembayaran
-     * sama sekali, dan tidak punya kolom tagihan untuk ditutup.
+     * Hanya layanan yang PUNYA kolom tagihan: Webinar Eksklusif dan Scopus
+     * Camp. Ketiga sisanya belum memakai gerbang pembayaran sama sekali.
+     *
+     * Status "tidak aktif"-nya berbeda per layanan karena kosakatanya memang
+     * berbeda — dan itu sebabnya daftarnya ditulis per layanan di sini, bukan
+     * disamaratakan. 'Pendaftaran Refund' TIDAK ada di dalamnya: uangnya
+     * sudah masuk lalu dikembalikan, jadi tidak ada tagihan hidup untuk
+     * ditutup, dan DOKU memang menolak membatalkan pesanan yang sudah
+     * dibayar.
      */
+    private const TIDAK_AKTIF = [
+        'webinar_eksklusif' => ['cancel', 'expired'],
+        'scopus_camp' => ['Pendaftaran Dibatalkan', 'Pendaftaran Ditolak'],
+    ];
+
     private function tutupTagihanGerbang(
         string $layanan,
         $pendaftaran,
@@ -169,11 +181,11 @@ class UbahStatusPendaftaran
         string $statusBaru,
         ?string $olehSiapa
     ): void {
-        if ($layanan !== 'webinar_eksklusif') {
+        $tidakAktif = self::TIDAK_AKTIF[$layanan] ?? null;
+
+        if ($tidakAktif === null) {
             return;
         }
-
-        $tidakAktif = ['cancel', 'expired'];
 
         // Hanya perpindahan dari AKTIF ke tidak aktif. Yang sudah batal lalu
         // ditandai kedaluwarsa tidak punya tagihan hidup untuk ditutup.

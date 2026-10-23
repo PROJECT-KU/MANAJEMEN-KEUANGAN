@@ -10,11 +10,17 @@ use Illuminate\Support\Facades\DB;
 use App\CategoriesScopusCamp;
 use App\PendaftaranScopusCamp;
 use App\Mail\ScopusCampMail;
+use App\Services\Doku;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class PublicScopusCampController extends Controller
 {
+    public function __construct(private Doku $doku)
+    {
+    }
+
 
     // <!--================== NAMPILIN KATEGORI ==================-->
     public function public(Request $request)
@@ -174,7 +180,26 @@ class PublicScopusCampController extends Controller
     public function FormPendaftaran($id)
     {
         $item = CategoriesScopusCamp::findOrFail($id);
-        return view('public.scopus_camp.form_pendaftaran', compact('item'));
+
+        /*
+         * Borangnya BERCABANG menurut kesiapan gerbang pembayaran.
+         *
+         * Dengan gerbang siap, nomor rekening dan unggah bukti transfer
+         * tidak digambar sama sekali: orangnya menekan satu tombol, membayar
+         * di DOKU dengan cara apa pun yang ia punya, dan selesai. Tanpa
+         * gerbang, jalur transfer manual yang lama tetap utuh — kalau tidak,
+         * peladen yang kredensial DOKU-nya belum dipasang akan memajang
+         * borang yang tidak punya satu pun cara membayar.
+         *
+         * Diperiksa di sini, BUKAN di dalam Blade: satu sumber jawaban untuk
+         * borang dan untuk penyimpanannya. Kalau keduanya bertanya sendiri-
+         * sendiri, borang bisa menuntut bukti transfer sementara peladen
+         * mengarahkan ke DOKU.
+         */
+        return view('public.scopus_camp.form_pendaftaran', [
+            'item' => $item,
+            'bayarDaring' => $this->doku->siap(),
+        ]);
     }
     // <!--================== END ==================-->
 
@@ -279,10 +304,23 @@ class PublicScopusCampController extends Controller
         }
         // END
 
+        /*
+         * Lewat gerbang pembayaran kalau kredensialnya ada, kalau tidak
+         * transfer manual seperti dulu.
+         *
+         * Dipakai di EMPAT tempat di bawah — bukti transfer, cara_bayar,
+         * tenggat, dan tujuan akhirnya — jadi ditanyakan sekali lalu
+         * disimpan. Menanyakannya berulang membuka celah yang tidak akan
+         * pernah terlihat di mesin pengembang: kalau jawabannya sempat
+         * berubah di tengah, barisnya bisa tersimpan sebagai 'doku' tanpa
+         * tagihan, atau sebagai 'transfer' tanpa bukti.
+         */
+        $bayarDaring = $this->doku->siap();
+
         // SAVE IMAGE
         $imagePath = null;
 
-        if ($request->hasFile('gambar')) {
+        if (! $bayarDaring && $request->hasFile('gambar')) {
             $image = $request->file('gambar');
 
             // Generate nama file dengan UUID
@@ -343,7 +381,37 @@ class PublicScopusCampController extends Controller
             'total_pembayaran'                                          => $cleanTotalPembayaran,
             // Tali ke promo yang memotong harganya; dibaca layar dampak promo.
             'promo_id'                                                  => $harga['promo']?->getKey(),
-            'status'                                                    => $request->input('status') ?? 'diproses',
+
+            /*
+             * Statusnya DIPUTUSKAN DI SINI, tidak lagi diterima dari borang.
+             *
+             * Sebelum ini `$request->input('status') ?? 'diproses'`: siapa
+             * pun bisa mengirimkan status='Pendaftaran Diterima' bersama
+             * borangnya dan mendaftar sebagai lunas tanpa membayar sepeser
+             * pun. Tidak ada galat, dan di layar panitia ia terbaca persis
+             * sama dengan yang sudah diperiksa buktinya.
+             *
+             * Nilainya dibaca dari katalog, bukan dituliskan ulang: ketiga
+             * layanan memakai kata yang berbeda untuk keadaan yang sama, dan
+             * salinan kedua di sini akan berselisih diam-diam saat katalognya
+             * berubah.
+             */
+            'status'                                                    => \App\Support\PendaftaranSemuaLayanan::statusAwal('scopus_camp'),
+
+            // 'doku' atau 'transfer'; layar panitia membedakan keduanya,
+            // dan hanya yang 'doku' punya tagihan untuk ditutup saat
+            // pendaftarannya dibatalkan.
+            'cara_bayar'                                                => $bayarDaring ? 'doku' : 'transfer',
+
+            /*
+             * Tenggat HANYA untuk yang lewat gerbang: tagihan DOKU memang
+             * mati sendiri sesudah sekian menit, sedangkan transfer manual
+             * tidak punya tenggat sama sekali di layanan ini.
+             */
+            'kedaluwarsa_pada'                                          => $bayarDaring
+                ? now()->addMinutes(Doku::MENIT_KEDALUWARSA)
+                : null,
+
             'note'                                                      => $request->input('note'),
         ]);
 
@@ -359,11 +427,348 @@ class PublicScopusCampController extends Controller
             $appName = 'Rumah Scopus Foundation';
             $emailTo = $request->input('email');
 
-            Mail::to($emailTo)->send(new ScopusCampMail($save, $kategori, $appName));
+            /*
+             * Surat buktinya tetap dikirim lebih dulu, lewat gerbang maupun
+             * tidak. Ia yang memuat nomor pendaftaran dan tautan halaman
+             * statusnya — satu-satunya jalan kembali bagi yang tab
+             * pembayarannya telanjur tertutup.
+             *
+             * Dibungkus: alamat email yang salah ketik melempar, dan sampai
+             * sekarang lemparan itu membatalkan SELURUH pendaftaran yang
+             * barisnya sudah tersimpan dan kuotanya sudah terpotong —
+             * orangnya melihat halaman galat dan mendaftar lagi.
+             */
+            try {
+                Mail::to($emailTo)->send(new ScopusCampMail($save, $kategori, $appName));
+            } catch (\Throwable $e) {
+                report($e);
+            }
+
+            if ($bayarDaring) {
+                return $this->mulaiBayar($save, $kategori);
+            }
+
             return redirect()->route('public.scopuscamp.index')->with('success', 'Pendaftaran Analisis Bibliometrik Terkirim!');
         } else {
             return redirect()->route('public.scopuscamp.index')->with('error', 'Pendaftaran Analisis Bibliometrik Gagal Terkirim!');
         }
+    }
+
+    // <!--================== END ==================-->
+
+    // <!--================== BAYAR LEWAT DOKU ==================-->
+
+    /**
+     * Membuat tagihan lalu mengantar pendaftarnya ke halaman bayar DOKU.
+     *
+     * Gagal membuat tagihan TIDAK menghapus pendaftarannya. Orangnya sudah
+     * mengisi borang dan kursinya sudah ditahan; membatalkannya berarti ia
+     * mengulang dari nol karena kesalahan yang bukan miliknya. Ia diantar ke
+     * halaman status, yang memuat nomor rekening dan nomor panitia.
+     */
+    private function mulaiBayar(PendaftaranScopusCamp $pendaftaran, CategoriesScopusCamp $kategori)
+    {
+        /*
+         * Rinciannya HARUS berjumlah sama dengan total yang tersimpan, kalau
+         * tidak DOKU menolak dengan "AMOUNT NOT MATCH". Jadi ketiga bagian
+         * yang membentuk total — potongan, kode unik, dan PPN — ikut dikirim
+         * semuanya, bukan cuma harga kali jumlah peserta.
+         *
+         * PPN-nya dikirim sebagai baris tersendiri karena di layanan ini ia
+         * dihitung dari SATU kursi, bukan dari subtotal; dilipat ke harga
+         * satuan, angkanya akan meleset begitu pesertanya lebih dari satu.
+         */
+        $hasil = $this->doku->buatTagihan([
+            'nomor' => $pendaftaran->id_transaksi,
+            'jumlah' => (int) $pendaftaran->total_pembayaran,
+            'harga_satuan' => (int) $kategori->harga_setelah_promo,
+            'jumlah_peserta' => (int) $pendaftaran->jumlah_pendaftar,
+            'potongan' => (int) $pendaftaran->nominal_diskon,
+            'label_potongan' => $pendaftaran->kode_diskon
+                ? 'Potongan ' . $pendaftaran->kode_diskon
+                : 'Potongan',
+            'kode_unik' => (int) $pendaftaran->kode_unik,
+            'ppn' => (int) $pendaftaran->ppn,
+            'judul' => trim($kategori->nama . ' ' . ($kategori->nama_ke ? '#' . $kategori->nama_ke : '')),
+            'nama' => $pendaftaran->nama,
+            'email' => $pendaftaran->email,
+            'telp' => $pendaftaran->telp,
+            'kembali' => route('public.scopuscamp.status', $pendaftaran->getKey()),
+        ]);
+
+        if (! $hasil['berhasil'] || ! $hasil['url']) {
+            $pendaftaran->forceFill([
+                'bayar_status' => 'gagal-dibuat',
+                'note' => trim((string) $pendaftaran->note . ' Tagihan daring gagal dibuat: '
+                    . ($hasil['pesan'] ?? 'tidak diketahui')),
+            ])->save();
+
+            return redirect()->route('public.scopuscamp.status', $pendaftaran->getKey())
+                ->with('error', 'Pembayaran daring sedang bermasalah. Pendaftaran Anda SUDAH '
+                    . 'tersimpan dan kursinya ditahan — silakan hubungi panitia lewat '
+                    . 'WhatsApp untuk menyelesaikan pembayarannya.');
+        }
+
+        $pendaftaran->forceFill([
+            'bayar_rujukan' => $hasil['rujukan'],
+
+            // Diwajibkan Cancel Order API DOKU untuk menutup tagihan ini
+            // kalau pendaftarannya dibatalkan sebelum tenggatnya habis.
+            'bayar_permintaan_id' => $hasil['permintaan_id'],
+
+            /*
+             * Alamat halaman bayarnya DISIMPAN, bukan dipakai sekali lalu
+             * dibuang. Yang menutup tabnya — atau membuka tautan di emailnya
+             * nanti — kalau tidak begini mendarat di halaman status tanpa
+             * satu pun tombol untuk membayar.
+             */
+            'bayar_url' => $hasil['url'],
+
+            'bayar_status' => 'menunggu',
+        ])->save();
+
+        return redirect()->away($hasil['url']);
+    }
+
+    /**
+     * Halaman keadaan satu pendaftaran; tautannya ikut di surat buktinya.
+     *
+     * Satu-satunya jalan masuk adalah tautan ber-UUID. Tidak ada daftar dan
+     * tidak ada pencarian: nomor urut akan membuat pendaftaran orang lain
+     * bisa dibuka cukup dengan menebak.
+     */
+    public function status(string $id)
+    {
+        $pendaftaran = PendaftaranScopusCamp::whereKey($id)->first();
+
+        if ($pendaftaran === null) {
+            return redirect()->route('public.scopuscamp.index')
+                ->with('error', 'Pendaftaran itu tidak ditemukan.');
+        }
+
+        $pendaftaran = $this->susulkanDariGerbang($pendaftaran);
+
+        return view('public.scopus_camp.status', [
+            'pendaftaran' => $pendaftaran,
+            'kategori' => CategoriesScopusCamp::find($pendaftaran->kategori_id),
+        ]);
+    }
+
+    /**
+     * Keadaan ringkas satu pendaftaran, untuk ditanyakan berulang halamannya.
+     *
+     * Yang dipulangkan HANYA keadaannya — tidak ada nama, email, maupun
+     * nominal. Alamat ini tidak memakai sesi, jadi siapa pun yang memegang
+     * tautannya bisa memanggilnya, dan semua yang ada di sini memang sudah
+     * terlihat di halamannya sendiri.
+     */
+    public function keadaan(string $id)
+    {
+        $pendaftaran = PendaftaranScopusCamp::whereKey($id)->first();
+
+        if ($pendaftaran === null) {
+            return response()->json(['ada' => false], 404);
+        }
+
+        $pendaftaran = $this->susulkanDariGerbang($pendaftaran);
+
+        $lunas = $this->sudahLunas($pendaftaran);
+
+        return response()->json([
+            'ada' => true,
+            'lunas' => $lunas,
+
+            /*
+             * "selesai" berarti halamannya TIDAK perlu bertanya lagi.
+             * Dihitung di sini, bukan di peramban: aturannya hidup di satu
+             * tempat, dan menyalinnya ke JavaScript berarti satu salinan
+             * lagi yang harus ikut diubah tiap kali.
+             */
+            'selesai' => $lunas || in_array((string) $pendaftaran->status, [
+                'Pendaftaran Dibatalkan', 'Pendaftaran Ditolak', 'Pendaftaran Refund',
+            ], true),
+        ]);
+    }
+
+    /** Pendaftaran ini sudah dibayar. */
+    private function sudahLunas(PendaftaranScopusCamp $pendaftaran): bool
+    {
+        return in_array(
+            (string) $pendaftaran->status,
+            \App\Support\PendaftaranSemuaLayanan::KEADAAN['lunas']['nilai'],
+            true
+        );
+    }
+
+    /**
+     * Menanyakan LANGSUNG ke DOKU, lalu menyusulkan statusnya sendiri.
+     *
+     * Pemberitahuan dari DOKU tetap jalan dan tetap jadi pegangan utama — ia
+     * yang datang walau halamannya sudah ditutup. Tetapi ia berjalan dari
+     * peladen ke peladen dan hampir selalu kalah cepat dari peramban yang
+     * cuma berpindah halaman; di mesin pengembang ia tidak pernah sampai
+     * sama sekali, sebab `localhost` tidak bisa dihubungi dari luar.
+     *
+     * Jadi selama pembayarnya masih menatap layarnya, KITA yang bertanya.
+     */
+    private function susulkanDariGerbang(PendaftaranScopusCamp $pendaftaran): PendaftaranScopusCamp
+    {
+        // Yang transfer manual tidak punya tagihan di sana untuk ditanyakan.
+        if ($pendaftaran->cara_bayar !== 'doku' || $this->sudahLunas($pendaftaran)) {
+            return $pendaftaran;
+        }
+
+        $kabar = $this->doku->periksaStatus((string) $pendaftaran->id_transaksi);
+
+        // tahu=false berarti DOKU tidak menjawab atau belum mengenal
+        // nomornya — BUKAN berarti belum dibayar.
+        if (! $kabar['tahu'] || ! $kabar['lunas']) {
+            return $pendaftaran;
+        }
+
+        /*
+         * Pembayaran yang LEBIH TUA daripada pendaftarannya TIDAK diterima.
+         *
+         * Nomor tagihan bisa terpakai ulang, dan gerbang akan menjawab
+         * SUCCESS untuk nomor itu sebab memang pernah dibayar — yang
+         * membayar pendahulunya. Tanpa penjagaan ini pendaftaran baru
+         * tertandai lunas tanpa ada uang masuk, dan pendaftarnya menerima
+         * surat "pendaftaran Anda diterima".
+         *
+         * Sepuluh menit kelonggaran terhadap selisih jam antara peladen kita
+         * dan peladen gerbang; pembayaran yang sah selalu terjadi SESUDAH
+         * pendaftarannya.
+         */
+        if ($kabar['waktu'] !== null
+            && $pendaftaran->created_at !== null
+            && $kabar['waktu']->lt($pendaftaran->created_at->copy()->subMinutes(10))) {
+            Log::warning('Pembayaran di gerbang lebih tua daripada pendaftarannya; tidak diwariskan', [
+                'nomor' => $pendaftaran->id_transaksi,
+                'bayar_pada' => (string) $kabar['waktu'],
+                'pendaftaran_dibuat' => (string) $pendaftaran->created_at,
+            ]);
+
+            return $pendaftaran;
+        }
+
+        $this->tandaiLunas($pendaftaran, (string) $kabar['status'], $kabar['kanal']);
+
+        return $pendaftaran->refresh();
+    }
+
+    /**
+     * Menandai satu pendaftaran lunas, dari jalur mana pun kabarnya datang.
+     *
+     * SATU tempat untuk dua jalur — yang bertanya sendiri dan yang
+     * diberitahu DOKU. Mana pun yang tiba lebih dulu, hasilnya tidak boleh
+     * bisa dibedakan: kolom yang sama terisi dan surat yang sama berangkat.
+     */
+    private function tandaiLunas(PendaftaranScopusCamp $pendaftaran, string $status, ?string $kanal): void
+    {
+        /*
+         * 'Pendaftaran Diterima', bukan status baru.
+         *
+         * Itulah kata yang sudah dipakai layanan ini untuk "uangnya sudah
+         * masuk, kursinya milik Anda" — dibaca layar panitia sebagai Lunas,
+         * dan surat penerimaannya menempel padanya. Menambah kata baru
+         * berarti pendaftaran yang membayar lewat DOKU tidak terhitung di
+         * satu pun ringkasan yang sudah ada.
+         */
+        $pendaftaran->forceFill([
+            'status' => 'Pendaftaran Diterima',
+            'bayar_status' => $status !== '' ? $status : 'success',
+            'bayar_pada' => now(),
+
+            // Kanal yang BENAR-BENAR dipakai — VA Mandiri, QRIS, OVO.
+            // Tanpa ini layar panitia cuma bisa berkata "DOKU".
+            'bayar_kanal' => $kanal ?: $pendaftaran->bayar_kanal,
+        ])->save();
+
+        \App\PendaftaranJejak::create([
+            'layanan' => 'scopus_camp',
+            'pendaftaran_id' => (string) $pendaftaran->getKey(),
+            'aksi' => 'status',
+            'dari' => 'diproses',
+            'ke' => 'Pendaftaran Diterima',
+            'ringkasan' => 'Dibayar lewat ' . ($kanal ?: 'DOKU') . '; ditandai lunas oleh sistem',
+        ]);
+
+        /*
+         * Surat penerimaannya dikirim lewat jalur yang SAMA dengan yang
+         * dipakai panitia, bukan Mail::send sendiri di sini. Jalur itu yang
+         * memilih kelas suratnya dari katalog dan mencatat hasil kirimnya di
+         * jejak — dan pendaftar yang berkata "saya tidak terima email" hanya
+         * bisa dijawab dari catatan itu.
+         */
+        (new \App\Actions\Pendaftaran\KirimSuratStatus)
+            ->jalankan('scopus_camp', $pendaftaran->refresh());
+    }
+
+    /**
+     * Pemberitahuan balik dari DOKU bahwa sebuah tagihan sudah dibayar.
+     *
+     * Dikecualikan dari CSRF karena yang mengirim peladen DOKU, bukan
+     * peramban pendaftarnya. Penggantinya BUKAN tidak ada penjagaan: tanda
+     * tangannya diperiksa lebih dulu, dan tanpa itu siapa pun yang tahu
+     * alamat ini bisa menandai pendaftaran mana pun sebagai lunas hanya
+     * dengan satu permintaan POST.
+     */
+    public function pemberitahuan(Request $request)
+    {
+        $sah = $this->doku->pemberitahuanSah(
+            '/' . ltrim($request->path(), '/'),
+            $request->header('Request-Id'),
+            $request->header('Request-Timestamp'),
+            $request->header('Signature'),
+            $request->getContent()
+        );
+
+        if (! $sah) {
+            // Kepala yang memuat tanda tangannya TIDAK ikut dicatat.
+            Log::warning('Pemberitahuan DOKU Scopus Camp ditolak: tanda tangannya tidak cocok', [
+                'nomor' => $request->input('order.invoice_number'),
+                'ip' => $request->ip(),
+            ]);
+
+            return response()->json(['ok' => false], 401);
+        }
+
+        $nomor = (string) $request->input('order.invoice_number');
+        $status = mb_strtolower((string) $request->input('transaction.status'));
+
+        $pendaftaran = PendaftaranScopusCamp::where('id_transaksi', $nomor)->first();
+
+        if ($pendaftaran === null) {
+            Log::warning('DOKU memberi tahu nomor Scopus Camp yang tidak dikenal', ['nomor' => $nomor]);
+
+            // 200, bukan galat: nomornya memang tidak ada di sini, dan
+            // menjawab galat membuat DOKU mengulang pemberitahuan yang sama
+            // berhari-hari.
+            return response()->json(['ok' => true]);
+        }
+
+        if (! in_array($status, ['success', 'settlement'], true)) {
+            // Gagal dan kedaluwarsa cuma dicatat di kolom tagihannya.
+            // Statusnya TIDAK diturunkan: di layanan ini 'Pendaftaran
+            // Dibatalkan' adalah keputusan panitia, bukan keputusan gerbang,
+            // dan ia menyeret surat pembatalan ke pendaftarnya.
+            $pendaftaran->forceFill(['bayar_status' => $status ?: 'gagal'])->save();
+
+            return response()->json(['ok' => true]);
+        }
+
+        /*
+         * Yang sudah lunas TIDAK diproses lagi. DOKU boleh mengirim
+         * pemberitahuan yang sama lebih dari sekali, dan dua kali proses
+         * berarti dua kali surat ke orang yang sama.
+         */
+        if ($this->sudahLunas($pendaftaran)) {
+            return response()->json(['ok' => true]);
+        }
+
+        $this->tandaiLunas($pendaftaran, $status, $this->doku->namaKanal($request->all()));
+
+        return response()->json(['ok' => true]);
     }
 
     // <!--================== END ==================-->

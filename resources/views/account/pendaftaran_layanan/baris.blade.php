@@ -2,9 +2,14 @@
   Satu baris pendaftaran di daftar terpadu.
 
   Dipisah jadi partial bukan demi kerapian: tubuh barisnya memuat delapan
-  perhitungan yang semuanya butuh blok @php, dan blok @php di dalam @foreach
-  pada berkas yang juga memakai penanda sebaris adalah persis jebakan yang
-  pernah menelan markah sampai @endphp. Di berkas sendiri, bloknya aman.
+  perhitungan yang semuanya butuh blok PHP, dan blok semacam itu di dalam
+  perulangan pada berkas yang juga memakai penanda sebaris adalah persis
+  jebakan yang pernah menelan markah sampai penutupnya. Di berkas sendiri,
+  bloknya aman.
+
+  (Penanda bloknya sengaja TIDAK dieja di komentar ini. Menyebutnya di dalam
+  komentar Blade justru memicu jebakan yang sama — lihat
+  Tests\Feature\KomentarBladeUtuhTest.)
 
   Tujuh kolom, bukan sembilan. "Orang" dilipat ke dalam kolom Pendaftar
   sebagai pil, dan "Bukti" ke dalam kolom Keadaan sebagai keping — keduanya
