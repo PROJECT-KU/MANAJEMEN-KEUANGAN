@@ -612,4 +612,108 @@ class KabarWhatsAppSemuaLayananTest extends TestCase
             (string) file_get_contents(base_path('app/Actions/Pendaftaran/UbahStatusPendaftaran.php')),
             'Perpindahan status dari layar panitia tidak mengabari pendaftarnya.');
     }
+
+    #[Test]
+    public function sapuan_scopus_camp_dibatasi_supaya_nomornya_tidak_diblokir(): void
+    {
+        /*
+         * Yang membuat nomor WhatsApp diblokir bukan banyaknya pesan dalam
+         * sehari melainkan LEDAKAN: puluhan pesan beruntun dalam hitungan
+         * detik, ke nomor berbeda, berbunyi hampir sama.
+         *
+         * Perintah ini satu-satunya tempat di Scopus Camp yang bisa meledak —
+         * ia memindahkan puluhan pendaftaran sekaligus. Diblokir, yang hilang
+         * bukan cuma pesan kedaluwarsa: SELURUH pemberitahuan kelima layanan
+         * lewat nomor yang sama, termasuk tagihan yang umurnya 60 menit.
+         */
+        config()->set('services.fonnte.batas_sapuan', 2);
+
+        // Jedanya dimatikan DI UJI saja; dibiarkan 25 detik, rangkaian uji
+        // ini sendiri tertidur hampir satu menit.
+        config()->set('services.fonnte.jeda_sapuan_detik', 0);
+
+        $angkatan = $this->angkatanCamp();
+
+        for ($i = 0; $i < 5; $i++) {
+            PendaftaranScopusCamp::create([
+                'token' => Str::random(30),
+                'id_transaksi' => 'CAMP-SAPU-' . Str::random(8),
+                'kategori_id' => $angkatan->getKey(),
+                'nama' => 'Pendaftar Sapu ' . $i,
+                'email' => 'sapu' . Str::random(5) . '@contoh.test',
+                'telp' => '081234567890',
+                'jumlah_pendaftar' => 1,
+                'total_pembayaran' => '5500000',
+                'cara_bayar' => 'doku',
+                'status' => 'diproses',
+                'kedaluwarsa_pada' => now()->subHours($i + 1),
+            ]);
+        }
+
+        Http::fake(['api.fonnte.com/*' => Http::response(['status' => true, 'id' => ['1']], 200)]);
+
+        $this->artisan('scopus-camp:kedaluwarsakan')->assertSuccessful();
+
+        $terkirim = 0;
+
+        foreach (Http::recorded() as [$permintaan, $jawaban]) {
+            if (str_contains($permintaan->url(), 'fonnte.com')) {
+                $terkirim++;
+            }
+        }
+
+        $this->assertSame(2, $terkirim,
+            'Sapuan Scopus Camp tidak dibatasi; satu kali jalan mengirim seluruh tumpukan.');
+    }
+
+    #[Test]
+    public function yang_tertinggal_batas_sapuan_kursinya_belum_dilepas(): void
+    {
+        /*
+         * Pasangan wajib dari uji di atas, dan yang paling mudah salah.
+         *
+         * Batasnya HARUS menggigit pada baris yang diproses, bukan pada pesan
+         * yang dikirim. Dipasang pada pesannya, tiga orang yang tertinggal
+         * tetap kehilangan kursinya tanpa pernah dikabari — dan barisnya
+         * sudah keluar dari saringan perintah ini, jadi tidak ada jalankan
+         * berikutnya yang akan melihatnya lagi.
+         *
+         * Yang diukur: tiga sisanya masih berstatus awal, jadi jalankan
+         * berikutnya sepuluh menit kemudian mengambilnya.
+         */
+        config()->set('services.fonnte.batas_sapuan', 2);
+        config()->set('services.fonnte.jeda_sapuan_detik', 0);
+
+        $angkatan = $this->angkatanCamp();
+        $kunci = [];
+
+        for ($i = 0; $i < 5; $i++) {
+            $kunci[] = PendaftaranScopusCamp::create([
+                'token' => Str::random(30),
+                'id_transaksi' => 'CAMP-SISA-' . Str::random(8),
+                'kategori_id' => $angkatan->getKey(),
+                'nama' => 'Pendaftar Sisa ' . $i,
+                'email' => 'sisa' . Str::random(5) . '@contoh.test',
+                'telp' => '081234567890',
+                'jumlah_pendaftar' => 1,
+                'total_pembayaran' => '5500000',
+                'cara_bayar' => 'doku',
+                'status' => 'diproses',
+                'kedaluwarsa_pada' => now()->subHours($i + 1),
+            ])->getKey();
+        }
+
+        Http::fake(['api.fonnte.com/*' => Http::response(['status' => true, 'id' => ['1']], 200)]);
+
+        $this->artisan('scopus-camp:kedaluwarsakan')->assertSuccessful();
+
+        $masihAwal = PendaftaranScopusCamp::whereIn('id', $kunci)
+            ->where('status', 'diproses')
+            ->count();
+
+        $this->assertSame(3, $masihAwal,
+            'Batasnya dipasang pada pesannya, bukan pada barisnya: kursi orang yang '
+            . 'tertinggal sudah dilepas tanpa ia pernah dikabari, dan barisnya tidak '
+            . 'akan dilihat jalankan berikutnya.');
+    }
 }
