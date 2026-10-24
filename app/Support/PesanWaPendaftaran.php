@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Support\KabarStatusPendaftaran;
+use App\Support\PesanKabarWa;
 use App\Support\PesanTagihanWa;
 use App\Support\PendaftaranSemuaLayanan as Pendaftaran;
 use Illuminate\Support\Carbon;
@@ -75,22 +76,6 @@ class PesanWaPendaftaran
     ];
 
     /**
-     * Kalimat penagihan untuk keadaan SELAIN "menunggu".
-     *
-     * Keadaan "menunggu" tidak memakai ini: naskahnya dirakit PesanTagihanWa,
-     * sumber yang sama dengan pesan otomatis lewat Fonnte. Dirakit dua kali,
-     * pendaftar yang menerima pesan otomatis lalu ditindaklanjuti panitia
-     * menerima dua pesan tentang satu hal yang berbunyi berbeda — dan yang
-     * paling mudah berselisih justru nominalnya.
-     *
-     * Bayar di tempat satu-satunya yang masih dirakit di sini: uangnya tidak
-     * lewat gerbang mana pun, dan menyuruh orang yang akan membayar di meja
-     * panitia membuka tautan pembayaran mengirimnya membayar dua kali.
-     */
-    private const MENAGIH_TUNAI = 'Pembayaran diserahkan langsung kepada panitia '
-        . 'pada hari acara.';
-
-    /**
      * Pesan tindak lanjut untuk STATUS yang sedang berlaku.
      *
      * Kalimat keadaannya diambil dari KabarStatusPendaftaran — sumber yang
@@ -118,13 +103,14 @@ class PesanWaPendaftaran
          * dua pesan tentang satu hal, dan kalau keduanya berbunyi berbeda ia
          * bertanya mana yang berlaku.
          *
-         * Bayar di tempat DIKECUALIKAN: uangnya tidak lewat gerbang mana pun
-         * dan tidak ada bukti yang diunggah, jadi naskah tagihan itu tidak
-         * berlaku sama sekali untuknya.
+         * Bayar di tempat ikut lewat naskah ini, dengan 'tunai' => true:
+         * langkahnya berbeda (diserahkan di meja panitia, tanpa tenggat dan
+         * tanpa desakan) tetapi bentuk pesannya sama, dan dipisahkan ke
+         * rakitan sendiri ia akan berbeda bunyi perlahan.
          */
         $tunai = (Pendaftaran::caraBayar($b->cara_bayar ?? null)['kunci'] ?? '') === 'tunai';
 
-        if ($keadaan === 'menunggu' && ! $tunai) {
+        if ($keadaan === 'menunggu') {
             return PesanTagihanWa::rakit([
                 'nama' => $b->nama_orang ?? null,
                 'layanan' => Pendaftaran::katalog()[$layanan]['nama'] ?? null,
@@ -156,141 +142,82 @@ class PesanWaPendaftaran
                  */
                 'perkenalan' => 'Perkenalkan, saya admin Rumah Scopus.',
                 'tautan' => Pendaftaran::tautanStatusUmum($layanan, (string) ($b->id ?? '')),
-                'bergerbang' => Pendaftaran::pakaiGerbang($layanan),
+                'bergerbang' => Pendaftaran::pakaiGerbang($layanan) && ! $tunai,
                 'diperiksa' => Pendaftaran::perluDiperiksa($b),
+                'tunai' => $tunai,
             ]);
         }
 
-        $nama = trim((string) ($b->nama_orang ?? ''));
-
         /*
-         * Nama yang SELURUHNYA huruf kecil dibesarkan awal katanya.
+         * Sisanya memakai naskah kabar bersama, sumber yang sama dengan pesan
+         * otomatis lewat Fonnte.
          *
-         * Borang pendaftarannya tidak memaksa huruf besar, dan sebagian
-         * mengisinya apa adanya dari papan ketik ponsel. Hasilnya sapaan
-         * "Yth. Bapak/Ibu joko," — justru di kalimat yang paling resmi
-         * dari seluruh pesan ini.
+         * Sebelum ini rakitannya di sini sendiri, dan selisihnya sudah
+         * terlihat: yang otomatis berjudul tebal bergaris pisah dan menyapa
+         * "Halo <nama>,", yang draf tanpa judul dan menyapa "Yth. Bapak/Ibu".
+         * Satu pendaftar bisa menerima keduanya dalam satu hari.
          *
-         * Hanya yang seluruhnya huruf kecil yang disentuh. Nama yang sudah
-         * memuat huruf besar dibiarkan utuh: di dalamnya ada singkatan
-         * ("M. Rizki", gelar, nama lembaga) yang akan rusak kalau
-         * dibesarkan-kecilkan ulang.
+         * Dua hal yang MEMANG berbeda diserahkan sebagai argumen, bukan
+         * dibiarkan jadi dua naskah: draf ini memperkenalkan pengirimnya —
+         * yang mengirimnya orang — dan penutupnya boleh menyuruh membalas,
+         * sebab nomor pengirimnya nomor yang ia baca sendiri.
          */
-        if ($nama !== '' && $nama === mb_strtolower($nama, 'UTF-8')) {
-            $nama = mb_convert_case($nama, MB_CASE_TITLE, 'UTF-8');
-        }
-        $total = (int) ($b->total ?? 0);
+        return PesanKabarWa::rakit([
+            'jenis' => PesanKabarWa::jenisDariStatus($status),
+            'status' => $status,
+            'nama' => $b->nama_orang ?? null,
+            'layanan' => Pendaftaran::katalog()[$layanan]['nama'] ?? null,
+            'kelas' => self::namaKelas($b, $sesi),
+            'nomor' => $b->nomor ?? null,
+            'jumlah' => (int) ($b->jumlah ?? 1),
+            'total' => (int) ($b->total ?? 0),
 
-        /*
-         * "📩 Halo Bapak/Ibu", mengikuti naskah yang dipakai pemiliknya.
-         *
-         * Sebelumnya "Yth. Bapak/Ibu", dengan alasan bahwa pesan ini mewakili
-         * lembaga. Alasannya masih berlaku, tetapi sapaan yang BERBEDA antar
-         * keadaan lebih merugikan: satu orang bisa menerima dua pesan dalam
-         * satu hari — tagihan lalu pelunasan — dan yang sapaannya berganti
-         * terbaca seperti datang dari dua orang yang berbeda.
-         */
-        $baris = ['📩 Halo Bapak/Ibu' . ($nama === '' ? '' : ' ' . $nama)];
-        $baris[] = '';
-        /*
-         * "Admin Rumah Scopus", bukan "panitia <nama layanan>".
-         *
-         * Satu orang memegang kelima layanan, dan memperkenalkan diri sebagai
-         * panitia satu layanan membuat percakapan berikutnya — yang sering
-         * soal pendaftaran lain milik orang yang sama — terbaca seperti
-         * datang dari orang yang berbeda. Nama layanannya tetap disebut, di
-         * rincian, tempat ia memang keterangan.
-         */
-        $baris[] = 'Perkenalkan, saya admin Rumah Scopus.';
+            /*
+             * Kanal yang BENAR-BENAR dipakai — "VA Mandiri", "QRIS" — bukan
+             * nilai mentah `cara_bayar`, yang berbunyi "doku" untuk semua
+             * pembayaran daring. Nama gerbangnya tidak pernah disebut ke
+             * pendaftar: itu urusan internal, dan pesan yang menyebutnya
+             * berbohong pada hari gerbangnya diganti.
+             */
+            'kanal' => self::kanalAman($b),
+            'email' => $b->email ?? null,
 
-        /*
-         * Status yang belum punya kalimat tidak menghasilkan pesan setengah
-         * jadi: kalimat keadaannya dilewati, rinciannya tetap terkirim.
-         * Panitia masih bisa mengetik sisanya sendiri — jauh lebih baik
-         * daripada tombol yang mati.
-         */
-        if ($kabar !== null) {
-            $baris[] = '';
-            $baris[] = $kabar['pembuka'];
-        }
+            /*
+             * Kalimat "sesudah lunas" milik tiap layanan tidak ada di baris
+             * union, dan tidak dikarang di sini: tanpa itu pesannya berhenti
+             * di kwitansi, yang masih benar. Dikarang, ia menjanjikan tautan
+             * sesi untuk Scopus Camp yang pesertanya justru berangkat ke
+             * suatu tempat.
+             */
+            'kelanjutan' => null,
+            'grup' => in_array($keadaan, ['lunas', 'jadwal'], true)
+                ? Pendaftaran::tautanGrup($b)
+                : null,
+            'tautan_daftar' => null,
+            'perkenalan' => 'Perkenalkan, saya admin Rumah Scopus.',
+            'bisa_dibalas' => true,
+        ]);
+    }
 
-        /*
-         * Menagih atau tidak. Yang buktinya sudah diunggah TIDAK ditagih:
-         * keadaannya memang masih 'menunggu', tetapi uangnya sudah dikirim
-         * dan yang ditunggu panitia, bukan dia.
-         */
-        $menagih = $keadaan === 'menunggu' && ! Pendaftaran::perluDiperiksa($b);
+    /**
+     * Kanal pembayaran yang AMAN dicetak ke pendaftar.
+     *
+     * `kanal_bayar` lebih dulu: itu yang benar-benar dipakai. Kalau kosong,
+     * `cara_bayar` dipakai HANYA kalau nilainya bukan gerbang — labelnya
+     * sendiri berbunyi "Pembayaran daring (DOKU)", dan nama gerbangnya tidak
+     * pernah disebut ke pendaftar.
+     */
+    private static function kanalAman(object $b): ?string
+    {
+        $kanal = trim((string) ($b->kanal_bayar ?? ''));
 
-        $rincian = self::rincian($b, $sesi, $menagih, $total);
-
-        if ($rincian !== []) {
-            $baris[] = '';
-            $baris[] = 'Berikut rincian pendaftaran Anda:';
-
-            foreach ($rincian as $r) {
-                $baris[] = '• ' . $r;
-            }
+        if ($kanal !== '') {
+            return $kanal;
         }
 
-        /*
-         * Peringatan "jangan dibulatkan sampai angka terakhir" DIBUANG.
-         *
-         * Tiga angka terakhir itu kode unik, gunanya mencocokkan mutasi
-         * rekening dengan tangan. Lewat gerbang pembayaran nominalnya sudah
-         * terpatok di tautannya — tidak ada yang bisa dibulatkan — dan
-         * menyuruh orang menjaga angkanya sendiri cuma menakuti.
-         */
+        $cara = Pendaftaran::caraBayar($b->cara_bayar ?? null);
 
-        /*
-         * Ajakan masuk grup, HANYA untuk yang sudah jadi peserta.
-         *
-         * Dua keadaan: 'lunas' dan 'jadwal' — yang dijadwalkan ulang sudah
-         * membayar, cuma pindah tanggal. Yang belum bayar tidak diberi
-         * tautannya: grupnya akan terisi orang yang kursinya belum ada,
-         * dan mengeluarkan mereka kembali satu per satu pekerjaan panitia
-         * yang tidak perlu ada. Yang batal dan yang dananya dikembalikan
-         * jelas tidak diajak.
-         */
-        if (in_array($keadaan, ['lunas', 'jadwal'], true)) {
-            $grup = Pendaftaran::tautanGrup($b);
-
-            if ($grup !== null) {
-                $baris[] = '';
-                $baris[] = 'Silakan bergabung ke grup peserta melalui tautan berikut:';
-                /*
-                 * Alamatnya BERDIRI SENDIRI di barisnya, tanpa titik di
-                 * ujungnya. WhatsApp menebak batas tautan dari spasi, dan
-                 * tanda baca yang menempel ikut termakan ke dalam alamat —
-                 * yang ditekan pendaftar lalu alamat yang tidak ada.
-                 */
-                $baris[] = $grup;
-            }
-        }
-
-        $baris[] = '';
-
-        /*
-         * Sampai di sini, satu-satunya yang masih menunggu pembayaran adalah
-         * yang membayar di tempat — sisanya sudah dipulangkan di atas lewat
-         * naskah tagihan bersama. Kalimat tagihan untuk gerbang dan untuk
-         * transfer manual ikut pindah ke sana; ditinggal di sini, ia akan
-         * berselisih dengan yang di sana tanpa ada yang menandainya.
-         */
-        if ($menagih) {
-            $baris[] = self::MENAGIH_TUNAI;
-        } else {
-            $kunciPenutup = $keadaan === 'menunggu' ? 'diperiksa' : $keadaan;
-
-            $baris[] = self::PENUTUP[$kunciPenutup] ?? self::PENUTUP['lain'];
-        }
-
-        // Tanda tangan lembaganya, sama dengan naskah tagihan dan pesan
-        // otomatisnya. Yang menerimanya mengenalinya; pesan yang
-        // kehilangannya terbaca seperti datang dari orang lain.
-        $baris[] = '';
-        $baris = [...$baris, ...PesanTagihanWa::penutup()];
-
-        return implode("\n", $baris);
+        return ($cara['kunci'] ?? '') === 'doku' ? null : ($cara['label'] ?? null);
     }
 
     /** Tanggal mulai angkatannya, kalau barisnya memang berangkatan. */

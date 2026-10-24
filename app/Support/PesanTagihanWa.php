@@ -65,6 +65,7 @@ class PesanTagihanWa
      *     tautan: ?string,
      *     bergerbang: bool,
      *     diperiksa: bool,
+     *     tunai: bool,
      *     mulai: mixed,
      *     perkenalan: ?string,
      * }  $isi
@@ -81,9 +82,7 @@ class PesanTagihanWa
                 ? '🎉 *Selamat, pendaftaran Anda dengan diskon sudah berhasil!*'
                 : '🎉 *Selamat, pendaftaran Anda sudah berhasil!*',
             '',
-            '📩 Halo Bapak/Ibu ' . self::sapaan($isi['nama'] ?? null),
-            'Terima kasih, kami telah menerima detail pendaftaran Anda untuk *'
-                . self::sebutan($isi) . '* 🙏',
+            '📩 Halo Bapak/Ibu ' . self::namaSapaan($isi['nama'] ?? null),
         ];
 
         /*
@@ -93,12 +92,18 @@ class PesanTagihanWa
          * menulisnya, dan kakinya sendiri sudah berkata pesan itu dikirim
          * otomatis. "Perkenalkan, saya admin" di pesan mesin adalah
          * kalimat yang langsung dibantah kalimat di bawahnya.
+         *
+         * Letaknya SESUDAH sapaan dan SEBELUM kabarnya: orang
+         * memperkenalkan diri lebih dulu, baru menyampaikan urusannya.
          */
         $perkenalan = trim((string) ($isi['perkenalan'] ?? ''));
 
         if ($perkenalan !== '') {
             $baris[] = $perkenalan;
         }
+
+        $baris[] = 'Terima kasih, kami telah menerima detail pendaftaran Anda untuk *'
+            . self::sebutanLayanan($isi) . '* 🙏';
 
         $rincian = self::rincian($isi, $total);
 
@@ -120,7 +125,7 @@ class PesanTagihanWa
             $baris = [...$baris, ...$catatan];
         }
 
-        $tenggat = ($isi['diperiksa'] ?? false)
+        $tenggat = (($isi['diperiksa'] ?? false) || ($isi['tunai'] ?? false))
             ? null
             : self::tenggat($isi['tenggat'] ?? null);
 
@@ -129,7 +134,7 @@ class PesanTagihanWa
             $baris[] = '⏳ *Batas pembayaran: ' . $tenggat . '*';
         }
 
-        if (! ($isi['diperiksa'] ?? false)) {
+        if (! ($isi['diperiksa'] ?? false) && ! ($isi['tunai'] ?? false)) {
             /*
              * Desakannya DILEWATI untuk yang buktinya sedang diperiksa.
              *
@@ -173,6 +178,10 @@ class PesanTagihanWa
      */
     private static function soalBukti(array $isi): string
     {
+        if ($isi['tunai'] ?? false) {
+            return 'Bapak/Ibu tidak perlu mengirimkan apa pun sebelum hari acara.';
+        }
+
         if ($isi['diperiksa'] ?? false) {
             return 'Bapak/Ibu tidak perlu mengirimkan apa pun lagi — kami akan '
                 . 'mengabari melalui nomor ini setelah pemeriksaannya selesai.';
@@ -195,11 +204,27 @@ class PesanTagihanWa
      *
      * @return array<int, string>
      */
-    public static function penutup(): array
+    public static function penutup(?string $jenis = null): array
     {
+        /*
+         * Harapan publikasinya DILEWATI untuk kabar yang buruk.
+         *
+         * "Semoga ini jadi langkah awal menuju publikasi" kepada orang yang
+         * baru saja ditolak, dibatalkan, atau dananya dikembalikan terbaca
+         * sebagai sindiran — ia justru tidak ikut. Yang tersisa ucapan terima
+         * kasih yang netral.
+         *
+         * "Salam Q1 ✨" tetap ada di keduanya: itu tanda tangan lembaganya,
+         * dan pesan yang kehilangannya terbaca seperti datang dari orang lain
+         * — justru di pesan yang paling mungkin dicurigai penipuan.
+         */
+        $buruk = in_array((string) $jenis, ['refund', 'ditolak', 'dibatalkan'], true);
+
         return [
-            'Terima kasih, semoga ini jadi langkah awal menuju publikasi di jurnal '
-                . 'bereputasi! 🙌',
+            $buruk
+                ? 'Terima kasih atas perhatian Bapak/Ibu 🙏'
+                : 'Terima kasih, semoga ini jadi langkah awal menuju publikasi di jurnal '
+                    . 'bereputasi! 🙌',
             'Salam Q1 ✨',
         ];
     }
@@ -208,6 +233,10 @@ class PesanTagihanWa
 
     /**
      * Nama yang SELURUHNYA huruf kecil dibesarkan awal katanya.
+     *
+     * Terbuka karena PesanKabarWa memakainya juga: sapaan yang berbeda antara
+     * pesan tagihan dan pesan perpindahan status terbaca seperti datang dari
+     * dua pengirim.
      *
      * Borangnya tidak memaksa huruf besar, dan sebagian mengisinya apa adanya
      * dari papan ketik ponsel. Hasilnya "Halo Bapak/Ibu joko" — justru di
@@ -218,7 +247,7 @@ class PesanTagihanWa
      * ("M. Rizki", "Deni Adha Akbari, S.E.") yang rusak kalau dibesar-kecilkan
      * ulang.
      */
-    private static function sapaan(?string $nama): string
+    public static function namaSapaan(?string $nama): string
     {
         $nama = trim((string) $nama);
 
@@ -243,7 +272,7 @@ class PesanTagihanWa
      * untuk *Scopus Camp — Scopus Camp Padang #4*" — dan di sepuluh dari
      * sepuluh pendaftaran Analisis Bibliometrik, SELALU begitu.
      */
-    private static function sebutan(array $isi): string
+    public static function sebutanLayanan(array $isi): string
     {
         $layanan = trim((string) ($isi['layanan'] ?? ''));
         $kelas = trim((string) ($isi['kelas'] ?? ''));
@@ -331,6 +360,22 @@ class PesanTagihanWa
 
         $tautan = trim((string) ($isi['tautan'] ?? ''));
         $nominal = $total > 0 ? ' senilai *Rp ' . number_format($total, 0, ',', '.') . '*' : '';
+
+        /*
+         * Bayar di tempat: tidak ada yang perlu ditransfer sama sekali.
+         *
+         * Uangnya tidak lewat gerbang mana pun, dan menyuruh orang yang akan
+         * membayar di meja panitia membuka tautan pembayaran mengirimnya
+         * membayar dua kali — lalu salah satunya harus dikembalikan dengan
+         * tangan.
+         */
+        if ($isi['tunai'] ?? false) {
+            return [
+                '✅ *Langkah selanjutnya:*',
+                'Pembayaran' . $nominal . ' diserahkan langsung kepada panitia pada '
+                    . 'hari acara.',
+            ];
+        }
 
         if (($isi['bergerbang'] ?? false) && $tautan !== '') {
             return [
