@@ -47,11 +47,16 @@ use Illuminate\Support\Facades\DB;
  * Yang TIDAK dilakukan perintah ini
  * ---------------------------------------------------------------------------
  *
- * Statusnya tidak diturunkan jadi 'Pendaftaran Dibatalkan'. Di layanan ini
- * pembatalan adalah KEPUTUSAN PANITIA — ia menyeret surat pembatalan ke
- * pendaftarnya — sedangkan tagihan yang mati cuma berarti tagihannya mati.
- * Yang dicatat di `bayar_status`, dan kursinya dikembalikan lewat hitung
- * ulang di bawah.
+ * Suratnya tidak dikirim. Perpindahan statusnya dikerjakan dengan `update()`
+ * borongan — sengaja, supaya ratusan baris tidak jadi ratusan kueri — dan
+ * jalur itu tidak melewati UbahStatusPendaftaran, satu-satunya tempat yang
+ * memilih kelas suratnya dari katalog lalu mencatat hasil kirimnya di jejak.
+ *
+ * Yang DIKIRIM pemberitahuan WhatsApp-nya, lewat KabariWhatsApp. Itu bukan
+ * tukar-menukar: tanpa satu pun pemberitahuan, orangnya tahu kursinya hilang
+ * hanya kalau ia kebetulan membuka halaman statusnya lagi. Suratnya menyusul
+ * begitu layanan ini punya surat kedaluwarsa sendiri — Webinar Eksklusif
+ * sudah punya, Scopus Camp belum.
  */
 class KedaluwarsakanPendaftaranScopusCamp extends Command
 {
@@ -69,13 +74,44 @@ class KedaluwarsakanPendaftaranScopusCamp extends Command
          * layanan ini, dan yang sudah diterima panitia jelas tidak boleh
          * disentuh.
          */
-        $lewat = PendaftaranScopusCamp::query()
+        /*
+         * DIBATASI per jalankan, sama seperti sapuan Webinar Eksklusif.
+         *
+         * Yang membuat nomor WhatsApp diblokir bukan banyaknya pesan dalam
+         * sehari melainkan LEDAKAN: puluhan pesan beruntun dalam hitungan
+         * detik, ke nomor berbeda, berbunyi hampir sama. Perintah ini satu-
+         * satunya tempat di layanan ini yang bisa meledak — ia memindahkan
+         * puluhan pendaftaran sekaligus.
+         *
+         * Batasnya dipasang pada BARIS YANG DIPROSES, bukan pada pesan yang
+         * dikirim. Dipasang pada pesannya, kursinya tetap dilepas sementara
+         * pemberitahuannya tidak — dan barisnya sudah keluar dari saringan
+         * ini, jadi tidak ada jalankan berikutnya yang akan melihatnya lagi.
+         *
+         * Yang tertinggal diambil jalankan berikutnya, sepuluh menit
+         * kemudian. Yang paling lama menunggu didahulukan.
+         */
+        $batas = max(0, (int) config('services.fonnte.batas_sapuan', 40));
+
+        $kueri = PendaftaranScopusCamp::query()
             ->where('cara_bayar', 'doku')
             ->whereNotNull('kedaluwarsa_pada')
             ->where('kedaluwarsa_pada', '<', now())
             ->where('status', \App\Support\PendaftaranSemuaLayanan::statusAwal('scopus_camp'))
             ->whereNull('bayar_pada')
-            ->get();
+            ->orderBy('kedaluwarsa_pada')
+
+            // Kunci kedua: 'kedaluwarsa_pada' seri untuk pendaftaran yang
+            // dibuat dalam detik yang sama, dan urutan tanpa pemecah seri
+            // tidak ditentukan — barisnya bisa berpindah antar jalankan,
+            // dan yang tertinggal tidak selalu yang sama.
+            ->orderBy('id');
+
+        if ($batas > 0) {
+            $kueri->limit($batas);
+        }
+
+        $lewat = $kueri->get();
 
         foreach ($lewat as $p) {
             $this->line(sprintf(
@@ -98,6 +134,8 @@ class KedaluwarsakanPendaftaranScopusCamp extends Command
                 'bayar_status' => 'expired',
                 'bayar_url' => null,
             ]);
+
+            $this->kabari($lewat);
         }
 
         $this->info($lewat->count() . ' pendaftaran kedaluwarsa, '
@@ -112,6 +150,60 @@ class KedaluwarsakanPendaftaranScopusCamp extends Command
         }
 
         return self::SUCCESS;
+    }
+
+    /**
+     * Mengabari lewat WhatsApp bahwa kursinya dilepas.
+     *
+     * DI SINI, bukan lewat UbahStatusPendaftaran: perintah ini memindahkan
+     * status dengan satu `update()` borongan — sengaja, supaya ratusan baris
+     * tidak jadi ratusan kueri — dan jalur borongan itu tidak melewati aksi
+     * mana pun. Pesannya juga satu-satunya yang sebabnya BENAR di sini:
+     * saringannya sendiri yang memastikan tenggatnya memang sudah lewat dan
+     * pembayarannya memang belum pernah masuk. Dipanggil dari layar panitia,
+     * pesan yang sama akan menuduh orang yang dibatalkan karena alasan lain.
+     *
+     * SESUDAH status tersimpan, bukan sebelum: pesan yang menyatakan kursinya
+     * dilepas sementara barisnya masih berstatus awal berarti orangnya
+     * membuka halaman statusnya dan melihat tombol bayar yang masih hidup.
+     *
+     * Dibungkus per orang. Satu nomor yang tidak bisa dihubungi tidak boleh
+     * menghentikan sapuannya — sisanya ikut tidak dikabari, dan kuotanya
+     * tetap terlepas, jadi kegagalannya tidak akan pernah muncul lagi di
+     * jalankan berikutnya.
+     *
+     * @param  \Illuminate\Support\Collection<int, PendaftaranScopusCamp>  $lewat
+     */
+    private function kabari($lewat): void
+    {
+        $wa = app(\App\Actions\Pendaftaran\KabariWhatsApp::class);
+
+        /*
+         * JEDA ANTAR PESAN. Amannya karena pemanggilnya perintah terjadwal —
+         * tidak ada orang yang menunggu layarnya. Di jalur web, menidurkan
+         * permintaan berarti halamannya menggantung.
+         */
+        $jeda = max(0, (int) config('services.fonnte.jeda_sapuan_detik', 25));
+        $pertama = true;
+
+        foreach ($lewat as $p) {
+            if (! $pertama && $jeda > 0) {
+                sleep($jeda);
+            }
+
+            $pertama = false;
+
+            try {
+                $wa->kursiDilepas('scopus_camp', $p->refresh());
+            } catch (\Throwable $e) {
+                $this->warn('  WhatsApp ' . $p->id_transaksi . ' gagal: ' . $e->getMessage());
+
+                \Illuminate\Support\Facades\Log::warning('Kabar WhatsApp kursi Scopus Camp dilepas gagal.', [
+                    'nomor' => $p->id_transaksi,
+                    'pesan' => $e->getMessage(),
+                ]);
+            }
+        }
     }
 
     /** Menyetel ulang `sisa_kuota` tiap angkatan dari pendaftaran yang hidup. */

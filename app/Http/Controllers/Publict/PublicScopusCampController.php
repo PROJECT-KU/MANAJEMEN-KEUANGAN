@@ -842,6 +842,27 @@ class PublicScopusCampController extends Controller
                 report($e);
             }
 
+            /*
+             * WhatsApp-nya sepasang dengan suratnya, dan sebabnya sama:
+             * tidak semua orang membuka emailnya, dan yang tidak membukanya
+             * kehilangan nomor pendaftaran, tagihan, dan batas waktunya
+             * sekaligus — lalu kursinya dilepas tanpa ia pernah tahu.
+             *
+             * try-nya TERPISAH dari milik surat: surat yang gagal tidak boleh
+             * ikut membatalkan WhatsApp-nya, dan sebaliknya. Keduanya juga
+             * tidak boleh menggagalkan pendaftaran yang barisnya SUDAH
+             * tersimpan dan kuotanya sudah terpotong.
+             */
+            try {
+                app(\App\Actions\Pendaftaran\KabariWhatsApp::class)
+                    ->pendaftaranMasuk('scopus_camp', $save, $kategori);
+            } catch (\Throwable $e) {
+                Log::warning('Kabar WhatsApp pendaftaran Scopus Camp gagal.', [
+                    'nomor' => $save->id_transaksi,
+                    'pesan' => $e->getMessage(),
+                ]);
+            }
+
             if ($bayarDaring) {
                 return $this->mulaiBayar($save, $kategori);
             }
@@ -1121,6 +1142,29 @@ class PublicScopusCampController extends Controller
          */
         (new \App\Actions\Pendaftaran\KirimSuratStatus)
             ->jalankan('scopus_camp', $pendaftaran->refresh());
+
+        /*
+         * WhatsApp-nya dipanggil DI SINI, bukan lewat UbahStatusPendaftaran.
+         *
+         * Jalur ini memang tidak melewatinya — aksi itu milik layar panitia,
+         * dan memanggilnya dari pemberitahuan gerbang akan ikut menutup
+         * tagihan yang baru saja dibayar. Yang dipakai bersama cuma
+         * perakit pemberitahuannya.
+         *
+         * Dibungkus: kegagalan di sini tidak boleh membuat kami menjawab
+         * bukan-200 ke DOKU, yang lalu mengulang pemberitahuan pembayaran
+         * yang sudah tercatat — dan pengulangannya mengirim surat kedua ke
+         * orang yang sama.
+         */
+        try {
+            app(\App\Actions\Pendaftaran\KabariWhatsApp::class)
+                ->lunas('scopus_camp', $pendaftaran->refresh());
+        } catch (\Throwable $e) {
+            Log::warning('Kabar WhatsApp lunas Scopus Camp gagal.', [
+                'nomor' => $pendaftaran->id_transaksi,
+                'pesan' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**

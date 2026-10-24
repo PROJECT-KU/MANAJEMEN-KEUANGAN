@@ -143,6 +143,27 @@ class UbahStatusPendaftaran
         $hasilSurat = (new KirimSuratStatus)->jalankan($layanan, $pendaftaran->refresh(), $olehSiapa);
         $surat = $hasilSurat['terkirim'];
 
+        /*
+         * WhatsApp-nya menyusul suratnya, dan di SINI — bukan di tiga layar
+         * panitia yang memanggil aksi ini.
+         *
+         * try-nya TERPISAH dari surat: surat yang gagal tidak boleh ikut
+         * membatalkan WhatsApp-nya, dan sebaliknya. Kegagalannya juga tidak
+         * mengubah hasil yang dipulangkan — statusnya sudah berpindah dan
+         * tersimpan, dan mengembalikan 'berhasil' => false karena satu pesan
+         * tidak sampai akan membuat panitia mengulang perpindahannya.
+         */
+        try {
+            app(\App\Actions\Pendaftaran\KabariWhatsApp::class)
+                ->untukStatus($layanan, $pendaftaran->refresh());
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Kabar WhatsApp status gagal.', [
+                'layanan' => $layanan,
+                'id' => $pendaftaran->getKey(),
+                'pesan' => $e->getMessage(),
+            ]);
+        }
+
         return [
             'berhasil' => true,
             'surat' => $surat,
