@@ -910,7 +910,28 @@ class WebinarEksklusifTest extends TestCase
         $this->artisan('webinar-eksklusif:ingatkan');
         $this->artisan('webinar-eksklusif:ingatkan');
 
-        \Illuminate\Support\Facades\Mail::assertSent(\App\Mail\WebinarEksklusifPengingatMail::class, 1);
+        /*
+         * Dihitung HANYA surat yang ditujukan ke alamat uji ini, bukan semua
+         * surat yang terkirim.
+         *
+         * Perintahnya menyapu SELURUH tabel, dan rangkaian uji ini jalan di
+         * basis data yang sama dengan data pengembangan. Begitu ada satu
+         * sesi nyata yang tanggal mulainya kebetulan jatuh pada "besok",
+         * pendaftarannya ikut diingatkan dan hitungannya jadi dua.
+         *
+         * Terjadi 24 Okt 2026: sesi "testing webinar eksklusif #2" yang
+         * dibuat 18 Okt bermula 25 Okt, jadi hari itu "besok" menunjuk tepat
+         * ke sana. Penjaga ini merah tanpa ada satu baris kode pun yang
+         * berubah — dan merahnya menuduh mesin pencegah kirim-ulang yang
+         * justru bekerja dengan benar.
+         */
+        $keUji = \Illuminate\Support\Facades\Mail::sent(
+            \App\Mail\WebinarEksklusifPengingatMail::class,
+            fn ($surat) => $surat->hasTo('dua@contoh.test')
+        )->count();
+
+        $this->assertSame(1, $keUji,
+            'Pengingatnya terkirim ' . $keUji . ' kali ke pendaftar yang sama.');
     }
 
     /**
@@ -935,7 +956,19 @@ class WebinarEksklusifTest extends TestCase
 
         $this->artisan('webinar-eksklusif:ingatkan');
 
-        \Illuminate\Support\Facades\Mail::assertNothingSent();
+        /*
+         * Diperiksa per ALAMAT, bukan "tidak ada surat sama sekali": lihat
+         * alasannya di pengingat_tidak_dikirim_dua_kali() — perintahnya
+         * menyapu seluruh tabel, termasuk data pengembangan.
+         */
+        foreach (['cancel@contoh.test', 'expired@contoh.test'] as $alamat) {
+            $this->assertSame(0,
+                \Illuminate\Support\Facades\Mail::sent(
+                    \App\Mail\WebinarEksklusifPengingatMail::class,
+                    fn ($surat) => $surat->hasTo($alamat)
+                )->count(),
+                'Pendaftaran yang kursinya sudah dilepas tetap diingatkan (' . $alamat . ').');
+        }
     }
 
     #[Test]

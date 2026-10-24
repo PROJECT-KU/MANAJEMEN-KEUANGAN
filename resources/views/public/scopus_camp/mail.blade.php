@@ -1,183 +1,134 @@
-<!DOCTYPE html>
-<html lang="id">
+{{--
+  Bukti pendaftaran Scopus Camp.
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pendaftaran Scopus Camp</title>
-    <style>
-        /* CSS Khusus untuk perangkat Mobile / HP */
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #f4f7f6;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            -webkit-font-smoothing: antialiased;
-        }
+  SELURUH susunannya di emails/pendaftaran/bukti.blade.php, dipakai bersama
+  semua layanan. Berkas ini hanya menyiapkan isinya.
 
-        @media only screen and (max-width: 600px) {
-            .email-container {
-                width: 100% !important;
-                border-radius: 0 !important;
-                margin: 0 !important;
-            }
+  Sebelum 24 Okt 2026 ia punya desain sendiri: logo MIS biru, kepala biru
+  muda, dan susunan yang sama sekali berbeda dari surat Webinar Eksklusif.
+  Satu pelanggan yang memesan dua layanan menerima dua surat yang tidak
+  terlihat berasal dari tempat yang sama. Diseragamkan atas permintaan
+  pemiliknya.
 
-            .content-wrapper {
-                padding: 20px !important;
-            }
+  Yang dikirim ScopusCampMail: $pendaftaran, $categoriesScopusCamp, $appName.
+--}}
+@php
+    $angkatan = $categoriesScopusCamp;
 
-            .data-table td {
-                display: block !important;
-                width: 100% !important;
-                text-align: left !important;
-            }
+    /*
+     * "Sudah dibayar" ditentukan STATUSNYA, bukan ada-tidaknya bukti.
+     *
+     * Surat ini dikirim tepat saat pendaftaran dibuat — jadi lewat gerbang
+     * pembayaran ia selalu belum lunas, dan lewat transfer manual ia menunggu
+     * panitia memeriksa buktinya. Keduanya sama-sama "belum".
+     */
+    $lunas = in_array((string) $pendaftaran->status,
+        \App\Support\PendaftaranSemuaLayanan::KEADAAN['lunas']['nilai'], true);
 
-            .data-table td.value {
-                padding-top: 2px !important;
-                padding-bottom: 15px !important;
-                font-size: 16px !important;
-            }
-        }
-    </style>
-</head>
+    $belumBayar = ! $lunas;
 
-<body style="margin: 0; padding: 0; background-color: #f4f7f6;">
+    $rincian = [
+        ['label' => 'Kelas', 'nilai' => trim($angkatan->nama . ' ' . ($angkatan->nama_ke ? '#' . $angkatan->nama_ke : ''))],
+        ['label' => 'Tanggal', 'nilai' => \App\Support\RentangTanggal::tulis(
+            $angkatan->mulai ? \Carbon\Carbon::parse($angkatan->mulai) : null,
+            $angkatan->selesai ? \Carbon\Carbon::parse($angkatan->selesai) : null
+        ) ?: 'Menyusul'],
+        ['label' => 'Lokasi', 'nilai' => $angkatan->lokasi ?: 'Akan dikabari panitia'],
+        ['label' => 'Atas nama', 'nilai' => $pendaftaran->nama],
+        ['label' => 'Jumlah peserta', 'nilai' => (int) $pendaftaran->jumlah_pendaftar . ' orang'],
+    ];
 
-    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%); padding: 40px 20px;">
-        <tr>
-            <td align="center">
+    /*
+     * Potongan dan kode unik hanya disebut kalau memang ada. Baris "Rp 0"
+     * terbaca sebagai potongan yang GAGAL dipakai, bukan sebagai potongan
+     * yang memang tidak diminta.
+     */
+    if ((int) $pendaftaran->nominal_diskon > 0) {
+        $rincian[] = [
+            'label' => 'Potongan' . ($pendaftaran->kode_diskon ? ' (' . $pendaftaran->kode_diskon . ')' : ''),
+            'nilai' => 'Rp ' . number_format((int) $pendaftaran->nominal_diskon, 0, ',', '.'),
+            'warna' => '#0f9b74',
+            'awalan' => '&minus; ',
+        ];
+    }
 
-                <table class="email-container" width="600" border="0" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); overflow: hidden;">
+    if ((int) $pendaftaran->ppn > 0) {
+        $rincian[] = [
+            'label' => 'PPN',
+            'nilai' => 'Rp ' . number_format((int) $pendaftaran->ppn, 0, ',', '.'),
+        ];
+    }
 
-                    <tr>
-                        <td align="center" style="padding: 40px 20px 20px 20px;">
-                            <a href="https://rumahscopusfoundation.com/" target="_blank">
-                                <img src="{{ aset_surat('assets/img/logo-email.png') }}"
-                                    alt="MIS — Management Integration System by Rumah Scopus" width="190"
-                                    style="display:block;border:0;width:190px;max-width:60%;height:auto">
-                            </a>
-                        </td>
-                    </tr>
+    if ((int) $pendaftaran->kode_unik > 0) {
+        $rincian[] = [
+            'label' => 'Kode unik',
+            'nilai' => 'Rp ' . number_format((int) $pendaftaran->kode_unik, 0, ',', '.'),
+            'warna' => '#ff6a00',
+            'awalan' => '+ ',
+        ];
+    }
 
-                    <tr>
-                        <td align="center">
-                            <div style="height: 1px; background: linear-gradient(to right, transparent, rgba(99, 102, 241, 0.2), transparent); width: 80%;"></div>
-                        </td>
-                    </tr>
+    /*
+     * Langkahnya BERCABANG menurut cara bayarnya. Menyuruh yang lewat gerbang
+     * "transfer lalu kirim bukti" berarti mengarahkan uang ke rekening yang
+     * tidak lagi dicocokkan siapa pun — dan sebaliknya, menyuruh yang
+     * transfer manual "selesaikan di halaman status" menunjuk tombol yang
+     * memang tidak ada baginya.
+     */
+    $langkah = null;
 
-                    <tr>
-                        <td class="content-wrapper" style="padding: 20px 40px; color: #334155;">
+    if ($belumBayar) {
+        $langkah = ['judul' => 'Langkah berikutnya', 'daftar' => $pendaftaran->cara_bayar === 'doku'
+            ? [
+                'Buka halaman status lewat tombol di bawah.',
+                'Selesaikan pembayarannya di sana — lewat QRIS atau Virtual Account.',
+                'Begitu pembayarannya masuk, status Anda berubah sendiri. '
+                    . 'Tidak perlu mengirim bukti apa pun.',
+            ]
+            : [
+                'Transfer <strong>tepat sampai angka terakhir</strong> sesuai total di atas.'
+                    . ((int) $pendaftaran->kode_unik > 0
+                        ? ' Angka terakhirnya kode unik Anda — kalau dibulatkan, pembayarannya '
+                            . 'tidak bisa kami cocokkan.'
+                        : ''),
+                'Kirim bukti transfernya ke panitia lewat WhatsApp.',
+                'Panitia memeriksanya, lalu mengirim kabar penerimaan ke email ini.',
+            ]];
+    }
+@endphp
 
-                            <h1 style="margin: 0 0 15px 0; font-size: 26px; color: #1e293b; font-weight: 800; text-align: center;">
-                                Hallo, {{ $pendaftaran->nama }} 👋
-                            </h1>
-
-                            <p style="font-size: 15px; line-height: 1.6; color: #475569; margin-bottom: 25px; text-align: center;">
-                                Terima kasih sudah melakukan pendaftaran! Berikut adalah rincian data <strong>Scopus Camp</strong> Anda:
-                            </p>
-
-                            <table width="100%" border="0" cellpadding="0" cellspacing="0" style="background: linear-gradient(to bottom right, #ffffff, #f0fdf4); border: 1px solid #e2e8f0; border-radius: 16px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.02); margin-bottom: 25px;">
-                                <tr>
-                                    <td style="padding: 25px;">
-
-                                        <table class="data-table" width="100%" border="0" cellpadding="0" cellspacing="0" style="font-size: 14px;">
-                                            <tr>
-                                                <td style="padding: 8px 0; color: #64748b; font-weight: 600; border-bottom: 1px dashed #cbd5e1;" width="45%">Kode Transaksi</td>
-                                                <td class="value" style="padding: 8px 0; color: #3b82f6; font-weight: 800; text-align: right; border-bottom: 1px dashed #cbd5e1; letter-spacing: 1px;">
-                                                    {{ strtoupper($pendaftaran->id_transaksi) }}
-                                                </td>
-                                            </tr>
-
-                                            <tr>
-                                                <td align="center">
-                                                    <div style="height: 1px; background: linear-gradient(to right, transparent, rgba(99, 102, 241, 0.2), transparent); width: 80%;"></div>
-                                                </td>
-                                            </tr>
-
-                                            <tr>
-                                                <td style="padding: 12px 0 8px 0; color: #64748b; font-weight: 600; border-bottom: 1px dashed #cbd5e1;">Batch</td>
-                                                <td class="value" style="padding: 12px 0 8px 0; color: #0f172a; font-weight: 700; text-align: right; border-bottom: 1px dashed #cbd5e1;">
-                                                    {{ $categoriesScopusCamp->nama }} #{{ $categoriesScopusCamp->nama_ke }}
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td style="padding: 12px 0 8px 0; color: #64748b; font-weight: 600; border-bottom: 1px dashed #cbd5e1;">Mulai Pelaksanaan</td>
-                                                <td class="value" style="padding: 12px 0 8px 0; color: #0f172a; font-weight: 700; text-align: right; border-bottom: 1px dashed #cbd5e1;">
-                                                    {{ strftime('%d %B %Y', strtotime($categoriesScopusCamp->mulai)) }}
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td style="padding: 12px 0 8px 0; color: #64748b; font-weight: 600; border-bottom: 1px dashed #cbd5e1;">Selesai Pelaksanaan</td>
-                                                <td class="value" style="padding: 12px 0 8px 0; color: #0f172a; font-weight: 700; text-align: right; border-bottom: 1px dashed #cbd5e1;">
-                                                    {{ strftime('%d %B %Y', strtotime($categoriesScopusCamp->selesai)) }}
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td style="padding: 12px 0 8px 0; color: #64748b; font-weight: 600; border-bottom: 1px dashed #cbd5e1;">Lokasi</td>
-                                                <td class="value" style="padding: 12px 0 8px 0; color: #0f172a; font-weight: 700; text-align: right; border-bottom: 1px dashed #cbd5e1;">
-                                                    {{ $categoriesScopusCamp->lokasi }}
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td style="padding: 12px 0 0 0; color: #64748b; font-weight: 600;">Total Pembayaran</td>
-                                                <td class="value" style="padding: 12px 0 0 0; color: #10b981; font-size: 18px; font-weight: 900; text-align: right;">
-                                                    Rp. {{ number_format($pendaftaran->total_pembayaran, 0, ',', '.') }}
-                                                </td>
-                                            </tr>
-                                        </table>
-
-                                    </td>
-                                </tr>
-                            </table>
-                            <div style="background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 15px 20px; border-radius: 8px; margin-bottom: 25px;">
-                                <p style="margin: 0; font-size: 14px; color: #92400e; line-height: 1.5;">
-                                    Status pendaftaran Anda saat ini: <strong style="text-transform: uppercase;">{{ $status }}</strong>.<br>
-                                    Silakan tunggu maksimal 1x24 jam untuk proses konfirmasi.
-                                </p>
-                            </div>
-
-                            <p style="font-size: 15px; font-weight: bold; color: #1e293b; margin-bottom: 30px;">Salam Q1!</p>
-
-                            <hr style="border: 0; border-top: 1px solid #e2e8f0; margin-bottom: 20px;">
-
-                            <p style="font-size: 13px; line-height: 1.6; color: #64748b; margin-bottom: 20px;">
-                                <strong>Admin Rumah Scopus Foundation</strong><br>
-                                Bangunsari, Jl. Bangunsari, Bangun Kerto, Turi,<br>
-                                Sleman Regency, Special Region of Yogyakarta 55551<br>
-                                Telp: 0812-2688-3280
-                            </p>
-
-                            <table border="0" cellpadding="0" cellspacing="0">
-                                <tr>
-                                    <td style="padding-right: 15px;">
-                                        <a href="https://www.instagram.com/rumah_scopus/" target="_blank">
-                                            <img src="{{ aset_surat('assets/img/instagram.png') }}" alt="Instagram" width="35" style="display: block; border: 0;">
-                                        </a>
-                                    </td>
-                                    <td style="padding-right: 15px;">
-                                        <a href="https://www.youtube.com/@rumahscopus" target="_blank">
-                                            <img src="{{ aset_surat('assets/img/youtube.png') }}" alt="YouTube" width="35" style="display: block; border: 0;">
-                                        </a>
-                                    </td>
-                                    <td>
-                                        <a href="https://www.facebook.com/RumahScopusAkademi" target="_blank">
-                                            <img src="{{ aset_surat('assets/img/facebook.png') }}" alt="Facebook" width="35" style="display: block; border: 0;">
-                                        </a>
-                                    </td>
-                                </tr>
-                            </table>
-
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td height="20"></td>
-                    </tr>
-                </table>
-
-            </td>
-        </tr>
-    </table>
-</body>
-
-</html>
+@include('emails.pendaftaran.bukti', [
+    'judul' => 'Data Anda sudah kami terima',
+    'ringkas' => $belumBayar
+        ? 'Kursi Anda ditahan sementara. Tinggal satu langkah lagi: pembayaran.'
+        : 'Pendaftaran Anda lengkap. Sampai jumpa di kelasnya.',
+    'lencana' => $belumBayar
+        ? ['teks' => 'BELUM DIBAYAR', 'latar' => '#fff7ed', 'garis' => '#fed7aa', 'tinta' => '#9a3412']
+        : ['teks' => 'SUDAH DIBAYAR', 'latar' => '#ecfdf5', 'garis' => '#a7f3d0', 'tinta' => '#065f46'],
+    'sapaan' => $pendaftaran->nama,
+    'pembuka' => 'terima kasih sudah mendaftar <strong style="color:#0f2b5b;">'
+        . e(trim($angkatan->nama . ' ' . ($angkatan->nama_ke ? '#' . $angkatan->nama_ke : '')))
+        . '</strong>.',
+    'nomor' => $pendaftaran->id_transaksi,
+    'rincian' => $rincian,
+    'total' => [
+        'label' => $belumBayar ? 'Total bayar' : 'Sudah dibayar',
+        'nilai' => 'Rp ' . number_format((int) $pendaftaran->total_pembayaran, 0, ',', '.'),
+    ],
+    'peserta' => $pendaftaran->semuaPeserta(),
+    'langkah' => $langkah,
+    'catatan' => $belumBayar
+        ? ['<strong style="color:#0f2b5b;">Fakturnya terlampir</strong> di email ini sebagai '
+            . 'berkas PDF, lengkap dengan jumlah dan rinciannya.']
+        : [],
+    'tombol' => [
+        'teks' => $belumBayar ? 'Lihat cara pembayaran' : 'Lihat rincian pendaftaran',
+        'url' => route('public.scopuscamp.status', $pendaftaran->getKey()),
+    ],
+    'tenggat' => $belumBayar && $pendaftaran->kedaluwarsa_pada
+        ? 'Kursi Anda ditahan sampai <strong>'
+            . $pendaftaran->kedaluwarsa_pada->locale('id')->translatedFormat('d F Y, H:i')
+            . ' WIB</strong>.'
+        : null,
+    'kaki' => ['Pengumuman teknis dibagikan panitia lewat grup peserta di WhatsApp.'],
+])

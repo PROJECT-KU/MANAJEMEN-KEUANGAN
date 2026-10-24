@@ -56,7 +56,34 @@ class LogoSuratSeragamTest extends TestCase
     private const SURAT_YAYASAN = [
         'emails/pendaftaran-dicatat.blade.php',
         'emails/pendaftaran/kerangka.blade.php',
-        'public/webinar_eksklusif/email_pendaftaran.blade.php',
+
+        /*
+         * Kerangka surat BUKTI PENDAFTARAN, dipakai bersama semua layanan
+         * sejak 24 Okt 2026. Pembacanya pendaftar, bukan orang dalam — jadi
+         * ia memang memakai logo yayasan, sama seperti kerangka surat status
+         * di baris atasnya.
+         *
+         * Sejak kerangka ini ada, surat per layanan TIDAK LAGI menyebut logo
+         * apa pun: logonya satu, di sini.
+         */
+        'emails/pendaftaran/bukti.blade.php',
+
+        /*
+         * CATATAN PENTING SEJAK 24 Okt 2026.
+         *
+         * Surat bukti pendaftaran per layanan — Webinar Eksklusif, Scopus
+         * Camp, Bibliometrik, Scopus Kafe — TIDAK LAGI menyebut logo apa pun.
+         * Semuanya menyertakan kerangka di baris atas ini, dan logonya satu,
+         * di sana.
+         *
+         * Jadi berkas-berkas itu sengaja TIDAK didaftarkan di sini: uji
+         * test_surat_pendaftar_memakai_logo_yayasan menuntut logonya ADA di
+         * dalam berkasnya sendiri, dan menuntut itu dari berkas yang memang
+         * tidak lagi memasang logo berarti memaksanya memasang logo kedua.
+         *
+         * Yang menjaga mereka tetap berlogo yayasan: mereka memakai kerangka
+         * ini, dan itu dijaga SuratSeragamTest.
+         */
         'public/webinar_eksklusif/email_pengingat.blade.php',
 
         /*

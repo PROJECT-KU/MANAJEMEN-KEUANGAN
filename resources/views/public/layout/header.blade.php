@@ -563,6 +563,13 @@
          yang ditulis sesudah isi halaman membuat peramban menggambar
          paragraf dengan huruf cadangan lebih dulu, lalu menggesernya saat
          huruf aslinya datang. --}}
+    {{-- Rupa kotak dialog SweetAlert2, satu berkas untuk seluruh halaman
+         umum. Diletakkan SESUDAH berkas gaya templat dan SEBELUM
+         @stack('kepala'): ia harus menimpa bawaan SweetAlert2, tetapi
+         halaman yang butuh penyesuaian sendiri masih bisa menimpanya lagi
+         lewat tumpukan itu. --}}
+    @include('public.partials.gaya-dialog')
+
     @stack('kepala')
 </head>
 

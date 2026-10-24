@@ -119,7 +119,24 @@ class ApiWebinarEksklusifController extends Controller
              * terpampang sampai 01:10 — dan yang membacanya halaman iklan.
              */
             ->whereRaw('coalesce(selesai, mulai) >= ?', [Carbon::today()->toDateString()])
-            ->orderBy('mulai');
+            ->orderBy('mulai')
+
+            /*
+             * PEMUTUS SERI, dan ia bukan kerapian.
+             *
+             * `sekarang()` mengambil satu sesi dengan ->first(), dan halaman
+             * landing memajang sesi ITU lengkap dengan naskah serta
+             * harganya. Dua sesi yang tanggal mulainya SAMA — dan itu wajar,
+             * satu gelombang bisa dibuka di dua kelas pada hari yang sama —
+             * tidak punya urutan yang ditentukan tanpa baris ini: basis data
+             * boleh memulangkan yang mana saja, dan boleh berganti antar
+             * permintaan.
+             *
+             * Akibatnya halaman landing menampilkan sesi yang berbeda-beda
+             * tiap kali dimuat, tanpa satu pun galat. Tertangkap 24 Okt 2026
+             * sebagai uji API yang merah HANYA di rangkaian penuh.
+             */
+            ->orderBy('id');
     }
 
     // ---------------------------------------------------------- penyusun

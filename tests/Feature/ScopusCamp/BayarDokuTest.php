@@ -34,6 +34,9 @@ class BayarDokuTest extends TestCase
 {
     use DatabaseTransactions;
 
+    /** Angkatan yang dipakai pendaftaran() terakhir; lihat alasannya di sana. */
+    private ?CategoriesScopusCamp $angkatanTerakhir = null;
+
     private const KLIEN = 'BRN-UJI-CAMP';
     private const RAHASIA = 'SK-UJI-CAMP';
 
@@ -92,10 +95,24 @@ class BayarDokuTest extends TestCase
 
     private function pendaftaran(array $ubah = []): PendaftaranScopusCamp
     {
-        return PendaftaranScopusCamp::create(array_merge([
+        /*
+         * Angkatannya diingat di properti KELAS UJI, bukan ditempelkan ke
+         * modelnya.
+         *
+         * Menempelkannya sebagai properti dinamis pada model Eloquent membuat
+         * ia diperlakukan sebagai ATRIBUT: simpanan berikutnya mengirimkannya
+         * sebagai kolom, dan MySQL menolak dengan "Unknown column ... in
+         * field list". Terjadi persis begitu 24 Okt 2026, dan yang merah
+         * bukan uji yang menempelkannya melainkan uji lain yang kebetulan
+         * menyimpan ulang barisnya.
+         */
+        $angkatan = $this->angkatan();
+        $this->angkatanTerakhir = $angkatan;
+
+        $baris = PendaftaranScopusCamp::create(array_merge([
             'token' => Str::random(30),
             'id_transaksi' => 'CAMP-UJI-' . Str::random(8),
-            'kategori_id' => $this->angkatan()->getKey(),
+            'kategori_id' => $angkatan->getKey(),
             'nama' => 'Pendaftar Uji',
             'email' => 'uji' . Str::random(6) . '@contoh.test',
             'telp' => '6281234567890',
@@ -110,6 +127,8 @@ class BayarDokuTest extends TestCase
             'bayar_permintaan_id' => (string) Str::uuid(),
             'kedaluwarsa_pada' => now()->addHour(),
         ], $ubah));
+
+        return $baris;
     }
 
     // ------------------------------------------------------------ borang
@@ -559,7 +578,7 @@ class BayarDokuTest extends TestCase
         $this->assertStringContainsString($p->bayar_url, $isi,
             'Tombol bayarnya hilang padahal tagihannya masih hidup — orangnya '
             . 'tidak punya jalan menyelesaikan pembayarannya.');
-        $this->assertStringContainsString('Menunggu pembayaran', $isi);
+        $this->assertStringContainsString('Tinggal satu langkah lagi', $isi);
     }
 
     #[Test]
@@ -647,6 +666,245 @@ class BayarDokuTest extends TestCase
         $this->getJson(route('public.scopuscamp.keadaan', $p->getKey()))
             ->assertOk()
             ->assertJson(['ada' => true, 'lunas' => true, 'selesai' => true]);
+    }
+
+    // --------------------------------------------- isi halaman statusnya
+
+    #[Test]
+    public function tautan_grup_peserta_hanya_untuk_yang_sudah_lunas(): void
+    {
+        /*
+         * INI penjagaan, bukan tata letak.
+         *
+         * Grup peserta isinya orang yang sudah membayar. Memajang tautannya
+         * pada pendaftaran yang BELUM lunas berarti siapa pun yang memegang
+         * alamat halaman ini — dan alamatnya ikut terkirim di surat bukti
+         * pendaftaran — bisa masuk tanpa membayar sepeser pun.
+         */
+        Http::fake(['*/orders/v1/status/*' => Http::response([], 404)]);
+
+        $p = $this->pendaftaran();
+        $grup = $this->angkatanTerakhir->group_wa;
+
+        $this->assertNotEmpty($grup, 'Angkatan ujinya tidak punya tautan grup.');
+
+        $belum = (string) $this->get(route('public.scopuscamp.status', $p->getKey()))
+            ->assertOk()->getContent();
+
+        $this->assertStringNotContainsString($grup, $belum,
+            'Tautan grup peserta dipajang pada pendaftaran yang belum lunas.');
+
+        $p->forceFill(['status' => 'Pendaftaran Diterima'])->save();
+
+        $sudah = (string) $this->get(route('public.scopuscamp.status', $p->getKey()))
+            ->assertOk()->getContent();
+
+        $this->assertStringContainsString($grup, $sudah,
+            'Yang sudah lunas tidak diberi tautan grup pesertanya.');
+    }
+
+    #[Test]
+    public function halaman_status_menyebut_jadwal_dan_lokasi_acaranya(): void
+    {
+        /*
+         * Orangnya baru membayar belasan juta untuk sebuah acara, dan sampai
+         * 24 Okt 2026 halaman yang memberitahunya "sudah lunas" tidak
+         * menyebutkan kapan maupun di mana acaranya. Keterangan itu memang
+         * ada di suratnya — tetapi halaman ini yang ia buka lagi saat
+         * mencarinya.
+         */
+        Http::fake(['*/orders/v1/status/*' => Http::response([], 404)]);
+
+        $p = $this->pendaftaran();
+
+        $isi = (string) $this->get(route('public.scopuscamp.status', $p->getKey()))
+            ->assertOk()->getContent();
+
+        /*
+         * Diperiksa DI DALAM kwitansinya, bukan di seluruh halaman.
+         *
+         * Versi pertama penjaga ini mencari "Yogyakarta" di mana pun — dan
+         * kata itu ADA di alamat kaki halaman ("… Sleman, Daerah Istimewa
+         * Yogyakarta 55551"). Jadi ia tetap hijau walau kwitansinya sama
+         * sekali tidak menyebut lokasi acaranya. Dibuktikan: mematikan baris
+         * lokasinya di Blade tidak membuat penjaga ini merah.
+         */
+        $karcis = (string) (preg_match('#<div class="sts-karcis">(.*?)</div>\s*</div>#s', $isi, $c)
+            ? $c[1]
+            : '');
+
+        $this->assertNotSame('', $karcis, 'Kwitansinya tidak tergambar.');
+
+        $this->assertStringContainsString($this->angkatanTerakhir->lokasi, $karcis,
+            'Lokasi acaranya tidak disebut di kwitansi halaman status.');
+
+        $this->assertStringContainsString(
+            \Carbon\Carbon::parse($this->angkatanTerakhir->mulai)->locale('id')->translatedFormat('F'),
+            $karcis,
+            'Tanggal acaranya tidak disebut di kwitansi halaman status.'
+        );
+    }
+
+    #[Test]
+    public function halaman_status_memajang_nama_peserta_rombongan(): void
+    {
+        /*
+         * Satu-satunya tempat pendaftar bisa MEMERIKSA siapa saja yang ia
+         * daftarkan. Tanpa itu, salah ketik nama baru ketahuan di sertifikat —
+         * saat sudah terlambat diperbaiki.
+         */
+        Http::fake(['*/orders/v1/status/*' => Http::response([], 404)]);
+
+        $p = $this->pendaftaran(['jumlah_pendaftar' => 3]);
+        $p->pesertaLain()->create(['urutan' => 1, 'nama' => 'Siti Peserta Dua', 'telp' => '6285712345678']);
+        $p->pesertaLain()->create(['urutan' => 2, 'nama' => 'Ahmad Peserta Tiga', 'telp' => null]);
+
+        $isi = (string) $this->get(route('public.scopuscamp.status', $p->getKey()))
+            ->assertOk()->getContent();
+
+        $this->assertStringContainsString('Siti Peserta Dua', $isi);
+        $this->assertStringContainsString('Ahmad Peserta Tiga', $isi);
+
+        // Nomornya ditampilkan dalam bentuk lokal, bukan 62… mentah seperti
+        // tersimpan — yang membacanya pendaftar, bukan panitia.
+        $this->assertStringContainsString('0857-1234-5678', $isi);
+
+        // Yang nomornya memang belum diisi disebut apa adanya, bukan
+        // dibiarkan kosong — baris kosong terbaca seperti data yang hilang.
+        $this->assertStringContainsString('Nomornya belum diisi', $isi);
+    }
+
+    #[Test]
+    public function daftar_peserta_tidak_digambar_untuk_pendaftaran_satu_orang(): void
+    {
+        // Judul "Peserta yang didaftarkan" di atas satu nama adalah bagian
+        // yang tidak menjelaskan apa pun, dan hampir semua pendaftaran
+        // memang satu orang.
+        Http::fake(['*/orders/v1/status/*' => Http::response([], 404)]);
+
+        $isi = (string) $this->get(route('public.scopuscamp.status',
+            $this->pendaftaran()->getKey()))->assertOk()->getContent();
+
+        $this->assertStringNotContainsString('Peserta yang didaftarkan', $isi);
+    }
+
+    #[Test]
+    public function yang_batal_tidak_diberi_langkah_berikutnya(): void
+    {
+        // Tidak ada langkah berikutnya bagi pendaftaran yang sudah
+        // dibatalkan; menuliskannya tetap berarti menyuruh orang mengerjakan
+        // sesuatu yang tidak akan mengubah apa pun.
+        Http::fake(['*/orders/v1/status/*' => Http::response([], 404)]);
+
+        $p = $this->pendaftaran(['status' => 'Pendaftaran Dibatalkan']);
+
+        $isi = (string) $this->get(route('public.scopuscamp.status', $p->getKey()))
+            ->assertOk()->getContent();
+
+        /*
+         * Yang diperiksa MARKAHNYA, bukan kata "sts-langkah" di mana pun.
+         *
+         * Aturan gayanya selalu ada di blok <style> halaman ini, lunas
+         * maupun batal — jadi mencari namanya begitu saja membuat penjaga
+         * ini merah selamanya, untuk alasan yang tidak ada hubungannya
+         * dengan yang dijaga.
+         */
+        $this->assertStringNotContainsString('<ol class="sts-langkah">', $isi,
+            'Pendaftaran yang sudah batal tetap diberi daftar langkah berikutnya.');
+
+        $this->assertStringContainsString('sudah tidak berjalan', $isi);
+    }
+
+    #[Test]
+    public function centang_lunas_tetap_tergambar_saat_gerak_dikurangi(): void
+    {
+        /*
+         * Centangnya digambar dengan stroke-dashoffset: ia BERANGKAT dari
+         * keadaan tidak terlihat dan baru lengkap saat animasinya selesai.
+         *
+         * Jadi mematikan animasinya untuk yang memasang "kurangi gerak" —
+         * dengan `animation: none` saja — membuat centangnya TIDAK PERNAH
+         * TERGAMBAR: yang tampil lingkaran kosong, persis pada orang yang
+         * paling tidak akan menyangka halamannya sedang beranimasi, dan
+         * tidak ada galat apa pun yang memberi tahu.
+         *
+         * Dijaga di sumbernya: penjaga berbasis permintaan HTTP tidak
+         * menghitung CSS, dan media query-nya tidak pernah aktif di sana.
+         */
+        $sumber = file_get_contents(base_path(
+            'resources/views/public/scopus_camp/status.blade.php'
+        ));
+
+        $cocok = preg_match(
+            '/@media \(prefers-reduced-motion: reduce\) \{(.*?)\n    \}/s',
+            $sumber,
+            $c
+        );
+
+        $this->assertSame(1, $cocok, 'Blok "kurangi gerak" tidak ada di halaman status.');
+
+        $this->assertStringContainsString('stroke-dashoffset: 0', $c[1],
+            'Blok "kurangi gerak" tidak memasang keadaan akhir centangnya, jadi '
+            . 'centang itu tidak akan pernah tergambar bagi yang memintanya.');
+    }
+
+    #[Test]
+    public function animasi_centang_lunas_berulang_terus(): void
+    {
+        /*
+         * Diminta pemiliknya 24 Okt 2026: versi pertama memakai `forwards`,
+         * jadi animasinya jalan SEKALI saat halaman dibuka lalu berhenti di
+         * keadaan akhir — dan sesudah itu halaman diam.
+         *
+         * Dijaga di sumbernya karena yang menentukan CSS, dan `forwards`
+         * kembali ke sini tidak akan membuat satu pun uji lain merah:
+         * halamannya tetap 200, centangnya tetap tergambar, yang hilang cuma
+         * geraknya.
+         */
+        $sumber = file_get_contents(base_path(
+            'resources/views/public/scopus_camp/status.blade.php'
+        ));
+
+        foreach (['sts-centang-lingkar', 'sts-centang-garis'] as $bagian) {
+            $cocok = preg_match(
+                '/\.sts-meterai\.lunas \.' . preg_quote($bagian, '/') . ' \{(.*?)\}/s',
+                $sumber,
+                $c
+            );
+
+            $this->assertSame(1, $cocok, 'Aturan animasi ' . $bagian . ' tidak ada.');
+
+            $this->assertStringContainsString('infinite', $c[1],
+                'Animasi ' . $bagian . ' tidak berulang — ia berhenti sesudah '
+                . 'satu putaran, dan halamannya diam sesudah itu.');
+        }
+    }
+
+    #[Test]
+    public function centang_lunas_digambar_sebagai_svg(): void
+    {
+        /*
+         * Ikon Font Awesome adalah glif — ia hanya bisa dibesarkan dan
+         * diputar, tidak bisa digambar garis demi garis. Kembali ke
+         * <i class="fas fa-check"> akan mencabut animasinya tanpa satu pun
+         * galat; yang tersisa cuma lingkaran dengan centang yang langsung
+         * jadi.
+         */
+        Http::fake(['*/orders/v1/status/*' => Http::response([], 404)]);
+
+        $p = $this->pendaftaran(['status' => 'Pendaftaran Diterima']);
+
+        $isi = (string) $this->get(route('public.scopuscamp.status', $p->getKey()))
+            ->assertOk()->getContent();
+
+        /*
+         * Dicari MARKAHNYA, bukan namanya di mana pun: aturan gayanya selalu
+         * ada di blok <style> halaman ini, jadi mencari nama kelasnya begitu
+         * saja membuat penjaga ini hijau selamanya. Sudah dibuktikan —
+         * mencabut kelas itu dari <path> tidak membuatnya merah.
+         */
+        $this->assertStringContainsString('<path class="sts-centang-garis"', $isi,
+            'Centang lunasnya tidak lagi digambar sebagai SVG beranimasi.');
     }
 
     // -------------------------------------------------- menutup tagihannya

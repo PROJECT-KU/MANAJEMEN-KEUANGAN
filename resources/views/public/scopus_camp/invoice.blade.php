@@ -19,10 +19,24 @@
                         </center>
                         <h2 class="page-header" style="text-align: center;">
                             INVOICE SCOPUS CAMP
+                            {{-- Rentangnya dirakit RentangTanggal, bukan dua
+                                 date(strtotime(...)) berdampingan.
+
+                                 `selesai` boleh kosong, dan strtotime(null)
+                                 memulangkan false yang dibaca date() sebagai
+                                 nol — yang tercetak di faktur "1 January
+                                 1970". Bukan kemungkinan yang jauh: angkatan
+                                 yang tanggal selesainya belum ditentukan
+                                 memang ada di basis data.
+
+                                 Pembuatnya juga yang dipakai halaman status
+                                 dan borangnya, jadi ketiganya menulis rentang
+                                 tanggal dengan cara yang sama. --}}
                             <p style="margin-top: -3px; font-size: 15px; text-align: center;"><strong>Pelaksanaan</strong>
-                                {{ date('j F Y', strtotime($categoriesScopusCamp->mulai)) }}
-                                s/d
-                                {{ date('j F Y', strtotime($categoriesScopusCamp->selesai)) }}
+                                {{ \App\Support\RentangTanggal::tulis(
+                                    $categoriesScopusCamp->mulai ? \Carbon\Carbon::parse($categoriesScopusCamp->mulai)->locale('id') : null,
+                                    $categoriesScopusCamp->selesai ? \Carbon\Carbon::parse($categoriesScopusCamp->selesai) : null
+                                ) ?: 'Menyusul' }}
                             </p>
                         </h2>
                     </div>
@@ -52,8 +66,8 @@
                                         Affiliasi :{{ $pendaftaran->affiliasi }}<br>
                                         Phone: {{ $pendaftaran->telp }}<br>
                                         Email: {{ $pendaftaran->email }}<br>
-                                        <b>Pembayaran : </b>{{ date('j F Y', strtotime($pendaftaran->created_at)) }}<br>
-                                        <b>Pukul &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; : </b>{{ date('H:i', strtotime($pendaftaran->created_at)) }}<br>
+                                        <b>Pembayaran : </b>{{ optional($pendaftaran->created_at)->locale('id')->translatedFormat('j F Y') }}<br>
+                                        <b>Pukul &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; : </b>{{ optional($pendaftaran->created_at)->format('H:i') }}<br>
                                     </td>
                                 </tr>
                             </tbody>
@@ -106,21 +120,21 @@
                                     <td style="padding-left: 80px;">Kode Unik Transfer</td>
                                     <td></td>
                                     <td style="padding-right: 80px; text-align: right;">
-                                        Rp. {{ number_format($pendaftaran->kode_unik, 0, ',', '.') }}
+                                        Rp. {{ number_format((int) $pendaftaran->kode_unik, 0, ',', '.') }}
                                     </td>
                                 </tr>
                                 <tr>
                                     <td style="padding-left: 80px;">PPN</td>
                                     <td></td>
                                     <td style="padding-right: 80px; text-align: right;">
-                                        Rp. {{ number_format($pendaftaran->ppn, 0, ',', '.') }}
+                                        Rp. {{ number_format((int) $pendaftaran->ppn, 0, ',', '.') }}
                                     </td>
                                 </tr>
                                 <tr>
                                     <td style="padding-left: 80px;">Diskon</td>
                                     <td></td>
                                     <td style="padding-right: 80px; text-align: right;">
-                                        Rp. {{ number_format($pendaftaran->nominal_diskon, 0, ',', '.') }}
+                                        Rp. {{ number_format((int) $pendaftaran->nominal_diskon, 0, ',', '.') }}
                                     </td>
                                 </tr>
                             </tbody>
@@ -128,7 +142,7 @@
                         <br>
                         <hr>
                         <center>
-                            <h3><b>Total </b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Rp. {{ number_format($pendaftaran->total_pembayaran, 0, ',', '.') }}</h3>
+                            <h3><b>Total </b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Rp. {{ number_format((int) $pendaftaran->total_pembayaran, 0, ',', '.') }}</h3>
                             <p><i>{{ $terbilang }}</i></p>
                         </center>
                         <hr>
@@ -138,7 +152,7 @@
                 <div class="row">
                     <div class="col-6" style="float: right;">
                         <center>
-                            <p class="lead">Yogyakarta, {{ date('j F Y', strtotime($pendaftaran->created_at)) }}</p>
+                            <p class="lead">Yogyakarta, {{ optional($pendaftaran->created_at)->locale('id')->translatedFormat('j F Y') }}</p>
                             <p class="lead"> Manager Operasional</p><br>
                             <p class="lead">
                                 Umang Wildan Pratama., S.E

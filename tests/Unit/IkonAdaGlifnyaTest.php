@@ -25,18 +25,36 @@ class IkonAdaGlifnyaTest extends TestCase
 
     /**
      * Utang yang sudah ada sebelum penjaga ini dipasang (28 Sep 2026).
+     *
      * Daftar ini hanya boleh MENGECIL. Menambah nama baru ke sini berarti
      * sengaja memasang ikon yang tidak akan tergambar.
+     *
+     * ---------------------------------------------------------------------
+     * BERPASANGAN DENGAN BERKASNYA, bukan daftar nama saja
+     * ---------------------------------------------------------------------
+     *
+     * Sampai 24 Okt 2026 ini cuma daftar nama, dan berkasnya ditulis sebagai
+     * komentar di sebelahnya. Akibatnya nama yang sudah terlanjur ada di sini
+     * bebas dipakai di berkas MANA PUN yang baru — penjaganya diam, dan
+     * ikonnya tetap tidak tergambar.
+     *
+     * Terjadi persis begitu hari itu: fa-list-check dipakai di halaman status
+     * Scopus Camp yang baru, lolos karena namanya sudah ada di sini untuk
+     * layouts/version.blade.php, dan judul "Setelah ini" tergambar tanpa
+     * ikon. Komentarnya menyebut berkas yang benar sejak awal; yang tidak ada
+     * cuma yang memeriksanya.
+     *
+     * @var array<string, array<int, string>>
      */
     private const UTANG_LAMA = [
-        'fa-circle-user',        // layouts/version.blade.php
-        'fa-clock-rotate-left',  // layouts/version.blade.php
-        'fa-grid-2',             // account/clinik_scopus_riwayat_pemesanan/index.blade.php
-        'fa-house',              // layouts/version.blade.php
-        'fa-image-slash',        // account/clinik_scopus_riwayat_pemesanan/detail.blade.php
-        'fa-list-check',         // layouts/version.blade.php
-        'fa-rectangle-list',     // layouts/version.blade.php
-        'fa-user-gear',          // layouts/version.blade.php
+        'fa-circle-user' => ['layouts/version.blade.php'],
+        'fa-clock-rotate-left' => ['layouts/version.blade.php'],
+        'fa-grid-2' => ['account/clinik_scopus_riwayat_pemesanan/index.blade.php'],
+        'fa-house' => ['layouts/version.blade.php'],
+        'fa-image-slash' => ['account/clinik_scopus_riwayat_pemesanan/detail.blade.php'],
+        'fa-list-check' => ['layouts/version.blade.php'],
+        'fa-rectangle-list' => ['layouts/version.blade.php'],
+        'fa-user-gear' => ['layouts/version.blade.php'],
     ];
 
     /**
@@ -96,15 +114,30 @@ class IkonAdaGlifnyaTest extends TestCase
         $hilang = [];
 
         foreach ($ketemu as $nama => $tempat) {
-            if (in_array($nama, self::BUKAN_IKON, true) || in_array($nama, self::UTANG_LAMA, true)) {
+            if (in_array($nama, self::BUKAN_IKON, true)) {
                 continue;
             }
 
             // Font Awesome menulis tiap ikon sebagai ".fa-nama:before" atau
             // sebagai salah satu dari daftar selektor yang dipisah koma.
-            if (! str_contains($gaya, '.' . $nama . ':') && ! str_contains($gaya, '.' . $nama . ',')) {
-                $hilang[] = $nama . ' (' . implode(', ', array_unique($tempat)) . ')';
+            if (str_contains($gaya, '.' . $nama . ':') || str_contains($gaya, '.' . $nama . ',')) {
+                continue;
             }
+
+            /*
+             * Yang diampuni HANYA berkas yang memang sudah memakainya. Berkas
+             * di luar itu tetap dilaporkan, walau namanya ada di daftar utang.
+             */
+            $baru = array_values(array_diff(
+                array_unique($tempat),
+                self::UTANG_LAMA[$nama] ?? []
+            ));
+
+            if ($baru === []) {
+                continue;
+            }
+
+            $hilang[] = $nama . ' (' . implode(', ', $baru) . ')';
         }
 
         $this->assertSame([], $hilang, "Nama ikon berikut tidak ada di Font Awesome 5.5.0, jadi tidak akan tergambar:\n- " . implode("\n- ", $hilang) . "\n");
