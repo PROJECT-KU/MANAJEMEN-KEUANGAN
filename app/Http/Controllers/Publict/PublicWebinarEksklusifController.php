@@ -1737,8 +1737,8 @@ class PublicWebinarEksklusifController extends Controller
         // WhatsApp-nya di cabang yang sama dengan suratnya; alasannya sama
         // persis seperti di kirimEmailPendaftaran().
         try {
-            app(\App\Actions\WebinarEksklusif\KabariWhatsApp::class)
-                ->lunas($pendaftaran, $sesi);
+            app(\App\Actions\Pendaftaran\KabariWhatsApp::class)
+                ->lunas('webinar_eksklusif', $pendaftaran, $sesi);
         } catch (\Throwable $e) {
             Log::warning('Kabar WhatsApp lunas gagal.', [
                 'nomor' => $pendaftaran->id_transaksi,
@@ -1787,8 +1787,8 @@ class PublicWebinarEksklusifController extends Controller
          * ikut membatalkan WhatsApp-nya, dan sebaliknya.
          */
         try {
-            app(\App\Actions\WebinarEksklusif\KabariWhatsApp::class)
-                ->pendaftaranMasuk($pendaftaran, $sesi);
+            app(\App\Actions\Pendaftaran\KabariWhatsApp::class)
+                ->pendaftaranMasuk('webinar_eksklusif', $pendaftaran, $sesi);
         } catch (\Throwable $e) {
             Log::warning('Kabar WhatsApp pendaftaran gagal.', [
                 'pendaftaran' => $pendaftaran->getKey(),

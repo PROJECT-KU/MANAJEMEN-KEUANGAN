@@ -2,6 +2,7 @@
 
 namespace App\Actions\WebinarEksklusif;
 
+use App\Actions\Pendaftaran\KabariWhatsApp;
 use App\KategoriLayanan;
 use App\Mail\WebinarEksklusifGagalBayarMail;
 use App\Mail\WebinarEksklusifKedaluwarsaMail;
@@ -222,8 +223,8 @@ class KabariKursiDilepas
             $wa = app(KabariWhatsApp::class);
 
             $gagalBayar
-                ? $wa->gagalBayar($segar, $sesi)
-                : $wa->kursiDilepas($segar, $sesi);
+                ? $wa->gagalBayar('webinar_eksklusif', $segar, $sesi)
+                : $wa->kursiDilepas('webinar_eksklusif', $segar, $sesi);
         } catch (\Throwable $e) {
             Log::warning('Kabar WhatsApp penutup gagal.', [
                 'nomor' => $pendaftaran->id_transaksi,

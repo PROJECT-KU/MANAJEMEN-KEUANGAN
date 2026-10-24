@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\WebinarEksklusif;
 
-use App\Actions\WebinarEksklusif\KabariWhatsApp;
+use App\Actions\Pendaftaran\KabariWhatsApp;
 use App\KategoriLayanan;
 use App\Services\Fonnte;
 use App\WebinarEksklusifPendaftaran;
@@ -184,7 +184,7 @@ class KabarWhatsAppTest extends TestCase
         $p = $this->pendaftaran();
         $sesi = KategoriLayanan::find($p->kategori_id);
 
-        app(KabariWhatsApp::class)->pendaftaranMasuk($p, $sesi);
+        app(KabariWhatsApp::class)->pendaftaranMasuk('webinar_eksklusif', $p, $sesi);
 
         Http::assertSent(function ($permintaan) use ($p) {
             $pesan = $permintaan['message'];
@@ -215,7 +215,7 @@ class KabarWhatsAppTest extends TestCase
         foreach (['pendaftaranMasuk', 'lunas', 'gagalBayar', 'kursiDilepas'] as $cara) {
             Http::fake(['api.fonnte.com/*' => Http::response(['status' => true, 'id' => ['1']], 200)]);
 
-            $wa->{$cara}($p, $sesi);
+            $wa->{$cara}('webinar_eksklusif', $p, $sesi);
 
             $terkirim = null;
             Http::assertSent(function ($permintaan) use (&$terkirim) {
@@ -411,7 +411,7 @@ class KabarWhatsAppTest extends TestCase
         $p = $this->pendaftaran();
 
         $terkirim = app(KabariWhatsApp::class)
-            ->pendaftaranMasuk($p, KategoriLayanan::find($p->kategori_id));
+            ->pendaftaranMasuk('webinar_eksklusif', $p, KategoriLayanan::find($p->kategori_id));
 
         $this->assertFalse($terkirim, 'Kegagalan jaringan terbaca sebagai terkirim.');
     }

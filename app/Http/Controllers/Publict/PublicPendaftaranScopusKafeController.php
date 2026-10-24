@@ -159,7 +159,38 @@ class PublicPendaftaranScopusKafeController extends Controller
             $appName = 'Rumah Scopus Foundation';
             $emailTo = $request->input('email');
 
-            Mail::to($emailTo)->send(new CreatePublicPendaftaranScopusKafeMail($datas, $save, $appName));
+            /*
+             * DIBUNGKUS. Alamat email yang salah ketik melempar, dan sampai
+             * sekarang lemparan itu membatalkan SELURUH pendaftaran yang
+             * barisnya sudah tersimpan, kuotanya sudah terpotong, dan bukti
+             * bayarnya sudah terunggah — orangnya melihat halaman galat lalu
+             * mendaftar lagi, dan panitia menerima dua baris untuk satu
+             * orang. Sama seperti yang sudah dibetulkan di Scopus Camp.
+             */
+            try {
+                Mail::to($emailTo)->send(new CreatePublicPendaftaranScopusKafeMail($datas, $save, $appName));
+            } catch (\Throwable $e) {
+                report($e);
+            }
+
+            /*
+             * WhatsApp-nya sepasang dengan suratnya, dan sebabnya sama:
+             * tidak semua orang membuka emailnya — dan yang tidak
+             * membukanya kehilangan nomor pendaftarannya, satu-satunya hal
+             * yang disebut panitia saat pembayarannya ditelusuri.
+             *
+             * try-nya TERPISAH dari milik surat: yang satu gagal tidak boleh
+             * ikut membatalkan yang lain.
+             */
+            try {
+                app(\App\Actions\Pendaftaran\KabariWhatsApp::class)
+                    ->pendaftaranMasuk('scopus_kafe', $save);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Kabar WhatsApp pendaftaran Scopus Kafe gagal.', [
+                    'id' => $save->getKey(),
+                    'pesan' => $e->getMessage(),
+                ]);
+            }
 
             return redirect()->route('public.scopuskafe.index')->with('success', 'Data Pendaftaran Scopus Kafe Berhasil Disimpan!');
         } else {
