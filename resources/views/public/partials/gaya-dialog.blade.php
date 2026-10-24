@@ -122,6 +122,62 @@
     /* Cincin fokus jingga, bukan biru bawaan. */
     .swal2-styled:focus { box-shadow: 0 0 0 4px rgba(231, 109, 32, .25) !important; }
 
+    /* ------------------------------------------------- kotak menunggu */
+    /*
+     * Dipakai dialog "sedang diproses", menggantikan Swal.showLoading().
+     *
+     * Pemutar bawaannya cincin kecil berputar — ia menyampaikan "sedang
+     * sibuk" tetapi tidak menyampaikan BERAPA LAMA, dan di tengah kotak
+     * seluas ini ia terbaca seperti halaman yang menggantung. Yang
+     * menunggunya orang yang baru saja menekan tombol bayar lima juta
+     * rupiah, dan di situ keraguan paling mahal.
+     *
+     * Rel dengan isian yang meluncur: geraknya terus-menerus dan arahnya
+     * jelas, jadi terbaca "sedang berjalan", bukan "sedang macet". Tidak
+     * berpura-pura tahu persennya — isiannya memang tidak pernah berhenti.
+     */
+    .dlg-tunggu { margin-top: 4px; }
+
+    .dlg-rel {
+        position: relative;
+        height: 8px;
+        border-radius: 999px;
+        background: #f2e7d2;
+        overflow: hidden;
+    }
+    .dlg-rel::after {
+        content: '';
+        position: absolute;
+        top: 0; bottom: 0; left: 0;
+        width: 42%;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #fb8c3d, #ad4d12);
+        animation: dlg-luncur 1.25s cubic-bezier(.45, 0, .55, 1) infinite;
+    }
+    @keyframes dlg-luncur {
+        /* -45% sampai 103%: isiannya keluar penuh di kedua ujung, jadi tidak
+           ada jeda saat ia berbalik — jeda terbaca sebagai berhenti. */
+        from { left: -45%; }
+        to   { left: 103%; }
+    }
+
+    .dlg-langkah {
+        margin-top: 14px;
+        font-size: .9rem;
+        line-height: 1.6;
+        color: #5c6b85;
+    }
+    .dlg-langkah b { color: #16233f; }
+
+    @media (prefers-reduced-motion: reduce) {
+        /*
+         * Isiannya DIAM di tengah, bukan dihilangkan: rel kosong terbaca
+         * sebagai bar yang gagal dimuat, dan yang melihatnya justru orang
+         * yang paling tidak menyangka halamannya sedang beranimasi.
+         */
+        .dlg-rel::after { animation: none; left: 29%; }
+    }
+
     /* --------------------------------------------------------- lainnya */
     .swal2-container { backdrop-filter: blur(2px); }
     .swal2-timer-progress-bar { background: #e76d20; }

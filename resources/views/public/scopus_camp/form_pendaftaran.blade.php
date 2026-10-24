@@ -907,13 +907,33 @@
                 tombol.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' +
                     (bayarDaring ? 'Menyiapkan pembayaran...' : 'Mengirim...');
 
+                /*
+                 * Rel yang meluncur, BUKAN Swal.showLoading().
+                 *
+                 * Cincin bawaannya menyampaikan "sedang sibuk" tetapi tidak
+                 * menyampaikan bahwa sesuatu sedang BERJALAN — di tengah
+                 * kotak seluas ini ia terbaca seperti halaman yang
+                 * menggantung. Yang menunggunya orang yang baru menekan
+                 * tombol bayar lima juta rupiah.
+                 *
+                 * Kalimat di bawahnya menyebut APA yang sedang dikerjakan
+                 * dan ke mana ia akan dibawa, supaya perpindahan ke domain
+                 * DOKU tidak terasa seperti halaman yang nyasar.
+                 */
                 Swal.fire({
                     title: bayarDaring ? 'Menyiapkan pembayaran' : 'Memproses pendaftaran',
-                    html: 'Mohon tunggu sebentar, jangan tutup halaman ini.',
+                    html: '<div class="dlg-tunggu">'
+                        + '<div class="dlg-rel"></div>'
+                        + '<div class="dlg-langkah">'
+                        + (bayarDaring
+                            ? 'Kami sedang membuat tagihan Anda, lalu membuka halaman '
+                                + 'pembayaran <b>DOKU</b>.<br>Mohon jangan tutup halaman ini.'
+                            : 'Kami sedang menyimpan pendaftaran Anda.<br>'
+                                + 'Mohon jangan tutup halaman ini.')
+                        + '</div></div>',
                     allowOutsideClick: false,
                     allowEscapeKey: false,
-                    showConfirmButton: false,
-                    didOpen: function () { Swal.showLoading(); }
+                    showConfirmButton: false
                 });
 
                 setTimeout(function () { borang.submit(); }, 250);

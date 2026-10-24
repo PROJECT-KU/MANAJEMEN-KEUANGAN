@@ -1031,12 +1031,56 @@ class PendaftaranSemuaLayanan
             ->orderByDesc($kolom)
             ->value($kolom);
 
-        $urutan = $terakhir === null ? 1 : ((int) substr((string) $terakhir, -4)) + 1;
+        /*
+         * Nomor yang pernah DIHAPUS ikut diperhitungkan, dan ini bukan soal
+         * kerapian.
+         *
+         * Nomor ini dipakai sebagai invoice_number di gerbang pembayaran.
+         * Dihitung dari tabel hidup saja, menghapus satu pendaftaran
+         * MEMBEBASKAN nomornya — dan pendaftaran berikutnya memakai nomor
+         * yang sama. Akibatnya berantai:
+         *
+         *   1. gerbang menolak tagihannya dengan "INVOICE ALREADY USED",
+         *      jadi pendaftarnya TIDAK BISA MEMBAYAR SAMA SEKALI;
+         *   2. kalau nomornya pernah dibayar, gerbang menjawab SUCCESS saat
+         *      statusnya ditanyakan — untuk pembayaran milik pendaftaran
+         *      yang sudah dihapus;
+         *   3. pendaftaran baru itu tertandai LUNAS tanpa ada uang masuk.
+         *
+         * Webinar Eksklusif sudah memperbaikinya di pembuat nomornya sendiri
+         * 17 Okt 2026, sesudah WE-20261017-0015 dihapus pukul 21:49:10 dan
+         * dipakai ulang 47 detik kemudian. Pembuat BERSAMA ini tidak ikut
+         * diperbaiki — jadi keempat layanan lain masih membebaskan nomornya,
+         * dan begitu Scopus Camp memakai DOKU, akibat nomor 1 langsung
+         * terjadi: CAMP-20261024-0001 ditolak dua kali hari ini.
+         */
+        $terakhirDihapus = DB::table('pendaftaran_dihapus')
+            ->where('layanan', $layanan)
+            ->where('nomor', 'like', $awalan . '%')
+            ->orderByDesc('nomor')
+            ->value('nomor');
+
+        $urutan = max(
+            $terakhir === null ? 0 : (int) substr((string) $terakhir, -4),
+            $terakhirDihapus === null ? 0 : (int) substr((string) $terakhirDihapus, -4)
+        ) + 1;
 
         for ($coba = 0; $coba < 40; $coba++, $urutan++) {
             $nomor = $awalan . str_pad((string) $urutan, 4, '0', STR_PAD_LEFT);
 
-            if (! $model::where($kolom, $nomor)->exists()) {
+            if ($model::where($kolom, $nomor)->exists()) {
+                continue;
+            }
+
+            // Diperiksa ke KEDUA tempat, bukan hanya ke tabel hidupnya:
+            // nomor terbesar di atas bisa saja bukan satu-satunya yang
+            // pernah dihapus hari itu.
+            $pernahDihapus = DB::table('pendaftaran_dihapus')
+                ->where('layanan', $layanan)
+                ->where('nomor', $nomor)
+                ->exists();
+
+            if (! $pernahDihapus) {
                 return $nomor;
             }
         }
