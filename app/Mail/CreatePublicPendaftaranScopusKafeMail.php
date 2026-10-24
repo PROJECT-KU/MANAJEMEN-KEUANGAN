@@ -37,11 +37,23 @@ class CreatePublicPendaftaranScopusKafeMail extends Mailable
      */
     public function build()
     {
-        $logoPath = public_path('assets/img/LogoRSC.png');
+        /*
+         * FAKTURNYA dilampirkan, dan sebelum 24 Okt 2026 Scopus Kafe tidak
+         * punya lampiran sama sekali.
+         *
+         * Yang dilampirkan dulu justru LOGO: assets/img/LogoRSC.png, 121.370
+         * bita, pada tiap surat — dan isi suratnya tidak pernah merujuknya,
+         * jadi ia muncul di kotak masuk sebagai berkas gambar yang tidak jelas
+         * gunanya sementara tagihannya sendiri tidak terlampir. Logonya kini
+         * disisipkan kerangka suratnya lewat aset_surat().
+         */
+        $faktur = \App\Support\LampiranDokumen::rakit(
+            'scopus_kafe', 'faktur', $this->pendaftaranScopusKafe
+        );
 
         return $this->view('public.scopus_kafe.send_email_sukses')
             ->subject('Pendaftaran Scopus Kafe Berhasil Terkirim')
             ->from(config('mail.from.address'), $this->appName)
-            ->attach($logoPath, ['mime' => 'image/png']);
+            ->attachData($faktur['isi'], $faktur['nama'], ['mime' => 'application/pdf']);
     }
 }

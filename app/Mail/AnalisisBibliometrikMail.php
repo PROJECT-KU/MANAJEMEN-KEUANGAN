@@ -44,17 +44,15 @@ class AnalisisBibliometrikMail extends Mailable
      */
     public function build()
     {
-        $pdf = Pdf::loadView('public.analisis_bibliometrik.invoice', [
-            'analisisbibliometrik' => $this->analisisbibliometrik,
-            'categoriesanalisisbibliometrik' => $this->categoriesanalisisbibliometrik,
-            'terbilang' => Terbilang::make($this->analisisbibliometrik->total_pembayaran),
-        ]);
+        // Lewat perakit bersama; alasannya di ScopusCampMail.
+        $faktur = \App\Support\LampiranDokumen::rakit(
+            'bibliometrik', 'faktur',
+            $this->analisisbibliometrik, $this->categoriesanalisisbibliometrik
+        );
 
         return $this->view('public.analisis_bibliometrik.mail')
             ->subject('Pendaftaran Analisis Bibliometrik Berhasil Terkirim')
             ->from(config('mail.from.address'), $this->appName)
-            ->attachData($pdf->output(), 'invoice_' . strtoupper($this->analisisbibliometrik->id_transaksi) . '.pdf', [
-                'mime' => 'application/pdf',
-            ]);
+            ->attachData($faktur['isi'], $faktur['nama'], ['mime' => 'application/pdf']);
     }
 }

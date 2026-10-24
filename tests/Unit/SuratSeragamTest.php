@@ -72,8 +72,9 @@ class SuratSeragamTest extends TestCase
      */
     private const CETAKAN = [
         'Webinar Eksklusif' => 'public/webinar_eksklusif/dokumen_pdf.blade.php',
-        'Scopus Camp' => 'public/scopus_camp/invoice.blade.php',
-        'Analisis Bibliometrik' => 'public/analisis_bibliometrik/invoice.blade.php',
+        'Scopus Camp' => 'public/scopus_camp/dokumen_pdf.blade.php',
+        'Analisis Bibliometrik' => 'public/analisis_bibliometrik/dokumen_pdf.blade.php',
+        'Scopus Kafe' => 'public/scopus_kafe/dokumen_pdf.blade.php',
     ];
 
     private function isi(string $relatif): string

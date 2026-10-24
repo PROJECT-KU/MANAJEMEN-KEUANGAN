@@ -44,17 +44,21 @@ class ScopusCampMail extends Mailable
      */
     public function build()
     {
-        $pdf = Pdf::loadView('public.scopus_camp.invoice', [
-            'pendaftaran' => $this->pendaftaran,
-            'categoriesScopusCamp' => $this->categoriesScopusCamp,
-            'terbilang' => Terbilang::make($this->pendaftaran->total_pembayaran),
-        ]);
+        /*
+         * Lampirannya lewat perakit BERSAMA, bukan Pdf::loadView di sini.
+         *
+         * Perakit itu yang memilih cetakannya, merakit terbilang dari kolom
+         * total yang benar, dan menamai berkasnya. Disalin ke tiap Mailable,
+         * ketiganya akan berselisih di sebagian — dan yang berselisih pada
+         * dokumen keuangan adalah angka.
+         */
+        $faktur = \App\Support\LampiranDokumen::rakit(
+            'scopus_camp', 'faktur', $this->pendaftaran, $this->categoriesScopusCamp
+        );
 
         return $this->view('public.scopus_camp.mail')
             ->subject('Pendaftaran Scopus Camp Berhasil Terkirim')
             ->from(config('mail.from.address'), $this->appName)
-            ->attachData($pdf->output(), 'invoice_' . strtoupper($this->pendaftaran->id_transaksi) . '.pdf', [
-                'mime' => 'application/pdf',
-            ]);
+            ->attachData($faktur['isi'], $faktur['nama'], ['mime' => 'application/pdf']);
     }
 }
