@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Support\KabarStatusPendaftaran;
+use App\Support\PesanTagihanWa;
 use App\Support\PendaftaranSemuaLayanan as Pendaftaran;
 use Illuminate\Support\Carbon;
 
@@ -74,33 +75,17 @@ class PesanWaPendaftaran
     ];
 
     /**
-     * Kalimat penagihan.
+     * Kalimat penagihan untuk keadaan SELAIN "menunggu".
      *
-     * Pembayarannya SELURUHNYA lewat gerbang pembayaran — tidak ada lagi
-     * transfer manual ke rekening. Karena itu tidak ada bukti yang perlu
-     * dikirim: gerbangnya yang mengabari sistem begitu uangnya masuk.
+     * Keadaan "menunggu" tidak memakai ini: naskahnya dirakit PesanTagihanWa,
+     * sumber yang sama dengan pesan otomatis lewat Fonnte. Dirakit dua kali,
+     * pendaftar yang menerima pesan otomatis lalu ditindaklanjuti panitia
+     * menerima dua pesan tentang satu hal yang berbunyi berbeda — dan yang
+     * paling mudah berselisih justru nominalnya.
      *
-     * Dulu di sini ada kalimat "mohon kirimkan bukti transfernya ke nomor
-     * ini", dan kalimat itulah yang membuat orang mengira pembayarannya
-     * belum sah sampai ia mengirim tangkapan layar ke WhatsApp — padahal
-     * tidak ada yang menunggu tangkapan layar itu.
-     *
-     * NAMA GERBANGNYA TIDAK DISEBUT ke pendaftar. Itu urusan internal: yang
-     * perlu ia tahu cuma bahwa pembayarannya diselesaikan lewat tautan yang
-     * kami kirimkan. Disebut namanya, pesan ini berbohong pada hari
-     * gerbangnya diganti — dan yang menerimanya akan mencari halaman yang
-     * sudah tidak dipakai lagi.
-     */
-    private const MENAGIH = 'Pembayaran diselesaikan melalui tautan pembayaran '
-        . 'yang kami kirimkan. Anda tidak perlu mengirimkan bukti pembayaran ke '
-        . 'nomor ini.';
-
-    /**
-     * Bayar di tempat satu-satunya kekecualian.
-     *
-     * Uangnya memang tidak lewat gerbang mana pun, dan menyuruh orang yang
-     * akan membayar di meja panitia membuka tautan pembayaran mengirimnya
-     * membayar dua kali.
+     * Bayar di tempat satu-satunya yang masih dirakit di sini: uangnya tidak
+     * lewat gerbang mana pun, dan menyuruh orang yang akan membayar di meja
+     * panitia membuka tautan pembayaran mengirimnya membayar dua kali.
      */
     private const MENAGIH_TUNAI = 'Pembayaran diserahkan langsung kepada panitia '
         . 'pada hari acara.';
@@ -120,6 +105,61 @@ class PesanWaPendaftaran
         $status = (string) ($b->status ?? '');
         $kabar = KabarStatusPendaftaran::untuk($status);
         $keadaan = Pendaftaran::keadaanDari($status);
+        $layanan = (string) ($b->layanan ?? '');
+
+        /*
+         * Keadaan "menunggu" memakai NASKAH BERSAMA, bukan rakitan di bawah.
+         *
+         * Itu naskah yang sudah dipakai panitia sehari-hari — ucapan selamat,
+         * langkah selanjutnya, catatan penting soal potongannya, penutup
+         * "Salam Q1" — dan naskah yang sama dikirim otomatis lewat Fonnte
+         * begitu borangnya tersimpan. Satu sumber untuk keduanya: pendaftar
+         * yang menerima pesan otomatis lalu ditindaklanjuti panitia menerima
+         * dua pesan tentang satu hal, dan kalau keduanya berbunyi berbeda ia
+         * bertanya mana yang berlaku.
+         *
+         * Bayar di tempat DIKECUALIKAN: uangnya tidak lewat gerbang mana pun
+         * dan tidak ada bukti yang diunggah, jadi naskah tagihan itu tidak
+         * berlaku sama sekali untuknya.
+         */
+        $tunai = (Pendaftaran::caraBayar($b->cara_bayar ?? null)['kunci'] ?? '') === 'tunai';
+
+        if ($keadaan === 'menunggu' && ! $tunai) {
+            return PesanTagihanWa::rakit([
+                'nama' => $b->nama_orang ?? null,
+                'layanan' => Pendaftaran::katalog()[$layanan]['nama'] ?? null,
+                'kelas' => self::namaKelas($b, $sesi),
+                'nomor' => $b->nomor ?? null,
+                'jumlah' => (int) ($b->jumlah ?? 1),
+                'total' => (int) ($b->total ?? 0),
+                'diskon' => (int) ($b->nominal_diskon ?? 0),
+                'kode_diskon' => $b->kode_diskon ?? null,
+                'promo' => $b->promo ?? null,
+
+                /*
+                 * Tenggatnya tidak ada di baris union — kolomnya memang tidak
+                 * diproyeksikan — jadi dibaca dari barisnya kalau pemanggilnya
+                 * menyerahkan model, dan dilewati kalau tidak. Dilewati berarti
+                 * satu kalimat hilang; dikarang berarti panitia menjanjikan
+                 * batas waktu yang bukan batas waktunya.
+                 */
+                'tenggat' => $b->kedaluwarsa_pada ?? null,
+                'mulai' => self::tanggalMulai($b),
+
+                /*
+                 * Perkenalannya hanya di draf panitia, bukan di pesan
+                 * otomatisnya: satu orang memegang kelima layanan, dan
+                 * memperkenalkan diri sebagai panitia satu layanan membuat
+                 * percakapan berikutnya — yang sering soal pendaftaran lain
+                 * milik orang yang sama — terbaca seperti datang dari orang
+                 * yang berbeda.
+                 */
+                'perkenalan' => 'Perkenalkan, saya admin Rumah Scopus.',
+                'tautan' => Pendaftaran::tautanStatusUmum($layanan, (string) ($b->id ?? '')),
+                'bergerbang' => Pendaftaran::pakaiGerbang($layanan),
+                'diperiksa' => Pendaftaran::perluDiperiksa($b),
+            ]);
+        }
 
         $nama = trim((string) ($b->nama_orang ?? ''));
 
@@ -142,14 +182,15 @@ class PesanWaPendaftaran
         $total = (int) ($b->total ?? 0);
 
         /*
-         * "Yth. Bapak/Ibu", bukan "Halo".
+         * "📩 Halo Bapak/Ibu", mengikuti naskah yang dipakai pemiliknya.
          *
-         * Pesan ini mewakili lembaga, bukan percakapan pribadi — dan yang
-         * menerimanya sebagian dosen dan peneliti. Sapaan santai membuat
-         * tagihan di dalamnya terbaca seperti pesan asal, bukan pemberitahuan
-         * resmi yang perlu ditindaklanjuti.
+         * Sebelumnya "Yth. Bapak/Ibu", dengan alasan bahwa pesan ini mewakili
+         * lembaga. Alasannya masih berlaku, tetapi sapaan yang BERBEDA antar
+         * keadaan lebih merugikan: satu orang bisa menerima dua pesan dalam
+         * satu hari — tagihan lalu pelunasan — dan yang sapaannya berganti
+         * terbaca seperti datang dari dua orang yang berbeda.
          */
-        $baris = ['Yth. Bapak/Ibu' . ($nama === '' ? '' : ' ' . $nama) . ','];
+        $baris = ['📩 Halo Bapak/Ibu' . ($nama === '' ? '' : ' ' . $nama)];
         $baris[] = '';
         /*
          * "Admin Rumah Scopus", bukan "panitia <nama layanan>".
@@ -191,8 +232,6 @@ class PesanWaPendaftaran
             }
         }
 
-        $cara = Pendaftaran::caraBayar($b->cara_bayar ?? null);
-
         /*
          * Peringatan "jangan dibulatkan sampai angka terakhir" DIBUANG.
          *
@@ -229,17 +268,62 @@ class PesanWaPendaftaran
         }
 
         $baris[] = '';
+
+        /*
+         * Sampai di sini, satu-satunya yang masih menunggu pembayaran adalah
+         * yang membayar di tempat — sisanya sudah dipulangkan di atas lewat
+         * naskah tagihan bersama. Kalimat tagihan untuk gerbang dan untuk
+         * transfer manual ikut pindah ke sana; ditinggal di sini, ia akan
+         * berselisih dengan yang di sana tanpa ada yang menandainya.
+         */
         if ($menagih) {
-            $baris[] = ($cara['kunci'] ?? '') === 'tunai'
-                ? self::MENAGIH_TUNAI
-                : self::MENAGIH;
+            $baris[] = self::MENAGIH_TUNAI;
         } else {
             $kunciPenutup = $keadaan === 'menunggu' ? 'diperiksa' : $keadaan;
 
             $baris[] = self::PENUTUP[$kunciPenutup] ?? self::PENUTUP['lain'];
         }
 
+        // Tanda tangan lembaganya, sama dengan naskah tagihan dan pesan
+        // otomatisnya. Yang menerimanya mengenalinya; pesan yang
+        // kehilangannya terbaca seperti datang dari orang lain.
+        $baris[] = '';
+        $baris = [...$baris, ...PesanTagihanWa::penutup()];
+
         return implode("\n", $baris);
+    }
+
+    /** Tanggal mulai angkatannya, kalau barisnya memang berangkatan. */
+    private static function tanggalMulai(object $b)
+    {
+        $angkatan = isset($b->angkatan_id) ? Pendaftaran::angkatanBaris($b) : null;
+
+        return $angkatan === null ? null : ($angkatan['mulai'] ?? null);
+    }
+
+    /**
+     * "Yogyakarta #199", ejaan yang sama dengan halaman, surat, dan fakturnya.
+     *
+     * Dibaca lewat helper hanya kalau barisnya memang punya angkatan_id:
+     * pemanggil yang menyerahkan baris rakitan sendiri tidak punya kolom itu,
+     * dan membacanya melempar galat atas properti yang tidak ada.
+     */
+    private static function namaKelas(object $b, ?string $sesi): ?string
+    {
+        $angkatan = isset($b->angkatan_id) ? Pendaftaran::angkatanBaris($b) : null;
+
+        if ($angkatan !== null) {
+            $nama = trim((string) ($angkatan['nama'] ?? ''));
+            $nomor = $angkatan['nomor'] ?? null;
+
+            if ($nama !== '') {
+                return $nomor === null ? $nama : $nama . ' #' . $nomor;
+            }
+        }
+
+        $sesi = trim((string) $sesi);
+
+        return $sesi === '' ? null : $sesi;
     }
 
     /**

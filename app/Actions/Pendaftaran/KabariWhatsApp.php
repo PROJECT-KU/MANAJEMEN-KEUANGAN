@@ -3,6 +3,7 @@
 namespace App\Actions\Pendaftaran;
 
 use App\Services\Fonnte;
+use App\Support\PesanTagihanWa;
 use App\Support\PendaftaranSemuaLayanan as Katalog;
 use Illuminate\Support\Facades\Log;
 
@@ -42,18 +43,6 @@ class KabariWhatsApp
      *
      * Kuncinya:
      *
-     *   status   rute halaman status ber-UUID, boleh NULL. Hanya Webinar
-     *            Eksklusif dan Scopus Camp yang punya. Yang tidak punya
-     *            tidak diberi tautan palsu — tautan yang mengantar ke
-     *            halaman yang salah lebih buruk daripada tidak ada tautan,
-     *            sebab yang menekannya mengira ia sudah memeriksa.
-     *
-     *   gerbang  pembayarannya lewat gerbang (DOKU) atau transfer manual
-     *            berbukti unggahan. Ini PEMBEDA TERPENTING di berkas ini:
-     *            ia menentukan langkah berikutnya yang kami suruh kerjakan,
-     *            ada-tidaknya batas waktu, dan — lihat kaki() — apakah kami
-     *            boleh berjanji "pembayaran hanya lewat tautan resmi".
-     *
      *   kabar_status  status mana yang mengabari, dan dengan pesan apa.
      *            Kosakatanya BERBEDA per layanan ('paid' vs 'Pendaftaran
      *            Diterima' vs 'pembayaran diterima'), jadi tidak bisa
@@ -65,15 +54,13 @@ class KabariWhatsApp
      *            camp berangkat ke tempat, bibliometrik mulai dikerjakan.
      *            Dikalimatkan seragam, tiga di antaranya jadi salah.
      *
-     * @var array<string, array{status:?string, daftar:string, daftar_berangkatan:bool, indeks:string, gerbang:bool, kabar_status:array<string, string>, kelanjutan:string}>
+     * @var array<string, array{daftar:string, daftar_berangkatan:bool, indeks:string, kabar_status:array<string, string>, kelanjutan:string}>
      */
     private const LAYANAN = [
         'webinar_eksklusif' => [
-            'status' => 'public.webinareksklusif.status',
             'daftar' => 'public.webinareksklusif.daftar',
             'daftar_berangkatan' => true,
             'indeks' => 'public.webinareksklusif.index',
-            'gerbang' => true,
 
             /*
              * HANYA 'paid'.
@@ -90,11 +77,9 @@ class KabariWhatsApp
             'kelanjutan' => 'Tautan masuk sesinya dibagikan panitia lewat grup peserta di WhatsApp.',
         ],
         'scopus_camp' => [
-            'status' => 'public.scopuscamp.status',
             'daftar' => 'public.scopuscamp.formpendaftaran',
             'daftar_berangkatan' => true,
             'indeks' => 'public.scopuscamp.index',
-            'gerbang' => true,
 
             /*
              * 'Pendaftaran Dibatalkan' TIDAK dikabari dari sini.
@@ -113,11 +98,9 @@ class KabariWhatsApp
             'kelanjutan' => 'Informasi teknis keberangkatannya dibagikan panitia lewat grup peserta di WhatsApp.',
         ],
         'bibliometrik' => [
-            'status' => null,
             'daftar' => 'public.analisisbibliometrik.formpendaftaran',
             'daftar_berangkatan' => true,
             'indeks' => 'public.analisisbibliometrik.index',
-            'gerbang' => false,
 
             /*
              * Hanya 'Pendaftaran Diterima'. Yang lain TIDAK dikabari lewat
@@ -131,14 +114,12 @@ class KabariWhatsApp
             'kelanjutan' => 'Tim kami mulai mengerjakan analisisnya dan menghubungi Anda lewat nomor ini.',
         ],
         'scopus_kafe' => [
-            'status' => null,
             'daftar' => 'public.scopuskafe.formpendaftaran',
 
             // Satu-satunya yang tidak berangkatan: borangnya satu untuk
             // semua, dan rutenya memang tidak menerima parameter.
             'daftar_berangkatan' => false,
             'indeks' => 'public.scopuskafe.index',
-            'gerbang' => false,
             'kabar_status' => ['pembayaran diterima' => 'lunas'],
             'kelanjutan' => 'Jadwal dan tautan sesinya dibagikan panitia lewat grup peserta di WhatsApp.',
         ],
@@ -179,46 +160,37 @@ class KabariWhatsApp
 
         $angkatan ??= $this->angkatanDari($layanan, $p);
 
-        $status = $this->tautanStatus($layanan, $p);
-        $batas = $this->batas($p);
-
         /*
-         * Dua langkah berikutnya yang BERBEDA SAMA SEKALI.
+         * Naskahnya dirakit PesanTagihanWa, bukan di sini.
          *
-         * Lewat gerbang, orangnya belum membayar apa pun: yang ia butuhkan
-         * tautan untuk membayar, dan peringatan bahwa kursinya cuma ditahan
-         * sampai batas waktu. Lewat transfer manual, ia SUDAH mengunggah
-         * buktinya di borang pendaftaran — menyuruhnya "selesaikan
-         * pembayarannya" di situ membuatnya mengira unggahannya gagal, lalu
-         * ia mentransfer dua kali.
+         * Naskah yang sama dipakai draf follow-up panitia. Dirakit dua kali,
+         * pendaftar yang menerima pesan otomatis lalu ditindaklanjuti panitia
+         * menerima dua pesan tentang satu hal yang berbunyi berbeda — dan
+         * yang paling mudah berselisih justru nominalnya.
          */
-        $langkah = ($this->ciri($layanan)['gerbang'] && $status !== null)
-            ? [
-                '',
-                'Selesaikan pembayarannya di sini:',
-                $status,
-                '',
-                'Fakturnya kami kirim ke email Anda. Kursi ditahan sampai batas waktu di atas.',
-            ]
-            : [
-                '',
-                'Bukti pembayaran yang Anda unggah sedang kami periksa. Hasilnya kami '
-                    . 'kabari lewat email dan nomor ini.',
-                '',
-                'Fakturnya kami kirim ke email Anda.',
-            ];
+        return $this->kirim($layanan, $p, PesanTagihanWa::baris([
+            'nama' => $this->nama($layanan, $p),
+            'layanan' => Katalog::sumber($layanan)['nama'] ?? null,
+            'kelas' => $this->namaKelas($layanan, $angkatan, true),
+            'nomor' => $this->nomor($layanan, $p),
+            'jumlah' => (int) ($p->{Katalog::kolomPeran($layanan, 'jumlah') ?? 'jumlah_pendaftar'} ?? 1),
+            'total' => $this->total($layanan, $p),
+            'diskon' => (int) ($p->{Katalog::kolomPeran($layanan, 'nominal_diskon') ?? 'nominal_diskon'} ?? 0),
+            'kode_diskon' => $p->{Katalog::kolomPeran($layanan, 'kode_diskon') ?? 'kode_diskon'} ?? null,
+            'promo' => $p->{Katalog::kolomPeran($layanan, 'promo') ?? 'promo_id'} ?? null,
+            'tenggat' => $p->kedaluwarsa_pada ?? null,
+            'tautan' => $this->tautanStatus($layanan, $p),
+            'bergerbang' => $this->bergerbang($layanan),
 
-        return $this->kirim($layanan, $p, array_filter([
-            '*Pendaftaran tersimpan* — Rumah Scopus Foundation',
-            '',
-            'Halo ' . $this->nama($layanan, $p) . ', pendaftaran Anda untuk *'
-                . $this->namaKelas($layanan, $angkatan) . '* sudah kami terima.',
-            '',
-            'No. pendaftaran: ' . $this->nomor($layanan, $p),
-            'Total bayar: Rp ' . number_format($this->total($layanan, $p), 0, ',', '.'),
-            $batas ? 'Batas bayar: ' . $batas : null,
-            ...$langkah,
-        ], fn ($b) => $b !== null));
+            /*
+             * Buktinya SUDAH terunggah di borang pendaftaran — Scopus Kafe
+             * mewajibkannya. Dibaca dari kolomnya, bukan diandaikan dari
+             * layanannya: Analisis Bibliometrik memakai borang yang sama
+             * tetapi unggahannya tidak wajib, jadi dua pendaftaran di satu
+             * layanan bisa berbeda keadaan.
+             */
+            'diperiksa' => trim((string) ($p->{Katalog::kolomPeran($layanan, 'bukti') ?? 'gambar'} ?? '')) !== '',
+        ]));
     }
 
     /** Uangnya diterima — tempatnya aman. */
@@ -245,6 +217,8 @@ class KabariWhatsApp
             '',
             'Kwitansinya kami kirim ke ' . ($email !== '' ? $email : 'email Anda') . '.',
             $this->ciri($layanan)['kelanjutan'],
+            '',
+            ...PesanTagihanWa::penutup(),
         ], fn ($b) => $b !== null));
     }
 
@@ -359,7 +333,7 @@ class KabariWhatsApp
 
     // ------------------------------------------------------------ bagiannya
 
-    /** @return array{status:?string, daftar:string, daftar_berangkatan:bool, indeks:string, gerbang:bool, kabar_status:array<string, string>, kelanjutan:string} */
+    /** @return array{daftar:string, daftar_berangkatan:bool, indeks:string, kabar_status:array<string, string>, kelanjutan:string} */
     private function ciri(string $layanan): array
     {
         return self::LAYANAN[$layanan];
@@ -367,7 +341,7 @@ class KabariWhatsApp
 
     private function bergerbang(string $layanan): bool
     {
-        return self::melayani($layanan) && self::LAYANAN[$layanan]['gerbang'];
+        return self::melayani($layanan) && Katalog::pakaiGerbang($layanan);
     }
 
     private function nama(string $layanan, object $p): string
@@ -430,12 +404,17 @@ class KabariWhatsApp
      * mencocokkan pesan WhatsApp-nya dengan fakturnya mengira keduanya dua
      * pendaftaran yang berbeda.
      */
-    private function namaKelas(string $layanan, ?object $angkatan): string
+    private function namaKelas(string $layanan, ?object $angkatan, bool $bolehKosong = false): ?string
     {
         $nama = trim((string) ($angkatan->nama ?? ''));
 
         if ($nama === '') {
-            return Katalog::sumber($layanan)['nama'] ?? 'Rumah Scopus';
+            /*
+             * $bolehKosong dipakai perakit naskah tagihan, yang menyebut nama
+             * layanannya sendiri di medan terpisah. Memulangkan nama layanan
+             * di situ membuat pesannya berbunyi "Scopus Camp — Scopus Camp".
+             */
+            return $bolehKosong ? null : (Katalog::sumber($layanan)['nama'] ?? 'Rumah Scopus');
         }
 
         $ke = trim((string) ($angkatan->nama_ke ?? ''));
@@ -455,9 +434,9 @@ class KabariWhatsApp
 
     private function tautanStatus(string $layanan, object $p): ?string
     {
-        $rute = $this->ciri($layanan)['status'];
-
-        return $rute === null ? null : route($rute, $p->getKey());
+        // Dibaca dari katalog: draf follow-up panitia memakai alamat yang
+        // sama, dan diketik di dua tempat, yang satu akan tertinggal.
+        return Katalog::tautanStatusUmum($layanan, (string) $p->getKey());
     }
 
     private function tautanDaftar(string $layanan, ?object $angkatan): string
@@ -531,7 +510,7 @@ class KabariWhatsApp
         $wa = preg_replace('/^62/', '0', (string) config('panitia.whatsapp'));
         $tampil = trim(chunk_split((string) $wa, 4, '-'), '-');
 
-        $modus = $this->ciri($layanan)['gerbang']
+        $modus = $this->bergerbang($layanan)
             ? 'Kami tidak pernah meminta transfer ke rekening pribadi, dan pembayaran '
                 . 'hanya lewat tautan resmi di pesan maupun email ini.'
             : 'Kami tidak pernah meminta transfer ke rekening pribadi — pembayaran hanya '

@@ -6,6 +6,7 @@ use App\Actions\Pendaftaran\KabariWhatsApp;
 use App\AnalisisBibliometrik;
 use App\CategoriesAnalisisBibliometrik;
 use App\CategoriesScopusCamp;
+use App\Support\PendaftaranSemuaLayanan as Pendaftaran;
 use App\PendaftaranScopusCamp;
 use App\PendaftaranScopusKafe;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -100,7 +101,7 @@ class KabarWhatsAppSemuaLayananTest extends TestCase
 
             return ['scopus_camp', PendaftaranScopusCamp::create([
                 'token' => Str::random(30),
-                'id_transaksi' => 'CAMP-WA-' . Str::random(6),
+                'id_transaksi' => 'CAMP-WA-' . Str::upper(Str::random(6)),
                 'kategori_id' => $a->getKey(),
                 'nama' => 'Pendaftar Camp',
                 'email' => 'camp' . Str::random(5) . '@contoh.test',
@@ -118,7 +119,7 @@ class KabarWhatsAppSemuaLayananTest extends TestCase
 
             return ['bibliometrik', AnalisisBibliometrik::create([
                 'token' => Str::random(30),
-                'id_transaksi' => 'BIB-WA-' . Str::random(6),
+                'id_transaksi' => 'BIB-WA-' . Str::upper(Str::random(6)),
                 'kategori_id' => $a->getKey(),
                 'nama' => 'Pendaftar Bib',
                 'email' => 'bib' . Str::random(5) . '@contoh.test',
@@ -132,7 +133,7 @@ class KabarWhatsAppSemuaLayananTest extends TestCase
 
         if ($layanan === 'scopus_kafe') {
             return ['scopus_kafe', PendaftaranScopusKafe::create([
-                'id_pemesanan' => 'KAFE-WA-' . Str::random(6),
+                'id_pemesanan' => 'KAFE-WA-' . Str::upper(Str::random(6)),
                 'nama' => 'Pendaftar Kafe',
                 'email' => 'kafe' . Str::random(5) . '@contoh.test',
                 'telp' => '081234567892',
@@ -157,7 +158,7 @@ class KabarWhatsAppSemuaLayananTest extends TestCase
         ]);
 
         return ['webinar_eksklusif', \App\WebinarEksklusifPendaftaran::create([
-            'id_transaksi' => 'WE-WA-' . Str::random(6),
+            'id_transaksi' => 'WE-WA-' . Str::upper(Str::random(6)),
             'kategori_id' => $a->getKey(),
             'nama' => 'Pendaftar Webinar',
             'email' => 'we' . Str::random(5) . '@contoh.test',
@@ -294,29 +295,76 @@ class KabarWhatsAppSemuaLayananTest extends TestCase
     public function yang_buktinya_sudah_terunggah_tidak_disuruh_membayar_lagi(): void
     {
         /*
-         * Di Analisis Bibliometrik dan Scopus Kafe, bukti transfernya
-         * diunggah DI BORANG PENDAFTARAN — sudah ada di tangan kami sebelum
+         * Scopus Kafe MEWAJIBKAN unggahan bukti transfer di borang
+         * pendaftarannya: orangnya sudah mengirim uang DAN buktinya sebelum
          * pesan ini berangkat.
          *
-         * Disuruh "selesaikan pembayarannya di sini", orangnya mengira
-         * unggahannya gagal lalu mentransfer untuk kedua kalinya. Uangnya
-         * masuk dua kali, dan pengembaliannya dikerjakan dengan tangan.
+         * Disuruh menyelesaikan pembayaran, ia mengira unggahannya gagal
+         * lalu mentransfer untuk kedua kalinya. Uangnya masuk dua kali, dan
+         * pengembaliannya dikerjakan dengan tangan.
+         *
+         * Ikut dijaga: desakan "mohon segera diselesaikan" juga tidak boleh
+         * ada. Ia membantah kalimat di atasnya sendiri yang baru saja
+         * berkata tidak ada yang perlu dikerjakan.
          */
         foreach (self::MANUAL as $layanan) {
             [$l, $p, $angkatan] = $this->barisnya($layanan);
 
+            $p->forceFill(['gambar' => 'uji/bukti-palsu.jpg'])->save();
+
             Http::fake(['api.fonnte.com/*' => Http::response(['status' => true, 'id' => ['1']], 200)]);
-            app(KabariWhatsApp::class)->pendaftaranMasuk($l, $p, $angkatan);
+            app(KabariWhatsApp::class)->pendaftaranMasuk($l, $p->refresh(), $angkatan);
 
             $pesan = (string) $this->pesanTerakhir();
 
-            $this->assertStringNotContainsString('Selesaikan pembayarannya', $pesan,
+            $this->assertStringNotContainsString('Silakan selesaikan pembayaran', $pesan,
                 $layanan . ' menyuruh membayar lagi, padahal bukti transfernya sudah terunggah.');
 
             $this->assertStringContainsString('sedang kami periksa', $pesan,
                 $layanan . ' tidak memberi tahu bahwa buktinya sedang diperiksa, jadi '
                 . 'orangnya tidak tahu apa yang ditunggunya.');
+
+            $this->assertStringNotContainsString('Mohon segera diselesaikan', $pesan,
+                $layanan . ' mendesak orang yang sudah membayar, di pesan yang sama yang '
+                . 'baru saja berkata tidak ada yang perlu ia kerjakan.');
         }
+    }
+
+    #[Test]
+    public function yang_belum_mengunggah_bukti_diberi_tahu_ke_mana_mentransfer(): void
+    {
+        /*
+         * Pasangan terbalik dari uji di atas, dan perlu keduanya.
+         *
+         * Analisis Bibliometrik memakai borang yang sama tetapi unggahan
+         * buktinya TIDAK wajib — dua pendaftaran di satu layanan bisa berbeda
+         * keadaan. Yang belum mengunggah harus tahu ke mana uangnya masuk;
+         * dikirimi "buktinya sedang kami periksa", ia menunggu kabar atas
+         * pembayaran yang belum pernah ia kerjakan, dan kursinya berlalu.
+         *
+         * Yang disebut HALAMAN PENDAFTARANNYA, bukan nomor rekening yang
+         * diketik di perakit pesan: satu angka salah di situ mengirim uang
+         * orang ke rekening orang lain tanpa ada yang tahu sampai ia menagih.
+         */
+        [$l, $p, $angkatan] = $this->barisnya('bibliometrik');
+
+        $this->assertSame('', trim((string) $p->gambar),
+            'Data ujinya sudah memuat bukti, jadi uji ini tidak menguji apa pun.');
+
+        Http::fake(['api.fonnte.com/*' => Http::response(['status' => true, 'id' => ['1']], 200)]);
+        app(KabariWhatsApp::class)->pendaftaranMasuk($l, $p, $angkatan);
+
+        $pesan = (string) $this->pesanTerakhir();
+
+        $this->assertStringContainsString('rekening atas nama yayasan', $pesan,
+            'Yang belum mengunggah bukti tidak diberi tahu ke mana uangnya masuk.');
+
+        $this->assertStringNotContainsString('sedang kami periksa', $pesan,
+            'Yang belum membayar dikabari buktinya sedang diperiksa, jadi ia menunggu '
+            . 'kabar atas pembayaran yang belum pernah ia kerjakan.');
+
+        $this->assertStringNotContainsString('melalui tautan berikut', $pesan,
+            'Layanan bertransfer manual diberi tautan pembayaran yang tidak ada.');
     }
 
     #[Test]
@@ -637,7 +685,7 @@ class KabarWhatsAppSemuaLayananTest extends TestCase
         for ($i = 0; $i < 5; $i++) {
             PendaftaranScopusCamp::create([
                 'token' => Str::random(30),
-                'id_transaksi' => 'CAMP-SAPU-' . Str::random(8),
+                'id_transaksi' => 'CAMP-SAPU-' . Str::upper(Str::random(8)),
                 'kategori_id' => $angkatan->getKey(),
                 'nama' => 'Pendaftar Sapu ' . $i,
                 'email' => 'sapu' . Str::random(5) . '@contoh.test',
@@ -690,7 +738,7 @@ class KabarWhatsAppSemuaLayananTest extends TestCase
         for ($i = 0; $i < 5; $i++) {
             $kunci[] = PendaftaranScopusCamp::create([
                 'token' => Str::random(30),
-                'id_transaksi' => 'CAMP-SISA-' . Str::random(8),
+                'id_transaksi' => 'CAMP-SISA-' . Str::upper(Str::random(8)),
                 'kategori_id' => $angkatan->getKey(),
                 'nama' => 'Pendaftar Sisa ' . $i,
                 'email' => 'sisa' . Str::random(5) . '@contoh.test',
@@ -715,5 +763,173 @@ class KabarWhatsAppSemuaLayananTest extends TestCase
             'Batasnya dipasang pada pesannya, bukan pada barisnya: kursi orang yang '
             . 'tertinggal sudah dilepas tanpa ia pernah dikabari, dan barisnya tidak '
             . 'akan dilihat jalankan berikutnya.');
+    }
+
+    #[Test]
+    public function pesan_otomatis_dan_draf_panitia_dirakit_dari_satu_naskah(): void
+    {
+        /*
+         * INTI permintaan pemiliknya, dan satu-satunya uji di berkas ini yang
+         * membandingkan dua saluran.
+         *
+         * Satu pendaftar menerima DUA pesan tentang satu hal: yang otomatis
+         * begitu borangnya tersimpan, lalu yang diketik panitia saat
+         * menindaklanjuti. Dirakit dari dua naskah, keduanya akan berbeda
+         * perlahan — dan yang paling mudah berselisih justru NOMINALNYA,
+         * satu-satunya angka di pesan itu yang tidak boleh diragukan.
+         *
+         * Yang dibandingkan bagian-bagian yang memang harus sama, bukan
+         * untaiannya utuh: draf panitia memuat satu kalimat perkenalan yang
+         * sengaja tidak ada di pesan mesin — tidak ada orang yang sedang
+         * menulisnya, dan kakinya sendiri sudah berkata pesan itu otomatis.
+         */
+        [$l, $p, $angkatan] = $this->barisnya('scopus_camp');
+
+        Http::fake(['api.fonnte.com/*' => Http::response(['status' => true, 'id' => ['1']], 200)]);
+        app(KabariWhatsApp::class)->pendaftaranMasuk($l, $p, $angkatan);
+
+        $otomatis = (string) $this->pesanTerakhir();
+
+        Pendaftaran::lupakan();
+        $union = Pendaftaran::kueri()
+            ->where('layanan', 'scopus_camp')->where('id', $p->getKey())->first();
+
+        $this->assertNotNull($union, 'Barisnya tidak terbaca dari kueri gabungan.');
+
+        $draf = \App\Support\PesanWaPendaftaran::tindakLanjut($union, null);
+
+        $sama = [
+            '🎉 *Selamat, pendaftaran Anda sudah berhasil!*',
+            '📩 Halo Bapak/Ibu ' . $p->nama,
+            '✅ *Langkah selanjutnya:*',
+            'Total pembayaran: *Rp ' . number_format((int) $p->total_pembayaran, 0, ',', '.') . '*',
+            route('public.scopuscamp.status', $p->getKey()),
+            'Salam Q1 ✨',
+        ];
+
+        foreach ($sama as $bagian) {
+            $this->assertStringContainsString($bagian, $otomatis,
+                'Pesan otomatisnya kehilangan bagian: ' . $bagian);
+
+            $this->assertStringContainsString($bagian, $draf,
+                'Draf panitianya kehilangan bagian: ' . $bagian);
+        }
+    }
+
+    #[Test]
+    public function tidak_ada_nomor_rekening_di_pesan_layanan_bergerbang(): void
+    {
+        /*
+         * Naskah aslinya menyuruh mentransfer ke Bank BRI dengan nomor
+         * rekening yang diketik di dalamnya. Pemiliknya meminta bagian itu
+         * diganti tautan pembayaran.
+         *
+         * Dijaga karena kembalinya tidak mengeluarkan galat apa pun, dan
+         * akibatnya paling mahal dari seluruh berkas ini: dua layanan ini
+         * TIDAK punya rekening yang dicocokkan dengan tangan, jadi uang yang
+         * masuk ke nomor yang tertulis di pesan tidak akan pernah tercatat
+         * sebagai pembayaran pendaftaran itu — dan yang mengirimnya merasa
+         * sudah membayar.
+         */
+        foreach (self::BERGERBANG as $layanan) {
+            [$l, $p, $angkatan] = $this->barisnya($layanan);
+
+            Http::fake(['api.fonnte.com/*' => Http::response(['status' => true, 'id' => ['1']], 200)]);
+            app(KabariWhatsApp::class)->pendaftaranMasuk($l, $p, $angkatan);
+
+            $pesan = (string) $this->pesanTerakhir();
+
+            foreach (['No. Rek', 'Bank BRI', 'A.n:', 'rekening berikut'] as $kata) {
+                $this->assertStringNotContainsString($kata, $pesan,
+                    $layanan . ' menyuruh transfer ke rekening, padahal pembayarannya '
+                    . 'lewat gerbang: "' . $kata . '"');
+            }
+
+            // Deretan angka panjang — bentuk nomor rekening — tidak boleh ada
+            // sama sekali. Nominalnya bertitik, nomor pendaftarannya bertanda
+            // hubung, jadi tidak ada yang sah berbentuk seperti ini.
+            $this->assertSame(0, preg_match('/\b\d{9,}\b/', $pesan),
+                $layanan . ' memuat deretan angka panjang yang terbaca sebagai nomor rekening.');
+        }
+    }
+
+    #[Test]
+    public function potongan_harga_menyebut_harga_normalnya_dari_data(): void
+    {
+        /*
+         * Naskah aslinya menyebut "harga normal Rp 1.875.000" dan "20
+         * pendaftar pertama" sebagai angka tetap. Keduanya TIDAK diketik di
+         * perakitnya:
+         *
+         *   - harga normalnya dihitung dari total + potongannya. Harga tiap
+         *     angkatan berbeda, dan satu angka yang diketik akan salah untuk
+         *     semua angkatan selain satu;
+         *
+         *   - batas pendaftarnya dibaca dari promo_layanan.kuota, dan terukur
+         *     24 Okt 2026 keempat promo yang ada BERNILAI NULL. Ditulis tetap
+         *     "20", pesannya mengancam dengan batas yang tidak pernah
+         *     ditegakkan sistemnya sendiri — lalu yang terlambat tetap
+         *     mendapat harga diskon, dan ancaman kita berikutnya tidak lagi
+         *     dipercaya.
+         */
+        [$l, $p, $angkatan] = $this->barisnya('scopus_camp');
+
+        $p->forceFill([
+            'kode_diskon' => 'HEMAT876',
+            'nominal_diskon' => 876000,
+            'total_pembayaran' => '4624000',
+        ])->save();
+
+        Http::fake(['api.fonnte.com/*' => Http::response(['status' => true, 'id' => ['1']], 200)]);
+        app(KabariWhatsApp::class)->pendaftaranMasuk($l, $p->refresh(), $angkatan);
+
+        $pesan = (string) $this->pesanTerakhir();
+
+        $this->assertStringContainsString('dengan diskon sudah berhasil', $pesan,
+            'Pendaftaran berdiskon tidak disebut berdiskon di judulnya.');
+
+        $this->assertStringContainsString('📌 *Catatan penting:*', $pesan,
+            'Catatan soal potongannya tidak ada.');
+
+        $this->assertStringContainsString('HEMAT876', $pesan,
+            'Kode potongan yang dipakai tidak disebut, padahal itu yang ditanyakan '
+            . 'orangnya saat harganya berbeda dari yang ia lihat di halaman.');
+
+        // 4.624.000 + 876.000 = 5.500.000
+        $this->assertStringContainsString('harga normal *Rp 5.500.000*', $pesan,
+            'Harga normalnya tidak dihitung dari total + potongannya.');
+
+        $this->assertStringNotContainsString('pendaftar pertama', $pesan,
+            'Pesannya mengancam dengan batas jumlah pendaftar, padahal tidak ada '
+            . 'satu promo pun yang kuotanya disetel.');
+    }
+
+    #[Test]
+    public function tanpa_potongan_tidak_ada_catatan_penting(): void
+    {
+        /*
+         * Pasangan terbalik: yang membayar harga penuh tidak diberi catatan
+         * soal potongan yang tidak pernah ia dapat. Kalimat "harganya kembali
+         * ke harga normal" di situ membingungkan — harga yang ia lihat SUDAH
+         * harga normalnya.
+         */
+        [$l, $p, $angkatan] = $this->barisnya('scopus_camp');
+
+        $this->assertSame(0, (int) $p->nominal_diskon,
+            'Data ujinya sudah berdiskon, jadi uji ini tidak menguji apa pun.');
+
+        Http::fake(['api.fonnte.com/*' => Http::response(['status' => true, 'id' => ['1']], 200)]);
+        app(KabariWhatsApp::class)->pendaftaranMasuk($l, $p, $angkatan);
+
+        $pesan = (string) $this->pesanTerakhir();
+
+        $this->assertStringNotContainsString('Catatan penting', $pesan,
+            'Yang membayar harga penuh diberi catatan soal potongan yang tidak ada.');
+
+        $this->assertStringNotContainsString('harga normal', $pesan,
+            'Yang membayar harga penuh diancam kembali ke harga normal.');
+
+        $this->assertStringContainsString('🎉 *Selamat, pendaftaran Anda sudah berhasil!*', $pesan,
+            'Judulnya menyebut diskon untuk pendaftaran tanpa potongan.');
     }
 }
