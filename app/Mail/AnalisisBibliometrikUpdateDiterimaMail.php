@@ -42,8 +42,15 @@ class AnalisisBibliometrikUpdateDiterimaMail extends Mailable
     public function build()
     {
 
+        // Kwitansinya dilampirkan; alasannya di ScopusCampUpdateDiterimaMail.
+        $kwitansi = \App\Support\LampiranDokumen::rakit(
+            'bibliometrik', 'kwitansi',
+            $this->analisisbibliometrik, $this->categoriesanalisisbibliometrik
+        );
+
         return $this->view('account.analisis_bibliometrik.mail_diterima')
-            ->subject('Pendaftaran Analisis Bibliometrik Berhasil Diterima')
-            ->from(config('mail.from.address'), $this->appName);
+            ->subject('Pembayaran diterima — ' . $this->analisisbibliometrik->id_transaksi)
+            ->from(config('mail.from.address'), $this->appName)
+            ->attachData($kwitansi['isi'], $kwitansi['nama'], ['mime' => 'application/pdf']);
     }
 }

@@ -39,11 +39,15 @@ class UpdatePublicPendaftaranScopusKafeMail extends Mailable
      */
     public function build()
     {
-        $logoPath = public_path('assets/img/LogoRSC.png');
+        // Kwitansinya dilampirkan, menggantikan logo 121.370 bita yang dulu
+        // ikut terkirim tanpa dirujuk isi suratnya.
+        $kwitansi = \App\Support\LampiranDokumen::rakit(
+            'scopus_kafe', 'kwitansi', $this->pendaftaranScopusKafe
+        );
 
         return $this->view('account.pendaftaran_scopus_kafe.send_email_sukses')
-            ->subject('Pembayaran Scopus Kafe Diterima')
+            ->subject('Pembayaran diterima — ' . $this->pendaftaranScopusKafe->id_pemesanan)
             ->from(config('mail.from.address'), $this->appName)
-            ->attach($logoPath, ['mime' => 'image/png']);
+            ->attachData($kwitansi['isi'], $kwitansi['nama'], ['mime' => 'application/pdf']);
     }
 }

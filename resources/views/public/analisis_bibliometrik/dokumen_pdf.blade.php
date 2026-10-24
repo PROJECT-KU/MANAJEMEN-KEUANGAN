@@ -1,5 +1,5 @@
 {{--
-  Faktur Analisis Bibliometrik.
+  Faktur dan kwitansi Analisis Bibliometrik.
 
   SELURUH tata letaknya di pendaftaran/dokumen_pdf.blade.php, dipakai bersama
   semua layanan. Berkas ini hanya menyiapkan angkanya — lihat alasan
@@ -11,15 +11,14 @@
   akibatnya; tetapi rute yang salah di dalam dokumen keuangan adalah hal yang
   menyesatkan siapa pun yang membacanya nanti.
 
-  Yang dikirim AnalisisBibliometrikMail: $analisisbibliometrik,
-  $categoriesanalisisbibliometrik, $terbilang.
+  Kontraknya SERAGAM dengan cetakan layanan lain — $jenis, $pendaftaran,
+  $angkatan, $terbilang — supaya App\Support\LampiranDokumen bisa merakit
+  lampirannya tanpa satu cabang per layanan.
 --}}
 @php
-    $pendaftaran = $analisisbibliometrik;
-    $angkatan = $categoriesanalisisbibliometrik;
-
-    $lunas = in_array((string) $pendaftaran->status,
-        \App\Support\PendaftaranSemuaLayanan::KEADAAN['lunas']['nilai'], true);
+    // Jenisnya dari pemanggil, bukan disimpulkan dari statusnya; alasannya
+    // sama persis seperti di cetakan Scopus Camp.
+    $lunas = $jenis === 'kwitansi';
 
     $total = (int) $pendaftaran->total_pembayaran;
     $potongan = (int) ($pendaftaran->nominal_diskon ?? 0);

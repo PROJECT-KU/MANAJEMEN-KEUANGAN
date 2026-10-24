@@ -1,5 +1,5 @@
 {{--
-  Faktur Scopus Camp.
+  Faktur dan kwitansi Scopus Camp.
 
   SELURUH tata letaknya di pendaftaran/dokumen_pdf.blade.php, dipakai bersama
   semua layanan. Berkas ini hanya menyiapkan angkanya.
@@ -17,14 +17,21 @@
     - tanggal pembayarannya berbahasa Inggris, sebab APP_LOCALE=en;
     - number_format(null) pada kode unik, PPN, dan diskon.
 
-  Yang dikirim ScopusCampMail: $pendaftaran, $categoriesScopusCamp,
-  $terbilang.
+  Kontraknya SERAGAM dengan cetakan layanan lain — $jenis, $pendaftaran,
+  $angkatan, $terbilang — supaya App\Support\LampiranDokumen bisa merakit
+  lampirannya tanpa satu cabang per layanan. Namanya pun dokumen_pdf, bukan
+  invoice: berkas ini mencetak faktur DAN kwitansi.
 --}}
 @php
-    $angkatan = $categoriesScopusCamp;
-
-    $lunas = in_array((string) $pendaftaran->status,
-        \App\Support\PendaftaranSemuaLayanan::KEADAAN['lunas']['nilai'], true);
+    /*
+     * Jenisnya dari pemanggil, BUKAN disimpulkan dari statusnya.
+     *
+     * Kwitansi hanya boleh terbit kalau uangnya memang sudah diterima, dan
+     * yang tahu itu pemanggilnya — surat penerimaan pembayaran. Disimpulkan
+     * di sini, satu perubahan status oleh panitia bisa menerbitkan kwitansi
+     * untuk uang yang belum masuk.
+     */
+    $lunas = $jenis === 'kwitansi';
 
     $total = (int) $pendaftaran->total_pembayaran;
     $potongan = (int) ($pendaftaran->nominal_diskon ?? 0);
