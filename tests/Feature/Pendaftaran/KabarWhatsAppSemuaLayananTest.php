@@ -466,7 +466,7 @@ class KabarWhatsAppSemuaLayananTest extends TestCase
             $this->assertTrue(app(KabariWhatsApp::class)->untukStatus($l, $p->refresh()),
                 $layanan . ' tidak mengabari pelunasannya pada status "' . $status . '".');
 
-            $this->assertStringContainsString('Pembayaran diterima',
+            $this->assertStringContainsString('🎉 *Pembayaran Anda sudah kami terima!*',
                 (string) $this->pesanTerakhir(),
                 $layanan . ' mengirim pesan yang bukan pemberitahuan pelunasan.');
         }
@@ -477,27 +477,37 @@ class KabarWhatsAppSemuaLayananTest extends TestCase
     {
         /*
          * Di Scopus Camp, 'Pendaftaran Dibatalkan' adalah KEPUTUSAN PANITIA,
-         * dan alasannya bisa apa saja: pesertanya mengundurkan diri,
-         * kelasnya tidak jalan, berkasnya tidak lengkap, dananya dikembalikan.
+         * dan alasannya bisa apa saja: pesertanya mengundurkan diri, kelasnya
+         * tidak jalan, berkasnya tidak lengkap, dananya dikembalikan.
          *
-         * Pesan "kursi Anda dilepas" menyebut satu sebab yang tegas —
-         * "pembayaran belum masuk sampai batas waktunya". Dipatok ke status
-         * itu, ia akan menuduh sebagian orang tidak membayar padahal
-         * sebagian dari mereka sudah, dan panitia yang menerima balasan
-         * marahnya tidak tahu dari mana tuduhan itu datang.
+         * Pesannya karena itu TIDAK BOLEH menyebut sebab apa pun — dan
+         * khususnya tidak boleh menyebut sebab yang paling menyinggung:
+         * bahwa orangnya tidak membayar. Sebagian dari mereka sudah, dan
+         * panitia yang menerima balasan marahnya tidak tahu dari mana
+         * tuduhan itu datang.
          *
-         * Pesan itu hanya dikirim perintah scopus-camp:kedaluwarsakan, satu-
-         * satunya tempat yang sebabnya benar menurut saringannya sendiri.
+         * Pesan yang menyebut tenggat terlewat hanya dikirim perintah
+         * scopus-camp:kedaluwarsakan, satu-satunya tempat yang sebabnya benar
+         * menurut saringannya sendiri.
          */
         [$l, $p, ] = $this->barisnya('scopus_camp');
         $p->forceFill(['status' => 'Pendaftaran Dibatalkan'])->save();
 
         Http::fake(['api.fonnte.com/*' => Http::response(['status' => true, 'id' => ['1']], 200)]);
 
-        $this->assertFalse(app(KabariWhatsApp::class)->untukStatus($l, $p->refresh()),
-            'Pembatalan oleh panitia mengirim pesan yang menuduh orangnya tidak membayar.');
+        $this->assertTrue(app(KabariWhatsApp::class)->untukStatus($l, $p->refresh()),
+            'Pembatalan oleh panitia tidak dikabari sama sekali.');
 
-        Http::assertNothingSent();
+        $pesan = (string) $this->pesanTerakhir();
+
+        foreach (['belum masuk sampai batas', 'batas waktu pembayarannya telah terlewat',
+            'tidak selesai', 'belum bayar'] as $tuduhan) {
+            $this->assertStringNotContainsStringIgnoringCase($tuduhan, $pesan,
+                'Pembatalan oleh panitia menuduh orangnya tidak membayar: "' . $tuduhan . '"');
+        }
+
+        $this->assertStringContainsString('terdapat kekeliruan', $pesan,
+            'Pembatalan tidak memberi jalan bagi yang merasa keliru dibatalkan.');
     }
 
     #[Test]
@@ -961,5 +971,224 @@ class KabarWhatsAppSemuaLayananTest extends TestCase
 
         $this->assertStringNotContainsString('Scopus Camp — Scopus Camp', $pesan,
             'Nama layanannya disebut dua kali dalam satu kalimat.');
+    }
+
+    /**
+     * Keempat kabar statusnya, dirakit lalu diambil isi pesannya.
+     *
+     * @return array<string, string>
+     */
+    private function semuaKabar(string $layanan): array
+    {
+        [$l, $p, $angkatan] = $this->barisnya($layanan);
+        $wa = app(KabariWhatsApp::class);
+
+        $pesan = [];
+
+        foreach (['pendaftaranMasuk', 'lunas', 'gagalBayar', 'kursiDilepas'] as $cara) {
+            Http::fake(['api.fonnte.com/*' => Http::response(['status' => true, 'id' => ['1']], 200)]);
+
+            if (! $wa->{$cara}($l, $p, $angkatan)) {
+                continue;
+            }
+
+            $pesan[$cara] = (string) $this->pesanTerakhir();
+        }
+
+        return $pesan;
+    }
+
+    #[Test]
+    public function tidak_ada_pesan_otomatis_yang_menyuruh_membalas(): void
+    {
+        /*
+         * Kakinya berkata "mohon jangan dibalas", sebab nomor pengirimnya
+         * nomor SISTEM. Pesan yang di baris lain menyuruh membalas membantah
+         * kakinya sendiri — dan yang membalas lalu menunggu jawaban yang
+         * tidak akan pernah datang, sementara masalahnya (uangnya terpotong,
+         * tempatnya hilang) tetap tidak tertangani.
+         *
+         * DIBANDINGKAN TANPA MEMBEDAKAN HURUF, dan itu hasil koreksi:
+         * penjagaan lamanya melarang "Balas pesan ini" berhuruf besar saja,
+         * sementara tiga penutup milik draf panitia berbunyi "mohon *b*alas
+         * pesan ini" — lolos seluruhnya. Penutup itu kini dipakai bersama
+         * kedua saluran, jadi kekeliruannya bisa sampai ke pesan otomatis.
+         */
+        foreach (self::BERGERBANG as $layanan) {
+            foreach ($this->semuaKabar($layanan) as $cara => $pesan) {
+                $this->assertStringNotContainsStringIgnoringCase('balas pesan ini', $pesan,
+                    $layanan . '/' . $cara . ' menyuruh membalas, padahal kakinya melarang.');
+            }
+        }
+    }
+
+    #[Test]
+    public function nama_gerbangnya_tidak_pernah_bocor_ke_pendaftar(): void
+    {
+        /*
+         * Nama gerbangnya urusan internal: yang perlu diketahui pendaftar
+         * cuma bahwa pembayarannya diselesaikan lewat tautan kami. Disebut
+         * namanya, pesan ini berbohong pada hari gerbangnya diganti — dan
+         * yang menerimanya mencari halaman yang sudah tidak dipakai.
+         *
+         * Bocornya tidak lewat kalimat yang diketik melainkan lewat KOLOM:
+         * nilai mentah `cara_bayar` memang berbunyi "doku", dan labelnya di
+         * katalog berbunyi "Pembayaran daring (DOKU)". Dicetak sebagai "Cara
+         * bayar", keduanya sampai ke pendaftar.
+         */
+        foreach (self::BERGERBANG as $layanan) {
+            [$l, $p, $angkatan] = $this->barisnya($layanan);
+
+            // Kanal yang benar DIKOSONGKAN — justru keadaan yang membuat
+            // perakitnya jatuh ke nilai mentah kolomnya.
+            $p->forceFill(['bayar_kanal' => null, 'cara_bayar' => 'doku'])->save();
+
+            Http::fake(['api.fonnte.com/*' => Http::response(['status' => true, 'id' => ['1']], 200)]);
+            app(KabariWhatsApp::class)->lunas($l, $p->refresh(), $angkatan);
+
+            $this->assertStringNotContainsStringIgnoringCase('doku',
+                (string) $this->pesanTerakhir(),
+                $layanan . ': nama gerbangnya bocor ke pesan pelunasan.');
+        }
+    }
+
+    #[Test]
+    public function keempat_kabarnya_berbentuk_sama(): void
+    {
+        /*
+         * Satu pendaftar menerima beberapa pesan ini sepanjang satu
+         * pendaftaran: tagihan, lalu pelunasan, atau tagihan lalu kabar
+         * tempatnya dilepas. Bentuk yang berganti-ganti membuat ia
+         * mencurigai salah satunya palsu — dan kecurigaan itu beralasan,
+         * sebab memang ada pihak yang mengatasnamakan lembaga ini.
+         *
+         * Sebelum ini keempatnya berbeda sungguhan: yang tagihan berjudul
+         * "🎉 *Selamat…*" bersapaan "📩 Halo Bapak/Ibu", sementara tiga
+         * sisanya berjudul "*Pembayaran diterima* — Rumah Scopus Foundation"
+         * bersapaan "Halo <nama>,".
+         */
+        foreach (self::BERGERBANG as $layanan) {
+            $semua = $this->semuaKabar($layanan);
+
+            $this->assertCount(4, $semua,
+                $layanan . ': ada kabar yang tidak terkirim sama sekali.');
+
+            foreach ($semua as $cara => $pesan) {
+                $ikut = $layanan . '/' . $cara;
+
+                $this->assertStringContainsString('📩 Halo Bapak/Ibu ', $pesan,
+                    $ikut . ' tidak memakai sapaan yang sama dengan pesan lainnya.');
+
+                $this->assertStringEndsWith('rekening pribadi, dan pembayaran hanya lewat '
+                    . 'tautan resmi di pesan maupun email ini.', $pesan,
+                    $ikut . ' tidak ditutup peringatan penipuannya.');
+
+                $this->assertStringContainsString('Salam Q1 ✨', $pesan,
+                    $ikut . ' kehilangan tanda tangan lembaganya.');
+
+                $this->assertStringContainsString('jangan dibalas', $pesan,
+                    $ikut . ' tidak melarang membalas, padahal pengirimnya nomor sistem.');
+
+                $this->assertStringContainsString('0889-8356-7819', $pesan,
+                    $ikut . ' tidak menyebut nomor admin resmi yang bisa dihubungi.');
+            }
+        }
+    }
+
+    #[Test]
+    public function kabar_buruk_tidak_ditutup_harapan_publikasi(): void
+    {
+        /*
+         * "Semoga ini jadi langkah awal menuju publikasi" kepada orang yang
+         * baru saja ditolak atau dananya dikembalikan terbaca sebagai
+         * sindiran — ia justru tidak ikut.
+         *
+         * Tanda tangannya tetap ada di keduanya: pesan tanpa "Salam Q1"
+         * terbaca seperti datang dari orang lain, justru di pesan yang paling
+         * mungkin dicurigai penipuan.
+         */
+        $buruk = ['Pendaftaran Ditolak', 'Pendaftaran Refund', 'Pendaftaran Dibatalkan'];
+
+        foreach ($buruk as $status) {
+            [$l, $p, ] = $this->barisnya('scopus_camp');
+            $p->forceFill(['status' => $status])->save();
+
+            Http::fake(['api.fonnte.com/*' => Http::response(['status' => true, 'id' => ['1']], 200)]);
+
+            $this->assertTrue(app(KabariWhatsApp::class)->untukStatus($l, $p->refresh()),
+                'Status "' . $status . '" tidak dikabari lewat WhatsApp sama sekali.');
+
+            $pesan = (string) $this->pesanTerakhir();
+
+            $this->assertStringNotContainsString('langkah awal menuju publikasi', $pesan,
+                'Status "' . $status . '" ditutup harapan publikasi, padahal orangnya '
+                . 'justru tidak ikut.');
+
+            $this->assertStringContainsString('Salam Q1 ✨', $pesan,
+                'Status "' . $status . '" kehilangan tanda tangan lembaganya.');
+        }
+    }
+
+    #[Test]
+    public function penolakan_tidak_memasang_nominal_yang_terbaca_sebagai_tagihan(): void
+    {
+        /*
+         * Sebagian yang ditolak belum pernah membayar apa pun. Angka yang
+         * berdiri sendiri di pesan penolakan terbaca sebagai tagihan —
+         * terutama oleh mereka — dan yang mentransfernya mengirim uang untuk
+         * pendaftaran yang sudah tidak ada.
+         */
+        [$l, $p, ] = $this->barisnya('scopus_camp');
+        $p->forceFill(['status' => 'Pendaftaran Ditolak'])->save();
+
+        Http::fake(['api.fonnte.com/*' => Http::response(['status' => true, 'id' => ['1']], 200)]);
+        app(KabariWhatsApp::class)->untukStatus($l, $p->refresh());
+
+        $pesan = (string) $this->pesanTerakhir();
+
+        $this->assertStringNotContainsString(
+            number_format((int) $p->total_pembayaran, 0, ',', '.'), $pesan,
+            'Pesan penolakan memasang nominalnya, yang terbaca sebagai tagihan.');
+    }
+
+    #[Test]
+    public function grup_peserta_hanya_untuk_yang_sudah_jadi_peserta(): void
+    {
+        /*
+         * Grupnya akan terisi orang yang tempatnya belum ada, dan
+         * mengeluarkan mereka kembali satu per satu pekerjaan panitia yang
+         * tidak perlu ada.
+         *
+         * Isian yang BUKAN tautan juga tidak boleh tercetak: kolomnya varchar
+         * bebas, dan terukur di basis data ia lebih sering berisi catatan
+         * panitia daripada alamat — "menyusul", "link nyusul". Dicetak apa
+         * adanya, yang terkirim adalah "bergabung ke grup melalui tautan
+         * berikut: menyusul".
+         */
+        [$l, $p, $angkatan] = $this->barisnya('scopus_camp');
+        $angkatan->forceFill(['group_wa' => 'https://chat.whatsapp.com/UjiGrup123'])->save();
+
+        Http::fake(['api.fonnte.com/*' => Http::response(['status' => true, 'id' => ['1']], 200)]);
+        app(KabariWhatsApp::class)->lunas($l, $p, $angkatan->refresh());
+
+        $this->assertStringContainsString('https://chat.whatsapp.com/UjiGrup123',
+            (string) $this->pesanTerakhir(),
+            'Yang sudah lunas tidak diberi tautan grupnya.');
+
+        Http::fake(['api.fonnte.com/*' => Http::response(['status' => true, 'id' => ['1']], 200)]);
+        app(KabariWhatsApp::class)->kursiDilepas($l, $p, $angkatan);
+
+        $this->assertStringNotContainsString('chat.whatsapp.com',
+            (string) $this->pesanTerakhir(),
+            'Yang tempatnya dilepas tetap diberi tautan grup peserta.');
+
+        $angkatan->forceFill(['group_wa' => 'menyusul'])->save();
+
+        Http::fake(['api.fonnte.com/*' => Http::response(['status' => true, 'id' => ['1']], 200)]);
+        app(KabariWhatsApp::class)->lunas($l, $p, $angkatan->refresh());
+
+        $this->assertStringNotContainsString('tautan berikut:',
+            (string) $this->pesanTerakhir(),
+            'Isian yang bukan tautan tercetak sebagai tautan grup.');
     }
 }
