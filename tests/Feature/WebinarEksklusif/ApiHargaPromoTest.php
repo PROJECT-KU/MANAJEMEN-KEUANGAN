@@ -151,9 +151,17 @@ class ApiHargaPromoTest extends TestCase
          * Tanggalnya sengaja PALING DEKAT: hanya sesi pertama yang dikirim
          * lengkap beserta naskahnya; sesi lain cuma diringkas. Tanpa ini
          * ujinya ikut bergantung sesi apa yang kebetulan ada di basis data.
+         *
+         * HARI INI, bukan besok. Rangkaian uji ini jalan di basis data yang
+         * sama dengan data pengembangan, dan di sana ada sesi nyata yang
+         * mulainya kebetulan BESOK — "testing webinar eksklusif #2", dibuat
+         * 18 Okt, mulai 25 Okt. Dengan tanggal yang sama persis, urutan
+         * keduanya ditentukan basis data dan uji ini merah separuh waktu.
+         * Terjadi 24 Okt 2026, dan merahnya menuduh naskah promo yang
+         * sebenarnya benar.
          */
         $sesi = $this->sesi([
-            'mulai' => now()->addDay()->toDateString(),
+            'mulai' => now()->toDateString(),
             'desc' => "Yang didapat peserta\n\n\u{1F4B5} Rp 150.000 per peserta",
         ]);
         $this->promo($sesi);
