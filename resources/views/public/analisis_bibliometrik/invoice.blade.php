@@ -1,158 +1,94 @@
-<!DOCTYPE html>
-<html>
+{{--
+  Faktur Analisis Bibliometrik.
 
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
+  SELURUH tata letaknya di pendaftaran/dokumen_pdf.blade.php, dipakai bersama
+  semua layanan. Berkas ini hanya menyiapkan angkanya — lihat alasan
+  penyeragamannya di kerangka itu.
 
-<body>
-    <form action="{{ route('account.gaji.store') }}" method="GET" enctype="multipart/form-data">
-        @csrf
-        <div class="wrapper">
-            <section class="invoice">
-                <div class="row">
-                    <div class="col-12">
-                        <center>
-                            <img src="{{ public_path('assets/img/LogoRSC.png') }}" alt="logo" width="250">
-                        </center>
-                        <h2 class="page-header" style="text-align: center;">
-                            INVOICE ANALISIS BIBLIOMETRIK
-                            <p style="margin-top: -3px; font-size: 15px; text-align: center;"><strong>Pelaksanaan</strong>
-                                {{ date('j F Y', strtotime($categoriesanalisisbibliometrik->mulai)) }}
-                                s/d
-                                {{ date('j F Y', strtotime($categoriesanalisisbibliometrik->selesai)) }}
-                            </p>
-                        </h2>
-                    </div>
-                </div>
-                <hr>
-                <br>
+  Cetakan lamanya bahkan membungkus isinya dengan <form action="{{ route(
+  'account.gaji.store') }}"> — borang milik layar GAJI, di dalam faktur
+  pendaftaran. Ia tidak pernah bisa dikirim dari dalam PDF, jadi tidak ada
+  akibatnya; tetapi rute yang salah di dalam dokumen keuangan adalah hal yang
+  menyesatkan siapa pun yang membacanya nanti.
 
-                <div class="row">
-                    <div class="col-12 table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th scope="col" style="text-align: left; width:300px">Dari</th>
-                                    <th scope="col" style="text-align: left; width:250px">Untuk</th>
-                                    <th scope="col" style="text-align: left;  width:250px"><b>ID Transaksi : {{ $analisisbibliometrik->id_transaksi }}</b>
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td> <strong style="text-transform:uppercase">RUMAH SCOPUS FOUNDATION</strong><br>
-                                        Bangunsari, Jl. Bangunsari, Bangunsari, Bangun Kerto, Turi, Sleman Regency, Special Region of Yogyakarta 55551<br>
-                                        Phone: 0812-2688-3280<br>
-                                        Email: info@rumahscopusfoundation.com
-                                    </td>
-                                    <td style="margin-top: -200px;"><strong>{{ $analisisbibliometrik->nama }}</strong><br>
-                                        Affiliasi :{{ $analisisbibliometrik->affiliasi }}<br>
-                                        Phone: {{ $analisisbibliometrik->telp }}<br>
-                                        Email: {{ $analisisbibliometrik->email }}<br>
-                                        <b>Pembayaran : </b>{{ date('j F Y', strtotime($analisisbibliometrik->created_at)) }}<br>
-                                        <b>Pukul &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; : </b>{{ date('H:i', strtotime($analisisbibliometrik->created_at)) }}<br>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div><br><br>
+  Yang dikirim AnalisisBibliometrikMail: $analisisbibliometrik,
+  $categoriesanalisisbibliometrik, $terbilang.
+--}}
+@php
+    $pendaftaran = $analisisbibliometrik;
+    $angkatan = $categoriesanalisisbibliometrik;
 
-                <div class="row">
-                    <div class="col-12 table-responsive">
-                        <table class="table table-striped" style="width: 100%;">
-                            <thead>
-                                <tr>
-                                    <th style="width: 40%; padding-left: 80px; text-align: left;"><u>Kategori</u></th>
-                                    <th style="width: 10%;"></th> <!-- Spacer -->
-                                    <th style="width: 40%; padding-right: 80px; text-align: right;"><u>Jumlah</u></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td style="padding-left: 80px;">
-                                        {{ $categoriesanalisisbibliometrik->nama }} #{{ $categoriesanalisisbibliometrik->nama_ke }}
-                                    </td>
-                                    <td></td>
-                                    <td style="padding-right: 80px; text-align: right;">
-                                        {{ $analisisbibliometrik->jumlah_pendaftar }} Orang
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="padding-left: 80px;">Biaya</td>
-                                    <td></td>
-                                    <td style="padding-right: 80px; text-align: right;">
-                                        {{-- Harga yang BENAR-BENAR ditagih, bukan `biaya`.
+    $lunas = in_array((string) $pendaftaran->status,
+        \App\Support\PendaftaranSemuaLayanan::KEADAAN['lunas']['nilai'], true);
 
-                                             Dengan promo berjalan, baris ini memajang harga
-                                             penuh sementara "Total" di bawah sudah terpotong,
-                                             sehingga kuitansinya tidak pernah berjumlah benar —
-                                             dan promonya tidak terlihat sama sekali oleh orang
-                                             yang mendapatkannya. --}}
-                                        @php($asal = (int) $categoriesanalisisbibliometrik->biaya)
-                                        @php($bayar = (int) $categoriesanalisisbibliometrik->harga_setelah_promo)
+    $total = (int) $pendaftaran->total_pembayaran;
+    $potongan = (int) ($pendaftaran->nominal_diskon ?? 0);
+    $unik = (int) ($pendaftaran->kode_unik ?? 0);
+    $ppn = (int) ($pendaftaran->ppn ?? 0);
+    $jumlahOrang = max(1, (int) $pendaftaran->jumlah_pendaftar);
 
-                                        @if ($asal > $bayar && $bayar > 0)
-                                            <s style="color: #94a3b8;">Rp. {{ number_format($asal, 0, ',', '.') }}</s>
-                                            &nbsp;
-                                        @endif
-                                        Rp. {{ number_format($bayar ?: $asal, 0, ',', '.') }}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="padding-left: 80px;">Kode Unik Transfer</td>
-                                    <td></td>
-                                    <td style="padding-right: 80px; text-align: right;">
-                                        Rp. {{ number_format($analisisbibliometrik->kode_unik, 0, ',', '.') }}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="padding-left: 80px;">PPN</td>
-                                    <td></td>
-                                    <td style="padding-right: 80px; text-align: right;">
-                                        Rp. {{ number_format($analisisbibliometrik->ppn, 0, ',', '.') }}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="padding-left: 80px;">Diskon</td>
-                                    <td></td>
-                                    <td style="padding-right: 80px; text-align: right;">
-                                        Rp. {{ number_format($analisisbibliometrik->nominal_diskon, 0, ',', '.') }}
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <br>
-                        <hr>
-                        <center>
-                            <h3><b>Total </b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Rp. {{ number_format($analisisbibliometrik->total_pembayaran, 0, ',', '.') }}</h3>
-                            <p><i>{{ $terbilang }}</i></p>
-                        </center>
-                        <hr>
-                    </div>
-                </div>
+    $pokok = $total + $potongan - $unik - $ppn;
+    $perOrang = $pokok % $jumlahOrang === 0;
 
-                <div class="row">
-                    <div class="col-6" style="float: right;">
-                        <center>
-                            <p class="lead">Yogyakarta, {{ date('j F Y', strtotime($analisisbibliometrik->created_at)) }}</p>
-                            <p class="lead"> Manager Operasional</p><br>
-                            <p class="lead">
-                                Umang Wildan Pratama., S.E
-                            </p>
-                        </center>
-                    </div>
-                </div>
-            </section>
-        </div>
-    </form>
+    $nomorAngkatan = trim((string) ($angkatan->nama_ke ?? ''));
 
-    <script type="text/javascript">
-        window.addEventListener("load", window.print());
-    </script>
-</body>
+    $tanggalKelas = $angkatan->mulai
+        ? \App\Support\RentangTanggal::tulis(
+            \Carbon\Carbon::parse($angkatan->mulai),
+            $angkatan->selesai ? \Carbon\Carbon::parse($angkatan->selesai) : null
+        )
+        : null;
 
-</html>
+    $baris = [[
+        'nama' => ($angkatan->nama ?: 'Analisis Bibliometrik')
+            . ($nomorAngkatan !== '' ? ' #' . $nomorAngkatan : ''),
+        'nota' => $tanggalKelas ?: '',
+        'qty' => $perOrang ? $jumlahOrang : 1,
+        'harga' => $perOrang ? intdiv($pokok, $jumlahOrang) : $pokok,
+    ]];
+
+    if ($potongan > 0) {
+        $baris[] = [
+            'nama' => 'Potongan' . ($pendaftaran->kode_diskon ? ' (' . $pendaftaran->kode_diskon . ')' : ''),
+            'qty' => 1,
+            'harga' => -1 * $potongan,
+        ];
+    }
+
+    if ($ppn > 0) {
+        $baris[] = ['nama' => 'PPN', 'qty' => 1, 'harga' => $ppn];
+    }
+
+    if ($unik > 0) {
+        $baris[] = ['nama' => 'Kode unik pembayaran', 'qty' => 1, 'harga' => $unik];
+    }
+@endphp
+
+@include('pendaftaran.dokumen_pdf', [
+    'lunas' => $lunas,
+    'nomor' => str_replace('BIB-', $lunas ? 'KW-' : 'INV-', (string) $pendaftaran->id_transaksi),
+    'nomorPendaftaran' => $pendaftaran->id_transaksi,
+    'tanggalDokumen' => $pendaftaran->created_at?->locale('id')->translatedFormat('j F Y') ?: '',
+    'tanggalCap' => $pendaftaran->created_at?->locale('id')->translatedFormat('j F Y') ?: '',
+
+    /*
+     * Bibliometrik TIDAK punya kolom kedaluwarsa_pada maupun bayar_kanal —
+     * layanannya belum memakai gerbang pembayaran. Dikirim null, bukan
+     * dibiarkan: kerangkanya mencetak "-" untuk null, sedangkan variabel yang
+     * tidak dikirim sama sekali akan melempar "Undefined variable".
+     */
+    'tenggat' => null,
+    'caraBayar' => null,
+
+    'pelanggan' => [
+        'nama' => $pendaftaran->nama,
+        'email' => $pendaftaran->email,
+        'telp' => $pendaftaran->telp
+            ? \App\Support\NomorTelepon::tampil($pendaftaran->telp)
+            : null,
+    ],
+    'baris' => $baris,
+    'total' => $total,
+    'dibayar' => $lunas ? $total : 0,
+    'terbilang' => $terbilang,
+])

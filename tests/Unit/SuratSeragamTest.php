@@ -59,6 +59,23 @@ class SuratSeragamTest extends TestCase
         'Scopus Kafe' => 'public/scopus_kafe/send_email_sukses.blade.php',
     ];
 
+    private const KERANGKA_CETAKAN = "@include('pendaftaran.dokumen_pdf'";
+
+    /**
+     * Faktur/kwitansi yang DILAMPIRKAN ke surat tiap layanan.
+     *
+     * Scopus Kafe dan Clinik Scopus tidak ada di sini: keduanya memang tidak
+     * melampirkan cetakan apa pun — diperiksa ke seluruh app/Mail, hanya tiga
+     * Mailable yang memanggil Pdf::loadView.
+     *
+     * @var array<string, string>
+     */
+    private const CETAKAN = [
+        'Webinar Eksklusif' => 'public/webinar_eksklusif/dokumen_pdf.blade.php',
+        'Scopus Camp' => 'public/scopus_camp/invoice.blade.php',
+        'Analisis Bibliometrik' => 'public/analisis_bibliometrik/invoice.blade.php',
+    ];
+
     private function isi(string $relatif): string
     {
         $jalur = dirname(__DIR__, 2) . '/resources/views/' . $relatif;
@@ -157,6 +174,70 @@ class SuratSeragamTest extends TestCase
             "Surat berikut memuat gaya dari berkas luar atau blok <style>; "
             . "Gmail membuang keduanya, dan yang sampai ke pembacanya teks "
             . "telanjang:\n- " . implode("\n- ", $bergaya) . "\n");
+    }
+
+    public function test_semua_cetakan_memakai_kerangka_yang_sama(): void
+    {
+        /*
+         * Lampirannya ikut diseragamkan 24 Okt 2026, atas permintaan
+         * pemiliknya: "attach file nya di email belum sama seperti yang ada
+         * di webinar eksklusif".
+         *
+         * Sebelumnya Scopus Camp dan Bibliometrik punya cetakannya sendiri —
+         * logo di tengah, tabel tanpa kolom Qty maupun Harga satuan, tanpa
+         * cap, tanpa pita kaki, dan tanpa baris "Sisa tagihan". Dokumen untuk
+         * dua layanan yang sama penerbitnya terbaca seperti berasal dari dua
+         * kantor, dan yang memegangnya sering bendahara yang harus
+         * mencocokkan keduanya.
+         */
+        $melenceng = [];
+
+        foreach (self::CETAKAN as $layanan => $relatif) {
+            if (! str_contains($this->tanpaKomentar($this->isi($relatif)), self::KERANGKA_CETAKAN)) {
+                $melenceng[] = $layanan . ' (' . $relatif . ')';
+            }
+        }
+
+        $this->assertSame([], $melenceng,
+            "Cetakan berikut TIDAK memakai kerangka bersama "
+            . "pendaftaran.dokumen_pdf, jadi angkanya akan menyimpang sendiri:\n- "
+            . implode("\n- ", $melenceng) . "\n");
+    }
+
+    public function test_tidak_ada_cetakan_yang_merakit_halamannya_sendiri(): void
+    {
+        $kembar = [];
+
+        foreach (self::CETAKAN as $layanan => $relatif) {
+            if (stripos($this->tanpaKomentar($this->isi($relatif)), '<!DOCTYPE') !== false) {
+                $kembar[] = $layanan . ' (' . $relatif . ')';
+            }
+        }
+
+        $this->assertSame([], $kembar,
+            "Cetakan berikut menyertakan kerangka bersama TETAPI masih membuka "
+            . "halamannya sendiri; Dompdf menggambar dua dokumen bersarang:\n- "
+            . implode("\n- ", $kembar) . "\n");
+    }
+
+    public function test_kerangka_cetakannya_memakai_helvetica(): void
+    {
+        /*
+         * BUKAN DejaVu, dan ini soal ukuran berkas.
+         *
+         * Dompdf MENYISIPKAN font yang dipakai ke dalam tiap PDF. Terukur:
+         * DejaVu 1.289.545 bita melawan Helvetica 20.965 — dan berkas ini
+         * dilampirkan ke setiap surat pendaftaran. Helvetica salah satu font
+         * bawaan PDF, jadi ia tidak perlu disisipkan sama sekali.
+         */
+        $isi = $this->tanpaKomentar($this->isi('pendaftaran/dokumen_pdf.blade.php'));
+
+        $this->assertStringContainsString('Helvetica', $isi,
+            'Kerangka cetakannya tidak lagi memakai Helvetica.');
+
+        $this->assertStringNotContainsString('DejaVu', $isi,
+            'Kerangka cetakannya memakai DejaVu; Dompdf menyisipkan fontnya utuh '
+            . 'ke tiap berkas — 1.289.545 bita melawan 20.965.');
     }
 
     public function test_kerangkanya_menulis_gaya_sebaris(): void
