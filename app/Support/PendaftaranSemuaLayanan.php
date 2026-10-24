@@ -61,6 +61,35 @@ class PendaftaranSemuaLayanan
             'kolom_catatan' => 'note',
             'status_awal' => 'diproses',
             'nomor_awalan' => 'CAMP',
+            /*
+             * Halaman status umum ber-UUID, tempat pendaftarnya melihat
+             * tagihannya dan menyelesaikan pembayarannya. NULL untuk layanan
+             * yang tidak punya.
+             *
+             * Yang tidak punya tidak boleh diberi tautan tebakan: tautan yang
+             * mengantar ke halaman yang salah lebih buruk daripada tidak ada
+             * tautan, sebab yang menekannya mengira ia sudah memeriksa.
+             */
+            'rute_status' => 'public.scopuscamp.status',
+            /*
+             * Pembayarannya lewat GERBANG (DOKU), bukan transfer manual.
+             *
+             * Dipakai perakit pesan WhatsApp — otomatis maupun draf panitia —
+             * untuk memutuskan dua hal yang kalau salah merugikan orangnya:
+             * apakah ia disuruh membuka tautan pembayaran atau mentransfer
+             * sendiri, dan apakah kami boleh berjanji "pembayaran hanya lewat
+             * tautan resmi" di peringatan penipuannya. Janji itu di layanan
+             * bertransfer manual adalah janji yang dilanggar borang kami
+             * sendiri.
+             *
+             * Di katalog, bukan diketik ulang di tiap perakit: sebelum ini
+             * kebenaran yang sama hidup di tiga tempat, dan satu di antaranya
+             * sudah salah — PesanWaPendaftaran menagih KELIMA layanan dengan
+             * kalimat "pembayaran diselesaikan melalui tautan pembayaran yang
+             * kami kirimkan", padahal dua di antaranya tidak pernah mengirim
+             * tautan apa pun.
+             */
+            'pakai_gerbang' => true,
             'pakai_kode_unik' => true,
             'kolom_nomor' => 'id_transaksi',
             'kode_unik_rentang' => self::KODE_UNIK,
@@ -116,6 +145,10 @@ class PendaftaranSemuaLayanan
             'kolom_catatan' => 'note',
             'status_awal' => 'diproses',
             'nomor_awalan' => 'BIB',
+            'rute_status' => null,
+            // Transfer manual ke rekening yayasan; tidak ada tagihan di
+            // gerbang. Lihat alasan lengkapnya di entri Scopus Camp.
+            'pakai_gerbang' => false,
             'pakai_kode_unik' => true,
             'kolom_nomor' => 'id_transaksi',
             'kode_unik_rentang' => self::KODE_UNIK,
@@ -168,6 +201,8 @@ class PendaftaranSemuaLayanan
             'kolom_catatan' => 'note',
             'status_awal' => 'pending',
             'nomor_awalan' => 'WE',
+            'rute_status' => 'public.webinareksklusif.status',
+            'pakai_gerbang' => true,
             'pakai_kode_unik' => true,
             'kolom_nomor' => 'id_transaksi',
             'kode_unik_rentang' => self::KODE_UNIK,
@@ -243,6 +278,8 @@ class PendaftaranSemuaLayanan
             'kolom_catatan' => 'note',
             'status_awal' => 'menunggu verifikasi',
             'nomor_awalan' => 'KAFE',
+            'rute_status' => null,
+            'pakai_gerbang' => false,
             'pakai_kode_unik' => true,
             'kolom_nomor' => 'id_pemesanan',
             'kode_unik_rentang' => self::KODE_UNIK,
@@ -291,6 +328,8 @@ class PendaftaranSemuaLayanan
             'kolom_catatan' => 'note',
             'status_awal' => 'pending',
             'nomor_awalan' => 'KLINIK',
+            'rute_status' => null,
+            'pakai_gerbang' => false,
             'pakai_kode_unik' => true,
             'kolom_nomor' => 'id_transaksi',
             'kode_unik_rentang' => self::KODE_UNIK,
@@ -857,6 +896,34 @@ class PendaftaranSemuaLayanan
     public static function kolomCatatan(string $layanan): ?string
     {
         return self::SUMBER[$layanan]['kolom_catatan'] ?? null;
+    }
+
+    /**
+     * Pembayarannya lewat gerbang, atau transfer manual.
+     *
+     * Dibaca perakit pesan WhatsApp dan perakit draf follow-up panitia.
+     * Layanan yang tidak terdaftar memulangkan false: yang belum dikenal
+     * tidak boleh disuruh membuka tautan pembayaran yang tidak ada.
+     */
+    public static function pakaiGerbang(string $layanan): bool
+    {
+        return (bool) (self::SUMBER[$layanan]['pakai_gerbang'] ?? false);
+    }
+
+    /**
+     * Alamat halaman status pendaftarnya, atau null kalau layanannya tidak punya.
+     *
+     * Di katalog, bukan di perakit pesan: dua perakit memakainya — pengirim
+     * WhatsApp otomatis dan draf follow-up panitia — dan diketik di keduanya,
+     * yang satu akan tertinggal saat alamatnya berubah.
+     */
+    public static function tautanStatusUmum(string $layanan, ?string $kunci): ?string
+    {
+        $rute = self::SUMBER[$layanan]['rute_status'] ?? null;
+
+        return ($rute === null || $kunci === null || $kunci === '')
+            ? null
+            : route($rute, $kunci);
     }
 
     /**
