@@ -94,13 +94,55 @@
     .daf-kepala i { color: var(--jingga); }
 
     /* ==================================================== ringkasan kelas */
-    .daf-ringkas { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 24px; margin: 0; }
-    .daf-ringkas dt {
-        font-size: .78rem; font-weight: 800; letter-spacing: .06em;
-        text-transform: uppercase; color: var(--tinta-2); margin-bottom: 3px;
+    /* Nama kelasnya berdiri sendiri di puncak kartu, bukan salah satu
+       pasangan label-nilai: ia identitas barangnya. */
+    /*
+     * Pemilihnya `.daf .daf-kelas-nama` — bobot (0,2,0), bukan (0,1,0).
+     *
+     * `.daf p` di atas berbobot (0,1,1) karena ia kelas DAN unsur, jadi ia
+     * menang atas satu kelas saja walau ditulis lebih dulu. Terukur: nama
+     * kelasnya tergambar rgb(92,107,133) — warna redup untuk kalimat biasa —
+     * padahal diminta #16233f. Tidak ada galat; yang terlihat cuma judul yang
+     * pucat, dan itu mudah dikira memang begitu desainnya.
+     */
+    .daf .daf-kelas-nama {
+        margin: -4px 0 18px;
+        font-family: 'Fraunces', Georgia, serif;
+        font-size: 1.32rem; font-weight: 800; line-height: 1.25;
+        color: var(--tinta);
     }
-    .daf-ringkas dd { margin: 0; font-weight: 700; font-size: 1.04rem; color: var(--tinta); }
-    .daf-coret { color: var(--tinta-2); font-weight: 600; margin-right: 6px; }
+    .daf-kelas-nomor { color: var(--tinta-2); font-weight: 700; }
+
+    /* Baris label KIRI, nilai KANAN — sama persis dengan kartu Rincian biaya
+       dan dengan kwitansi di halaman status, jadi ketiganya dibaca dengan
+       cara yang sama. */
+    .daf-baris-daftar { margin: 0; }
+    .daf-baris {
+        display: flex; align-items: baseline; justify-content: space-between;
+        gap: 18px; padding: 12px 0;
+        border-bottom: 1px dashed var(--garis);
+    }
+    .daf-baris:first-child { padding-top: 0; }
+    .daf-baris:last-child { border-bottom: 0; padding-bottom: 0; }
+    .daf-baris dt {
+        flex: 0 0 auto;
+        font-size: .76rem; font-weight: 800; letter-spacing: .06em;
+        text-transform: uppercase; color: var(--tinta-2);
+    }
+    .daf-baris dd {
+        flex: 1 1 auto; min-width: 0; margin: 0; text-align: right;
+        font-weight: 700; font-size: 1.02rem; color: var(--tinta);
+        line-height: 1.45;
+    }
+
+    /* Harganya dibesarkan dan dijinggakan: ia angka yang paling dicari di
+       kartu ini, dan di antara empat baris sewarna ia tidak terlihat. */
+    .daf-baris-harga dd b {
+        font-family: 'Fraunces', Georgia, serif;
+        font-size: 1.2rem; font-weight: 900; color: var(--jingga-tua);
+        font-variant-numeric: lining-nums tabular-nums;
+    }
+    .daf-coret { color: var(--tinta-2); font-weight: 600; margin-right: 7px; font-size: .95rem; }
 
     /* ==================================================== isian */
     .daf-medan { margin-bottom: 20px; }
@@ -148,7 +190,17 @@
     .daf-tipis { color: #a3281c; font-weight: 800; }
 
     /* ================================================== jumlah peserta */
-    .daf-jumlah { margin-top: 20px; }
+    /*
+     * Dipisahkan garis dari deret keterangan di atasnya.
+     *
+     * Tanpa garis, "Jumlah peserta" menempel di bawah "Biaya per orang" dan
+     * terbaca sebagai keterangan kelima tentang kelasnya — padahal ia
+     * satu-satunya hal di kartu ini yang bisa DIUBAH orangnya.
+     */
+    .daf-jumlah {
+        margin-top: 22px; padding-top: 22px;
+        border-top: 2px dashed var(--garis);
+    }
     .daf-jumlah-baris { display: flex; align-items: stretch; gap: 10px; }
     .daf-jumlah-baris .daf-isian {
         flex: 1 1 auto; min-width: 0; text-align: center;
@@ -356,7 +408,19 @@
     @media (max-width: 575.98px) {
         .daf { font-size: 17px; padding-top: 96px; }
         .daf-kartu { padding: 22px 18px 24px; border-radius: 18px; }
-        .daf-ringkas, .daf-dua { grid-template-columns: 1fr; }
+        .daf-dua { grid-template-columns: 1fr; }
+
+        /*
+         * Di bawah 576px label dan nilainya BERTUMPUK, bukan berhadapan.
+         *
+         * Nilai terpanjangnya "30 Oktober – 1 November 2026"; berhadapan
+         * dengan labelnya di layar selebar 360px ia tersisa sekitar 150px dan
+         * pecah jadi tiga baris di sebelah label satu baris. Bertumpuk, tiap
+         * keterangan tetap utuh.
+         */
+        .daf-baris { display: block; }
+        .daf-baris dt { display: block; margin-bottom: 3px; }
+        .daf-baris dd { text-align: left; }
         .daf-diskon-baris { flex-wrap: wrap; }
         .daf-cek { width: 100%; min-height: 50px; }
     }
@@ -443,27 +507,47 @@
                             <i class="fas fa-campground"></i> Kelas yang Anda daftarkan
                         </div>
 
-                        <dl class="daf-ringkas">
-                            <div>
-                                <dt>Kelas</dt>
-                                <dd>{{ $item->nama }}@if ($item->nama_ke) #{{ $item->nama_ke }}@endif</dd>
-                            </div>
-                            <div>
+                        {{-- NAMA KELASNYA berdiri sendiri, bukan salah satu
+                             pasangan label-nilai.
+
+                             Ia identitas barangnya, bukan salah satu
+                             keterangan tentangnya — di dalam deret label-nilai
+                             ia tenggelam di antara tanggal dan lokasi, padahal
+                             itu satu-satunya hal yang dipastikan orang sebelum
+                             membayar. --}}
+                        <p class="daf-kelas-nama">
+                            {{ $item->nama }}@if ($item->nama_ke) <span class="daf-kelas-nomor">#{{ $item->nama_ke }}</span>@endif
+                        </p>
+
+                        {{-- Label KIRI, nilai KANAN — sama persis dengan kartu
+                             Rincian biaya di sebelahnya dan dengan kwitansi di
+                             halaman status.
+
+                             Kisi dua kolom yang labelnya di ATAS nilainya
+                             membuat mata melompat dua kali untuk tiap
+                             keterangan, dan menyisakan sel kosong di sebelah
+                             keterangan terakhir saat jumlahnya ganjil —
+                             terukur, "Biaya per orang" duduk sendirian di
+                             baris ketiga. --}}
+                        <dl class="daf-baris-daftar">
+                            <div class="daf-baris">
                                 <dt>Tanggal</dt>
                                 <dd>{{ \App\Support\RentangTanggal::tulis($fMulai, $fSelesai) }}</dd>
                             </div>
-                            <div>
+
+                            <div class="daf-baris">
                                 <dt>Lokasi</dt>
                                 <dd>{{ $item->lokasi ?: 'Akan dikabari panitia' }}</dd>
                             </div>
-                            <div>
-                                {{-- SISA KURSI, dan sebelumnya tidak disebut
-                                     di halaman ini sama sekali.
 
-                                     Dua akibatnya: tidak ada alasan untuk
-                                     bergegas, dan orang bisa mengisi seluruh
-                                     borang lalu baru ditolak saat menekan
-                                     tombol. --}}
+                            {{-- SISA KURSI, dan sebelum 23 Okt 2026 tidak
+                                 disebut di halaman ini sama sekali.
+
+                                 Dua akibatnya: tidak ada alasan untuk
+                                 bergegas, dan orang bisa mengisi seluruh
+                                 borang lalu baru ditolak saat menekan
+                                 tombol. --}}
+                            <div class="daf-baris">
                                 <dt>Sisa kursi</dt>
                                 <dd>
                                     @if ($sisaKursi === null)
@@ -475,13 +559,14 @@
                                     @endif
                                 </dd>
                             </div>
-                            <div>
+
+                            <div class="daf-baris daf-baris-harga">
                                 <dt>Biaya per orang</dt>
                                 <dd>
                                     @if ($item->harga_sebelum_promo > $item->harga_setelah_promo)
                                         <s class="daf-coret">Rp {{ number_format($item->harga_sebelum_promo, 0, ',', '.') }}</s>
                                     @endif
-                                    Rp {{ number_format($item->harga_setelah_promo, 0, ',', '.') }}
+                                    <b>Rp {{ number_format($item->harga_setelah_promo, 0, ',', '.') }}</b>
                                 </dd>
                             </div>
                         </dl>

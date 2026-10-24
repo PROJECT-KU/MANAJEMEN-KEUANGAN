@@ -301,6 +301,58 @@ class ScopusCampDaftarTest extends TestCase
     }
 
     #[Test]
+    public function keterangan_kelasnya_berbaris_label_kiri_nilai_kanan(): void
+    {
+        /*
+         * Diminta pemiliknya 24 Okt 2026: kartu "Kelas yang Anda daftarkan"
+         * dibuat lebih rapi.
+         *
+         * Bentuk lamanya kisi dua kolom dengan label DI ATAS nilainya. Mata
+         * melompat dua kali untuk tiap keterangan — turun ke nilainya, lalu
+         * balik ke atas untuk label berikutnya — dan sel terakhirnya kosong
+         * saat jumlah keterangannya ganjil: terukur, "Biaya per orang" duduk
+         * sendirian di baris ketiga.
+         *
+         * Bentuk barisnya sama persis dengan kartu Rincian biaya di
+         * sebelahnya dan dengan kwitansi di halaman status, jadi ketiganya
+         * dibaca dengan cara yang sama. Terukur sesudahnya: keempat nilainya
+         * rata di satu tepi — 921px keempat-empatnya di layar 1440.
+         */
+        $isi = (string) $this->get(route('public.scopuscamp.formpendaftaran',
+            ['id' => $this->angkatan()->id]))->assertOk()->getContent();
+
+        $this->assertStringContainsString('class="daf-baris-daftar"', $isi,
+            'Kartu kelasnya tidak lagi memakai baris label-nilai.');
+
+        $this->assertStringNotContainsString('class="daf-ringkas"', $isi,
+            'Kisi lamanya masih dipakai; labelnya kembali duduk di atas nilainya.');
+    }
+
+    #[Test]
+    public function nama_kelasnya_tidak_tergambar_dengan_warna_redup(): void
+    {
+        /*
+         * JEBAKAN BOBOT PEMILIH, dan ia tidak mengeluarkan galat apa pun.
+         *
+         * `.daf p` berbobot (0,1,1) — satu kelas DAN satu unsur — sementara
+         * `.daf-kelas-nama` hanya (0,1,0). Jadi aturan untuk kalimat biasa
+         * MENANG atas aturan untuk nama kelasnya, walau ditulis lebih dulu.
+         *
+         * Terukur 24 Okt 2026: namanya tergambar rgb(92,107,133), warna redup
+         * untuk kalimat biasa, padahal diminta #16233f. Yang terlihat cuma
+         * judul yang pucat — dan itu mudah dikira memang begitu desainnya.
+         *
+         * Dijaga di sumbernya: penjaga berbasis permintaan HTTP tidak
+         * menghitung bobot CSS sama sekali.
+         */
+        $sumber = file_get_contents(base_path(self::BORANG));
+
+        $this->assertStringContainsString('.daf .daf-kelas-nama {', $sumber,
+            'Aturan nama kelasnya kembali berbobot satu kelas saja, jadi ia '
+            . 'kalah oleh `.daf p` dan namanya tergambar redup.');
+    }
+
+    #[Test]
     public function total_tidak_menunggu_seluruh_halaman_selesai_dimuat(): void
     {
         /*
