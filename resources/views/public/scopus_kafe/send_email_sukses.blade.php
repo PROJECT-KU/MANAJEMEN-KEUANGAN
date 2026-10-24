@@ -1,125 +1,101 @@
-<!DOCTYPE html>
-<html lang="en">
+{{--
+  Bukti pemesanan Scopus Kafe.
 
-<head>
-    <meta charset="UTF-8">
-    <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
-    <link rel="stylesheet" href="{{ asset('assets/modules/bootstrap/css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/modules/fontawesome/css/all.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/modules/bootstrap-social/bootstrap-social.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/components.css') }}">
-    <link rel="stylesheet" href="{{ asset('path/to/sweetalert2.css') }}">
-    <script src="{{ asset('path/to/sweetalert2.js') }}"></script>
+  SELURUH susunannya di emails/pendaftaran/bukti.blade.php, dipakai bersama
+  semua layanan. Berkas ini hanya menyiapkan isinya.
 
-    <style>
-        .container {
-            background-color: #FF8C00;
-            margin: 20px;
-            max-width: 100%;
+  Versi sebelumnya yang PALING jauh dari sampai: ia memuat Bootstrap,
+  FontAwesome, style.css, components.css, bahkan sweetalert2 lewat <link>,
+  lalu menata isinya dengan kelas .card di dalam blok <style>. Gmail membuang
+  <link> DAN <style> sama sekali — jadi yang benar-benar diterima orangnya
+  teks telanjang tanpa warna, tanpa kartu, tanpa logo. Diseragamkan atas
+  permintaan pemiliknya 24 Okt 2026.
+
+  Yang dikirim CreatePublicPendaftaranScopusKafeMail: $datas, $appName.
+--}}
+@php
+    $pendaftaran = $datas;
+
+    $lunas = in_array((string) $pendaftaran->status,
+        \App\Support\PendaftaranSemuaLayanan::KEADAAN['lunas']['nilai'], true);
+
+    $belumBayar = ! $lunas;
+
+    /*
+     * Scopus Kafe menyimpan SAMPAI TIGA SESI dalam satu baris, masing-masing
+     * dengan kolomnya sendiri (sesi, sesi_kedua, sesi_ketiga). Ketiganya
+     * disebut sebagai barisnya sendiri; yang kosong dilewati.
+     */
+    $rincian = [];
+
+    $sesiKe = [
+        ['sesi', 'waktu_mulai', 'waktu_selesai', 'lokasi'],
+        ['sesi_kedua', 'waktu_mulai_kedua', 'waktu_selesai_kedua', 'lokasi_kedua'],
+        ['sesi_ketiga', 'waktu_mulai_ketiga', 'waktu_selesai_ketiga', 'lokasi_ketiga'],
+    ];
+
+    foreach ($sesiKe as $ke => [$kNama, $kMulai, $kSelesai, $kLokasi]) {
+        $nama = trim((string) $pendaftaran->{$kNama});
+
+        if ($nama === '') {
+            continue;
         }
 
-        .card {
-            background-color: #F8F8FF;
-            border-radius: 10px;
-            max-width: 100%;
-            /* Lebar maksimum card */
-            padding: 20px;
-            margin-top: 100px;
-            /* Jarak atas */
-            margin-bottom: 100px;
-            /* Jarak bawah */
-        }
+        $jam = trim(implode(' - ', array_filter([
+            trim((string) $pendaftaran->{$kMulai}),
+            trim((string) $pendaftaran->{$kSelesai}),
+        ])));
 
-        .card_dalam {
-            background-color: #F5F5F5;
-            color: white;
-            border-radius: 10px;
-            max-width: 100%;
-            /* Lebar maksimum card */
-            padding: 20px;
-            margin-top: 20px;
-            /* Jarak atas */
-            margin-bottom: 20px;
-            /* Jarak bawah */
-        }
+        $lokasi = trim((string) $pendaftaran->{$kLokasi});
 
-        @media (max-width: 767px) {
+        $rincian[] = [
+            'label' => 'Sesi ' . ($ke + 1),
+            'nilai' => $nama . ($jam !== '' ? ' · ' . $jam : '') . ($lokasi !== '' ? ' · ' . $lokasi : ''),
+        ];
+    }
 
-            /* Target perangkat dengan lebar maksimum 767px */
-            .container {
-                background-color: transparent;
-                /* Mengubah warna latar belakang menjadi transparan */
-            }
+    $rincian[] = ['label' => 'Atas nama', 'nilai' => $pendaftaran->nama];
 
-            .mobile {
-                font-size: 18px;
-            }
-        }
+    if (trim((string) $pendaftaran->telp) !== '') {
+        $rincian[] = [
+            'label' => 'Nomor WhatsApp',
+            'nilai' => \App\Support\NomorTelepon::tampil($pendaftaran->telp),
+        ];
+    }
 
-        @media (min-width: 768px) and (max-width: 991px) {
-            .mobile {
-                margin-left: 100px;
-            }
-        }
-    </style>
-</head>
+    if ($pendaftaran->tanggal_pemesanan) {
+        $rincian[] = [
+            'label' => 'Tanggal pemesanan',
+            'nilai' => \Carbon\Carbon::parse($pendaftaran->tanggal_pemesanan)
+                ->locale('id')->translatedFormat('j F Y'),
+        ];
+    }
+@endphp
 
-<body>
-    <div id="app">
-        <section class="section">
-            <div class="container mt-5">
-                <div class="row">
-                    <div class="col-12 col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-8 offset-lg-2 col-xl-8 offset-xl-2">
-                        <center>
-                            <div class="card mt-5 mb-5" style="width: 35rem;">
-                                <div style="text-align: center;" class="login-brand">
-                                    <a href="https://rumahscopusfoundation.com/"> <img src="{{ aset_surat('assets/img/logo-email.png') }}"
-                                    alt="MIS — Management Integration System by Rumah Scopus" width="190"
-                                    style="display:block;border:0;width:190px;max-width:60%;height:auto"></a>
-                                </div>
-                                <div class="card-body">
-                                    <p style="font-weight: bold; font-size: 35px;">Hallo, {{ $datas->nama }}</p>
-                                    <p style="font-size: 15px;">Pendaftaran Scopus Kafe anda berhasil terikirim, pada tanggal <b>{{ strftime('%d %B %Y', strtotime($datas->created_at)) }}</b>, dengan status {{ $datas->status }}. Berikut rinciannya:</p>
-                                    <div class="card_dalam" style="display: flex; justify-content: space-between; flex-wrap: wrap;">
-                                        <div class="card-body mobile geser1" style="color: black; text-align: left; flex: 1; margin-left:25px;">
-                                            <p>ID Pemesanan </p>
-                                            <p>Atas Nama </p>
-                                            <p>No Telp </p>
-                                            <p>Tanggal Pemesanan </p>
-                                            <p>Total Pembayaran </p>
-                                        </div>
-                                        <div class="card-body mobile" style="color: black; text-align: left; flex: 1; margin-right: 25px; margin-left:180px;">
-                                            <div style="text-align: right;">
-                                                <p>{{ strtoupper($datas->id_pemesanan) }}</p>
-                                                <p>{{ $datas->nama }}</p>
-                                                <p>{{ $datas->telp }}</p>
-                                                <p>{{ strftime('%d %B %Y', strtotime($datas->tanggal_pemesanan)) }}</p>
-                                                <p>Rp. {{ number_format($datas->total_keseluruhan_pembayaran, 0, ',', ',') }}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <p style="font-size:15px">Status pemesanan anda akan berubah jika admin kami sudah memverifikasi pembayaran anda dengan waktu maksimal 1x24 jam. Jika terdapat kendala atau pertanyaan silahkan menghubungi kami.</p>
-
-                                    <p>Salam,<br>
-
-                                        Admin Rumah Scopus Foundation<br>
-                                        Rumah Scopus Foundation (RSC) <br>
-                                        Bangunsari, Jl. Bangunsari, Bangunsari, Bangun Kerto, Turi,<br>
-                                        Sleman Regency, Special Region of Yogyakarta 55551 <br>
-                                        Telp: 0812-2688-3280</p>
-                                    <a href="https://www.instagram.com/rumah_scopus/"> <img src="{{ aset_surat('assets/img/instagram.png') }}" alt="logo" width="40" height="40" style="margin-right: 20px; margin-top:10px"></a>
-                                    <a href="https://www.youtube.com/@rumahscopus"> <img src="{{ aset_surat('assets/img/youtube.png') }}" alt="logo" width="40" style="margin-right: 20px; margin-top:10px"></a>
-                                    <a href="https://www.facebook.com/RumahScopusAkademi"> <img src="{{ aset_surat('assets/img/facebook.png') }}" alt="logo" width="40" style="margin-top:10px"></a>
-                                </div>
-                            </div>
-                        </center>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </div>
-</body>
-
-</html>
+@include('emails.pendaftaran.bukti', [
+    'judul' => 'Pemesanan Anda sudah kami terima',
+    'ringkas' => $belumBayar
+        ? 'Pemesanan Anda tercatat. Tinggal satu langkah lagi: pembayaran.'
+        : 'Pemesanan Anda lengkap. Sampai jumpa di sesinya.',
+    'lencana' => $belumBayar
+        ? ['teks' => 'BELUM DIBAYAR', 'latar' => '#fff7ed', 'garis' => '#fed7aa', 'tinta' => '#9a3412']
+        : ['teks' => 'SUDAH DIBAYAR', 'latar' => '#ecfdf5', 'garis' => '#a7f3d0', 'tinta' => '#065f46'],
+    'sapaan' => $pendaftaran->nama,
+    'pembuka' => 'terima kasih sudah memesan <strong style="color:#0f2b5b;">Scopus Kafe</strong>.',
+    'nomor' => $pendaftaran->id_pemesanan,
+    'rincian' => $rincian,
+    'total' => [
+        'label' => $belumBayar ? 'Total bayar' : 'Sudah dibayar',
+        'nilai' => 'Rp ' . number_format((int) $pendaftaran->total_keseluruhan_pembayaran, 0, ',', '.'),
+    ],
+    'langkah' => $belumBayar
+        ? ['judul' => 'Langkah berikutnya', 'daftar' => [
+            'Transfer <strong>tepat sampai angka terakhir</strong> sesuai total di atas. '
+                . 'Angka terakhirnya kode unik Anda — kalau dibulatkan, pembayarannya '
+                . 'tidak bisa kami cocokkan.',
+            'Kirim bukti transfernya ke panitia lewat WhatsApp.',
+            'Panitia memeriksanya, lalu mengirim kabar penerimaan ke email ini.',
+        ]]
+        : null,
+    'kaki' => ['Pengumuman teknis dibagikan panitia lewat WhatsApp.'],
+])
