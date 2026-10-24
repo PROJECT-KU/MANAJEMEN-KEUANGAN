@@ -932,4 +932,34 @@ class KabarWhatsAppSemuaLayananTest extends TestCase
         $this->assertStringContainsString('🎉 *Selamat, pendaftaran Anda sudah berhasil!*', $pesan,
             'Judulnya menyebut diskon untuk pendaftaran tanpa potongan.');
     }
+
+    #[Test]
+    public function nama_layanan_tidak_disebut_dua_kali(): void
+    {
+        /*
+         * Terukur 24 Okt 2026: 46 dari 375 angkatan Scopus Camp, 10 dari 10
+         * angkatan Analisis Bibliometrik, dan 1 dari 2 sesi Webinar Eksklusif
+         * memberi nama angkatannya dengan menyertakan nama layanannya sendiri
+         * — "Scopus Camp Padang", "Analisis Bibliometrik Batch 12".
+         *
+         * Tanpa penyaringan, kalimat pembukanya berbunyi "pendaftaran Anda
+         * untuk *Scopus Camp — Scopus Camp Padang #4*". Di Analisis
+         * Bibliometrik itu terjadi pada SELURUH pendaftarannya, bukan
+         * sebagian.
+         */
+        [$l, $p, $angkatan] = $this->barisnya('scopus_camp');
+
+        $angkatan->forceFill(['nama' => 'Scopus Camp Padang'])->save();
+
+        Http::fake(['api.fonnte.com/*' => Http::response(['status' => true, 'id' => ['1']], 200)]);
+        app(KabariWhatsApp::class)->pendaftaranMasuk($l, $p, $angkatan->refresh());
+
+        $pesan = (string) $this->pesanTerakhir();
+
+        $this->assertStringContainsString('*Scopus Camp Padang #', $pesan,
+            'Nama kelasnya tidak disebut.');
+
+        $this->assertStringNotContainsString('Scopus Camp — Scopus Camp', $pesan,
+            'Nama layanannya disebut dua kali dalam satu kalimat.');
+    }
 }

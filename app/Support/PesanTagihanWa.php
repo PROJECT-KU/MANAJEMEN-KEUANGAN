@@ -231,7 +231,18 @@ class PesanTagihanWa
             : $nama;
     }
 
-    /** "Scopus Camp — Yogyakarta #199", atau nama layanannya saja. */
+    /**
+     * "Scopus Camp — Yogyakarta #199", atau nama layanannya saja.
+     *
+     * Nama layanannya DILEWATI kalau nama kelasnya sudah memuatnya. Terukur
+     * 24 Okt 2026: 46 dari 375 angkatan Scopus Camp, 10 dari 10 angkatan
+     * Analisis Bibliometrik, dan 1 dari 2 sesi Webinar Eksklusif memberi nama
+     * angkatannya dengan menyertakan nama layanannya sendiri.
+     *
+     * Tanpa penyaringan ini, kalimat pembukanya berbunyi "pendaftaran Anda
+     * untuk *Scopus Camp — Scopus Camp Padang #4*" — dan di sepuluh dari
+     * sepuluh pendaftaran Analisis Bibliometrik, SELALU begitu.
+     */
     private static function sebutan(array $isi): string
     {
         $layanan = trim((string) ($isi['layanan'] ?? ''));
@@ -241,7 +252,13 @@ class PesanTagihanWa
             return $kelas !== '' ? $kelas : 'Rumah Scopus';
         }
 
-        return $kelas === '' ? $layanan : $layanan . ' — ' . $kelas;
+        if ($kelas === '') {
+            return $layanan;
+        }
+
+        return mb_stripos($kelas, $layanan) === false
+            ? $layanan . ' — ' . $kelas
+            : $kelas;
     }
 
     /** @return array<int, string> */
@@ -304,8 +321,11 @@ class PesanTagihanWa
         if ($isi['diperiksa'] ?? false) {
             return [
                 '✅ *Langkah selanjutnya:*',
-                'Tidak ada. Bukti pembayaran yang Bapak/Ibu unggah sedang kami periksa, '
-                    . 'dan hasilnya kami kabari melalui nomor ini.',
+                // Kabar hasilnya TIDAK disebut di sini: soalBukti() di bawah
+                // sudah mengatakannya, dan dua kalimat yang menjanjikan hal
+                // yang sama dalam satu pesan terbaca seperti pesan yang
+                // dirakit dengan ceroboh.
+                'Tidak ada. Bukti pembayaran yang Bapak/Ibu unggah sedang kami periksa.',
             ];
         }
 
