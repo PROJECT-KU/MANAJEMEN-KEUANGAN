@@ -1,172 +1,104 @@
-<!DOCTYPE html>
-<html>
+{{--
+  Faktur Scopus Camp.
 
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
+  SELURUH tata letaknya di pendaftaran/dokumen_pdf.blade.php, dipakai bersama
+  semua layanan. Berkas ini hanya menyiapkan angkanya.
 
-<body>
-    <form action="{{ route('account.gaji.store') }}" method="GET" enctype="multipart/form-data">
-        @csrf
-        <div class="wrapper">
-            <section class="invoice">
-                <div class="row">
-                    <div class="col-12">
-                        <center>
-                            <img src="{{ public_path('assets/img/LogoRSC.png') }}" alt="logo" width="250">
-                        </center>
-                        <h2 class="page-header" style="text-align: center;">
-                            INVOICE SCOPUS CAMP
-                            {{-- Rentangnya dirakit RentangTanggal, bukan dua
-                                 date(strtotime(...)) berdampingan.
+  Sebelum 24 Okt 2026 ia punya cetakannya sendiri: logo di tengah, tabel
+  tanpa kolom Qty maupun Harga satuan, tanpa cap, tanpa pita kaki, dan tanpa
+  baris "Sisa tagihan" — jadi dokumen untuk dua layanan yang sama penerbitnya
+  terbaca seperti berasal dari dua kantor. Diseragamkan atas permintaan
+  pemiliknya.
 
-                                 `selesai` boleh kosong, dan strtotime(null)
-                                 memulangkan false yang dibaca date() sebagai
-                                 nol — yang tercetak di faktur "1 January
-                                 1970". Bukan kemungkinan yang jauh: angkatan
-                                 yang tanggal selesainya belum ditentukan
-                                 memang ada di basis data.
+  Cacat yang ikut hilang bersama cetakan lamanya:
 
-                                 Pembuatnya juga yang dipakai halaman status
-                                 dan borangnya, jadi ketiganya menulis rentang
-                                 tanggal dengan cara yang sama. --}}
-                            <p style="margin-top: -3px; font-size: 15px; text-align: center;"><strong>Pelaksanaan</strong>
-                                {{ \App\Support\RentangTanggal::tulis(
-                                    $categoriesScopusCamp->mulai ? \Carbon\Carbon::parse($categoriesScopusCamp->mulai)->locale('id') : null,
-                                    $categoriesScopusCamp->selesai ? \Carbon\Carbon::parse($categoriesScopusCamp->selesai) : null
-                                ) ?: 'Menyusul' }}
-                            </p>
-                        </h2>
-                    </div>
-                </div>
-                <hr>
-                <br>
+    - date('j F Y', strtotime($angkatan->selesai)) mencetak "1 January 1970"
+      untuk angkatan yang tanggal selesainya belum ditentukan;
+    - tanggal pembayarannya berbahasa Inggris, sebab APP_LOCALE=en;
+    - number_format(null) pada kode unik, PPN, dan diskon.
 
-                <div class="row">
-                    <div class="col-12 table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th scope="col" style="text-align: left; width:300px">Dari</th>
-                                    <th scope="col" style="text-align: left; width:250px">Untuk</th>
-                                    <th scope="col" style="text-align: left;  width:250px"><b>ID Transaksi : {{ $pendaftaran->id_transaksi }}</b>
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td> <strong style="text-transform:uppercase">RUMAH SCOPUS FOUNDATION</strong><br>
-                                        Bangunsari, Jl. Bangunsari, Bangunsari, Bangun Kerto, Turi, Sleman Regency, Special Region of Yogyakarta 55551<br>
-                                        Phone: 0812-2688-3280<br>
-                                        Email: info@rumahscopusfoundation.com
-                                    </td>
-                                    <td style="margin-top: -200px;"><strong>{{ $pendaftaran->nama }}</strong><br>
-                                        Affiliasi :{{ $pendaftaran->affiliasi }}<br>
-                                        Phone: {{ $pendaftaran->telp }}<br>
-                                        Email: {{ $pendaftaran->email }}<br>
-                                        <b>Pembayaran : </b>{{ optional($pendaftaran->created_at)->locale('id')->translatedFormat('j F Y') }}<br>
-                                        <b>Pukul &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; : </b>{{ optional($pendaftaran->created_at)->format('H:i') }}<br>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div><br><br>
+  Yang dikirim ScopusCampMail: $pendaftaran, $categoriesScopusCamp,
+  $terbilang.
+--}}
+@php
+    $angkatan = $categoriesScopusCamp;
 
-                <div class="row">
-                    <div class="col-12 table-responsive">
-                        <table class="table table-striped" style="width: 100%;">
-                            <thead>
-                                <tr>
-                                    <th style="width: 40%; padding-left: 80px; text-align: left;"><u>Kategori</u></th>
-                                    <th style="width: 10%;"></th> <!-- Spacer -->
-                                    <th style="width: 40%; padding-right: 80px; text-align: right;"><u>Jumlah</u></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td style="padding-left: 80px;">
-                                        {{ $categoriesScopusCamp->nama }} #{{ $categoriesScopusCamp->nama_ke }}
-                                    </td>
-                                    <td></td>
-                                    <td style="padding-right: 80px; text-align: right;">
-                                        {{ $pendaftaran->jumlah_pendaftar }} Orang
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="padding-left: 80px;">Biaya</td>
-                                    <td></td>
-                                    <td style="padding-right: 80px; text-align: right;">
-                                        {{-- Harga yang BENAR-BENAR ditagih, bukan `biaya`.
+    $lunas = in_array((string) $pendaftaran->status,
+        \App\Support\PendaftaranSemuaLayanan::KEADAAN['lunas']['nilai'], true);
 
-                                             Dengan promo berjalan, baris ini memajang harga
-                                             penuh sementara "Total" di bawah sudah terpotong,
-                                             sehingga kuitansinya tidak pernah berjumlah benar —
-                                             dan promonya tidak terlihat sama sekali oleh orang
-                                             yang mendapatkannya. --}}
-                                        @php($asal = (int) $categoriesScopusCamp->biaya)
-                                        @php($bayar = (int) $categoriesScopusCamp->harga_setelah_promo)
+    $total = (int) $pendaftaran->total_pembayaran;
+    $potongan = (int) ($pendaftaran->nominal_diskon ?? 0);
+    $unik = (int) ($pendaftaran->kode_unik ?? 0);
+    $ppn = (int) ($pendaftaran->ppn ?? 0);
+    $jumlahOrang = max(1, (int) $pendaftaran->jumlah_pendaftar);
 
-                                        @if ($asal > $bayar && $bayar > 0)
-                                            <s style="color: #94a3b8;">Rp. {{ number_format($asal, 0, ',', '.') }}</s>
-                                            &nbsp;
-                                        @endif
-                                        Rp. {{ number_format($bayar ?: $asal, 0, ',', '.') }}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="padding-left: 80px;">Kode Unik Transfer</td>
-                                    <td></td>
-                                    <td style="padding-right: 80px; text-align: right;">
-                                        Rp. {{ number_format((int) $pendaftaran->kode_unik, 0, ',', '.') }}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="padding-left: 80px;">PPN</td>
-                                    <td></td>
-                                    <td style="padding-right: 80px; text-align: right;">
-                                        Rp. {{ number_format((int) $pendaftaran->ppn, 0, ',', '.') }}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="padding-left: 80px;">Diskon</td>
-                                    <td></td>
-                                    <td style="padding-right: 80px; text-align: right;">
-                                        Rp. {{ number_format((int) $pendaftaran->nominal_diskon, 0, ',', '.') }}
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <br>
-                        <hr>
-                        <center>
-                            <h3><b>Total </b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Rp. {{ number_format((int) $pendaftaran->total_pembayaran, 0, ',', '.') }}</h3>
-                            <p><i>{{ $terbilang }}</i></p>
-                        </center>
-                        <hr>
-                    </div>
-                </div>
+    // Pokoknya = total dikurangi yang ditambahkan dan ditambah yang dipotong,
+    // supaya rinciannya menjumlah tepat ke totalnya lagi.
+    $pokok = $total + $potongan - $unik - $ppn;
 
-                <div class="row">
-                    <div class="col-6" style="float: right;">
-                        <center>
-                            <p class="lead">Yogyakarta, {{ optional($pendaftaran->created_at)->locale('id')->translatedFormat('j F Y') }}</p>
-                            <p class="lead"> Manager Operasional</p><br>
-                            <p class="lead">
-                                Umang Wildan Pratama., S.E
-                            </p>
-                        </center>
-                    </div>
-                </div>
-            </section>
-        </div>
-    </form>
+    $perOrang = $pokok % $jumlahOrang === 0;
 
-    <script type="text/javascript">
-        window.addEventListener("load", window.print());
-    </script>
-</body>
+    $nomorAngkatan = trim((string) ($angkatan->nama_ke ?? ''));
 
-</html>
+    $tanggalKelas = $angkatan->mulai
+        ? \App\Support\RentangTanggal::tulis(
+            \Carbon\Carbon::parse($angkatan->mulai),
+            $angkatan->selesai ? \Carbon\Carbon::parse($angkatan->selesai) : null
+        )
+        : null;
+
+    $baris = [[
+        'nama' => ($angkatan->nama ?: 'Scopus Camp') . ($nomorAngkatan !== '' ? ' #' . $nomorAngkatan : ''),
+        'nota' => trim(($tanggalKelas ?: '') . ($angkatan->lokasi ? ' · ' . $angkatan->lokasi : ''), ' ·'),
+        'qty' => $perOrang ? $jumlahOrang : 1,
+        'harga' => $perOrang ? intdiv($pokok, $jumlahOrang) : $pokok,
+    ]];
+
+    if ($potongan > 0) {
+        $baris[] = [
+            'nama' => 'Potongan' . ($pendaftaran->kode_diskon ? ' (' . $pendaftaran->kode_diskon . ')' : ''),
+            'qty' => 1,
+            'harga' => -1 * $potongan,
+        ];
+    }
+
+    if ($ppn > 0) {
+        $baris[] = ['nama' => 'PPN', 'qty' => 1, 'harga' => $ppn];
+    }
+
+    if ($unik > 0) {
+        // Kode uniknya SELALU disebut: yang membayar harus mengirim angka
+        // yang persis, dan selisih tiga digit membuat pembayarannya tidak
+        // cocok dengan tagihan mana pun.
+        $baris[] = ['nama' => 'Kode unik pembayaran', 'qty' => 1, 'harga' => $unik];
+    }
+
+    $tanggalAcuan = $lunas
+        ? ($pendaftaran->bayar_pada ?: $pendaftaran->created_at)
+        : $pendaftaran->created_at;
+@endphp
+
+@include('pendaftaran.dokumen_pdf', [
+    'lunas' => $lunas,
+    'nomor' => str_replace('CAMP-', $lunas ? 'KW-' : 'INV-', (string) $pendaftaran->id_transaksi),
+    'nomorPendaftaran' => $pendaftaran->id_transaksi,
+    'tanggalDokumen' => $lunas
+        ? ($tanggalAcuan?->locale('id')->translatedFormat('j F Y, H:i') . ' WIB')
+        : ($pendaftaran->created_at?->locale('id')->translatedFormat('j F Y') ?: ''),
+    'tanggalCap' => $tanggalAcuan?->locale('id')->translatedFormat('j F Y') ?: '',
+    'tenggat' => $pendaftaran->kedaluwarsa_pada
+        ? $pendaftaran->kedaluwarsa_pada->locale('id')->translatedFormat('j F Y, H:i') . ' WIB'
+        : null,
+    'caraBayar' => $pendaftaran->bayar_kanal,
+    'pelanggan' => [
+        'nama' => $pendaftaran->nama,
+        'email' => $pendaftaran->email,
+        'telp' => $pendaftaran->telp
+            ? \App\Support\NomorTelepon::tampil($pendaftaran->telp)
+            : null,
+    ],
+    'baris' => $baris,
+    'total' => $total,
+    'dibayar' => $lunas ? $total : 0,
+    'terbilang' => $terbilang,
+])
