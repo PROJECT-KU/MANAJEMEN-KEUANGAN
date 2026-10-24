@@ -53,7 +53,7 @@ class KabarWhatsAppTest extends TestCase
     private function pendaftaran(array $ubah = []): WebinarEksklusifPendaftaran
     {
         return WebinarEksklusifPendaftaran::create(array_merge([
-            'id_transaksi' => 'WE-WA-' . Str::random(5),
+            'id_transaksi' => 'WE-WA-' . Str::upper(Str::random(5)),
             'kategori_id' => $this->sesi()->getKey(),
             'nama' => 'Pendaftar WA',
             'email' => 'wa' . Str::random(5) . '@contoh.test',
@@ -383,7 +383,7 @@ class KabarWhatsAppTest extends TestCase
         for ($i = 0; $i < 5; $i++) {
             $this->pendaftaran([
                 'kategori_id' => $sesi->getKey(),
-                'id_transaksi' => 'WE-SAPU-' . Str::random(6),
+                'id_transaksi' => 'WE-SAPU-' . Str::upper(Str::random(6)),
                 'email' => 'sapu' . Str::random(5) . '@contoh.test',
                 'status' => 'expired',
                 'bayar_status' => 'kedaluwarsa',

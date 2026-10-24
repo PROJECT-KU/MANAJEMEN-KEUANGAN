@@ -63,7 +63,20 @@ class TindakLanjutWaTest extends TestCase
     #[Test]
     public function kalimatnya_sama_dengan_suratnya(): void
     {
-        foreach (['diproses', 'Pendaftaran Diterima', 'Pendaftaran Reschedule',
+        /*
+         * 'diproses' DIKELUARKAN dari daftar ini, dan itu keputusan pemilik
+         * produknya, bukan kelonggaran.
+         *
+         * Keadaan "menunggu" kini memakai naskah tagihan yang sudah dipakai
+         * panitia sehari-hari — ucapan selamat, langkah selanjutnya, catatan
+         * potongannya, penutup "Salam Q1" — dan naskah yang SAMA dikirim
+         * otomatis lewat Fonnte begitu borangnya tersimpan. Itu yang menjaga
+         * kedua saluran tetap sebunyi untuk keadaan ini; penjaganya
+         * naskah_menunggu_sama_dengan_pesan_otomatisnya() di bawah.
+         *
+         * Status lainnya tetap mengambil kalimatnya dari sumber suratnya.
+         */
+        foreach (['Pendaftaran Diterima', 'Pendaftaran Reschedule',
             'Pendaftaran Refund', 'Pendaftaran Ditolak'] as $status) {
             $pesan = PesanWaPendaftaran::tindakLanjut($this->baris($status));
 
@@ -133,8 +146,18 @@ class TindakLanjutWaTest extends TestCase
             $this->assertNotSame('', $akhir,
                 "Pesan untuk keadaan {$keadaan} berakhir dengan baris kosong.");
 
-            $this->assertMatchesRegularExpression('/(balas pesan ini|tautan pembayaran|simpan pesan ini|ingin ditanyakan|mengabari melalui nomor ini|kepada panitia)/', $akhir,
-                "Pesan untuk keadaan {$keadaan} tidak ditutup kalimat ajakan: {$akhir}");
+            /*
+             * Baris terakhirnya kini SELALU tanda tangan lembaganya, jadi
+             * yang dituntut bergeser: tanda tangannya ada, DAN di dalam
+             * pesannya masih ada kalimat yang menyebutkan apa yang harus
+             * dikerjakan. Hanya menuntut tanda tangannya lulus pada pesan
+             * yang kehilangan seluruh ajakannya.
+             */
+            $this->assertSame('Salam Q1 ✨', $akhir,
+                "Pesan untuk keadaan {$keadaan} tidak ditutup tanda tangan lembaganya: {$akhir}");
+
+            $this->assertMatchesRegularExpression('/(balas pesan ini|tautan pembayaran|melalui tautan berikut|rekening atas nama yayasan|simpan pesan ini|ingin ditanyakan|mengabari melalui nomor ini|kepada panitia)/', $pesan,
+                "Pesan untuk keadaan {$keadaan} tidak memuat satu pun kalimat ajakan.");
         }
     }
 
@@ -148,7 +171,7 @@ class TindakLanjutWaTest extends TestCase
     {
         $pesan = PesanWaPendaftaran::tindakLanjut($this->baris('status-karangan'));
 
-        $this->assertStringContainsString('Yth. Bapak/Ibu Budi Santoso,', $pesan);
+        $this->assertStringContainsString('📩 Halo Bapak/Ibu Budi Santoso', $pesan);
         $this->assertStringContainsString('CAMP-0007', $pesan,
             'Nomor pendaftarannya hilang, jadi pesannya tidak menunjuk pendaftaran mana pun.');
     }
@@ -354,8 +377,19 @@ class TindakLanjutWaTest extends TestCase
 
         $pesan = PesanWaPendaftaran::tindakLanjut($union, Pendaftaran::sesiBaris($union));
 
-        $this->assertStringContainsString('Layanan: *Scopus Camp*', $pesan);
-        $this->assertStringContainsString('Angkatan ke-77: Angkatan Uji', $pesan,
+        /*
+         * Layanan dan kelasnya kini di KALIMAT PEMBUKANYA, bukan sebagai
+         * butir rincian: "pendaftaran Anda untuk *Scopus Camp — Angkatan Uji
+         * #77*". Bentuknya mengikuti naskah yang dipakai pemiliknya.
+         *
+         * Ejaan "#77", bukan "Angkatan ke-77": itu ejaan yang dipakai halaman
+         * pendaftaran, surat bukti, dan fakturnya. Disebut berbeda di sini,
+         * orang yang mencocokkan pesan WhatsApp-nya dengan fakturnya mengira
+         * keduanya dua pendaftaran yang berbeda.
+         */
+        $this->assertStringContainsString('Scopus Camp — Angkatan Uji', $pesan,
+            'Layanan dan kelasnya tidak disebut di kalimat pembukanya.');
+        $this->assertStringContainsString('#77', $pesan,
             'Angkatan ke-berapa tidak disebut; namanya saja tidak menunjuk apa pun '
             . 'bagi yang menerimanya.');
         $this->assertStringContainsString('Mulai: ', $pesan, 'Tanggal mulainya tidak disebut.');
@@ -423,8 +457,14 @@ class TindakLanjutWaTest extends TestCase
         $union = Pendaftaran::kueri()
             ->where('layanan', 'scopus_camp')->where('id', $b->getKey())->first();
 
-        $this->assertStringContainsString('tautan pembayaran',
-            PesanWaPendaftaran::tindakLanjut($union));
+        $pesan = PesanWaPendaftaran::tindakLanjut($union);
+
+        $this->assertStringContainsString('Silakan selesaikan pembayaran', $pesan,
+            'Yang belum mengunggah bukti tidak ditagih sama sekali.');
+
+        $this->assertStringContainsString('/Scopus-Camp/Status/', $pesan,
+            'Tagihannya tidak membawa tautan pembayarannya, jadi orangnya '
+            . 'tidak punya jalan menyelesaikannya.');
     }
 
     /**
@@ -541,48 +581,44 @@ class TindakLanjutWaTest extends TestCase
     // ------------------------------------------------------------- pembantu
 
     /**
-     * Ragam bahasanya RESMI di seluruh lima belas statusnya.
+     * Ragamnya mengikuti NASKAH PEMILIKNYA, dan tetap dijaga batasnya.
      *
-     * Yang menerima pesan ini sebagian dosen dan peneliti, dan isinya
-     * menagih uang. Ditulis santai, tagihannya terbaca seperti pesan asal —
-     * bukan pemberitahuan lembaga yang perlu ditindaklanjuti.
+     * Penjaga ini semula melarang "Halo", tanda seru, dan seluruh emoji,
+     * dengan alasan pesan ini mewakili lembaga. Pemilik produknya menyerahkan
+     * naskah yang ia pakai sehari-hari dan memintanya dipakai apa adanya —
+     * dan naskah itu memang dibuka "📩 Halo Bapak/Ibu", memakai tanda seru,
+     * serta ✅ 📌 ⏳ sebagai penanda bagian. Larangannya dicabut untuk
+     * ketiganya.
      *
-     * Disapu seluruh statusnya, bukan satu contoh: kalimat keadaannya datang
-     * dari katalog yang dipakai bersama suratnya, dan satu kalimat santai
-     * yang terselip di sana ikut terkirim lewat WhatsApp tanpa ada yang
-     * melihatnya. Terukur sebelum ini: sapaan dan penutupnya sudah resmi,
-     * tetapi kalimat tengahnya masih "sudah masuk dan sekarang menunggu".
+     * Emojinya aman: tombolnya memakai api.whatsapp.com, BUKAN wa.me — lewat
+     * wa.me emoji dan sebagian tanda baca sampai dalam keadaan rusak. Alasan
+     * itu yang dulu membuat emojinya dilarang, dan alasan itu sudah hilang.
+     *
+     * Yang MASIH dijaga: ragam yang membuat tagihan terbaca seperti pesan
+     * asal, bukan pemberitahuan lembaga — "nggak", "Oke", "Kalau", ", jadi".
+     * Dan dua hal yang kini menggantikan larangan sapaan: pesannya dibuka
+     * sapaan yang dikenali dan ditutup tanda tangan lembaganya. Keduanya
+     * yang membuat pendaftar tahu pesan itu datang dari kami.
      */
     #[Test]
-    public function ragam_bahasanya_resmi_di_semua_status(): void
+    public function ragam_bahasanya_mengikuti_naskah_pemiliknya(): void
     {
-        /*
-         * Penanda santai, masing-masing punya pasangan resminya:
-         * "Halo" -> "Yth. Bapak/Ibu", "Kalau" -> "Apabila",
-         * ", jadi" -> "sehingga", "bisa" -> "dapat".
-         */
-        $santai = ['Halo', 'Kalau ', ', jadi ', 'nggak', 'Oke', '!'];
+        $santai = ['Kalau ', ', jadi ', 'nggak', 'Oke'];
 
         foreach (KabarStatusPendaftaran::semuaStatus() as $status) {
             $pesan = PesanWaPendaftaran::tindakLanjut($this->baris($status));
 
-            $this->assertStringStartsWith('Yth. Bapak/Ibu', $pesan,
-                "Pesan status {$status} tidak dibuka sapaan resmi.");
+            $this->assertStringContainsString('Halo Bapak/Ibu', $pesan,
+                "Pesan status {$status} tidak menyapa penerimanya.");
+
+            $this->assertStringEndsWith('Salam Q1 ✨', $pesan,
+                "Pesan status {$status} tidak ditutup tanda tangan lembaganya; "
+                . 'yang menerimanya tidak mengenali dari siapa pesan itu datang.');
 
             foreach ($santai as $kata) {
                 $this->assertStringNotContainsString($kata, $pesan,
                     "Pesan status {$status} memuat ragam santai \"{$kata}\".");
             }
-
-            /*
-             * Emoji dibuang seluruhnya. Dulu penutupnya ditutup emoji, dan
-             * itu satu-satunya alasan tombol ini dulu memakai api.whatsapp.com
-             * — sekarang alasannya tinggal tanda baca, tetapi emojinya tidak
-             * boleh kembali lewat kalimat baru yang ditambahkan nanti.
-             */
-            $this->assertSame(0,
-                preg_match('/[\x{1F300}-\x{1FAFF}\x{2600}-\x{27BF}]/u', $pesan),
-                "Pesan status {$status} masih memuat emoji.");
         }
     }
 
@@ -600,7 +636,7 @@ class TindakLanjutWaTest extends TestCase
             $this->baris('diproses', ['nama_orang' => 'joko susilo'])
         );
 
-        $this->assertStringStartsWith('Yth. Bapak/Ibu Joko Susilo,', $pesan);
+        $this->assertStringContainsString('📩 Halo Bapak/Ibu Joko Susilo', $pesan);
     }
 
     /**
@@ -617,7 +653,7 @@ class TindakLanjutWaTest extends TestCase
             $this->baris('diproses', ['nama_orang' => 'M. Rizki Al-Hakim, S.Si'])
         );
 
-        $this->assertStringStartsWith('Yth. Bapak/Ibu M. Rizki Al-Hakim, S.Si,', $pesan);
+        $this->assertStringContainsString('📩 Halo Bapak/Ibu M. Rizki Al-Hakim, S.Si', $pesan);
     }
 
     /**
