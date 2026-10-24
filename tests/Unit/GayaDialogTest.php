@@ -93,6 +93,51 @@ class GayaDialogTest extends TestCase
         }
     }
 
+    public function test_rel_menunggunya_bergerak_terus(): void
+    {
+        /*
+         * Rel ini menggantikan Swal.showLoading() di dialog "sedang
+         * diproses". Isinya meluncur terus-menerus, dan itu seluruh gunanya:
+         * yang menunggunya orang yang baru menekan tombol bayar lima juta
+         * rupiah, dan bar yang DIAM terbaca sebagai halaman yang menggantung.
+         *
+         * `infinite` yang hilang tidak membuat satu uji pun merah —
+         * dialognya tetap muncul, relnya tetap tergambar, isiannya cuma
+         * berhenti di ujung sesudah satu putaran. Itu sebabnya dijaga di
+         * sini.
+         */
+        $isi = $this->isi(self::BERKAS);
+
+        $cocok = preg_match('/\.dlg-rel::after\s*\{([^}]*)\}/s', $isi, $c);
+
+        $this->assertSame(1, $cocok, 'Aturan isian rel menunggunya tidak ada.');
+
+        $this->assertStringContainsString('infinite', $c[1],
+            'Isian rel menunggunya tidak berulang; ia berhenti sesudah satu '
+            . 'putaran, dan bar yang diam terbaca sebagai halaman yang macet.');
+
+        /*
+         * Keadaan DIAMNYA pun harus di tengah, bukan hilang: rel kosong
+         * terbaca sebagai bar yang gagal dimuat, dan yang melihatnya justru
+         * orang yang memasang "kurangi gerak" di sistemnya.
+         */
+        $kurang = preg_match(
+            '/@media \(prefers-reduced-motion: reduce\)\s*\{(.*?)\n    \}/s',
+            $isi,
+            $k
+        );
+
+        $this->assertSame(1, $kurang, 'Blok "kurangi gerak" tidak ada di gaya dialognya.');
+
+        $this->assertStringContainsString('.dlg-rel::after', $k[1],
+            'Blok "kurangi gerak" tidak menyebut rel menunggunya, jadi ia tetap '
+            . 'beranimasi bagi yang memintanya berhenti.');
+
+        $this->assertMatchesRegularExpression('/left:\s*\d/', $k[1],
+            'Isian relnya tidak diberi tempat diam; yang tampil rel kosong, '
+            . 'dan itu terbaca sebagai bar yang gagal dimuat.');
+    }
+
     public function test_gayanya_tidak_menyentuh_letak_dialognya(): void
     {
         /*
