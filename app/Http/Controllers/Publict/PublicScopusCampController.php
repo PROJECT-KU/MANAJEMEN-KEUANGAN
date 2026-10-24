@@ -958,6 +958,15 @@ class PublicScopusCampController extends Controller
 
         $pendaftaran = $this->susulkanDariGerbang($pendaftaran);
 
+        /*
+         * Peserta rombongannya dimuat sekaligus.
+         *
+         * Halaman ini satu-satunya tempat pendaftar bisa MEMERIKSA siapa saja
+         * yang ia daftarkan. Tanpa itu, salah ketik nama baru ketahuan di
+         * sertifikat — saat sudah terlambat diperbaiki.
+         */
+        $pendaftaran->load('pesertaLain');
+
         return view('public.scopus_camp.status', [
             'pendaftaran' => $pendaftaran,
             'kategori' => CategoriesScopusCamp::find($pendaftaran->kategori_id),
