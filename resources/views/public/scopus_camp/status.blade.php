@@ -454,7 +454,7 @@
     /* ====================================================== tombol */
     /* JARAKNYA DI WADAHNYA, bukan di tiap tombol.
 
-       Sebelumnya hanya .sts-tombol-polos yang punya margin-top, sementara
+       Sebelumnya hanya tombol sekunder yang punya margin-top, sementara
        .sts-tombol (yang bergradien, termasuk .hijau) tidak punya sama sekali.
        Selama hanya satu tombol bergradien yang tampil, itu tidak terlihat —
        dan memang begitu dulu: tombol bayar hanya muncul saat belum lunas,
@@ -493,13 +493,46 @@
         box-shadow: 0 10px 24px rgba(15, 118, 110, .3);
     }
 
-    .sts-tombol-polos {
-        display: flex; align-items: center; justify-content: center; gap: 10px;
-        width: 100%; min-height: 54px; padding: 0 20px;
-        border: 2px solid var(--garis); border-radius: 15px;
-        background: #fff; color: var(--tinta); font-weight: 800; font-size: 1rem;
+    /* ================================== tindakan pendukung, satu baris
+
+       auto-fit dengan minmax: ketiganya berbagi satu baris selama muat, dan
+       turun sendiri jadi dua lajur lalu satu lajur begitu kartunya menyempit.
+       Tanpa titik putus yang ditulis tangan — lebar kartunya sendiri yang
+       menentukan, bukan lebar layar, dan keduanya tidak selalu sama. */
+    .sts-aksi-kecil {
+        display: grid; gap: 10px;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     }
-    .sts-tombol-polos:hover { border-color: var(--jingga); color: var(--jingga-tua); }
+
+    /* <form> pembungkus tombol kirim ulang ikut jadi sel kisi. Tanpa ini ia
+       menyusut mengikuti isinya dan tombolnya lebih sempit daripada
+       tetangganya di baris yang sama. */
+    .sts-aksi-kecil > form { display: block; width: 100%; margin: 0; }
+
+    .sts-tombol-kecil {
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        width: 100%; min-height: 46px; padding: 8px 12px;
+        border: 2px solid var(--garis); border-radius: 13px;
+        background: #fff; color: var(--tinta);
+        font-weight: 800; font-size: .92rem; line-height: 1.25;
+        text-align: center; cursor: pointer;
+        transition: border-color .18s ease, color .18s ease;
+    }
+    .sts-tombol-kecil:hover { border-color: var(--jingga); color: var(--jingga-tua); }
+    .sts-tombol-kecil i { font-size: 1rem; flex: 0 0 auto; }
+
+    /* Tulisannya MEMBUNGKUS, tidak dipotong.
+
+       Versi pertama memotongnya dengan ellipsis supaya satu label panjang
+       tidak melebarkan selnya. Terukur di lebar 390 px — lebar ponsel yang
+       paling umum — "Kirim ulang ke email" keluar terpotong: label yang
+       terpotong adalah label yang berbohong, dan yang membacanya tidak tahu
+       tombol itu mengirim apa ke mana.
+
+       Melebarkan selnya tidak jadi soal: lajurnya sudah 1fr yang sama rata,
+       dan min-width 0 yang menahan isinya meluber. Sel yang tingginya
+       bertambah diikuti dua tetangganya oleh kisi, jadi barisnya tetap rata. */
+    .sts-tombol-kecil span { min-width: 0; }
 
     /* Margin NEGATIF, dan itu disengaja.
 
@@ -946,28 +979,18 @@
                         </a>
                     @endif
 
-                    {{-- ======================================= berkasnya
+                    {{-- TOMBOL UTAMA berdiri sendiri; sisanya sebaris.
 
-                         Halaman ini dirancang SEBAGAI kwitansi — nomor di
-                         puncak, deret label-nilai, nominal di kaki — tetapi
-                         sampai sekarang tidak ada yang bisa diunduh dari
-                         sini. Berkasnya hanya hidup sebagai lampiran surat,
-                         jadi yang suratnya tidak sampai tidak punya faktur
-                         sama sekali — dan bagian keuangan kampusnya
-                         memintanya.
+                         Sebelumnya keempatnya tersusun ke bawah selebar
+                         kartu, dan terukur 288 px — lebih tinggi daripada
+                         kwitansi yang dijelaskannya. Di layar laptop,
+                         "Tanya panitia" bahkan jatuh di bawah lipatan.
 
-                         Kwitansi HANYA setelah lunas: ia menyatakan uangnya
-                         sudah diterima, dan diberikan sebelum itu ia jadi
-                         surat yang kami tanda tangani sendiri untuk sesuatu
-                         yang belum terjadi. Peladennya memeriksa ulang. --}}
-                    @unless ($batal && ! $lunas)
-                        <a href="{{ route('public.scopuscamp.dokumen', [$pendaftaran->id, $lunas ? 'kwitansi' : 'faktur']) }}"
-                            class="sts-tombol-polos">
-                            <i class="fas fa-file-pdf"></i>
-                            {{ $lunas ? 'Unduh kwitansi (PDF)' : 'Unduh faktur (PDF)' }}
-                        </a>
-                    @endunless
-
+                         Yang dibedakan BOBOTNYA, bukan sekadar ukurannya:
+                         satu tindakan yang memang dituju orangnya di
+                         keadaan itu — membayar, masuk grup, mendaftar lagi —
+                         tetap selebar kartu, dan tiga tindakan pendukung
+                         yang jarang ditekan berbagi satu baris. --}}
                     @if ($grup)
                         <a href="{{ $grup }}" target="_blank" rel="noopener"
                             class="sts-tombol hijau">
@@ -975,22 +998,54 @@
                         </a>
                     @endif
 
-                    {{-- Kirim ulang suratnya, untuk yang emailnya salah ketik,
-                         masuk spam, atau terhapus. Tanpa ini satu-satunya
-                         jalan mendapatkan nomor dan fakturnya kembali adalah
-                         menghubungi panitia. --}}
-                    <form method="POST" action="{{ route('public.scopuscamp.kirimulang', $pendaftaran->id) }}">
-                        @csrf
-                        <button type="submit" class="sts-tombol-polos" style="width: 100%; border: 0;">
-                            <i class="fas fa-envelope"></i> Kirim ulang bukti ke email saya
-                        </button>
-                    </form>
+                    {{-- Kisinya auto-fit: di layar sempit ketiganya turun
+                         sendiri jadi satu lajur tanpa titik putus yang
+                         ditulis tangan. --}}
+                    <div class="sts-aksi-kecil">
 
-                    @if ($wa !== '')
-                        <a href="{{ $wa }}" target="_blank" rel="noopener" class="sts-tombol-polos">
-                            <i class="fab fa-whatsapp"></i> Tanya panitia
-                        </a>
-                    @endif
+                        {{-- Berkasnya.
+
+                             Halaman ini dirancang SEBAGAI kwitansi — nomor di
+                             puncak, deret label-nilai, nominal di kaki —
+                             tetapi dulu tidak ada yang bisa diunduh dari
+                             sini. Berkasnya hanya hidup sebagai lampiran
+                             surat, jadi yang suratnya tidak sampai tidak
+                             punya faktur sama sekali, dan bagian keuangan
+                             kampusnya memintanya.
+
+                             Kwitansi HANYA setelah lunas: ia menyatakan
+                             uangnya sudah diterima, dan diberikan sebelum itu
+                             ia jadi surat yang kami tanda tangani sendiri
+                             untuk sesuatu yang belum terjadi. Peladennya
+                             memeriksa ulang. --}}
+                        @unless ($batal && ! $lunas)
+                            <a href="{{ route('public.scopuscamp.dokumen', [$pendaftaran->id, $lunas ? 'kwitansi' : 'faktur']) }}"
+                                class="sts-tombol-kecil">
+                                <i class="fas fa-file-pdf"></i>
+                                <span>{{ $lunas ? 'Kwitansi (PDF)' : 'Faktur (PDF)' }}</span>
+                            </a>
+                        @endunless
+
+                        {{-- Kirim ulang suratnya, untuk yang emailnya salah
+                             ketik, masuk spam, atau terhapus. Tanpa ini
+                             satu-satunya jalan mendapatkan nomor dan
+                             fakturnya kembali adalah menghubungi panitia. --}}
+                        <form method="POST" action="{{ route('public.scopuscamp.kirimulang', $pendaftaran->id) }}">
+                            @csrf
+                            <button type="submit" class="sts-tombol-kecil">
+                                <i class="fas fa-envelope"></i>
+                                <span>Kirim ulang ke email</span>
+                            </button>
+                        </form>
+
+                        @if ($wa !== '')
+                            <a href="{{ $wa }}" target="_blank" rel="noopener"
+                                class="sts-tombol-kecil">
+                                <i class="fab fa-whatsapp"></i>
+                                <span>Tanya panitia</span>
+                            </a>
+                        @endif
+                    </div>
                 </div>
 
             </div>

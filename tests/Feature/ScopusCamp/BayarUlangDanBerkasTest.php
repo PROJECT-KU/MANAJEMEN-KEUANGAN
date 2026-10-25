@@ -798,13 +798,57 @@ class BayarUlangDanBerkasTest extends TestCase
          * wadahnya, jadi sebagian jarak jadi dua kali lipat sementara
          * sisanya tidak — tampak seperti tata letak yang rusak sebagian.
          */
-        $awalPolos = strpos($gaya, '.sts-tombol-polos {');
-        $this->assertNotFalse($awalPolos);
+        $awalKecil = strpos($gaya, '.sts-tombol-kecil {');
+        $this->assertNotFalse($awalKecil, 'Aturan .sts-tombol-kecil hilang.');
 
         $this->assertStringNotContainsString('margin-top',
-            substr($gaya, $awalPolos, (int) strpos($gaya, '}', $awalPolos) - $awalPolos),
+            substr($gaya, $awalKecil, (int) strpos($gaya, '}', $awalKecil) - $awalKecil),
             'Margin per tombol dipasang lagi; ia menumpuk di atas gap wadahnya '
             . 'dan sebagian jaraknya jadi dua kali lipat.');
+
+        /*
+         * Baris tindakan pendukungnya pun harus punya jaraknya sendiri.
+         * Tanpa gap, ketiga tombol di dalamnya menempel satu sama lain —
+         * cacat yang sama persis, cuma berpindah ke dalam satu baris.
+         */
+        $awalBaris = strpos($gaya, '.sts-aksi-kecil {');
+        $this->assertNotFalse($awalBaris, 'Aturan .sts-aksi-kecil hilang.');
+
+        $this->assertStringContainsString('gap:',
+            substr($gaya, $awalBaris, (int) strpos($gaya, '}', $awalBaris) - $awalBaris),
+            'Baris tindakan pendukungnya tidak memberi jarak; ketiga tombolnya '
+            . 'akan menempel.');
+    }
+
+    #[Test]
+    public function tulisan_tombol_pendukung_tidak_pernah_dipotong(): void
+    {
+        /*
+         * Terukur di lebar 390 px — lebar ponsel yang paling umum — "Kirim
+         * ulang ke email" keluar TERPOTONG oleh ellipsis. Label yang
+         * terpotong adalah label yang berbohong: yang membacanya tidak tahu
+         * tombol itu mengirim apa ke mana, dan tombol yang tidak dimengerti
+         * tidak ditekan.
+         *
+         * Dipatok di sumbernya — PHPUnit tidak bisa menghitung tata letak —
+         * dan yang dipatok MEKANISMENYA: begitu pemotongan dipasang lagi,
+         * label mana pun yang kebetulan panjang akan hilang separuh di layar
+         * sempit tanpa ada galat apa pun.
+         */
+        $gaya = (string) file_get_contents(
+            base_path('resources/views/public/scopus_camp/status.blade.php')
+        );
+
+        $awal = strpos($gaya, '.sts-tombol-kecil span {');
+        $this->assertNotFalse($awal, 'Aturan tulisan tombol pendukung hilang.');
+
+        $aturan = substr($gaya, $awal, (int) strpos($gaya, '}', $awal) - $awal);
+
+        foreach (['text-overflow', 'nowrap'] as $pemotong) {
+            $this->assertStringNotContainsString($pemotong, $aturan,
+                'Tulisan tombol pendukung dipotong lagi; di lebar ponsel '
+                . 'labelnya hilang separuh.');
+        }
     }
 
     #[Test]
