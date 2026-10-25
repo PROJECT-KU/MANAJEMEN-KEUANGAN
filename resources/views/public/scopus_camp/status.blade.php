@@ -452,7 +452,30 @@
     .sts-langkah strong { color: var(--tinta); }
 
     /* ====================================================== tombol */
-    .sts-aksi { padding: 0 24px 30px; }
+    /* JARAKNYA DI WADAHNYA, bukan di tiap tombol.
+
+       Sebelumnya hanya .sts-tombol-polos yang punya margin-top, sementara
+       .sts-tombol (yang bergradien, termasuk .hijau) tidak punya sama sekali.
+       Selama hanya satu tombol bergradien yang tampil, itu tidak terlihat —
+       dan memang begitu dulu: tombol bayar hanya muncul saat belum lunas,
+       tombol grup hanya saat sudah lunas.
+
+       Begitu "Unduh kwitansi" ditambahkan di antara keduanya, jaraknya jadi
+       NOL dan kedua tombol itu menempel. Terukur lewat getBoundingClientRect:
+       0 px antara "Unduh kwitansi (PDF)" dan "Masuk grup peserta".
+
+       Dengan gap di wadahnya, tiap gabungan tombol — dan gabungan baru mana
+       pun nanti — berjarak sama tanpa perlu ada yang mengingat memasang
+       margin di kelas yang benar. */
+    .sts-aksi {
+        display: flex; flex-direction: column; gap: 12px;
+        padding: 0 24px 30px;
+    }
+
+    /* Pembungkus <form> ikut jadi anak flex. Tanpa ini ia menyusut mengikuti
+       isinya di sebagian peramban, dan tombolnya jadi lebih sempit daripada
+       tautan di atas-bawahnya. */
+    .sts-aksi > form { display: block; width: 100%; margin: 0; }
 
     .sts-tombol {
         display: flex; align-items: center; justify-content: center; gap: 10px;
@@ -472,14 +495,24 @@
 
     .sts-tombol-polos {
         display: flex; align-items: center; justify-content: center; gap: 10px;
-        width: 100%; min-height: 54px; margin-top: 12px; padding: 0 20px;
+        width: 100%; min-height: 54px; padding: 0 20px;
         border: 2px solid var(--garis); border-radius: 15px;
         background: #fff; color: var(--tinta); font-weight: 800; font-size: 1rem;
     }
     .sts-tombol-polos:hover { border-color: var(--jingga); color: var(--jingga-tua); }
 
+    /* Margin NEGATIF, dan itu disengaja.
+
+       Catatan ini menjelaskan tombol DI ATASNYA, jadi ia harus lebih dekat
+       ke sana daripada ke tombol berikutnya — kedekatan itu yang
+       memberitahu mata keduanya satu kelompok.
+
+       Terukur sesudah gap wadahnya dipasang: 16 px di atas catatan dan 12 px
+       di bawahnya, yaitu kebalikannya — catatannya terbaca sebagai milik
+       tombol yang justru tidak ia jelaskan. Dengan -4 px jaraknya jadi 8 px
+       di atas dan 12 px di bawah. */
     .sts-catatan {
-        display: flex; align-items: flex-start; gap: 10px; margin-top: 16px;
+        display: flex; align-items: flex-start; gap: 10px; margin-top: -4px;
         font-size: .92rem; line-height: 1.6; color: var(--tinta-2);
     }
     .sts-catatan i { color: var(--jingga); margin-top: 3px; }
