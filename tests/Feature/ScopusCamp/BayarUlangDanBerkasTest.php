@@ -250,6 +250,89 @@ class BayarUlangDanBerkasTest extends TestCase
             'Ditawari membuat tagihan untuk kursi yang sudah diberikan ke orang lain.');
     }
 
+    #[Test]
+    public function yang_tidak_bisa_membayar_lagi_tidak_disuruh_membayar(): void
+    {
+        /*
+         * Terukur pada pendaftaran GNKMO: status 'diproses' sejak 3 Okt,
+         * angkatannya berjalan 9 Okt, tagihannya tidak pernah dibuat.
+         *
+         * Judulnya berbunyi "Tinggal satu langkah lagi — yang tersisa hanya
+         * menyelesaikan pembayaran" sementara satu-satunya kalimat di
+         * bawahnya berkata angkatannya sudah ditutup. Dua kalimat yang saling
+         * membantah di satu halaman, dan yang membacanya mencari tombol yang
+         * tidak ada lalu mengira halamannya rusak.
+         *
+         * Yang dijaga: halaman ini tidak boleh menjanjikan langkah yang tidak
+         * bisa dikerjakan siapa pun.
+         */
+        [$p] = $this->pendaftaran(['cara_bayar' => 'transfer'], [
+            'mulai' => now()->subWeek()->toDateString(),
+            'selesai' => now()->subDays(5)->toDateString(),
+        ]);
+
+        $isi = $this->get(route('public.scopuscamp.status', $p->getKey()))
+            ->assertOk()->getContent();
+
+        $this->assertStringNotContainsString('Tinggal satu langkah lagi', $isi,
+            'Halamannya menjanjikan satu langkah lagi, padahal tidak ada tombol '
+            . 'apa pun yang bisa ditekan orangnya.');
+
+        $this->assertStringNotContainsString('Selesaikan pembayaran', $isi,
+            'Daftar langkahnya masih menyuruh menyelesaikan pembayaran lewat '
+            . 'tombol yang tidak digambar.');
+
+        $this->assertStringContainsString('sudah berjalan', $isi,
+            'Sebab sebenarnya tidak disebut, jadi orangnya tidak tahu mengapa '
+            . 'tidak ada yang bisa ia kerjakan.');
+    }
+
+    #[Test]
+    public function pendaftaran_transfer_lama_masih_bisa_dibayar_lewat_gerbang(): void
+    {
+        /*
+         * 307 pendaftaran bercara bayar 'transfer' — nilai bawaan dari zaman
+         * rekening. Yang angkatannya masih terbuka harus punya jalan
+         * membayar; sebelum ini halaman statusnya tidak menawarkan apa pun:
+         * tidak ada tombol gerbang (tagihannya belum pernah dibuat), tidak
+         * ada nomor rekening, dan tidak ada unggah bukti.
+         */
+        [$p] = $this->pendaftaran(['cara_bayar' => 'transfer']);
+
+        $this->assertStringContainsString('Lanjutkan pembayaran',
+            $this->get(route('public.scopuscamp.status', $p->getKey()))
+                ->assertOk()->getContent(),
+            'Pendaftaran transfer lama tidak diberi jalan membayar sama sekali.');
+    }
+
+    #[Test]
+    public function cara_bayarnya_berpindah_ke_gerbang_begitu_tagihannya_dibuat(): void
+    {
+        /*
+         * DUA JALUR BERHENTI MENGENALINYA kalau tidak, dan keduanya diam:
+         *
+         *   1. susulkanDariGerbang() melewati baris yang cara_bayar-nya bukan
+         *      'doku', jadi halaman statusnya tidak pernah menanyakan sendiri
+         *      ke gerbang — ia bergantung sepenuhnya pada pemberitahuan
+         *      balik, yang ke localhost tidak pernah sampai. Orangnya sudah
+         *      membayar dan halamannya tetap berkata menunggu;
+         *
+         *   2. scopus-camp:kedaluwarsakan menyaring where('cara_bayar','doku').
+         *      Yang tidak tersaring kursinya TIDAK pernah dilepas walau
+         *      tenggatnya lewat — tertahan selamanya, persis cacat yang
+         *      perintah itu dibuat untuk memperbaiki.
+         */
+        [$p] = $this->pendaftaran(['cara_bayar' => 'transfer']);
+
+        $this->gerbangMenerima();
+        $this->post(route('public.scopuscamp.bayarulang', $p->getKey()));
+
+        $this->assertSame('doku', (string) $p->refresh()->cara_bayar,
+            'Cara bayarnya masih transfer sesudah tagihan gerbang dibuat; '
+            . 'pembayarannya tidak akan terdeteksi dan kursinya tidak akan '
+            . 'pernah dilepas.');
+    }
+
     // ------------------------------------------------------- tagihan baru
 
     #[Test]
