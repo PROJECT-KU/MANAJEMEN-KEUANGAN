@@ -331,6 +331,21 @@
      */
     $penuh = $item->total_kuota !== null && (int) $item->sisa_kuota < 1;
 
+    /*
+     * $tertutup DISERAHKAN PENGENDALI, dan ia yang menentukan tombolnya.
+     *
+     * $penuh di atas hanya satu dari TIGA sebab tertutupnya — dua sisanya
+     * status angkatan dan tanggal mulai yang sudah lewat. Terukur pada
+     * angkatan Padang: halaman ini menjawab 200 dengan dua tombol "Daftar
+     * sekarang" untuk angkatan non-aktif yang acaranya sudah lewat sebulan,
+     * dan borangnya memantulkan orangnya kembali tanpa penjelasan.
+     *
+     * Kalimatnya dipakai apa adanya dari pengendali, bukan dikarang lagi di
+     * sini: itu kalimat yang SAMA dengan yang disampaikan borangnya, jadi
+     * orang yang membaca keduanya tidak menerima dua versi.
+     */
+    $pesanTutup = $tertutup;
+
     $hargaAsal = (int) $item->harga_sebelum_promo;
     $hargaBayar = (int) $item->harga_setelah_promo;
     $adaDiskon = $hargaAsal > $hargaBayar && $hargaBayar > 0;
@@ -410,10 +425,15 @@
                              cuma angkanya, bukan kabarnya. --}}
                     </div>
 
-                    @if ($penuh)
+                    @if ($pesanTutup !== null)
                         <span class="cmp-tombol cmp-tombol-mati cmp-tombol-atas">
-                            <i class="bi bi-lock-fill"></i> Kursinya sudah habis
+                            <i class="bi bi-lock-fill"></i>
+                            {{ $penuh ? 'Kursinya sudah habis' : 'Pendaftarannya sudah ditutup' }}
                         </span>
+                        <p class="cmp-tenang">
+                            <i class="bi bi-info-circle"></i> {{ $pesanTutup }}
+                            Angkatan berikutnya ada di daftar di bawah.
+                        </p>
                     @else
                         <a href="{{ $tautanDaftar }}" class="cmp-tombol cmp-tombol-atas">
                             <i class="bi bi-pencil-square"></i> Daftar sekarang
@@ -558,8 +578,9 @@
     {{-- Pita ajakan: muncul justru ketika tombol di atas sudah lewat layar,
          jadi tidak pernah ada dua jalan masuk yang terlihat bersamaan. --}}
     <div class="cmp-pita" id="cmpPita" aria-hidden="true">
-        @if ($penuh)
-            <span class="cmp-tombol cmp-tombol-mati"><i class="bi bi-lock-fill"></i> Kursinya sudah habis</span>
+        @if ($pesanTutup !== null)
+            <span class="cmp-tombol cmp-tombol-mati"><i class="bi bi-lock-fill"></i>
+                {{ $penuh ? 'Kursinya sudah habis' : 'Pendaftarannya sudah ditutup' }}</span>
         @else
             <a href="{{ $tautanDaftar }}" class="cmp-tombol">
                 <i class="bi bi-pencil-square"></i> Daftar sekarang
