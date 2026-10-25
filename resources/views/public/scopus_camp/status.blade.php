@@ -88,6 +88,20 @@
      */
     $bolehBayarUlang = ! $lunas && ! $batal && $tertutup === null && $gerbangSiap;
 
+    /*
+     * Ada jalan menyelesaikan pembayarannya ATAU tidak — dan judulnya harus
+     * ikut.
+     *
+     * Terukur 25 Okt 2026 pada pendaftaran GNKMO: statusnya 'diproses',
+     * angkatannya sudah berjalan sejak 9 Okt, dan tagihannya tidak pernah
+     * dibuat. Judulnya berbunyi "Tinggal satu langkah lagi — yang tersisa
+     * hanya menyelesaikan pembayaran" sementara satu-satunya kalimat di
+     * bawahnya berkata angkatannya sudah ditutup. Dua kalimat yang saling
+     * membantah di satu halaman, dan yang membacanya mencari tombol yang
+     * tidak ada.
+     */
+    $bisaLanjut = $masihBisaBayar || $bolehBayarUlang;
+
     $wa = \App\Support\TautanWa::kirim(
         config('panitia.whatsapp'),
         'Halo, saya mau bertanya soal pendaftaran Scopus Camp nomor '
@@ -602,9 +616,14 @@
                             <h1 class="sts-judul">Batas waktu pembayarannya sudah lewat</h1>
                             <p class="sts-kata">
                                 Tagihan sebelumnya sudah kedaluwarsa.
-                                <strong>Kursi Anda masih kami tahan</strong> — tagihannya bisa
-                                dibuat ulang sekarang lewat tombol di bawah, dan nomor
-                                pendaftaran Anda tidak berubah.
+                                @if ($bisaLanjut)
+                                    <strong>Kursi Anda masih kami tahan</strong> — tagihannya
+                                    bisa dibuat ulang sekarang lewat tombol di bawah, dan nomor
+                                    pendaftaran Anda tidak berubah.
+                                @else
+                                    {{ $tertutup ?? '' }}
+                                    Hubungi panitia dengan menyebut nomor pendaftaran di bawah.
+                                @endif
                             </p>
                         @endif
                     @elseif ($batal)
@@ -631,8 +650,34 @@
                         <p class="sts-kata">
                             Pembayaran sebelumnya tidak selesai — ini biasanya urusan bank
                             atau kartunya, bukan kesalahan Anda.
-                            <strong>Kursi Anda masih kami tahan</strong>, dan tagihannya bisa
-                            dibuat ulang sekarang lewat tombol di bawah.
+                            @if ($bisaLanjut)
+                                <strong>Kursi Anda masih kami tahan</strong>, dan tagihannya
+                                bisa dibuat ulang sekarang lewat tombol di bawah.
+                            @else
+                                {{ $tertutup ?? '' }}
+                                Hubungi panitia dengan menyebut nomor pendaftaran di bawah.
+                            @endif
+                        </p>
+                    @elseif (! $bisaLanjut)
+                        {{-- BELUM DIBAYAR, dan tidak ada lagi jalan membayarnya.
+
+                             Paling sering karena angkatannya sudah berjalan
+                             sementara pembayarannya tidak pernah selesai —
+                             dan pendaftaran seperti itu memang ada: GNKMO,
+                             'diproses' sejak 3 Okt untuk angkatan yang jalan
+                             9 Okt.
+
+                             Judulnya TIDAK boleh berbunyi "tinggal satu
+                             langkah lagi": tidak ada langkah yang bisa ia
+                             kerjakan sendiri, dan menyuruhnya mencari tombol
+                             yang tidak ada hanya membuatnya mengira
+                             halamannya rusak. --}}
+                        <span class="sts-meterai batal"><i class="fas fa-ban"></i></span>
+                        <h1 class="sts-judul">Pembayarannya tidak pernah selesai</h1>
+                        <p class="sts-kata">
+                            {{ $tertutup ?? 'Pembayaran untuk pendaftaran ini sudah tidak bisa diselesaikan sendiri.' }}
+                            Merasa sudah membayar, atau ingin menanyakan jalan lain? Hubungi
+                            panitia dengan menyebut nomor pendaftaran di bawah.
                         </p>
                     @else
                         <span class="sts-meterai tunggu"><i class="fas fa-hourglass-half"></i></span>
@@ -786,6 +831,16 @@
                                     bawah. Pengumuman teknis dibagikan di sana.</span></li>
                                 <li><span>Datang sesuai tanggal dan lokasi di kwitansi ini.
                                     Panitia mengabari lagi menjelang hari-H.</span></li>
+                            @elseif (! $bisaLanjut)
+                                {{-- Langkahnya DIGANTI, bukan disembunyikan: yang
+                                     membacanya tetap perlu tahu apa yang bisa ia
+                                     kerjakan — dan satu-satunya yang tersisa
+                                     menghubungi panitia. --}}
+                                <li><span><strong>Hubungi panitia</strong> lewat tombol di bawah,
+                                    sebutkan nomor pendaftaran di atas.</span></li>
+                                <li><span>Panitia yang memeriksa apakah pembayarannya masih
+                                    bisa diselesaikan atau pendaftarannya dipindahkan ke
+                                    angkatan berikutnya.</span></li>
                             @else
                                 <li><span><strong>Selesaikan pembayaran</strong> lewat tombol di
                                     bawah — QRIS atau Virtual Account.</span></li>

@@ -1027,6 +1027,31 @@ class PublicScopusCampController extends Controller
         }
 
         $pendaftaran->forceFill([
+            /*
+             * CARA BAYARNYA IKUT BERPINDAH ke gerbang, dan ini bukan kerapian.
+             *
+             * Pendaftaran lama bercara bayar 'transfer' — 307 baris, nilai
+             * bawaan dari zaman rekening — bisa menekan "Lanjutkan
+             * pembayaran" di halaman statusnya dan benar-benar membayar lewat
+             * gerbang. Dibiarkan 'transfer', DUA jalur berhenti mengenalinya,
+             * dan keduanya diam:
+             *
+             *   1. susulkanDariGerbang() memulangkan barisnya apa adanya
+             *      untuk yang cara_bayar-nya bukan 'doku'. Halaman statusnya
+             *      lalu tidak pernah menanyakan sendiri ke gerbang — ia
+             *      bergantung sepenuhnya pada pemberitahuan balik, yang ke
+             *      localhost tidak pernah sampai dan di peladen bergantung
+             *      pada alamat di dasbor mereka. Orangnya sudah membayar dan
+             *      halamannya tetap berkata menunggu;
+             *
+             *   2. perintah scopus-camp:kedaluwarsakan menyaring
+             *      `where('cara_bayar','doku')`. Yang tidak ikut tersaring
+             *      kursinya TIDAK pernah dilepas walau tenggatnya lewat —
+             *      tertahan selamanya, persis cacat yang perintah itu dibuat
+             *      untuk memperbaiki.
+             */
+            'cara_bayar' => 'doku',
+
             'bayar_nomor' => $nomorTagihan,
             'bayar_rujukan' => $hasil['rujukan'],
 
