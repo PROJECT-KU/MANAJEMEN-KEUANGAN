@@ -750,7 +750,7 @@ class BayarUlangDanBerkasTest extends TestCase
             'Tidak ada jalan kembali sama sekali di halaman daftar.');
 
         /*
-         * DAN LETAKNYA DI ATAS DAFTAR ANGKATAN.
+         * DAN LETAKNYA SEBELUM KARTU ANGKATAN PERTAMA.
          *
          * Mulanya ditaruh di kaki halaman; terukur 2,4 layar ke bawah di
          * laptop dan 3,9 layar di ponsel — di balik dua belas kartu angkatan
@@ -758,26 +758,28 @@ class BayarUlangDanBerkasTest extends TestCase
          * sedang membaca-baca, ia sedang mencari, dan yang tidak ia temukan
          * berakhir jadi pesan WhatsApp ke panitia.
          *
-         * Urutan markahnya yang dipatok, bukan piksel: PHPUnit tidak bisa
-         * menghitung tata letak, tetapi "sebelum daftar angkatan" sudah
-         * cukup untuk menangkap kalau ia dikembalikan ke kaki halaman.
+         * Yang dipatok urutan markahnya, bukan pikselnya: PHPUnit tidak bisa
+         * menghitung tata letak. "Sebelum kartu angkatan pertama" sudah cukup
+         * untuk menangkap kalau ia dikembalikan ke kaki halaman — dan ia
+         * tetap berlaku saat borangnya pindah ke dalam lajur keterangan,
+         * yang memang digambar sebelum daftarnya.
          */
         $letakBorang = strpos($isi, route('public.scopuscamp.tautansaya'));
 
         /*
-         * Dicari TAG PEMBUKANYA, bukan nama kelasnya.
+         * Dicari ATRIBUT class-nya, bukan nama kelas telanjang.
          *
          * Nama kelas yang sama ada di blok <style> halaman ini — yang letaknya
-         * jauh di atas markah mana pun — jadi mencari 'kmp-bagian' saja
-         * memulangkan posisi aturan CSS-nya, dan perbandingannya membandingkan
-         * dua hal yang tidak berhubungan. Tertangkap persis begitu saat uji
-         * ini pertama dijalankan.
+         * jauh di atas markah mana pun — jadi mencari 'kmp-baris' saja
+         * memulangkan posisi aturan CSS-nya, dan perbandingannya
+         * membandingkan dua hal yang tidak berhubungan. Tertangkap persis
+         * begitu saat uji ini pertama dijalankan, memakai patokan sejenis.
          */
-        $letakDaftar = strpos($isi, '<section class="kmp-bagian">');
+        $letakKartu = strpos($isi, 'class="kmp-baris');
 
-        $this->assertNotFalse($letakDaftar, 'Bagian daftar angkatannya hilang.');
+        $this->assertNotFalse($letakKartu, 'Kartu angkatannya tidak digambar.');
 
-        $this->assertLessThan($letakDaftar, $letakBorang,
+        $this->assertLessThan($letakKartu, $letakBorang,
             'Borang "kehilangan tautan" ada di bawah daftar angkatan; yang '
             . 'mencarinya harus menggulir melewati dua belas kartu dan '
             . 'penomoran halaman dulu.');
