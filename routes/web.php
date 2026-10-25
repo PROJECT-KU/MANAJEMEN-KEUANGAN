@@ -84,6 +84,41 @@ Route::get('/Scopus-Camp/Status/{id}', 'Publict\PublicScopusCampController@statu
 Route::get('/Scopus-Camp/Status/{id}/keadaan', 'Publict\PublicScopusCampController@keadaan')->name('public.scopuscamp.keadaan');
 
 /*
+ * Tiga jalur yang dipakai pendaftar dari halaman statusnya sendiri.
+ *
+ * Pembatas lajunya BERNAMA. `throttle:3,1` tanpa nama tidak memberi rute ini
+ * jatahnya sendiri — kuncinya dirakit dari domain dan IP saja — jadi tombol
+ * di sini akan ikut menghabiskan jatah borang pendaftaran, dan orang
+ * berikutnya di jaringan yang sama ditolak 429 saat menekan "Daftar".
+ * Lihat RouteServiceProvider.
+ */
+Route::post('/Scopus-Camp/Status/{id}/bayar-ulang', 'Publict\PublicScopusCampController@bayarUlang')
+    ->middleware('throttle:camp-bayar-ulang')
+    ->name('public.scopuscamp.bayarulang');
+
+Route::post('/Scopus-Camp/Status/{id}/kirim-ulang', 'Publict\PublicScopusCampController@kirimUlang')
+    ->middleware('throttle:camp-kirim-ulang')
+    ->name('public.scopuscamp.kirimulang');
+
+/*
+ * Faktur dan kwitansi sebagai PDF. GET, dan itu memang benar: tidak ada yang
+ * berubah di basis data, jadi memuat ulang halamannya tidak boleh menimbulkan
+ * peringatan "kirim ulang formulir". Penjagaannya UUID pendaftarannya, sama
+ * dengan halaman statusnya sendiri.
+ */
+Route::get('/Scopus-Camp/Status/{id}/dokumen/{jenis}', 'Publict\PublicScopusCampController@dokumen')
+    ->name('public.scopuscamp.dokumen');
+
+/*
+ * Jalan kembali bagi yang kehilangan tautan pendaftarannya. Tautannya dikirim
+ * ke EMAIL, tidak pernah ditampilkan di layar — kalau tidak, siapa pun yang
+ * menebak alamat email orang lain bisa membuka pendaftarannya.
+ */
+Route::post('/Scopus-Camp/tautan-saya', 'Publict\PublicScopusCampController@tautanSaya')
+    ->middleware('throttle:camp-tautan-saya')
+    ->name('public.scopuscamp.tautansaya');
+
+/*
  * Pemberitahuan balik dari DOKU; dikecualikan dari CSRF di VerifyCsrfToken.
  * Penjagaannya tanda tangan HMAC, diperiksa sebelum satu pun status diubah.
  */

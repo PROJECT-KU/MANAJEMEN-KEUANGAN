@@ -59,6 +59,47 @@ class RouteServiceProvider extends ServiceProvider
             return Limit::perMinute(10)->by($request->ip());
         });
 
+        /*
+         * Tiga jalur baru halaman status Scopus Camp, masing-masing
+         * berpenghitung sendiri dengan alasan yang berbeda.
+         *
+         * 'camp-bayar-ulang' — tiap penekanan membuat TAGIHAN SUNGGUHAN di
+         * DOKU. Tagihan yang menumpuk membuat panitia menelusuri pembayaran
+         * di antara belasan nomor mati, dan jatahnya di DOKU pun terpakai.
+         *
+         * 'camp-kirim-ulang' — tiap penekanan mengirim SURAT. Tanpa nama,
+         * tombol ini ikut menghabiskan jatah borang pendaftaran, dan orang
+         * berikutnya di jaringan yang sama ditolak 429 saat menekan
+         * "Daftar".
+         *
+         * 'camp-tautan-saya' — borangnya menerima alamat email ORANG LAIN.
+         * Batasnya yang paling ketat: tanpa itu ia bisa dipakai mengirim
+         * surat beruntun ke alamat siapa pun, dan yang menerimanya melihat
+         * nama kita sebagai pengirimnya.
+         */
+        RateLimiter::for('camp-bayar-ulang', function (Request $request) {
+            return Limit::perMinute(3)->by($request->ip());
+        });
+
+        RateLimiter::for('camp-kirim-ulang', function (Request $request) {
+            return Limit::perMinute(2)->by($request->ip());
+        });
+
+        RateLimiter::for('camp-tautan-saya', function (Request $request) {
+            /*
+             * Dihitung per ALAMAT EMAIL yang diminta, bukan hanya per IP.
+             *
+             * Per IP saja, satu orang bisa membanjiri satu alamat dari
+             * beberapa jaringan; per email saja, satu penyerang dari satu
+             * jaringan bisa menyapu banyak alamat sekaligus. Keduanya
+             * dipakai, jadi yang dibatasi dua-duanya.
+             */
+            return [
+                Limit::perMinute(3)->by($request->ip()),
+                Limit::perMinute(2)->by(mb_strtolower(trim((string) $request->input('email')))),
+            ];
+        });
+
         $this->routes(function () {
             // Tanpa namespace: isinya komponen Livewire & controller ber-FQCN.
             Route::middleware('web')

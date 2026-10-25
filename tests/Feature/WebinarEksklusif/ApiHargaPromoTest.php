@@ -38,14 +38,37 @@ class ApiHargaPromoTest extends TestCase
 
     private function sesi(array $ubah = []): KategoriLayanan
     {
-        return KategoriLayanan::create(array_merge([
+        /*
+         * Kuncinya DISETEL LANGSUNG kalau pemanggilnya menyerahkannya.
+         *
+         * `id` tidak ada di $fillable — create() akan membuangnya diam-diam —
+         * jadi ia dipasang lewat forceFill sebelum disimpan. Dipakai uji yang
+         * harus menang pemutus seri `orderBy('id')`.
+         */
+        $kunci = $ubah['id'] ?? null;
+        unset($ubah['id']);
+
+        if ($kunci !== null) {
+            $sesi = new KategoriLayanan;
+            $sesi->forceFill(array_merge($this->bawaanSesi(), $ubah, ['id' => $kunci]))->save();
+
+            return $sesi;
+        }
+
+        return KategoriLayanan::create(array_merge($this->bawaanSesi(), $ubah));
+    }
+
+    /** @return array<string, mixed> */
+    private function bawaanSesi(): array
+    {
+        return [
             'layanan' => 'webinar_eksklusif',
             'nama' => 'Sesi Uji ' . Str::random(6),
             'nama_ke' => '9',
             'mulai' => now()->addDays(10)->toDateString(),
             'status' => 'active',
             'biaya' => '150000',
-        ], $ubah));
+        ];
     }
 
     private function promo(KategoriLayanan $sesi, array $ubah = []): PromoLayanan
@@ -149,18 +172,24 @@ class ApiHargaPromoTest extends TestCase
          */
         /*
          * Tanggalnya sengaja PALING DEKAT: hanya sesi pertama yang dikirim
-         * lengkap beserta naskahnya; sesi lain cuma diringkas. Tanpa ini
-         * ujinya ikut bergantung sesi apa yang kebetulan ada di basis data.
+         * lengkap beserta naskahnya; sesi lain cuma diringkas.
          *
-         * HARI INI, bukan besok. Rangkaian uji ini jalan di basis data yang
-         * sama dengan data pengembangan, dan di sana ada sesi nyata yang
-         * mulainya kebetulan BESOK — "testing webinar eksklusif #2", dibuat
-         * 18 Okt, mulai 25 Okt. Dengan tanggal yang sama persis, urutan
-         * keduanya ditentukan basis data dan uji ini merah separuh waktu.
-         * Terjadi 24 Okt 2026, dan merahnya menuduh naskah promo yang
-         * sebenarnya benar.
+         * TANGGAL SAJA TIDAK CUKUP, dan ini perbaikan kedua atas uji yang
+         * sama. Patokan sebelumnya memakai hari ini dengan alasan "sesi nyata
+         * yang bertabrakan mulainya besok" — dan esoknya tiba. Terukur 25 Okt
+         * 2026: sesi nyata "testing webinar eksklusif" mulai hari itu juga,
+         * jadi tanggalnya seri lagi dan ujinya merah separuh waktu. Patokan
+         * apa pun yang berupa tanggal akan mengalami hal yang sama begitu
+         * ada sesi nyata di tanggal itu.
+         *
+         * Yang dipatok sekarang PEMUTUS SERINYA. Kuerinya mengurutkan
+         * `mulai` lalu `id` — lihat ApiWebinarEksklusifController — jadi
+         * kunci yang dimulai nol berurut paling depan di antara UUID mana
+         * pun. Dengan begitu sesi uji ini menang tanpa bergantung pada data
+         * yang kebetulan ada.
          */
         $sesi = $this->sesi([
+            'id' => '00000000-0000-4000-8000-' . bin2hex(random_bytes(6)),
             'mulai' => now()->toDateString(),
             'desc' => "Yang didapat peserta\n\n\u{1F4B5} Rp 150.000 per peserta",
         ]);

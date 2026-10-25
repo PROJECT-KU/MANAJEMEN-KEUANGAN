@@ -221,6 +221,42 @@
         background: var(--stabilo); color: var(--tinta);
         font-size: .72rem; font-weight: 800;
     }
+    /* ================================================ kabar kilat & tautan */
+    .kmp-kabar {
+        display: flex; gap: 12px; align-items: flex-start;
+        padding: 14px 18px; margin: 0 0 20px; border-radius: 14px;
+        font-size: 15px; line-height: 1.6; border: 1px solid;
+    }
+    .kmp-kabar i { flex: 0 0 auto; margin-top: 3px; font-size: 18px; }
+    .kmp-kabar.sukses { background: #eafaf6; border-color: #a7e3d6; color: #0b5a52; }
+    .kmp-kabar.galat  { background: #fdecea; border-color: #f0bdb6; color: #8e2318; }
+
+    /* Borang "kehilangan tautan". DI KAKI halaman, bukan di kepala: yang
+       mencarinya tahu apa yang ia cari, sementara yang baru datang tidak
+       perlu dibingungkan kotak isian email sebelum melihat satu pun
+       angkatan. */
+    .kmp-lacak {
+        background: #fff; border: 1px solid #e7dcc6; border-radius: 22px;
+        padding: 26px 24px; margin: 48px auto 0; max-width: 620px;
+    }
+    .kmp-lacak h3 {
+        font-size: 19px; font-weight: 800; margin: 0 0 6px; color: #16233f;
+    }
+    .kmp-lacak p { font-size: 15px; color: #5c6b85; margin: 0 0 16px; line-height: 1.6; }
+    .kmp-lacak-baris { display: flex; gap: 10px; flex-wrap: wrap; }
+    .kmp-lacak input {
+        flex: 1 1 240px; min-width: 0; padding: 12px 14px; font-size: 15px;
+        border: 1px solid #d9cfba; border-radius: 12px; background: #fdfcf9;
+        color: #16233f;
+    }
+    .kmp-lacak input:focus { outline: 2px solid #e76d20; outline-offset: 1px; }
+    .kmp-lacak button {
+        flex: 0 0 auto; padding: 12px 20px; font-size: 15px; font-weight: 700;
+        border: 0; border-radius: 12px; background: #16233f; color: #fff;
+        cursor: pointer;
+    }
+    .kmp-lacak button:hover { background: #23365c; }
+
     .kmp-sisa {
         padding: 1px 9px; border-radius: 999px;
         background: var(--jingga-kuat); color: #fff;
@@ -293,6 +329,39 @@
 </style>
 
 <div class="kmp">
+
+    {{-- ====================================== kabar kilat & jalan kembali
+
+         Pesan galat sebelumnya TIDAK DIGAMBAR DI MANA PUN pada jalur layanan
+         ini. Terukur 25 Okt 2026: membuka borang angkatan yang sudah ditutup
+         memantulkan orangnya ke halaman ini dengan ->with('error'), dan
+         halaman ini cuma punya penangan 'success' — yang pun mengabaikan isi
+         pesannya dan selalu berbunyi "Data Berhasil Terkirim! Mohon tunggu
+         verifikasi 1x24 jam", kalimat yang sudah tidak benar sejak
+         pembayarannya lewat gerbang. --}}
+    <div class="container" style="padding-top: 96px;">
+        @if (session('error'))
+            <div class="kmp-kabar galat" role="alert">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                <span>{{ session('error') }}</span>
+            </div>
+        @endif
+
+        @if (session('success'))
+            <div class="kmp-kabar sukses" role="status">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>{{ session('success') }}</span>
+            </div>
+        @endif
+
+        @if ($errors->any())
+            <div class="kmp-kabar galat" role="alert">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                <span>{{ $errors->first() }}</span>
+            </div>
+        @endif
+    </div>
+
 
     {{-- ==================================================== kepala ===== --}}
     <section class="kmp-kepala">
@@ -543,16 +612,48 @@
         </div>
     </section>
 
+    {{-- ================================== jalan kembali bagi yang kehilangan tautannya
+
+         Alamat halaman status memuat UUID yang tidak bisa ditebak — itu yang
+         menjaga keterangan satu orang tidak terbuka bagi yang menebak nomor
+         urut. Harganya: yang menutup tabnya dan tidak menerima suratnya
+         kehilangan pendaftarannya untuk SELAMANYA, termasuk tombol bayarnya.
+
+         Tautannya dikirim ke EMAIL, tidak ditampilkan di layar. Ditampilkan,
+         siapa pun yang menebak alamat email orang lain bisa membuka
+         pendaftarannya: di halaman itu ada nama, nomor telepon, afiliasi, dan
+         daftar pesertanya. --}}
+    <div class="container">
+        <div class="kmp-lacak">
+            <h3>Kehilangan tautan pendaftaran Anda?</h3>
+            <p>
+                Masukkan alamat email yang Anda pakai saat mendaftar. Tautan halaman
+                pendaftarannya kami kirimkan ke sana — di halaman itu Anda bisa
+                menyelesaikan pembayaran dan mengunduh fakturnya.
+            </p>
+            <form method="POST" action="{{ route('public.scopuscamp.tautansaya') }}">
+                @csrf
+                <div class="kmp-lacak-baris">
+                    <label for="kmpLacakEmail" class="visually-hidden">Alamat email</label>
+                    <input type="email" id="kmpLacakEmail" name="email" required
+                        autocomplete="email" placeholder="nama@email.com"
+                        value="{{ old('email') }}">
+                    <button type="submit">
+                        <i class="bi bi-envelope"></i> Kirim tautannya
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 </div>
 
-@if (session()->has('success'))
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-    Swal.fire({
-        icon: 'success',
-        title: 'Berhasil!',
-        text: 'Data Berhasil Terkirim! Mohon tunggu verifikasi 1x24 jam.'
-    });
-</script>
-@endif
+{{-- Pemberitahuan 'success' DULU digambar SweetAlert dengan teks tetap
+     "Data Berhasil Terkirim! Mohon tunggu verifikasi 1x24 jam" — isi pesannya
+     diabaikan seluruhnya.
+
+     Kalimat itu sudah tidak benar sejak pembayarannya lewat gerbang: tidak ada
+     yang diverifikasi 1x24 jam, dan yang baru saja meminta tautan
+     pendaftarannya diberi tahu bahwa datanya terkirim. Diganti pita di kepala
+     halaman yang mencetak pesannya sendiri. --}}
 @stop
