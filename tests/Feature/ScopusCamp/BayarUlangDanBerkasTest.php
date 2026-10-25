@@ -146,6 +146,49 @@ class BayarUlangDanBerkasTest extends TestCase
     }
 
     #[Test]
+    public function kegagalan_dari_gerbang_dicatat_saat_halamannya_dibuka(): void
+    {
+        /*
+         * DITAMBAHKAN SETELAH PENJAGA LAIN TERBUKTI KOSONG.
+         *
+         * Uji di atas menyetel `bayar_status` langsung di data ujinya, jadi
+         * ia tidak pernah melewati jalur yang MENCATAT kegagalan itu —
+         * mematikan cabang pencatatnya di susulkanDariGerbang() tidak
+         * memerahkan satu pun uji.
+         *
+         * Yang dijaga di sini jalur sungguhannya, dan ia yang paling
+         * menentukan di produksi: pemberitahuan DOKU TIDAK SELALU SAMPAI —
+         * ke localhost tidak pernah, dan di peladen pun bergantung pada
+         * alamat yang disetel di dasbor mereka. Kalau halaman ini tidak
+         * menanyakan sendiri lalu mencatat jawabannya, orang yang
+         * pembayarannya gagal melihat "Tinggal satu langkah lagi" sampai
+         * sapuan melepas kursinya — tanpa pernah tahu kenapa.
+         */
+        [$p] = $this->pendaftaran([
+            'bayar_status' => 'menunggu',
+            'bayar_url' => 'https://staging.doku.com/checkout-link-v2/SUDAH-MATI',
+        ]);
+
+        Http::fake(['*/orders/v1/status/*' => Http::response([
+            'transaction' => ['status' => 'FAILED'],
+        ], 200)]);
+
+        $isi = $this->get(route('public.scopuscamp.status', $p->getKey()))
+            ->assertOk()->getContent();
+
+        $this->assertSame('failed', (string) $p->refresh()->bayar_status,
+            'Jawaban gagal dari gerbang dibuang; halaman ini akan terus berkata '
+            . 'menunggu pembayaran sampai sapuan melepas kursinya.');
+
+        $this->assertStringContainsString('Pembayarannya belum berhasil', $isi,
+            'Halamannya tidak langsung mengabarkan kegagalan yang baru saja '
+            . 'ditanyakannya sendiri.');
+
+        $this->assertStringNotContainsString('SUDAH-MATI', $isi,
+            'Tombol bayarnya masih menunjuk tagihan yang baru saja dinyatakan gagal.');
+    }
+
+    #[Test]
     public function halaman_berhenti_menanyai_keadaan_yang_tidak_akan_berubah(): void
     {
         /*

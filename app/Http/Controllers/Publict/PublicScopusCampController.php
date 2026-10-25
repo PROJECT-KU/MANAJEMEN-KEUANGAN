@@ -1215,14 +1215,18 @@ class PublicScopusCampController extends Controller
          * dan 'Pendaftaran Dibatalkan' di layanan ini keputusan panitia yang
          * menyeret surat pembatalan ke pendaftarnya.
          *
-         * Ditulis hanya kalau nilainya BERUBAH: halaman ini ditanyai berkala
-         * oleh pollernya sendiri, dan menyimpan baris yang sama tiap
-         * beberapa detik membebani basis data tanpa mengubah apa pun.
+         * TIDAK dibungkus pemeriksaan "nilainya berubah atau tidak". Halaman
+         * ini memang ditanyai pollernya sendiri tiap beberapa detik, tetapi
+         * save() pada atribut yang nilainya sama TIDAK mengirim UPDATE —
+         * isDirty() Eloquent yang menahannya, dan updated_at pun tidak
+         * tersentuh. Pemeriksaan tambahan di sini sempat ada lalu dicabut:
+         * ia tidak bisa dibuat merah oleh uji mana pun, sebab yang
+         * dijanjikannya sudah dijamin kerangka kerjanya.
          */
         if ($kabar['gagal']) {
             $baru = (string) $kabar['status'];
 
-            if ($baru !== '' && $baru !== (string) $pendaftaran->bayar_status) {
+            if ($baru !== '') {
                 $pendaftaran->forceFill(['bayar_status' => $baru])->save();
             }
 
