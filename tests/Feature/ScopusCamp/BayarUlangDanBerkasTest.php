@@ -750,6 +750,95 @@ class BayarUlangDanBerkasTest extends TestCase
             ->assertSee(route('public.scopuscamp.tautansaya'), false);
     }
 
+    #[Test]
+    public function tombol_di_halaman_status_tidak_pernah_saling_menempel(): void
+    {
+        /*
+         * Terukur lewat getBoundingClientRect di Chrome: jarak antara "Unduh
+         * kwitansi (PDF)" dan "Masuk grup peserta" NOL piksel — keduanya
+         * menempel.
+         *
+         * Sebabnya jaraknya dulu dipasang per tombol: hanya .sts-tombol-polos
+         * yang punya margin-top, sementara .sts-tombol yang bergradien
+         * (termasuk .hijau) tidak punya sama sekali. Selama cuma satu tombol
+         * bergradien yang tampil itu tidak terlihat — dan memang begitu dulu,
+         * tombol bayar hanya muncul saat belum lunas dan tombol grup hanya
+         * saat sudah lunas. Begitu "Unduh kwitansi" ditambahkan di antara
+         * keduanya, cacatnya muncul.
+         *
+         * YANG DIJAGA MEKANISMENYA, bukan angkanya: jarak hidup di WADAHNYA
+         * sebagai gap, jadi gabungan tombol mana pun — termasuk yang
+         * ditambahkan nanti — berjarak sama tanpa perlu ada yang mengingat
+         * memasang margin di kelas yang benar. Dikembalikan ke margin per
+         * tombol, cacat yang sama akan muncul lagi pada gabungan berikutnya,
+         * dan tidak ada galat apa pun yang memberitahunya.
+         *
+         * PHPUnit tidak bisa menghitung tata letak; yang bisa dipatok di sini
+         * kontraknya di sumber.
+         */
+        $gaya = (string) file_get_contents(
+            base_path('resources/views/public/scopus_camp/status.blade.php')
+        );
+
+        $awal = strpos($gaya, '.sts-aksi {');
+        $this->assertNotFalse($awal, 'Aturan .sts-aksi hilang.');
+
+        $aturan = substr($gaya, $awal, (int) strpos($gaya, '}', $awal) - $awal);
+
+        $this->assertStringContainsString('display: flex', $aturan,
+            'Jarak antar tombol tidak lagi diatur wadahnya; tombol yang kelasnya '
+            . 'tidak bermargin akan menempel ke tetangganya.');
+
+        $this->assertStringContainsString('gap:', $aturan,
+            'Wadahnya tidak memberi jarak, jadi tombol bergradien yang berurutan '
+            . 'akan menempel — persis cacat yang terukur nol piksel.');
+
+        /*
+         * Dan margin per tombol TIDAK boleh kembali: ia menumpuk di atas gap
+         * wadahnya, jadi sebagian jarak jadi dua kali lipat sementara
+         * sisanya tidak — tampak seperti tata letak yang rusak sebagian.
+         */
+        $awalPolos = strpos($gaya, '.sts-tombol-polos {');
+        $this->assertNotFalse($awalPolos);
+
+        $this->assertStringNotContainsString('margin-top',
+            substr($gaya, $awalPolos, (int) strpos($gaya, '}', $awalPolos) - $awalPolos),
+            'Margin per tombol dipasang lagi; ia menumpuk di atas gap wadahnya '
+            . 'dan sebagian jaraknya jadi dua kali lipat.');
+    }
+
+    #[Test]
+    public function gabungan_tombol_yang_dulu_menempel_memang_ada(): void
+    {
+        /*
+         * Penjaga di atas memeriksa mekanismenya. Yang ini memastikan
+         * gabungan yang MEMBUAT cacatnya muncul memang masih dirakit —
+         * tanpa ini, penjaga itu bisa tetap hijau pada halaman yang tidak
+         * pernah lagi menggambar kedua tombol itu bersamaan, dan kita
+         * mengira sudah terjaga.
+         *
+         * DIPATOK KE ALAMAT TOMBOLNYA, bukan ke tulisannya. Versi pertama
+         * uji ini mencari frasa "Unduh kwitansi (PDF)" dan TIDAK BISA dibuat
+         * merah: frasa yang sama ada di komentar CSS halaman itu sendiri —
+         * komentar yang ikut terkirim ke peramban — jadi ia ditemukan walau
+         * tombolnya diganti tulisannya. Alamat tidak bisa menyelinap ke
+         * komentar penjelasan.
+         */
+        [$p, $a] = $this->pendaftaran(['status' => 'Pendaftaran Diterima']);
+        $a->forceFill(['group_wa' => 'https://chat.whatsapp.com/UjiJarak123'])->save();
+
+        $isi = $this->get(route('public.scopuscamp.status', $p->getKey()))
+            ->assertOk()->getContent();
+
+        $this->assertStringContainsString(
+            route('public.scopuscamp.dokumen', [$p->getKey(), 'kwitansi']), $isi,
+            'Tombol unduh kwitansinya tidak digambar, jadi gabungan tombol yang '
+            . 'dulu menempel tidak lagi diuji oleh penjaga mana pun.');
+
+        $this->assertStringContainsString('https://chat.whatsapp.com/UjiJarak123', $isi,
+            'Tombol grup pesertanya tidak digambar.');
+    }
+
     // ------------------------------------------------------------ pembantu
 
     private function kirimPemberitahuan(array $isi)
