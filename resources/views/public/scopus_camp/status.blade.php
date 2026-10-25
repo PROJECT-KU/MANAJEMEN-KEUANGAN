@@ -43,10 +43,50 @@
      * tombol yang mengantarnya ke halaman DOKU bertuliskan "order has
      * expired" — dan menyalahkan dirinya sendiri.
      */
+    /*
+     * KEADAAN GERBANG, yang sebelumnya tidak dibaca halaman ini sama sekali.
+     *
+     * Terukur 24 Okt 2026: pendaftaran ber-bayar_status 'failed' digambar
+     * sebagai "Tinggal satu langkah lagi" lengkap dengan tombol bayar yang
+     * mengantar ke tagihan mati — dan pollernya menanyai keadaan itu
+     * selamanya, sebab 'selesai' pun tidak pernah jadi benar.
+     *
+     * 'gagal-dibuat' ikut di sini: tagihannya tidak pernah berhasil dibuat,
+     * jadi yang dibutuhkan orangnya sama — tagihan baru.
+     */
+    $gagalBayar = ! $lunas && in_array((string) $pendaftaran->bayar_status,
+        ['failed', 'cancel', 'canceled', 'gagal', 'gagal-dibuat'], true);
+
+    /*
+     * Tenggat terlewat DIPISAHKAN dari pembatalan panitia.
+     *
+     * Sapuan scopus-camp:kedaluwarsakan menyetel status 'Pendaftaran
+     * Dibatalkan' BESERTA bayar_status 'expired'. Dibaca sebagai pembatalan
+     * biasa, halaman ini berbunyi "Pendaftaran ini sudah tidak berjalan.
+     * Statusnya sekarang Pendaftaran Dibatalkan" — yang membuat orangnya
+     * mengira panitia membatalkannya, bukan bahwa ia kehabisan waktu. Dan ia
+     * tidak diberi jalan mendaftar lagi.
+     */
+    $habisWaktu = ! $lunas && (string) $pendaftaran->bayar_status === 'expired';
+
     $masihBisaBayar = $pendaftaran->bayar_url
         && ! $lunas
         && ! $batal
+        && ! $gagalBayar
+        && ! $habisWaktu
         && ($pendaftaran->kedaluwarsa_pada === null || $pendaftaran->kedaluwarsa_pada->isFuture());
+
+    /*
+     * Boleh dibuatkan tagihan baru sendiri? Syaratnya sama dengan yang
+     * diperiksa ulang peladen di bayarUlang() — digambar di sini hanya untuk
+     * memutuskan tombolnya tampil atau tidak.
+     *
+     * Dihitung dari $tertutup yang DISERAHKAN PENGENDALI, bukan diperiksa
+     * lagi di Blade: aturan "angkatan ini masih terbuka" ada tiga butir
+     * (status, tanggal mulai, sisa kursi), dan salinan keduanya di sini akan
+     * berselisih dengan yang asli pada butir yang terlupa.
+     */
+    $bolehBayarUlang = ! $lunas && ! $batal && $tertutup === null && $gerbangSiap;
 
     $wa = \App\Support\TautanWa::kirim(
         config('panitia.whatsapp'),
@@ -116,6 +156,26 @@
     .sts-kotak.lunas::before  { background: linear-gradient(90deg, var(--rumput), var(--rumput-muda)); }
     .sts-kotak.tunggu::before { background: linear-gradient(90deg, var(--jingga-tua), var(--jingga-muda)); }
     .sts-kotak.batal::before  { background: linear-gradient(90deg, var(--merah), #d2695c); }
+
+    /* Pembayaran gagal BUKAN merah seperti pembatalan: kursinya masih
+       ditahan dan tagihannya bisa dibuat ulang. Merah menyampaikan "sudah
+       habis", dan itu bukan yang terjadi. */
+    .sts-kotak.gagal::before  { background: linear-gradient(90deg, #b45309, #f59e0b); }
+
+    /* ============================================== kabar kilat (flash)
+
+       DI ATAS kotak statusnya, bukan di dalamnya: isinya kabar tentang
+       TINDAKAN yang baru saja dikerjakan ("suratnya dikirim ulang",
+       "tagihannya tidak bisa dibuat"), bukan tentang keadaan pendaftarannya.
+       Di dalam kotak, keduanya terbaca sebagai satu hal. */
+    .sts-kabar {
+        display: flex; gap: 12px; align-items: flex-start;
+        padding: 14px 18px; margin: 0 0 18px; border-radius: 16px;
+        font-size: 15px; line-height: 1.6; border: 1px solid;
+    }
+    .sts-kabar i { flex: 0 0 auto; margin-top: 3px; font-size: 18px; }
+    .sts-kabar.sukses { background: #eafaf6; border-color: #a7e3d6; color: #0b5a52; }
+    .sts-kabar.galat  { background: #fdecea; border-color: #f0bdb6; color: #8e2318; }
 
     .sts-kepala { padding: 40px 34px 30px; text-align: center; }
 
@@ -223,6 +283,7 @@
     .sts-meterai { position: relative; }
     .sts-meterai.tunggu { background: #fff4d6; color: #8a6200; }
     .sts-meterai.batal  { background: #fbe4e0; color: var(--merah); }
+    .sts-meterai.gagal  { background: #fef3c7; color: #b45309; }
 
     /* Lingkaran luarnya berdenyut HANYA selagi menunggu: gerakan pada
        halaman yang sudah selesai cuma menarik mata ke tempat yang tidak
@@ -442,10 +503,39 @@
 </style>
 
 <section class="sts" data-keadaan="{{ route('public.scopuscamp.keadaan', $pendaftaran->id) }}"
-    data-selesai="{{ $lunas || $batal ? '1' : '0' }}">
+    data-selesai="{{ $lunas || $batal || $gagalBayar || $habisWaktu ? '1' : '0' }}">
     <div class="container">
         <div class="sts-bungkus">
-            <div class="sts-kotak {{ $lunas ? 'lunas' : ($batal ? 'batal' : 'tunggu') }}">
+            {{-- Pesan kilat DIGAMBAR DI SINI, dan sebelumnya tidak di mana pun.
+
+                 Tiga jalur mengantar orang ke halaman ini dengan pesan: tagihan
+                 daring yang gagal dibuat, tagihan baru yang ditolak, dan surat
+                 yang gagal dikirim ulang. Ketiganya memasang ->with('error')
+                 lalu pesannya hilang tanpa bekas, sebab tata letak publik ini
+                 tidak menggambarnya dan halaman ini pun tidak. Webinar
+                 Eksklusif menggambarnya di dua tempat; layanan ini di nol. --}}
+            @if (session('success'))
+                <div class="sts-kabar sukses" role="status">
+                    <i class="fas fa-check-circle"></i>
+                    <span>{{ session('success') }}</span>
+                </div>
+            @endif
+
+            @if (session('error'))
+                <div class="sts-kabar galat" role="alert">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span>{{ session('error') }}</span>
+                </div>
+            @endif
+
+            @if ($errors->any())
+                <div class="sts-kabar galat" role="alert">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span>{{ $errors->first() }}</span>
+                </div>
+            @endif
+
+            <div class="sts-kotak {{ $lunas ? 'lunas' : (($batal || $habisWaktu) ? 'batal' : ($gagalBayar ? 'gagal' : 'tunggu')) }}">
 
                 <div class="sts-kepala">
                     @if ($lunas)
@@ -472,6 +562,51 @@
                             Terima kasih — kursi Anda sudah pasti. Keterangan lengkapnya
                             juga kami kirim ke <strong>{{ $pendaftaran->email }}</strong>.
                         </p>
+                    @elseif ($habisWaktu)
+                        {{-- DIDAHULUKAN atas $batal.
+
+                             Sapuan kedaluwarsa menyetel keduanya sekaligus —
+                             status 'Pendaftaran Dibatalkan' dan bayar_status
+                             'expired' — dan yang benar disampaikan di sini
+                             sebabnya, bukan akibatnya di kolom status. --}}
+                        {{-- DUA KEADAAN BERBEDA, dan membedakannya penting.
+
+                             Tagihan yang kedaluwarsa TIDAK sama dengan kursi
+                             yang dilepas. Tenggat tagihannya 60 menit,
+                             sementara kursinya baru dilepas oleh sapuan
+                             scopus-camp:kedaluwarsakan — yang berjalan tiap
+                             sepuluh menit dan hanya menyentuh yang statusnya
+                             masih status awal.
+
+                             Di antara keduanya ada tenggang: tagihannya mati,
+                             kursinya MASIH ditahan, dan yang dibutuhkan
+                             orangnya tagihan baru — bukan pendaftaran baru,
+                             yang akan menghasilkan dua baris untuk satu orang
+                             dan memotong kuota dua kali. --}}
+                        <span class="sts-meterai batal"><i class="fas fa-hourglass-end"></i></span>
+
+                        @if ($batal)
+                            <h1 class="sts-judul">Kursinya sudah kami lepas</h1>
+                            <p class="sts-kata">
+                                Pembayarannya tidak masuk sampai batas waktunya, jadi kursinya
+                                kami lepas untuk pendaftar lain.
+                                @if ($tertutup === null)
+                                    Kursinya masih bisa diambil lagi — silakan mendaftar
+                                    kembali lewat tombol di bawah.
+                                @else
+                                    Merasa sudah membayar? Hubungi panitia dengan menyebut
+                                    nomor pendaftaran di bawah.
+                                @endif
+                            </p>
+                        @else
+                            <h1 class="sts-judul">Batas waktu pembayarannya sudah lewat</h1>
+                            <p class="sts-kata">
+                                Tagihan sebelumnya sudah kedaluwarsa.
+                                <strong>Kursi Anda masih kami tahan</strong> — tagihannya bisa
+                                dibuat ulang sekarang lewat tombol di bawah, dan nomor
+                                pendaftaran Anda tidak berubah.
+                            </p>
+                        @endif
                     @elseif ($batal)
                         <span class="sts-meterai batal"><i class="fas fa-times"></i></span>
                         <h1 class="sts-judul">Pendaftaran ini sudah tidak berjalan</h1>
@@ -479,6 +614,25 @@
                             Statusnya sekarang <strong>{{ $pendaftaran->status }}</strong>.
                             Kalau menurut Anda ini keliru, hubungi panitia dengan menyebut
                             nomor pendaftaran di bawah.
+                        </p>
+                    @elseif ($gagalBayar)
+                        {{-- KEADAAN YANG SEBELUMNYA TIDAK ADA.
+
+                             Yang kartunya ditolak atau tagihannya gagal dibuat
+                             digambar sebagai "Tinggal satu langkah lagi" —
+                             dengan tombol yang mengantarnya ke halaman DOKU
+                             bertuliskan "INVOICE ALREADY USED", lalu ia
+                             menyalahkan dirinya sendiri.
+
+                             Kursinya MASIH ditahan: gagal di gerbang hanya
+                             berarti tagihannya mati, bukan pendaftarannya. --}}
+                        <span class="sts-meterai gagal"><i class="fas fa-exclamation"></i></span>
+                        <h1 class="sts-judul">Pembayarannya belum berhasil</h1>
+                        <p class="sts-kata">
+                            Pembayaran sebelumnya tidak selesai — ini biasanya urusan bank
+                            atau kartunya, bukan kesalahan Anda.
+                            <strong>Kursi Anda masih kami tahan</strong>, dan tagihannya bisa
+                            dibuat ulang sekarang lewat tombol di bawah.
                         </p>
                     @else
                         <span class="sts-meterai tunggu"><i class="fas fa-hourglass-half"></i></span>
@@ -654,14 +808,77 @@
                             <span>Begitu pembayaran Anda masuk, halaman ini berubah sendiri —
                                 tidak perlu mengirim bukti transfer.</span>
                         </div>
-                    @elseif (! $lunas && ! $batal)
+                    @elseif ($bolehBayarUlang)
+                        {{-- TAGIHAN BARU, dibuat pendaftarnya sendiri.
+
+                             Sebelum ini kalimat di sini berbunyi "hubungi
+                             panitia … dan tagihannya akan dibuatkan lagi" —
+                             satu pekerjaan tangan untuk setiap pembayaran yang
+                             gagal dan setiap tenggat yang lewat, dua kejadian
+                             yang paling sering terjadi di jalur ini.
+
+                             BORANG, bukan tautan: peladennya memeriksa ulang
+                             ketiga syaratnya (belum lunas, belum dihentikan,
+                             angkatannya masih buka) lalu membuat tagihan
+                             SUNGGUHAN di gerbang. Yang begitu tidak boleh
+                             terpicu oleh pengambil pratayang tautan. --}}
+                        <form method="POST" action="{{ route('public.scopuscamp.bayarulang', $pendaftaran->id) }}">
+                            @csrf
+                            <button type="submit" class="sts-tombol" style="width: 100%; border: 0;">
+                                <i class="fas fa-redo"></i>
+                                {{ $gagalBayar || $habisWaktu ? 'Buat tagihan baru' : 'Lanjutkan pembayaran' }}
+                            </button>
+                        </form>
+                        <div class="sts-catatan">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Tagihan baru berlaku {{ $menitBayar }} menit sejak dibuat.
+                                Nomor pendaftaran Anda tidak berubah.</span>
+                        </div>
+                    @elseif (! $lunas && ! $batal && ! $habisWaktu)
                         <div class="sts-catatan" style="margin-top: 0;">
                             <i class="fas fa-exclamation-circle"></i>
-                            <span>Halaman pembayarannya sudah tidak berlaku. Hubungi panitia
-                                lewat WhatsApp dengan menyebut nomor pendaftaran di atas,
-                                dan tagihannya akan dibuatkan lagi.</span>
+                            <span>{{ $tertutup ?? 'Halaman pembayarannya sudah tidak berlaku.' }}
+                                Hubungi panitia lewat WhatsApp dengan menyebut nomor
+                                pendaftaran di atas.</span>
                         </div>
                     @endif
+
+                    {{-- Mendaftar lagi HANYA kalau kursinya memang sudah
+                         dilepas ($batal), bukan sekadar tagihannya mati.
+
+                         Ditawarkan saat kursinya masih ditahan, orangnya
+                         mendaftar untuk KEDUA kalinya: dua baris untuk satu
+                         orang, kuota terpotong dua kali, dan panitia yang
+                         menghapus salah satunya harus menebak mana yang
+                         dimaksud. --}}
+                    @if ($batal && $tertutup === null)
+                        <a href="{{ route('public.scopuscamp.formpendaftaran', $pendaftaran->kategori_id) }}"
+                            class="sts-tombol">
+                            <i class="fas fa-pen"></i> Daftar lagi
+                        </a>
+                    @endif
+
+                    {{-- ======================================= berkasnya
+
+                         Halaman ini dirancang SEBAGAI kwitansi — nomor di
+                         puncak, deret label-nilai, nominal di kaki — tetapi
+                         sampai sekarang tidak ada yang bisa diunduh dari
+                         sini. Berkasnya hanya hidup sebagai lampiran surat,
+                         jadi yang suratnya tidak sampai tidak punya faktur
+                         sama sekali — dan bagian keuangan kampusnya
+                         memintanya.
+
+                         Kwitansi HANYA setelah lunas: ia menyatakan uangnya
+                         sudah diterima, dan diberikan sebelum itu ia jadi
+                         surat yang kami tanda tangani sendiri untuk sesuatu
+                         yang belum terjadi. Peladennya memeriksa ulang. --}}
+                    @unless ($batal && ! $lunas)
+                        <a href="{{ route('public.scopuscamp.dokumen', [$pendaftaran->id, $lunas ? 'kwitansi' : 'faktur']) }}"
+                            class="sts-tombol-polos">
+                            <i class="fas fa-file-pdf"></i>
+                            {{ $lunas ? 'Unduh kwitansi (PDF)' : 'Unduh faktur (PDF)' }}
+                        </a>
+                    @endunless
 
                     @if ($grup)
                         <a href="{{ $grup }}" target="_blank" rel="noopener"
@@ -669,6 +886,17 @@
                             <i class="fab fa-whatsapp"></i> Masuk grup peserta
                         </a>
                     @endif
+
+                    {{-- Kirim ulang suratnya, untuk yang emailnya salah ketik,
+                         masuk spam, atau terhapus. Tanpa ini satu-satunya
+                         jalan mendapatkan nomor dan fakturnya kembali adalah
+                         menghubungi panitia. --}}
+                    <form method="POST" action="{{ route('public.scopuscamp.kirimulang', $pendaftaran->id) }}">
+                        @csrf
+                        <button type="submit" class="sts-tombol-polos" style="width: 100%; border: 0;">
+                            <i class="fas fa-envelope"></i> Kirim ulang bukti ke email saya
+                        </button>
+                    </form>
 
                     @if ($wa !== '')
                         <a href="{{ $wa }}" target="_blank" rel="noopener" class="sts-tombol-polos">

@@ -19,6 +19,8 @@
     $rincian   larik asosiatif label => nilai, dicetak jadi tabel
     $penutup   larik paragraf penutup (boleh kosong)
     $sorot     ['judul' => ..., 'isi' => ...] kotak sorot (boleh null)
+    $tautan    larik ['label','teks','alamat'] tombol yang bisa ditekan
+               (boleh tidak diserahkan sama sekali)
 --}}
 <!DOCTYPE html>
 <html lang="id">
@@ -128,6 +130,43 @@
                     <tr>
                         <td style="padding:16px 28px 0 28px;">
                             <p style="margin:0; font-size:15px; line-height:1.6; color:#334155;">{{ $alinea }}</p>
+                        </td>
+                    </tr>
+                @endforeach
+
+                {{-- Tautan yang bisa ditekan, kalau pemanggilnya menyerahkannya.
+
+                     `$tautan ?? []`, BUKAN $tautan: keempat surat yang sudah
+                     berjalan tidak menyerahkannya, dan variabel yang tidak
+                     ada membuat @include melempar "Undefined variable" —
+                     keempatnya gagal terkirim sekaligus.
+
+                     Alamatnya ikut DICETAK di bawah teks tombolnya. Sebagian
+                     klien email dan hampir semua penyaring korporat membuang
+                     <a> tetapi menyisakan teksnya; tanpa alamat yang tertulis,
+                     yang menerimanya tidak punya apa pun untuk disalin.
+
+                     Dibingkai <table>, bukan padding pada <a>: Outlook
+                     mengabaikan padding pada unsur sebaris, dan tombolnya
+                     sampai sebagai teks biru setinggi satu baris. --}}
+                @foreach ($tautan ?? [] as $t)
+                    <tr>
+                        <td style="padding:18px 28px 0 28px;">
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                                style="background-color:#f8fafc; border:1px solid #e7ecf5; border-radius:12px;">
+                                <tr>
+                                    <td style="padding:14px 16px;">
+                                        @if (! empty($t['label']))
+                                            <p style="margin:0 0 8px 0; font-size:13px; color:#64748b;">{{ $t['label'] }}</p>
+                                        @endif
+                                        <p style="margin:0 0 8px 0;">
+                                            <a href="{{ $t['alamat'] }}"
+                                                style="display:inline-block; background-color:#16233f; color:#ffffff; text-decoration:none; font-size:14px; font-weight:bold; padding:11px 18px; border-radius:8px;">{{ $t['teks'] ?? 'Buka halaman' }}</a>
+                                        </p>
+                                        <p style="margin:0; font-size:12px; line-height:1.5; color:#94a3b8; word-break:break-all;">{{ $t['alamat'] }}</p>
+                                    </td>
+                                </tr>
+                            </table>
                         </td>
                     </tr>
                 @endforeach

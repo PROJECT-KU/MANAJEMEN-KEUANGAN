@@ -49,6 +49,11 @@ class PendaftaranScopusCamp extends Model
          * yang memberi tahu — nilainya cuma menguap saat create().
          */
         'bayar_rujukan',
+
+        // Nomor tagihan di gerbang, yang BISA berbeda dari nomor
+        // pendaftarannya begitu tagihannya dibuat ulang; lihat migrasi
+        // 2026_10_25_090000.
+        'bayar_nomor',
         'bayar_permintaan_id',
         'bayar_url',
         'bayar_status',
