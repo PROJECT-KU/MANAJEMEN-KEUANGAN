@@ -231,47 +231,47 @@
     .kmp-kabar.sukses { background: #eafaf6; border-color: #a7e3d6; color: #0b5a52; }
     .kmp-kabar.galat  { background: #fdecea; border-color: #f0bdb6; color: #8e2318; }
 
-    /* ============================= pita "kehilangan tautan"
+    /* ======================== borang "kehilangan tautan"
 
-       Satu baris di atas daftar angkatan. Ramping dengan sengaja: ia harus
-       terbaca sekali pandang tanpa digulir, TANPA merebut perhatian dari
-       daftar angkatan yang memang tujuan utama halaman ini.
+       Di lajur keterangan, tepat di bawah kartu "Yang kamu dapat".
 
-       Terukur sebelum dipindahkan: 2,4 layar ke bawah di laptop dan 3,9
-       layar di ponsel — di balik dua belas kartu angkatan dan penomoran
-       halaman 29 nomor. */
-    .kmp-lacak-pita { padding: 0 0 8px; }
+       Riwayat letaknya: mula-mula di kaki halaman — terukur 2,4 layar ke
+       bawah di laptop dan 3,9 layar di ponsel — lalu sempat jadi pita
+       selebar layar di bawah hero (0,5 layar), dan kini di sini (1,1 layar).
+       Setengah layar lebih jauh daripada pita, dan itu harga yang dibayar
+       dengan sadar: lajur ini memang lajur keterangan, jadi borangnya duduk
+       bersama hal-hal yang dibaca orang SEBELUM memilih angkatan, dan daftar
+       angkatannya tidak lagi terdorong ke bawah.
 
+       MENUMPUK KE BAWAH, bukan sebaris: lajurnya 330 px. Dipaksa sebaris,
+       kotak email tinggal ~120 px — terlalu sempit untuk melihat alamat yang
+       sedang diketik, dan alamat yang salah ketik berarti suratnya terbang ke
+       tempat lain tanpa ada yang tahu. */
     .kmp-lacak {
-        display: flex; align-items: center; justify-content: space-between;
-        gap: 18px 24px; flex-wrap: wrap;
-        padding: 16px 22px; border-radius: 18px;
+        margin-top: 14px; padding: 18px 20px; border-radius: 18px;
         background: #fff; border: 1px solid #efe3cd;
         box-shadow: 0 6px 20px rgba(22, 35, 63, .05);
     }
 
     .kmp-lacak-kata {
-        display: flex; align-items: center; gap: 13px;
-        flex: 1 1 300px; min-width: 0;
-        font-size: 15px; line-height: 1.5; color: #5c6b85;
+        display: flex; align-items: flex-start; gap: 12px;
+        font-size: 14px; line-height: 1.55; color: #5c6b85;
     }
-    .kmp-lacak-kata strong { display: block; color: #16233f; font-size: 16px; }
+    .kmp-lacak-kata strong {
+        display: block; color: #16233f; font-size: 15.5px; margin-bottom: 2px;
+    }
 
     .kmp-lacak-ikon {
         flex: 0 0 auto;
-        display: grid; place-items: center; width: 44px; height: 44px;
-        border-radius: 13px; font-size: 20px;
+        display: grid; place-items: center; width: 40px; height: 40px;
+        border-radius: 12px; font-size: 18px;
         background: linear-gradient(135deg, #fde8d3, #fbd9b4); color: #ad4d12;
     }
 
-    /* Isiannya satu kelompok sendiri supaya kotak dan tombolnya tidak pernah
-       terpisah baris — kotak isian yang tombolnya terlempar ke baris lain
-       terbaca seperti dua hal yang tidak berhubungan. */
-    .kmp-lacak-isian {
-        display: flex; gap: 10px; flex: 1 1 340px; min-width: 0;
-    }
+    .kmp-lacak-isian { display: grid; gap: 9px; margin-top: 14px; }
+
     .kmp-lacak-isian input {
-        flex: 1 1 auto; min-width: 0; padding: 12px 15px; font-size: 15px;
+        width: 100%; min-width: 0; padding: 12px 14px; font-size: 15px;
         border: 1px solid #ddd0b8; border-radius: 12px; background: #fdfcf9;
         color: #16233f;
     }
@@ -279,22 +279,22 @@
     .kmp-lacak-isian input:focus {
         outline: 2px solid #e76d20; outline-offset: 1px; background: #fff;
     }
+
     .kmp-lacak-isian button {
-        flex: 0 0 auto; display: inline-flex; align-items: center; gap: 8px;
-        padding: 12px 20px; font-size: 15px; font-weight: 700; white-space: nowrap;
+        display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        width: 100%; padding: 12px 16px; font-size: 15px; font-weight: 700;
         border: 0; border-radius: 12px; cursor: pointer;
         background: #16233f; color: #fff;
         transition: background .18s ease;
     }
     .kmp-lacak-isian button:hover { background: #23365c; }
 
-    /* Di layar sempit tulisannya di atas, isiannya di bawah — dan isiannya
-       tetap satu baris: kotak email yang menyusut masih lebih berguna
-       daripada tombol yang turun sendirian. */
-    @media (max-width: 575.98px) {
-        .kmp-lacak { padding: 14px 16px; gap: 14px; }
-        .kmp-lacak-kata { font-size: 14px; }
-        .kmp-lacak-isian button { padding: 12px 14px; }
+    /* Di layar sempit lajurnya melebar penuh, jadi kotak dan tombolnya muat
+       sebaris — dan sebaris di situ lebih baik: ia memendekkan satu blok lagi
+       di halaman yang sudah panjang. */
+    @media (min-width: 576px) and (max-width: 992px) {
+        .kmp-lacak-isian { grid-template-columns: minmax(0, 1fr) auto; }
+        .kmp-lacak-isian button { width: auto; white-space: nowrap; }
     }
 
     .kmp-sisa {
@@ -431,55 +431,6 @@
         </div>
     </section>
 
-    {{-- ============================== jalan kembali bagi yang kehilangan tautannya
-
-         DI ATAS daftar angkatan, dan itu hasil koreksi.
-
-         Mulanya ditaruh di KAKI halaman dengan alasan "yang mencarinya tahu
-         apa yang ia cari, dan yang baru datang tidak perlu dibingungkan kotak
-         isian email". Alasan itu salah menilai jaraknya: terukur 2,4 layar ke
-         bawah di laptop dan 3,9 layar di ponsel — melewati dua belas kartu
-         angkatan dan penomoran halaman 29 nomor. Yang kehilangan tautannya
-         tidak sedang membaca-baca; ia sedang mencari, dan menguburnya di
-         bawah membuatnya menghubungi panitia alih-alih menemukannya.
-
-         Bentuknya PITA SATU BARIS, bukan kartu: ia tetap tidak merebut
-         perhatian dari daftar angkatan — yang memang tujuan utama halaman ini
-         — tetapi terbaca sekali pandang tanpa digulir.
-
-         Alamat halaman status memuat UUID yang tidak bisa ditebak, jadi yang
-         menutup tabnya dan tidak menerima suratnya kehilangan pendaftarannya
-         untuk selamanya, termasuk tombol bayarnya. Tautannya dikirim ke
-         EMAIL, tidak ke layar: ditampilkan, siapa pun yang menebak alamat
-         email orang lain bisa membuka pendaftarannya — di halaman itu ada
-         nama, nomor telepon, afiliasi, dan daftar pesertanya. --}}
-    <section class="kmp-lacak-pita">
-        <div class="container">
-            <form method="POST" action="{{ route('public.scopuscamp.tautansaya') }}"
-                class="kmp-lacak">
-                @csrf
-
-                <div class="kmp-lacak-kata">
-                    <span class="kmp-lacak-ikon"><i class="bi bi-ticket-detailed"></i></span>
-                    <span>
-                        <strong>Sudah pernah mendaftar?</strong>
-                        Masukkan email Anda, tautan pendaftarannya kami kirim ke sana.
-                    </span>
-                </div>
-
-                <div class="kmp-lacak-isian">
-                    <label for="kmpLacakEmail" class="visually-hidden">Alamat email</label>
-                    <input type="email" id="kmpLacakEmail" name="email" required
-                        autocomplete="email" placeholder="nama@email.com"
-                        value="{{ old('email') }}">
-                    <button type="submit">
-                        <i class="bi bi-envelope"></i> Kirim tautannya
-                    </button>
-                </div>
-            </form>
-        </div>
-    </section>
-
     {{-- ================================================== angkatan ===== --}}
     <section class="kmp-bagian">
         <div class="container">
@@ -588,6 +539,58 @@
                                 @endforeach
                             @endif
                         </div>
+
+                        {{-- ================== jalan kembali bagi yang kehilangan tautannya
+
+                             DI BAWAH kartu "Yang kamu dapat", di lajur
+                             keterangan — bukan di kaki halaman, dan bukan pula
+                             sebagai pita selebar layar di bawah hero.
+
+                             Riwayatnya: mula-mula di KAKI halaman, dan terukur
+                             2,4 layar ke bawah di laptop serta 3,9 layar di
+                             ponsel — di balik dua belas kartu angkatan dan
+                             penomoran 29 nomor. Dipindahkan ke bawah hero ia
+                             jadi 0,5 layar, tetapi memotong jalan antara
+                             judul halaman dan daftar angkatannya.
+
+                             Di sini ia 1,1 layar — setengah layar lebih jauh
+                             daripada di bawah hero, dan itu harga yang dibayar
+                             dengan sadar: lajur ini memang lajur keterangan,
+                             jadi borangnya duduk bersama hal-hal lain yang
+                             dibaca orang SEBELUM memilih angkatan, dan daftar
+                             angkatannya tidak lagi terdorong ke bawah.
+
+                             Alamat halaman status memuat UUID yang tidak bisa
+                             ditebak, jadi yang menutup tabnya dan tidak
+                             menerima suratnya kehilangan pendaftarannya untuk
+                             selamanya, termasuk tombol bayarnya. Tautannya
+                             dikirim ke EMAIL, tidak ke layar: ditampilkan,
+                             siapa pun yang menebak alamat email orang lain
+                             bisa membuka pendaftarannya — di halaman itu ada
+                             nama, nomor telepon, afiliasi, dan daftar
+                             pesertanya. --}}
+                        <form method="POST" action="{{ route('public.scopuscamp.tautansaya') }}"
+                            class="kmp-lacak">
+                            @csrf
+
+                            <div class="kmp-lacak-kata">
+                                <span class="kmp-lacak-ikon"><i class="bi bi-ticket-detailed"></i></span>
+                                <span>
+                                    <strong>Sudah pernah mendaftar?</strong>
+                                    Masukkan email Anda, tautan pendaftarannya kami kirim ke sana.
+                                </span>
+                            </div>
+
+                            <div class="kmp-lacak-isian">
+                                <label for="kmpLacakEmail" class="visually-hidden">Alamat email</label>
+                                <input type="email" id="kmpLacakEmail" name="email" required
+                                    autocomplete="email" placeholder="nama@email.com"
+                                    value="{{ old('email') }}">
+                                <button type="submit">
+                                    <i class="bi bi-envelope"></i> Kirim tautannya
+                                </button>
+                            </div>
+                        </form>
                     </div>
 
                     @php
