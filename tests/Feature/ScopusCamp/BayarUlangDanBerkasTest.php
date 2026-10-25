@@ -744,10 +744,59 @@ class BayarUlangDanBerkasTest extends TestCase
          * menutup tabnya dan tidak menerima suratnya kehilangan
          * pendaftarannya untuk selamanya — termasuk tombol bayarnya.
          */
-        $this->get(route('public.scopuscamp.index'))
-            ->assertOk()
-            ->assertSee('Kehilangan tautan pendaftaran Anda?', false)
-            ->assertSee(route('public.scopuscamp.tautansaya'), false);
+        $isi = $this->get(route('public.scopuscamp.index'))->assertOk()->getContent();
+
+        $this->assertStringContainsString(route('public.scopuscamp.tautansaya'), $isi,
+            'Tidak ada jalan kembali sama sekali di halaman daftar.');
+
+        /*
+         * DAN LETAKNYA DI ATAS DAFTAR ANGKATAN.
+         *
+         * Mulanya ditaruh di kaki halaman; terukur 2,4 layar ke bawah di
+         * laptop dan 3,9 layar di ponsel — di balik dua belas kartu angkatan
+         * dan penomoran halaman 29 nomor. Yang kehilangan tautannya tidak
+         * sedang membaca-baca, ia sedang mencari, dan yang tidak ia temukan
+         * berakhir jadi pesan WhatsApp ke panitia.
+         *
+         * Urutan markahnya yang dipatok, bukan piksel: PHPUnit tidak bisa
+         * menghitung tata letak, tetapi "sebelum daftar angkatan" sudah
+         * cukup untuk menangkap kalau ia dikembalikan ke kaki halaman.
+         */
+        $letakBorang = strpos($isi, route('public.scopuscamp.tautansaya'));
+
+        /*
+         * Dicari TAG PEMBUKANYA, bukan nama kelasnya.
+         *
+         * Nama kelas yang sama ada di blok <style> halaman ini — yang letaknya
+         * jauh di atas markah mana pun — jadi mencari 'kmp-bagian' saja
+         * memulangkan posisi aturan CSS-nya, dan perbandingannya membandingkan
+         * dua hal yang tidak berhubungan. Tertangkap persis begitu saat uji
+         * ini pertama dijalankan.
+         */
+        $letakDaftar = strpos($isi, '<section class="kmp-bagian">');
+
+        $this->assertNotFalse($letakDaftar, 'Bagian daftar angkatannya hilang.');
+
+        $this->assertLessThan($letakDaftar, $letakBorang,
+            'Borang "kehilangan tautan" ada di bawah daftar angkatan; yang '
+            . 'mencarinya harus menggulir melewati dua belas kartu dan '
+            . 'penomoran halaman dulu.');
+    }
+
+    #[Test]
+    public function halaman_daftar_tidak_memasang_ruang_kosong_saat_tidak_ada_pesan(): void
+    {
+        /*
+         * Pembungkus pesan kilatnya berpadding-atas 96 px untuk melewati
+         * kepala halaman yang melayang. Digambar selalu — termasuk saat tidak
+         * ada pesan apa pun — padding itu jadi 96 px ruang kosong di atas
+         * hero pada SETIAP kunjungan, padahal hero-nya sendiri sudah punya
+         * ruang atasnya.
+         */
+        $isi = $this->get(route('public.scopuscamp.index'))->assertOk()->getContent();
+
+        $this->assertStringNotContainsString('padding-top: 96px', $isi,
+            'Ruang kosong 96 px digambar walau tidak ada pesan apa pun.');
     }
 
     #[Test]
