@@ -125,17 +125,26 @@ class KedaluwarsakanPendaftaranScopusCamp extends Command
 
         if (! $kering && $lewat->isNotEmpty()) {
             /*
-             * Ditandai dulu, baru kuotanya dihitung ulang. Urutannya
-             * MENGIKAT: hitung ulang membaca status, jadi menjalankannya
-             * lebih dulu akan tetap menghitung kursi yang baru saja dilepas.
+             * Dilepas lewat RAKITAN YANG SAMA dengan jalur web.
+             *
+             * Dulu di sini ada `update()` borongan tersendiri. Dua rakitan
+             * untuk satu pekerjaan berarti keduanya akan berbeda perlahan —
+             * dan yang satu sudah berbeda: jalur web mengunci barisnya
+             * sebelum memindahkan, yang ini tidak. Dua proses yang menyapu
+             * bersamaan karena itu bisa sama-sama memindahkan baris yang
+             * sama, lalu mengabari pendaftarnya dua kali.
              */
-            PendaftaranScopusCamp::whereKey($lewat->modelKeys())->update([
-                'status' => 'Pendaftaran Dibatalkan',
-                'bayar_status' => 'expired',
-                'bayar_url' => null,
-            ]);
+            $berpindah = PendaftaranScopusCamp::lepaskanYangKedaluwarsa(
+                [], null, max(1, $lewat->count())
+            );
 
-            $this->kabari($lewat);
+            $this->line('  ' . $berpindah . ' pendaftaran benar-benar berpindah.');
+
+            // Hanya yang BENAR-BENAR berpindah yang dikabari; lihat alasannya
+            // di kabari().
+            $this->kabari(PendaftaranScopusCamp::whereKey($lewat->modelKeys())
+                ->where('bayar_status', 'expired')
+                ->get());
         }
 
         $this->info($lewat->count() . ' pendaftaran kedaluwarsa, '
@@ -179,6 +188,19 @@ class KedaluwarsakanPendaftaranScopusCamp extends Command
         $wa = app(\App\Actions\Pendaftaran\KabariWhatsApp::class);
 
         /*
+         * SURAT ikut dikirim, tidak lagi WhatsApp saja.
+         *
+         * Sampai 26 Okt 2026 kursi yang dilepas hanya dikabari lewat
+         * WhatsApp — dan perangkat Fonnte-nya sedang putus, jadi tidak
+         * dikabari ke mana pun. Orangnya baru tahu kursinya hilang kalau ia
+         * kebetulan membuka halaman statusnya lagi.
+         *
+         * Webinar Eksklusif sudah punya suratnya sejak lama; layanan ini
+         * tidak. Dua saluran, sebab yang satu gagal tidak boleh membuat
+         * orangnya tidak tahu sama sekali.
+         */
+
+        /*
          * JEDA ANTAR PESAN. Amannya karena pemanggilnya perintah terjadwal —
          * tidak ada orang yang menunggu layarnya. Di jalur web, menidurkan
          * permintaan berarti halamannya menggantung.
@@ -192,6 +214,23 @@ class KedaluwarsakanPendaftaranScopusCamp extends Command
             }
 
             $pertama = false;
+
+            try {
+                $kategori = \App\CategoriesScopusCamp::find($p->kategori_id);
+
+                if ($kategori !== null && filter_var($p->email, FILTER_VALIDATE_EMAIL)) {
+                    \Illuminate\Support\Facades\Mail::to($p->email)->send(
+                        new \App\Mail\ScopusCampKedaluwarsaMail($p, $kategori)
+                    );
+                }
+            } catch (\Throwable $e) {
+                $this->warn('  Surat ' . $p->id_transaksi . ' gagal: ' . $e->getMessage());
+
+                \Illuminate\Support\Facades\Log::warning('Surat kedaluwarsa Scopus Camp gagal.', [
+                    'nomor' => $p->id_transaksi,
+                    'pesan' => $e->getMessage(),
+                ]);
+            }
 
             try {
                 $wa->kursiDilepas('scopus_camp', $p->refresh());

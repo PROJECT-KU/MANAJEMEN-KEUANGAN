@@ -77,6 +77,27 @@ class PublicScopusCampController extends Controller
          */
         $categories = $kueri->paginate(12)->withQueryString();
 
+        /*
+         * Kursi kedaluwarsa dari angkatan yang DITAMPILKAN halaman ini
+         * dilepas dulu, lalu angkanya dibaca ulang.
+         *
+         * Halaman ini yang paling sering dibuka orang, jadi di sinilah
+         * tenggatnya paling sering ditegakkan tanpa cron sama sekali. Satu
+         * kueri untuk dua belas angkatan sekaligus; kalau tidak ada yang
+         * lewat tenggat — keadaan biasa — ia berhenti di situ.
+         *
+         * Angkatan yang TIDAK tampil di halaman ini tidak ikut disapu: yang
+         * dijaga angka yang sedang dibaca orang, bukan seluruh basis data.
+         * Itu tugas perintah terjadwal, kalau cronnya kelak terpasang.
+         */
+        $kunci = $categories->getCollection()->pluck('id')->map(fn ($k) => (string) $k)->all();
+
+        if ($kunci !== [] && PendaftaranScopusCamp::lepaskanYangKedaluwarsa($kunci) > 0) {
+            $categories->setCollection(
+                $categories->getCollection()->map(fn ($a) => $a->refresh())
+            );
+        }
+
         \App\Support\PromoAngkatan::muat($categories->getCollection());
 
         /*
@@ -162,6 +183,15 @@ class PublicScopusCampController extends Controller
     public function selengkapnya($id)
     {
         $item = CategoriesScopusCamp::findOrFail($id);
+
+        /*
+         * Kursi kedaluwarsa angkatan ini dilepas dulu, supaya "sisa 2 kursi"
+         * yang dipajang halaman ini angka yang sebenarnya — bukan angka yang
+         * menunggu cron yang belum terpasang.
+         */
+        PendaftaranScopusCamp::lepaskanYangKedaluwarsa([(string) $item->getKey()]);
+
+        $item->refresh();
 
         /*
          * Daftar di bilah kanan dulu `orderBy('created_at','desc')->take(6)`
@@ -1176,7 +1206,21 @@ class PublicScopusCampController extends Controller
                 ->with('error', 'Pendaftaran itu tidak ditemukan.');
         }
 
-        $pendaftaran = $this->susulkanDariGerbang($pendaftaran);
+        /*
+         * Tenggatnya ditegakkan DI SINI juga, bukan cuma oleh cron.
+         *
+         * Cron hPanel di peladen ini belum terpasang, jadi tenggat 60 menit
+         * yang dipajang halaman ini tidak pernah ditegakkan siapa pun:
+         * kursinya tertahan selamanya dan orangnya melihat tombol bayar yang
+         * menunjuk tagihan mati. Dilepas di sini, halaman yang sedang ia buka
+         * itu juga yang langsung menampilkan keadaan sebenarnya.
+         *
+         * Dibatasi ke pendaftaran INI saja: satu kueri tambahan, dan yang
+         * belum lewat tenggatnya tidak menyentuh apa pun.
+         */
+        PendaftaranScopusCamp::lepaskanYangKedaluwarsa([], (string) $pendaftaran->getKey());
+
+        $pendaftaran = $this->susulkanDariGerbang($pendaftaran->refresh());
 
         /*
          * Peserta rombongannya dimuat sekaligus.
@@ -1231,7 +1275,11 @@ class PublicScopusCampController extends Controller
             return response()->json(['ada' => false], 404);
         }
 
-        $pendaftaran = $this->susulkanDariGerbang($pendaftaran);
+        // Sama seperti di status(): tenggatnya ditegakkan walau cron tidak
+        // pernah jalan, dan pollernya yang membawanya.
+        PendaftaranScopusCamp::lepaskanYangKedaluwarsa([], (string) $pendaftaran->getKey());
+
+        $pendaftaran = $this->susulkanDariGerbang($pendaftaran->refresh());
 
         $lunas = $this->sudahLunas($pendaftaran);
 

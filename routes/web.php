@@ -131,7 +131,9 @@ Route::post('/Scopus-Camp/tautan-saya', 'Publict\PublicScopusCampController@taut
  * Pemberitahuan balik dari DOKU; dikecualikan dari CSRF di VerifyCsrfToken.
  * Penjagaannya tanda tangan HMAC, diperiksa sebelum satu pun status diubah.
  */
-Route::post('/Scopus-Camp/pemberitahuan/doku', 'Publict\PublicScopusCampController@pemberitahuan')->name('public.scopuscamp.pemberitahuan');
+Route::post('/Scopus-Camp/pemberitahuan/doku', 'Publict\PublicScopusCampController@pemberitahuan')
+    ->middleware('throttle:gerbang-pemberitahuan')
+    ->name('public.scopuscamp.pemberitahuan');
 
 // WEBINAR EKSKLUSIF
 // Halaman pemasarannya ada di subdomain tersendiri dan mengambil datanya
@@ -206,7 +208,9 @@ Route::post('/Webinar-Eksklusif/Status/{id}/bukti', 'Publict\PublicWebinarEksklu
     ->name('public.webinareksklusif.bukti');
 // Pengirimnya peladen DOKU, bukan peramban peserta, jadi tanpa token CSRF —
 // penggantinya pemeriksaan tanda tangan di dalam pengendalinya.
-Route::post('/Webinar-Eksklusif/pemberitahuan/doku', 'Publict\PublicWebinarEksklusifController@pemberitahuan')->name('public.webinareksklusif.pemberitahuan');
+Route::post('/Webinar-Eksklusif/pemberitahuan/doku', 'Publict\PublicWebinarEksklusifController@pemberitahuan')
+    ->middleware('throttle:gerbang-pemberitahuan')
+    ->name('public.webinareksklusif.pemberitahuan');
 
 // CLINIK SCOPUS
 Route::get('/Clinik-Scopus', 'Publict\PublicClinikScopusController@index')->name('public.clinikscopus.index');

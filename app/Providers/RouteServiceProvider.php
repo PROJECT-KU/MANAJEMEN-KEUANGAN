@@ -56,7 +56,59 @@ class RouteServiceProvider extends ServiceProvider
          * perlu diputuskan tersendiri.
          */
         RateLimiter::for('isi-otomatis', function (Request $request) {
-            return Limit::perMinute(10)->by($request->ip());
+            /*
+             * DIPERKETAT 26 Okt 2026, dan sebabnya bukan beban peladen.
+             *
+             * Alamat ini memulangkan NAMA, EMAIL, dan AFILIASI untuk satu
+             * nomor telepon, tanpa login dan tanpa bukti apa pun bahwa
+             * penanyanya pemilik nomor itu. Dengan batas lama — 10 per menit
+             * — satu alamat IP bisa menanyakan 14.400 nomor sehari: siapa pun
+             * yang memegang daftar nomor bocoran bisa memperkayanya jadi
+             * berkas identitas, dari basis data kita.
+             *
+             * Fiturnya TIDAK dicabut: ia diminta pemiliknya justru supaya
+             * orang tidak perlu mengetik ulang datanya. Yang diubah harganya.
+             *
+             * Dua batas bersamaan, dan keduanya perlu:
+             *
+             *   - 4 per menit menahan penyapuan cepat;
+             *   - 25 per HARI menahan penyapuan lambat, yang tidak tersentuh
+             *     batas per menit sama sekali. Orang sungguhan menanyakan
+             *     nomornya sendiri satu sampai tiga kali; 25 jauh di atas itu,
+             *     dan memaksa pemanen menyiapkan ratusan alamat IP.
+             *
+             * Ditambah batas per NOMOR, supaya satu sasaran tertentu tidak
+             * bisa diintai berulang-ulang dari banyak jaringan sekaligus.
+             *
+             * DELAPAN, bukan tiga. Angka pertamanya tiga, dan itu langsung
+             * menggigit pemakaian yang sah: satu orang yang nomornya tidak
+             * ketemu mencoba ulang dalam bentuk lain — 0812…, +62812…, dengan
+             * tanda hubung — dan bentuk keempatnya sudah ditolak. Terukur
+             * begitu oleh ujinya sendiri. Delapan memberi ruang untuk
+             * percobaan yang wajar dan tetap menutup pengintaian.
+             */
+            $nomor = \App\Support\NomorTelepon::rapikan((string) $request->input('telp'));
+
+            return [
+                Limit::perMinute(4)->by($request->ip()),
+                Limit::perDay(25)->by('isi-ip:' . $request->ip()),
+                Limit::perDay(8)->by('isi-nomor:' . $nomor),
+            ];
+        });
+
+        /*
+         * Pemberitahuan balik dari gerbang pembayaran.
+         *
+         * Tanda tangannya diperiksa sebelum satu pun baris disentuh, jadi
+         * kiriman palsu tidak berbahaya — tetapi menghitung HMAC untuk
+         * banjir kiriman tetap memakan prosesor, dan gerbangnya sendiri tidak
+         * pernah mengirim sebanyak itu.
+         *
+         * 120 per menit: jauh di atas kebutuhan gerbang (satu pembayaran satu
+         * pemberitahuan, plus pengulangan saat jawaban kita tidak sampai).
+         */
+        RateLimiter::for('gerbang-pemberitahuan', function (Request $request) {
+            return Limit::perMinute(120)->by($request->ip());
         });
 
         /*
