@@ -227,8 +227,18 @@ class PendaftaranScopusCamp extends Model
              * Dua proses bisa menyapu bersamaan — perintah terjadwal dan
              * orang yang sedang membuka halaman — dan yang kalah merebut
              * kunci akan melihat status yang sudah berpindah lalu keluar
-             * tanpa mengubah apa pun. Tanpa itu, kursinya dihitung ulang dua
-             * kali dan pendaftarnya dikabari dua kali.
+             * tanpa mengubah apa pun. Tanpa itu, pendaftarnya dikabari dua
+             * kali oleh dua proses yang berbeda.
+             *
+             * TIDAK ADA UJI YANG MENJAGA BARIS INI, dan itu disebut di sini
+             * supaya tidak ada yang mengira ada. Lombanya menuntut dua proses
+             * sungguhan yang berjalan bersamaan; rangkaian uji ini satu utas,
+             * jadi mencabut penguncian maupun pemeriksaan ulang statusnya
+             * tidak memerahkan apa pun — sudah dicoba keduanya.
+             *
+             * Yang menanggung akibatnya tetap terjaga dari sisi lain: kuota
+             * dihitung ulang, bukan ditambahkan, jadi berapa kali pun
+             * pelepasannya terjadi angkanya tetap benar.
              */
             $pindah = \Illuminate\Support\Facades\DB::transaction(
                 function () use ($p, $statusAwal) {

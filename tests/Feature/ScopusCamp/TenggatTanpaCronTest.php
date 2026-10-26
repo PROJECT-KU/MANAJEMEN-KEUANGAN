@@ -141,6 +141,39 @@ class TenggatTanpaCronTest extends TestCase
     }
 
     #[Test]
+    public function kuota_yang_sudah_melenceng_ikut_dibetulkan(): void
+    {
+        /*
+         * DITAMBAHKAN SETELAH MUTASI MEMBUKTIKAN PENJAGA LAIN KOSONG.
+         *
+         * Mengganti hitung-ulang dengan penambahan (`sisa_kuota + jumlah`)
+         * tidak memerahkan satu pun uji: selama tiap baris cuma berpindah
+         * sekali, keduanya memulangkan angka yang sama. Jadi pilihan itu
+         * tidak terjaga apa pun.
+         *
+         * Yang membedakannya BISA diukur, dan itu keadaan yang memang pernah
+         * terjadi: `sisa_kuota` yang sudah MELENCENG. Terukur 23 Okt 2026 —
+         * 23 kursi tertahan di 5 angkatan karena rumus lamanya ikut
+         * menghitung pendaftaran yang sudah dibatalkan, dan Scopus Camp
+         * Yogyakarta #199 terbaca "tinggal 4 kursi" padahal 15 dari 16 yang
+         * terpakai milik pendaftaran yang sudah batal.
+         *
+         * Hitung ulang membetulkannya; penambahan hanya menggeser angka yang
+         * salah sejauh satu pendaftaran, dan angkatannya tetap terbaca lebih
+         * penuh daripada keadaan sebenarnya — selamanya.
+         */
+        $a = $this->angkatan(['total_kuota' => 20, 'sisa_kuota' => 5]);
+        $p = $this->lewatTenggat($a);
+
+        $this->get(route('public.scopuscamp.status', $p->getKey()))->assertOk();
+
+        $this->assertSame(20, (int) $a->refresh()->sisa_kuota,
+            'Kuota yang sudah melenceng tidak ikut dibetulkan; angkanya cuma '
+            . 'digeser sejauh satu pendaftaran dan angkatannya tetap terbaca '
+            . 'lebih penuh daripada keadaan sebenarnya.');
+    }
+
+    #[Test]
     public function halaman_angkatan_ikut_menegakkan_tenggatnya(): void
     {
         /*
