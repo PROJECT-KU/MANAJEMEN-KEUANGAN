@@ -1,100 +1,189 @@
 @extends('public.layout.header')
 
-@section('title')
-Scopus Kafe | Rumah Scopus
-@stop
+@section('title', 'Scopus Kafe | Rumah Scopus')
 
+@push('kepala')
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600..900&family=Figtree:wght@400;500;700;800&display=swap">
+@endpush
 
 @section('konten')
-<!-- ======= Hero Section ======= -->
-<section id="hero" class="hero d-flex align-items-center">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-6 d-flex flex-column justify-content-center">
-                <h1 data-aos="fade-up">Scopus Kafe</h1>
-                <h2 data-aos="fade-up" data-aos-delay="400" style="font-size: 15px;">
-                    Scopus Kafe adalah pendampingan secara private, yang akan di dampingi oleh Trainer Rumah Scopus. Pendampingan ini berdurasi selama 5 jam per sesinya. Pendampingan ini akan di
-                    selenggarakan di Rumah Scopus Pusat yang terletak di Yogyakarta.
-                </h2>
-                <div data-aos="fade-up" data-aos-delay="600">
-                    <div class="text-center text-lg-start">
-                        <a href="https://www.youtube.com/@rumahscopus" class="btn-get-started scrollto d-inline-flex align-items-center justify-content-center align-self-center" target="_blank">
-                            <span>Get Started</span>
-                            <i class="bi bi-arrow-right"></i>
-                        </a>
-                    </div>
+{{--
+    Scopus Kafe — dirombak 26 Okt 2026 mengikuti Scopus Camp.
+
+    Bentuk lamanya memakai hero Bootstrap bawaan templat beserta gradien
+    merah-jingga #ff3131 → #ff914d: palet yang sudah ditinggalkan beranda dan
+    blog justru karena pemiliknya menyebutnya terlalu mirip situs lain. Ia
+    juga memajang kartu sesi lewat `meme` tanpa menyebutkan satu hal yang
+    paling ditanyakan orang — KAPAN acaranya berjalan.
+
+    TIDAK BERANGKATAN, dan itu yang membedakannya dari Scopus Camp: tidak ada
+    daftar angkatan yang dibuka dan ditutup. Yang ada sesi tetap, dan
+    tanggalnya dipilih sendiri pemesan — asal akhir pekan.
+--}}
+@php
+    $hariBuka = \App\Support\HargaKafe::namaHariBuka();
+@endphp
+@include('public.scopus_kafe.partials.gaya-daftar')
+
+<div class="kfd">
+
+    @if (session('error') || session('success') || $errors->any())
+        <div class="container" style="padding-top: 96px;">
+            @if (session('error'))
+                <div class="kfd-kabar galat" role="alert">
+                    <i class="bi bi-exclamation-circle-fill"></i> <span>{{ session('error') }}</span>
                 </div>
-            </div>
-            <div class="col-lg-6 hero-img" data-aos="zoom-out" data-aos-delay="200">
-                <img src="{{ asset('assets/artikel/img/hero-img.png') }}" class="img-fluid" alt="">
+            @endif
+
+            @if (session('success'))
+                <div class="kfd-kabar sukses" role="status">
+                    <i class="bi bi-check-circle-fill"></i> <span>{{ session('success') }}</span>
+                </div>
+            @endif
+
+            @if ($errors->any())
+                <div class="kfd-kabar galat" role="alert">
+                    <i class="bi bi-exclamation-circle-fill"></i> <span>{{ $errors->first() }}</span>
+                </div>
+            @endif
+        </div>
+    @endif
+
+    <section class="kfd-kepala">
+        <div class="container">
+            <span class="kfd-stiker"><i class="bi bi-cup-hot-fill"></i> Pendampingan privat · 5 jam</span>
+
+            <h1 class="kfd-judul">
+                Datang dengan naskahmu, pulang dengan <span class="kfd-stabilo">jalan keluarnya</span>
+            </h1>
+
+            <p class="kfd-sub">
+                Lima jam berdua dengan trainer Rumah Scopus — bukan kelas, bukan ceramah.
+                Naskahmu sendiri yang dibedah, pertanyaanmu sendiri yang dijawab.
+            </p>
+
+            {{-- KAPAN-nya disebut di layar pertama, bukan ditemukan orangnya
+                 di borang. Ini layanan tanpa angkatan, jadi pertanyaan pertama
+                 yang muncul justru "kapan bisanya?" — dan sebelum ini halaman
+                 ini tidak menjawabnya sama sekali. --}}
+            <div class="kfd-kapan">
+                <i class="bi bi-calendar-week"></i>
+                <span>
+                    Terbuka sepanjang tahun, dijalankan setiap <strong>{{ $hariBuka }}</strong>.
+                    Tanggal terdekat yang bisa dipesan
+                    <strong>{{ $tanggalBerikutnya->locale('id')->translatedFormat('l, j F Y') }}</strong>.
+                </span>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<div class="container mt-5 mb-5">
-    <div class="main-card" style="background: linear-gradient(to right, #ff3131, #ff914d); border-radius: 15px; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); overflow: hidden; margin-bottom: 20px;" data-aos="fade-right">
-        <div class="card-body" style="padding: 30px; border-radius: 15px;">
-            <div class="row" style="display: flex; justify-content: center; flex-wrap: wrap;">
-                @foreach($datas as $item)
-                <div class="col-md-3 mb-2" data-aos="fade-up" style="margin: 10px;">
-                    <div class="inner-card" style="border-radius: 10px; padding: 20px; background-color: white; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); position: relative;">
-                        <div class="d-flex align-items-center">
-                            <div style="border-radius: 5px; background: linear-gradient(to right, #ff3131, #ff914d); padding: 10px; display: inline-block;">
-                                <i class="fas fa-user-graduate" style="font-size: 24px; color: white;"></i>
+    <section class="kfd-bagian">
+        <div class="container">
+            <div class="kfd-kisi">
+
+                <div class="kfd-panel">
+                    <div class="kfd-panel-kartu">
+                        <h2 class="kfd-panel-judul">Yang kamu dapat</h2>
+                        <ul class="kfd-fasilitas">
+                            <li><i class="bi bi-check-circle-fill"></i> <span>Lima jam pendampingan privat</span></li>
+                            <li><i class="bi bi-check-circle-fill"></i> <span>Bedah naskah langsung, bukan materi umum</span></li>
+                            <li><i class="bi bi-check-circle-fill"></i> <span>Trainer yang sudah menembus jurnal terindeks</span></li>
+                            <li><i class="bi bi-check-circle-fill"></i> <span>Tempat dan kopi di Rumah Scopus Pusat</span></li>
+                        </ul>
+
+                        <p class="kfd-panel-kata">
+                            Mau dua sesi sekaligus? Pilih keduanya di borang — tagihannya
+                            dijumlahkan jadi satu.
+                        </p>
+                    </div>
+
+                    {{-- Jalan kembali bagi yang kehilangan tautannya, di lajur
+                         keterangan seperti di Scopus Camp.
+
+                         Alamat halaman status memuat UUID yang tidak bisa
+                         ditebak, jadi yang menutup tabnya dan tidak menerima
+                         suratnya kehilangan pemesanannya — termasuk tombol
+                         bayarnya. Tautannya dikirim ke EMAIL, tidak ke layar:
+                         ditampilkan, siapa pun yang menebak alamat email orang
+                         lain bisa membuka pemesanannya. --}}
+                    <form method="POST" action="{{ route('public.scopuskafe.tautansaya') }}" class="kfd-lacak">
+                        @csrf
+                        <div class="kfd-lacak-kata">
+                            <span class="kfd-lacak-ikon"><i class="bi bi-ticket-detailed"></i></span>
+                            <span>
+                                <strong>Sudah pernah memesan?</strong>
+                                Masukkan email Anda, tautan pemesanannya kami kirim ke sana.
+                            </span>
+                        </div>
+                        <div class="kfd-lacak-isian">
+                            <label for="kfdLacakEmail" class="visually-hidden">Alamat email</label>
+                            <input type="email" id="kfdLacakEmail" name="email" required
+                                autocomplete="email" placeholder="nama@email.com" value="{{ old('email') }}">
+                            <button type="submit"><i class="bi bi-envelope"></i> Kirim tautannya</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="kfd-sesi">
+                    @forelse ($sesi as $s)
+                        <div class="kfd-baris">
+                            <div class="kfd-jam">
+                                <span class="kfd-jam-angka">{{ \Carbon\Carbon::parse($s->waktu_mulai)->format('H:i') }}</span>
+                                <span class="kfd-jam-label">mulai</span>
                             </div>
-                            <div style="margin-left: 10px;">
-                                <h5 style="font-weight: bold;">{{ strtoupper ($item->sesi) }}</h5>
-                                <p style="display: flex; align-items: center; margin-bottom: 5px;">
-                                    <i class="fas fa-clock" style="margin-right: 10px;"></i>
-                                    <span>{{ date('H:i', strtotime($item->waktu_mulai)) }} - {{ date('H:i', strtotime($item->waktu_selesai)) }} WIB</span>
+
+                            <div class="kfd-isi">
+                                <h3 class="kfd-nama">{{ $s->sesi }}</h3>
+                                <p class="kfd-ket">
+                                    <i class="bi bi-clock"></i>
+                                    {{ \Carbon\Carbon::parse($s->waktu_mulai)->format('H:i') }}–{{ \Carbon\Carbon::parse($s->waktu_selesai)->format('H:i') }}
+                                    @if ($s->lokasi)
+                                        <span class="kfd-pisah">·</span>
+                                        <i class="bi bi-geo-alt"></i> {{ $s->lokasi }}
+                                    @endif
                                 </p>
-                                <p style="display: flex; align-items: center; margin-bottom: 5px;">
-                                    <i class="fas fa-users" style="margin-right: 10px;"></i>
-                                    <span>Sisa Kuota : {{ $item->kuota }}</span>
-                                </p>
-                                <p style="display: flex; align-items: center; margin-bottom: 30px;">
-                                    <i class="fas fa-map-marker-alt" style="margin-right: 18px;"></i>
-                                    <span>{{ $item->lokasi }}</span>
-                                </p>
+                                @if ($s->deskripsi)
+                                    <p class="kfd-ket">{{ $s->deskripsi }}</p>
+                                @endif
+                            </div>
+
+                            <div class="kfd-kanan">
+                                <span class="kfd-harga">
+                                    Rp {{ number_format(\App\Support\HargaKafe::rupiah($s->biaya), 0, ',', '.') }}
+                                </span>
+                                <span class="kfd-harga-ket">per sesi</span>
                             </div>
                         </div>
-                        <a href="{{ url('/Scopus-Kafe/Form-Pendaftaran') }}"><button class="btn btn-info" src="" style="background-color: #6495ED; color:white; font-size: 16px; width: 100%; position: absolute; bottom: 0; left: 0;">Daftar Sekarang</button></a>
-                        <div class="label" style="position: absolute; top: 0px; right: 0px; background-color: #ff3131; color: white; padding: 5px; border-radius: 5px; font-size: 15px;">Rp. {{$item->biaya}}</div>
-                    </div>
+                    @empty
+                        <div class="kfd-kosong">
+                            <i class="bi bi-cup"></i>
+                            <h2>Belum ada sesi yang dibuka</h2>
+                            <p>Jadwalnya biasanya diumumkan beberapa hari sebelumnya.
+                                Kabari admin kalau mau diberi tahu duluan.</p>
+                        </div>
+                    @endforelse
+
+                    @if ($sesi->isNotEmpty())
+                        @if ($gerbangSiap)
+                            <a href="{{ route('public.scopuskafe.formpendaftaran') }}" class="kfd-tombol">
+                                <i class="bi bi-pencil-square"></i> Pesan sekarang
+                            </a>
+                        @else
+                            {{-- Tanpa gerbang, borangnya memang dipantulkan
+                                 pengendalinya. Menawarkan tombolnya berarti
+                                 mengantar orang ke jalan buntu. --}}
+                            <span class="kfd-tombol mati">
+                                <i class="bi bi-lock-fill"></i> Pemesanan ditutup sementara
+                            </span>
+                        @endif
+                    @endif
                 </div>
-                @endforeach
+
             </div>
         </div>
-    </div>
+    </section>
 </div>
-
-<!--================== RELOAD KETIKA DATA SUKSES ==================-->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-@if (session()->has('success'))
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        Swal.fire({
-            icon: 'success',
-            title: 'Berhasil!',
-            html: 'Data Pendaftaran Scopus Kafe Berhasil Terkirim!<br><br>Pembayaran Anda akan kami verifikasi terlebih dahulu. Mohon menunggu maksimal 1x24 jam.',
-            confirmButtonText: 'OK'
-        });
-    });
-</script>
-@endif
-
-@if (session()->has('error'))
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        Swal.fire({
-            icon: 'error',
-            title: 'Gagal!',
-            text: 'Data Pendaftaran Scopus Kafe Gagal Terkirim',
-            confirmButtonText: 'OK'
-        });
-    });
-</script>
-@endif
-<!--================== END ==================-->
 @stop

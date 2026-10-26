@@ -55,11 +55,12 @@ class KabariWhatsApp
      *            camp berangkat ke tempat, bibliometrik mulai dikerjakan.
      *            Dikalimatkan seragam, tiga di antaranya jadi salah.
      *
-     * @var array<string, array{daftar:string, daftar_berangkatan:bool, indeks:string, kabar_status:array<int, string>, kelanjutan:string}>
+     * @var array<string, array{daftar:string, lepas_tempat:bool, daftar_berangkatan:bool, indeks:string, kabar_status:array<int, string>, kelanjutan:string}>
      */
     private const LAYANAN = [
         'webinar_eksklusif' => [
             'daftar' => 'public.webinareksklusif.daftar',
+            'lepas_tempat' => true,
             'daftar_berangkatan' => true,
             'indeks' => 'public.webinareksklusif.index',
 
@@ -79,6 +80,7 @@ class KabariWhatsApp
         ],
         'scopus_camp' => [
             'daftar' => 'public.scopuscamp.formpendaftaran',
+            'lepas_tempat' => true,
             'daftar_berangkatan' => true,
             'indeks' => 'public.scopuscamp.index',
 
@@ -101,6 +103,7 @@ class KabariWhatsApp
         ],
         'bibliometrik' => [
             'daftar' => 'public.analisisbibliometrik.formpendaftaran',
+            'lepas_tempat' => false,
             'daftar_berangkatan' => true,
             'indeks' => 'public.analisisbibliometrik.index',
 
@@ -115,6 +118,7 @@ class KabariWhatsApp
         ],
         'scopus_kafe' => [
             'daftar' => 'public.scopuskafe.formpendaftaran',
+            'lepas_tempat' => false,
 
             // Satu-satunya yang tidak berangkatan: borangnya satu untuk
             // semua, dan rutenya memang tidak menerima parameter.
@@ -210,7 +214,7 @@ class KabariWhatsApp
      */
     public function gagalBayar(string $layanan, object $p, ?object $angkatan = null): bool
     {
-        if (! $this->bergerbang($layanan)) {
+        if (! $this->melepasTempat($layanan)) {
             return $this->dilewati($layanan);
         }
 
@@ -220,7 +224,7 @@ class KabariWhatsApp
     /** Batas waktunya habis tanpa pembayaran — tempatnya diberikan ke orang lain. */
     public function kursiDilepas(string $layanan, object $p, ?object $angkatan = null): bool
     {
-        if (! $this->bergerbang($layanan)) {
+        if (! $this->melepasTempat($layanan)) {
             return $this->dilewati($layanan);
         }
 
@@ -332,10 +336,27 @@ class KabariWhatsApp
 
     // ------------------------------------------------------------ bagiannya
 
-    /** @return array{daftar:string, daftar_berangkatan:bool, indeks:string, kabar_status:array<int, string>, kelanjutan:string} */
+    /** @return array{daftar:string, lepas_tempat:bool, daftar_berangkatan:bool, indeks:string, kabar_status:array<int, string>, kelanjutan:string} */
     private function ciri(string $layanan): array
     {
         return self::LAYANAN[$layanan];
+    }
+
+    /**
+     * Layanan ini punya tempat terbatas yang bisa dilepas kembali.
+     *
+     * Dipisahkan dari bergerbang() 26 Okt 2026, saat Scopus Kafe menyusul ke
+     * gerbang: ia bergerbang TETAPI tidak berkuota. Tagihan yang mati di sana
+     * tidak melepaskan apa pun — yang dipesan waktu pendampingan, bukan kursi
+     * dari jatah yang terbatas.
+     *
+     * Disamakan dengan bergerbang(), pesan "kursi Anda dilepas untuk peserta
+     * lain" terkirim ke pemesan Scopus Kafe: menyebut kejadian yang tidak
+     * terjadi, lalu menyuruhnya memeriksa kuota yang tidak ada.
+     */
+    private function melepasTempat(string $layanan): bool
+    {
+        return self::melayani($layanan) && self::LAYANAN[$layanan]['lepas_tempat'];
     }
 
     private function bergerbang(string $layanan): bool

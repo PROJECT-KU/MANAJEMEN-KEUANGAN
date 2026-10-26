@@ -17,6 +17,21 @@ use Illuminate\Support\Str;
 
 class PublicScopusCampController extends Controller
 {
+    /*
+     * Bagian alur gerbang yang sama dengan Scopus Kafe: penyusulan keadaan
+     * dari gerbang, penomoran tagihan ulang, kembali ke halaman status, dan
+     * penyamaran alamat email. Diangkat jadi perkakas bersama 26 Okt 2026 —
+     * disalin, keduanya akan berbeda perlahan, dan yang paling mudah berbeda
+     * justru penjagaan terhadap pembayaran milik pendaftaran LAIN yang
+     * diwariskan karena nomor tagihannya terpakai ulang.
+     */
+    use \App\Http\Controllers\Publict\Concerns\AlurGerbangPembayaran;
+
+    protected function layananKunci(): string
+    {
+        return 'scopus_camp';
+    }
+
     public function __construct(private Doku $doku)
     {
     }
@@ -1019,65 +1034,6 @@ class PublicScopusCampController extends Controller
      * mengulang dari nol karena kesalahan yang bukan miliknya. Ia diantar ke
      * halaman status, yang memuat nomor rekening dan nomor panitia.
      */
-    /**
-     * Nomor tagihan untuk percobaan pembayaran BERIKUTNYA.
-     *
-     * Percobaan pertama memakai nomor pendaftarannya apa adanya — itu yang
-     * paling mudah dicocokkan panitia dengan mutasi, dan sebagian besar
-     * pendaftaran tidak pernah butuh percobaan kedua.
-     *
-     * Sesudah itu ditambahkan -R2, -R3, dan seterusnya. Angkanya dibaca dari
-     * nomor tagihan SEBELUMNYA, bukan dari penghitung di kolom lain: satu
-     * sumber, dan tidak ada dua nilai yang bisa berselisih.
-     *
-     * Akhirannya memakai huruf R, bukan hanya angka. Nomor pendaftaran kita
-     * sendiri berakhir dengan tanda hubung dan empat angka
-     * (CAMP-20261024-0001), jadi akhiran yang cuma angka tidak bisa
-     * dibedakan dari bagian nomornya sendiri oleh mata siapa pun yang
-     * menelusuri pembayaran.
-     */
-    private function nomorTagihanBaru(PendaftaranScopusCamp $pendaftaran): string
-    {
-        $pokok = (string) $pendaftaran->id_transaksi;
-        $sebelumnya = trim((string) $pendaftaran->bayar_nomor);
-
-        /*
-         * Nomor tagihan sebelumnya SUDAH tercatat: hitungannya dilanjutkan
-         * dari situ, bukan dari penghitung di kolom lain. Satu sumber, dan
-         * tidak ada dua nilai yang bisa berselisih.
-         */
-        if ($sebelumnya !== '' && $sebelumnya !== $pokok) {
-            $ke = preg_match('/-R(\d+)$/', $sebelumnya, $cocok) === 1
-                ? ((int) $cocok[1]) + 1
-                : 2;
-
-            return $pokok . '-R' . $ke;
-        }
-
-        /*
-         * Belum tercatat — tetapi itu TIDAK berarti belum pernah ada
-         * tagihannya.
-         *
-         * Kolom `bayar_nomor` baru ada sejak 25 Okt 2026. Pendaftaran yang
-         * tagihannya dibuat sebelum itu memakai nomor pendaftarannya apa
-         * adanya dan tidak mencatatnya di mana pun — jadi nomor itu SUDAH
-         * terpakai di DOKU, dan memakainya lagi dijawab "INVOICE ALREADY
-         * USED". Persis itu yang terjadi pada CAMP-20261024-0001, yang sejak
-         * 24 Okt tidak bisa dibayar sama sekali.
-         *
-         * Jejak tagihan lama dibaca dari keempat kolom yang hanya terisi
-         * kalau tagihannya memang pernah dibuat atau pernah dicoba. Satu pun
-         * terisi sudah cukup: lebih baik melewati satu nomor yang sebenarnya
-         * masih bersih daripada memakai nomor yang sudah mati.
-         */
-        $pernahAda = $sebelumnya === $pokok
-            || trim((string) $pendaftaran->bayar_rujukan) !== ''
-            || trim((string) $pendaftaran->bayar_permintaan_id) !== ''
-            || trim((string) $pendaftaran->bayar_url) !== ''
-            || trim((string) $pendaftaran->bayar_status) !== '';
-
-        return $pernahAda ? $pokok . '-R2' : $pokok;
-    }
 
     private function mulaiBayar(PendaftaranScopusCamp $pendaftaran, CategoriesScopusCamp $kategori)
     {
@@ -1316,7 +1272,7 @@ class PublicScopusCampController extends Controller
     }
 
     /** Pendaftaran ini sudah dibayar. */
-    private function sudahLunas(PendaftaranScopusCamp $pendaftaran): bool
+    protected function sudahLunas($pendaftaran): bool
     {
         return in_array(
             (string) $pendaftaran->status,
@@ -1325,107 +1281,6 @@ class PublicScopusCampController extends Controller
         );
     }
 
-    /**
-     * Menanyakan LANGSUNG ke DOKU, lalu menyusulkan statusnya sendiri.
-     *
-     * Pemberitahuan dari DOKU tetap jalan dan tetap jadi pegangan utama — ia
-     * yang datang walau halamannya sudah ditutup. Tetapi ia berjalan dari
-     * peladen ke peladen dan hampir selalu kalah cepat dari peramban yang
-     * cuma berpindah halaman; di mesin pengembang ia tidak pernah sampai
-     * sama sekali, sebab `localhost` tidak bisa dihubungi dari luar.
-     *
-     * Jadi selama pembayarnya masih menatap layarnya, KITA yang bertanya.
-     */
-    private function susulkanDariGerbang(PendaftaranScopusCamp $pendaftaran): PendaftaranScopusCamp
-    {
-        // Yang transfer manual tidak punya tagihan di sana untuk ditanyakan.
-        if ($pendaftaran->cara_bayar !== 'doku' || $this->sudahLunas($pendaftaran)) {
-            return $pendaftaran;
-        }
-
-        /*
-         * Yang ditanyakan nomor TAGIHANNYA, bukan nomor pendaftarannya.
-         * Sesudah tagihannya dibuat ulang keduanya berbeda, dan menanyakan
-         * nomor pendaftaran memulangkan keadaan tagihan LAMA — yang memang
-         * gagal — sehingga pembayaran yang baru saja berhasil tidak pernah
-         * terbaca.
-         */
-        $kabar = $this->doku->periksaStatus(
-            (string) ($pendaftaran->bayar_nomor ?: $pendaftaran->id_transaksi)
-        );
-
-        // tahu=false berarti DOKU tidak menjawab atau belum mengenal
-        // nomornya — BUKAN berarti belum dibayar.
-        if (! $kabar['tahu']) {
-            return $pendaftaran;
-        }
-
-        /*
-         * KEGAGALANNYA IKUT DICATAT, bukan dibuang.
-         *
-         * Sampai 25 Okt 2026 cabang ini memulangkan barisnya apa adanya
-         * untuk semua jawaban selain lunas — jadi jawaban "failed" yang
-         * sudah ada di tangan dibuang, dan halaman statusnya tetap berbunyi
-         * "Tinggal satu langkah lagi" lengkap dengan tombol bayar yang
-         * mengantar ke tagihan mati. Terukur begitu: pendaftaran
-         * ber-bayar_status 'failed' digambar sebagai menunggu pembayaran.
-         *
-         * Statusnya TIDAK diturunkan. Gagal di gerbang hanya berarti
-         * tagihannya mati; kursinya masih ditahan sampai tenggatnya lewat,
-         * dan 'Pendaftaran Dibatalkan' di layanan ini keputusan panitia yang
-         * menyeret surat pembatalan ke pendaftarnya.
-         *
-         * TIDAK dibungkus pemeriksaan "nilainya berubah atau tidak". Halaman
-         * ini memang ditanyai pollernya sendiri tiap beberapa detik, tetapi
-         * save() pada atribut yang nilainya sama TIDAK mengirim UPDATE —
-         * isDirty() Eloquent yang menahannya, dan updated_at pun tidak
-         * tersentuh. Pemeriksaan tambahan di sini sempat ada lalu dicabut:
-         * ia tidak bisa dibuat merah oleh uji mana pun, sebab yang
-         * dijanjikannya sudah dijamin kerangka kerjanya.
-         */
-        if ($kabar['gagal']) {
-            $baru = (string) $kabar['status'];
-
-            if ($baru !== '') {
-                $pendaftaran->forceFill(['bayar_status' => $baru])->save();
-            }
-
-            return $pendaftaran;
-        }
-
-        if (! $kabar['lunas']) {
-            return $pendaftaran;
-        }
-
-        /*
-         * Pembayaran yang LEBIH TUA daripada pendaftarannya TIDAK diterima.
-         *
-         * Nomor tagihan bisa terpakai ulang, dan gerbang akan menjawab
-         * SUCCESS untuk nomor itu sebab memang pernah dibayar — yang
-         * membayar pendahulunya. Tanpa penjagaan ini pendaftaran baru
-         * tertandai lunas tanpa ada uang masuk, dan pendaftarnya menerima
-         * surat "pendaftaran Anda diterima".
-         *
-         * Sepuluh menit kelonggaran terhadap selisih jam antara peladen kita
-         * dan peladen gerbang; pembayaran yang sah selalu terjadi SESUDAH
-         * pendaftarannya.
-         */
-        if ($kabar['waktu'] !== null
-            && $pendaftaran->created_at !== null
-            && $kabar['waktu']->lt($pendaftaran->created_at->copy()->subMinutes(10))) {
-            Log::warning('Pembayaran di gerbang lebih tua daripada pendaftarannya; tidak diwariskan', [
-                'nomor' => $pendaftaran->id_transaksi,
-                'bayar_pada' => (string) $kabar['waktu'],
-                'pendaftaran_dibuat' => (string) $pendaftaran->created_at,
-            ]);
-
-            return $pendaftaran;
-        }
-
-        $this->tandaiLunas($pendaftaran, (string) $kabar['status'], $kabar['kanal']);
-
-        return $pendaftaran->refresh();
-    }
 
     /**
      * Menandai satu pendaftaran lunas, dari jalur mana pun kabarnya datang.
@@ -1434,7 +1289,7 @@ class PublicScopusCampController extends Controller
      * diberitahu DOKU. Mana pun yang tiba lebih dulu, hasilnya tidak boleh
      * bisa dibedakan: kolom yang sama terisi dan surat yang sama berangkat.
      */
-    private function tandaiLunas(PendaftaranScopusCamp $pendaftaran, string $status, ?string $kanal): void
+    protected function tandaiLunas($pendaftaran, string $status, ?string $kanal): void
     {
         /*
          * 'Pendaftaran Diterima', bukan status baru.
@@ -1744,33 +1599,7 @@ class PublicScopusCampController extends Controller
         return back()->with('success', $jawaban);
     }
 
-    /**
-     * Kembali ke halaman status pendaftaran ini, membawa pesannya.
-     *
-     * BUKAN back(). Ketiga jalur di atas bisa dibuka langsung dari alamatnya
-     * — tautan di surat, tautan yang disalin, tombol yang ditekan ulang
-     * sesudah tab lain ditutup — dan permintaan tanpa kepala Referer membuat
-     * back() jatuh ke halaman muka situs. Terukur begitu: menolak unduhan
-     * kwitansi yang belum lunas mengantar orangnya ke / dengan pesan yang
-     * tidak digambar halaman itu, jadi ia tidak pernah tahu kenapa.
-     */
-    private function kembaliKeStatus(PendaftaranScopusCamp $pendaftaran, string $kunci, string $pesan)
-    {
-        return redirect()
-            ->route('public.scopuscamp.status', $pendaftaran->getKey())
-            ->with($kunci, $pesan);
-    }
 
-    /** Alamat email yang disebutkan kembali ke pengirimnya, sebagian ditutup. */
-    private function samarkanEmail(string $email): string
-    {
-        [$nama, $ranah] = array_pad(explode('@', $email, 2), 2, '');
-
-        $tampak = mb_substr($nama, 0, min(2, max(1, mb_strlen($nama) - 1)));
-
-        return $tampak . str_repeat('*', max(1, mb_strlen($nama) - mb_strlen($tampak)))
-            . ($ranah !== '' ? '@' . $ranah : '');
-    }
 
     /**
      * Pemberitahuan balik dari DOKU bahwa sebuah tagihan sudah dibayar.
