@@ -170,35 +170,55 @@
                         <strong class="sts-nomor-nilai">{{ strtoupper($pemesanan->id_pemesanan) }}</strong>
                     </div>
 
-                    <dl class="sts-baris">
-                        <dt>Nama</dt>
-                        <dd>{{ $pemesanan->nama }}</dd>
+                    {{-- Tiap pasangan label-nilai dibungkus .sts-baris
+                         SENDIRI, bukan kelas itu dipasang di <dl>-nya.
+
+                         Dipasang di <dl>, seluruh daftarnya jadi SATU baris
+                         flex: nama, tanggal, sesi, dan lokasi berjajar
+                         mendatar jadi satu strip yang membungkus asal-asalan.
+                         Terukur dari potretnya — dari kodenya tidak kelihatan,
+                         sebab kelasnya memang ada. --}}
+                    <dl class="sts-baris-daftar">
+                        <div class="sts-baris">
+                            <dt>Nama</dt>
+                            <dd>{{ $pemesanan->nama }}</dd>
+                        </div>
 
                         @if ($tanggal)
-                            <dt>Tanggal</dt>
-                            <dd>{{ $tanggal->locale('id')->translatedFormat('l, j F Y') }}</dd>
+                            <div class="sts-baris">
+                                <dt>Tanggal</dt>
+                                <dd>{{ $tanggal->locale('id')->translatedFormat('l, j F Y') }}</dd>
+                            </div>
                         @endif
 
                         @foreach ($sesi as $ke => $s)
-                            <dt>{{ $ke === 0 ? 'Sesi' : 'Sesi ke-' . ($ke + 1) }}</dt>
-                            <dd>
-                                {{ $s['nama'] }}
-                                @if ($s['mulai'])
-                                    <span class="sts-jam">
-                                        {{ \Carbon\Carbon::parse($s['mulai'])->format('H:i') }}–{{ \Carbon\Carbon::parse($s['selesai'])->format('H:i') }}
-                                    </span>
-                                @endif
-                            </dd>
+                            <div class="sts-baris">
+                                <dt>{{ $ke === 0 ? 'Sesi' : 'Sesi ke-' . ($ke + 1) }}</dt>
+                                <dd>
+                                    {{-- namaSesi: isinya di basis data berhuruf
+                                         kecil semua ("sesi 1"). --}}
+                                    {{ \App\Support\HargaKafe::namaSesi($s['nama']) }}
+                                    @if ($s['mulai'])
+                                        <span class="sts-jam">
+                                            {{ \Carbon\Carbon::parse($s['mulai'])->format('H:i') }}–{{ \Carbon\Carbon::parse($s['selesai'])->format('H:i') }}
+                                        </span>
+                                    @endif
+                                </dd>
+                            </div>
                         @endforeach
 
                         @if ($sesi !== [] && $sesi[0]['lokasi'])
-                            <dt>Lokasi</dt>
-                            <dd>{{ $sesi[0]['lokasi'] }}</dd>
+                            <div class="sts-baris">
+                                <dt>Lokasi</dt>
+                                <dd>{{ $sesi[0]['lokasi'] }}</dd>
+                            </div>
                         @endif
 
                         @if ($pemesanan->bayar_kanal)
-                            <dt>Dibayar lewat</dt>
-                            <dd>{{ $pemesanan->bayar_kanal }}</dd>
+                            <div class="sts-baris">
+                                <dt>Dibayar lewat</dt>
+                                <dd>{{ $pemesanan->bayar_kanal }}</dd>
+                            </div>
                         @endif
                     </dl>
 

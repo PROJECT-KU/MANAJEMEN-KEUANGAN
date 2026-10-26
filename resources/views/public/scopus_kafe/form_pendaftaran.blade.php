@@ -121,7 +121,11 @@
                                     data-biaya="{{ \App\Support\HargaKafe::rupiah($s->biaya) }}"
                                     {{ $terpilih ? 'checked' : '' }}>
                                 <span class="kfb-sesi-isi">
-                                    <strong>{{ $s->sesi }}</strong>
+                                    {{-- namaSesi: isinya di basis data berhuruf
+                                         kecil semua ("sesi 1"), dan dicetak apa
+                                         adanya ia terbaca seperti catatan yang
+                                         belum selesai. --}}
+                                    <strong>{{ \App\Support\HargaKafe::namaSesi($s->sesi) }}</strong>
                                     <span class="kfb-sesi-jam">
                                         {{ \Carbon\Carbon::parse($s->waktu_mulai)->format('H:i') }}–{{ \Carbon\Carbon::parse($s->waktu_selesai)->format('H:i') }}
                                         @if ($s->lokasi) · {{ $s->lokasi }} @endif

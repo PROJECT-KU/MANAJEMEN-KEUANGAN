@@ -33,9 +33,19 @@
     .kfb-kabar.sukses { background: #eafaf6; border-color: #a7e3d6; color: #0b5a52; }
     .kfb-kabar.galat  { background: #fdecea; border-color: #f0bdb6; color: #8e2318; }
 
-    .kfb-kepala { max-width: 680px; margin: 0 0 28px; }
-    .kfb-judul { font-size: clamp(1.7rem, 4vw, 2.4rem); margin-bottom: 10px; }
-    .kfb-sub { font-size: 1.02rem; }
+    /* ===================================== bobot pemilihnya, bukan isinya
+
+       Aturan reset di atas — `.kfb h1, .kfb h2 { margin: 0 }` dan
+       `.kfb p { margin: 0 }` — berbobot (0,1,1) karena memuat kelas DAN
+       unsur. Pemilih satu kelas seperti `.kfb-judul` cuma (0,1,0), jadi
+       jarak yang ditulis di sana KALAH dan tidak pernah berlaku.
+
+       Terukur dari potretnya: tiap teks bantu menempel ke isian di atasnya,
+       dan judul halaman bersentuhan dengan paragrafnya. Tidak ada galat, dan
+       dari kodenya pun tidak kelihatan — jaraknya memang tertulis. */
+    .kfb .kfb-kepala { max-width: 680px; margin: 0 auto 30px; text-align: center; }
+    .kfb .kfb-judul { font-size: clamp(1.7rem, 4vw, 2.4rem); margin-bottom: 12px; }
+    .kfb .kfb-sub { font-size: 1.02rem; max-width: 60ch; margin: 0 auto; }
 
     /* Dua kartu berdampingan di layar lebar, menumpuk di layar sempit.
        minmax(0, 1fr): tanpa nol, isian tanggal yang punya lebar bawaan
@@ -58,9 +68,16 @@
     .kfb-label {
         display: block; font-size: .82rem; font-weight: 800;
         letter-spacing: .03em; text-transform: uppercase;
-        color: var(--tinta-2); margin: 16px 0 7px;
+        color: var(--tinta-2); margin: 20px 0 7px;
     }
-    .kfb-label:first-of-type { margin-top: 0; }
+    /* Label PERTAMA di tiap kartu, bukan ":first-of-type".
+
+       :first-of-type menghitung per NAMA UNSUR. Label-label di sini <label>,
+       kecuali "Pilih sesi" yang <span> karena ia menamai sekelompok kotak
+       centang, bukan satu isian — jadi ia satu-satunya span dan otomatis
+       jadi "yang pertama", lalu kehilangan jarak atasnya dan menempel ke
+       teks bantu di atasnya. Terukur dari potretnya. */
+    .kfb .kfb-kartu-judul + .kfb-label { margin-top: 0; }
 
     /* Bintang merah HANYA untuk yang validatornya memang required; dipasang
        di medan yang sebenarnya boleh kosong, ia mengajari orang mengabaikan
@@ -73,8 +90,8 @@
         background: #fdfcf9; color: var(--tinta);
     }
     .kfb-isian:focus { outline: 2px solid var(--jingga); outline-offset: 1px; background: #fff; }
-    .kfb-bantu { font-size: .86rem; margin-top: 6px; }
-    .kfb-bantu.galat { color: var(--merah); font-weight: 700; }
+    .kfb .kfb-bantu { font-size: .86rem; margin-top: 8px; }
+    .kfb .kfb-bantu.galat { color: var(--merah); font-weight: 700; }
 
     /* ============================================================ sesi */
     .kfb-sesi { display: grid; gap: 10px; }
