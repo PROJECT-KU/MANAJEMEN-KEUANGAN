@@ -388,6 +388,44 @@ class AlurPemesananTest extends TestCase
     }
 
     #[Test]
+    public function nama_sesi_bertulis_besar_tidak_dirusak_di_layar(): void
+    {
+        /*
+         * Tiga halaman publik membesarkan huruf nama sesi karena isinya di
+         * basis data berhuruf kecil semua ("sesi 1"). Str::title telanjang
+         * membesarkannya TERMASUK nama yang panitia sengaja tulis dengan
+         * singkatan: "Sesi SEO" keluar jadi "Sesi Seo" di daftar, di borang,
+         * dan di halaman status — salah di tiga tempat sekaligus dan tidak
+         * ada galat yang memberi tahu.
+         */
+        $sesi = $this->sesi(['sesi' => 'Sesi SEO & AI']);
+        $this->gerbangMenerima();
+
+        $this->post(route('public.scopuskafe.store'), $this->isian([$sesi]));
+
+        $p = PendaftaranScopusKafe::latest('created_at')->first();
+
+        Http::fake(['*' => Http::response(['transaction' => ['status' => 'PENDING']], 200)]);
+
+        $halaman = [
+            route('public.scopuskafe.index'),
+            route('public.scopuskafe.formpendaftaran'),
+            route('public.scopuskafe.status', $p->getKey()),
+        ];
+
+        foreach ($halaman as $alamat) {
+            $isi = $this->get($alamat)->assertOk()->getContent();
+
+            $this->assertStringContainsString('Sesi SEO &amp; AI', $isi,
+                'Nama sesinya dirusak di ' . $alamat . ': singkatan yang ditulis '
+                . 'panitia ikut dibesarkan hurufnya.');
+        }
+
+        // Yang berhuruf kecil memang masih dibesarkan; itu gunanya.
+        $this->assertSame('Sesi 1', HargaKafe::namaSesi('sesi 1'));
+    }
+
+    #[Test]
     public function pembayaran_lewat_gerbang_menandai_lunas(): void
     {
         $sesi = $this->sesi();

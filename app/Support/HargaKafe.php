@@ -156,6 +156,27 @@ class HargaKafe
      */
     public const HARI_BUKA = [5, 6, 7];
 
+    /**
+     * Nama sesi sebagaimana ditulis di layar.
+     *
+     * Isinya di basis data berhuruf kecil semua ("sesi 1"), jadi kalau
+     * dicetak mentah tiga halaman publik menampilkan huruf kecil di tengah
+     * kalimat berhuruf besar. Yang DIBESARKAN hanya nama yang memang tidak
+     * punya satu huruf besar pun: Str::title tanpa penjaga ini merusak nama
+     * yang sengaja ditulis panitia dengan singkatan — "Sesi SEO" keluar
+     * jadi "Sesi Seo" dan tidak ada yang memberi tahu kalau itu salah.
+     */
+    public static function namaSesi(?string $nama): string
+    {
+        $nama = trim((string) $nama);
+
+        if ($nama === '' || preg_match('/\p{Lu}/u', $nama)) {
+            return $nama;
+        }
+
+        return \Illuminate\Support\Str::title($nama);
+    }
+
     /** Nama harinya untuk ditulis di layar. */
     public static function namaHariBuka(): string
     {
