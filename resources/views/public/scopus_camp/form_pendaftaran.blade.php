@@ -374,42 +374,13 @@
         font-size: .86rem; font-weight: 700; color: var(--tinta);
     }
 
-    /* ==================================================== transfer manual */
-    .daf-rekening {
-        background: var(--kertas-2); border: 1px solid var(--garis);
-        border-radius: 18px; padding: 20px; text-align: center;
-    }
-    .daf-rekening-bank {
-        display: flex; align-items: center; justify-content: center; gap: 10px;
-        margin-bottom: 14px; font-size: 1.05rem;
-    }
-    .daf-rekening-label {
-        font-size: .76rem; font-weight: 800; letter-spacing: .07em;
-        text-transform: uppercase; color: var(--tinta-2); margin-bottom: 2px;
-    }
-    .daf-rekening-nomor {
-        font-family: 'Fraunces', Georgia, serif; font-size: 1.5rem; font-weight: 900;
-        color: var(--tinta); letter-spacing: .02em; margin-bottom: 2px;
-    }
-    .daf-rekening-nama { font-size: .95rem; margin-bottom: 14px; }
-    .daf-salin {
-        width: 100%; min-height: 50px; border: 0; border-radius: 13px;
-        background: var(--tinta); color: #fff; font-family: inherit;
-        font-size: .98rem; font-weight: 800; cursor: pointer;
-    }
-    .daf-salin:hover { background: var(--jingga-tua); }
+    /* Aturan rupa transfer manual — .daf-rekening, .daf-salin, .daf-unggah,
+       .daf-pratinjau, .daf-berkas — DIBUANG 26 Okt 2026 bersama jalurnya.
 
-    .daf-unggah {
-        display: flex; align-items: center; justify-content: center; gap: 10px;
-        width: 100%; min-height: 56px; margin: 0;
-        border: 2px dashed var(--jingga); border-radius: 14px;
-        background: #fff; color: var(--jingga-tua);
-        font-weight: 800; cursor: pointer;
-    }
-    .daf-unggah:hover { background: var(--kertas-2); }
-    .daf-pratinjau { margin-top: 14px; text-align: center; }
-    .daf-pratinjau img { max-width: 100%; border-radius: 12px; border: 1px solid var(--garis); }
-    .daf-berkas { display: block; margin-top: 8px; font-size: .88rem; font-weight: 700; color: var(--tinta-2); }
+       Markahnya sudah hilang lebih dulu, tetapi aturannya tetap terkirim ke
+       tiap pengunjung: beban yang tidak menggambar apa pun, dan — yang lebih
+       merugikan — cetakan siap pakai yang membuat menghidupkan kembali kotak
+       unggahnya terasa seperti menambah satu baris markah saja. */
 
     /* ==================================================== layar sempit */
     @media (max-width: 991.98px) {
@@ -900,28 +871,16 @@
          *
          * Yang menentukan satu-satunya jawaban ada di pengendali; menyalinnya
          * ke JavaScript berarti dua sumber jawaban, dan yang kedua akan
-         * ketinggalan diam-diam — borang menuntut bukti transfer sementara
-         * peladen mengantar orangnya ke DOKU.
+         * ketinggalan diam-diam.
          */
 
         borang.addEventListener('submit', function (e) {
             e.preventDefault();
 
-            /*
-             * Bukti transfer diperiksa di SINI, di dalam pengirimnya.
-             *
-             * Dulu pemeriksaannya menempel sebagai klik tersendiri pada
-             * tombolnya, dan tombolnya selalu ada — jadi begitu jalur
-             * unggahnya hilang (lewat DOKU), pemeriksaan itu akan menolak
-             * SETIAP pendaftaran dengan "bukti belum diunggah" untuk berkas
-             * yang memang tidak diminta.
-             */
 
             Swal.fire({
                 title: 'Sudah benar semua?',
-                text: true
-                    ? 'Setelah ini Anda dibawa ke halaman pembayaran.'
-                    : 'Pastikan data dan bukti transfernya sudah sesuai.',
+                text: 'Setelah ini Anda dibawa ke halaman pembayaran.',
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#e76d20',
