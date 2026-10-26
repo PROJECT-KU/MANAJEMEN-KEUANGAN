@@ -70,10 +70,18 @@ class HargaKafe
         foreach ($kunciSesi as $kunci) {
             $kunci = (string) $kunci;
 
-            // Sesi yang sama tidak boleh dihitung dua kali: borangnya
-            // memilih tiga slot, dan tidak ada yang menghalangi orang
-            // memilih sesi yang sama di dua slot.
-            if ($kunci === '' || isset($dipilih[$kunci]) || ! isset($katalog[$kunci])) {
+            /*
+             * Kunci yang tidak ada di katalog DILEWATI, bukan dihargai nol:
+             * dihargai nol, pemesanan berisi satu sesi sungguhan dan dua sesi
+             * karangan tetap tersimpan dan tagihannya kurang.
+             *
+             * Sesi kembar tidak perlu ditolak terpisah — $dipilih DIKUNCI
+             * pada kunci sesinya, jadi yang sama menimpa dirinya sendiri.
+             * Pemeriksaan isset() tambahan sempat ada di sini lalu dicabut:
+             * ia tidak bisa dibuat merah oleh uji mana pun, sebab yang
+             * dijanjikannya sudah dijamin bentuk lariknya.
+             */
+            if ($kunci === '' || ! isset($katalog[$kunci])) {
                 continue;
             }
 
