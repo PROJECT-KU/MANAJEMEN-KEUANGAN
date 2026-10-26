@@ -188,9 +188,23 @@ class KabarWhatsAppSemuaLayananTest extends TestCase
     /** @return array<int, string> */
     private const SEMUA = ['webinar_eksklusif', 'scopus_camp', 'bibliometrik', 'scopus_kafe'];
 
-    private const BERGERBANG = ['webinar_eksklusif', 'scopus_camp'];
+    /*
+     * Scopus Kafe pindah ke BERGERBANG 26 Okt 2026; Analisis Bibliometrik
+     * satu-satunya yang masih bertransfer manual.
+     */
+    private const BERGERBANG = ['webinar_eksklusif', 'scopus_camp', 'scopus_kafe'];
 
-    private const MANUAL = ['bibliometrik', 'scopus_kafe'];
+    private const MANUAL = ['bibliometrik'];
+
+    /*
+     * Yang punya TEMPAT TERBATAS untuk dilepas kembali — dan itu bukan
+     * hal yang sama dengan bergerbang. Scopus Kafe bergerbang tetapi tidak
+     * berkuota: yang dipesan waktu pendampingan, bukan kursi dari jatah yang
+     * terbatas, jadi tagihan yang mati di sana tidak melepaskan apa pun.
+     */
+    private const BERKUOTA = ['webinar_eksklusif', 'scopus_camp'];
+
+    private const TANPA_KUOTA = ['bibliometrik', 'scopus_kafe'];
 
     // ------------------------------------------------------------- ujiannya
 
@@ -388,7 +402,7 @@ class KabarWhatsAppSemuaLayananTest extends TestCase
     }
 
     #[Test]
-    public function kursi_dilepas_tidak_pernah_dikirim_ke_layanan_bertransfer_manual(): void
+    public function kursi_dilepas_tidak_pernah_dikirim_ke_layanan_tanpa_kuota(): void
     {
         /*
          * "Pembayaran belum masuk sampai batas waktunya, jadi kursinya kami
@@ -400,16 +414,18 @@ class KabarWhatsAppSemuaLayananTest extends TestCase
          * batasi waktunya — dan sebagian dari mereka buktinya sudah ada di
          * tangan kami.
          */
-        foreach (self::MANUAL as $layanan) {
+        foreach (self::TANPA_KUOTA as $layanan) {
             [$l, $p, $angkatan] = $this->barisnya($layanan);
 
             Http::fake(['api.fonnte.com/*' => Http::response(['status' => true, 'id' => ['1']], 200)]);
 
             $this->assertFalse(app(KabariWhatsApp::class)->kursiDilepas($l, $p, $angkatan),
-                $layanan . ' mengirim pesan kursi dilepas, padahal tidak punya tenggat bayar.');
+                $layanan . ' mengirim pesan kursi dilepas, padahal tidak punya tempat '
+                . 'terbatas yang bisa dilepas.');
 
             $this->assertFalse(app(KabariWhatsApp::class)->gagalBayar($l, $p, $angkatan),
-                $layanan . ' mengirim pesan gagal bayar, padahal tidak lewat gerbang.');
+                $layanan . ' mengirim pesan gagal bayar yang menyebut tempatnya dilepas, '
+                . 'padahal tidak ada kuota yang dikembalikan.');
 
             Http::assertNothingSent();
         }
@@ -648,7 +664,7 @@ class KabarWhatsAppSemuaLayananTest extends TestCase
         $jalur = [
             'app/Http/Controllers/Publict/PublicScopusCampController.php' => "pendaftaranMasuk('scopus_camp'",
             'app/Http/Controllers/Publict/PublicAnalisisBibliometrikController.php' => "pendaftaranMasuk('bibliometrik'",
-            'app/Http/Controllers/Publict/PublicPendaftaranScopusKafeController.php' => "pendaftaranMasuk('scopus_kafe'",
+            'app/Http/Controllers/Publict/PublicScopusKafeController.php' => "pendaftaranMasuk('scopus_kafe'",
             'app/Http/Controllers/Publict/PublicWebinarEksklusifController.php' => "pendaftaranMasuk('webinar_eksklusif'",
         ];
 
@@ -1067,7 +1083,15 @@ class KabarWhatsAppSemuaLayananTest extends TestCase
          * sisanya berjudul "*Pembayaran diterima* — Rumah Scopus Foundation"
          * bersapaan "Halo <nama>,".
          */
-        foreach (self::BERGERBANG as $layanan) {
+        /*
+         * DIPATOK KE YANG BERKUOTA, bukan ke yang bergerbang.
+         *
+         * Scopus Kafe bergerbang tetapi tidak berkuota, jadi dua dari empat
+         * kabarnya — gagal bayar dan tempat dilepas — memang sengaja tidak
+         * pernah dikirim. Diuji sebagai empat, uji ini akan menuntut pesan
+         * yang justru tidak boleh ada.
+         */
+        foreach (self::BERKUOTA as $layanan) {
             $semua = $this->semuaKabar($layanan);
 
             $this->assertCount(4, $semua,
