@@ -88,6 +88,15 @@ class HargaUmumTest extends TestCase
     {
         parent::setUp();
 
+        /*
+         * Borang Scopus Camp hanya digambar kalau gerbang pembayarannya siap.
+         * Sejak jalur unggah bukti dicabut 26 Okt 2026, pendaftaran tanpa
+         * gerbang pasti ditolak — borangnya pun dipantulkan, dan uji yang
+         * membukanya menerima 302 alih-alih 200.
+         */
+        config()->set('services.doku.client_id', 'BRN-UJI-HARGA');
+        config()->set('services.doku.secret_key', 'SK-UJI');
+
         foreach (self::FOLDER_BUKTI as $folder) {
             $this->buktiSebelumnya[$folder] = $this->isiFolderBukti($folder);
         }

@@ -512,15 +512,40 @@ class PenjagaanBorangTest extends TestCase
          * dibuat. Tanpa penjagaan ini ia mendapat DUA tagihan untuk satu
          * kursi, lalu sebagian membayar keduanya.
          */
+        \Illuminate\Support\Facades\Mail::fake();
+
         $a = $this->angkatan();
         $isian = $this->isian($a);
 
         $this->post(route('public.scopuscamp.store'), $isian);
-        $this->post(route('public.scopuscamp.store'), $isian)
-            ->assertRedirectContains('/Scopus-Camp/Status/');
+
+        $jawab = $this->post(route('public.scopuscamp.store'), $isian);
 
         $this->assertSame(1, $this->jumlahBaris($a),
             'Kiriman kedua membuat pendaftaran kedua.');
+
+        /*
+         * DAN TAUTANNYA TIDAK DIBUKA DI LAYAR.
+         *
+         * Cabang ini dulu mengantar pengirimnya langsung ke halaman status
+         * pendaftaran yang sudah ada. Yang dicocokkan cuma angkatan + nama +
+         * email — dan ketiganya bukan rahasia; nama dan email justru hal yang
+         * paling mudah diketahui rekan sekantor atau siapa pun yang memegang
+         * daftar peserta.
+         *
+         * Yang ia dapatkan dengan menebaknya: nomor telepon, afiliasi, daftar
+         * peserta rombongan, faktur PDF, dan tombol membuat tagihan.
+         */
+        $alamat = (string) $jawab->headers->get('location');
+
+        $this->assertStringNotContainsString('/Scopus-Camp/Status/', $alamat,
+            'Kiriman kedua diantar ke halaman status pendaftaran yang sudah ada; '
+            . 'siapa pun yang tahu nama dan email orang lain bisa membukanya.');
+
+        // Jalan kembalinya tetap ada — lewat kotak masuk pemiliknya.
+        \Illuminate\Support\Facades\Mail::assertSent(
+            \App\Mail\TautanPendaftaranScopusCampMail::class, 1
+        );
     }
 
     #[Test]

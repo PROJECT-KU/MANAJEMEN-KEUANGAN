@@ -235,6 +235,27 @@ class PublicScopusCampController extends Controller
         }
 
         /*
+         * TANPA GERBANG, BORANGNYA TIDAK DIGAMBAR SAMA SEKALI.
+         *
+         * Sejak jalur unggah bukti dicabut, pendaftaran tanpa gerbang pasti
+         * ditolak store(). Menggambar borangnya berarti orang mengisi tujuh
+         * isian — beserta nama dan nomor tiap peserta rombongan — lalu
+         * ditolak di akhir karena hal yang sudah diketahui sebelum ia
+         * mengetik huruf pertama.
+         *
+         * Dicegat di sini dengan alasan yang sama seperti angkatan tertutup.
+         */
+        if (! $this->doku->siap()) {
+            Log::error('Borang Scopus Camp ditutup: gerbang pembayaran belum siap.', [
+                'angkatan' => $item->getKey(),
+            ]);
+
+            return redirect()->route('public.scopuscamp.index')->with('error',
+                'Pembayaran daring sedang tidak tersedia, jadi pendaftaran ditutup '
+                . 'sementara. Silakan hubungi panitia lewat WhatsApp.');
+        }
+
+        /*
          * Borangnya BERCABANG menurut kesiapan gerbang pembayaran.
          *
          * Dengan gerbang siap, nomor rekening dan unggah bukti transfer
@@ -329,48 +350,56 @@ class PublicScopusCampController extends Controller
     // <!--================== CEK KODE DISKON ==================-->
     public function cekKodeDiskon(Request $request, $id)
     {
-        $kode = $request->query('kode_diskon');
+        $kode = trim((string) $request->query('kode_diskon'));
 
-        \Log::info('Cek Kode Diskon', [
-            'id_diterima' => $id,
-            'kode_diterima' => $kode,
-        ]);
-
-        $diskon = DB::table('kategori_layanan')->where('layanan', 'scopus_camp')
+        $diskon = DB::table('kategori_layanan')
+            ->where('layanan', 'scopus_camp')
             ->where('id', $id)
             ->first();
 
-        if (!$diskon) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Data tidak ditemukan. ID: ' . $id,
-            ]);
+        /*
+         * SATU JAWABAN UNTUK SEMUA KEGAGALAN.
+         *
+         * Sebelumnya tiga jawaban yang berbeda: "Data tidak ditemukan",
+         * "Kode diskon tidak tersedia untuk Batch ini", dan "Kode diskon
+         * tidak cocok". Ketiganya memberi tahu penebak lebih daripada yang
+         * ia kirimkan — terutama yang kedua, yang menyaring angkatan mana
+         * yang PUNYA kode dan karena itu layak ditebak. Rutenya pun tidak
+         * dibatasi lajunya sampai 26 Okt 2026, jadi menebaknya gratis.
+         *
+         * Kodenya juga TIDAK lagi dicatat ke log. Sebelumnya tiap percobaan
+         * tertulis apa adanya beserta kunci angkatannya — jadi log aplikasi
+         * jadi daftar kode diskon yang berlaku, dan log itu dibaca lebih
+         * banyak orang daripada basis datanya.
+         */
+        $tolak = response()->json([
+            'status' => 'error',
+            'message' => 'Kode diskonnya tidak berlaku untuk angkatan ini.',
+        ]);
+
+        if (! $diskon || $kode === '') {
+            return $tolak;
         }
 
-        if (is_null($diskon->kode_diskon)) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Kode diskon tidak tersedia untuk Batch ini.',
-            ]);
+        $seharusnya = trim((string) ($diskon->kode_diskon ?? ''));
+
+        // hash_equals: pembandingan untaian biasa berhenti di huruf pertama
+        // yang berbeda, dan selisih waktunya bisa dipakai menebak kodenya
+        // satu huruf demi satu huruf.
+        if ($seharusnya === '' || ! hash_equals($seharusnya, $kode)) {
+            return $tolak;
         }
 
-        if ($diskon->kode_diskon !== $kode) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Kode diskon tidak cocok.',
-            ]);
-        }
-
-        $nominal = trim((string)$diskon->nominal_diskon);
-        $casted = is_numeric($nominal) ? (int)$nominal : 0;
+        $nominal = trim((string) $diskon->nominal_diskon);
 
         return response()->json([
-                    'status' => 'success',
+            'status' => 'success',
             'kode_input' => $kode,
             'nominal_diskon' => $nominal,
-            'casted_nominal_diskon' => $casted,
+            'casted_nominal_diskon' => is_numeric($nominal) ? (int) $nominal : 0,
         ]);
     }
+
     // <!--================== END ==================-->
 
     // <!--================== KIRIM DATA PENDAFTARAN ==================-->
@@ -628,9 +657,39 @@ class PublicScopusCampController extends Controller
          */
         $bayarDaring = $this->doku->siap();
 
-        if (! $bayarDaring && ! $request->hasFile('gambar')) {
-            return back()->withInput()
-                ->withErrors(['gambar' => 'Bukti transfernya belum diunggah.']);
+        /*
+         * TANPA GERBANG, PENDAFTARANNYA DITOLAK — tidak lagi jatuh ke unggah
+         * bukti transfer.
+         *
+         * Jalur unggahan dicabut atas keputusan pemiliknya 26 Okt 2026:
+         * pembayaran layanan ini seluruhnya lewat gerbang. Yang dicabut bukan
+         * sekadar kolom isian melainkan seluruh penerimaan berkas dari orang
+         * luar, dan itu menutup lubang yang terukur hari itu juga: `gambar`
+         * TIDAK punya satu pun aturan validasi — tanpa mimes, tanpa max —
+         * sementara berkasnya disimpan ke public/ScopusCamp memakai EKSTENSI
+         * KIRIMAN PENGUNGGAH, di folder yang tersaji lewat HTTP.
+         *
+         * Berkas .htaccess di folder itu memang mematikan mesin PHP, jadi
+         * kode tidak bisa dieksekusi. Yang tidak ia tutup: .html dan .svg
+         * tidak ada di daftar tolaknya — halaman buatan orang luar bisa
+         * berdiri di domain kita sendiri, dan bagi lembaga yang pesannya
+         * sendiri memperingatkan penipuan mengatasnamakan Rumah Scopus, itu
+         * bahan phishing yang paling meyakinkan. Ditambah tanpa batas ukuran,
+         * cakramnya bisa dipenuhi satu permintaan.
+         *
+         * DITOLAK DENGAN TERANG, bukan diam-diam membuat pendaftaran yang
+         * tidak bisa dibayar: orangnya berhak tahu bahwa yang bermasalah
+         * bukan datanya.
+         */
+        if (! $bayarDaring) {
+            Log::error('Pendaftaran Scopus Camp ditolak: gerbang pembayaran belum siap.', [
+                'angkatan' => $kategori->getKey(),
+            ]);
+
+            return back()->withInput()->with('error',
+                'Pembayaran daring sedang tidak tersedia, jadi pendaftaran belum bisa '
+                . 'diproses sekarang. Data Anda TIDAK tersimpan — silakan hubungi '
+                . 'panitia lewat WhatsApp, atau coba lagi beberapa saat.');
         }
 
         /*
@@ -654,23 +713,46 @@ class PublicScopusCampController extends Controller
             ->first();
 
         if ($sudahAda !== null) {
-            return redirect()->route('public.scopuscamp.status', $sudahAda->getKey())
-                ->with('error', 'Data ini sudah terdaftar di angkatan tersebut. '
-                    . 'Kursinya sudah ditahan untuk Anda — tidak perlu mendaftar lagi.');
+            /*
+             * TAUTANNYA DIKIRIM KE EMAIL, bukan dibuka di layar.
+             *
+             * Sampai 26 Okt 2026 cabang ini MENGANTAR pengirimnya langsung ke
+             * halaman status pendaftaran yang sudah ada. Terukur sebagai
+             * lubang: yang dicocokkan cuma angkatan + nama + email, dan
+             * ketiganya bukan rahasia — nama dan email justru hal yang paling
+             * mudah diketahui rekan sekantor, panitia acara lain, atau siapa
+             * pun yang memegang daftar peserta.
+             *
+             * Yang ia dapatkan dengan menebaknya: nomor telepon, afiliasi,
+             * daftar peserta rombongan, faktur PDF, tombol kirim ulang, dan
+             * tombol membuat tagihan. UUID halaman statusnya memang rahasia
+             * pembawa — dan cabang ini menyerahkannya cuma-cuma.
+             *
+             * Dikirim lewat surat, hanya pemilik kotak masuknya yang
+             * menerimanya. Jawabannya di layar SAMA PERSIS untuk yang memang
+             * pemiliknya dan yang sekadar menebak, supaya borang ini pun
+             * tidak jadi alat memeriksa siapa yang sudah terdaftar.
+             */
+            try {
+                Mail::to($sudahAda->email)->send(
+                    new \App\Mail\TautanPendaftaranScopusCampMail(collect([$sudahAda]))
+                );
+            } catch (\Throwable $e) {
+                report($e);
+            }
+
+            return back()->withInput()->with('success',
+                'Data ini sudah pernah didaftarkan di angkatan tersebut, jadi kursinya '
+                . 'sudah ditahan. Tautan halaman pendaftarannya kami kirimkan ke alamat '
+                . 'email yang dipakai saat mendaftar — periksa juga folder spam.');
         }
 
-        // SAVE IMAGE
+        /*
+         * Tidak ada berkas yang diterima dari borang ini lagi. Kolom `gambar`
+         * tetap ada di tabelnya — 2.376 bukti lama masih tersimpan dan masih
+         * dibuka panitia — tetapi pendaftaran baru tidak pernah mengisinya.
+         */
         $imagePath = null;
-
-        if (! $bayarDaring && $request->hasFile('gambar')) {
-            $image = $request->file('gambar');
-
-            $imageName = Str::uuid() . '_Bukti_TF_Scopus_Camp.' . $image->getClientOriginalExtension();
-            $imagePath = 'ScopusCamp/' . $imageName;
-
-            $image->move(public_path('ScopusCamp'), $imageName);
-        }
-        // END
 
         // CEK APAKAH KODE DISKON NULL ATAU TIDAK
         $kodeDiskon = $data['kode_diskon'] ?? null;
@@ -769,16 +851,14 @@ class PublicScopusCampController extends Controller
             // 'doku' atau 'transfer'; layar panitia membedakan keduanya,
             // dan hanya yang 'doku' punya tagihan untuk ditutup saat
             // pendaftarannya dibatalkan.
-                    'cara_bayar'                                                => $bayarDaring ? 'doku' : 'transfer',
+                    // Selalu 'doku': store() menolak lebih dulu kalau
+                    // gerbangnya belum siap.
+                    'cara_bayar'                                                => 'doku',
 
-            /*
-             * Tenggat HANYA untuk yang lewat gerbang: tagihan DOKU memang
-             * mati sendiri sesudah sekian menit, sedangkan transfer manual
-             * tidak punya tenggat sama sekali di layanan ini.
-             */
-                    'kedaluwarsa_pada'                                          => $bayarDaring
-                ? now()->addMinutes(Doku::MENIT_KEDALUWARSA)
-                : null,
+            // Tagihan DOKU mati sendiri sesudah sekian menit; tenggatnya
+            // disalin ke sini supaya halaman status dan sapuan kedaluwarsa
+            // membaca angka yang sama.
+                    'kedaluwarsa_pada'                                          => now()->addMinutes(Doku::MENIT_KEDALUWARSA),
 
                     /*
                      * `note` TIDAK lagi diambil dari kiriman borang.
@@ -880,14 +960,21 @@ class PublicScopusCampController extends Controller
                 ]);
             }
 
-            if ($bayarDaring) {
-                return $this->mulaiBayar($save, $kategori);
-            }
-
-            return redirect()->route('public.scopuscamp.index')->with('success', 'Pendaftaran Analisis Bibliometrik Terkirim!');
-        } else {
-            return redirect()->route('public.scopuscamp.index')->with('error', 'Pendaftaran Analisis Bibliometrik Gagal Terkirim!');
+            // Selalu ke gerbang: tanpa gerbang, store() sudah menolak jauh
+            // di atas dan barisnya tidak pernah dibuat.
+            return $this->mulaiBayar($save, $kategori);
         }
+
+        /*
+         * Pesannya menyebut layanan yang BENAR.
+         *
+         * Dua kalimat di sini berbunyi "Pendaftaran Analisis Bibliometrik" —
+         * sisa salin-tempel dari pengendali layanan lain, dan yang gagal
+         * mendaftar Scopus Camp diberi tahu bahwa pendaftaran layanan yang
+         * tidak pernah ia buka gagal terkirim.
+         */
+        return redirect()->route('public.scopuscamp.index')
+            ->with('error', 'Pendaftaran Scopus Camp gagal disimpan. Silakan coba lagi.');
     }
 
     // <!--================== END ==================-->

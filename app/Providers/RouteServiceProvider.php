@@ -85,6 +85,77 @@ class RouteServiceProvider extends ServiceProvider
             return Limit::perMinute(2)->by($request->ip());
         });
 
+        /*
+         * BORANG PENDAFTARAN, dan ini yang paling merugikan kalau hilang.
+         *
+         * Tiap kiriman: menahan satu KURSI dari kuota yang terbatas,
+         * mengirim surat ke alamat yang DITENTUKAN PENGIRIMNYA — jadi
+         * alamat siapa pun bisa dibanjiri dari domain kita — dan membuat
+         * TAGIHAN SUNGGUHAN di gerbang pembayaran. Terukur 26 Okt 2026:
+         * rutenya tidak punya pembatas apa pun, sementara borang Webinar
+         * Eksklusif sudah lama punya.
+         *
+         * Enam per menit: satu orang yang menekan tombolnya berulang karena
+         * mengira gagal tidak akan pernah menyentuhnya, sementara skrip yang
+         * menyapu kuota berhenti di kiriman ketujuh.
+         *
+         * Dihitung per IP DAN per alamat email. Per IP saja, satu penyerang
+         * dari beberapa jaringan tetap bisa membanjiri satu alamat; per
+         * email saja, satu jaringan bisa menyapu banyak alamat sekaligus.
+         */
+        RateLimiter::for('daftar-umum', function (Request $request) {
+            return [
+                Limit::perMinute(6)->by($request->ip()),
+                Limit::perMinute(3)->by(mb_strtolower(trim((string) $request->input('email')))),
+            ];
+        });
+
+        /*
+         * Pemeriksa kode diskon.
+         *
+         * Tanpa pembatas, kodenya bisa ditebak satu per satu — dan jawabannya
+         * dulu membedakan "angkatan ini tidak punya kode" dari "kode tidak
+         * cocok", yang memberi tahu penebaknya angkatan mana yang layak
+         * dicoba. Jawabannya kini disamakan; pembatas ini lapis keduanya.
+         */
+        RateLimiter::for('cek-diskon', function (Request $request) {
+            return Limit::perMinute(10)->by($request->ip());
+        });
+
+        /*
+         * Penanya keadaan pembayaran di halaman status.
+         *
+         * Tiap permintaan ke sini memicu SATU panggilan keluar ke gerbang
+         * pembayaran — terukur 1:1 — dan halamannya menanyainya tiap 5 detik
+         * sampai 40 kali. Satu tab terbuka berarti 40 panggilan dalam tiga
+         * menit; siapa pun yang memegang satu UUID bisa mengulangnya tanpa
+         * henti, menghabiskan kuota kita di gerbang sekaligus kuota proses
+         * hosting yang memang sudah pernah berakhir 503 karena poller.
+         *
+         * 30 per menit: jauh di atas kebutuhan poller sendiri (12 per menit),
+         * cukup longgar untuk beberapa tab, dan tetap memotong pengulangan
+         * yang tidak wajar.
+         */
+        /*
+         * Halaman status dan unduhan berkasnya.
+         *
+         * Keduanya mahal dengan cara yang berbeda: halaman statusnya memicu
+         * satu panggilan keluar ke gerbang pembayaran tiap kali dimuat, dan
+         * unduhan dokumennya merakit PDF — kerja prosesor yang nyata di
+         * hosting berbagi.
+         *
+         * 60 per menit: satu orang yang memuat ulang halamannya berkali-kali
+         * tidak akan menyentuhnya, dan pengulangan yang tidak wajar tetap
+         * terpotong.
+         */
+        RateLimiter::for('camp-status', function (Request $request) {
+            return Limit::perMinute(60)->by($request->ip());
+        });
+
+        RateLimiter::for('camp-keadaan', function (Request $request) {
+            return Limit::perMinute(30)->by($request->ip());
+        });
+
         RateLimiter::for('camp-tautan-saya', function (Request $request) {
             /*
              * Dihitung per ALAMAT EMAIL yang diminta, bukan hanya per IP.

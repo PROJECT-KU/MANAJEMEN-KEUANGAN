@@ -34,6 +34,20 @@ class IsiOtomatisTest extends TestCase
 {
     use DatabaseTransactions;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        /*
+         * Borang Scopus Camp hanya digambar kalau gerbang pembayarannya
+         * siap — sejak jalur unggah bukti dicabut 26 Okt 2026, pendaftaran
+         * tanpa gerbang pasti ditolak, jadi borangnya pun tidak digambar.
+         * Tanpa kunci ini, uji yang membuka borangnya menerima 302.
+         */
+        config()->set('services.doku.client_id', 'BRN-UJI-ISI');
+        config()->set('services.doku.secret_key', 'SK-UJI-ISI');
+    }
+
     private const BORANG = 'resources/views/public/scopus_camp/form_pendaftaran.blade.php';
 
     private function angkatan(): CategoriesScopusCamp
