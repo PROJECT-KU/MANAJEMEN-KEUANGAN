@@ -186,22 +186,86 @@ class BayarDokuTest extends TestCase
     }
 
     #[Test]
-    public function borang_kembali_ke_transfer_manual_saat_gerbangnya_belum_disetel(): void
+    public function tanpa_gerbang_borangnya_ditutup_bukan_jatuh_ke_transfer_manual(): void
     {
         /*
-         * Peladen yang kredensial DOKU-nya belum dipasang HARUS tetap punya
-         * cara menerima uang. Tanpa cabang ini, borangnya memajang tombol
-         * "Lanjut ke pembayaran" yang selalu berakhir di halaman galat.
+         * KONTRAKNYA DIBALIK 26 Okt 2026, atas keputusan pemiliknya:
+         * pembayaran layanan ini seluruhnya lewat gerbang, dan jalur unggah
+         * bukti transfer dicabut dari borang umum.
+         *
+         * Sebelumnya peladen tanpa kredensial DOKU jatuh ke transfer manual.
+         * Jalur itu menerima BERKAS dari orang luar tanpa satu pun aturan
+         * validasi — tanpa mimes, tanpa max — lalu menyimpannya ke
+         * public/ScopusCamp memakai ekstensi kiriman pengunggah, di folder
+         * yang tersaji lewat HTTP. Berkas .htaccess di sana memang mematikan
+         * mesin PHP, tetapi .html dan .svg tidak ada di daftar tolaknya:
+         * halaman buatan orang luar bisa berdiri di domain kita sendiri,
+         * bahan phishing yang paling meyakinkan bagi lembaga yang pesannya
+         * sendiri memperingatkan penipuan mengatasnamakan namanya.
+         *
+         * Yang dituntut sekarang: borangnya TIDAK digambar sama sekali, dan
+         * orangnya diberi tahu sebabnya. Menggambarnya lalu menolak di akhir
+         * berarti ia mengisi tujuh isian — beserta nama dan nomor tiap
+         * peserta rombongan — untuk hal yang sudah diketahui sejak awal.
          */
         config()->set('services.doku.client_id', '');
         config()->set('services.doku.secret_key', '');
 
-        $isi = (string) $this->get(route('public.scopuscamp.formpendaftaran',
-            ['id' => $this->angkatan()->getKey()]))->assertOk()->getContent();
+        $this->followingRedirects()
+            ->get(route('public.scopuscamp.formpendaftaran', ['id' => $this->angkatan()->getKey()]))
+            ->assertOk()
+            ->assertSee('Pembayaran daring sedang tidak tersedia', false)
+            ->assertDontSee('name="gambar"', false);
+    }
 
-        $this->assertStringContainsString('216401000467563', $isi,
-            'Tanpa gerbang pembayaran, borangnya tidak memajang satu pun cara membayar.');
-        $this->assertStringContainsString('name="gambar"', $isi);
+    #[Test]
+    public function tanpa_gerbang_pendaftaran_ditolak_tanpa_menyimpan_apa_pun(): void
+    {
+        /*
+         * Lapis kedua, di peladennya sendiri: alamat store() bisa ditembak
+         * langsung tanpa pernah membuka borangnya.
+         *
+         * YANG DIUKUR: tidak ada baris baru DAN tidak ada berkas baru. Yang
+         * kedua itu inti perubahannya — selama jalur unggahnya masih hidup,
+         * satu permintaan POST bisa menaruh berkas apa pun di folder yang
+         * tersaji lewat HTTP.
+         */
+        config()->set('services.doku.client_id', '');
+        config()->set('services.doku.secret_key', '');
+
+        $a = $this->angkatan();
+        $sebelum = PendaftaranScopusCamp::count();
+        $berkasSebelum = count(glob(public_path('ScopusCamp/*')) ?: []);
+
+        $this->post(route('public.scopuscamp.store'), $this->isian($a))
+            ->assertRedirect()
+            ->assertSessionHas('error');
+
+        $this->assertSame($sebelum, PendaftaranScopusCamp::count(),
+            'Pendaftaran tetap tersimpan walau pembayarannya tidak mungkin diselesaikan.');
+
+        $this->assertSame($berkasSebelum, count(glob(public_path('ScopusCamp/*')) ?: []),
+            'Masih ada berkas yang diterima dari borang umum.');
+    }
+
+    #[Test]
+    public function tidak_ada_lagi_jalur_yang_menerima_berkas_dari_borang_umum(): void
+    {
+        /*
+         * Pin kontrak atas SUMBERNYA, dan sengaja: yang dijaga bukan satu
+         * cabang melainkan ketiadaan seluruh penerimaan berkas di pengendali
+         * ini. Dikembalikan dalam bentuk apa pun — move(), store(),
+         * storeAs() — lubang yang sama terbuka lagi, dan tidak ada galat
+         * yang memberitahunya.
+         */
+        $sumber = (string) file_get_contents(base_path(
+            'app/Http/Controllers/Publict/PublicScopusCampController.php'
+        ));
+
+        foreach (['getClientOriginalExtension', "->move(public_path", "hasFile('gambar')"] as $jejak) {
+            $this->assertStringNotContainsString($jejak, $sumber,
+                'Jalur penerimaan berkas hidup lagi di borang umum Scopus Camp: ' . $jejak);
+        }
     }
 
     // ------------------------------------------------------ membuat tagihan
