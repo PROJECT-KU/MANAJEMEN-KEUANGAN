@@ -992,7 +992,7 @@
                          tetap selebar kartu, dan tiga tindakan pendukung
                          yang jarang ditekan berbagi satu baris. --}}
                     @if ($grup)
-                        <a href="{{ $grup }}" target="_blank" rel="noopener"
+                        <a href="{{ $grup }}" target="_blank" rel="noopener noreferrer"
                             class="sts-tombol hijau">
                             <i class="fab fa-whatsapp"></i> Masuk grup peserta
                         </a>
@@ -1039,7 +1039,7 @@
                         </form>
 
                         @if ($wa !== '')
-                            <a href="{{ $wa }}" target="_blank" rel="noopener"
+                            <a href="{{ $wa }}" target="_blank" rel="noopener noreferrer"
                                 class="sts-tombol-kecil">
                                 <i class="fab fa-whatsapp"></i>
                                 <span>Tanya panitia</span>

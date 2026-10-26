@@ -59,8 +59,12 @@ Route::post('/Analisis-Bibliometrik/store', 'Publict\PublicAnalisisBibliometrikC
 Route::get('/Scopus-Camp', 'Publict\PublicScopusCampController@public')->name('public.scopuscamp.index');
 Route::get('/Scopus-Camp/selengkapnya/{id}', 'Publict\PublicScopusCampController@Selengkapnya')->name('public.scopuscamp.Selengkapnya');
 Route::get('/Scopus-Camp/Form-Pendaftaran/{id}', 'Publict\PublicScopusCampController@FormPendaftaran')->name('public.scopuscamp.formpendaftaran');
-Route::get('/Scopus-Camp/cek-kode-diskon/{id}', 'Publict\PublicScopusCampController@cekKodeDiskon')->name('public.scopuscamp.cekkodediskon');
-Route::post('/Scopus-Camp/store', 'Publict\PublicScopusCampController@store')->name('public.scopuscamp.store');
+Route::get('/Scopus-Camp/cek-kode-diskon/{id}', 'Publict\PublicScopusCampController@cekKodeDiskon')
+    ->middleware('throttle:cek-diskon')
+    ->name('public.scopuscamp.cekkodediskon');
+Route::post('/Scopus-Camp/store', 'Publict\PublicScopusCampController@store')
+    ->middleware('throttle:daftar-umum')
+    ->name('public.scopuscamp.store');
 
 /*
  * Pencarian data pendaftar dari nomor WhatsApp, untuk mengisi borang
@@ -80,8 +84,12 @@ Route::post('/Scopus-Camp/cari-pendaftar', 'Publict\PublicScopusCampController@c
  * acak tidak bisa ditebak, sedangkan nomor urut akan membuat pendaftaran
  * orang lain terbuka cukup dengan menaikkan satu angka.
  */
-Route::get('/Scopus-Camp/Status/{id}', 'Publict\PublicScopusCampController@status')->name('public.scopuscamp.status');
-Route::get('/Scopus-Camp/Status/{id}/keadaan', 'Publict\PublicScopusCampController@keadaan')->name('public.scopuscamp.keadaan');
+Route::get('/Scopus-Camp/Status/{id}', 'Publict\PublicScopusCampController@status')
+    ->middleware('throttle:camp-status')
+    ->name('public.scopuscamp.status');
+Route::get('/Scopus-Camp/Status/{id}/keadaan', 'Publict\PublicScopusCampController@keadaan')
+    ->middleware('throttle:camp-keadaan')
+    ->name('public.scopuscamp.keadaan');
 
 /*
  * Tiga jalur yang dipakai pendaftar dari halaman statusnya sendiri.
@@ -107,6 +115,7 @@ Route::post('/Scopus-Camp/Status/{id}/kirim-ulang', 'Publict\PublicScopusCampCon
  * dengan halaman statusnya sendiri.
  */
 Route::get('/Scopus-Camp/Status/{id}/dokumen/{jenis}', 'Publict\PublicScopusCampController@dokumen')
+    ->middleware('throttle:camp-status')
     ->name('public.scopuscamp.dokumen');
 
 /*

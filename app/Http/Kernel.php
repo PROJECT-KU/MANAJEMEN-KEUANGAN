@@ -21,6 +21,11 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
+
+        // Kepala keamanan untuk SETIAP jawaban; lihat kelasnya untuk sebab
+        // tiap kepala. Di tumpukan global, bukan di grup 'web': jawaban API
+        // dan berkas yang disajikan lewat PHP pun perlu nosniff.
+        \App\Http\Middleware\KepalaKeamanan::class,
     ];
 
     /**

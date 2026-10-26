@@ -33,10 +33,20 @@
         TIDAK PERNAH menempel — sudah diukur di halaman detail — tetapi
         tetap menggeser kartunya sejauh nilai `top`-nya.
 
-    Jalur transfer manual TIDAK dibuang, cuma disembunyikan selama gerbangnya
-    siap: peladen yang kredensial DOKU-nya belum dipasang harus tetap punya
-    cara menerima uang. Yang menentukan $bayarDaring, dihitung sekali di
-    pengendali supaya borang dan penyimpanannya tidak bisa berselisih.
+    JALUR TRANSFER MANUAL SUDAH DIBUANG SELURUHNYA, 26 Okt 2026, atas
+    keputusan pemiliknya: pembayaran layanan ini seluruhnya lewat gerbang.
+
+    Yang dibuang bukan sekadar tampilan kartu rekening dan kotak unggahnya.
+    Jalur itu menerima BERKAS dari orang luar tanpa satu pun aturan validasi —
+    tanpa mimes, tanpa max — lalu menyimpannya ke public/ScopusCamp memakai
+    ekstensi kiriman pengunggah, di folder yang tersaji lewat HTTP. Berkas
+    .htaccess di sana memang mematikan mesin PHP, tetapi .html dan .svg tidak
+    ada di daftar tolaknya: halaman buatan orang luar bisa berdiri di domain
+    kita sendiri.
+
+    Borang ini karena itu hanya digambar kalau gerbangnya siap; pengendalinya
+    memantulkan orangnya kembali kalau tidak, dan store() menolak sekali lagi
+    di peladen bagi yang menembak alamatnya langsung.
 --}}
 <style>
     .daf {
@@ -442,7 +452,7 @@
             {{-- Dirakit sebagai ungkapan, bukan sebagai percabangan sebaris:
                  cabang sebaris meninggalkan spasi tepat sebelum titiknya,
                  jadi yang tercetak "lanjutkan ke pembayaran ." --}}
-            {{ $bayarDaring ? 'lanjutkan ke pembayaran' : 'kirim bukti transfernya' }}.
+            lanjutkan ke pembayaran.
             Butuh sekitar dua menit.
         </p>
 
@@ -732,58 +742,17 @@
                         </div>
                     </div>
 
-                    @unless ($bayarDaring)
-                        {{-- Kartu rekening BIASA, bukan akordeon.
+                    {{-- Kartu nomor rekening dan unggah bukti transfer DIBUANG
+                         26 Okt 2026, atas keputusan pemiliknya: pembayaran
+                         layanan ini seluruhnya lewat gerbang.
 
-                             Nomor rekeningnya dulu duduk di dalam akordeon
-                             yang memang terbuka secara bawaan — tetapi
-                             tombolnya tetap bisa ditekan, dan sekali tertekan
-                             nomornya menghilang. Di halaman yang satu-satunya
-                             tujuannya mentransfer uang, tidak ada alasan
-                             menyembunyikan nomor rekening di balik tombol
-                             yang bisa salah tekan. --}}
-                        <div class="daf-kartu">
-                            <div class="daf-kepala">
-                                <i class="fas fa-university"></i> Transfer ke rekening ini
-                            </div>
-
-                            <div class="daf-rekening">
-                                <div class="daf-rekening-bank">
-                                    <img src="{{ asset('assets/img/bri.jpg') }}" alt="Logo Bank BRI"
-                                        style="width: 48px; height: auto; border-radius: 5px;">
-                                    <strong>Bank BRI</strong>
-                                </div>
-
-                                <p class="daf-rekening-label">Nomor rekening</p>
-                                <p id="nomor-rekening" class="daf-rekening-nomor">216401000467563</p>
-                                <p class="daf-rekening-nama">a.n. <strong>Rumah Scopus Akademi</strong></p>
-
-                                <button type="button" onclick="copyToClipboard('nomor-rekening')" class="daf-salin">
-                                    <i class="fas fa-copy"></i> Salin nomor rekening
-                                </button>
-                            </div>
-
-                            <div class="daf-medan" style="margin-top: 22px;">
-                                <label for="gambar">Unggah bukti transfer <span class="daf-wajib">*</span></label>
-                                <input type="file" name="gambar" id="gambar" style="display: none;"
-                                    accept="image/*" required>
-                                <label for="gambar" class="daf-unggah">
-                                    <i class="fas fa-cloud-upload-alt"></i> Pilih gambar
-                                </label>
-                                @error('gambar')
-                                    <span class="daf-pesan gagal">{{ $message }}</span>
-                                @enderror
-
-                                {{-- Disembunyikan selama belum ada yang dipilih: kotak
-                                     abu-abu kosong tepat di bawah tombol unggah terbaca
-                                     sebagai gambar yang gagal dimuat. --}}
-                                <div class="daf-pratinjau" id="wadahPratinjau" style="display: none;">
-                                    <div id="imagePreview"></div>
-                                    <span id="file-selected" class="daf-berkas"></span>
-                                </div>
-                            </div>
-                        </div>
-                    @endunless
+                         Yang dibuang bukan sekadar tampilannya. Jalur itu
+                         menerima BERKAS dari orang luar tanpa satu pun aturan
+                         validasi lalu menyimpannya ke public/ScopusCamp
+                         memakai ekstensi kiriman pengunggah, di folder yang
+                         tersaji lewat HTTP. Dibiarkan sebagai cabang mati di
+                         sini, ia tinggal menunggu satu orang menghidupkannya
+                         lagi tanpa tahu apa yang ia buka. --}}
                 </div>
 
                 <div class="daf-kolom-kanan">
@@ -872,17 +841,11 @@
                             </span>
                         </label>
 
-                        <button type="submit" class="daf-kirim" id="btnSubmit"
-                            data-bayar-daring="{{ $bayarDaring ? '1' : '0' }}">
-                            @if ($bayarDaring)
-                                <i class="fas fa-lock"></i> Lanjut ke pembayaran
-                            @else
-                                <i class="fas fa-paper-plane"></i> Kirim pendaftaran
-                            @endif
+                        <button type="submit" class="daf-kirim" id="btnSubmit">
+                            <i class="fas fa-lock"></i> Lanjut ke pembayaran
                         </button>
 
-                        @if ($bayarDaring)
-                            <div class="daf-aman">
+                        <div class="daf-aman">
                                 <i class="fas fa-shield-alt"></i>
                                 <span>Pembayaran diproses DOKU. Setelah membayar, status
                                     pendaftaran Anda berpindah sendiri — tidak perlu
@@ -918,13 +881,6 @@
                                 <span>QRIS</span>
                                 <span>Virtual Account</span>
                             </div>
-                        @else
-                            <div class="daf-aman">
-                                <i class="fas fa-clock"></i>
-                                <span>Panitia memeriksa bukti transfer Anda, lalu
-                                    mengirim kabarnya lewat email.</span>
-                            </div>
-                        @endif
                     </div>
                 </div>
 
@@ -947,9 +903,6 @@
          * ketinggalan diam-diam — borang menuntut bukti transfer sementara
          * peladen mengantar orangnya ke DOKU.
          */
-        var bayarDaring = tombol.dataset.bayarDaring === '1';
-
-        var gambar = document.getElementById('gambar');
 
         borang.addEventListener('submit', function (e) {
             e.preventDefault();
@@ -963,24 +916,16 @@
              * SETIAP pendaftaran dengan "bukti belum diunggah" untuk berkas
              * yang memang tidak diminta.
              */
-            if (! bayarDaring && gambar && gambar.files.length === 0) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Bukti belum diunggah',
-                    text: 'Silakan unggah bukti pembayaran Anda dulu.'
-                });
-                return;
-            }
 
             Swal.fire({
                 title: 'Sudah benar semua?',
-                text: bayarDaring
+                text: true
                     ? 'Setelah ini Anda dibawa ke halaman pembayaran.'
                     : 'Pastikan data dan bukti transfernya sudah sesuai.',
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#e76d20',
-                confirmButtonText: bayarDaring ? 'Ya, lanjut bayar' : 'Ya, kirim',
+                confirmButtonText: 'Ya, lanjut bayar',
                 cancelButtonText: 'Periksa lagi',
                 reverseButtons: true
             }).then(function (hasil) {
@@ -990,7 +935,7 @@
 
                 tombol.disabled = true;
                 tombol.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' +
-                    (bayarDaring ? 'Menyiapkan pembayaran...' : 'Mengirim...');
+                    'Menyiapkan pembayaran...';
 
                 /*
                  * Rel yang meluncur, BUKAN Swal.showLoading().
@@ -1006,15 +951,12 @@
                  * DOKU tidak terasa seperti halaman yang nyasar.
                  */
                 Swal.fire({
-                    title: bayarDaring ? 'Menyiapkan pembayaran' : 'Memproses pendaftaran',
+                    title: 'Menyiapkan pembayaran',
                     html: '<div class="dlg-tunggu">'
                         + '<div class="dlg-rel"></div>'
                         + '<div class="dlg-langkah">'
-                        + (bayarDaring
-                            ? 'Kami sedang membuat tagihan Anda, lalu membuka halaman '
-                                + 'pembayaran <b>DOKU</b>.<br>Mohon jangan tutup halaman ini.'
-                            : 'Kami sedang menyimpan pendaftaran Anda.<br>'
-                                + 'Mohon jangan tutup halaman ini.')
+                        + 'Kami sedang membuat tagihan Anda, lalu membuka halaman '
+                        + 'pembayaran <b>DOKU</b>.<br>Mohon jangan tutup halaman ini.'
                         + '</div></div>',
                     allowOutsideClick: false,
                     allowEscapeKey: false,
@@ -1339,86 +1281,6 @@
     })();
 </script>
 
-@unless ($bayarDaring)
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        /*
-         * Kotak pratinjaunya DIKOSONGKAN, bukan diisi gambar cadangan.
-         *
-         * Baris ini dulu menyuntikkan <img src=".../meme/no-image.jpg">, dan
-         * berkas itu TIDAK ADA di proyek ini — jadi yang tampil sebelum orang
-         * memilih apa pun adalah ikon gambar rusak bertuliskan "No Image".
-         * Di halaman yang meminta bukti transfer, gambar rusak terbaca
-         * sebagai unggahannya yang gagal.
-         */
-        document.getElementById('imagePreview').innerHTML = '';
-        document.getElementById('wadahPratinjau').style.display = 'none';
-    });
-
-    document.getElementById('gambar').addEventListener('change', function (peristiwa) {
-        var berkas = peristiwa.target.files[0];
-
-        if (! berkas) {
-            return;
-        }
-
-        var ukuran = berkas.size / 1024;
-        var diizinkan = ['image/png', 'image/jpeg', 'image/jpg'];
-
-        if (diizinkan.indexOf(berkas.type) === -1) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Format tidak didukung',
-                text: 'Yang bisa diunggah hanya PNG, JPEG, dan JPG.'
-            });
-            kosongkanPratinjau();
-            return;
-        }
-
-        if (ukuran > 2000) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Berkasnya terlalu besar',
-                text: 'Ukuran gambar paling besar 2 MB.'
-            });
-            kosongkanPratinjau();
-            return;
-        }
-
-        document.getElementById('file-selected').textContent =
-            berkas.name + ' (' + ukuran.toFixed(0) + ' KB)';
-
-        var pembaca = new FileReader();
-        pembaca.onload = function () {
-            document.getElementById('imagePreview').innerHTML =
-                '<img src="' + pembaca.result + '" alt="Pratinjau bukti transfer yang dipilih">';
-            document.getElementById('wadahPratinjau').style.display = '';
-        };
-        pembaca.readAsDataURL(berkas);
-    });
-
-    function kosongkanPratinjau() {
-        document.getElementById('imagePreview').innerHTML = '';
-        document.getElementById('wadahPratinjau').style.display = 'none';
-        document.getElementById('file-selected').textContent = '';
-        document.getElementById('gambar').value = '';
-    }
-
-    function copyToClipboard(id) {
-        var teks = document.getElementById(id).innerText.replace(/\D/g, '');
-
-        navigator.clipboard.writeText(teks).then(function () {
-            Swal.fire({
-                icon: 'success',
-                title: 'Nomor rekening disalin',
-                text: teks,
-                timer: 2000,
-                showConfirmButton: false
-            });
-        });
-    }
-</script>
-@endunless
 
 <script>
     /*

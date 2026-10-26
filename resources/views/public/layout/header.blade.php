@@ -711,7 +711,7 @@
                         <h4>Layanan Kami</h4>
                         <ul>
                             <li><i class="bi bi-chevron-right"></i> <a href="{{ url('/Scopus-Camp') }}">Scopus Camp</a></li>
-                            <li><i class="bi bi-chevron-right"></i> <a href="https://rumahscopus.com/courses/online-class/" target="_blank" rel="noopener">Online Training</a></li>
+                            <li><i class="bi bi-chevron-right"></i> <a href="https://rumahscopus.com/courses/online-class/" target="_blank" rel="noopener noreferrer">Online Training</a></li>
                             <li><i class="bi bi-chevron-right"></i> <a href="{{ url('/Scopus-Kafe') }}">Scopus Kafe</a></li>
                             <li><i class="bi bi-chevron-right"></i> <a href="{{ url('/Analisis-Bibliometrik') }}">Analisis Bibliometrik</a></li>
                             <li><i class="bi bi-chevron-right"></i> <a href="{{ url('/Clinik-Scopus') }}">Clinik Scopus</a></li>
@@ -736,7 +736,7 @@
                             <li>
                                 <i class="bi bi-whatsapp"></i>
                                 <a href="{{ \App\Support\TautanWa::kirim(config('panitia.whatsapp')) }}"
-                                    target="_blank" rel="noopener">
+                                    target="_blank" rel="noopener noreferrer">
                                     {{ config('panitia.whatsapp_nama') }}
                                 </a>
                             </li>
@@ -781,8 +781,18 @@
     </footer><!-- End Footer -->
 
 
+    {{-- noreferrer, bukan noopener saja.
+
+         Tata letak ini dipakai juga oleh halaman status pendaftaran, yang
+         alamatnya memuat UUID — satu-satunya yang menjaga nomor telepon,
+         afiliasi, daftar peserta, dan faktur seseorang. Tautan keluar yang
+         membawa alamat itu sebagai rujukan menyerahkannya ke situs lain.
+
+         Peramban masa kini memang sudah memotong jalurnya secara bawaan,
+         tetapi itu nilai bawaan PERAMBAN: berbeda antar peramban, berubah
+         antar versi, dan bisa dilonggarkan kebijakan perusahaan. --}}
     <a href="{{ \App\Support\TautanWa::kirim(config('panitia.whatsapp'), 'Halo, saya mau tanya soal kelas Rumah Scopus.') }}"
-        class="kaki-wa" target="_blank" rel="noopener"
+        class="kaki-wa" target="_blank" rel="noopener noreferrer"
         aria-label="Tanya admin lewat WhatsApp">
         <i class="bi bi-whatsapp"></i>
         <span>Tanya admin</span>

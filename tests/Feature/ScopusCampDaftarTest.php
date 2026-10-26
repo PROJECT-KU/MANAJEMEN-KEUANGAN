@@ -19,6 +19,21 @@ class ScopusCampDaftarTest extends TestCase
 {
     use DatabaseTransactions;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        /*
+         * Borang Scopus Camp hanya digambar kalau gerbang pembayarannya siap.
+         *
+         * Sejak jalur unggah bukti dicabut 26 Okt 2026, pendaftaran tanpa
+         * gerbang pasti ditolak — jadi borangnya pun dipantulkan, dan uji
+         * yang membukanya menerima 302 alih-alih 200.
+         */
+        config()->set('services.doku.client_id', 'BRN-UJI-DAFTAR');
+        config()->set('services.doku.secret_key', 'SK-UJI');
+    }
+
     private const BORANG = 'resources/views/public/scopus_camp/form_pendaftaran.blade.php';
 
     private function angkatan(array $ganti = []): CategoriesScopusCamp
@@ -278,25 +293,40 @@ class ScopusCampDaftarTest extends TestCase
     }
 
     #[Test]
-    public function nomor_rekening_tidak_bisa_disembunyikan_tak_sengaja(): void
+    public function borang_tidak_lagi_memajang_rekening_maupun_kotak_unggah(): void
     {
         /*
-         * Nomor rekeningnya dulu duduk di dalam akordeon. Ia memang terbuka
-         * secara bawaan, tetapi tombolnya tetap bisa ditekan — dan sekali
-         * tertekan, nomornya menghilang. Di halaman yang satu-satunya
-         * tujuannya mentransfer uang, tidak ada alasan menaruh nomor rekening
-         * di balik tombol yang bisa salah tekan.
+         * KONTRAKNYA DIBALIK 26 Okt 2026: pembayaran layanan ini seluruhnya
+         * lewat gerbang, dan jalur transfer manual dicabut dari borang umum.
+         *
+         * Uji ini dulu MENUNTUT nomor rekening tampil. Sekarang justru
+         * sebaliknya, dan sebabnya bukan kerapian: nomor rekening yang
+         * tercetak di halaman yang pembayarannya lewat gerbang mengundang
+         * transfer yang tidak dicocokkan siapa pun. Uangnya masuk, tidak ada
+         * tagihan yang tertutup, dan pengirimnya tetap tercatat belum bayar
+         * sampai ia mengadu.
+         *
+         * Kotak unggahnya pun tidak boleh kembali: ia menerima berkas dari
+         * orang luar tanpa satu pun aturan validasi, lalu menyimpannya ke
+         * folder yang tersaji lewat HTTP memakai ekstensi kiriman
+         * pengunggah.
          */
         $a = $this->angkatan();
 
         $isi = (string) $this->get(route('public.scopuscamp.formpendaftaran', ['id' => $a->id]))
             ->assertOk()->getContent();
 
-        $this->assertStringContainsString('216401000467563', $isi,
-            'Nomor rekening hilang dari borang.');
+        $this->assertStringNotContainsString('216401000467563', $isi,
+            'Nomor rekening masih tercetak di borang yang pembayarannya lewat '
+            . 'gerbang; transfer ke sana tidak akan dicocokkan siapa pun.');
+
+        foreach (['name="gambar"', 'type="file"'] as $jejak) {
+            $this->assertStringNotContainsString($jejak, $isi,
+                'Kotak unggah berkas hidup lagi di borang umum: ' . $jejak);
+        }
 
         $this->assertStringNotContainsString('data-bs-toggle="collapse"', $isi,
-            'Ada bagian borang yang bisa dilipat; nomor rekening tidak boleh '
+            'Ada bagian borang yang bisa dilipat; keterangan pembayaran tidak boleh '
             . 'berada di balik tombol yang bisa salah tekan.');
     }
 
