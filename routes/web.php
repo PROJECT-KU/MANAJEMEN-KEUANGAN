@@ -36,8 +36,57 @@ Route::get('/contact', 'Publict\PublicArticleController@contact')->name('blog.co
 // SCOPUS KAFE PUBLIC
 Route::get('/Scopus-Kafe', 'Publict\PublicScopusKafeController@public')->name('public.scopuskafe.index');
 Route::get('/Scopus-Kafe/Form-Pendaftaran', 'Publict\PublicScopusKafeController@FormPendaftaran')->name('public.scopuskafe.formpendaftaran');
-Route::get('/Scopus-Kafe/create', 'Publict\PublicPendaftaranScopusKafeController@create')->name('public.pendaftaranscopuskafe.create');
-Route::post('/Scopus-Kafe/store', 'Publict\PublicPendaftaranScopusKafeController@store')->name('public.pendaftaranscopuskafe.store');
+
+/*
+ * Seluruh alur Scopus Kafe pindah ke SATU pengendali, 26 Okt 2026.
+ *
+ * Sebelumnya terbelah dua — PublicScopusKafeController memajang daftarnya,
+ * PublicPendaftaranScopusKafeController menyimpannya — dan pembelahan itu
+ * yang membuat borangnya tidak pernah tahu apa yang diperiksa penyimpannya.
+ *
+ * Nama rute lamanya (public.pendaftaranscopuskafe.store) dibuang bersama
+ * pengendalinya; satu-satunya yang memakainya berkas borang itu sendiri.
+ *
+ * Pembatas lajunya BERNAMA. `throttle:6,1` tanpa nama tidak memberi rute
+ * jatahnya sendiri — kuncinya domain dan IP saja — jadi borang ini akan ikut
+ * menghabiskan jatah borang layanan lain. Lihat RouteServiceProvider.
+ */
+Route::post('/Scopus-Kafe/store', 'Publict\PublicScopusKafeController@store')
+    ->middleware('throttle:daftar-umum')
+    ->name('public.scopuskafe.store');
+
+Route::get('/Scopus-Kafe/Status/{id}', 'Publict\PublicScopusKafeController@status')
+    ->middleware('throttle:camp-status')
+    ->name('public.scopuskafe.status');
+
+Route::get('/Scopus-Kafe/Status/{id}/keadaan', 'Publict\PublicScopusKafeController@keadaan')
+    ->middleware('throttle:camp-keadaan')
+    ->name('public.scopuskafe.keadaan');
+
+Route::post('/Scopus-Kafe/Status/{id}/bayar-ulang', 'Publict\PublicScopusKafeController@bayarUlang')
+    ->middleware('throttle:camp-bayar-ulang')
+    ->name('public.scopuskafe.bayarulang');
+
+Route::post('/Scopus-Kafe/Status/{id}/kirim-ulang', 'Publict\PublicScopusKafeController@kirimUlang')
+    ->middleware('throttle:camp-kirim-ulang')
+    ->name('public.scopuskafe.kirimulang');
+
+Route::get('/Scopus-Kafe/Status/{id}/dokumen/{jenis}', 'Publict\PublicScopusKafeController@dokumen')
+    ->middleware('throttle:camp-status')
+    ->name('public.scopuskafe.dokumen');
+
+Route::post('/Scopus-Kafe/tautan-saya', 'Publict\PublicScopusKafeController@tautanSaya')
+    ->middleware('throttle:camp-tautan-saya')
+    ->name('public.scopuskafe.tautansaya');
+
+/*
+ * Pemberitahuan balik dari gerbang; dikecualikan dari CSRF di VerifyCsrfToken.
+ * Penjagaannya tanda tangan HMAC beserta umur dan sekali-pakainya, diperiksa
+ * sebelum satu pun baris disentuh.
+ */
+Route::post('/Scopus-Kafe/pemberitahuan/doku', 'Publict\PublicScopusKafeController@pemberitahuan')
+    ->middleware('throttle:gerbang-pemberitahuan')
+    ->name('public.scopuskafe.pemberitahuan');
 
 // PAPERISASI
 Route::get('/paperisasi/public/data', 'Publict\PublicPaperisasiController@public')->name('public.papaperisasi.data');

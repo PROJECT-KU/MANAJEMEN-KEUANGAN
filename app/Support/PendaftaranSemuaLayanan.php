@@ -278,8 +278,16 @@ class PendaftaranSemuaLayanan
             'kolom_catatan' => 'note',
             'status_awal' => 'menunggu verifikasi',
             'nomor_awalan' => 'KAFE',
-            'rute_status' => null,
-            'pakai_gerbang' => false,
+
+            /*
+             * BERGERBANG sejak 26 Okt 2026, mengikuti Scopus Camp.
+             *
+             * Sembilan pemesanan yang sudah ada dibayar lewat transfer manual
+             * berbukti unggahan — kolom `gambar` mereka tetap dipakai panitia.
+             * Yang berubah hanya pemesanan baru.
+             */
+            'rute_status' => 'public.scopuskafe.status',
+            'pakai_gerbang' => true,
             'pakai_kode_unik' => true,
             'kolom_nomor' => 'id_pemesanan',
             'kode_unik_rentang' => self::KODE_UNIK,
@@ -311,6 +319,11 @@ class PendaftaranSemuaLayanan
                  */
                 'varian' => 'varian',
                 'total' => 'total_keseluruhan_pembayaran',
+
+                // Kanal yang benar-benar dipakai lewat gerbang — VA Mandiri,
+                // QRIS. Tanpa ini layar Pendaftar Layanan cuma bisa berkata
+                // "DOKU" untuk semua pembayaran daring.
+                'kanal_bayar' => 'bayar_kanal',
                 'kode_unik' => 'kode_unik_pembayaran',
                 'bukti' => 'gambar',
                 'cara_bayar' => 'cara_bayar',
