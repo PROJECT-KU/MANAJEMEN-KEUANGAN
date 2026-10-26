@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -26,6 +27,15 @@ use Illuminate\Support\Str;
 class Doku
 {
     /** Berapa lama tagihan berlaku, dalam MENIT. */
+    /**
+     * Seberapa tua pemberitahuan masih diterima.
+     *
+     * Lima menit: cukup longgar untuk selisih jam antara peladen kita dan
+     * peladen gerbang serta antrean pengiriman mereka, cukup sempit untuk
+     * membuat tangkapan lama tidak berguna.
+     */
+    private const TOLERANSI_DETIK = 300;
+
     public const MENIT_KEDALUWARSA = 60;
 
     /**
@@ -429,6 +439,24 @@ class Doku
         return ['berhasil' => true, 'pesan' => null];
     }
 
+    /**
+     * Umur pemberitahuan dalam detik, atau null kalau cap waktunya tidak terbaca.
+     *
+     * NILAI MUTLAK: cap waktu yang berada di MASA DEPAN juga mencurigakan —
+     * dan tanpa nilai mutlak, cap waktu tahun 2099 memulangkan umur negatif
+     * yang lolos pemeriksaan "lebih besar daripada toleransi".
+     */
+    private function umurPemberitahuan(string $waktu): ?int
+    {
+        try {
+            $cap = \Illuminate\Support\Carbon::parse($waktu);
+        } catch (\Throwable) {
+            return null;
+        }
+
+        return (int) abs(now()->diffInSeconds($cap, false));
+    }
+
     public function pemberitahuanSah(
         string $jalur,
         ?string $requestId,
@@ -459,10 +487,74 @@ class Doku
         // hash_equals, bukan ===: pembandingan untaian biasa berhenti di huruf
         // pertama yang berbeda, dan selisih waktunya bisa dipakai menebak
         // tanda tangan satu huruf demi satu huruf.
-        return hash_equals(
+        $cocok = hash_equals(
             $this->tandaTangan($jalur, $requestId, $waktu, $isiMentah),
             $kiriman
         );
+
+        if (! $cocok) {
+            return false;
+        }
+
+        /*
+         * TANDA TANGAN YANG COCOK SAJA TIDAK CUKUP — ia tidak kedaluwarsa.
+         *
+         * Sampai 26 Okt 2026 pemeriksaan berhenti di baris atas: cap waktunya
+         * ikut ditandatangani tetapi tidak pernah DIBACA, dan Request-Id-nya
+         * tidak pernah dicatat. Satu pemberitahuan sah yang tertangkap —
+         * dari log proksi, dari peladen yang pernah disusupi, dari tangkapan
+         * jaringan — bisa dikirim ulang kapan saja, bertahun-tahun kemudian,
+         * dan tetap diterima.
+         *
+         * Akibat yang paling jelas: pendaftaran yang sudah dibatalkan atau
+         * dananya dikembalikan panitia bisa ditandai LUNAS lagi, sebab
+         * pemeriksaan "sudah lunas?" di penerimanya melihat status yang
+         * sekarang bukan lunas.
+         *
+         * Dua lapis, dan keduanya perlu:
+         *
+         *   1. UMUR. Yang lebih tua daripada toleransi ditolak, jadi
+         *      tangkapan lama tidak berguna walau Request-Id-nya belum
+         *      pernah terlihat di peladen ini — termasuk sesudah cache-nya
+         *      dibersihkan atau peladennya dipindah;
+         *
+         *   2. SEKALI PAKAI. Request-Id yang sudah pernah diterima ditolak,
+         *      jadi pengulangan DALAM jendela toleransi pun tidak lolos.
+         *
+         * DOKU sendiri boleh mengirim ulang pemberitahuan yang sama saat
+         * jawaban kita tidak sampai — dan itu memang terjadi. Pengulangan
+         * sah seperti itu membawa Request-Id BARU; yang ditolak di sini
+         * hanya pengulangan dengan identitas yang sama persis. Penerimanya
+         * pun tetap menjaga dirinya sendiri lewat pemeriksaan "sudah lunas?".
+         */
+        $umur = $this->umurPemberitahuan($waktu);
+
+        if ($umur === null || $umur > self::TOLERANSI_DETIK) {
+            Log::warning('Pemberitahuan DOKU ditolak: cap waktunya di luar toleransi.', [
+                'waktu' => $waktu,
+                'umur_detik' => $umur,
+            ]);
+
+            return false;
+        }
+
+        $kunci = 'doku:pemberitahuan:' . sha1($requestId);
+
+        /*
+         * add() — BUKAN get() lalu put(). Keduanya membuat celah di antara
+         * membaca dan menulis, dan dua salinan pemberitahuan yang tiba
+         * bersamaan akan sama-sama lolos. add() menulis hanya kalau kuncinya
+         * memang belum ada, dalam satu langkah.
+         */
+        if (! Cache::add($kunci, true, now()->addDay())) {
+            Log::warning('Pemberitahuan DOKU ditolak: Request-Id sudah pernah dipakai.', [
+                'request_id' => $requestId,
+            ]);
+
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -621,6 +713,31 @@ class Doku
      */
     public function periksaStatus(string $nomor): array
     {
+        /*
+         * JAWABANNYA DISIMPAN SEBENTAR, dan ini bukan penghematan biasa.
+         *
+         * Halaman status menanyai keadaan pembayaran tiap 5 detik sampai 40
+         * kali, dan tiap pertanyaan dulu jadi SATU panggilan keluar ke
+         * gerbang — terukur 1:1. Satu tab terbuka berarti 40 panggilan dalam
+         * tiga menit; sepuluh orang yang membayar bersamaan jadi 400.
+         * Alamatnya pun terbuka untuk siapa pun yang memegang satu UUID.
+         *
+         * Lima belas detik: poller 5 detik jadi satu panggilan per tiga
+         * tanya, sementara pembayaran yang baru masuk tetap terbaca dalam
+         * waktu yang tidak terasa berbeda oleh yang menunggunya.
+         *
+         * Dikunci pada NOMOR TAGIHANNYA. Dikunci pada pendaftarannya,
+         * tagihan baru yang dibuat sesudah yang lama gagal akan membaca
+         * jawaban milik tagihan mati.
+         */
+        $kunci = 'doku:status:' . sha1($nomor);
+
+        $tersimpan = \Illuminate\Support\Facades\Cache::get($kunci);
+
+        if (is_array($tersimpan)) {
+            return $tersimpan;
+        }
+
         $gagalTahu = [
             'tahu' => false, 'lunas' => false, 'gagal' => false,
             'status' => null, 'kanal' => null, 'waktu' => null,
@@ -669,7 +786,7 @@ class Doku
             ?? ''
         ));
 
-        return [
+        $hasil = [
             'tahu' => $status !== '',
             'lunas' => in_array($status, ['success', 'settlement', 'paid'], true),
             'gagal' => in_array($status, ['failed', 'expired', 'cancel', 'canceled'], true),
@@ -686,5 +803,17 @@ class Doku
              */
             'waktu' => $this->waktuTransaksi($data),
         ];
+
+        /*
+         * Yang TIDAK DIKETAHUI tidak disimpan. Gerbang yang sedang tidak
+         * menjawab memulangkan tahu=false, dan menyimpannya berarti
+         * pembayaran yang masuk sedetik kemudian baru terbaca lima belas
+         * detik lagi — tanpa alasan.
+         */
+        if ($hasil['tahu']) {
+            \Illuminate\Support\Facades\Cache::put($kunci, $hasil, now()->addSeconds(15));
+        }
+
+        return $hasil;
     }
 }

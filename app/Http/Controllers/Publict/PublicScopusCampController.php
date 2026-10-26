@@ -350,48 +350,56 @@ class PublicScopusCampController extends Controller
     // <!--================== CEK KODE DISKON ==================-->
     public function cekKodeDiskon(Request $request, $id)
     {
-        $kode = $request->query('kode_diskon');
+        $kode = trim((string) $request->query('kode_diskon'));
 
-        \Log::info('Cek Kode Diskon', [
-            'id_diterima' => $id,
-            'kode_diterima' => $kode,
-        ]);
-
-        $diskon = DB::table('kategori_layanan')->where('layanan', 'scopus_camp')
+        $diskon = DB::table('kategori_layanan')
+            ->where('layanan', 'scopus_camp')
             ->where('id', $id)
             ->first();
 
-        if (!$diskon) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Data tidak ditemukan. ID: ' . $id,
-            ]);
+        /*
+         * SATU JAWABAN UNTUK SEMUA KEGAGALAN.
+         *
+         * Sebelumnya tiga jawaban yang berbeda: "Data tidak ditemukan",
+         * "Kode diskon tidak tersedia untuk Batch ini", dan "Kode diskon
+         * tidak cocok". Ketiganya memberi tahu penebak lebih daripada yang
+         * ia kirimkan — terutama yang kedua, yang menyaring angkatan mana
+         * yang PUNYA kode dan karena itu layak ditebak. Rutenya pun tidak
+         * dibatasi lajunya sampai 26 Okt 2026, jadi menebaknya gratis.
+         *
+         * Kodenya juga TIDAK lagi dicatat ke log. Sebelumnya tiap percobaan
+         * tertulis apa adanya beserta kunci angkatannya — jadi log aplikasi
+         * jadi daftar kode diskon yang berlaku, dan log itu dibaca lebih
+         * banyak orang daripada basis datanya.
+         */
+        $tolak = response()->json([
+            'status' => 'error',
+            'message' => 'Kode diskonnya tidak berlaku untuk angkatan ini.',
+        ]);
+
+        if (! $diskon || $kode === '') {
+            return $tolak;
         }
 
-        if (is_null($diskon->kode_diskon)) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Kode diskon tidak tersedia untuk Batch ini.',
-            ]);
+        $seharusnya = trim((string) ($diskon->kode_diskon ?? ''));
+
+        // hash_equals: pembandingan untaian biasa berhenti di huruf pertama
+        // yang berbeda, dan selisih waktunya bisa dipakai menebak kodenya
+        // satu huruf demi satu huruf.
+        if ($seharusnya === '' || ! hash_equals($seharusnya, $kode)) {
+            return $tolak;
         }
 
-        if ($diskon->kode_diskon !== $kode) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Kode diskon tidak cocok.',
-            ]);
-        }
-
-        $nominal = trim((string)$diskon->nominal_diskon);
-        $casted = is_numeric($nominal) ? (int)$nominal : 0;
+        $nominal = trim((string) $diskon->nominal_diskon);
 
         return response()->json([
-                    'status' => 'success',
+            'status' => 'success',
             'kode_input' => $kode,
             'nominal_diskon' => $nominal,
-            'casted_nominal_diskon' => $casted,
+            'casted_nominal_diskon' => is_numeric($nominal) ? (int) $nominal : 0,
         ]);
     }
+
     // <!--================== END ==================-->
 
     // <!--================== KIRIM DATA PENDAFTARAN ==================-->
@@ -705,9 +713,38 @@ class PublicScopusCampController extends Controller
             ->first();
 
         if ($sudahAda !== null) {
-            return redirect()->route('public.scopuscamp.status', $sudahAda->getKey())
-                ->with('error', 'Data ini sudah terdaftar di angkatan tersebut. '
-                    . 'Kursinya sudah ditahan untuk Anda — tidak perlu mendaftar lagi.');
+            /*
+             * TAUTANNYA DIKIRIM KE EMAIL, bukan dibuka di layar.
+             *
+             * Sampai 26 Okt 2026 cabang ini MENGANTAR pengirimnya langsung ke
+             * halaman status pendaftaran yang sudah ada. Terukur sebagai
+             * lubang: yang dicocokkan cuma angkatan + nama + email, dan
+             * ketiganya bukan rahasia — nama dan email justru hal yang paling
+             * mudah diketahui rekan sekantor, panitia acara lain, atau siapa
+             * pun yang memegang daftar peserta.
+             *
+             * Yang ia dapatkan dengan menebaknya: nomor telepon, afiliasi,
+             * daftar peserta rombongan, faktur PDF, tombol kirim ulang, dan
+             * tombol membuat tagihan. UUID halaman statusnya memang rahasia
+             * pembawa — dan cabang ini menyerahkannya cuma-cuma.
+             *
+             * Dikirim lewat surat, hanya pemilik kotak masuknya yang
+             * menerimanya. Jawabannya di layar SAMA PERSIS untuk yang memang
+             * pemiliknya dan yang sekadar menebak, supaya borang ini pun
+             * tidak jadi alat memeriksa siapa yang sudah terdaftar.
+             */
+            try {
+                Mail::to($sudahAda->email)->send(
+                    new \App\Mail\TautanPendaftaranScopusCampMail(collect([$sudahAda]))
+                );
+            } catch (\Throwable $e) {
+                report($e);
+            }
+
+            return back()->withInput()->with('success',
+                'Data ini sudah pernah didaftarkan di angkatan tersebut, jadi kursinya '
+                . 'sudah ditahan. Tautan halaman pendaftarannya kami kirimkan ke alamat '
+                . 'email yang dipakai saat mendaftar — periksa juga folder spam.');
         }
 
         /*
