@@ -36,6 +36,7 @@ class PromoLayanan extends Model
 
     protected $fillable = [
         'nama',
+        'kode',
         'tipe',
         'persen',
         'nominal',
@@ -267,6 +268,44 @@ class PromoLayanan extends Model
         return $kueri->where('aktif', true)
             ->whereDate('mulai', '<=', $hari)
             ->whereDate('selesai', '>=', $hari);
+    }
+
+    /**
+     * Promo yang berlaku OTOMATIS: yang tidak punya kode.
+     *
+     * Dipakai jalur yang memajang harga kepada orang yang belum mengetikkan
+     * apa-apa. Promo berkode tidak boleh ikut di sana — kalau ikut, harganya
+     * sudah turun dan harga lamanya sudah tercoret sebelum satu pun kode
+     * dimasukkan, dan kodenya jadi tidak ada gunanya.
+     */
+    public function scopeOtomatis(Builder $kueri): Builder
+    {
+        return $kueri->where(fn ($q) => $q->whereNull('kode')->orWhere('kode', ''));
+    }
+
+    /** Promo yang baru berlaku sesudah kodenya diketik dan cocok. */
+    public function scopeBerkode(Builder $kueri, string $kode): Builder
+    {
+        return $kueri->whereRaw('UPPER(TRIM(kode)) = ?', [self::rapikanKode($kode)]);
+    }
+
+    /**
+     * Kode dirapikan SEKALI di sini, dipakai saat menyimpan dan saat mencari.
+     *
+     * Huruf besar semua dan tanpa spasi tepi. Orang mengetik "salamq1",
+     * " SalamQ1 ", dan "SALAMQ1" untuk kode yang sama; dibandingkan apa
+     * adanya, dua dari tiga ditolak dan yang mengetiknya tidak punya cara
+     * tahu bedanya di mana.
+     */
+    public static function rapikanKode(?string $kode): string
+    {
+        return mb_strtoupper(trim((string) $kode));
+    }
+
+    /** Promo ini menunggu kode diketik, atau berlaku dengan sendirinya. */
+    public function getBerkodeAttribute(): bool
+    {
+        return self::rapikanKode($this->kode) !== '';
     }
 
     public function scopeCari(Builder $kueri, ?string $kata): Builder

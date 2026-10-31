@@ -169,14 +169,23 @@ class PublicAnalisisBibliometrikController extends Controller
         }
         // END
 
-        // CEK APAKAH KODE DISKON NULL ATAU TIDAK
-        $kodeDiskon = $request->input('kode_diskon');
-        $nominalDiskon = null;
+        /*
+         * YANG DITERIMA DARI BORANG HANYA KODENYA. Nominalnya dicari peladen.
+         *
+         * Lubang yang sama persis dengan Scopus Camp, terukur 31 Okt 2026:
+         * besar potongannya diambil mentah dari `nominal_diskon` kiriman
+         * borang, tanpa satu baris pun yang memeriksa apakah kodenya sah.
+         * Kode karangan beserta nominal karangan menghasilkan tagihan
+         * sebesar kode uniknya saja.
+         */
+        $hasilKode = \App\Support\PotonganKode::hitung(
+            $kategori,
+            $request->input('kode_diskon'),
+            (int) $kategori->harga_setelah_promo * $jumlahPendaftarBaru
+        );
 
-        if (!empty($kodeDiskon)) {
-            $nominalDiskon = str_replace('.', '', $request->input('nominal_diskon'));
-        }
-        // END
+        $kodeDiskon = $hasilKode['kode'];
+        $nominalDiskon = $hasilKode['potongan'] > 0 ? (string) $hasilKode['potongan'] : null;
 
         /*
          * Harganya DIHITUNG ULANG di peladen, bukan diterima dari borangnya.

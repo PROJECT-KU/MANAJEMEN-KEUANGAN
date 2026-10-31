@@ -848,14 +848,33 @@ class PublicScopusCampController extends Controller
          */
         $imagePath = null;
 
-        // CEK APAKAH KODE DISKON NULL ATAU TIDAK
-        $kodeDiskon = $data['kode_diskon'] ?? null;
-        $nominalDiskon = null;
+        /*
+         * YANG DITERIMA DARI BORANG HANYA KODENYA. Nominalnya dicari peladen.
+         *
+         * Sampai 31 Okt 2026 besar potongannya diambil mentah dari
+         * `nominal_diskon` kiriman borang, tanpa satu baris pun yang
+         * memeriksa apakah kodenya sah. Terukur:
+         *
+         *     kode_diskon = KODE-KARANGAN   (angkatannya tidak punya kode)
+         *     nominal_diskon = 5.499.000
+         *
+         * Kursi seharga Rp 5.500.000 tersimpan dengan tagihan Rp 2.039, dan
+         * tagihan DOKU-nya benar-benar terbit atas angka itu.
+         *
+         * PotonganKode mengenali dua sumber: kode milik angkatannya sendiri,
+         * dan promo BERKODE di layar Promo Layanan yang menyasar angkatan
+         * ini. Kode yang tidak cocok memulangkan nol — bukan galat — sebab
+         * kiriman tanpa kode sah sekalipun tetap pendaftaran yang berlaku,
+         * hanya tanpa potongan.
+         */
+        $hasilKode = \App\Support\PotonganKode::hitung(
+            $kategori,
+            $data['kode_diskon'] ?? null,
+            (int) $kategori->harga_setelah_promo * $jumlahPendaftarBaru
+        );
 
-        if (! empty($kodeDiskon)) {
-            $nominalDiskon = str_replace('.', '', (string) $request->input('nominal_diskon'));
-        }
-        // END
+        $kodeDiskon = $hasilKode['kode'];
+        $nominalDiskon = $hasilKode['potongan'] > 0 ? (string) $hasilKode['potongan'] : null;
 
         /*
          * Harganya DIHITUNG ULANG di peladen, bukan diterima dari borangnya.
