@@ -146,14 +146,41 @@ class CariNomorTeleponTest extends TestCase
             'total_pembayaran' => '5500000', 'status' => 'diproses',
         ]);
 
-        // Orang lain yang nomor teleponnya kebetulan memuat "73" juga.
+        /*
+         * Nomor pendaftarannya SENGAJA tanpa angka acak.
+         *
+         * Str::random(8) memuat angka, dan cukup sering ia memuat "73" —
+         * angka yang dicari uji di bawah. Begitu itu terjadi, baris ini
+         * memang tertarik oleh `nomor LIKE '%73%'`, pencocokan yang justru
+         * BENAR, dan assertNotContains-nya merah tanpa satu baris kode pun
+         * berubah. Tertangkap 31 Okt 2026 sebagai uji yang merah di
+         * rangkaian penuh lalu hijau di jalan berikutnya; sebabnya dibuktikan
+         * dengan memaksa "73" masuk ke untaiannya.
+         *
+         * Str::upper() tidak menolong — membesarkan huruf tidak membuang
+         * angka — dan itu sudah dicoba.
+         */
         $lain = PendaftaranScopusCamp::create([
-            'id_transaksi' => 'CAMP-99-' . Str::random(8), 'kategori_id' => $angkatan->id,
+            'id_transaksi' => 'CAMP-99-' . self::hurufSaja(8),
+            'kategori_id' => $angkatan->id,
             'nama' => 'Peserta Dua ' . $t, 'email' => 'd' . $t . '@contoh.test',
             'telp' => '0873-1111-2222', 'jumlah_pendaftar' => '1',
             'total_pembayaran' => '5500000', 'status' => 'diproses',
         ]);
 
         return [$u, $saya, $lain];
+    }
+
+    /** Untaian acak TANPA ANGKA, supaya tidak pernah memuat angka yang dicari. */
+    private static function hurufSaja(int $panjang): string
+    {
+        $huruf = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $keluar = '';
+
+        for ($i = 0; $i < $panjang; $i++) {
+            $keluar .= $huruf[random_int(0, 25)];
+        }
+
+        return $keluar;
     }
 }

@@ -37,8 +37,12 @@ class PotonganKode
     /**
      * @return array{kode: ?string, potongan: int, promo: ?PromoLayanan, label: ?string}
      */
-    public static function hitung(KategoriLayanan $angkatan, ?string $kode, int $total): array
-    {
+    public static function hitung(
+        KategoriLayanan $angkatan,
+        ?string $kode,
+        int $total,
+        ?string $telp = null
+    ): array {
         $kosong = ['kode' => null, 'potongan' => 0, 'promo' => null, 'label' => null];
 
         $kode = trim((string) $kode);
@@ -69,7 +73,13 @@ class PotonganKode
             ];
         }
 
-        $promo = PromoAngkatan::denganKode($angkatan, $kode);
+        /*
+         * NOMORNYA ikut, sebab promo boleh menuntut pendaftarnya pernah
+         * lunas di layanan lain. Tanpa nomor, promo bersyarat riwayat tidak
+         * pernah terpenuhi — dan itu memang yang benar: lebih baik potongan
+         * tidak keluar daripada keluar untuk orang yang belum tentu alumni.
+         */
+        $promo = PromoAngkatan::denganKode($angkatan, $kode, $telp);
 
         if ($promo === null) {
             return $kosong;

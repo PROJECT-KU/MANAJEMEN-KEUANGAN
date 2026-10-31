@@ -181,7 +181,8 @@ class PublicAnalisisBibliometrikController extends Controller
         $hasilKode = \App\Support\PotonganKode::hitung(
             $kategori,
             $request->input('kode_diskon'),
-            (int) $kategori->harga_setelah_promo * $jumlahPendaftarBaru
+            (int) $kategori->harga_setelah_promo * $jumlahPendaftarBaru,
+            $request->input('telp')
         );
 
         $kodeDiskon = $hasilKode['kode'];
