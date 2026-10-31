@@ -292,10 +292,22 @@ class PromoLayanan extends Model
     /**
      * Kode dirapikan SEKALI di sini, dipakai saat menyimpan dan saat mencari.
      *
-     * Huruf besar semua dan tanpa spasi tepi. Orang mengetik "salamq1",
-     * " SalamQ1 ", dan "SALAMQ1" untuk kode yang sama; dibandingkan apa
-     * adanya, dua dari tiga ditolak dan yang mengetiknya tidak punya cara
-     * tahu bedanya di mana.
+     * Huruf besar semua dan tanpa spasi tepi.
+     *
+     * YANG DIJAMIN BARIS INI cuma BENTUK YANG TERSIMPAN: kode yang diketik
+     * admin sebagai "salamq1" tersimpan "SALAMQ1", jadi daftar promo tidak
+     * memajang kode yang sama dalam tiga ejaan.
+     *
+     * Pencocokannya BUKAN karena baris ini. Diukur 31 Okt 2026: collation
+     * sambungannya utf8mb4_unicode_ci, dan di sana 'SALAMQ1' = 'salamq1'
+     * memulangkan 1 — MySQL sendiri yang mengabaikan besar kecil huruf.
+     * Spasi tepinya pun sudah dibuang PotonganKode sebelum sampai ke sini.
+     * Mencabut mb_strtoupper() di baris ini TIDAK memerahkan satu uji pun,
+     * dan itu sudah dicoba.
+     *
+     * Tetap dipertahankan sebagai jaring untuk basis data yang pencocokan
+     * untaiannya peka huruf — SQLite memakai BINARY untuk '=' — supaya
+     * kodenya tidak diam-diam berhenti cocok di sana.
      */
     public static function rapikanKode(?string $kode): string
     {

@@ -220,6 +220,17 @@ class KodePromoTest extends TestCase
          * Orang mengetik "salamq1", " SalamQ1 ", dan "SALAMQ1" untuk kode
          * yang sama. Dibandingkan apa adanya, dua dari tiga ditolak dan yang
          * mengetiknya tidak punya cara tahu bedanya di mana.
+         *
+         * YANG MENJAGA PERILAKU INI BUKAN KODE KITA, dan itu disebut di sini
+         * supaya tidak ada yang mengira begitu. Collation sambungannya
+         * utf8mb4_unicode_ci; diukur 31 Okt 2026, 'SALAMQ1' = 'salamq1'
+         * memulangkan 1 di MySQL. Spasi tepinya dibuang PotonganKode.
+         * Mencabut mb_strtoupper() dari rapikanKode() tidak memerahkan uji
+         * ini — sudah dicoba.
+         *
+         * Ujinya tetap ada karena yang dijaga AKIBATNYA, bukan sebabnya: ia
+         * memerah kalau collation-nya kelak diganti jadi peka huruf, atau
+         * kalau rangkaian ujinya dipindah ke basis data yang '='-nya BINARY.
          */
         foreach (['salamq1', '  SalamQ1  ', 'SALAMQ1'] as $bentuk) {
             $a = $this->angkatan();
