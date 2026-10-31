@@ -758,31 +758,42 @@ class BayarUlangDanBerkasTest extends TestCase
          * sedang membaca-baca, ia sedang mencari, dan yang tidak ia temukan
          * berakhir jadi pesan WhatsApp ke panitia.
          *
-         * Yang dipatok urutan markahnya, bukan pikselnya: PHPUnit tidak bisa
-         * menghitung tata letak. "Sebelum kartu angkatan pertama" sudah cukup
-         * untuk menangkap kalau ia dikembalikan ke kaki halaman — dan ia
-         * tetap berlaku saat borangnya pindah ke dalam lajur keterangan,
-         * yang memang digambar sebelum daftarnya.
+         * LETAKNYA TIDAK LAGI DIPATOK, dan itu keputusan pemiliknya
+         * 31 Okt 2026: borangnya ditaruh paling bawah supaya yang membuka
+         * halaman ini langsung tertuju ke jadwalnya.
+         *
+         * Patokan lama "sebelum kartu angkatan pertama" dicabut, bukan
+         * dilonggarkan diam-diam. Angka yang dulu membenarkannya pun sudah
+         * tidak berlaku: halamannya dipendekkan dari 2,72 layar jadi 2,2,
+         * dan daftar angkatannya kini berkisi tiga kolom setinggi 731px —
+         * bukan tumpukan dua belas baris setinggi 1.341px. Jarak ke
+         * borangnya tinggal sekitar 1,4 layar, lebih dekat daripada 2,4
+         * layar yang dulu jadi alasan memindahkannya.
+         *
+         * Yang MASIH dijaga: borangnya tetap digambar di halaman ini. Itu
+         * satu-satunya jalan kembali bagi yang kehilangan tautannya, dan
+         * menghilangkannya tidak menimbulkan galat apa pun — halamannya
+         * tetap 200, cuma kehilangan satu-satunya pintu.
          */
         $letakBorang = strpos($isi, route('public.scopuscamp.tautansaya'));
+
+        $this->assertNotFalse($letakBorang,
+            'Borang "kehilangan tautan" tidak digambar sama sekali di halaman '
+            . 'daftar. Itu satu-satunya jalan kembali bagi yang kehilangan '
+            . 'tautan pendaftarannya — alamat halaman statusnya ber-UUID dan '
+            . 'tidak bisa ditebak, jadi yang kehilangannya kehilangan juga '
+            . 'tombol bayarnya.');
 
         /*
          * Dicari ATRIBUT class-nya, bukan nama kelas telanjang.
          *
          * Nama kelas yang sama ada di blok <style> halaman ini — yang letaknya
          * jauh di atas markah mana pun — jadi mencari 'kmp-baris' saja
-         * memulangkan posisi aturan CSS-nya, dan perbandingannya
-         * membandingkan dua hal yang tidak berhubungan. Tertangkap persis
-         * begitu saat uji ini pertama dijalankan, memakai patokan sejenis.
+         * memulangkan posisi aturan CSS-nya. Tertangkap persis begitu saat
+         * uji ini pertama dijalankan, memakai patokan sejenis.
          */
-        $letakKartu = strpos($isi, 'class="kmp-baris');
-
-        $this->assertNotFalse($letakKartu, 'Kartu angkatannya tidak digambar.');
-
-        $this->assertLessThan($letakKartu, $letakBorang,
-            'Borang "kehilangan tautan" ada di bawah daftar angkatan; yang '
-            . 'mencarinya harus menggulir melewati dua belas kartu dan '
-            . 'penomoran halaman dulu.');
+        $this->assertNotFalse(strpos($isi, 'class="kmp-baris'),
+            'Kartu angkatannya tidak digambar.');
     }
 
     #[Test]

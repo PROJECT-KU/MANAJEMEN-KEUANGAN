@@ -65,8 +65,13 @@
     /* ========================================================= kepala */
     /* 124px di atas, sama dengan hero beranda: kepala situs berposisi fixed
        setinggi 82px dan tidak memesan ruang untuk dirinya sendiri. */
+    /* 104px di atas: kepala situs berposisi fixed setinggi 82px dan tidak
+       memesan ruang untuk dirinya sendiri, jadi yang benar-benar perlu cuma
+       82px ditambah sedikit napas. Sisanya dulu jadi jurang kosong di layar
+       pertama — terukur 120px antara akhir paragraf hero dan benda
+       berikutnya, pada halaman yang justru diminta tanpa ruang kosong. */
     .kmp-kepala {
-        padding: 124px 0 50px;
+        padding: 104px 0 34px;
         background: linear-gradient(180deg, var(--kertas-2) 0%, var(--kertas) 100%);
         text-align: center;
     }
@@ -97,13 +102,21 @@
     .kmp p.kmp-sub { max-width: 56ch; margin: 17px auto 0; font-size: 1.04rem; }
 
     /* ========================================================== isi */
-    .kmp-bagian { padding: 54px 0; }
+    .kmp-bagian { padding: 30px 0 54px; }
 
-    /* Dua kolom TAK SAMA: keterangan tetap di kiri, daftar angkatan di
-       kanan — bentuk yang sama dengan bagian jadwal di beranda. */
-    .kmp-kisi {
-        display: grid; grid-template-columns: 330px minmax(0, 1fr); gap: 48px;
-    }
+    /* SATU LAJUR PENUH, bukan dua kolom tak sama.
+
+       Bentuk sebelumnya menaruh keterangan di lajur kiri selebar 330px dan
+       daftar angkatan di kanan. Terukur di 1440px: isi lajur kirinya
+       berhenti sekitar 910px sementara kisinya setinggi 1.468px — jadi
+       sekitar 550px lajur kiri bawah kosong melompong, dan panjang keduanya
+       ditentukan data yang berubah tiap pekan sehingga jurang itu tidak bisa
+       dihilangkan dengan menyetel tinggi.
+
+       Satu lajur penuh menghapusnya dengan sendirinya, DAN memberi ruang
+       untuk kartu angkatan tiga kolom — yang memotong tinggi daftarnya jadi
+       sepertiga. Halamannya turun dari 2,72 layar. */
+    .kmp-kisi { display: block; }
 
     /* TIDAK ada position: sticky di panel ini, dan itu hasil pengukuran,
        bukan selera.
@@ -120,8 +133,9 @@
        blok biasa pada halaman yang SAMA bergeser 0px, jadi pemicunya
        konteks kisi, bukan gaya halaman ini. */
 
+    .kmp-panel { margin-top: 34px; }
     .kmp-panel-kartu {
-        padding: 24px;
+        padding: 24px 26px;
         background: #fff;
         border: 1px solid var(--garis); border-radius: 22px;
         box-shadow: 0 8px 22px rgba(22, 35, 63, .06);
@@ -164,7 +178,17 @@
         background: color-mix(in srgb, var(--ungu) 14%, transparent);
         color: var(--ungu); font-size: .76rem; font-weight: 800;
     }
-    .kmp-fasilitas { list-style: none; padding: 0; margin: 0; }
+    /* Berkisi, bukan satu lajur panjang.
+
+       Lajurnya dulu 330px, jadi tujuh butir bertumpuk memang satu-satunya
+       bentuk yang muat. Melintang di lajur penuh 1.296px, satu lajur
+       meninggalkan tiga perempat kartu kosong di sebelah kanannya — persis
+       ruang kosong yang mau dihilangkan. */
+    .kmp-fasilitas {
+        list-style: none; padding: 0; margin: 0;
+        display: grid; gap: 0 26px;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr));
+    }
     .kmp-fasilitas li {
         display: flex; gap: 9px; padding: 6px 0;
         color: var(--tinta); font-size: .92rem; line-height: 1.5;
@@ -172,7 +196,21 @@
     .kmp-fasilitas i { flex: 0 0 auto; margin-top: 4px; color: var(--rumput); }
 
     /* ====================================================== angkatan */
-    .kmp-deret { display: flex; flex-direction: column; gap: 15px; }
+    /* Kartu angkatan BERKISI, bukan satu tumpukan baris selebar layar.
+
+       Dua belas baris setinggi 98px adalah 1.341px yang harus digulir orang
+       untuk melihat dua belas tanggal — padahal yang dibandingkan cuma
+       tanggal, kota, dan harga. Tiga kolom memuat yang sama dalam empat
+       baris. */
+    .kmp-deret {
+        display: grid; gap: 14px;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr));
+        align-items: start;
+    }
+
+    /* Penomoran halaman MELINTANG seluruh kisi; tanpa ini ia jadi satu sel
+       selebar sepertiga dan nomornya membungkus jadi tiga baris. */
+    .kmp-halaman { grid-column: 1 / -1; }
 
     /* Bayangannya navy tembus pandang, BUKAN jingga pekat.
 
@@ -181,9 +219,10 @@
        jingga ada di mana-mana, jadi ia berhenti berarti "ini yang diklik".
        Angka bayangannya disamakan dengan kartu Scopus Kafe. */
     .kmp-baris {
-        display: grid; grid-template-columns: 74px minmax(0, 1fr) auto;
-        gap: 20px; align-items: center;
-        padding: 17px 21px;
+        display: grid; grid-template-columns: 58px minmax(0, 1fr);
+        grid-template-areas: 'tgl isi' 'kaki kaki';
+        gap: 12px 14px; align-items: start;
+        padding: 16px 18px;
         background: #fff;
         border: 2px solid var(--tinta); border-radius: 18px;
         box-shadow: 6px 6px 0 rgba(22, 35, 63, .12);
@@ -203,18 +242,19 @@
     .kmp-baris.kmp-penuh:hover { transform: none; box-shadow: none; }
 
     .kmp-tgl {
+        grid-area: tgl;
         display: flex; flex-direction: column; align-items: center; justify-content: center;
-        padding: 9px 4px; border-radius: 13px;
+        padding: 8px 4px; border-radius: 13px;
         background: var(--jingga); color: #fff; line-height: 1;
     }
     .kmp-penuh .kmp-tgl { background: var(--tinta-2); }
-    .kmp-tgl strong { font-family: 'Fraunces', serif; font-weight: 900; font-size: 1.68rem; }
+    .kmp-tgl strong { font-family: 'Fraunces', serif; font-weight: 900; font-size: 1.42rem; }
     .kmp-tgl span {
         margin-top: 4px; font-size: .72rem; font-weight: 800;
         letter-spacing: .1em; text-transform: uppercase;
     }
 
-    .kmp-isi { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+    .kmp-isi { grid-area: isi; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
     .kmp-nama { font-family: 'Fraunces', serif; font-weight: 800; font-size: 1.1rem; line-height: 1.3; }
     .kmp-rinci {
         display: flex; flex-wrap: wrap; gap: 4px 16px;
@@ -222,10 +262,19 @@
     }
     .kmp-rinci i { margin-right: 4px; color: var(--jingga); }
 
+    /* Harga dan ajakan turun ke BARIS SENDIRI, melintang di kaki kartu.
+
+       Di lajur selebar 400px, tiga lajur sebaris membuat nama angkatan
+       tinggal dua pertiga kata — "Scopus Camp Yogyak…". Di kaki kartu
+       keduanya punya lebar penuh, dan matanya membaca satu arah: tanggal,
+       nama, lalu harga. */
     .kmp-kanan {
-        display: flex; flex-direction: column; align-items: flex-end; gap: 4px;
-        text-align: right; white-space: nowrap;
+        grid-area: kaki;
+        display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px;
+        padding-top: 11px; border-top: 1px dashed var(--garis);
+        white-space: nowrap;
     }
+    .kmp-ajak { margin-left: auto; }
     .kmp-coret { color: var(--tinta-2); font-size: .82rem; font-weight: 600; }
     .kmp-harga { font-family: 'Fraunces', serif; font-weight: 800; font-size: 1.12rem; }
     /* Warnanya ditulis utuh, bukan var(--stabilo): token itu dibuang
@@ -262,10 +311,23 @@
        kotak email tinggal ~120 px — terlalu sempit untuk melihat alamat yang
        sedang diketik, dan alamat yang salah ketik berarti suratnya terbang ke
        tempat lain tanpa ada yang tahu. */
+    /* Satu baris mendatar di layar lebar, bukan kartu tegak.
+
+       Duduk di atas daftar angkatan, kartu tegak setinggi tiga baris dengan
+       tombol selebar 1.296px mendorong kartu angkatan pertama turun — dan
+       yang dicari kebanyakan orang di halaman ini angkatannya, bukan borang
+       ini. Mendatar ia setinggi satu isian saja. */
     .kmp-lacak {
-        margin-top: 14px; padding: 18px 20px; border-radius: 18px;
-        background: #fff; border: 1px solid #efe3cd;
+        margin: 0 0 20px; padding: 14px 18px; border-radius: 18px;
+        background: #fff; border: 1px solid var(--garis);
         box-shadow: 0 6px 20px rgba(22, 35, 63, .05);
+        display: grid; gap: 12px; align-items: center;
+    }
+    @media (min-width: 860px) {
+        .kmp-lacak { grid-template-columns: minmax(0, 1fr) minmax(360px, 460px); gap: 24px; }
+        .kmp-lacak .kmp-lacak-isian {
+            margin-top: 0; grid-template-columns: minmax(0, 1fr) auto;
+        }
     }
 
     .kmp-lacak-kata {
@@ -330,20 +392,31 @@
     .kmp-baris:hover .kmp-ajak { gap: 13px; }
 
     .kmp-halaman { display: flex; justify-content: center; margin-top: 34px; }
-    .kmp-halaman .pagination { gap: 8px; margin: 0; flex-wrap: wrap; }
+    .kmp-halaman .pagination { gap: 6px; margin: 0; flex-wrap: wrap; }
+
+    /* Tombolnya bulat, bergaris tipis, tanpa bayangan keras.
+
+       Bentuk lamanya kotak bergaris 2px bertumpuk bayangan — empat belas
+       benda sekeras kartu angkatan, berjejer di bawahnya. Penomoran halaman
+       bukan isi halaman; ia tidak boleh seberat yang dinomorinya. */
     .kmp-halaman .page-item .page-link {
-        min-width: 42px; padding: 9px 14px;
-        background: var(--kertas); color: var(--tinta);
-        border: 2px solid var(--tinta); border-radius: 13px;
-        box-shadow: 3px 3px 0 rgba(22, 35, 63, .16);
-        font-weight: 800; text-align: center;
+        min-width: 38px; padding: 7px 12px;
+        background: #fff; color: var(--tinta);
+        border: 1px solid var(--garis); border-radius: 999px;
+        box-shadow: none;
+        font-weight: 700; font-size: .92rem; text-align: center;
+        transition: border-color .15s ease, color .15s ease;
+    }
+    .kmp-halaman .page-item .page-link:hover {
+        border-color: var(--jingga); color: var(--jingga-tua);
     }
     .kmp-halaman .page-item.active .page-link {
-        background: var(--jingga-kuat); color: #fff; box-shadow: 3px 3px 0 var(--tinta);
+        background: var(--jingga); border-color: var(--jingga);
+        color: #fff; box-shadow: none;
     }
     .kmp-halaman .page-item.disabled .page-link {
-        background: var(--kertas-2); color: var(--tinta-2);
-        border-color: rgba(22, 35, 63, .25); box-shadow: none;
+        background: transparent; color: #b6aa94;
+        border-color: var(--garis); box-shadow: none;
     }
 
     .kmp-kosong {
@@ -464,149 +537,6 @@
             @else
                 <div class="kmp-kisi">
 
-                    {{-- Poster dan fasilitasnya SEKALI di sini, bukan di tiap
-                         kartu: flyer-nya sama persis untuk semua angkatan. --}}
-                    <div class="kmp-panel">
-                        <div class="kmp-panel-kartu">
-                            {{-- POSTER TIDAK DIPAJANG di sini, dan itu keputusan.
-
-                                 Versi pertama rombakan ini memasangnya sekali di
-                                 panel, diambil dari angkatan pertama. Begitu
-                                 halaman ini memuat Jawa bersama luar Jawa, satu
-                                 flyer berdiri di atas dua paket yang isinya
-                                 berbeda — dan flyer itu mewakili salah satunya
-                                 saja.
-
-                                 Sempat dicoba menampilkannya hanya kalau seluruh
-                                 angkatan memakai gambar yang sama; terukur dengan
-                                 data sebenarnya ia nyaris tidak pernah lolos,
-                                 sebab sebagian angkatan memang tidak berflyer.
-                                 Aturan yang hampir selalu salah lebih baik
-                                 dibuang daripada dipelihara.
-
-                                 Yang dibutuhkan orang di halaman daftar adalah
-                                 APA YANG DIDAPAT, dan itu ada di bawah ini.
-                                 Flyer tiap angkatan tetap tampil di halaman
-                                 detailnya masing-masing. --}}
-
-                            {{-- Yang SAMA ditulis sekali, selisihnya disebut
-                                 terpisah.
-
-                                 Bentuk sebelumnya memajang dua daftar utuh
-                                 berdampingan — dan terukur, keduanya mengulang
-                                 5 dari 7 butir yang sama. Untuk tahu bedanya,
-                                 pembaca harus membandingkan dua daftar baris
-                                 per baris. Sasaran halaman ini orang berusia
-                                 lanjut, dan yang mereka cari cuma satu hal:
-                                 apa bedanya.
-
-                                 Sebelum itu pun pernah lebih buruk: SATU daftar
-                                 untuk semua varian, diambil dari angkatan
-                                 pertama — jadi peserta luar Jawa dijanjikan
-                                 penginapan dan kolam renang yang tidak akan ia
-                                 dapatkan, padahal membayar satu juta lebih
-                                 mahal. --}}
-                            @if ($pisahkan)
-                                <h2>Yang kamu dapat</h2>
-                                <ul class="kmp-fasilitas">
-                                    @foreach ($fasilitasUmum as $butir)
-                                        <li><i class="bi bi-check-circle-fill"></i> <span>{{ $butir }}</span></li>
-                                    @endforeach
-                                </ul>
-
-                                <div class="kmp-beda">
-                                    <h2>Bedanya</h2>
-
-                                    @foreach ($paket as $p)
-                                        <div class="kmp-beda-butir">
-                                            <span class="kmp-beda-label">{{ $p['label'] ?: 'Paket lain' }}</span>
-
-                                            @if (! empty($p['khusus']))
-                                                <ul class="kmp-fasilitas kmp-fasilitas-tambah">
-                                                    @foreach ($p['khusus'] as $butir)
-                                                        <li><i class="bi bi-plus-circle-fill"></i> <span>{{ $butir }}</span></li>
-                                                    @endforeach
-                                                </ul>
-                                            @else
-                                                {{-- Disebut, bukan didiamkan: paket yang tidak
-                                                     muncul di daftar "bedanya" membuat
-                                                     pembacanya menebak apakah ia terlewat. --}}
-                                                <p class="kmp-beda-nihil">Yang di atas saja, tanpa tambahan.</p>
-                                            @endif
-                                        </div>
-                                    @endforeach
-                                </div>
-                            @else
-                                @foreach ($paket as $p)
-                                    <div class="kmp-paket">
-                                        <h2>
-                                            Yang kamu dapat
-                                            @if ($paket->count() > 1 && $p['label'])
-                                                <span class="kmp-paket-tanda">{{ $p['label'] }}</span>
-                                            @endif
-                                        </h2>
-                                        <ul class="kmp-fasilitas">
-                                            @foreach ($p['fasilitas'] as $butir)
-                                                <li><i class="bi bi-check-circle-fill"></i> <span>{{ $butir }}</span></li>
-                                            @endforeach
-                                        </ul>
-                                    </div>
-                                @endforeach
-                            @endif
-                        </div>
-
-                        {{-- ================== jalan kembali bagi yang kehilangan tautannya
-
-                             DI BAWAH kartu "Yang kamu dapat", di lajur
-                             keterangan — bukan di kaki halaman, dan bukan pula
-                             sebagai pita selebar layar di bawah hero.
-
-                             Riwayatnya: mula-mula di KAKI halaman, dan terukur
-                             2,4 layar ke bawah di laptop serta 3,9 layar di
-                             ponsel — di balik dua belas kartu angkatan dan
-                             penomoran 29 nomor. Dipindahkan ke bawah hero ia
-                             jadi 0,5 layar, tetapi memotong jalan antara
-                             judul halaman dan daftar angkatannya.
-
-                             Di sini ia 1,1 layar — setengah layar lebih jauh
-                             daripada di bawah hero, dan itu harga yang dibayar
-                             dengan sadar: lajur ini memang lajur keterangan,
-                             jadi borangnya duduk bersama hal-hal lain yang
-                             dibaca orang SEBELUM memilih angkatan, dan daftar
-                             angkatannya tidak lagi terdorong ke bawah.
-
-                             Alamat halaman status memuat UUID yang tidak bisa
-                             ditebak, jadi yang menutup tabnya dan tidak
-                             menerima suratnya kehilangan pendaftarannya untuk
-                             selamanya, termasuk tombol bayarnya. Tautannya
-                             dikirim ke EMAIL, tidak ke layar: ditampilkan,
-                             siapa pun yang menebak alamat email orang lain
-                             bisa membuka pendaftarannya — di halaman itu ada
-                             nama, nomor telepon, afiliasi, dan daftar
-                             pesertanya. --}}
-                        <form method="POST" action="{{ route('public.scopuscamp.tautansaya') }}"
-                            class="kmp-lacak">
-                            @csrf
-
-                            <div class="kmp-lacak-kata">
-                                <span class="kmp-lacak-ikon"><i class="bi bi-ticket-detailed"></i></span>
-                                <span>
-                                    <strong>Sudah pernah mendaftar?</strong>
-                                    Masukkan email Anda, tautan pendaftarannya kami kirim ke sana.
-                                </span>
-                            </div>
-
-                            <div class="kmp-lacak-isian">
-                                <label for="kmpLacakEmail" class="visually-hidden">Alamat email</label>
-                                <input type="email" id="kmpLacakEmail" name="email" required
-                                    autocomplete="email" placeholder="nama@email.com"
-                                    value="{{ old('email') }}">
-                                <button type="submit">
-                                    <i class="bi bi-envelope"></i> Kirim tautannya
-                                </button>
-                            </div>
-                        </form>
-                    </div>
 
                     @php
                         /*
@@ -721,6 +651,154 @@
                             <div class="kmp-halaman">{{ $categories->links() }}</div>
                         @endif
                     </div>
+
+                    {{-- Poster dan fasilitasnya SEKALI di sini, bukan di tiap
+                         kartu: flyer-nya sama persis untuk semua angkatan. --}}
+                    <div class="kmp-panel">
+                        <div class="kmp-panel-kartu">
+                            {{-- POSTER TIDAK DIPAJANG di sini, dan itu keputusan.
+
+                                 Versi pertama rombakan ini memasangnya sekali di
+                                 panel, diambil dari angkatan pertama. Begitu
+                                 halaman ini memuat Jawa bersama luar Jawa, satu
+                                 flyer berdiri di atas dua paket yang isinya
+                                 berbeda — dan flyer itu mewakili salah satunya
+                                 saja.
+
+                                 Sempat dicoba menampilkannya hanya kalau seluruh
+                                 angkatan memakai gambar yang sama; terukur dengan
+                                 data sebenarnya ia nyaris tidak pernah lolos,
+                                 sebab sebagian angkatan memang tidak berflyer.
+                                 Aturan yang hampir selalu salah lebih baik
+                                 dibuang daripada dipelihara.
+
+                                 Yang dibutuhkan orang di halaman daftar adalah
+                                 APA YANG DIDAPAT, dan itu ada di bawah ini.
+                                 Flyer tiap angkatan tetap tampil di halaman
+                                 detailnya masing-masing. --}}
+
+                            {{-- Yang SAMA ditulis sekali, selisihnya disebut
+                                 terpisah.
+
+                                 Bentuk sebelumnya memajang dua daftar utuh
+                                 berdampingan — dan terukur, keduanya mengulang
+                                 5 dari 7 butir yang sama. Untuk tahu bedanya,
+                                 pembaca harus membandingkan dua daftar baris
+                                 per baris. Sasaran halaman ini orang berusia
+                                 lanjut, dan yang mereka cari cuma satu hal:
+                                 apa bedanya.
+
+                                 Sebelum itu pun pernah lebih buruk: SATU daftar
+                                 untuk semua varian, diambil dari angkatan
+                                 pertama — jadi peserta luar Jawa dijanjikan
+                                 penginapan dan kolam renang yang tidak akan ia
+                                 dapatkan, padahal membayar satu juta lebih
+                                 mahal. --}}
+                            @if ($pisahkan)
+                                <h2>Yang kamu dapat</h2>
+                                <ul class="kmp-fasilitas">
+                                    @foreach ($fasilitasUmum as $butir)
+                                        <li><i class="bi bi-check-circle-fill"></i> <span>{{ $butir }}</span></li>
+                                    @endforeach
+                                </ul>
+
+                                <div class="kmp-beda">
+                                    <h2>Bedanya</h2>
+
+                                    @foreach ($paket as $p)
+                                        <div class="kmp-beda-butir">
+                                            <span class="kmp-beda-label">{{ $p['label'] ?: 'Paket lain' }}</span>
+
+                                            @if (! empty($p['khusus']))
+                                                <ul class="kmp-fasilitas kmp-fasilitas-tambah">
+                                                    @foreach ($p['khusus'] as $butir)
+                                                        <li><i class="bi bi-plus-circle-fill"></i> <span>{{ $butir }}</span></li>
+                                                    @endforeach
+                                                </ul>
+                                            @else
+                                                {{-- Disebut, bukan didiamkan: paket yang tidak
+                                                     muncul di daftar "bedanya" membuat
+                                                     pembacanya menebak apakah ia terlewat. --}}
+                                                <p class="kmp-beda-nihil">Yang di atas saja, tanpa tambahan.</p>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @else
+                                @foreach ($paket as $p)
+                                    <div class="kmp-paket">
+                                        <h2>
+                                            Yang kamu dapat
+                                            @if ($paket->count() > 1 && $p['label'])
+                                                <span class="kmp-paket-tanda">{{ $p['label'] }}</span>
+                                            @endif
+                                        </h2>
+                                        <ul class="kmp-fasilitas">
+                                            @foreach ($p['fasilitas'] as $butir)
+                                                <li><i class="bi bi-check-circle-fill"></i> <span>{{ $butir }}</span></li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                @endforeach
+                            @endif
+                        </div>
+
+                    </div>
+
+                    {{-- ================== jalan kembali bagi yang kehilangan tautannya
+
+                         PALING BAWAH, sesudah kartu "Yang kamu dapat".
+                         Keputusan pemiliknya 31 Okt 2026, alasannya tegas:
+                         yang membuka halaman ini harus langsung tertuju ke
+                         jadwalnya, bukan ke borang yang cuma dibutuhkan
+                         sebagian kecil orang.
+
+                         Riwayatnya panjang dan tiap langkahnya diukur. Mula-
+                         mula di kaki halaman: 2,4 layar ke bawah di laptop
+                         dan 3,9 layar di ponsel, di balik dua belas baris
+                         angkatan setinggi 1.341px dan penomoran 29 nomor.
+                         Lalu dipindah ke lajur keterangan kiri (1,1 layar),
+                         lalu ke atas daftar saat lajur itu dibubarkan.
+
+                         Kembali ke bawah SEKARANG tidak mengulang kesalahan
+                         yang sama, dan itu bukan pembelaan melainkan
+                         pengukuran: halamannya sudah dipendekkan dari 2,72
+                         layar jadi 2,2 — daftar angkatannya kini berkisi
+                         tiga kolom setinggi 731px, bukan tumpukan 1.341px.
+                         Jarak ke borang ini tinggal sekitar 1,4 layar,
+                         lebih dekat daripada saat ia duduk di lajur kiri.
+
+                         Alamat halaman status memuat UUID yang tidak bisa
+                         ditebak, jadi yang menutup tabnya dan tidak
+                         menerima suratnya kehilangan pendaftarannya untuk
+                         selamanya, termasuk tombol bayarnya. Tautannya
+                         dikirim ke EMAIL, tidak ke layar: ditampilkan,
+                         siapa pun yang menebak alamat email orang lain
+                         bisa membuka pendaftarannya — di halaman itu ada
+                         nama, nomor telepon, afiliasi, dan daftar
+                         pesertanya. --}}
+                    <form method="POST" action="{{ route('public.scopuscamp.tautansaya') }}"
+                        class="kmp-lacak">
+                        @csrf
+
+                        <div class="kmp-lacak-kata">
+                            <span class="kmp-lacak-ikon"><i class="bi bi-ticket-detailed"></i></span>
+                            <span>
+                                <strong>Sudah pernah mendaftar?</strong>
+                                Masukkan email Anda, tautan pendaftarannya kami kirim ke sana.
+                            </span>
+                        </div>
+
+                        <div class="kmp-lacak-isian">
+                            <label for="kmpLacakEmail" class="visually-hidden">Alamat email</label>
+                            <input type="email" id="kmpLacakEmail" name="email" required
+                                autocomplete="email" placeholder="nama@email.com"
+                                value="{{ old('email') }}">
+                            <button type="submit">
+                                <i class="bi bi-envelope"></i> Kirim tautannya
+                            </button>
+                        </div>
+                    </form>
 
                 </div>
             @endif
