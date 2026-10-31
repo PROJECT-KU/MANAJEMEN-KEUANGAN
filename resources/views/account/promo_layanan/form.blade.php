@@ -218,6 +218,18 @@
     .prf-kelompok-nama { margin: 0; line-height: 1.3; font-size: .82rem; font-weight: 800; color: var(--mis-tinta); }
     .prf-kelompok-jumlah { margin: 0; line-height: 1.4; font-size: .72rem; color: var(--mis-tinta-3); }
 
+    /* Kotak centang syarat riwayat: sebaris, membungkus di layar sempit. */
+    .prf-syarat { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+    .prf-syarat-butir {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 8px 14px; border-radius: 999px; cursor: pointer;
+        border: 1px solid #e2e8f0; background: #fff; font-size: 14px;
+    }
+    .prf-syarat-butir:has(input:checked) {
+        border-color: #6366f1; background: #eef2ff; font-weight: 600;
+    }
+    .prf-syarat-butir i { color: #6366f1; }
+
     /* Pilih semua milik satu layanan. Di kanan, dan labelnya menyebut
        layanannya — "Pilih semua" saja tidak menyatakan sejauh mana. */
     .prf-semua { margin-left: auto; display: inline-flex; align-items: center; gap: 7px; font-size: .75rem; font-weight: 700; color: #4338ca; cursor: pointer; }
@@ -401,6 +413,33 @@
                                 sama sekali — potongannya baru muncul sesudah pendaftar
                                 mengetikkan kode ini di borangnya.
                             </p>
+                        </div>
+
+                        {{-- Syarat riwayat: hanya alumni layanan tertentu.
+
+                             Ditaruh tepat di bawah kode promo karena hampir
+                             selalu dipakai bersamanya — potongan alumni tanpa
+                             kode berarti harga di halaman layanan ikut turun
+                             untuk semua orang, termasuk yang bukan alumni. --}}
+                        <div class="mis-isian prf-penuh">
+                            <label class="mis-label">Hanya untuk yang pernah ikut</label>
+                            <p class="mis-bantuan">
+                                Centang layanan yang harus PERNAH DIIKUTI SAMPAI LUNAS oleh
+                                nomor WhatsApp pendaftarnya. Yang pernah mendaftar tetapi
+                                tagihannya tidak pernah dibayar TIDAK dihitung. Dikosongkan
+                                berarti promonya terbuka untuk siapa saja.
+                            </p>
+
+                            <div class="prf-syarat">
+                                @foreach ($layananSyarat as $l)
+                                    <label class="prf-syarat-butir">
+                                        <input type="checkbox" name="syarat_layanan[]"
+                                            value="{{ $l['kunci'] }}"
+                                            {{ in_array($l['kunci'], $syaratTerpilih, true) ? 'checked' : '' }}>
+                                        <span><i class="fas {{ $l['ikon'] }}"></i> {{ $l['nama'] }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
                         </div>
 
                         <div class="mis-isian prf-penuh">

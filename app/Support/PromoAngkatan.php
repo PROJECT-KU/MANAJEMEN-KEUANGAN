@@ -155,8 +155,11 @@ class PromoAngkatan
      * ditambah kodenya cocok. Yang longgar salah satunya membuat kode
      * kedaluwarsa tetap memotong harga.
      */
-    public static function denganKode(KategoriLayanan $angkatan, ?string $kode): ?PromoLayanan
-    {
+    public static function denganKode(
+        KategoriLayanan $angkatan,
+        ?string $kode,
+        ?string $telp = null
+    ): ?PromoLayanan {
         $kode = PromoLayanan::rapikanKode($kode);
 
         if ($kode === '') {
@@ -175,6 +178,21 @@ class PromoAngkatan
             ->whereHas('angkatan', fn ($q) => $q->where('kategori_layanan.id', $id))
             ->get()
             ->reject(fn (PromoLayanan $p) => $p->kuotaHabis())
+
+            /*
+             * SYARAT RIWAYAT diperiksa di sini, bukan di dalam kueri.
+             *
+             * Pertanyaannya "nomor ini pernah lunas di layanan apa saja",
+             * dan jawabannya tersebar di enam tabel pendaftaran yang
+             * kosakata statusnya berbeda-beda. Dipaksa jadi subkueri, ia
+             * jadi enam subkueri bersarang untuk SETIAP promo; di sini ia
+             * satu pemeriksaan untuk promo yang sudah lolos saringan lain,
+             * dan promo tanpa syarat riwayat tidak menyentuh basis data
+             * sama sekali.
+             */
+            ->filter(fn (PromoLayanan $p) => RiwayatLunas::pernahLunas(
+                $telp, $p->syarat_layanan_bersih
+            ))
 
             /*
              * Yang paling menguntungkan pendaftarnya kalau kebetulan ada

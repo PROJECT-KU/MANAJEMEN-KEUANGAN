@@ -894,6 +894,21 @@ class PendaftaranSemuaLayanan
     }
 
     /**
+     * Seluruh katalog sumber, berkunci layanan.
+     *
+     * Dipakai layar yang perlu MENAWARKAN daftar layanan — misalnya kotak
+     * centang syarat riwayat di borang promo. Dipulangkan apa adanya, bukan
+     * disalin: yang memanggilnya cuma membaca, dan konstanta tidak bisa
+     * diubah dari luar.
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    public static function semuaSumber(): array
+    {
+        return self::SUMBER;
+    }
+
+    /**
      * Kolom tempat jejak perubahan ditulis, atau null kalau tabelnya tidak punya.
      *
      * Kelimanya kini punya `note`, tetapi dua di antaranya baru sejak migrasi
