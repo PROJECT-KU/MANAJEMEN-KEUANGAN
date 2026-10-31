@@ -382,6 +382,27 @@
                                 placeholder="mis. Promo Ulang Tahun Rumah Scopus ke-8">
                         </div>
 
+                        {{-- Kode promo: kosong = otomatis, terisi = harus diketik.
+
+                             Perbedaan itu yang paling mudah disalahpahami di
+                             layar ini, jadi disebut di keterangan bawahnya
+                             dengan kalimat biasa — bukan di judul atau di
+                             tooltip yang harus ditemukan dulu. --}}
+                        <div class="mis-isian prf-penuh">
+                            <label class="mis-label" for="prf-kode">Kode promo</label>
+                            <input type="text" class="form-control-modern" id="prf-kode" name="kode"
+                                maxlength="60" value="{{ old('kode', $promo->kode) }}"
+                                placeholder="mis. SALAMQ1 — kosongkan kalau promonya otomatis"
+                                style="text-transform: uppercase;">
+                            <p class="mis-bantuan">
+                                <strong>Dikosongkan:</strong> potongannya langsung berlaku dan
+                                harga lama tercoret di halaman layanan.<br>
+                                <strong>Diisi:</strong> harga di halaman layanan TIDAK berubah
+                                sama sekali — potongannya baru muncul sesudah pendaftar
+                                mengetikkan kode ini di borangnya.
+                            </p>
+                        </div>
+
                         <div class="mis-isian prf-penuh">
                             <label class="mis-label" for="prf-catatan">Catatan</label>
                             <textarea class="form-control-modern" id="prf-catatan" name="catatan" rows="2"

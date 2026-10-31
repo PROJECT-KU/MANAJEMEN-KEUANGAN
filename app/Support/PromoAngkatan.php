@@ -82,8 +82,20 @@ class PromoAngkatan
          * dijalankan untuk SETIAP promo — sementara DampakPromo sudah
          * menghitung semuanya sekali untuk seluruh promo.
          */
+        /*
+         * HANYA promo otomatis — yang tidak punya kode.
+         *
+         * Kelas ini menjawab "harga berapa yang dipajang kepada orang yang
+         * belum mengetikkan apa-apa". Promo berkode ikut di sini berarti
+         * harganya sudah turun dan harga lamanya sudah tercoret sebelum satu
+         * pun kode dimasukkan — dan kodenya tidak ada gunanya lagi.
+         *
+         * Keputusan pemiliknya 31 Okt 2026. Promo berkode dicari lewat
+         * denganKode() di bawah, dan hanya saat kodenya memang dikirim.
+         */
         $promo = PromoLayanan::query()
             ->berjalan()
+            ->otomatis()
             ->whereHas('angkatan', fn ($q) => $q->whereIn('kategori_layanan.id', array_keys($perlu)))
             ->with(['angkatan' => fn ($q) => $q
                 ->whereIn('kategori_layanan.id', array_keys($perlu))
@@ -129,6 +141,48 @@ class PromoAngkatan
         }
 
         return self::$peta[$id] ?: null;
+    }
+
+    /**
+     * Promo BERKODE yang cocok untuk satu angkatan, atau null.
+     *
+     * Tidak lewat $peta: yang disimpan di sana jawaban untuk "promo apa yang
+     * berlaku tanpa diminta", dan jawaban itu tidak boleh berubah hanya
+     * karena seseorang mengetikkan kode di satu permintaan.
+     *
+     * Syaratnya sama ketatnya dengan promo otomatis — sedang berjalan,
+     * kuotanya belum habis, dan angkatan ini memang dicentang padanya —
+     * ditambah kodenya cocok. Yang longgar salah satunya membuat kode
+     * kedaluwarsa tetap memotong harga.
+     */
+    public static function denganKode(KategoriLayanan $angkatan, ?string $kode): ?PromoLayanan
+    {
+        $kode = PromoLayanan::rapikanKode($kode);
+
+        if ($kode === '') {
+            return null;
+        }
+
+        $id = (string) $angkatan->getKey();
+
+        if ($id === '') {
+            return null;
+        }
+
+        return PromoLayanan::query()
+            ->berjalan()
+            ->berkode($kode)
+            ->whereHas('angkatan', fn ($q) => $q->where('kategori_layanan.id', $id))
+            ->get()
+            ->reject(fn (PromoLayanan $p) => $p->kuotaHabis())
+
+            /*
+             * Yang paling menguntungkan pendaftarnya kalau kebetulan ada
+             * lebih dari satu promo berkode sama pada angkatan ini. Aturan
+             * yang sama dipakai promo otomatis di menang().
+             */
+            ->sortByDesc(fn (PromoLayanan $p) => $p->potonganUntuk(self::hargaDasar($angkatan)))
+            ->first();
     }
 
     /**
