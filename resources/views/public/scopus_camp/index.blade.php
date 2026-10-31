@@ -155,7 +155,7 @@
        Dipatok 420–500px, kotaknya ±289px di layar mana pun yang cukup
        lebar. Di bawah 1200px keduanya menumpuk dan kotaknya kembali lebar. */
     @media (min-width: 1200px) {
-        .kmp-bawah { grid-template-columns: minmax(0, 1fr) minmax(420px, 500px); }
+        .kmp-bawah { grid-template-columns: minmax(0, 1fr) 420px; }
     }
     .kmp-bawah > * { min-width: 0; }
     .kmp-panel-kartu { height: 100%; }
@@ -236,15 +236,49 @@
        Mengalir, tiap butir selebar isinya sendiri dan yang berikutnya
        langsung menempel. Jaraknya tetap diatur `gap`, jadi rapat bukan
        berarti berdempetan. */
+    /* BERLAJUR LAGI, tetapi lajurnya selebar butir terpanjang.
+
+       Mengalir bebas memang rapat, tetapi awal tiap butir jadi berbeda di
+       tiap baris — terukur 99px, 360px, lalu 99px, 517px, lalu 99px, 442px.
+       Tujuh butir yang awalnya berloncatan begitu terbaca seperti daftar
+       yang belum disusun.
+
+       Lebar lajurnya 390px, dan angka itu DIUKUR bukan dikira: butir
+       terpanjang ("Pendampingan lanjutan sampai jurnal memberi jawaban")
+       membutuhkan 364px untuk teksnya ditambah 26px untuk ikon dan jaraknya.
+       Dipatok 340px seperti percobaan sebelumnya, butir itu patah jadi dua
+       baris sementara enam lainnya satu baris — dan satu butir yang
+       menjulang di antara enam yang rata justru lebih berantakan daripada
+       lajur yang berloncatan.
+
+       auto-fit membuatnya menyesuaikan sendiri: di kartu selebar 726px ia
+       jadi SATU lajur (dua lajur butuh 808px), dan di kartu yang lebih lebar
+       ia jadi dua. Berapa pun lebarnya, tidak ada butir yang patah. */
     .kmp-fasilitas {
         list-style: none; padding: 0; margin: 0;
-        display: flex; flex-wrap: wrap; gap: 10px 30px;
+        display: grid; gap: 8px 20px;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 390px), 1fr));
     }
+
+    /* Ikon dan teks SEJAJAR pada baris pertama.
+
+       Sebelumnya ikonnya digeser `margin-top: 4px` — angka yang dulu
+       dikira-kira. Terukur: ketujuh butir meleset 4px ke bawah dari titik
+       tengah baris pertama teksnya, serempak. Angka tetap memang tidak bisa
+       benar; ia harus mengikuti tinggi baris.
+
+       Kotak ikonnya dibuat setinggi SATU BARIS teks (1.5em, sama dengan
+       line-height-nya) lalu isinya dipusatkan di dalam kotak itu. Dengan
+       begitu ia ikut benar saat butirnya satu baris maupun dua. */
     .kmp-fasilitas li {
-        display: flex; gap: 9px; padding: 2px 0;
+        display: flex; gap: 9px; align-items: flex-start; padding: 2px 0;
         color: var(--tinta); font-size: .92rem; line-height: 1.5;
     }
-    .kmp-fasilitas i { flex: 0 0 auto; margin-top: 4px; color: var(--rumput); }
+    .kmp-fasilitas i {
+        flex: 0 0 auto; color: var(--rumput);
+        display: inline-flex; align-items: center; justify-content: center;
+        height: 1.5em;
+    }
 
     /* Tanda centangnya BERDENYUT, teksnya tidak.
 
