@@ -47,8 +47,8 @@
         --tinta: #16233f;   --tinta-2: #5c6b85;
         --jingga: #e76d20;  --jingga-muda: #fb8c3d; --jingga-tua: #ad4d12;
         --jingga-kuat: #b85213;
-        --stabilo: #ffd84d;
         --rumput: #0f766e;  --ungu: #5b3fd6;
+        --garis: #e7dcc6;
 
         background: var(--kertas);
         color: var(--tinta);
@@ -70,23 +70,29 @@
         background: linear-gradient(180deg, var(--kertas-2) 0%, var(--kertas) 100%);
         text-align: center;
     }
+    /* Pil kertas bergaris tipis, BUKAN blok navy pekat.
+
+       Bentuk lamanya satu-satunya benda gelap di layar pertama, jadi mata
+       jatuh ke sana lebih dulu daripada ke judulnya. Disamakan dengan
+       Scopus Kafe: latar kertas, garis tipis, huruf jingga tua. */
     .kmp-stiker {
         display: inline-flex; align-items: center; gap: 8px;
-        padding: 7px 17px; margin-bottom: 18px;
-        background: var(--tinta); color: var(--kertas);
-        border-radius: 999px; font-weight: 800; font-size: .84rem;
+        padding: 7px 16px; margin-bottom: 20px;
+        background: var(--kertas-2); border: 1px solid var(--garis);
+        border-radius: 999px; font-weight: 800; font-size: .85rem;
+        color: var(--jingga-tua);
     }
-    .kmp-stiker i { color: var(--stabilo); }
 
     .kmp .kmp-judul { font-size: clamp(1.9rem, 4.2vw, 3rem); line-height: 1.12; max-width: 20ch; margin: 0 auto; }
 
-    .kmp-stabilo { position: relative; display: inline-block; z-index: 0; }
-    .kmp-stabilo::after {
-        content: ''; position: absolute; z-index: -1;
-        left: -5px; right: -5px; bottom: .06em; height: .42em;
-        background: var(--stabilo); border-radius: 3px;
-        transform: rotate(-1.1deg) skewX(-9deg);
-    }
+    /* Stabilo digambar di BELAKANG hurufnya lewat gradien, warna persik.
+
+       Kuning #ffd84d sebelumnya warna paling terang di seluruh halaman dan
+       menarik mata lebih kuat daripada tombol mana pun. Disamakan dengan
+       Scopus Kafe. padding-bottom pada judulnya supaya garis stabilo baris
+       terakhir tidak bersentuhan dengan paragraf di bawahnya. */
+    .kmp-stabilo { background: linear-gradient(180deg, transparent 62%, #fbd9b4 62%); padding: 0 .1em; }
+    .kmp .kmp-judul { padding-bottom: .12em; }
 
     .kmp p.kmp-sub { max-width: 56ch; margin: 17px auto 0; font-size: 1.04rem; }
 
@@ -115,10 +121,10 @@
        konteks kisi, bukan gaya halaman ini. */
 
     .kmp-panel-kartu {
-        padding: 22px;
-        background: var(--kertas-2);
-        border: 2px solid var(--tinta); border-radius: 22px;
-        box-shadow: 7px 7px 0 var(--jingga);
+        padding: 24px;
+        background: #fff;
+        border: 1px solid var(--garis); border-radius: 22px;
+        box-shadow: 0 8px 22px rgba(22, 35, 63, .06);
     }
 
     .kmp .kmp-panel-kartu h2 { font-size: 1.12rem; margin-bottom: 12px; }
@@ -168,27 +174,33 @@
     /* ====================================================== angkatan */
     .kmp-deret { display: flex; flex-direction: column; gap: 15px; }
 
+    /* Bayangannya navy tembus pandang, BUKAN jingga pekat.
+
+       Dua belas baris berbayang jingga penuh membuat warna ajakan utama
+       halaman ini — tombol dan harga — tidak lagi menonjol dari apa pun:
+       jingga ada di mana-mana, jadi ia berhenti berarti "ini yang diklik".
+       Angka bayangannya disamakan dengan kartu Scopus Kafe. */
     .kmp-baris {
         display: grid; grid-template-columns: 74px minmax(0, 1fr) auto;
         gap: 20px; align-items: center;
         padding: 17px 21px;
-        background: var(--kertas);
+        background: #fff;
         border: 2px solid var(--tinta); border-radius: 18px;
-        box-shadow: 5px 5px 0 var(--jingga);
+        box-shadow: 6px 6px 0 rgba(22, 35, 63, .12);
         color: var(--tinta);
         transition: transform .18s ease, box-shadow .18s ease;
     }
     .kmp-baris:hover {
         color: var(--tinta);
-        transform: translate(-3px, -3px); box-shadow: 9px 9px 0 var(--jingga);
+        transform: translateY(-3px); box-shadow: 6px 9px 0 rgba(22, 35, 63, .16);
     }
     /* Yang kuotanya habis tidak boleh terlihat sama menariknya dengan yang
        masih bisa didaftari. */
     .kmp-baris.kmp-penuh {
-        background: var(--kertas-2); box-shadow: 5px 5px 0 rgba(22, 35, 63, .2);
-        opacity: .72;
+        background: var(--kertas-2); border-color: var(--garis);
+        box-shadow: none; opacity: .75;
     }
-    .kmp-baris.kmp-penuh:hover { transform: none; box-shadow: 5px 5px 0 rgba(22, 35, 63, .2); }
+    .kmp-baris.kmp-penuh:hover { transform: none; box-shadow: none; }
 
     .kmp-tgl {
         display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -216,9 +228,12 @@
     }
     .kmp-coret { color: var(--tinta-2); font-size: .82rem; font-weight: 600; }
     .kmp-harga { font-family: 'Fraunces', serif; font-weight: 800; font-size: 1.12rem; }
+    /* Warnanya ditulis utuh, bukan var(--stabilo): token itu dibuang
+       bersama kuning #ffd84d, dan nilai yang tidak ada membuat lencana ini
+       kehilangan latarnya sama sekali tanpa satu galat pun. */
     .kmp-hemat {
         padding: 1px 9px; border-radius: 999px;
-        background: var(--stabilo); color: var(--tinta);
+        background: #fbd9b4; color: var(--jingga-tua);
         font-size: .72rem; font-weight: 800;
     }
     /* ================================================ kabar kilat & tautan */
