@@ -598,6 +598,23 @@
     .kmp-baris:hover .kmp-ajak i { transform: translateX(3px); }
 
     .kmp-halaman { display: flex; justify-content: center; margin-top: 34px; }
+
+    /* Keterangan "Menampilkan 1-12 dari 387" DI BAWAH nomornya.
+
+       Dibalik lewat `order`, bukan dengan menyunting templat penomorannya:
+       berkas itu dipakai lima layar lain, dan menukar urutannya di sana
+       berarti mengubah kelimanya demi satu halaman.
+
+       Urutan DOM-nya sengaja dibiarkan — keterangan tetap dibaca lebih dulu
+       oleh pembaca layar, dan itu memang urutan yang benar baginya:
+       "menampilkan 1-12 dari 387" menjelaskan daftar nomor yang menyusul.
+       Tidak ada yang bisa difokus di antara keduanya, jadi urutan Tab tidak
+       ikut terbalik. */
+    .kmp-halaman nav {
+        display: flex; flex-direction: column; align-items: center; gap: 12px;
+    }
+    .kmp-halaman .mis-halaman-ket { order: 2; margin: 0; }
+    .kmp-halaman .mis-halaman-daftar { order: 1; }
     /* justify-content: center DI DAFTARNYA, bukan cuma di pembungkusnya.
 
        Pembungkusnya sudah `display:flex; justify-content:center`, dan itu
