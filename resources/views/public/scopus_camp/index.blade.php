@@ -227,19 +227,78 @@
         border: 2px solid var(--tinta); border-radius: 18px;
         box-shadow: 6px 6px 0 rgba(22, 35, 63, .12);
         color: var(--tinta);
-        transition: transform .18s ease, box-shadow .18s ease;
+        transition: translate .22s cubic-bezier(.2, .7, .3, 1),
+                    box-shadow .22s cubic-bezier(.2, .7, .3, 1),
+                    border-color .18s ease;
     }
+    /* ANGKATNYA LEWAT `translate`, BUKAN `transform`.
+
+       Ditulis sebagai transform, kartunya TIDAK terangkat sama sekali —
+       terukur lewat DevTools: computed transform-nya tetap "none" saat
+       :hover dipaksa, sementara warna garis dan bayangannya berubah dengan
+       benar. Sebabnya AOS: aturannya
+       `[data-aos^="fade"][data-aos^="fade"].aos-animate` berbobot (0,3,0)
+       dan memasang `transform: translate3d(0,0,0)` pada kartu yang sama,
+       mengalahkan `.kmp-baris:hover` yang (0,2,0).
+
+       Menaikkan bobot pemilihnya bisa saja, tetapi berarti menang tipis atas
+       pustaka yang boleh berubah kapan pun ia diperbarui. `translate`
+       properti TERSENDIRI — ia tidak bertabrakan dengan transform milik AOS,
+       melainkan bertumpuk dengannya.
+
+       Empat piksel, tidak lebih. Kartu yang melompat besar membuat yang di
+       sebelahnya terbaca ikut bergeser — mata menangkap gerak, bukan jarak. */
     .kmp-baris:hover {
         color: var(--tinta);
-        transform: translateY(-3px); box-shadow: 6px 9px 0 rgba(22, 35, 63, .16);
+        translate: 0 -4px;
+        border-color: var(--jingga);
+        box-shadow: 6px 11px 0 rgba(231, 109, 32, .18);
     }
+
+    /* Ditekan, kartunya turun kembali: tanpa keadaan ini tombol terasa
+       menggantung — sudah diklik tetapi tidak membalas apa pun sampai
+       halaman berikutnya datang. */
+    .kmp-baris:active {
+        translate: 0 -1px;
+        box-shadow: 4px 5px 0 rgba(231, 109, 32, .22);
+    }
+
+    /* Tanda tanggalnya ikut hidup sedikit. Diputar -2 derajat, bukan
+       diperbesar saja: pembesaran murni pada kotak berisi angka terbaca
+       seperti salah render, sementara miring sedikit terbaca sebagai stiker
+       yang terangkat. */
+    .kmp-baris .kmp-tgl {
+        transition: transform .22s cubic-bezier(.2, .7, .3, 1),
+                    box-shadow .22s ease;
+    }
+    .kmp-baris:hover .kmp-tgl {
+        transform: scale(1.06) rotate(-2.5deg);
+        box-shadow: 0 6px 14px rgba(231, 109, 32, .32);
+    }
+
+    /* Nama angkatannya berganti warna, bukan bergaris bawah: garis bawah
+       pada judul tebal berserif menambah satu garis lagi ke kartu yang
+       sudah penuh garis. */
+    .kmp-nama { transition: color .18s ease; }
+    .kmp-baris:hover .kmp-nama { color: var(--jingga-tua); }
     /* Yang kuotanya habis tidak boleh terlihat sama menariknya dengan yang
        masih bisa didaftari. */
     .kmp-baris.kmp-penuh {
         background: var(--kertas-2); border-color: var(--garis);
         box-shadow: none; opacity: .75;
     }
-    .kmp-baris.kmp-penuh:hover { transform: none; box-shadow: none; }
+    /* Yang kursinya habis TIDAK ikut hidup sama sekali.
+
+       Kartu yang terangkat, bergaris jingga, dan panahnya bergeser adalah
+       janji "ini bisa diklik". Pada angkatan yang sudah penuh janji itu
+       dilanggar sedetik kemudian, dan yang mengkliknya merasa dipermainkan
+       oleh halaman yang kami sendiri yang membuatnya bergerak. */
+    .kmp-baris.kmp-penuh:hover,
+    .kmp-baris.kmp-penuh:active {
+        translate: none; box-shadow: none; border-color: var(--garis);
+    }
+    .kmp-baris.kmp-penuh:hover .kmp-tgl { transform: none; box-shadow: none; }
+    .kmp-baris.kmp-penuh:hover .kmp-nama { color: var(--tinta); }
 
     .kmp-tgl {
         grid-area: tgl;
@@ -389,7 +448,9 @@
         color: var(--jingga-tua); font-weight: 800; font-size: .9rem;
         transition: gap .2s ease;
     }
-    .kmp-baris:hover .kmp-ajak { gap: 13px; }
+    .kmp-ajak i { transition: transform .22s cubic-bezier(.2, .7, .3, 1); }
+    .kmp-baris:hover .kmp-ajak { gap: 11px; }
+    .kmp-baris:hover .kmp-ajak i { transform: translateX(3px); }
 
     .kmp-halaman { display: flex; justify-content: center; margin-top: 34px; }
     .kmp-halaman .pagination { gap: 6px; margin: 0; flex-wrap: wrap; }
@@ -451,8 +512,23 @@
         .kmp-ajak { margin-top: 0; margin-left: auto; }
     }
 
+    /* Yang minta gerak dikurangi tidak cukup dimatikan TRANSISINYA saja.
+
+       Aturan lamanya hanya `transition: none`, jadi transform-nya tetap
+       berlaku — kartunya tetap melompat 4px dan tanda tanggalnya tetap
+       miring, cuma seketika alih-alih mulus. Bagi yang memasang setelan itu
+       karena vertigo atau mabuk gerak, perpindahan mendadak justru lebih
+       buruk daripada yang mulus. Animasi dan transform ikut dimatikan;
+       warna dan garis tetap berubah, sebab keduanya tidak bergerak. */
     @media (prefers-reduced-motion: reduce) {
-        .kmp *, .kmp *::before, .kmp *::after { transition: none !important; }
+        .kmp *, .kmp *::before, .kmp *::after {
+            transition: none !important;
+            animation: none !important;
+        }
+        .kmp .kmp-baris:hover,
+        .kmp .kmp-baris:active { translate: none !important; }
+        .kmp .kmp-baris:hover .kmp-tgl,
+        .kmp .kmp-baris:hover .kmp-ajak i { transform: none !important; }
     }
 </style>
 
@@ -576,7 +652,17 @@
                                 <div class="kmp-baris kmp-penuh">
                             @else
                                 <a href="{{ route('public.scopuscamp.Selengkapnya', ['id' => $item->id]) }}"
-                                    class="kmp-baris" data-aos="fade-up" data-aos-delay="{{ ($i % 4) * 80 }}">
+                                    class="kmp-baris" data-aos="fade-up"
+                                    {{-- Jedanya berpola TIGA, mengikuti tiga lajur kisinya.
+
+                                         Dulu `% 4` — sisa dari bentuk lama yang
+                                         satu lajur. Di kisi tiga kolom polanya
+                                         tidak lagi jatuh sebaris: kartu pertama
+                                         baris kedua kebagian jeda 240ms
+                                         sementara tetangganya 0ms, jadi
+                                         munculnya terbaca acak, bukan mengalir
+                                         dari kiri ke kanan. --}}
+                                    data-aos-delay="{{ ($i % 3) * 80 }}">
                             @endif
 
                                 <span class="kmp-tgl">
