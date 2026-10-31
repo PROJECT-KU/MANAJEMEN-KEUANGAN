@@ -738,20 +738,66 @@ class PublicScopusCampController extends Controller
         }
 
         /*
-         * PENDAFTARAN GANDA ditolak sebelum barisnya dibuat.
+         * TAGIHAN LAMA YANG SUDAH LEWAT TENGGAT DIMATIKAN DULU.
+         *
+         * Penjagaan di bawah bertanya "masih ada tagihan hidup?", jadi
+         * jawabannya hanya benar kalau yang sudah mati memang sudah
+         * ditandai mati. Penyapu di halaman daftar dan halaman borang
+         * dibatasi 20 baris sekali jalan dan diurut dari yang PALING LAMA
+         * kedaluwarsa — jadi justru tagihan yang baru saja lewat tenggat,
+         * milik orang yang sedang berdiri di sini, yang paling mungkin
+         * tidak kebagian jatah sapuan itu. Yang di bawah ini disasarkan ke
+         * barisnya sendiri, jadi tidak ikut berebut jatah.
+         */
+        $calon = PendaftaranScopusCamp::where('kategori_id', $kategori->getKey())
+            ->whereNotIn('status', self::STATUS_LEPAS_KURSI)
+            ->where('email', mb_strtolower(trim($data['email'])))
+            ->where('nama', trim($data['nama']))
+            ->latest('created_at')
+            ->first();
+
+        if ($calon !== null) {
+            PendaftaranScopusCamp::lepaskanYangKedaluwarsa([], (string) $calon->getKey());
+        }
+
+        /*
+         * PENDAFTARAN GANDA ditolak sebelum barisnya dibuat — tetapi HANYA
+         * selama tagihan yang lama masih hidup.
          *
          * Orang menekan tombolnya dua kali karena mengira yang pertama
          * gagal — halaman ini memang diam beberapa detik saat tagihannya
          * dibuat — dan tanpa penjagaan ini ia mendapat DUA tagihan untuk
          * satu kursi, lalu sebagian membayar keduanya.
          *
-         * Yang dicegat diantar ke halaman status pendaftaran yang sudah ada,
-         * bukan ditolak dengan pesan galat: ia memang berhak atas kursinya,
-         * dan yang ia butuhkan tautan bayarnya — bukan pemberitahuan bahwa
-         * ia sudah mendaftar.
+         * Yang dijaga itu saja: DUA TAGIHAN TERBUKA atas satu kursi. Sampai
+         * 31 Okt 2026 penjagaan ini jauh lebih luas daripada bahayanya — ia
+         * mencegat setiap baris yang statusnya bukan batal/tolak/refund,
+         * termasuk yang SUDAH LUNAS. Akibatnya alumni yang ingin ikut lagi
+         * terkunci: nomor 0895…441 punya pendaftaran lunas di angkatan
+         * ke-202, dan karena ke-202 satu-satunya angkatan yang terbuka, ia
+         * tidak bisa mendaftar sama sekali — borangnya malah mengirimkan
+         * kembali tautan pendaftaran lamanya.
+         *
+         * Keputusan pemiliknya 31 Okt 2026: yang mengunci cuma tagihan yang
+         * belum dibayar DAN belum lewat 60 menit. Sesudah lunas boleh
+         * mendaftar lagi; sesudah tenggatnya lewat boleh mendaftar lagi.
+         * Status lain — Reschedule, Dibatalkan, Ditolak, Refund — tidak
+         * memegang tagihan terbuka, jadi tidak mengunci apa pun.
+         *
+         * Yang dicegat diantar ke pendaftaran yang sudah ada, bukan ditolak
+         * dengan pesan galat: ia memang berhak atas kursinya, dan yang ia
+         * butuhkan tautan bayarnya — bukan pemberitahuan bahwa ia sudah
+         * mendaftar.
          */
         $sudahAda = PendaftaranScopusCamp::where('kategori_id', $kategori->getKey())
-            ->whereNotIn('status', self::STATUS_LEPAS_KURSI)
+            ->where('status', \App\Support\PendaftaranSemuaLayanan::statusAwal('scopus_camp'))
+            ->whereNull('bayar_pada')
+            ->where(function ($q) {
+                // Tanpa tenggat tercatat, tagihannya dianggap masih hidup:
+                // menebak sebaliknya membuka kembali pintu tagihan ganda.
+                $q->whereNull('kedaluwarsa_pada')
+                    ->orWhere('kedaluwarsa_pada', '>', now());
+            })
             ->where('email', mb_strtolower(trim($data['email'])))
             ->where('nama', trim($data['nama']))
             ->latest('created_at')
@@ -787,9 +833,12 @@ class PublicScopusCampController extends Controller
             }
 
             return back()->withInput()->with('success',
-                'Data ini sudah pernah didaftarkan di angkatan tersebut, jadi kursinya '
-                . 'sudah ditahan. Tautan halaman pendaftarannya kami kirimkan ke alamat '
-                . 'email yang dipakai saat mendaftar — periksa juga folder spam.');
+                'Data ini masih punya tagihan yang belum dibayar di angkatan tersebut, '
+                . 'jadi kursinya sedang ditahan. Tautan halaman pendaftarannya kami '
+                . 'kirimkan ke alamat email yang dipakai saat mendaftar — periksa juga '
+                . 'folder spam. Kalau tagihan itu memang tidak jadi dibayar, tunggu '
+                . Doku::MENIT_KEDALUWARSA . ' menit sampai tagihannya kedaluwarsa, lalu '
+                . 'pendaftaran baru bisa dibuat lagi.');
         }
 
         /*
