@@ -67,8 +67,12 @@ class PublicWebinarEksklusifController extends Controller
      * tagihan akan membuat total negatif, dan gerbang pembayaran menolak
      * angka seperti itu dengan galat yang tidak menyebut sebabnya.
      */
-    private function hitungPotongan(KategoriLayanan $sesi, ?string $kode, int $total): int
-    {
+    private function hitungPotongan(
+        KategoriLayanan $sesi,
+        ?string $kode,
+        int $total,
+        ?string $telp = null
+    ): int {
         /*
          * Dua sumber kode, dan keduanya dijawab PotonganKode.
          *
@@ -81,7 +85,7 @@ class PublicWebinarEksklusifController extends Controller
          * kodenya ditulis sekali, jadi tidak ada layanan yang diam-diam
          * memakai aturan yang lebih longgar daripada yang lain.
          */
-        return \App\Support\PotonganKode::hitung($sesi, $kode, $total)['potongan'];
+        return \App\Support\PotonganKode::hitung($sesi, $kode, $total, $telp)['potongan'];
     }
 
     /*
@@ -333,7 +337,13 @@ class PublicWebinarEksklusifController extends Controller
         // harga promo, dan menghitungnya dari harga penuh membuat angka di
         // layar lebih besar daripada yang benar-benar akan ditagih.
         $total = (int) $sesi->harga_setelah_promo * $jumlah;
-        $potongan = $this->hitungPotongan($sesi, $kode, $total);
+        /*
+         * Nomornya ikut diperiksa di jalur PRATINJAU juga, bukan cuma saat
+         * menyimpan. Tanpa itu layar menjanjikan potongan kepada yang bukan
+         * alumni, lalu borangnya menagih penuh — dan yang membayar merasa
+         * ditipu oleh angka yang kami sendiri yang memajangnya.
+         */
+        $potongan = $this->hitungPotongan($sesi, $kode, $total, $request->input('telp'));
 
         if ($potongan <= 0) {
             return response()->json([
@@ -701,7 +711,9 @@ class PublicWebinarEksklusifController extends Controller
                  * dipercaya dari borang. Nominal yang dikirim peramban bisa
                  * disunting siapa saja sebelum dikirim.
                  */
-                $potongan = $this->hitungPotongan($terkunci, $data['kode_diskon'] ?? null, $total);
+                $potongan = $this->hitungPotongan(
+                    $terkunci, $data['kode_diskon'] ?? null, $total, $data['telp'] ?? null
+                );
                 $total = max(0, $total - $potongan);
 
                 /*

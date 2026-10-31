@@ -37,6 +37,7 @@ class PromoLayanan extends Model
     protected $fillable = [
         'nama',
         'kode',
+        'syarat_layanan',
         'tipe',
         'persen',
         'nominal',
@@ -57,6 +58,7 @@ class PromoLayanan extends Model
         'nominal' => 'integer',
         'batas_potongan' => 'integer',
         'kuota' => 'integer',
+        'syarat_layanan' => 'array',
     ];
 
     /** Potongan sekian persen dari harga. */
@@ -318,6 +320,33 @@ class PromoLayanan extends Model
     public function getBerkodeAttribute(): bool
     {
         return self::rapikanKode($this->kode) !== '';
+    }
+
+    /**
+     * Layanan yang HARUS pernah diikuti sampai lunas, sudah dibersihkan.
+     *
+     * Larik kosong berarti promo ini tanpa syarat riwayat. Kunci yang sudah
+     * tidak ada di katalog DIBUANG di sini: layanan boleh dihapus, dan
+     * syarat yang menyebut layanan yang tidak ada lagi adalah syarat yang
+     * TIDAK AKAN PERNAH terpenuhi — promonya diam-diam berhenti berlaku
+     * untuk semua orang, tanpa satu galat pun yang menyebut sebabnya.
+     *
+     * @return list<string>
+     */
+    public function getSyaratLayananBersihAttribute(): array
+    {
+        $dikenal = array_keys(\App\Support\PendaftaranSemuaLayanan::semuaSumber());
+
+        return array_values(array_intersect(
+            array_map('strval', (array) ($this->syarat_layanan ?? [])),
+            $dikenal
+        ));
+    }
+
+    /** Promo ini menuntut pendaftarnya pernah ikut layanan lain. */
+    public function getBersyaratRiwayatAttribute(): bool
+    {
+        return $this->syarat_layanan_bersih !== [];
     }
 
     public function scopeCari(Builder $kueri, ?string $kata): Builder

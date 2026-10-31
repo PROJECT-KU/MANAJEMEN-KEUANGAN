@@ -870,7 +870,8 @@ class PublicScopusCampController extends Controller
         $hasilKode = \App\Support\PotonganKode::hitung(
             $kategori,
             $data['kode_diskon'] ?? null,
-            (int) $kategori->harga_setelah_promo * $jumlahPendaftarBaru
+            (int) $kategori->harga_setelah_promo * $jumlahPendaftarBaru,
+            $data['telp'] ?? null
         );
 
         $kodeDiskon = $hasilKode['kode'];

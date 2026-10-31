@@ -590,6 +590,21 @@ class PromoLayananController extends Controller
             'terpilih' => $terpilih,
             'kelompok' => $this->angkatanPerLayanan($terpilih, $promo),
             'tipe' => PromoLayanan::TIPE,
+
+            /*
+             * Daftar layanan untuk kotak centang syarat riwayat. Dibaca dari
+             * katalog yang sama dengan jalur pendaftaran, bukan ditulis ulang
+             * di borangnya — layanan berikutnya muncul sendiri di sini.
+             */
+            'layananSyarat' => collect(\App\Support\PendaftaranSemuaLayanan::semuaSumber())
+                ->map(fn ($s, $kunci) => [
+                    'kunci' => $kunci,
+                    'nama' => $s['nama'] ?? str_replace('_', ' ', $kunci),
+                    'ikon' => $s['ikon'] ?? 'fa-tag',
+                ])
+                ->values()->all(),
+
+            'syaratTerpilih' => (array) old('syarat_layanan', $promo->syarat_layanan ?? []),
         ];
     }
 
@@ -783,6 +798,20 @@ class PromoLayananController extends Controller
              */
             'kode' => ['nullable', 'string', 'max:60', 'regex:/^[A-Za-z0-9\-]+$/'],
 
+            /*
+             * Syarat riwayat: layanan yang HARUS pernah diikuti sampai lunas.
+             *
+             * Kuncinya diperiksa terhadap katalog, bukan diterima mentah.
+             * Kunci karangan tersimpan berarti syarat yang tidak akan pernah
+             * terpenuhi siapa pun — promonya diam-diam mati untuk semua
+             * orang, dan tidak ada satu galat pun yang menyebut sebabnya.
+             */
+            'syarat_layanan' => ['nullable', 'array'],
+            'syarat_layanan.*' => [
+                'string',
+                Rule::in(array_keys(\App\Support\PendaftaranSemuaLayanan::semuaSumber())),
+            ],
+
             'tipe' => ['required', Rule::in(array_keys(PromoLayanan::TIPE))],
 
             /*
@@ -818,6 +847,7 @@ class PromoLayananController extends Controller
         ], [], [
             'nama' => 'nama promo',
             'kode' => 'kode promo',
+            'syarat_layanan' => 'syarat pernah ikut layanan',
             'persen' => 'potongan persen',
             'nominal' => 'potongan rupiah',
             'batas_potongan' => 'batas potongan',
@@ -836,6 +866,12 @@ class PromoLayananController extends Controller
                 // Dirapikan SEKALI di modelnya, supaya yang disimpan dan yang
                 // dicari jalur umum memakai bentuk yang sama persis.
                 'kode' => PromoLayanan::rapikanKode($isian['kode'] ?? null) ?: null,
+
+                // Larik kosong disimpan NULL, bukan "[]": keduanya berarti
+                // tanpa syarat, dan dua bentuk untuk satu arti membuat layar
+                // yang membacanya harus memeriksa keduanya.
+                'syarat_layanan' => array_values(array_unique($isian['syarat_layanan'] ?? []))
+                    ?: null,
 
                 'tipe' => $isian['tipe'],
 
