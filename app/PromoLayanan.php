@@ -36,6 +36,7 @@ class PromoLayanan extends Model
 
     protected $fillable = [
         'nama',
+        'kode',
         'tipe',
         'persen',
         'nominal',
@@ -267,6 +268,56 @@ class PromoLayanan extends Model
         return $kueri->where('aktif', true)
             ->whereDate('mulai', '<=', $hari)
             ->whereDate('selesai', '>=', $hari);
+    }
+
+    /**
+     * Promo yang berlaku OTOMATIS: yang tidak punya kode.
+     *
+     * Dipakai jalur yang memajang harga kepada orang yang belum mengetikkan
+     * apa-apa. Promo berkode tidak boleh ikut di sana — kalau ikut, harganya
+     * sudah turun dan harga lamanya sudah tercoret sebelum satu pun kode
+     * dimasukkan, dan kodenya jadi tidak ada gunanya.
+     */
+    public function scopeOtomatis(Builder $kueri): Builder
+    {
+        return $kueri->where(fn ($q) => $q->whereNull('kode')->orWhere('kode', ''));
+    }
+
+    /** Promo yang baru berlaku sesudah kodenya diketik dan cocok. */
+    public function scopeBerkode(Builder $kueri, string $kode): Builder
+    {
+        return $kueri->whereRaw('UPPER(TRIM(kode)) = ?', [self::rapikanKode($kode)]);
+    }
+
+    /**
+     * Kode dirapikan SEKALI di sini, dipakai saat menyimpan dan saat mencari.
+     *
+     * Huruf besar semua dan tanpa spasi tepi.
+     *
+     * YANG DIJAMIN BARIS INI cuma BENTUK YANG TERSIMPAN: kode yang diketik
+     * admin sebagai "salamq1" tersimpan "SALAMQ1", jadi daftar promo tidak
+     * memajang kode yang sama dalam tiga ejaan.
+     *
+     * Pencocokannya BUKAN karena baris ini. Diukur 31 Okt 2026: collation
+     * sambungannya utf8mb4_unicode_ci, dan di sana 'SALAMQ1' = 'salamq1'
+     * memulangkan 1 — MySQL sendiri yang mengabaikan besar kecil huruf.
+     * Spasi tepinya pun sudah dibuang PotonganKode sebelum sampai ke sini.
+     * Mencabut mb_strtoupper() di baris ini TIDAK memerahkan satu uji pun,
+     * dan itu sudah dicoba.
+     *
+     * Tetap dipertahankan sebagai jaring untuk basis data yang pencocokan
+     * untaiannya peka huruf — SQLite memakai BINARY untuk '=' — supaya
+     * kodenya tidak diam-diam berhenti cocok di sana.
+     */
+    public static function rapikanKode(?string $kode): string
+    {
+        return mb_strtoupper(trim((string) $kode));
+    }
+
+    /** Promo ini menunggu kode diketik, atau berlaku dengan sendirinya. */
+    public function getBerkodeAttribute(): bool
+    {
+        return self::rapikanKode($this->kode) !== '';
     }
 
     public function scopeCari(Builder $kueri, ?string $kata): Builder

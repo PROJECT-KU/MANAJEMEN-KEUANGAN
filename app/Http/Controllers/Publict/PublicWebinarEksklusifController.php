@@ -69,16 +69,19 @@ class PublicWebinarEksklusifController extends Controller
      */
     private function hitungPotongan(KategoriLayanan $sesi, ?string $kode, int $total): int
     {
-        $kodeSesi = trim((string) $sesi->kode_diskon);
-        $kode = trim((string) $kode);
-
-        if ($kodeSesi === '' || $kode === '' || ! hash_equals($kodeSesi, $kode)) {
-            return 0;
-        }
-
-        $nominal = (int) preg_replace('/\\D+/', '', (string) $sesi->nominal_diskon);
-
-        return max(0, min($nominal, $total));
+        /*
+         * Dua sumber kode, dan keduanya dijawab PotonganKode.
+         *
+         * Kode milik sesinya sendiri — jalur yang sudah ada — plus promo
+         * BERKODE di layar Promo Layanan yang menyasar sesi ini. Sebelumnya
+         * hanya yang pertama, jadi promo berkode tidak pernah berlaku di
+         * Webinar Eksklusif walau panitia sudah mencentang sesinya.
+         *
+         * Dipakai bersama Scopus Camp dan Analisis Bibliometrik: aturan
+         * kodenya ditulis sekali, jadi tidak ada layanan yang diam-diam
+         * memakai aturan yang lebih longgar daripada yang lain.
+         */
+        return \App\Support\PotonganKode::hitung($sesi, $kode, $total)['potongan'];
     }
 
     /*

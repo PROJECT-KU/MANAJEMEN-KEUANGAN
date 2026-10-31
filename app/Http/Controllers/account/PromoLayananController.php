@@ -769,6 +769,20 @@ class PromoLayananController extends Controller
 
         $isian = $request->validate([
             'nama' => ['required', 'string', 'max:120'],
+
+            /*
+             * Kode BOLEH KOSONG, dan kosong itu yang membedakan dua jenis
+             * promo: tanpa kode berarti memotong dengan sendirinya seperti
+             * dulu, berkode berarti harganya baru turun sesudah pendaftarnya
+             * mengetikkan kodenya.
+             *
+             * Hurufnya dibatasi ke huruf, angka, dan tanda hubung. Kode
+             * berisi spasi atau tanda baca akan diketik berbeda-beda oleh
+             * orang yang membacanya dari poster, lalu ditolak tanpa ia tahu
+             * sebabnya.
+             */
+            'kode' => ['nullable', 'string', 'max:60', 'regex:/^[A-Za-z0-9\-]+$/'],
+
             'tipe' => ['required', Rule::in(array_keys(PromoLayanan::TIPE))],
 
             /*
@@ -803,6 +817,7 @@ class PromoLayananController extends Controller
             'angkatan.*' => ['string', 'exists:kategori_layanan,id'],
         ], [], [
             'nama' => 'nama promo',
+            'kode' => 'kode promo',
             'persen' => 'potongan persen',
             'nominal' => 'potongan rupiah',
             'batas_potongan' => 'batas potongan',
@@ -817,6 +832,11 @@ class PromoLayananController extends Controller
         return [
             'promo' => [
                 'nama' => $isian['nama'],
+
+                // Dirapikan SEKALI di modelnya, supaya yang disimpan dan yang
+                // dicari jalur umum memakai bentuk yang sama persis.
+                'kode' => PromoLayanan::rapikanKode($isian['kode'] ?? null) ?: null,
+
                 'tipe' => $isian['tipe'],
 
                 /*
