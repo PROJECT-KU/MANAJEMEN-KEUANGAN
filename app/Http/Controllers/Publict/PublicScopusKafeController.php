@@ -89,7 +89,7 @@ class PublicScopusKafeController extends Controller
         PendaftaranScopusKafe::lepaskanYangKedaluwarsa();
 
         return view('public.scopus_kafe.index', [
-            'sesi' => HargaKafe::sesiTersedia(),
+            'varian' => $this->varianUntukLayar(),
             'tanggalBerikutnya' => $this->tanggalBukaBerikutnya(),
             'gerbangSiap' => $this->doku->siap(),
         ]);
@@ -115,15 +115,15 @@ class PublicScopusKafeController extends Controller
                 . 'sementara. Silakan hubungi panitia lewat WhatsApp.');
         }
 
-        $sesi = HargaKafe::sesiTersedia();
+        $varian = $this->varianUntukLayar();
 
-        if ($sesi->isEmpty()) {
+        if ($varian === []) {
             return redirect()->route('public.scopuskafe.index')->with('error',
                 'Belum ada sesi yang dibuka. Silakan periksa lagi beberapa saat.');
         }
 
         return view('public.scopus_kafe.form_pendaftaran', [
-            'sesi' => $sesi,
+            'varian' => $varian,
             'maksSesi' => HargaKafe::MAKS_SESI,
             'tanggalMin' => $this->tanggalBukaBerikutnya()->toDateString(),
             'namaHariBuka' => HargaKafe::namaHariBuka(),
@@ -147,10 +147,12 @@ class PublicScopusKafeController extends Controller
             'email' => ['required', 'email:rfc', 'max:100'],
             'telp' => ['required', 'string', 'min:8', 'max:25'],
             'tanggal_pemesanan' => ['required', 'date'],
+            'varian' => ['required', 'string'],
             'sesi' => ['required', 'array', 'min:1', 'max:' . HargaKafe::MAKS_SESI],
             'sesi.*' => ['required', 'string'],
             'setuju' => ['accepted'],
         ], [
+            'varian.required' => 'Pilih dulu Anda ikut tatap muka atau daring.',
             'nama.required' => 'Namanya belum diisi.',
             'email.required' => 'Alamat emailnya belum diisi.',
             'email.email' => 'Alamat emailnya belum benar.',
@@ -204,11 +206,18 @@ class PublicScopusKafeController extends Controller
          * Yang diterima dari borang cuma KUNCI sesinya. Sebelumnya tujuh
          * medan uang datang mentah dari peramban.
          */
-        $harga = HargaKafe::hitung($data['sesi'], $request->input('kode_unik_pembayaran'));
+        $harga = HargaKafe::hitung(
+            $data['varian'], $data['sesi'], $request->input('kode_unik_pembayaran')
+        );
 
         if ($harga['sesi'] === []) {
+            /*
+             * Satu pesan untuk dua sebab — varian karangan dan sesi yang
+             * sudah ditarik — sebab keduanya berakhir sama bagi pemesannya:
+             * pilihannya tidak berlaku lagi dan ia harus memilih ulang.
+             */
             return back()->withInput()->withErrors([
-                'sesi' => 'Sesi yang Anda pilih sudah tidak tersedia. Silakan pilih lagi.',
+                'sesi' => 'Pilihan sesinya sudah tidak tersedia. Silakan pilih lagi.',
             ]);
         }
 
@@ -282,6 +291,7 @@ class PublicScopusKafeController extends Controller
             'email' => mb_strtolower(trim($data['email'])),
             'telp' => \App\Support\NomorTelepon::rapikan($data['telp']),
             'tanggal_pemesanan' => $tanggal,
+            'varian' => $data['varian'],
             'total_keseluruhan_pembayaran' => (string) $harga['total'],
             'kode_unik_pembayaran' => (string) $harga['kode_unik'],
             'cara_bayar' => 'doku',
@@ -302,12 +312,12 @@ class PublicScopusKafeController extends Controller
                 break;
             }
 
-            $isi['sesi' . $akhiran] = $sesi->sesi;
-            $isi['waktu_mulai' . $akhiran] = $sesi->waktu_mulai;
-            $isi['waktu_selesai' . $akhiran] = $sesi->waktu_selesai;
-            $isi['lokasi' . $akhiran] = $sesi->lokasi;
-            $isi['biaya' . $akhiran] = (string) HargaKafe::rupiah($sesi->biaya);
-            $isi['subtotal_pembayaran' . $akhiran] = (string) HargaKafe::rupiah($sesi->biaya);
+            $isi['sesi' . $akhiran] = $sesi['nama'];
+            $isi['waktu_mulai' . $akhiran] = $sesi['mulai'];
+            $isi['waktu_selesai' . $akhiran] = $sesi['selesai'];
+            $isi['lokasi' . $akhiran] = $sesi['lokasi'];
+            $isi['biaya' . $akhiran] = (string) $sesi['biaya'];
+            $isi['subtotal_pembayaran' . $akhiran] = (string) $sesi['biaya'];
         }
 
         $simpan = PendaftaranScopusKafe::create($isi);
@@ -786,6 +796,34 @@ class PublicScopusKafeController extends Controller
                 'selesai' => $pemesanan->{'waktu_selesai' . $akhiran},
                 'lokasi' => $pemesanan->{'lokasi' . $akhiran},
                 'biaya' => (int) $pemesanan->{'biaya' . $akhiran},
+            ];
+        }
+
+        return $keluar;
+    }
+
+    /**
+     * Varian beserta sesi dan harganya, siap digambar.
+     *
+     * Dirakit di satu tempat karena DUA layar membacanya — halaman daftar
+     * dan borang — dan keduanya harus menyebut harga serta jam yang sama.
+     * Dua perakitan yang terpisah pernah jadi sebab angka di kartu dan angka
+     * di borang berselisih tanpa ada yang menyadarinya.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function varianUntukLayar(): array
+    {
+        $keluar = [];
+
+        foreach (HargaKafe::varianTersedia() as $kunci => $tarif) {
+            $keluar[] = [
+                'kunci' => $kunci,
+                'nama' => HargaKafe::namaVarian($kunci),
+                'lokasi' => HargaKafe::lokasiVarian($kunci),
+                'biaya' => HargaKafe::rupiah($tarif->biaya_persesi),
+                'fasilitas' => $tarif->daftar_fasilitas,
+                'sesi' => HargaKafe::sesiTersedia($kunci),
             ];
         }
 

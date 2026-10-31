@@ -108,35 +108,72 @@
                         Scopus Kafe berjalan setiap <strong>{{ $namaHariBuka }}</strong>.
                     </p>
 
+                    @php $varianDipilih = (string) old('varian', $varian[0]['kunci']); @endphp
+
+                    <span class="kfb-label">Ikut yang mana <span class="kfb-wajib">*</span></span>
+                    <p class="kfb-bantu" style="margin-top: -4px;">
+                        Jam dan biayanya berbeda, jadi pilih dulu bentuknya.
+                    </p>
+
+                    {{-- Variannya radio, bukan daftar jatuh: cuma dua pilihan,
+                         dan keduanya perlu menyebut harga sendiri. Di daftar
+                         jatuh harga itu tidak terbaca sampai dibuka. --}}
+                    <div class="kfb-varian">
+                        @foreach ($varian as $v)
+                            <label class="kfb-varian-butir {{ $varianDipilih === $v['kunci'] ? 'dipilih' : '' }}">
+                                <input type="radio" name="varian" value="{{ $v['kunci'] }}"
+                                    {{ $varianDipilih === $v['kunci'] ? 'checked' : '' }}>
+                                <span class="kfb-varian-isi">
+                                    <strong>{{ $v['nama'] }}</strong>
+                                    <span class="kfb-varian-ket">{{ $v['lokasi'] }}</span>
+                                </span>
+                                <span class="kfb-sesi-harga">
+                                    Rp {{ number_format($v['biaya'], 0, ',', '.') }}
+                                </span>
+                            </label>
+                        @endforeach
+                    </div>
+
                     <span class="kfb-label">Pilih sesi <span class="kfb-wajib">*</span></span>
                     <p class="kfb-bantu" style="margin-top: -4px;">
                         Boleh lebih dari satu, paling banyak {{ $maksSesi }} sesi.
                     </p>
 
-                    <div class="kfb-sesi">
-                        @foreach ($sesi as $s)
-                            @php $terpilih = in_array($s->id, (array) old('sesi', []), true); @endphp
-                            <label class="kfb-sesi-butir {{ $terpilih ? 'dipilih' : '' }}">
-                                <input type="checkbox" name="sesi[]" value="{{ $s->id }}"
-                                    data-biaya="{{ \App\Support\HargaKafe::rupiah($s->biaya) }}"
-                                    {{ $terpilih ? 'checked' : '' }}>
-                                <span class="kfb-sesi-isi">
-                                    {{-- namaSesi: isinya di basis data berhuruf
-                                         kecil semua ("sesi 1"), dan dicetak apa
-                                         adanya ia terbaca seperti catatan yang
-                                         belum selesai. --}}
-                                    <strong>{{ \App\Support\HargaKafe::namaSesi($s->sesi) }}</strong>
-                                    <span class="kfb-sesi-jam">
-                                        {{ \Carbon\Carbon::parse($s->waktu_mulai)->format('H:i') }}–{{ \Carbon\Carbon::parse($s->waktu_selesai)->format('H:i') }}
-                                        @if ($s->lokasi) · {{ $s->lokasi }} @endif
+                    {{-- Satu kelompok sesi per varian; yang bukan pilihannya
+                         disembunyikan, TIDAK sekadar diredupkan. Kotak centang
+                         yang terlihat tetapi milik varian lain akan terkirim
+                         juga, dan peladen melewatinya tanpa ada yang tahu
+                         kenapa sesinya hilang dari tagihan. --}}
+                    @foreach ($varian as $v)
+                        <div class="kfb-sesi" data-varian="{{ $v['kunci'] }}"
+                            @if ($varianDipilih !== $v['kunci']) hidden @endif>
+                            @foreach ($v['sesi'] as $s)
+                                @php
+                                    $terpilih = $varianDipilih === $v['kunci']
+                                        && in_array($s['nilai'], (array) old('sesi', []), true);
+                                @endphp
+                                <label class="kfb-sesi-butir {{ $terpilih ? 'dipilih' : '' }}">
+                                    <input type="checkbox" name="sesi[]" value="{{ $s['nilai'] }}"
+                                        data-biaya="{{ $v['biaya'] }}"
+                                        {{ $terpilih ? 'checked' : '' }}
+                                        @if ($varianDipilih !== $v['kunci']) disabled @endif>
+                                    <span class="kfb-sesi-isi">
+                                        {{-- namaSesi: isinya di Tarif Layanan boleh
+                                             berhuruf kecil semua ("sesi 1"), dan
+                                             dicetak apa adanya ia terbaca seperti
+                                             catatan yang belum selesai. --}}
+                                        <strong>{{ \App\Support\HargaKafe::namaSesi($s['nama']) }}</strong>
+                                        <span class="kfb-sesi-jam">
+                                            {{ $s['mulai'] }}–{{ $s['selesai'] }} · {{ $v['lokasi'] }}
+                                        </span>
                                     </span>
-                                </span>
-                                <span class="kfb-sesi-harga">
-                                    Rp {{ number_format(\App\Support\HargaKafe::rupiah($s->biaya), 0, ',', '.') }}
-                                </span>
-                            </label>
-                        @endforeach
-                    </div>
+                                    <span class="kfb-sesi-harga">
+                                        Rp {{ number_format($v['biaya'], 0, ',', '.') }}
+                                    </span>
+                                </label>
+                            @endforeach
+                        </div>
+                    @endforeach
                 </div>
             </div>
 

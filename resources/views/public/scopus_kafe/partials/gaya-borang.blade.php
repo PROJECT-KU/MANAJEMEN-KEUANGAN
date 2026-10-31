@@ -94,6 +94,22 @@
     .kfb .kfb-bantu.galat { color: var(--merah); font-weight: 700; }
 
     /* ============================================================ sesi */
+    /* Pilihan varian: bentuknya meminjam butir sesi supaya dua kelompok
+       pilihan yang berurutan tidak terbaca sebagai dua gaya yang berbeda. */
+    .kfb-varian { display: grid; gap: 10px; margin-bottom: 18px; }
+    .kfb-varian-butir {
+        display: flex; align-items: center; gap: 12px;
+        padding: 12px 14px; cursor: pointer;
+        border: 1px solid var(--garis); border-radius: 14px; background: #fff;
+    }
+    .kfb-varian-butir.dipilih { border-color: var(--jingga); background: var(--kertas-2); }
+    .kfb-varian-isi { display: grid; gap: 2px; flex: 1; }
+    .kfb .kfb-varian-ket { font-size: .84rem; color: var(--tinta-2); margin: 0; }
+
+    /* Kelompok sesi milik varian yang tidak dipilih. Tanpa ini atribut
+       `hidden` kalah oleh `display: grid` di bawah dan keduanya tampil. */
+    .kfb-sesi[hidden] { display: none; }
+
     .kfb-sesi { display: grid; gap: 10px; }
 
     .kfb-sesi-butir {

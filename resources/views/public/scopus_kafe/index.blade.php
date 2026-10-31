@@ -95,58 +95,66 @@
     <section class="kfd-bagian">
         <div class="container">
 
-            @if ($sesi->isNotEmpty())
-                <h2 class="kfd-bagian-judul">Pilih sesinya</h2>
+            @if ($varian !== [])
+                <h2 class="kfd-bagian-judul">Pilih bentuk dan sesinya</h2>
                 <p class="kfd-bagian-kata">
-                    Boleh satu, boleh keduanya — kalau dua sesi, tagihannya dijumlahkan
-                    jadi satu.
+                    Tatap muka dan daring punya jam serta biaya sendiri. Boleh ambil
+                    lebih dari satu sesi — tagihannya dijumlahkan jadi satu.
                 </p>
 
-                {{-- Kartu berdampingan, bukan baris selebar layar.
+                {{-- Dikelompokkan per varian, bukan satu deret kartu.
 
-                     Barisnya dulu selebar kartu dengan jurang kosong di
-                     tengahnya: nama sesi di kiri, harga di kanan, dan dua
-                     pertiga ruang di antaranya tidak mengatakan apa-apa.
-                     Dengan dua sesi, kartu berdampingan memakai lebarnya dan
-                     tiap sesi punya bobot yang sama. --}}
-                <div class="kfd-sesi">
-                    @foreach ($sesi as $s)
-                        <article class="kfd-kartu">
-                            <div class="kfd-jam">
-                                <span class="kfd-jam-angka">{{ \Carbon\Carbon::parse($s->waktu_mulai)->format('H:i') }}</span>
-                                <span class="kfd-jam-label">mulai</span>
-                            </div>
+                     Sampai 31 Okt 2026 halaman ini memajang SATU daftar sesi
+                     untuk semua orang, dibaca dari tabel `meme`. Yang tatap
+                     muka dan yang daring terbaca sebagai pilihan yang sama
+                     padahal jam dan harganya berbeda — dan harga yang
+                     tertulis cuma salah satunya. --}}
+                @foreach ($varian as $v)
+                    <section class="kfd-varian">
+                        <header class="kfd-varian-kepala">
+                            <h3 class="kfd-varian-nama">
+                                <i class="bi {{ $v['kunci'] === 'online' ? 'bi-laptop' : 'bi-geo-alt' }}"></i>
+                                {{ $v['nama'] }}
+                            </h3>
+                            <p class="kfd-varian-ket">
+                                {{ $v['lokasi'] }} ·
+                                <strong>Rp {{ number_format($v['biaya'], 0, ',', '.') }}</strong> per sesi
+                            </p>
+                        </header>
 
-                            {{-- namaSesi: isinya di basis data berhuruf kecil
-                                 semua ("sesi 1"), dan dicetak apa adanya ia
-                                 terbaca seperti catatan yang belum selesai. --}}
-                            <h3 class="kfd-nama">{{ \App\Support\HargaKafe::namaSesi($s->sesi) }}</h3>
+                        <div class="kfd-sesi">
+                            @foreach ($v['sesi'] as $s)
+                                <article class="kfd-kartu">
+                                    <div class="kfd-jam">
+                                        <span class="kfd-jam-angka">{{ $s['mulai'] }}</span>
+                                        <span class="kfd-jam-label">mulai</span>
+                                    </div>
 
-                            <ul class="kfd-ciri">
-                                <li>
-                                    <i class="bi bi-clock"></i>
-                                    {{ \Carbon\Carbon::parse($s->waktu_mulai)->format('H:i') }}–{{ \Carbon\Carbon::parse($s->waktu_selesai)->format('H:i') }}
-                                    <span class="kfd-ciri-ket">
-                                        ({{ \Carbon\Carbon::parse($s->waktu_mulai)->diffInHours(\Carbon\Carbon::parse($s->waktu_selesai)) }} jam)
-                                    </span>
-                                </li>
-                                @if ($s->lokasi)
-                                    <li><i class="bi bi-geo-alt"></i> {{ $s->lokasi }}</li>
-                                @endif
-                                @if ($s->deskripsi)
-                                    <li><i class="bi bi-info-circle"></i> {{ $s->deskripsi }}</li>
-                                @endif
-                            </ul>
+                                    {{-- namaSesi: isinya di Tarif Layanan boleh
+                                         berhuruf kecil semua ("sesi 1"), dan
+                                         dicetak apa adanya ia terbaca seperti
+                                         catatan yang belum selesai. --}}
+                                    <h4 class="kfd-nama">{{ \App\Support\HargaKafe::namaSesi($s['nama']) }}</h4>
 
-                            <div class="kfd-harga">
-                                <span class="kfd-harga-angka">
-                                    Rp {{ number_format(\App\Support\HargaKafe::rupiah($s->biaya), 0, ',', '.') }}
-                                </span>
-                                <span class="kfd-harga-ket">per sesi</span>
-                            </div>
-                        </article>
-                    @endforeach
-                </div>
+                                    <ul class="kfd-ciri">
+                                        <li>
+                                            <i class="bi bi-clock"></i>
+                                            {{ $s['mulai'] }}–{{ $s['selesai'] }}
+                                        </li>
+                                        <li><i class="bi bi-geo-alt"></i> {{ $v['lokasi'] }}</li>
+                                    </ul>
+
+                                    <div class="kfd-harga">
+                                        <span class="kfd-harga-angka">
+                                            Rp {{ number_format($v['biaya'], 0, ',', '.') }}
+                                        </span>
+                                        <span class="kfd-harga-ket">per sesi</span>
+                                    </div>
+                                </article>
+                            @endforeach
+                        </div>
+                    </section>
+                @endforeach
 
                 <div class="kfd-ajak">
                     @if ($gerbangSiap)

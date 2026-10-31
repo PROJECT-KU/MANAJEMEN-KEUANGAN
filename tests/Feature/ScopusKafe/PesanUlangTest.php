@@ -7,10 +7,8 @@ use App\Services\Doku;
 use App\Support\HargaKafe;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Str;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -44,25 +42,26 @@ class PesanUlangTest extends TestCase
         ], 200)]);
     }
 
+    /** Tarif uji beserta satu sesi; sumbernya layar Tarif Layanan. */
     private function sesi(): object
     {
-        $id = (string) Str::uuid();
-
-        DB::table('meme')->insert([
-            'id' => $id,
-            'token' => Str::random(30),
-            'sesi' => 'sesi uji ulang',
-            'waktu_mulai' => '08:00:00',
-            'waktu_selesai' => '13:00:00',
-            'kuota' => '25',
-            'biaya' => '1.000.000',
-            'lokasi' => 'Rumah Scopus Pusat',
-            'status' => 'publish',
-            'created_at' => now(),
-            'updated_at' => now(),
+        \App\ClinikScopusBiayaPersesi::create([
+            'layanan' => 'scopus_kafe',
+            'varian' => 'offline',
+            'biaya_persesi' => '1.000.000',
+            'status' => \App\ClinikScopusBiayaPersesi::AKTIF,
+            'sesi' => [['nama' => 'sesi uji ulang', 'mulai' => '08:00', 'selesai' => '13:00']],
         ]);
 
-        return DB::table('meme')->where('id', $id)->first();
+        // Keduanya disimpan di ingatan selama satu permintaan; tanpa dibuang,
+        // tarif yang baru dibuat tidak terlihat oleh kode yang diuji.
+        \App\Support\PendaftaranSemuaLayanan::lupakanSesi();
+        \App\ClinikScopusBiayaPersesi::lupakanPemeriksaanJadwal();
+
+        return (object) [
+            'id' => \App\ClinikScopusBiayaPersesi::nilaiSesi('sesi uji ulang'),
+            'varian' => 'offline',
+        ];
     }
 
     private function jumatBerikutnya(): Carbon
@@ -84,6 +83,7 @@ class PesanUlangTest extends TestCase
             'email' => 'pemesanujiulang@contoh.test',
             'telp' => '0895421735441',
             'tanggal_pemesanan' => $this->jumatBerikutnya()->toDateString(),
+            'varian' => $sesi->varian,
             'sesi' => [$sesi->id],
             'setuju' => '1',
         ];

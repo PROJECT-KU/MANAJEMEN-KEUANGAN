@@ -191,6 +191,17 @@
                             </div>
                         @endif
 
+                        {{-- Variannya disebut: tatap muka dan daring punya jam
+                             serta biaya sendiri, dan pemesanan lama — yang
+                             dibuat sebelum variannya ada — kolomnya kosong,
+                             jadi barisnya memang boleh tidak muncul. --}}
+                        @if ($pemesanan->varian)
+                            <div class="sts-baris">
+                                <dt>Bentuk</dt>
+                                <dd>{{ \App\Support\HargaKafe::namaVarian($pemesanan->varian) }}</dd>
+                            </div>
+                        @endif
+
                         @foreach ($sesi as $ke => $s)
                             <div class="sts-baris">
                                 <dt>{{ $ke === 0 ? 'Sesi' : 'Sesi ke-' . ($ke + 1) }}</dt>

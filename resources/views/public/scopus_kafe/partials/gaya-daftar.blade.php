@@ -104,7 +104,21 @@
     .kfd .kfd-renggang { margin-top: 72px; }
     .kfd .kfd-bagian-kata { max-width: 50ch; margin: 10px auto 0; font-size: .98rem; }
 
+    /* ==================================================== blok varian */
+    /* Satu blok per bentuk layanan. Tanpa pemisah ini dua kelompok sesi
+       yang harganya berbeda terbaca sebagai satu deret kartu yang sama. */
+    .kfd-varian { margin-top: 42px; }
+    .kfd .kfd-varian-kepala { max-width: 860px; margin: 0 auto; }
+    .kfd .kfd-varian-nama {
+        display: inline-flex; align-items: center; gap: 10px;
+        font-size: 1.15rem; margin: 0;
+    }
+    .kfd .kfd-varian-nama i { color: var(--jingga); }
+    .kfd .kfd-varian-ket { margin: 6px 0 0; font-size: .95rem; color: var(--tinta-2); }
+    .kfd .kfd-varian-ket strong { color: var(--tinta); }
+
     /* ====================================================== kartu sesi */
+    .kfd-varian .kfd-sesi { margin-top: 18px; }
     .kfd-sesi {
         display: grid; gap: 20px; margin: 30px auto 0; max-width: 860px;
         grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
