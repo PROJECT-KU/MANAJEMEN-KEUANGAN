@@ -176,6 +176,38 @@ class VarianTarifTest extends TestCase
     }
 
     #[Test]
+    public function tanpa_tarif_aktif_sesinya_tidak_dijual_seharga_nol(): void
+    {
+        /*
+         * Daftar sesi dan tarifnya datang dari DUA tempat yang berbeda, dan
+         * itu yang membuat lubang ini mungkin: sesinya punya daftar BAWAAN
+         * di PendaftaranSemuaLayanan::SESI, sementara harganya tidak punya
+         * bawaan sama sekali. Jadi begitu panitia menonaktifkan tarif satu
+         * varian, sesinya MASIH ada — tinggal harganya yang hilang.
+         *
+         * Tanpa penjagaan ini $satuan jatuh ke nol dan dua sesi tatap muka
+         * terjual Rp 0, lengkap dengan tagihan DOKU senilai kode uniknya
+         * saja. Tidak ada galat; angkanya cuma salah.
+         */
+        ClinikScopusBiayaPersesi::where('layanan', 'scopus_kafe')
+            ->update(['status' => ClinikScopusBiayaPersesi::NONAKTIF]);
+
+        PendaftaranSemuaLayanan::lupakanSesi();
+        ClinikScopusBiayaPersesi::lupakanPemeriksaanJadwal();
+
+        $this->assertNotSame([], HargaKafe::sesiTersedia('offline'),
+            'Andaian ujinya tidak berlaku lagi: sesi bawaannya ikut hilang saat '
+            . 'tarifnya dimatikan, jadi lubang yang dijaga di bawah tidak ada.');
+
+        $harga = HargaKafe::hitung('offline', ['sesi 1', 'sesi 2']);
+
+        $this->assertSame([], $harga['sesi'],
+            'Sesi tetap terjual padahal tidak ada tarif aktif yang memberinya harga.');
+
+        $this->assertSame(0, $harga['total']);
+    }
+
+    #[Test]
     public function tarif_yang_dinonaktifkan_tidak_lagi_ditawarkan(): void
     {
         /*
