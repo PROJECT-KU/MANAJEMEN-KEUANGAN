@@ -139,7 +139,28 @@
         background: #fff;
         border: 1px solid var(--garis); border-radius: 22px;
         box-shadow: 0 8px 22px rgba(22, 35, 63, .06);
+
+        /* `translate`, BUKAN `transform` — alasannya sama dengan kartu
+           angkatan: keduanya kini dimunculkan AOS, yang memasang transform
+           sendiri pada unsur yang sama dan mengalahkan aturan :hover. */
+        transition: translate .22s cubic-bezier(.2, .7, .3, 1),
+                    box-shadow .22s ease, border-color .18s ease;
     }
+    .kmp-panel-kartu:hover {
+        translate: 0 -3px;
+        border-color: #efd7b4;
+        box-shadow: 0 16px 32px rgba(22, 35, 63, .10);
+    }
+
+    /* Tiap butir fasilitas bergeser sedikit saat disentuh pointer.
+
+       Gunanya bukan hiasan: daftar tujuh butir di empat lajur sulit diikuti
+       matanya saat membandingkan, dan butir yang bergeser menandai di mana
+       pointer sedang berada tanpa menambah satu garis pun ke kartunya. */
+    .kmp-fasilitas li { transition: translate .18s ease, color .18s ease; }
+    .kmp-fasilitas li:hover { translate: 4px 0; color: var(--tinta); }
+    .kmp-fasilitas i { transition: transform .18s cubic-bezier(.2, .7, .3, 1); }
+    .kmp-fasilitas li:hover i { transform: scale(1.2); }
 
     .kmp .kmp-panel-kartu h2 { font-size: 1.12rem; margin-bottom: 12px; }
     .kmp-paket + .kmp-paket {
@@ -381,7 +402,26 @@
         background: #fff; border: 1px solid var(--garis);
         box-shadow: 0 6px 20px rgba(22, 35, 63, .05);
         display: grid; gap: 12px; align-items: center;
+        transition: translate .22s cubic-bezier(.2, .7, .3, 1),
+                    box-shadow .22s ease, border-color .18s ease;
     }
+
+    /* :focus-within ikut, bukan cuma :hover.
+
+       Yang sampai ke borang ini lewat papan ketik — Tab dari penomoran
+       halaman — tidak pernah menyentuhnya dengan pointer. Tanpa
+       :focus-within, kartunya diam sementara kursor sudah berkedip di
+       dalamnya, dan tidak ada yang menandai bahwa isiannya sudah aktif. */
+    .kmp-lacak:hover,
+    .kmp-lacak:focus-within {
+        translate: 0 -3px;
+        border-color: var(--jingga);
+        box-shadow: 0 16px 32px rgba(231, 109, 32, .14);
+    }
+
+    .kmp-lacak-ikon { transition: transform .25s cubic-bezier(.2, .7, .3, 1); }
+    .kmp-lacak:hover .kmp-lacak-ikon,
+    .kmp-lacak:focus-within .kmp-lacak-ikon { transform: rotate(-8deg) scale(1.08); }
     @media (min-width: 860px) {
         .kmp-lacak { grid-template-columns: minmax(0, 1fr) minmax(360px, 460px); gap: 24px; }
         .kmp-lacak .kmp-lacak-isian {
@@ -421,9 +461,14 @@
         width: 100%; padding: 12px 16px; font-size: 15px; font-weight: 700;
         border: 0; border-radius: 12px; cursor: pointer;
         background: #16233f; color: #fff;
-        transition: background .18s ease;
+        transition: background .18s ease, translate .18s ease, box-shadow .18s ease;
     }
-    .kmp-lacak-isian button:hover { background: #23365c; }
+    .kmp-lacak-isian button:hover {
+        background: #23365c;
+        translate: 0 -2px;
+        box-shadow: 0 8px 18px rgba(22, 35, 63, .24);
+    }
+    .kmp-lacak-isian button:active { translate: 0 0; box-shadow: none; }
 
     /* Di layar sempit lajurnya melebar penuh, jadi kotak dan tombolnya muat
        sebaris — dan sebaris di situ lebih baik: ia memendekkan satu blok lagi
@@ -453,7 +498,20 @@
     .kmp-baris:hover .kmp-ajak i { transform: translateX(3px); }
 
     .kmp-halaman { display: flex; justify-content: center; margin-top: 34px; }
-    .kmp-halaman .pagination { gap: 6px; margin: 0; flex-wrap: wrap; }
+    /* justify-content: center DI DAFTARNYA, bukan cuma di pembungkusnya.
+
+       Pembungkusnya sudah `display:flex; justify-content:center`, dan itu
+       memusatkan BLOK penomorannya sebagai satu kesatuan — cukup selama
+       nomornya muat satu baris. Begitu membungkus, tiap barisnya tetap
+       dimulai dari tepi kiri daftarnya.
+
+       Terukur di 390px: 11 tombol pecah jadi dua baris, dan baris keduanya
+       melenceng 118px ke kiri dari titik tengah layar. Di 360px melencengnya
+       81px. Di 768px nomornya masih muat satu baris, jadi cacatnya tidak
+       pernah terlihat dari layar lebar sama sekali. */
+    .kmp-halaman .pagination {
+        gap: 6px; margin: 0; flex-wrap: wrap; justify-content: center;
+    }
 
     /* Tombolnya bulat, bergaris tipis, tanpa bayangan keras.
 
@@ -526,9 +584,17 @@
             animation: none !important;
         }
         .kmp .kmp-baris:hover,
-        .kmp .kmp-baris:active { translate: none !important; }
+        .kmp .kmp-baris:active,
+        .kmp .kmp-panel-kartu:hover,
+        .kmp .kmp-fasilitas li:hover,
+        .kmp .kmp-lacak:hover,
+        .kmp .kmp-lacak:focus-within,
+        .kmp .kmp-lacak-isian button:hover { translate: none !important; }
         .kmp .kmp-baris:hover .kmp-tgl,
-        .kmp .kmp-baris:hover .kmp-ajak i { transform: none !important; }
+        .kmp .kmp-baris:hover .kmp-ajak i,
+        .kmp .kmp-fasilitas li:hover i,
+        .kmp .kmp-lacak:hover .kmp-lacak-ikon,
+        .kmp .kmp-lacak:focus-within .kmp-lacak-ikon { transform: none !important; }
     }
 </style>
 
@@ -740,7 +806,7 @@
 
                     {{-- Poster dan fasilitasnya SEKALI di sini, bukan di tiap
                          kartu: flyer-nya sama persis untuk semua angkatan. --}}
-                    <div class="kmp-panel">
+                    <div class="kmp-panel" data-aos="fade-up">
                         <div class="kmp-panel-kartu">
                             {{-- POSTER TIDAK DIPAJANG di sini, dan itu keputusan.
 
@@ -864,7 +930,7 @@
                          nama, nomor telepon, afiliasi, dan daftar
                          pesertanya. --}}
                     <form method="POST" action="{{ route('public.scopuscamp.tautansaya') }}"
-                        class="kmp-lacak">
+                        class="kmp-lacak" data-aos="fade-up" data-aos-delay="80">
                         @csrf
 
                         <div class="kmp-lacak-kata">
