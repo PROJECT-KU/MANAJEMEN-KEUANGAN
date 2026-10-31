@@ -213,12 +213,32 @@ class PublicScopusKafeController extends Controller
         }
 
         /*
-         * PEMESANAN GANDA ditolak sebelum barisnya dibuat.
+         * PEMESANAN GANDA ditolak sebelum barisnya dibuat — tetapi HANYA
+         * selama tagihan yang lama masih hidup.
          *
          * Orang menekan tombolnya dua kali karena mengira yang pertama gagal —
          * halaman ini memang diam beberapa detik saat tagihannya dibuat — dan
          * tanpa penjagaan ini ia mendapat DUA tagihan untuk satu tempat, lalu
          * sebagian membayar keduanya.
+         *
+         * Yang dijaga itu saja: DUA TAGIHAN TERBUKA. Sampai 31 Okt 2026
+         * penjagaan ini mencegat SETIAP baris yang statusnya bukan
+         * 'pembayaran ditolak' — dan penyapu kedaluwarsa Kafe tidak pernah
+         * menyentuh kolom `status`, jadi tidak ada satu pun keadaan yang
+         * melepaskannya kembali. Terukur: memesan satu tanggal lalu tidak
+         * membayar mengunci tanggal itu SELAMANYA bagi orang yang sama, dan
+         * yang sudah membayar pun tidak bisa memesan lagi.
+         *
+         * Yang dipindahkan TENGGATNYA, bukan statusnya. Memindahkan status
+         * ke 'pembayaran ditolak' saat tenggat lewat sempat dicoba di sini
+         * dan dibatalkan: status itu masuk STATUS_LEPAS, dan halaman status
+         * berhenti menawarkan "Buat tagihan baru" begitu ia menyentuhnya —
+         * jalan keluar satu-satunya yang dimiliki pemesannya ikut hilang.
+         *
+         * Aturannya disamakan dengan Scopus Camp, keputusan pemiliknya
+         * 31 Okt 2026: yang mengunci cuma tagihan yang belum dibayar DAN
+         * belum lewat 60 menit. Sesudah lunas boleh memesan lagi; sesudah
+         * tenggatnya lewat boleh memesan lagi.
          *
          * Tautannya dikirim ke EMAIL, tidak dibuka di layar: yang dicocokkan
          * cuma tanggal + nama + email, dan ketiganya bukan rahasia. Dibuka di
@@ -226,7 +246,14 @@ class PublicScopusKafeController extends Controller
          * pemesanannya.
          */
         $sudahAda = PendaftaranScopusKafe::whereDate('tanggal_pemesanan', $tanggal->toDateString())
-            ->whereNotIn('status', self::STATUS_LEPAS)
+            ->where('status', Katalog::statusAwal('scopus_kafe'))
+            ->whereNull('bayar_pada')
+            ->where(function ($q) {
+                // Tanpa tenggat tercatat, tagihannya dianggap masih hidup:
+                // menebak sebaliknya membuka kembali pintu tagihan ganda.
+                $q->whereNull('kedaluwarsa_pada')
+                    ->orWhere('kedaluwarsa_pada', '>', now());
+            })
             ->where('email', mb_strtolower(trim($data['email'])))
             ->where('nama', trim($data['nama']))
             ->latest('created_at')
@@ -242,9 +269,11 @@ class PublicScopusKafeController extends Controller
             }
 
             return back()->withInput()->with('success',
-                'Data ini sudah pernah dipesan untuk tanggal tersebut. Tautan halaman '
-                . 'pemesanannya kami kirimkan ke alamat email yang dipakai saat memesan — '
-                . 'periksa juga folder spam.');
+                'Data ini masih punya tagihan yang belum dibayar untuk tanggal tersebut. '
+                . 'Tautan halaman pemesanannya kami kirimkan ke alamat email yang dipakai '
+                . 'saat memesan — periksa juga folder spam. Kalau tagihan itu memang tidak '
+                . 'jadi dibayar, tunggu ' . Doku::MENIT_KEDALUWARSA . ' menit sampai '
+                . 'tagihannya kedaluwarsa, lalu pemesanan baru bisa dibuat lagi.');
         }
 
         $isi = [
