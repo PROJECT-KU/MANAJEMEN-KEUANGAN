@@ -35,6 +35,22 @@
         <env name="APP_ENV" value="testing"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="CACHE_DRIVER" value="array"/>
+
+        <!--
+            Pembatas laju DIPAKSA ke ingatan proses.
+
+            config/cache.php menyetel `limiter` ke 'database' secara terpisah
+            dari `default`, jadi CACHE_DRIVER=array di atas TIDAK menyentuhnya:
+            hitungan throttle ditulis ke tabel `cache` yang sungguhan dan
+            bertahan antar jalankan rangkaian uji.
+
+            Akibatnya terukur 31 Okt 2026. Batas 'isi-otomatis' adalah 25 per
+            HARI per alamat IP; menjalankan rangkaiannya beberapa kali dalam
+            satu hari menghabiskan jatah 127.0.0.1, lalu dua uji pencarian
+            nomor memerah dengan 429 — tanpa satu baris kode pun berubah, dan
+            hijau lagi keesokan harinya. Dijaga PembatasLajuUjiTest.
+        -->
+        <env name="CACHE_LIMITER" value="array"/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>

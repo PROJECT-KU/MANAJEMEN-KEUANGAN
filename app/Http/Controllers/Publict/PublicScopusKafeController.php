@@ -89,7 +89,7 @@ class PublicScopusKafeController extends Controller
         PendaftaranScopusKafe::lepaskanYangKedaluwarsa();
 
         return view('public.scopus_kafe.index', [
-            'sesi' => HargaKafe::sesiTersedia(),
+            'varian' => $this->varianUntukLayar(),
             'tanggalBerikutnya' => $this->tanggalBukaBerikutnya(),
             'gerbangSiap' => $this->doku->siap(),
         ]);
@@ -115,15 +115,15 @@ class PublicScopusKafeController extends Controller
                 . 'sementara. Silakan hubungi panitia lewat WhatsApp.');
         }
 
-        $sesi = HargaKafe::sesiTersedia();
+        $varian = $this->varianUntukLayar();
 
-        if ($sesi->isEmpty()) {
+        if ($varian === []) {
             return redirect()->route('public.scopuskafe.index')->with('error',
                 'Belum ada sesi yang dibuka. Silakan periksa lagi beberapa saat.');
         }
 
         return view('public.scopus_kafe.form_pendaftaran', [
-            'sesi' => $sesi,
+            'varian' => $varian,
             'maksSesi' => HargaKafe::MAKS_SESI,
             'tanggalMin' => $this->tanggalBukaBerikutnya()->toDateString(),
             'namaHariBuka' => HargaKafe::namaHariBuka(),
@@ -147,10 +147,12 @@ class PublicScopusKafeController extends Controller
             'email' => ['required', 'email:rfc', 'max:100'],
             'telp' => ['required', 'string', 'min:8', 'max:25'],
             'tanggal_pemesanan' => ['required', 'date'],
+            'varian' => ['required', 'string'],
             'sesi' => ['required', 'array', 'min:1', 'max:' . HargaKafe::MAKS_SESI],
             'sesi.*' => ['required', 'string'],
             'setuju' => ['accepted'],
         ], [
+            'varian.required' => 'Pilih dulu Anda ikut tatap muka atau daring.',
             'nama.required' => 'Namanya belum diisi.',
             'email.required' => 'Alamat emailnya belum diisi.',
             'email.email' => 'Alamat emailnya belum benar.',
@@ -204,21 +206,48 @@ class PublicScopusKafeController extends Controller
          * Yang diterima dari borang cuma KUNCI sesinya. Sebelumnya tujuh
          * medan uang datang mentah dari peramban.
          */
-        $harga = HargaKafe::hitung($data['sesi'], $request->input('kode_unik_pembayaran'));
+        $harga = HargaKafe::hitung(
+            $data['varian'], $data['sesi'], $request->input('kode_unik_pembayaran')
+        );
 
         if ($harga['sesi'] === []) {
+            /*
+             * Satu pesan untuk dua sebab — varian karangan dan sesi yang
+             * sudah ditarik — sebab keduanya berakhir sama bagi pemesannya:
+             * pilihannya tidak berlaku lagi dan ia harus memilih ulang.
+             */
             return back()->withInput()->withErrors([
-                'sesi' => 'Sesi yang Anda pilih sudah tidak tersedia. Silakan pilih lagi.',
+                'sesi' => 'Pilihan sesinya sudah tidak tersedia. Silakan pilih lagi.',
             ]);
         }
 
         /*
-         * PEMESANAN GANDA ditolak sebelum barisnya dibuat.
+         * PEMESANAN GANDA ditolak sebelum barisnya dibuat — tetapi HANYA
+         * selama tagihan yang lama masih hidup.
          *
          * Orang menekan tombolnya dua kali karena mengira yang pertama gagal —
          * halaman ini memang diam beberapa detik saat tagihannya dibuat — dan
          * tanpa penjagaan ini ia mendapat DUA tagihan untuk satu tempat, lalu
          * sebagian membayar keduanya.
+         *
+         * Yang dijaga itu saja: DUA TAGIHAN TERBUKA. Sampai 31 Okt 2026
+         * penjagaan ini mencegat SETIAP baris yang statusnya bukan
+         * 'pembayaran ditolak' — dan penyapu kedaluwarsa Kafe tidak pernah
+         * menyentuh kolom `status`, jadi tidak ada satu pun keadaan yang
+         * melepaskannya kembali. Terukur: memesan satu tanggal lalu tidak
+         * membayar mengunci tanggal itu SELAMANYA bagi orang yang sama, dan
+         * yang sudah membayar pun tidak bisa memesan lagi.
+         *
+         * Yang dipindahkan TENGGATNYA, bukan statusnya. Memindahkan status
+         * ke 'pembayaran ditolak' saat tenggat lewat sempat dicoba di sini
+         * dan dibatalkan: status itu masuk STATUS_LEPAS, dan halaman status
+         * berhenti menawarkan "Buat tagihan baru" begitu ia menyentuhnya —
+         * jalan keluar satu-satunya yang dimiliki pemesannya ikut hilang.
+         *
+         * Aturannya disamakan dengan Scopus Camp, keputusan pemiliknya
+         * 31 Okt 2026: yang mengunci cuma tagihan yang belum dibayar DAN
+         * belum lewat 60 menit. Sesudah lunas boleh memesan lagi; sesudah
+         * tenggatnya lewat boleh memesan lagi.
          *
          * Tautannya dikirim ke EMAIL, tidak dibuka di layar: yang dicocokkan
          * cuma tanggal + nama + email, dan ketiganya bukan rahasia. Dibuka di
@@ -226,7 +255,14 @@ class PublicScopusKafeController extends Controller
          * pemesanannya.
          */
         $sudahAda = PendaftaranScopusKafe::whereDate('tanggal_pemesanan', $tanggal->toDateString())
-            ->whereNotIn('status', self::STATUS_LEPAS)
+            ->where('status', Katalog::statusAwal('scopus_kafe'))
+            ->whereNull('bayar_pada')
+            ->where(function ($q) {
+                // Tanpa tenggat tercatat, tagihannya dianggap masih hidup:
+                // menebak sebaliknya membuka kembali pintu tagihan ganda.
+                $q->whereNull('kedaluwarsa_pada')
+                    ->orWhere('kedaluwarsa_pada', '>', now());
+            })
             ->where('email', mb_strtolower(trim($data['email'])))
             ->where('nama', trim($data['nama']))
             ->latest('created_at')
@@ -242,9 +278,11 @@ class PublicScopusKafeController extends Controller
             }
 
             return back()->withInput()->with('success',
-                'Data ini sudah pernah dipesan untuk tanggal tersebut. Tautan halaman '
-                . 'pemesanannya kami kirimkan ke alamat email yang dipakai saat memesan — '
-                . 'periksa juga folder spam.');
+                'Data ini masih punya tagihan yang belum dibayar untuk tanggal tersebut. '
+                . 'Tautan halaman pemesanannya kami kirimkan ke alamat email yang dipakai '
+                . 'saat memesan — periksa juga folder spam. Kalau tagihan itu memang tidak '
+                . 'jadi dibayar, tunggu ' . Doku::MENIT_KEDALUWARSA . ' menit sampai '
+                . 'tagihannya kedaluwarsa, lalu pemesanan baru bisa dibuat lagi.');
         }
 
         $isi = [
@@ -253,6 +291,7 @@ class PublicScopusKafeController extends Controller
             'email' => mb_strtolower(trim($data['email'])),
             'telp' => \App\Support\NomorTelepon::rapikan($data['telp']),
             'tanggal_pemesanan' => $tanggal,
+            'varian' => $data['varian'],
             'total_keseluruhan_pembayaran' => (string) $harga['total'],
             'kode_unik_pembayaran' => (string) $harga['kode_unik'],
             'cara_bayar' => 'doku',
@@ -273,12 +312,12 @@ class PublicScopusKafeController extends Controller
                 break;
             }
 
-            $isi['sesi' . $akhiran] = $sesi->sesi;
-            $isi['waktu_mulai' . $akhiran] = $sesi->waktu_mulai;
-            $isi['waktu_selesai' . $akhiran] = $sesi->waktu_selesai;
-            $isi['lokasi' . $akhiran] = $sesi->lokasi;
-            $isi['biaya' . $akhiran] = (string) HargaKafe::rupiah($sesi->biaya);
-            $isi['subtotal_pembayaran' . $akhiran] = (string) HargaKafe::rupiah($sesi->biaya);
+            $isi['sesi' . $akhiran] = $sesi['nama'];
+            $isi['waktu_mulai' . $akhiran] = $sesi['mulai'];
+            $isi['waktu_selesai' . $akhiran] = $sesi['selesai'];
+            $isi['lokasi' . $akhiran] = $sesi['lokasi'];
+            $isi['biaya' . $akhiran] = (string) $sesi['biaya'];
+            $isi['subtotal_pembayaran' . $akhiran] = (string) $sesi['biaya'];
         }
 
         $simpan = PendaftaranScopusKafe::create($isi);
@@ -757,6 +796,34 @@ class PublicScopusKafeController extends Controller
                 'selesai' => $pemesanan->{'waktu_selesai' . $akhiran},
                 'lokasi' => $pemesanan->{'lokasi' . $akhiran},
                 'biaya' => (int) $pemesanan->{'biaya' . $akhiran},
+            ];
+        }
+
+        return $keluar;
+    }
+
+    /**
+     * Varian beserta sesi dan harganya, siap digambar.
+     *
+     * Dirakit di satu tempat karena DUA layar membacanya — halaman daftar
+     * dan borang — dan keduanya harus menyebut harga serta jam yang sama.
+     * Dua perakitan yang terpisah pernah jadi sebab angka di kartu dan angka
+     * di borang berselisih tanpa ada yang menyadarinya.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function varianUntukLayar(): array
+    {
+        $keluar = [];
+
+        foreach (HargaKafe::varianTersedia() as $kunci => $tarif) {
+            $keluar[] = [
+                'kunci' => $kunci,
+                'nama' => HargaKafe::namaVarian($kunci),
+                'lokasi' => HargaKafe::lokasiVarian($kunci),
+                'biaya' => HargaKafe::rupiah($tarif->biaya_persesi),
+                'fasilitas' => $tarif->daftar_fasilitas,
+                'sesi' => HargaKafe::sesiTersedia($kunci),
             ];
         }
 
