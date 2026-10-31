@@ -90,7 +90,16 @@ class PublicScopusCampController extends Controller
          * perlu — tanpa itu halaman ini tumbuh selamanya mengikuti jumlah
          * angkatan yang pernah dibuka.
          */
-        $categories = $kueri->paginate(12)->withQueryString();
+        /*
+         * onEachSide(1): satu nomor di kiri-kanan halaman aktif, bukan tiga.
+         *
+         * Dengan 31 halaman, bawaannya menggambar 14 tombol selebar 918px —
+         * pita setinggi 73px yang isinya hampir seluruhnya nomor yang tidak
+         * akan ditekan siapa pun. Yang dipakai orang di daftar berurut
+         * tanggal cuma "berikutnya" dan sesekali lompat ke ujung; keduanya
+         * tetap ada.
+         */
+        $categories = $kueri->paginate(12)->withQueryString()->onEachSide(1);
 
         /*
          * Kursi kedaluwarsa dari angkatan yang DITAMPILKAN halaman ini
