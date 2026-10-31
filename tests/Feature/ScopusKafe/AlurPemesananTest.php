@@ -4,9 +4,9 @@ namespace Tests\Feature\ScopusKafe;
 
 use App\PendaftaranScopusKafe;
 use App\Support\HargaKafe;
+use App\Support\PendaftaranSemuaLayanan;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -43,29 +43,47 @@ class AlurPemesananTest extends TestCase
         config()->set('services.doku.secret_key', self::RAHASIA);
     }
 
-    /** Jadwal sesi uji; dibuat sendiri supaya tidak bergantung isi katalog. */
+    /**
+     * Tarif uji beserta satu sesi; sumbernya layar Tarif Layanan.
+     *
+     * Dibuat sendiri supaya ujinya tidak bergantung isi katalog sungguhan —
+     * tarif Scopus Kafe yang asli boleh berubah kapan saja oleh panitia.
+     * Dipulangkan sebagai objek bergaya lama (->id, ->sesi, ->biaya) supaya
+     * uji yang sudah ada tidak perlu dirombak seluruhnya: ->id kini berisi
+     * KUNCI sesinya, yang memang itulah yang dikirim borang.
+     */
     private function sesi(array $ganti = []): object
     {
-        $id = (string) Str::uuid();
+        $nama = (string) ($ganti['sesi'] ?? 'Sesi Uji ' . Str::upper(Str::random(4)));
+        $varian = (string) ($ganti['varian'] ?? 'offline');
+        $mulai = (string) ($ganti['waktu_mulai'] ?? '08:00');
+        $selesai = (string) ($ganti['waktu_selesai'] ?? '13:00');
 
-        DB::table('meme')->insert(array_merge([
-            'id' => $id,
-            'token' => Str::random(30),
-            'sesi' => 'Sesi Uji ' . Str::upper(Str::random(4)),
-            'waktu_mulai' => '08:00:00',
-            'waktu_selesai' => '13:00:00',
-            'kuota' => '25',
+        $tarif = \App\ClinikScopusBiayaPersesi::create([
+            'layanan' => 'scopus_kafe',
+            'varian' => $varian,
 
             // Bertitik, seperti isi sungguhannya: dibaca apa adanya sebagai
             // angka, PHP memulangkan 1 dan sesinya berharga satu rupiah.
-            'biaya' => '1.000.000',
-            'lokasi' => 'Rumah Scopus Pusat',
-            'status' => 'publish',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ], $ganti));
+            'biaya_persesi' => (string) ($ganti['biaya'] ?? '1.000.000'),
+            'status' => \App\ClinikScopusBiayaPersesi::AKTIF,
+            'sesi' => [['nama' => $nama, 'mulai' => $mulai, 'selesai' => $selesai]],
+        ]);
 
-        return DB::table('meme')->where('id', $id)->first();
+        // Keduanya disimpan di ingatan selama satu permintaan; tanpa dibuang,
+        // tarif yang baru dibuat tidak terlihat oleh kode yang diuji.
+        PendaftaranSemuaLayanan::lupakanSesi();
+        \App\ClinikScopusBiayaPersesi::lupakanPemeriksaanJadwal();
+
+        return (object) [
+            'id' => \App\ClinikScopusBiayaPersesi::nilaiSesi($nama),
+            'sesi' => $nama,
+            'varian' => $varian,
+            'waktu_mulai' => $mulai,
+            'waktu_selesai' => $selesai,
+            'biaya' => $tarif->biaya_persesi,
+            'lokasi' => HargaKafe::lokasiVarian($varian),
+        ];
     }
 
     private function jumatBerikutnya(): Carbon
@@ -87,6 +105,7 @@ class AlurPemesananTest extends TestCase
             'email' => 'kafe' . Str::random(6) . '@contoh.test',
             'telp' => '081234567890',
             'tanggal_pemesanan' => $this->jumatBerikutnya()->toDateString(),
+            'varian' => collect($sesi)->first()->varian ?? 'offline',
             'sesi' => collect($sesi)->pluck('id')->all(),
             'setuju' => '1',
         ], $ganti);
@@ -162,7 +181,7 @@ class AlurPemesananTest extends TestCase
          */
         $sesi = $this->sesi();
 
-        $harga = HargaKafe::hitung([$sesi->id, $sesi->id, $sesi->id], 900);
+        $harga = HargaKafe::hitung($sesi->varian, [$sesi->id, $sesi->id, $sesi->id], 900);
 
         $this->assertCount(1, $harga['sesi']);
         $this->assertSame(1000000, $harga['subtotal']);
@@ -178,7 +197,7 @@ class AlurPemesananTest extends TestCase
          */
         $sesi = $this->sesi();
 
-        $harga = HargaKafe::hitung([$sesi->id, (string) Str::uuid()], 900);
+        $harga = HargaKafe::hitung($sesi->varian, [$sesi->id, (string) Str::uuid()], 900);
 
         $this->assertCount(1, $harga['sesi']);
         $this->assertSame(1000000, $harga['subtotal']);

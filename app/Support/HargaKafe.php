@@ -2,7 +2,6 @@
 
 namespace App\Support;
 
-use Illuminate\Support\Facades\DB;
 
 /**
  * Harga pemesanan Scopus Kafe, DIHITUNG DI PELADEN.
@@ -28,27 +27,92 @@ class HargaKafe
     public const MAKS_SESI = 3;
 
     /**
-     * Sesi yang boleh dipesan, dibaca dari katalognya sendiri.
+     * Varian yang boleh dipesan, beserta tarifnya — offline dan online.
      *
-     * Hanya yang berstatus 'publish'. Sesi yang ditarik panitia tidak boleh
-     * dipesan lewat alamat borang yang masih tersimpan di tab seseorang.
+     * Sampai 31 Okt 2026 Scopus Kafe tidak mengenal varian sama sekali:
+     * sesinya dibaca dari tabel `meme` (layar "Data Meme"), satu daftar
+     * untuk semua orang, dan harganya ikut dari kolom `biaya` di sana.
+     * Padahal layanannya berjalan dalam DUA bentuk dengan sesi dan harga
+     * yang berbeda, dan keduanya sudah lama ada di layar Tarif Layanan.
      *
-     * @return \Illuminate\Support\Collection<int, object>
+     * Keputusan pemiliknya 31 Okt 2026: Tarif Layanan yang jadi sumbernya.
+     * `meme` tidak dibaca lagi oleh jalur publik — tabelnya dibiarkan hidup
+     * sebab layar "Data Meme" masih memakainya.
+     *
+     * @return array<string, \App\ClinikScopusBiayaPersesi>  berkunci varian
      */
-    public static function sesiTersedia()
+    public static function varianTersedia(): array
     {
-        return DB::table('meme')
-            ->where('status', 'publish')
-            ->orderBy('waktu_mulai')
+        $keluar = [];
+
+        foreach (self::VARIAN as $varian) {
+            $tarif = \App\ClinikScopusBiayaPersesi::berlaku('scopus_kafe', $varian);
 
             /*
-             * Pemutus seri: dua sesi yang jam mulainya sama tidak punya
-             * urutan yang ditentukan tanpa baris ini, dan urutannya boleh
-             * berubah antar permintaan — jadi nomor sesi yang dilihat orang
-             * di borang bisa berbeda dari yang ia lihat sedetik sebelumnya.
+             * Varian yang tarifnya tidak aktif TIDAK ditawarkan. Menawarkannya
+             * dengan harga nol berarti menerima pemesanan yang tidak bisa
+             * ditagih; menawarkannya dengan harga varian lain berarti menagih
+             * angka yang tidak pernah disetel siapa pun.
              */
-            ->orderBy('id')
-            ->get();
+            if ($tarif === null) {
+                continue;
+            }
+
+            // Tarif tanpa sesi sama sekali juga dilewati: borangnya akan
+            // menampilkan varian yang tidak punya satu pun pilihan di
+            // bawahnya, dan orangnya mentok tanpa tahu kenapa.
+            if (self::sesiTersedia($varian) === []) {
+                continue;
+            }
+
+            $keluar[$varian] = $tarif;
+        }
+
+        return $keluar;
+    }
+
+    /** Varian yang dikenal layanan ini; urutannya urutan tampil di layar. */
+    public const VARIAN = ['offline', 'online'];
+
+    /** Nama varian sebagaimana ditulis di layar. */
+    public static function namaVarian(?string $varian): string
+    {
+        return match ((string) $varian) {
+            'offline' => 'Tatap muka',
+            'online' => 'Daring',
+            default => (string) $varian,
+        };
+    }
+
+    /**
+     * Tempatnya, menurut variannya.
+     *
+     * BELUM ADA di Tarif Layanan — tabel tarif tidak punya kolom tempat —
+     * jadi disetel di sini dan disebut terang supaya tidak terbaca seperti
+     * data yang datang dari layar panitia. Kolom `lokasi` di baris pemesanan
+     * tetap diisi, sebab faktur dan surat membacanya.
+     */
+    public static function lokasiVarian(?string $varian): string
+    {
+        return match ((string) $varian) {
+            'online' => 'Daring — tautannya dikirim lewat WhatsApp',
+            default => 'Rumah Scopus Pusat, Yogyakarta',
+        };
+    }
+
+    /**
+     * Sesi yang boleh dipesan untuk satu varian, dibaca dari Tarif Layanan.
+     *
+     * Jamnya diatur panitia di layar Tarif Layanan; kalau baris tarifnya
+     * tidak menyetel sesi sendiri, PendaftaranSemuaLayanan jatuh kembali ke
+     * daftar bawaannya. Yang TIDAK terjadi lagi: satu daftar sesi yang sama
+     * untuk tatap muka dan daring.
+     *
+     * @return list<array{nilai: string, nama: string, mulai: string, selesai: string}>
+     */
+    public static function sesiTersedia(?string $varian): array
+    {
+        return PendaftaranSemuaLayanan::sesiPilihan('scopus_kafe', $varian);
     }
 
     /**
@@ -59,11 +123,29 @@ class HargaKafe
      * dilewati, bukan dihargai nol.
      *
      * @param  array<int, string>  $kunciSesi
-     * @return array{sesi: array<int, object>, subtotal: int, kode_unik: int, total: int}
+     * @return array{sesi: list<array<string, mixed>>, subtotal: int, kode_unik: int, total: int}
      */
-    public static function hitung(array $kunciSesi, $kodeUnikDikirim = null): array
+    public static function hitung(?string $varian, array $kunciSesi, $kodeUnikDikirim = null): array
     {
-        $katalog = self::sesiTersedia()->keyBy('id');
+        $tarif = self::varianTersedia()[(string) $varian] ?? null;
+
+        /*
+         * Varian yang tidak ditawarkan memulangkan pemesanan KOSONG, bukan
+         * pemesanan berharga nol. Pemanggilnya menolak yang kosong; kalau
+         * yang dipulangkan nol, kiriman dengan varian karangan tersimpan
+         * lengkap dengan tagihan DOKU senilai kode uniknya saja.
+         */
+        if ($tarif === null) {
+            return ['sesi' => [], 'subtotal' => 0, 'kode_unik' => 0, 'total' => 0];
+        }
+
+        $satuan = self::rupiah($tarif->biaya_persesi);
+
+        $katalog = [];
+
+        foreach (self::sesiTersedia($varian) as $sesi) {
+            $katalog[$sesi['nilai']] = $sesi;
+        }
 
         $dipilih = [];
 
@@ -75,28 +157,28 @@ class HargaKafe
              * dihargai nol, pemesanan berisi satu sesi sungguhan dan dua sesi
              * karangan tetap tersimpan dan tagihannya kurang.
              *
+             * Katalognya milik VARIAN ini saja, jadi kunci sesi milik varian
+             * lain ikut terlewat — tanpa itu orang bisa memesan sesi tatap
+             * muka dengan harga daring yang lebih murah.
+             *
              * Sesi kembar tidak perlu ditolak terpisah — $dipilih DIKUNCI
              * pada kunci sesinya, jadi yang sama menimpa dirinya sendiri.
-             * Pemeriksaan isset() tambahan sempat ada di sini lalu dicabut:
-             * ia tidak bisa dibuat merah oleh uji mana pun, sebab yang
-             * dijanjikannya sudah dijamin bentuk lariknya.
              */
             if ($kunci === '' || ! isset($katalog[$kunci])) {
                 continue;
             }
 
-            $dipilih[$kunci] = $katalog[$kunci];
+            $dipilih[$kunci] = $katalog[$kunci] + [
+                'biaya' => $satuan,
+                'lokasi' => self::lokasiVarian($varian),
+            ];
 
             if (count($dipilih) >= self::MAKS_SESI) {
                 break;
             }
         }
 
-        $subtotal = 0;
-
-        foreach ($dipilih as $sesi) {
-            $subtotal += self::rupiah($sesi->biaya);
-        }
+        $subtotal = count($dipilih) * $satuan;
 
         /*
          * Kode uniknya dihitung SEKALI ke dalam peubah. Dipanggil dua kali —

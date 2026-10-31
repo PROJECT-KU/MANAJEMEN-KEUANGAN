@@ -18,6 +18,8 @@
         var total = document.getElementById('kfbTotal');
         var kirim = document.getElementById('kfbKirim');
         var kotakSesi = [].slice.call(borang.querySelectorAll('input[name="sesi[]"]'));
+        var pilihVarian = [].slice.call(borang.querySelectorAll('input[name="varian"]'));
+        var grupSesi = [].slice.call(borang.querySelectorAll('.kfb-sesi[data-varian]'));
 
         var HARI_BUKA = (tanggal.dataset.hariBuka || '').split(',').map(Number);
         var MAKS = {{ (int) $maksSesi }};
@@ -60,11 +62,62 @@
             return boleh;
         }
 
+        /** Varian yang sedang dipilih; radio pertama kalau entah bagaimana tidak ada. */
+        function varianAktif() {
+            for (var i = 0; i < pilihVarian.length; i++) {
+                if (pilihVarian[i].checked) {
+                    return pilihVarian[i].value;
+                }
+            }
+
+            return pilihVarian.length ? pilihVarian[0].value : '';
+        }
+
+        /*
+         * Kelompok sesi milik varian lain DISEMBUNYIKAN DAN DIMATIKAN.
+         *
+         * Dimatikan, bukan cuma disembunyikan: kotak centang yang tersembunyi
+         * tetapi masih hidup akan ikut terkirim kalau sempat tercentang
+         * sebelum variannya diganti — dan peladen melewatinya tanpa ada yang
+         * tahu kenapa sesinya hilang dari tagihan. Centangnya juga dilepas,
+         * supaya yang terbaca di layar dan yang terkirim selalu sama.
+         */
+        function pasangVarian() {
+            var aktif = varianAktif();
+
+            grupSesi.forEach(function (grup) {
+                var punyaDia = grup.dataset.varian === aktif;
+
+                grup.hidden = ! punyaDia;
+
+                [].slice.call(grup.querySelectorAll('input[name="sesi[]"]'))
+                    .forEach(function (kotak) {
+                        if (! punyaDia) {
+                            kotak.checked = false;
+                        }
+
+                        kotak.disabled = ! punyaDia;
+                    });
+            });
+
+            pilihVarian.forEach(function (radio) {
+                radio.closest('.kfb-varian-butir')
+                    .classList.toggle('dipilih', radio.checked);
+            });
+        }
+
         function hitung() {
+            pasangVarian();
+
+            var aktif = varianAktif();
+            var kotakAktif = kotakSesi.filter(function (kotak) {
+                return kotak.closest('.kfb-sesi').dataset.varian === aktif;
+            });
+
             var jumlah = 0;
             var terpilih = 0;
 
-            kotakSesi.forEach(function (kotak) {
+            kotakAktif.forEach(function (kotak) {
                 kotak.closest('.kfb-sesi-butir').classList.toggle('dipilih', kotak.checked);
 
                 if (kotak.checked) {
@@ -77,8 +130,12 @@
              * Yang sudah penuh DIMATIKAN, bukan dibiarkan lalu ditolak saat
              * dikirim: orangnya sudah mencentang sesi keempat dan baru tahu
              * batasnya sesudah menekan tombol.
+             *
+             * Hanya kelompok yang AKTIF yang disentuh di sini — menyapu
+             * seluruh kotak akan menghidupkan kembali milik varian lain yang
+             * baru saja dimatikan pasangVarian().
              */
-            kotakSesi.forEach(function (kotak) {
+            kotakAktif.forEach(function (kotak) {
                 kotak.disabled = ! kotak.checked && terpilih >= MAKS;
                 kotak.closest('.kfb-sesi-butir').style.opacity = kotak.disabled ? '.5' : '';
             });
@@ -89,6 +146,7 @@
         }
 
         kotakSesi.forEach(function (kotak) { kotak.addEventListener('change', hitung); });
+        pilihVarian.forEach(function (radio) { radio.addEventListener('change', hitung); });
         tanggal.addEventListener('change', hitung);
         hitung();
 
