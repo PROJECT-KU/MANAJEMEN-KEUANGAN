@@ -37,10 +37,24 @@ class PromoAngkatan
      */
     private static array $peta = [];
 
+    /**
+     * layanan|varian => tarif yang berlaku, atau false kalau sudah dicari
+     * dan memang tidak ada.
+     *
+     * Tanpa ingatan ini, hargaDasar() memanggil basis data SEKALI PER
+     * ANGKATAN. Terukur saat tarif jadi sumber harga: pemuatan promo untuk
+     * sepuluh angkatan naik dari 2 kueri jadi 13 — persis pemuatan per
+     * baris yang kelas ini dibuat untuk menghindarinya.
+     *
+     * @var array<string, \App\ClinikScopusBiayaPersesi|false>
+     */
+    private static array $tarif = [];
+
     /** Dibuang uji yang mengubah promonya di tengah jalan. */
     public static function lupakan(): void
     {
         self::$peta = [];
+        self::$tarif = [];
     }
 
     /**
@@ -214,6 +228,73 @@ class PromoAngkatan
      */
     public static function hargaDasar(KategoriLayanan $angkatan): int
     {
+        /*
+         * TARIF LAYANAN yang menentukan, bukan kolom harga di angkatannya.
+         *
+         * Keputusan pemiliknya 2 Nov 2026. Sebelum ini harganya dibaca dari
+         * `total_biaya ?: biaya` milik angkatan — angka yang diketik ulang
+         * tiap kali angkatan baru dibuat. Akibatnya terukur di Scopus Camp
+         * Yogyakarta ke-202: tarifnya Rp 5.500.000, tetapi angkatan itu
+         * menyimpan `total_biaya` Rp 4.950.000 beserta diskon 10% yang
+         * sudah dibakukan ke dalamnya. Halaman umum memajang 4.950.000 dan
+         * tidak ada yang tahu dari mana angka itu, sebab layar Tarif Layanan
+         * menyebut angka yang lain.
+         *
+         * Lebih buruk lagi, angkatan itu juga menyimpan kode diskon bernama
+         * sama dengan promonya. Mengetik kodenya memotong 550.000 SEKALI
+         * LAGI di atas harga yang sudah dipotong — 4.400.000 untuk kelas
+         * yang dimaksudkan diskon 10%, tanpa satu galat pun.
+         *
+         * Tarifnya dibaca menurut VARIAN angkatannya: Scopus Camp Jawa dan
+         * luar Jawa berbeda harganya, dan satu tarif untuk keduanya akan
+         * menagih peserta luar Jawa dengan harga Jawa.
+         */
+        /*
+         * HANYA Scopus Camp, dan itu DIUKUR bukan dipilih sembarangan.
+         *
+         * Dicoba dulu untuk semua layanan: rangkaian ujinya memerah di 9
+         * tempat — Webinar Eksklusif, Doku, perakit deskripsi, dan layar
+         * promo. Sebabnya bukan ujinya rewel, melainkan artinya memang
+         * berbeda: sesi Webinar Eksklusif punya harga SENDIRI-SENDIRI dan
+         * tarifnya cuma angka bawaan, sementara angkatan Scopus Camp
+         * memang dimaksudkan mengikuti satu tarif baku per varian.
+         *
+         * Melebarkannya ke layanan lain perkara tersendiri, dan perkara
+         * uang — bukan sesuatu yang pantas ikut terbawa diam-diam.
+         */
+        if ((string) $angkatan->layanan !== 'scopus_camp') {
+            return (int) ($angkatan->total_biaya ?: $angkatan->biaya);
+        }
+
+        $varian = $angkatan->varian !== null && $angkatan->varian !== ''
+            ? (string) $angkatan->varian
+            : null;
+
+        $kunciTarif = $angkatan->layanan . '|' . ($varian ?? '');
+
+        if (! array_key_exists($kunciTarif, self::$tarif)) {
+            self::$tarif[$kunciTarif] = \App\ClinikScopusBiayaPersesi::berlaku(
+                (string) $angkatan->layanan, $varian
+            ) ?: false;
+        }
+
+        $tarif = self::$tarif[$kunciTarif] ?: null;
+
+        if ($tarif !== null) {
+            $dariTarif = (int) preg_replace('/\D+/', '', (string) $tarif->biaya_persesi);
+
+            if ($dariTarif > 0) {
+                return $dariTarif;
+            }
+        }
+
+        /*
+         * Jatuh kembali ke kolom angkatannya kalau tarifnya belum disetel.
+         *
+         * Dipaksa nol saat tarifnya tidak ada, seluruh angkatan layanan itu
+         * mendadak berharga Rp 0 dan borangnya menerima pendaftaran gratis —
+         * kegagalan yang jauh lebih mahal daripada harga yang ketinggalan.
+         */
         return (int) ($angkatan->total_biaya ?: $angkatan->biaya);
     }
 
