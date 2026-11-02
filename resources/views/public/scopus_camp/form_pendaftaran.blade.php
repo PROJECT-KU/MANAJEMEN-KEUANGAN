@@ -179,6 +179,16 @@
 
     .daf-dua { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 
+    /* Sel kisi TIDAK membawa margin sendiri.
+
+       `.daf-medan { margin-bottom: 20px }` berlaku juga saat medan itu jadi
+       sel kisi, dan `:last-child` cuma menolkannya untuk sel KANAN. Terukur:
+       kotak sel kiri berakhir di 1.169px sementara yang kanan di 1.189px —
+       barisnya 20px lebih tinggi daripada isinya, dan dua isian yang
+       sebaris tidak rata bawahnya. Jaraknya memang sudah diatur `gap`. */
+    .daf-dua > .daf-medan { margin-bottom: 0; }
+    .daf-renggang { margin-top: 18px; }
+
     .daf-bantu {
         display: block; margin-top: 7px;
         font-size: .88rem; line-height: 1.5; color: var(--tinta-2);
@@ -278,7 +288,11 @@
     /* ================================================== isi otomatis */
     .daf-kabar-isi {
         display: flex; align-items: flex-start; flex-wrap: wrap; gap: 9px;
-        margin: 0 0 20px; padding: 13px 15px;
+        /* Celah atasnya terukur 48px — 20px dari medan nomor di atasnya
+           ditambah 28px milik pita ini sendiri. Pita yang muncul tiba-tiba
+           dan terpisah sejauh itu terbaca seperti kotak milik bagian lain,
+           bukan jawaban atas nomor yang baru diketik. */
+        margin: -6px 0 18px; padding: 12px 15px;
         background: #e8f5f2; border: 1px solid #bfe3db; border-radius: 13px;
         font-size: .92rem; line-height: 1.55; color: #0b5a53;
     }
@@ -288,21 +302,30 @@
     .daf-kabar-isi[hidden] { display: none; }
     .daf-kabar-isi i { margin-top: 3px; color: var(--rumput); }
     .daf-kabar-isi span { flex: 1 1 180px; min-width: 0; }
+    /* Tombol bergaris, BUKAN blok hijau pekat.
+
+       "Kosongkan" bukan tindakan utama di kartu ini — yang utama meneruskan
+       isian. Blok hijau tua di samping kalimat hijau muda membuat mata
+       jatuh ke tombol pembatal lebih dulu daripada ke isian yang baru saja
+       terisi, padahal yang perlu dibaca justru isiannya. */
     .daf-kabar-isi button {
-        flex: 0 0 auto; border: 0; border-radius: 10px; padding: 7px 14px;
-        background: #0b5a53; color: #fff; font-family: inherit;
-        font-size: .86rem; font-weight: 800; cursor: pointer;
+        flex: 0 0 auto; border-radius: 999px; padding: 6px 15px;
+        background: #fff; border: 1px solid #a7d8cd; color: #0b5a53;
+        font-family: inherit; font-size: .86rem; font-weight: 800; cursor: pointer;
+        transition: border-color .16s ease, background .16s ease;
     }
-    .daf-kabar-isi button:hover { background: #09443f; }
+    .daf-kabar-isi button:hover { background: #eefaf7; border-color: #58b5a5; }
 
     /* Isian yang baru saja diisikan sendiri DITANDAI.
 
        Tanpa tanda, tiga kotak yang mendadak terisi tanpa disentuh terbaca
        seperti halaman yang berkelakuan aneh — dan yang paling mungkin
        merasa begitu justru pembaca yang jadi sasaran layanan ini. */
+    /* Tandanya SAMAR, cukup untuk terlihat tanpa jadi tiga kotak hijau
+       yang bersaing dengan isian yang masih kosong. */
     .daf-isian.daf-baru-diisi {
-        border-color: #58b5a5;
-        background: #f2fbf9;
+        border-color: #a7d8cd;
+        background: #f7fcfb;
     }
 
     /* ==================================================== kode diskon */
@@ -650,7 +673,10 @@
                             </div>
                         </div>
 
-                        <div class="daf-medan" style="margin-top: 20px;">
+                        {{-- Tanpa margin-top tambahan: celahnya dulu 48px —
+                             20px sisa margin sel kisi di atasnya ditambah 20px
+                             dari gaya sebaris ini, dan keduanya menumpuk. --}}
+                        <div class="daf-medan daf-renggang">
                             <label for="affiliasi">Asal instansi <span class="daf-wajib">*</span></label>
                             <input type="text" name="affiliasi" id="affiliasi"
                                 value="{{ old('affiliasi', $isiAwal['affiliasi'] ?? '') }}"
@@ -692,20 +718,26 @@
                             @foreach (old('peserta', []) as $i => $orang)
                                 <div class="daf-peserta" data-baris="{{ $i }}">
                                     <span class="daf-peserta-nomor">{{ $i + 2 }}</span>
+                                    {{-- NOMOR DULU, baru nama — urutan yang sama
+                                         dengan kartu pendaftar utama di atas.
+                                         Nomornya yang mencari nama peserta dari
+                                         pesanan sebelumnya, jadi menaruh nama di
+                                         depan berarti meminta orangnya mengetik
+                                         hal yang justru bisa kami isikan. --}}
                                     <div class="daf-dua">
-                                        <div class="daf-medan">
-                                            <label>Nama lengkap &amp; gelar <span class="daf-wajib">*</span></label>
-                                            <input type="text" name="peserta[{{ $i }}][nama]"
-                                                value="{{ $orang['nama'] ?? '' }}"
-                                                class="daf-isian" placeholder="Nama peserta" required>
-                                        </div>
                                         <div class="daf-medan">
                                             <label>Nomor WhatsApp <span class="daf-opsional">— boleh dikosongkan</span></label>
                                             <input type="text" name="peserta[{{ $i }}][telp]"
                                                 value="{{ $orang['telp'] ?? '' }}"
-                                                class="daf-isian" placeholder="0812-3456-7890"
+                                                class="daf-isian daf-peserta-telp" placeholder="0812-3456-7890"
                                                 inputmode="numeric" maxlength="20"
                                                 oninput="formatPhoneNumber(this)">
+                                        </div>
+                                        <div class="daf-medan">
+                                            <label>Nama lengkap &amp; gelar <span class="daf-wajib">*</span></label>
+                                            <input type="text" name="peserta[{{ $i }}][nama]"
+                                                value="{{ $orang['nama'] ?? '' }}"
+                                                class="daf-isian daf-peserta-nama" placeholder="Nama peserta" required>
                                         </div>
                                     </div>
                                 </div>
@@ -1145,8 +1177,10 @@
 
             var dua = document.createElement('div');
             dua.className = 'daf-dua';
-            dua.appendChild(medanPeserta(i, 'nama', 'Nama lengkap & gelar', true));
+            // Nomor DULU: ia yang mencari namanya, jadi nama di depan
+            // berarti meminta orangnya mengetik hal yang bisa kami isikan.
             dua.appendChild(medanPeserta(i, 'telp', 'Nomor WhatsApp', false));
+            dua.appendChild(medanPeserta(i, 'nama', 'Nama lengkap & gelar', true));
 
             baris.appendChild(nomor);
             baris.appendChild(dua);
@@ -1177,6 +1211,8 @@
             isian.type = 'text';
             isian.name = 'peserta[' + i + '][' + kunci + ']';
             isian.className = 'daf-isian';
+
+            isian.classList.add('daf-peserta-' + kunci);
 
             if (kunci === 'telp') {
                 isian.placeholder = '0812-3456-7890';
@@ -1421,6 +1457,87 @@
         // tidak selalu memicu 'input' di semua peramban.
         telp.addEventListener('change', cari);
         telp.addEventListener('blur', cari);
+
+        /*
+         * ISI OTOMATIS UNTUK PESERTA LAINNYA.
+         *
+         * Alasan nomornya ditaruh sebelum nama: nomor itulah yang mencari
+         * namanya. Dengan nama di depan, orangnya sudah mengetik hal yang
+         * justru bisa kami isikan sendiri.
+         *
+         * Dipasang lewat SATU pendengar di induknya, bukan satu per baris.
+         * Barisnya dirakit dan dibuang JavaScript tiap kali jumlah peserta
+         * diubah; pendengar yang dipasang per baris ikut hilang bersama
+         * barisnya, dan yang dipasang ulang menumpuk diam-diam.
+         */
+        var wadahPeserta = document.getElementById('daftarPesertaLain');
+
+        if (wadahPeserta) {
+            var jadwalPeserta = new WeakMap();
+            var nomorPeserta = new WeakMap();
+
+            var cariPeserta = function (kotak) {
+                var nomor = angkaSaja(kotak.value);
+
+                if (nomor.length < 9 || nomor.length > 15) {
+                    return;
+                }
+
+                if (nomorPeserta.get(kotak) === nomor) {
+                    return;
+                }
+
+                nomorPeserta.set(kotak, nomor);
+
+                var baris = kotak.closest('.daf-peserta');
+                var kotakNama = baris ? baris.querySelector('.daf-peserta-nama') : null;
+
+                // Yang sudah diketik TIDAK ditimpa: orangnya mungkin sengaja
+                // menuliskan nama yang berbeda dari yang tersimpan.
+                if (! kotakNama || kotakNama.value.trim() !== '') {
+                    return;
+                }
+
+                fetch(ALAMAT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': CSRF ? CSRF.getAttribute('content') : ''
+                    },
+                    body: JSON.stringify({ telp: kotak.value })
+                })
+                    .then(function (r) { return r.ok ? r.json() : null; })
+                    .then(function (d) {
+                        if (d && d.ditemukan && d.nama && kotakNama.value.trim() === '') {
+                            kotakNama.value = d.nama;
+                            kotakNama.classList.add('daf-baru-diisi');
+                        }
+                    })
+                    .catch(function () {
+                        // Didiamkan: ini kemudahan, bukan syarat. Termasuk 429
+                        // dari pembatas laju — borangnya tetap bisa diisi tangan.
+                    });
+            };
+
+            wadahPeserta.addEventListener('input', function (e) {
+                var kotak = e.target;
+
+                if (! kotak.classList || ! kotak.classList.contains('daf-peserta-telp')) {
+                    return;
+                }
+
+                clearTimeout(jadwalPeserta.get(kotak));
+                jadwalPeserta.set(kotak, setTimeout(function () { cariPeserta(kotak); }, 600));
+            });
+
+            // Tempel dari papan klip tidak selalu memicu 'input'.
+            wadahPeserta.addEventListener('change', function (e) {
+                if (e.target.classList && e.target.classList.contains('daf-peserta-telp')) {
+                    cariPeserta(e.target);
+                }
+            }, true);
+        }
     })();
 </script>
 
