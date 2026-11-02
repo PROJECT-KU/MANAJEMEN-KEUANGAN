@@ -15,6 +15,19 @@ use Carbon\Carbon;
 
 class KarirController extends Controller
 {
+    use \App\Http\Controllers\account\Concerns\JagaPeran;
+
+    /**
+     * Bilah sisi: orang dalam yang bukan karyawan.
+     *
+     * Terukur 3 Nov 2026 layar ini menjawab HTTP 200 untuk akun
+     * berperan `user`. Lihat sebabnya di trait JagaPeran.
+     */
+    public function __construct()
+    {
+        $this->jagaOrangDalamBukanKaryawan();
+    }
+
     /**
      * PenyewaanController constructor.
      */

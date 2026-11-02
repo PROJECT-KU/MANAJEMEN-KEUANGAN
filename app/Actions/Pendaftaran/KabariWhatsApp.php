@@ -653,6 +653,58 @@ class KabariWhatsApp
             ]);
         }
 
+        $this->catatJejak($layanan, $p, $hasil);
+
         return $hasil['berhasil'];
+    }
+
+    /**
+     * Mencatat hasil kirim WhatsApp di JEJAK pendaftarannya.
+     *
+     * ---------------------------------------------------------------------
+     * Kenapa bukan cukup di log
+     * ---------------------------------------------------------------------
+     *
+     * Sampai 3 Nov 2026 hasil kirim WhatsApp HANYA masuk log peladen. Surat
+     * sudah lama dicatat di jejak — `aksi` 'surat' dan 'surat-gagal', yang
+     * tergambar di layar rincian dengan ikonnya sendiri — tetapi WhatsApp
+     * tidak punya apa pun.
+     *
+     * Akibatnya pendaftar yang berkata "saya tidak dapat WhatsApp" tidak
+     * bisa dijawab dari layar mana pun: panitia harus meminta seseorang
+     * membuka log peladen, dan di hosting ini log itu sering `LOG_LEVEL`
+     * di atas `warning` — yaitu baris di atas tidak pernah tertulis sama
+     * sekali. Perangkat Fonnte yang terputus karena itu bisa menelan SEMUA
+     * pemberitahuan berhari-hari tanpa satu pun tanda di aplikasinya.
+     *
+     * Berhasil pun dicatat, bukan hanya yang gagal: "tidak ada catatan"
+     * harus berarti "memang tidak pernah dicoba", bukan "mungkin berhasil,
+     * mungkin tidak".
+     *
+     * DIBUNGKUS. Jejak yang gagal ditulis tidak boleh menggagalkan
+     * pemberitahuan yang sudah berangkat — apalagi membatalkan pembayaran
+     * yang memanggilnya.
+     *
+     * @param  array{berhasil:bool, pesan:string, id:?string}  $hasil
+     */
+    private function catatJejak(string $layanan, object $p, array $hasil): void
+    {
+        try {
+            \App\PendaftaranJejak::create([
+                'layanan' => $layanan,
+                'pendaftaran_id' => (string) $p->getKey(),
+                'aksi' => $hasil['berhasil'] ? 'whatsapp' : 'whatsapp-gagal',
+                'ke' => \App\Support\NomorTelepon::rapikan((string) $this->telp($layanan, $p)),
+                'ringkasan' => $hasil['berhasil']
+                    ? 'Pemberitahuan WhatsApp terkirim.'
+                    : 'Pemberitahuan WhatsApp GAGAL: ' . $hasil['pesan'],
+                'oleh_nama' => 'sistem',
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning('Jejak kabar WhatsApp gagal dicatat.', [
+                'layanan' => $layanan,
+                'pesan' => $e->getMessage(),
+            ]);
+        }
     }
 }

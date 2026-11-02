@@ -21,9 +21,20 @@ use Illuminate\Support\Str;
 class PaperisasiController extends Controller
 {
 
+    use \App\Http\Controllers\account\Concerns\JagaPeran;
+
     public function __construct()
     {
         $this->middleware('auth');
+
+        /*
+         * Bilah sisi: administrator.
+         *
+         * Terukur 3 Nov 2026 layar ini menjawab HTTP 200 untuk akun berperan
+         * `user` — `auth` di atas hanya menuntut SUDAH MASUK, bukan berhak.
+         * Lihat sebabnya di trait JagaPeran.
+         */
+        $this->jagaAdministrator();
     }
 
     function generateRandomToken($length)

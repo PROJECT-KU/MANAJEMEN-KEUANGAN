@@ -3796,6 +3796,18 @@ Rincian Pendaftaran | MIS Rumah Scopus
                                                 'ingat-bayar' => ['fa-bell', 'kuning'],
                                                 'ingat-bayar-gagal' => ['fa-exclamation-triangle', 'merah'],
 
+                                                /*
+                                                 * Kabar WhatsApp. Sampai 3 Nov 2026
+                                                 * hasilnya cuma masuk log peladen, jadi
+                                                 * "saya tidak dapat WhatsApp" tidak bisa
+                                                 * dijawab dari layar mana pun — dan
+                                                 * perangkat Fonnte yang terputus bisa
+                                                 * menelan semua pemberitahuan berhari-hari
+                                                 * tanpa satu pun tanda di sini.
+                                                 */
+                                                'whatsapp' => ['fa-comment-dots', 'hijau'],
+                                                'whatsapp-gagal' => ['fa-comment-slash', 'merah'],
+
                                                 // Uang yang tiba sesudah pendaftarannya
                                                 // dibatalkan. Yang kedua merah: itu uang
                                                 // orang yang menunggu dikembalikan.

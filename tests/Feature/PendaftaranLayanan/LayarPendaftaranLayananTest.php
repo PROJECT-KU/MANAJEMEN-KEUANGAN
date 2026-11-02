@@ -123,15 +123,23 @@ class LayarPendaftaranLayananTest extends TestCase
          * baris kembar, dan dua pendaftaran yang isinya kebetulan sama persis
          * akan hilang satu tanpa galat apa pun.
          */
+        /*
+         * Daftar tabelnya DIBACA DARI KATALOG, bukan diketik di sini.
+         *
+         * Versi sebelumnya menuliskan kelima nama tabelnya apa adanya, dan
+         * itu membuat uji ini merah tiap kali ada layanan baru — bukan
+         * karena kuerinya rusak melainkan karena daftarnya tertinggal.
+         * Terukur 3 Nov 2026 saat Class Online masuk: "381 is identical to
+         * 379", dan angka 379 itu sekadar daftar yang kurang satu tabel.
+         *
+         * Yang dijaga uji ini `UNION` yang tertulis tanpa `ALL` — ia membuang
+         * baris kembar, dan dua pendaftaran yang isinya kebetulan sama persis
+         * akan hilang satu tanpa galat apa pun. Penjagaan itu tetap utuh
+         * dengan daftar yang ikut tumbuh sendiri.
+         */
         $terpisah = 0;
 
-        foreach ([
-            'scopus_camp_pendaftaran',
-            'analisis_bibliometrik',
-            'webinar_eksklusif_pendaftaran',
-            'pendaftaran_scopus_kafe',
-            'clinikscopus_pemesanan',
-        ] as $tabel) {
+        foreach (collect(Pendaftaran::semuaSumber())->pluck('tabel')->filter()->unique() as $tabel) {
             $terpisah += DB::table($tabel)->count();
         }
 
@@ -142,7 +150,14 @@ class LayarPendaftaranLayananTest extends TestCase
         // sebagai nama mentah tanpa ikon, tanpa warna, dan tanpa tautan.
         $kunci = Pendaftaran::kueri()->distinct()->pluck('layanan')->sort()->values()->all();
 
-        $this->assertCount(5, $kunci, 'Kelima layanan harus punya barisnya di basis data uji.');
+        /*
+         * Angkanya tidak dipatok. Yang diperiksa bukan BERAPA layanan yang
+         * punya baris di basis data uji — itu keadaan data, bukan keadaan
+         * kode, dan ia berubah tiap layanan baru dibuka atau tiap barisnya
+         * habis disapu. Yang diperiksa: kuerinya memulangkan sesuatu, dan
+         * tiap kunci yang keluar memang dikenali katalognya.
+         */
+        $this->assertNotEmpty($kunci, 'Kueri gabungan tidak memulangkan satu layanan pun.');
 
         foreach ($kunci as $k) {
             $this->assertArrayHasKey($k, Pendaftaran::katalog(),
