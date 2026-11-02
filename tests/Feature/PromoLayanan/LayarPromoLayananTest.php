@@ -856,33 +856,61 @@ class LayarPromoLayananTest extends TestCase
          * Yang dihitung kuerinya SENDIRI, bukan waktunya: ukuran waktu di
          * basis data lokal terlalu berderau untuk membedakan 1 kueri dari 10.
          */
-        $angkatan = [];
+        /*
+         * DUA UKURAN, 10 angkatan dan 20, lalu dibandingkan.
+         *
+         * Angka tetap sempat dipakai di sini (<= 2), dan itu patokan yang
+         * rapuh: ia ikut memerah saat biaya TETAP bertambah tanpa pemuatan
+         * per baris muncul kembali. Terjadi 2 Nov 2026 — harga angkatan
+         * mulai dibaca dari Tarif Layanan, yang menambah dua kueri SEKALI
+         * untuk seluruh daftar, dan ujinya memerah walau yang dijaganya
+         * sama sekali tidak rusak.
+         *
+         * Yang dijaga sebenarnya: jumlah kuerinya TIDAK TUMBUH mengikuti
+         * jumlah barisnya. Dua ukuran menjawab itu langsung, dan tetap
+         * menangkap pemuatan per baris — di sana 20 angkatan akan memakan
+         * sekitar dua kali lipat kueri 10 angkatan.
+         */
+        $ukur = function (int $berapa) {
+            $angkatan = [];
 
-        for ($i = 0; $i < 10; $i++) {
-            $angkatan[] = $this->angkatan('scopus_camp');
-        }
+            for ($i = 0; $i < $berapa; $i++) {
+                $angkatan[] = $this->angkatan('scopus_camp');
+            }
 
-        $promo = PromoLayanan::create([
-            'nama' => 'Promo Serentak ' . Str::random(4), 'tipe' => 'persen', 'persen' => 10,
-            'mulai' => now()->subDay()->toDateString(),
-            'selesai' => now()->addDay()->toDateString(), 'aktif' => true,
-        ]);
-        $promo->angkatan()->attach(collect($angkatan)->map->getKey()->all());
+            $promo = PromoLayanan::create([
+                'nama' => 'Promo Serentak ' . Str::random(4), 'tipe' => 'persen', 'persen' => 10,
+                'mulai' => now()->subDay()->toDateString(),
+                'selesai' => now()->addDay()->toDateString(), 'aktif' => true,
+            ]);
+            $promo->angkatan()->attach(collect($angkatan)->map->getKey()->all());
 
-        PromoAngkatan::lupakan();
+            PromoAngkatan::lupakan();
 
-        $jumlahKueri = 0;
-        DB::listen(function () use (&$jumlahKueri) { $jumlahKueri++; });
+            $jumlah = 0;
+            $pendengar = function () use (&$jumlah) { $jumlah++; };
+            DB::listen($pendengar);
 
-        PromoAngkatan::muat($angkatan);
+            PromoAngkatan::muat($angkatan);
 
-        // Dua: satu untuk promonya, satu untuk angkatan yang dimuat bersamanya.
-        $this->assertLessThanOrEqual(2, $jumlahKueri,
-            'Promo dimuat per baris, bukan berkelompok: ' . $jumlahKueri . ' kueri untuk 10 angkatan.');
+            return ['kueri' => $jumlah, 'angkatan' => $angkatan, 'promo' => $promo];
+        };
+
+        $sepuluh = $ukur(10);
+        $duaPuluh = $ukur(20);
+
+        $this->assertSame($sepuluh['kueri'], $duaPuluh['kueri'],
+            'Jumlah kuerinya tumbuh mengikuti jumlah angkatan: '
+            . $sepuluh['kueri'] . ' untuk 10, ' . $duaPuluh['kueri'] . ' untuk 20. '
+            . 'Promonya dimuat per baris, bukan berkelompok.');
+
+        $this->assertLessThanOrEqual(6, $duaPuluh['kueri'],
+            'Pemuatannya memang tidak tumbuh, tetapi biaya tetapnya sudah '
+            . $duaPuluh['kueri'] . ' kueri — terlalu banyak untuk satu daftar.');
 
         // Dan hasilnya benar, bukan cuma hemat.
-        foreach ($angkatan as $a) {
-            $this->assertSame($promo->getKey(), PromoAngkatan::untuk($a)?->getKey());
+        foreach ($duaPuluh['angkatan'] as $a) {
+            $this->assertSame($duaPuluh['promo']->getKey(), PromoAngkatan::untuk($a)?->getKey());
         }
     }
 
