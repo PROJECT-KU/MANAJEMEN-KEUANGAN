@@ -230,17 +230,37 @@ class PenautanPesananTest extends TestCase
         $sumber = (new \ReflectionClass(PesananPelanggan::class))->getConstant('SUMBER');
 
         /*
-         * Lima, bukan empat. Webinar Eksklusif ditambahkan 3 Okt 2026: ia
-         * lahir sesudah daftar ini dibuat untuk empat layanan, dan akibatnya
-         * pendaftaran webinar seseorang tidak pernah muncul di halaman
-         * pelanggannya sementara jumlah pesanannya terhitung kurang.
+         * DIHITUNG DARI KATALOG, bukan angka yang diketik di sini.
          *
-         * Angkanya disebut persis supaya layanan berikutnya yang terlewat
+         * Versi sebelumnya menuliskan "5" apa adanya, dan itu memang sengaja:
+         * angkanya disebut persis supaya layanan berikutnya yang terlewat
          * ketahuan di sini, bukan di halaman pelanggan yang kehilangan baris.
+         * Ia bekerja — dua kali, malah. Webinar Eksklusif ditambahkan 3 Okt
+         * 2026 dan Class Online 2 Nov 2026, keduanya lahir sesudah daftar
+         * sumbernya dibuat, dan keduanya tertangkap di sini.
+         *
+         * Tetapi angka yang diketik menuntut DUA perubahan tiap layanan baru
+         * — daftarnya dan angkanya — dan yang kedua tidak melindungi apa pun
+         * yang tidak sudah dilindungi dengan membandingkan ke katalog. Jadi
+         * sekarang ia membandingkan nama tabelnya: tiap layanan yang punya
+         * tabel pendaftaran di katalog WAJIB ada di daftar sumber ini, dan
+         * layanan ketujuh akan memerahkan uji ini tanpa ada yang perlu
+         * menaikkan angka.
          */
-        $this->assertCount(5, $sumber,
-            'Kelima layanan yang punya tabel pendaftaran harus ikut: Clinik Scopus, '
-            . 'Analisis Bibliometrik, Scopus Kafe, Scopus Camp, Webinar Eksklusif.');
+        $diKatalog = collect(\App\Support\PendaftaranSemuaLayanan::semuaSumber())
+            ->pluck('tabel')
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values()
+            ->all();
+
+        $diSini = collect($sumber)->pluck('tabel')->unique()->sort()->values()->all();
+
+        $this->assertSame($diKatalog, $diSini,
+            'Tiap layanan yang punya tabel pendaftaran harus ikut di PesananPelanggan::SUMBER. '
+            . 'Yang terlewat tidak melempar galat — pesanannya hanya hilang diam-diam dari '
+            . 'halaman pelanggannya, dan jumlah pesanannya terhitung kurang.');
 
         foreach ($sumber as $s) {
             $kolom = array_map(

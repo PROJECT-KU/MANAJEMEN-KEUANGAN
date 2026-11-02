@@ -72,6 +72,17 @@ class IsiOtomatisDariNomor
         // "Unknown column" saat kuerinya dirakit.
         ['tabel' => 'pendaftaran_scopus_kafe', 'nama' => 'nama', 'email' => 'email',
          'telp' => 'telp', 'afiliasi' => null],
+
+        /*
+         * Class Online, dibuka 2 Nov 2026 — dan TERLEWAT di daftar ini saat
+         * itu. Terukur: pendaftar yang nomornya hanya pernah dipakai di
+         * Class Online dijawab "tidak ketemu" di SEMUA borang, termasuk
+         * borang Class Online itu sendiri. Ia mengetik ulang nama, email,
+         * dan asal instansinya tiap kali — persis yang fitur ini dibuat
+         * untuk menghindarinya.
+         */
+        ['tabel' => 'online_training_pendaftaran', 'nama' => 'nama', 'email' => 'email',
+         'telp' => 'telp', 'afiliasi' => 'affiliasi'],
     ];
 
     /**

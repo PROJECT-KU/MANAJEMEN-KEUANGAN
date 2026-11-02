@@ -255,6 +255,16 @@ class PendaftaranSemuaLayanan
             ],
             'surat' => [
                 'Pendaftaran Diterima' => \App\Mail\OnlineTrainingUpdateDiterimaMail::class,
+
+                /*
+                 * 'Pendaftaran Reschedule' TERLEWAT saat layanan ini dibuka
+                 * 2 Nov 2026: statusnya ada di daftar status, jadi panitia
+                 * BISA memilihnya di layar rincian — tetapi tidak ada kelas
+                 * suratnya, jadi tidak ada satu pun kabar yang berangkat.
+                 * Pendaftarnya tahu jadwalnya berubah hanya kalau ia
+                 * kebetulan membuka halaman statusnya lagi.
+                 */
+                'Pendaftaran Reschedule' => \App\Mail\OnlineTrainingUpdateResheduleMail::class,
             ],
             'kolom' => [
                 'nomor' => 'id_transaksi',

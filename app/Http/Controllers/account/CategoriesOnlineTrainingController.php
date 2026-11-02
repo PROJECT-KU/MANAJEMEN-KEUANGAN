@@ -17,6 +17,39 @@ use Illuminate\Support\Str;
 class CategoriesOnlineTrainingController extends Controller
 {
 
+    /**
+     * HANYA PANITIA. Dipasang di pembangun, bukan di tiap method.
+     *
+     * Grup rute `account/` di aplikasi ini hanya ber-middleware
+     * `web, auth, terverifikasi` — TIDAK ADA pemeriksaan peran sama sekali.
+     * Penjagaannya diserahkan ke tiap pengendali, dan layar ini tidak
+     * punya satu pun. Terukur 2 Nov 2026 dengan akun pelanggan biasa
+     * (peran `user`, adalahAdministrator() = false):
+     *
+     *     GET  .../kategori            -> 200
+     *     GET  .../kategori/create     -> 200
+     *     GET  .../kategori/edit/{id}  -> 200
+     *     DELETE .../kategori/delete/{id} -> 200, angkatannya BENAR-BENAR HILANG
+     *
+     * Bilah sisi memang menyembunyikan menunya di balik
+     * adalahAdministrator(), tetapi alamatnya bisa ditebak dan menyembunyikan
+     * tautan bukan penjagaan.
+     *
+     * DI PEMBANGUN, supaya method yang ditambahkan besok ikut terjaga tanpa
+     * harus diingat. Dipasang per-method, yang terlupa justru yang paling
+     * berbahaya — persis bagaimana layar ini jadi terbuka.
+     */
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            if (! Auth::user()?->adalahAdministrator()) {
+                abort(403, 'Layar ini hanya untuk panitia.');
+            }
+
+            return $next($request);
+        });
+    }
+
     function generateRandomToken($length)
     {
         $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
