@@ -769,13 +769,23 @@
                                 Punya kode diskon? <span class="daf-opsional">— boleh dikosongkan</span>
                             </label>
                             <div class="daf-diskon-baris">
+                                {{-- old(): tanpa ini kodenya HILANG DIAM-DIAM saat
+                                     borangnya dipantulkan validasi.
+
+                                     Orang yang lupa mengisi nama mendapat
+                                     halaman yang sama tanpa kode diskonnya, dan
+                                     kalau ia tidak sadar ia membayar penuh.
+                                     Tidak ada galat apa pun yang memberi tahu —
+                                     yang hilang justru potongannya sendiri. --}}
                                 <input type="text" name="kode_diskon_input" id="kodeDiskon" class="daf-isian"
+                                    value="{{ old('kode_diskon') }}"
                                     placeholder="Ketik kode diskon" autocomplete="off">
                                 <button type="button" class="daf-cek" id="btnCekDiskon" data-id="{{ $item->id }}">
                                     <i class="fas fa-tag"></i> Cek
                                 </button>
                             </div>
-                            <input type="hidden" name="kode_diskon" id="hiddenKodeDiskon">
+                            <input type="hidden" name="kode_diskon" id="hiddenKodeDiskon"
+                                value="{{ old('kode_diskon') }}">
                             <small id="diskonMessage" class="daf-pesan ok"></small>
                         </div>
 
@@ -961,8 +971,25 @@
 </script>
 
 <script>
-    document.getElementById('btnCekDiskon').addEventListener('click', function () {
-        var id = this.dataset.id;
+    /*
+     * Dijadikan FUNGSI BERNAMA, bukan penangan klik anonim.
+     *
+     * Pemeriksaannya kini dipanggil dari tiga tempat, dan ketiganya perlu:
+     *
+     *   - tombol "Cek", seperti sebelumnya;
+     *   - saat halaman dimuat, kalau kodenya dikembalikan old() sesudah
+     *     validasi gagal — tanpa ini kodenya terlihat di kotaknya tetapi
+     *     potongannya tidak terpasang, dan totalnya memajang harga penuh;
+     *   - saat JUMLAH PESERTA diubah, sebab promo persen menghitung
+     *     potongannya dari subtotal.
+     *
+     * `diam` mematikan kotak pesan SweetAlert-nya: pemeriksaan ulang yang
+     * dipicu halaman sendiri tidak boleh memunculkan kotak yang tidak
+     * diminta siapa pun.
+     */
+    function periksaKodeDiskon(diam) {
+        var tombol = document.getElementById('btnCekDiskon');
+        var id = tombol.dataset.id;
         var kode = document.getElementById('kodeDiskon').value.trim();
 
         var pesan = document.getElementById('diskonMessage');
@@ -1035,13 +1062,33 @@
             .catch(function () {
                 kosongkan();
                 pesan.textContent = '';
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal memeriksa',
-                    text: 'Kode diskonnya tidak bisa diperiksa sekarang.'
-                });
+
+                if (! diam) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal memeriksa',
+                        text: 'Kode diskonnya tidak bisa diperiksa sekarang.'
+                    });
+                }
             });
+    }
+
+    document.getElementById('btnCekDiskon').addEventListener('click', function () {
+        periksaKodeDiskon(false);
     });
+
+    /*
+     * Kode yang dikembalikan old() diperiksa ULANG saat halaman dimuat.
+     *
+     * Dikembalikan kotaknya saja tidak cukup: potongannya hidup di medan
+     * tersembunyi dan di total yang dihitung skrip, dan keduanya kosong di
+     * halaman yang baru dimuat. Orangnya akan melihat kodenya terpasang
+     * sementara totalnya memajang harga penuh — dan tidak ada yang memberi
+     * tahu mana yang benar.
+     */
+    if (document.getElementById('kodeDiskon').value.trim() !== '') {
+        periksaKodeDiskon(true);
+    }
 </script>
 
 <script>
@@ -1156,6 +1203,34 @@
             });
 
             hitungTotalPembayaran();
+            periksaUlangDiskon();
+        }
+
+        /*
+         * POTONGANNYA DIHITUNG ULANG saat jumlah peserta berubah.
+         *
+         * Promo PERSEN menghitung potongannya dari subtotal, jadi angkanya
+         * ikut jumlah peserta. Tanpa pemeriksaan ulang ini, potongan yang
+         * sudah terpasang tertinggal di angka lama — terukur dengan promo
+         * 10%: layar tetap memajang potongan Rp 550.000 sesudah jumlahnya
+         * diubah 1 menjadi 3, sementara peladen menghitung Rp 1.650.000.
+         * Selisih 1,1 juta antara yang dipajang dan yang ditagih.
+         *
+         * Ditunda 400 ms: menekan tombol + beberapa kali berturut-turut
+         * akan mengirim satu permintaan per tekanan, dan alamat itu
+         * dibatasi lajunya.
+         */
+        var jadwalDiskon = null;
+
+        function periksaUlangDiskon() {
+            var terpasang = document.getElementById('hiddenKodeDiskon');
+
+            if (! terpasang || terpasang.value.trim() === '') {
+                return;
+            }
+
+            clearTimeout(jadwalDiskon);
+            jadwalDiskon = setTimeout(function () { periksaKodeDiskon(true); }, 400);
         }
 
         Array.prototype.forEach.call(langkah, function (t) {

@@ -711,9 +711,18 @@ class PublicWebinarEksklusifController extends Controller
                  * dipercaya dari borang. Nominal yang dikirim peramban bisa
                  * disunting siapa saja sebelum dikirim.
                  */
-                $potongan = $this->hitungPotongan(
+                /*
+                 * Dipanggil langsung, bukan lewat hitungPotongan(), sebab di
+                 * sini PROMONYA juga dibutuhkan — bukan cuma angkanya.
+                 * Tanpa menyimpan promonya, promo yang dipakai lewat kode
+                 * tidak meninggalkan jejak dan kuotanya tidak membatasi
+                 * apa pun.
+                 */
+                $hasilKode = \App\Support\PotonganKode::hitung(
                     $terkunci, $data['kode_diskon'] ?? null, $total, $data['telp'] ?? null
                 );
+
+                $potongan = $hasilKode['potongan'];
                 $total = max(0, $total - $potongan);
 
                 /*
@@ -754,7 +763,7 @@ class PublicWebinarEksklusifController extends Controller
                     // bisa menghitung berapa pendaftaran yang benar-benar
                     // memakainya — tanpa ini, promo terlihat tidak pernah
                     // dipakai siapa pun.
-                    'promo_id' => $promo?->getKey(),
+                    'promo_id' => $hasilKode['promo']?->getKey() ?? $promo?->getKey(),
                     'kode_diskon' => $potongan > 0 ? trim((string) $data['kode_diskon']) : null,
                     'nominal_diskon' => $potongan > 0 ? (string) $potongan : null,
                     /*
