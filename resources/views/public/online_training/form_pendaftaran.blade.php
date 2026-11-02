@@ -301,6 +301,22 @@
        atribut hidden-nya ada. Dinyatakan sendiri, bukan diandaikan. */
     .daf-kabar-isi[hidden] { display: none; }
     .daf-kabar-isi i { margin-top: 3px; color: var(--rumput); }
+
+    /* PITA YANG SAMA, WARNA BERBEDA saat pencariannya DITOLAK.
+
+       Sampai 2 Nov 2026 penolakan tidak kelihatan sama sekali: skripnya
+       memeriksa `r.ok ? r.json() : null` lalu diam. Terukur lewat DevTools
+       pada borang sungguhan — POST /cari-pendaftar menjawab 429 Too Many
+       Requests, dan di layar TIDAK ADA APA PUN. Tiga isian tetap kosong,
+       tanpa pita, tanpa pesan. Yang melihatnya menyimpulkan fiturnya rusak;
+       pemiliknya sendiri menanyakannya begitu.
+
+       Hijau berarti "sudah kami isikan", kuning berarti "tidak bisa sekarang,
+       isi sendiri". Dua kabar yang berbeda tidak boleh berwarna sama. */
+    .daf-kabar-isi.daf-kabar-tertahan {
+        background: #fdf5e4; border-color: #f0d9a8; color: #7a5312;
+    }
+    .daf-kabar-isi.daf-kabar-tertahan i { color: #c98a14; }
     .daf-kabar-isi span { flex: 1 1 180px; min-width: 0; }
     /* Tombol bergaris, BUKAN blok hijau pekat.
 
@@ -1460,9 +1476,30 @@
             kabar.hidden = false;
         }
 
+        function tampilkanTertahan() {
+            kabar.innerHTML = '';
+            kabar.classList.add('daf-kabar-tertahan');
+
+            var ikon = document.createElement('i');
+            // fa-hourglass-half ada di Font Awesome 5, yang dimuat aplikasi
+            // ini; nama ikon versi 6 menyisakan kotak kosong tanpa galat.
+            ikon.className = 'fas fa-hourglass-half';
+            ikon.setAttribute('aria-hidden', 'true');
+
+            var teks = document.createElement('span');
+            teks.textContent = 'Pengisian otomatis sedang dibatasi, jadi isian di '
+                + 'bawah tidak kami isikan kali ini. Silakan isi sendiri — '
+                + 'pendaftarannya tetap berjalan seperti biasa.';
+
+            kabar.appendChild(ikon);
+            kabar.appendChild(teks);
+            kabar.hidden = false;
+        }
+
         function isikan(data) {
             diisiSkrip = [];
             bersihkanTanda();
+            kabar.classList.remove('daf-kabar-tertahan');
 
             Object.keys(medan).forEach(function (k) {
                 var e = medan[k];
@@ -1513,14 +1550,51 @@
                 },
                 body: JSON.stringify({ telp: telp.value })
             })
-                .then(function (r) { return r.ok ? r.json() : null; })
+                .then(function (r) {
+                    /*
+                     * DITOLAK itu kabar, bukan diam.
+                     *
+                     * Alamat ini dibatasi 4 per menit per IP, 25 per hari per
+                     * IP, dan 8 PER HARI PER NOMOR — yang terakhir itu yang
+                     * paling mudah menggigit orang sungguhan, sebab tiap
+                     * memuat ulang borangnya menanyakan nomor yang sama
+                     * sekali lagi. Terukur 2 Nov 2026: nomor pemiliknya
+                     * sendiri terkunci sampai keesokan harinya, di Class
+                     * Online MAUPUN Class Offline, dan layarnya tidak
+                     * mengatakan apa-apa.
+                     *
+                     * Kalimatnya SENGAJA tidak menyebut apakah nomornya
+                     * terdaftar: 429 terbit untuk nomor yang ada maupun yang
+                     * tidak, dan menyebutkannya akan mengubah pita ini jadi
+                     * alat memeriksa keanggotaan.
+                     */
+                    if (r.status === 429) {
+                        // Dibuka lagi untuk dicoba ulang: batas per menit
+                        // pulih sendiri, dan tanpa ini halamannya tidak akan
+                        // pernah mencoba lagi sampai dimuat ulang.
+                        nomorTerakhir = '';
+                        tampilkanTertahan();
+
+                        return null;
+                    }
+
+                    if (! r.ok) {
+                        nomorTerakhir = '';
+
+                        return null;
+                    }
+
+                    return r.json();
+                })
                 .then(function (d) { if (d && d.ditemukan) { isikan(d); } })
                 .catch(function () {
                     /*
-                     * Didiamkan dengan sengaja. Ini kemudahan, bukan syarat —
-                     * jaringan yang bermasalah tidak boleh memunculkan pesan
-                     * galat di borang yang sebenarnya masih bisa diisi tangan.
+                     * Jaringan yang putus didiamkan — ini kemudahan, bukan
+                     * syarat, dan borangnya masih bisa diisi tangan. Yang
+                     * tidak boleh didiamkan penolakan dari peladen di atas:
+                     * itu bukan gangguan sesaat, melainkan jawaban.
                      */
+                    nomorTerakhir = '';
                 });
         }
 
