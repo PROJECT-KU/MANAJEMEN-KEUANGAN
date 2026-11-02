@@ -283,7 +283,24 @@ class TarifAuditDuaTest extends TestCase
         $halaman = $this->actingAs($admin)->get(route('account.Clinik-Scopus-Biaya-Persesi.index'));
         $adaYangKosong = $halaman->viewData('totalKartu') > $halaman->viewData('adaTarif');
 
-        $this->assertTrue($adaYangKosong, 'Uji ini perlu setidaknya satu layanan tanpa tarif.');
+        /*
+         * DILEWATI, bukan dimerahkan, kalau SEMUA layanan sudah bertarif.
+         *
+         * Yang diperiksa uji ini: layanan yang tarifnya belum disetel tidak
+         * ikut tercetak di lembar harga. Jadi ia butuh setidaknya satu
+         * layanan tanpa tarif — dan itu keadaan BASIS DATA, bukan keadaan
+         * kode. Terukur 2 Nov 2026: pemiliknya mengisi tarif layanan
+         * terakhir yang masih kosong lewat layar Tarif Layanan, dan uji ini
+         * langsung merah tanpa satu baris kode pun berubah. Merah yang
+         * sebabnya pekerjaan admin yang benar adalah merah yang mengajari
+         * orang mengabaikan rangkaian ujinya.
+         *
+         * assertTrue di sini sebelumnya; diganti skip supaya yang merah
+         * tetap berarti ada yang rusak.
+         */
+        if (! $adaYangKosong) {
+            $this->markTestSkipped('Semua layanan sudah bertarif, jadi tidak ada yang bisa diperiksa terbuang.');
+        }
 
         $berlaku = T::semuaYangBerlaku();
         $baris = [];

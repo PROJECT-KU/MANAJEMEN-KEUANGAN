@@ -32,5 +32,6 @@ class VerifyCsrfToken extends Middleware
         'Webinar-Eksklusif/pemberitahuan/doku',
         'Scopus-Camp/pemberitahuan/doku',
         'Scopus-Kafe/pemberitahuan/doku',
+        'Class-Online/pemberitahuan/doku',
     ];
 }

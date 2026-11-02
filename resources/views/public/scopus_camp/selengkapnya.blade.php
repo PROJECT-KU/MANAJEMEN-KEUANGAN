@@ -542,10 +542,20 @@
                         </a>
                     @endif
 
+                    {{-- "lalu bayar daring", BUKAN "lalu transfer".
+
+                         Kalimat lamanya sisa dari zaman rekening. Jalur unggah
+                         bukti transfer dicabut 26 Okt 2026 dan pembayarannya
+                         seluruhnya lewat gerbang — tombol "Daftar sekarang" di
+                         atasnya mengantar ke halaman DOKU, bukan ke nomor
+                         rekening. Janji yang tidak ditepati halamannya sendiri
+                         membuat orang menunggu nomor rekening yang tidak akan
+                         pernah datang, lalu menghubungi panitia menanyakannya. --}}
                     <p class="cmp-tenang">
                         <i class="bi bi-shield-check"></i>
-                        Isi borangnya sebentar saja, lalu transfer. Kalau bingung,
-                        tekan tombol WhatsApp di pojok dan tanya admin dulu.
+                        Isi borangnya sebentar saja, lalu bayar daring lewat QRIS
+                        atau Virtual Account. Kalau bingung, tekan tombol WhatsApp
+                        di pojok dan tanya admin dulu.
                     </p>
                 </div>
 
@@ -672,10 +682,28 @@
             <div class="cmp-langkah">
                 <h2 class="cmp-sub-judul"><i class="bi bi-signpost-split"></i> Sesudah menekan daftar</h2>
                 <ol>
+                    {{-- KETIGANYA DITULIS ULANG 2 Nov 2026, dan sebabnya bukan
+                         kerapian: ketiganya menjanjikan alur yang sudah tidak ada.
+
+                         "Transfer biayanya — nomor rekening dan nominal persisnya
+                         tertulis di halaman borang" dan "panitia mengecek bukti
+                         transfermu" keduanya sisa dari zaman rekening. Jalur unggah
+                         bukti dicabut 26 Okt 2026; borangnya TIDAK memuat satu pun
+                         nomor rekening, dan tidak ada bukti yang bisa dikirim
+                         siapa pun. Jadi bagian yang justru dipasang untuk
+                         menghilangkan keraguan — "apa yang terjadi sesudah
+                         tombolnya ditekan" — menjawabnya dengan tiga langkah yang
+                         dua di antaranya salah.
+
+                         Tenggatnya dibaca dari Doku::MENIT_KEDALUWARSA, bukan
+                         diketik: angka yang disalin ke halaman akan berselisih
+                         dengan tagihan yang sesungguhnya begitu tenggatnya diubah,
+                         dan yang menanggungnya orang yang mengira masih punya
+                         waktu. --}}
                     @foreach ([
                         ['bi-pencil-square', 'Isi borangnya', 'Nama, email, asal instansi, dan nomor WhatsApp. Empat isian saja.'],
-                        ['bi-bank', 'Transfer biayanya', 'Nomor rekening dan nominal persisnya tertulis di halaman borang.'],
-                        ['bi-chat-dots', 'Tunggu dikabari', 'Panitia mengecek bukti transfermu, lalu menghubungi lewat WhatsApp.'],
+                        ['bi-qr-code', 'Bayar di halaman pembayaran', 'Langsung sesudah borangnya terkirim, lewat QRIS atau Virtual Account. Batas waktunya ' . \App\Services\Doku::MENIT_KEDALUWARSA . ' menit.'],
+                        ['bi-envelope-check', 'Bukti dan tautannya dikirim', 'Nomor pendaftaran, faktur, dan tautan halaman statusmu masuk ke email dan WhatsApp.'],
                     ] as $i => [$ikon, $judul, $ket])
                         <li>
                             <span class="cmp-langkah-nomor">{{ $i + 1 }}</span>

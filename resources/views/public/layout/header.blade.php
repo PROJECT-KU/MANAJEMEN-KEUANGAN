@@ -603,7 +603,12 @@
                     <li class="dropdown">
                         <a href="#"><span>Class</span> <i class="bi bi-chevron-down"></i></a>
                         <ul>
-                            <li><a href="https://rumahscopus.com/courses/online-class/" target="_blank">Class Online</a></li>
+                            {{-- Pendaftarannya pindah ke aplikasi ini 2 Nov 2026.
+                                 Sebelumnya tautan ini keluar ke WordPress, jadi orang
+                                 yang mau mendaftar Class Online meninggalkan situs ini
+                                 dan tidak pernah sampai ke borang mana pun yang kita
+                                 pegang. --}}
+                            <li><a href="{{ url('/Class-Online') }}">Class Online</a></li>
                             <li><a href="{{ url('/Scopus-Camp') }}">Class Offline</a></li>
                             <li><a href="{{ url('/Scopus-Kafe') }}">Scopus Kafe</a></li>
                             <li><a href="{{ url('/Analisis-Bibliometrik') }}">Analisis Bibliometrik</a></li>
@@ -711,7 +716,7 @@
                         <h4>Layanan Kami</h4>
                         <ul>
                             <li><i class="bi bi-chevron-right"></i> <a href="{{ url('/Scopus-Camp') }}">Scopus Camp</a></li>
-                            <li><i class="bi bi-chevron-right"></i> <a href="https://rumahscopus.com/courses/online-class/" target="_blank" rel="noopener noreferrer">Online Training</a></li>
+                            <li><i class="bi bi-chevron-right"></i> <a href="{{ url('/Class-Online') }}">Class Online</a></li>
                             <li><i class="bi bi-chevron-right"></i> <a href="{{ url('/Scopus-Kafe') }}">Scopus Kafe</a></li>
                             <li><i class="bi bi-chevron-right"></i> <a href="{{ url('/Analisis-Bibliometrik') }}">Analisis Bibliometrik</a></li>
                             <li><i class="bi bi-chevron-right"></i> <a href="{{ url('/Clinik-Scopus') }}">Clinik Scopus</a></li>

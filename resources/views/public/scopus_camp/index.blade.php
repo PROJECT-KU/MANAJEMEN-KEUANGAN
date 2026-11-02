@@ -156,6 +156,15 @@
        lebar. Di bawah 1200px keduanya menumpuk dan kotaknya kembali lebar. */
     @media (min-width: 1200px) {
         .kmp-bawah { grid-template-columns: minmax(0, 1fr) 420px; }
+
+        /* SENDIRIAN, kartu lacak tidak menyisakan lajur kosong di kirinya.
+
+           Kartu "Yang kamu dapat" tidak digambar kalau tidak ada satu pun
+           fasilitas yang bisa disebut — lihat alasannya di markahnya. Tanpa
+           aturan ini kartu lacak tetap duduk di lajur PERTAMA dan menyisakan
+           420px kosong di kanannya; terukur di layar 1440px, kotak putih
+           selebar 866px tanpa satu huruf pun. */
+        .kmp-bawah-tunggal { grid-template-columns: minmax(0, 560px); justify-content: center; }
     }
     .kmp-bawah > * { min-width: 0; }
     .kmp-panel-kartu { height: 100%; }
@@ -929,7 +938,23 @@
                          satu isian, dan separuh lebarnya kosong. Sejajar,
                          keduanya memakai lebar yang sama dan halaman ikut
                          memendek. Diminta pemiliknya 31 Okt 2026. --}}
-                    <div class="kmp-bawah">
+                    {{-- KARTU "Yang kamu dapat" DIGAMBAR HANYA KALAU ADA ISINYA.
+
+                         Fasilitasnya tidak disimpan di angkatan melainkan diambil
+                         dari TARIF induknya — lihat
+                         KategoriLayanan::getDaftarFasilitasAttribute(). Layanan yang
+                         tarifnya belum diisi karena itu memulangkan daftar kosong,
+                         dan pengendalinya memang sudah menyaringnya
+                         (`filter(fn ($p) => ! empty($p['fasilitas']))`).
+
+                         Yang TIDAK ikut disaring kartunya. Terukur di layar 1440px
+                         pada layanan yang tarifnya belum diisi: kotak putih selebar
+                         866px dan setinggi 174px, berbingkai, tanpa satu huruf pun —
+                         persis "space kosong" yang halaman ini dirombak untuk
+                         menghilangkan. Tidak ada galat; yang melihatnya mengira
+                         halamannya gagal dimuat separuh. --}}
+                    <div class="kmp-bawah {{ $paket->isEmpty() && ! $pisahkan ? 'kmp-bawah-tunggal' : '' }}">
+                        @if ($paket->isNotEmpty() || $pisahkan)
                         <div class="kmp-panel" data-aos="fade-up">
                             <div class="kmp-panel-kartu">
                                 {{-- POSTER TIDAK DIPAJANG di sini, dan itu keputusan.
@@ -1020,6 +1045,7 @@
                             </div>
 
                         </div>
+                        @endif
 
                         {{-- ================== jalan kembali bagi yang kehilangan tautannya
 
