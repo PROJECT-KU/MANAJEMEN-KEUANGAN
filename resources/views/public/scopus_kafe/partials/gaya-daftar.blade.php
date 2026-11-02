@@ -46,7 +46,11 @@
     .kfd-kabar.galat  { background: #fdecea; border-color: #f0bdb6; color: #8e2318; }
 
     /* ========================================================== kepala */
-    .kfd-kepala { padding: 124px 0 44px; text-align: center; }
+    /* 104px di atas, sama dengan Scopus Camp: kepala situs berposisi fixed
+       setinggi 82px dan tidak memesan ruang untuk dirinya sendiri, jadi
+       yang benar-benar perlu 82px ditambah sedikit napas. Sisanya jurang
+       kosong di layar pertama. */
+    .kfd-kepala { padding: 104px 0 34px; text-align: center; }
 
     .kfd-stiker {
         display: inline-flex; align-items: center; gap: 8px;
@@ -99,7 +103,7 @@
     .kfd-kapan-pisah { width: 1px; height: 20px; background: var(--garis); }
 
     /* ========================================================= bagian */
-    .kfd-bagian { padding: 8px 0 80px; text-align: center; }
+    .kfd-bagian { padding: 8px 0 54px; text-align: center; }
     .kfd-bagian-judul { font-size: clamp(1.4rem, 3vw, 1.9rem); }
     .kfd .kfd-renggang { margin-top: 72px; }
     .kfd .kfd-bagian-kata { max-width: 50ch; margin: 10px auto 0; font-size: .98rem; }
@@ -107,7 +111,15 @@
     /* ==================================================== blok varian */
     /* Satu blok per bentuk layanan. Tanpa pemisah ini dua kelompok sesi
        yang harganya berbeda terbaca sebagai satu deret kartu yang sama. */
-    .kfd-varian { margin-top: 42px; }
+    /* padding: 0 DINYATAKAN, bukan diandaikan.
+
+       Blok ini sebuah <section>, dan templat situs memberi `section`
+       padding 60px atas-bawah. Terukur: tiap blok varian 360px padahal
+       isinya cuma 240px — 120px sisanya padding warisan itu, dan dengan
+       dua varian ia menyumbang 240px ke panjang halaman tanpa menampilkan
+       apa pun. Tidak kelihatan dari gaya berkas ini sama sekali; yang
+       menunjukkannya cuma computed style. */
+    .kfd-varian { margin-top: 30px; padding: 0; }
     .kfd .kfd-varian-kepala { max-width: 860px; margin: 0 auto; }
     .kfd .kfd-varian-nama {
         display: inline-flex; align-items: center; gap: 10px;
@@ -125,42 +137,71 @@
     }
 
     .kfd-kartu {
-        display: flex; flex-direction: column; align-items: center; gap: 12px;
-        padding: 28px 24px; text-align: center;
-        background: #fff; border: 2px solid var(--tinta); border-radius: 22px;
+        /* MENDATAR DAN PADAT, bukan lajur tegak terpusat.
+
+           Terukur: bentuk tegaknya setinggi 336px per kartu, dan dengan dua
+           varian halaman ini jadi 3,48 layar — sementara kartu angkatan
+           Scopus Camp yang isinya sejenis cuma 160px. Yang memakan tinggi
+           bukan isinya melainkan susunannya: jam, nama, dua ciri, dan harga
+           masing-masing menempati barisnya sendiri di tengah.
+
+           Mendatar, jam duduk di samping nama dan cirinya, lalu harganya di
+           kaki kartu. Isi yang sama, tinggi sepertiganya. */
+        display: grid;
+        grid-template-columns: 62px minmax(0, 1fr);
+        grid-template-areas: 'jam nama' 'jam ciri' 'kaki kaki';
+        gap: 4px 14px; align-items: start;
+        padding: 16px 18px; text-align: left;
+        background: #fff; border: 2px solid var(--tinta); border-radius: 20px;
         box-shadow: 6px 6px 0 rgba(22, 35, 63, .12);
-        transition: transform .18s ease, box-shadow .18s ease;
     }
-    .kfd-kartu:hover { transform: translateY(-3px); box-shadow: 6px 9px 0 rgba(22, 35, 63, .14); }
+
+    /* TIDAK ADA efek pointer pada kartunya, dan itu disengaja.
+
+       Kartu sesi di sini BUKAN tautan — yang bisa diklik cuma tombol "Pesan
+       sekarang" di bawahnya. Kartu yang terangkat saat disentuh pointer
+       adalah janji "ini bisa diklik" yang dilanggar sedetik kemudian. Di
+       Scopus Camp kartunya memang tautan, jadi di sana janji itu ditepati. */
+
+    .kfd-jam { grid-area: jam; }
+    .kfd-nama { grid-area: nama; }
+    .kfd-ciri { grid-area: ciri; }
+    .kfd-harga { grid-area: kaki; }
 
     .kfd-jam {
         display: grid; place-items: center; gap: 1px;
-        width: 92px; padding: 12px 8px; border-radius: 16px;
+        width: 62px; padding: 8px 4px; border-radius: 14px;
         background: linear-gradient(135deg, var(--jingga-muda), var(--jingga-tua));
         color: #fff;
     }
-    .kfd-jam-angka { font-family: 'Fraunces', Georgia, serif; font-size: 1.45rem; font-weight: 800; }
-    .kfd-jam-label { font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; opacity: .92; }
+    .kfd-jam-angka { font-family: 'Fraunces', Georgia, serif; font-size: 1.05rem; font-weight: 800; }
+    .kfd-jam-label { font-size: .6rem; letter-spacing: .08em; text-transform: uppercase; opacity: .92; }
 
-    .kfd-nama { font-size: 1.3rem; }
+    .kfd-nama { font-size: 1.1rem; }
 
-    .kfd-ciri { list-style: none; padding: 0; margin: 0; display: grid; gap: 7px; }
+    .kfd-ciri { list-style: none; padding: 0; margin: 0; display: grid; gap: 3px; }
+    /* Rata kiri, bukan terpusat: kartunya tidak lagi lajur tegak di tengah,
+       dan teks terpusat di sebelah kanan kotak jam terbaca seperti melayang
+       lepas dari namanya. */
     .kfd-ciri li {
-        display: flex; align-items: center; justify-content: center; gap: 8px;
-        font-size: .92rem; color: var(--tinta-2); line-height: 1.5;
+        display: flex; align-items: center; gap: 8px;
+        font-size: .88rem; color: var(--tinta-2); line-height: 1.5;
     }
     .kfd-ciri i { color: var(--jingga); }
     .kfd-ciri-ket { opacity: .75; }
 
+    /* Harga dan satuannya SEBARIS di kaki kartu: ditumpuk, keduanya
+       menambah satu baris lagi ke kartu yang justru sedang dipendekkan. */
     .kfd-harga {
-        margin-top: 4px; padding-top: 14px; width: 100%;
-        border-top: 2px dashed var(--garis);
+        margin-top: 8px; padding-top: 10px; width: 100%;
+        display: flex; align-items: baseline; gap: 8px;
+        border-top: 1px dashed var(--garis);
     }
     .kfd-harga-angka {
-        display: block; font-family: 'Fraunces', Georgia, serif;
-        font-size: 1.5rem; font-weight: 800; color: var(--rumput);
+        font-family: 'Fraunces', Georgia, serif;
+        font-size: 1.2rem; font-weight: 800; color: var(--rumput);
     }
-    .kfd-harga-ket { font-size: .8rem; color: var(--tinta-2); }
+    .kfd-harga-ket { margin-left: auto; font-size: .8rem; color: var(--tinta-2); }
 
     /* ========================================================== ajakan */
     .kfd-ajak { margin-top: 34px; }
@@ -173,15 +214,35 @@
         font-family: 'Fraunces', Georgia, serif; font-size: 1.05rem; font-weight: 800;
         transition: transform .15s ease;
     }
-    .kfd-tombol:hover { color: #fff; background: var(--tinta); transform: translateY(-2px); }
+    .kfd-tombol:hover {
+        color: #fff; background: var(--tinta);
+        translate: 0 -2px; box-shadow: 0 14px 30px rgba(22, 35, 63, .22);
+    }
+    .kfd-tombol:active { translate: 0 0; box-shadow: 0 6px 14px rgba(22, 35, 63, .2); }
     .kfd-tombol.mati { background: var(--tinta-2); box-shadow: none; cursor: not-allowed; }
     .kfd .kfd-ajak-kata { margin-top: 12px; font-size: .92rem; max-width: 46ch; margin-left: auto; margin-right: auto; }
 
     /* =========================================================== ubin */
+    /* Jumlah lajurnya DIPATOK per lebar layar, bukan lewat auto-fit.
+
+       `repeat(auto-fit, minmax(min(100%, 220px), 1fr))` benar selama blok
+       ini anak langsung .container. Begitu ia jadi SEL KISI di .kfd-bawah,
+       `100%` tidak lagi mengacu ke lebar yang sama: terukur di layar 390px,
+       ubinnya 581px di dalam induk 366px — dua ubin selebar 281px, dan yang
+       kanan terpotong di luar layar.
+
+       Terpotongnya TIDAK terlihat dan TIDAK menggulir ke samping, sebab
+       `.kfd { overflow-x: clip }` memotongnya diam-diam. Cacat yang cuma
+       kelihatan dari angka, bukan dari tampilannya. */
     .kfd-ubin {
         display: grid; gap: 18px; margin: 28px auto 0; max-width: 1040px;
-        grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+        width: 100%; grid-template-columns: 1fr;
     }
+    @media (min-width: 560px)  { .kfd-ubin { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (min-width: 992px)  { .kfd-ubin { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+    /* Sejajar dengan kartu lacak, lajurnya tinggal ±780px: empat ubin di
+       situ menyisakan 180px per ubin dan judulnya patah tiap kata. */
+    @media (min-width: 1200px) { .kfd-ubin { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
     .kfd-ubin-butir {
         padding: 24px 20px; border-radius: 20px;
         background: #fff; border: 1px solid var(--garis);
@@ -196,6 +257,19 @@
     .kfd-ubin-butir p { font-size: .9rem; }
 
     /* ================================================== jalan kembali */
+    /* Dua blok penutup sejajar.
+
+       Lebar kartu lacak DIPATOK 420-500px, bukan dibagi rasio: dibagi
+       rasio, lebarnya ikut lebar layar dan kotak emailnya menyempit sampai
+       tidak muat satu alamat utuh — angka itu sudah terukur saat Scopus
+       Camp disusun begini. Di bawah 1200px keduanya menumpuk. */
+    .kfd-bawah { display: grid; gap: 16px; }
+    @media (min-width: 1200px) {
+        .kfd-bawah { grid-template-columns: minmax(0, 1fr) minmax(420px, 500px); }
+        .kfd-bawah .kfd-lacak { margin-top: 0; align-content: center; }
+    }
+    .kfd-bawah > * { min-width: 0; }
+
     .kfd-lacak {
         display: grid; gap: 14px; justify-items: center;
         margin: 72px auto 0; max-width: 560px; padding: 28px 26px;
@@ -224,7 +298,10 @@
         padding: 12px 20px; font-size: 15px; font-weight: 700; white-space: nowrap;
         border: 0; border-radius: 12px; cursor: pointer; background: var(--tinta); color: #fff;
     }
-    .kfd-lacak-isian button:hover { background: #23365c; }
+    .kfd-lacak-isian button:hover {
+        background: #23365c; translate: 0 -2px; box-shadow: 0 8px 18px rgba(22, 35, 63, .24);
+    }
+    .kfd-lacak-isian button:active { translate: 0 0; box-shadow: none; }
 
     .kfd-kosong {
         padding: 56px 24px; margin-top: 24px;
@@ -241,7 +318,20 @@
         .kfd-lacak { padding: 22px 18px; }
     }
 
+    /* Yang minta gerak dikurangi tidak cukup dimatikan TRANSISINYA saja:
+       tanpa baris transform/translate di bawah, tombolnya tetap melompat —
+       cuma seketika alih-alih mulus, dan bagi yang memasang setelan itu
+       karena vertigo perpindahan mendadak justru lebih buruk. */
     @media (prefers-reduced-motion: reduce) {
-        .kfd *, .kfd *::before, .kfd *::after { transition: none !important; }
+        .kfd *, .kfd *::before, .kfd *::after {
+            transition: none !important;
+            animation: none !important;
+        }
+        .kfd .kfd-tombol:hover,
+        .kfd .kfd-tombol:active,
+        .kfd .kfd-lacak-isian button:hover,
+        .kfd .kfd-lacak-isian button:active {
+            translate: none !important; transform: none !important;
+        }
     }
 </style>

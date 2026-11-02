@@ -189,6 +189,12 @@
 
             <h2 class="kfd-bagian-judul kfd-renggang">Yang kamu dapat</h2>
 
+            {{-- Dua blok penutup SEJAJAR di layar lebar — susunan yang sama
+                 dengan Scopus Camp. Ditumpuk, keduanya memakan dua blok penuh
+                 padahal kartu lacak cuma setinggi satu isian dan separuh
+                 lebarnya kosong. --}}
+            <div class="kfd-bawah">
+
             {{-- Empat ubin sejajar, bukan daftar centang di lajur sempit:
                  keempatnya sederajat, dan ditumpuk ke bawah di kiri halaman
                  ia terbaca seperti syarat dan ketentuan. --}}
@@ -228,6 +234,8 @@
                     <button type="submit"><i class="bi bi-envelope"></i> Kirim tautannya</button>
                 </div>
             </form>
+
+            </div>
         </div>
     </section>
 </div>
