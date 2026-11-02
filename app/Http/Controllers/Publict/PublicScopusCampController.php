@@ -426,31 +426,66 @@ class PublicScopusCampController extends Controller
          * jadi daftar kode diskon yang berlaku, dan log itu dibaca lebih
          * banyak orang daripada basis datanya.
          */
+        /*
+         * SATU JAWABAN UNTUK SEMUA KEGAGALAN, dan itu tetap dipertahankan:
+         * membedakan "kodenya tidak ada" dari "kodenya ada tetapi Anda tidak
+         * memenuhi syaratnya" memberi tahu penebak lebih daripada yang ia
+         * kirimkan.
+         *
+         * Yang DITAMBAHKAN cuma petunjuk nomornya. Sejak promo boleh
+         * menuntut pendaftarnya pernah lunas di layanan lain, kode yang
+         * benar-benar berlaku tetap ditolak selama nomornya belum diisi —
+         * dan kalimat lama membuat orangnya menyalahkan kodenya, lalu
+         * menyerah tanpa pernah mengisi nomor yang sebenarnya menentukan.
+         */
         $tolak = response()->json([
             'status' => 'error',
-            'message' => 'Kode diskonnya tidak berlaku untuk angkatan ini.',
+            'message' => 'Kode itu tidak berlaku untuk pendaftaran ini. '
+                . 'Pastikan nomor WhatsApp Anda sudah diisi di bawah — '
+                . 'sebagian promo hanya untuk yang pernah ikut kelas kami.',
         ]);
 
         if (! $diskon || $kode === '') {
             return $tolak;
         }
 
-        $seharusnya = trim((string) ($diskon->kode_diskon ?? ''));
+        /*
+         * LEWAT PotonganKode, sama persis dengan yang menagih.
+         *
+         * Sampai 2 Nov 2026 alamat ini hanya mengenali kode milik ANGKATAN,
+         * sementara store() sudah mengenali kode promo juga. Akibatnya
+         * terukur pada angkatan ke-202: tombol "Cek" menjawab "Kode
+         * diskonnya tidak berlaku untuk angkatan ini" untuk kode EKSKLUSIF
+         * yang — kalau borangnya tetap dikirim — justru DIPOTONG peladen.
+         * Layar dan tagihan berselisih; yang membacanya menyerah sebelum
+         * sempat tahu potongannya ada.
+         *
+         * Nomor WhatsApp-nya ikut dikirim sebab promo boleh menuntut
+         * pendaftarnya pernah lunas di layanan lain. Tanpa nomor, pratinjau
+         * ini akan menolak kode yang sebenarnya berlaku bagi orangnya.
+         */
+        $angkatan = \App\CategoriesScopusCamp::find($id);
 
-        // hash_equals: pembandingan untaian biasa berhenti di huruf pertama
-        // yang berbeda, dan selisih waktunya bisa dipakai menebak kodenya
-        // satu huruf demi satu huruf.
-        if ($seharusnya === '' || ! hash_equals($seharusnya, $kode)) {
+        if ($angkatan === null) {
             return $tolak;
         }
 
-        $nominal = trim((string) $diskon->nominal_diskon);
+        $jumlah = max(1, (int) $request->query('jumlah', 1));
+        $subtotal = (int) $angkatan->harga_setelah_promo * $jumlah;
+
+        $hasil = \App\Support\PotonganKode::hitung(
+            $angkatan, $kode, $subtotal, $request->query('telp')
+        );
+
+        if ($hasil['potongan'] <= 0) {
+            return $tolak;
+        }
 
         return response()->json([
             'status' => 'success',
-            'kode_input' => $kode,
-            'nominal_diskon' => $nominal,
-            'casted_nominal_diskon' => is_numeric($nominal) ? (int) $nominal : 0,
+            'kode_input' => $hasil['kode'] ?? $kode,
+            'nominal_diskon' => (string) $hasil['potongan'],
+            'casted_nominal_diskon' => $hasil['potongan'],
         ]);
     }
 
