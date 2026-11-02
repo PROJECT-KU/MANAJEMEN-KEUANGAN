@@ -11,6 +11,22 @@ use Illuminate\Support\Facades\DB;
 
 class PesertaController extends Controller
 {
+    use \App\Http\Controllers\account\Concerns\JagaPeran;
+
+    /**
+     * Keempatnya lembar kerja PESERTA, bukan layar panitia: index() borangnya,
+     * store() menyimpannya, update() menandainya selesai, dan testimoni()
+     * dibuka lewat token sekali pakai. Dijaga administrator, pesertanya
+     * sendiri terkunci di luar lembar yang dibuat untuknya.
+     *
+     * Terukur 3 Nov 2026 layar ini menjawab HTTP 200 untuk akun
+     * berperan `user`. Lihat sebabnya di trait JagaPeran.
+     */
+    public function __construct()
+    {
+        $this->jagaAdministrator(['index', 'store', 'update', 'testimoni']);
+    }
+
     /**
      * PenyewaanController constructor.
      */

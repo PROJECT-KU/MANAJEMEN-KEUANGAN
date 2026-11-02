@@ -15,6 +15,20 @@ use Illuminate\Support\Facades\Hash;
 
 class MaintenanceController extends Controller
 {
+    use \App\Http\Controllers\account\Concerns\JagaPeran;
+
+    /**
+     * page() menyajikan halaman PUBLIK /page-maintenance tanpa auth sama sekali — dijaga,
+     * situsnya sendiri tidak bisa dibuka saat sedang dimatikan.
+     *
+     * Terukur 3 Nov 2026 layar ini menjawab HTTP 200 untuk akun
+     * berperan `user`. Lihat sebabnya di trait JagaPeran.
+     */
+    public function __construct()
+    {
+        $this->jagaAdministrator(['page']);
+    }
+
 
     public function index()
     {

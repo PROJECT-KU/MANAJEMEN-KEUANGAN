@@ -139,9 +139,23 @@ class KeamananAlurBayarTest extends TestCase
 
         Http::fake(['*' => Http::response(['transaction' => ['status' => 'PENDING']], 200)]);
 
+        /*
+         * 80 percobaan, bukan 40.
+         *
+         * Ambangnya naik dari 30 jadi 40 per menit pada 3 Nov 2026, saat
+         * jatahnya dipindah dari PER ALAMAT IP ke PER PENDAFTARAN — per IP,
+         * orang-orang berbeda di belakang satu alamat kampus saling
+         * menghabiskan jatah, dan yang ketiga ditolak karena kelakuan dua
+         * orang yang tidak ia kenal.
+         *
+         * Dengan batas 40, empat puluh percobaan berhenti tepat SEBELUM
+         * penolakan pertama — uji ini karena itu merah walau pembatasnya
+         * bekerja sempurna. Ruangnya dilebihkan supaya kenaikan berikutnya
+         * tidak mengulanginya.
+         */
         $kena = false;
 
-        for ($i = 0; $i < 40; $i++) {
+        for ($i = 0; $i < 80; $i++) {
             if ($this->get(route('public.scopuscamp.keadaan', $p->getKey()))->status() === 429) {
                 $kena = true;
                 break;
