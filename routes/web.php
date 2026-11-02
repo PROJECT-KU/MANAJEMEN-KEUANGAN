@@ -184,6 +184,75 @@ Route::post('/Scopus-Camp/pemberitahuan/doku', 'Publict\PublicScopusCampControll
     ->middleware('throttle:gerbang-pemberitahuan')
     ->name('public.scopuscamp.pemberitahuan');
 
+/*
+ * CLASS ONLINE PUBLIC
+ *
+ * Bentuknya SAMA dengan Scopus Camp — berangkatan, bergerbang, berhalaman
+ * status — dan pembatas lajunya memang memakai nama yang sama ('camp-*').
+ * Itu bukan kelupaan: Scopus Kafe sudah memakainya juga sejak 26 Okt 2026.
+ * Yang dijaga nama-nama itu BENTUK jalurnya, bukan layanannya — "tiap
+ * penekanan membuat tagihan sungguhan", "tiap penekanan mengirim surat",
+ * "borangnya menerima alamat email orang lain" — dan ketiganya berlaku sama
+ * di sini. Jatahnya memang jadi bersama; itu lebih longgar daripada yang
+ * dibutuhkan satu orang yang sedang mengisi satu borang, dan jauh lebih
+ * mudah dipercaya daripada tiga salinan aturan yang akan berbeda perlahan.
+ */
+Route::get('/Class-Online', 'Publict\PublicOnlineTrainingController@public')->name('public.onlinetraining.index');
+Route::get('/Class-Online/selengkapnya/{id}', 'Publict\PublicOnlineTrainingController@Selengkapnya')->name('public.onlinetraining.Selengkapnya');
+Route::get('/Class-Online/Form-Pendaftaran/{id}', 'Publict\PublicOnlineTrainingController@FormPendaftaran')->name('public.onlinetraining.formpendaftaran');
+Route::get('/Class-Online/cek-kode-diskon/{id}', 'Publict\PublicOnlineTrainingController@cekKodeDiskon')
+    ->middleware('throttle:cek-diskon')
+    ->name('public.onlinetraining.cekkodediskon');
+Route::post('/Class-Online/store', 'Publict\PublicOnlineTrainingController@store')
+    ->middleware('throttle:daftar-umum')
+    ->name('public.onlinetraining.store');
+
+// Menukar nomor WhatsApp jadi nama dan email, untuk mengisi borang otomatis.
+// Dibatasi per menit per IP: tanpa batas ia bisa dipakai memanen keduanya
+// dengan mencoba nomor satu per satu.
+Route::post('/Class-Online/cari-pendaftar', 'Publict\PublicOnlineTrainingController@cariPendaftar')
+    ->middleware('throttle:isi-otomatis')
+    ->name('public.onlinetraining.caripendaftar');
+
+// UUID saja, tanpa token: UUID acak tidak bisa ditebak, sedangkan nomor urut
+// akan membuat pendaftaran orang lain terbuka cukup dengan menaikkan satu
+// angka.
+Route::get('/Class-Online/Status/{id}', 'Publict\PublicOnlineTrainingController@status')
+    ->middleware('throttle:camp-status')
+    ->name('public.onlinetraining.status');
+Route::get('/Class-Online/Status/{id}/keadaan', 'Publict\PublicOnlineTrainingController@keadaan')
+    ->middleware('throttle:camp-keadaan')
+    ->name('public.onlinetraining.keadaan');
+
+Route::post('/Class-Online/Status/{id}/bayar-ulang', 'Publict\PublicOnlineTrainingController@bayarUlang')
+    ->middleware('throttle:camp-bayar-ulang')
+    ->name('public.onlinetraining.bayarulang');
+
+Route::post('/Class-Online/Status/{id}/kirim-ulang', 'Publict\PublicOnlineTrainingController@kirimUlang')
+    ->middleware('throttle:camp-kirim-ulang')
+    ->name('public.onlinetraining.kirimulang');
+
+// GET, dan itu memang benar: tidak ada yang berubah di basis data, jadi
+// memuat ulang halamannya tidak boleh menimbulkan peringatan "kirim ulang
+// formulir". Penjagaannya UUID pendaftarannya.
+Route::get('/Class-Online/Status/{id}/dokumen/{jenis}', 'Publict\PublicOnlineTrainingController@dokumen')
+    ->middleware('throttle:camp-status')
+    ->name('public.onlinetraining.dokumen');
+
+// Jalan kembali bagi yang kehilangan tautan pendaftarannya. Tautannya dikirim
+// ke EMAIL, tidak pernah ditampilkan di layar.
+Route::post('/Class-Online/tautan-saya', 'Publict\PublicOnlineTrainingController@tautanSaya')
+    ->middleware('throttle:camp-tautan-saya')
+    ->name('public.onlinetraining.tautansaya');
+
+/*
+ * Pemberitahuan balik dari DOKU; dikecualikan dari CSRF di VerifyCsrfToken.
+ * Penjagaannya tanda tangan HMAC, diperiksa sebelum satu pun status diubah.
+ */
+Route::post('/Class-Online/pemberitahuan/doku', 'Publict\PublicOnlineTrainingController@pemberitahuan')
+    ->middleware('throttle:gerbang-pemberitahuan')
+    ->name('public.onlinetraining.pemberitahuan');
+
 // WEBINAR EKSKLUSIF
 // Halaman pemasarannya ada di subdomain tersendiri dan mengambil datanya
 // lewat /api/webinar-eksklusif; yang di sini bagian yang menulis ke basis data.
@@ -604,6 +673,16 @@ Route::prefix('account')
             Route::delete('/scopus-camp/kategori/delete/{id}', 'account\CategoriesScopusCampController@destroy')->name('account.kategoriscopuscamp.destroy');
             Route::get('scopus-camp/kategori/search', 'account\CategoriesScopusCampController@search')->name('account.kategoriscopuscamp.search');
             Route::get('scopus-camp/kategori/filter', 'account\CategoriesScopusCampController@filter')->name('account.kategoriscopuscamp.filter');
+
+            // kategori class online
+            Route::get('class-online/kategori/', 'account\CategoriesOnlineTrainingController@index')->name('account.kategorionlinetraining.index');
+            Route::get('class-online/kategori/create', 'account\CategoriesOnlineTrainingController@create')->name('account.kategorionlinetraining.create');
+            Route::post('class-online/kategori/store', 'account\CategoriesOnlineTrainingController@store')->name('account.kategorionlinetraining.store');
+            Route::get('class-online/kategori/edit/{id}', 'account\CategoriesOnlineTrainingController@edit')->name('account.kategorionlinetraining.edit');
+            Route::post('class-online/kategori/update/{id}', 'account\CategoriesOnlineTrainingController@update')->name('account.kategorionlinetraining.update');
+            Route::delete('/class-online/kategori/delete/{id}', 'account\CategoriesOnlineTrainingController@destroy')->name('account.kategorionlinetraining.destroy');
+            Route::get('class-online/kategori/search', 'account\CategoriesOnlineTrainingController@search')->name('account.kategorionlinetraining.search');
+            Route::get('class-online/kategori/filter', 'account\CategoriesOnlineTrainingController@filter')->name('account.kategorionlinetraining.filter');
 
 
             /*

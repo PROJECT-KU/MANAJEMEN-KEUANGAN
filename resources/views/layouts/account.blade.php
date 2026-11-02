@@ -638,6 +638,29 @@ $isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';
                                 @endif
                                 <!--================== END ==================-->
 
+                                <!--================== CLASS ONLINE ==================-->
+                                @if (Auth::user()->adalahAdministrator())
+                                <li class="menu-header">CLASS ONLINE</li>
+
+                                <li class="{{ setActive('account/class-online') }}">
+                                    <a class="nav-link" href="{{ route('account.kategorionlinetraining.index') }}">
+                                        <i class="fas fa-laptop"></i> <span>Kategori </span>
+                                    </a>
+                                </li>
+
+                                {{-- Menunjuk layar Pendaftar Layanan yang sudah
+                                     tersaring ke layanan ini. Layanan ini TIDAK
+                                     punya layar pendaftarnya sendiri, dan memang
+                                     tidak perlu: layar bersama itu membaca keenam
+                                     layanan lewat katalog. --}}
+                                <li>
+                                    <a class="nav-link" href="{{ route('account.pendaftaran-layanan.index', ['layanan' => 'online_training']) }}">
+                                        <i class="fas fa-file-signature"></i> <span>Data Pendaftar</span>
+                                    </a>
+                                </li>
+                                @endif
+                                <!--================== END ==================-->
+
                                 {{-- Menu KEUANGAN (Uang Masuk & Uang Keluar beserta kategorinya)
                                      dihapus 27 September 2026 atas permintaan pemilik.
                                      Laporan Uang Masuk/Keluar di bagian LAPORAN sengaja

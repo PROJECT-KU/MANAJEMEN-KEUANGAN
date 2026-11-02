@@ -104,6 +104,22 @@ class Kernel extends ConsoleKernel
         $tugas('scopus-camp:kedaluwarsakan')->everyTenMinutes();
 
         /*
+         * Dan hal yang sama untuk Class Online, sejak layanan itu dibuka
+         * 2 Nov 2026. Kuotanya dipotong pada detik yang sama dengan Scopus
+         * Camp — saat orang menekan "Lanjut ke pembayaran" — jadi tanpa
+         * sapuan ini kursinya tertahan selamanya persis seperti dulu.
+         *
+         * Jaraknya satu menit dari milik Camp, bukan menit yang sama.
+         * Keduanya mengirim WhatsApp berjeda 25 detik per pesan, dan dua
+         * sapuan yang menembak bersamaan membuat ledakan yang justru jadi
+         * sebab nomornya diblokir.
+         */
+        // cron() langsung, bukan everyTenMinutes()->at(...): at() menyetel
+        // JAM harian dan menimpa seluruh jadwal sepuluh menitan itu — jadi
+        // rangkaiannya terbaca benar tetapi jalannya sekali sehari.
+        $tugas('online-training:kedaluwarsakan')->cron('1,11,21,31,41,51 * * * *');
+
+        /*
          * Pengingat H-1, pagi hari. Jam 08:00, bukan tengah malam: surat yang
          * tiba pukul 00:05 tenggelam di antara surat semalam, dan yang
          * membacanya pagi-pagi sudah melewatkan satu kesempatan mengingat.

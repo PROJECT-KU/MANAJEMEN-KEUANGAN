@@ -250,19 +250,30 @@ class PromoAngkatan
          * menagih peserta luar Jawa dengan harga Jawa.
          */
         /*
-         * HANYA Scopus Camp, dan itu DIUKUR bukan dipilih sembarangan.
+         * DUA LAYANAN, bukan semuanya — dan daftarnya DIUKUR, bukan dipilih
+         * sembarangan.
          *
-         * Dicoba dulu untuk semua layanan: rangkaian ujinya memerah di 9
+         * Dicoba dulu untuk SEMUA layanan: rangkaian ujinya memerah di 9
          * tempat — Webinar Eksklusif, Doku, perakit deskripsi, dan layar
          * promo. Sebabnya bukan ujinya rewel, melainkan artinya memang
          * berbeda: sesi Webinar Eksklusif punya harga SENDIRI-SENDIRI dan
          * tarifnya cuma angka bawaan, sementara angkatan Scopus Camp
          * memang dimaksudkan mengikuti satu tarif baku per varian.
          *
-         * Melebarkannya ke layanan lain perkara tersendiri, dan perkara
-         * uang — bukan sesuatu yang pantas ikut terbawa diam-diam.
+         * Class Online ikut sejak 2 Nov 2026, hari layanan itu dibuka.
+         * Bentuknya memang disalin dari Scopus Camp atas permintaan
+         * pemiliknya — berangkatan, satu tarif baku, harga yang sama untuk
+         * seluruh angkatan — jadi alasan yang membuat Camp membaca tarif
+         * berlaku sama persis di sini. Dibiarkan membaca kolom harga
+         * angkatannya, layar Tarif Layanan dan halaman umum akan menyebut
+         * dua angka berbeda untuk satu kelas yang sama, persis cacat yang
+         * ditemukan pada angkatan Camp ke-202.
+         *
+         * INI PERKARA UANG. Menambah layanan ketiga ke daftar ini mengubah
+         * angka yang ditagihkan kepada orang, jadi daftarnya ditulis di sini
+         * terang-terangan dan tidak boleh ditebak dari nama layanan.
          */
-        if ((string) $angkatan->layanan !== 'scopus_camp') {
+        if (! in_array((string) $angkatan->layanan, ['scopus_camp', 'online_training'], true)) {
             return (int) ($angkatan->total_biaya ?: $angkatan->biaya);
         }
 

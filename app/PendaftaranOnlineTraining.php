@@ -122,6 +122,34 @@ class PendaftaranOnlineTraining extends Model
     }
 
     /**
+     * Semua nama peserta, pendaftar utama lebih dulu.
+     *
+     * DIPAKAI CETAKAN SURAT dan cetakan faktur, bukan kode PHP di sini — dan
+     * karena itu ketiadaannya tidak kelihatan dari mana pun. Terukur saat
+     * layanan ini dirakit: methodnya tertinggal, dan surat bukti
+     * pendaftarannya melempar "Call to undefined method" DI DALAM try-catch
+     * yang memang disengaja — jadi pendaftarannya tersimpan rapi, tagihannya
+     * terbit, orangnya diantar ke DOKU, dan suratnya tidak pernah berangkat
+     * ke siapa pun. Tidak ada satu pun galat di layar.
+     *
+     * @return list<array{nama:string, email:?string, utama:bool}>
+     */
+    public function semuaPeserta(): array
+    {
+        $daftar = [[
+            'nama' => (string) $this->nama,
+            'email' => (string) $this->email,
+            'utama' => true,
+        ]];
+
+        foreach ($this->pesertaLain as $p) {
+            $daftar[] = ['nama' => (string) $p->nama, 'email' => $p->email, 'utama' => false];
+        }
+
+        return $daftar;
+    }
+
+    /**
      * Melepas kursi dari tagihan yang sudah lewat tenggat 60 menit.
      *
      * MENYALIN PendaftaranScopusCamp::lepaskanYangKedaluwarsa() termasuk

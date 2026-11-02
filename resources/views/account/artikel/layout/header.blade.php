@@ -47,7 +47,7 @@
                     <li><a class="nav-link scrollto active" href="{{ url('/blog') }}">Blog</a></li>
                     <li class="dropdown"><a href="#"><span>Class<i class="bi bi-chevron-down"></i></a>
                         <ul>
-                            <li><a href="https://rumahscopus.com/courses/online-class/" target="_blank">Class Online</a></li>
+                            <li><a href="{{ url('/Class-Online') }}">Class Online</a></li>
                             <li><a href="https://rumahscopusfoundation.com/account/Scopus-Camp" target="_blank">Class Offline</a></li>
                         </ul>
                     </li>
@@ -83,7 +83,7 @@
                         <h4>Useful Links</h4>
                         <ul>
                             <li><i class="bi bi-chevron-right"></i> <a href="{{ url('/blog') }}">Blog</a></li>
-                            <li><i class="bi bi-chevron-right"></i> <a href="https://rumahscopus.com/courses/online-class/" target="_blank">Class Online</a></li>
+                            <li><i class="bi bi-chevron-right"></i> <a href="{{ url('/Class-Online') }}">Class Online</a></li>
                             <li><i class="bi bi-chevron-right"></i> <a href="https://rumahscopusfoundation.com/account/Scopus-Camp" target="_blank">Class Offline</a></li>
                             <li><i class="bi bi-chevron-right"></i> <a href="{{ url('/blog/contact') }}">Contact</a></li>
                         </ul>

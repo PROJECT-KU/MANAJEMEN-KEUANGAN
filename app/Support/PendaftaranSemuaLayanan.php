@@ -217,19 +217,16 @@ class PendaftaranSemuaLayanan
             'status_awal' => 'diproses',
             'nomor_awalan' => 'CO',
             /*
-             * NULL untuk sekarang, dan itu bukan kelalaian.
+             * Halaman statusnya ada sejak 2 Nov 2026, jadi tautannya
+             * disebutkan di sini.
              *
-             * Halaman status publiknya belum dibuat. Katalog ini memang
-             * mengizinkan null untuk layanan yang tidak punya — "yang tidak
-             * punya tidak boleh diberi tautan tebakan: tautan yang mengantar
-             * ke halaman yang salah lebih buruk daripada tidak ada tautan,
-             * sebab yang menekannya mengira ia sudah memeriksa".
-             *
-             * Diisi nama rute yang belum ada, layar rincian panitia 500
-             * seketika — terukur begitu layanan ini didaftarkan. Diganti ke
-             * 'public.onlinetraining.status' begitu jalur publiknya jadi.
+             * Sempat null sehari: katalog ini mengizinkan null untuk layanan
+             * yang belum punya halaman status, dan diisi nama rute yang
+             * BELUM ADA layar rincian panitia 500 seketika — terukur begitu
+             * layanan ini didaftarkan. Rutenya sekarang terdaftar di
+             * routes/web.php; dijaga uji RuteKatalogTest.
              */
-            'rute_status' => null,
+            'rute_status' => 'public.onlinetraining.status',
             'pakai_gerbang' => true,
             'pakai_kode_unik' => true,
             'kolom_nomor' => 'id_transaksi',
