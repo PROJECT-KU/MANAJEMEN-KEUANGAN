@@ -40,7 +40,8 @@
         --tinta: #16233f;   --tinta-2: #5c6b85;
         --jingga: #e76d20;  --jingga-muda: #fb8c3d; --jingga-tua: #ad4d12;
         --jingga-kuat: #b85213;
-        --stabilo: #ffd84d; --rumput: #0f766e; --ungu: #5b3fd6;
+        --rumput: #0f766e; --ungu: #5b3fd6;
+        --garis: #e7dcc6;
 
         background: var(--kertas); color: var(--tinta);
         font-family: 'Figtree', system-ui, sans-serif;
@@ -74,13 +75,17 @@
         align-items: start;
     }
 
+    /* Pil kertas bergaris tipis, BUKAN blok navy pekat — disamakan dengan
+       halaman daftar. Warna ikonnya ditulis utuh: token --stabilo dibuang
+       bersama kuningnya, dan nilai yang tidak ada akan membuat ikon ini
+       kehilangan warnanya tanpa satu galat pun. */
     .cmp-tanda {
         display: inline-flex; align-items: center; gap: 8px;
-        padding: 6px 15px; margin-bottom: 14px;
-        background: var(--tinta); color: var(--kertas);
+        padding: 7px 16px; margin-bottom: 14px;
+        background: var(--kertas-2); border: 1px solid var(--garis);
+        color: var(--jingga-tua);
         border-radius: 999px; font-size: .84rem; font-weight: 800;
     }
-    .cmp-tanda i { color: var(--stabilo); }
 
     .cmp .cmp-judul { font-size: clamp(1.75rem, 3.6vw, 2.6rem); line-height: 1.14; }
     .cmp-nomor { color: var(--tinta-2); }
@@ -97,12 +102,26 @@
         display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 12px; margin: 22px 0 26px;
     }
+    /* Tiga kotak fakta: garis tipis, TANPA bayangan tiga warna.
+
+       Bentuk lamanya bergaris 2px dengan bayangan padat jingga, toska, dan
+       ungu — tiga warna aksen berjajar di layar pertama, masing-masing
+       sekuat tombol ajakan di bawahnya. Warnanya tetap dibedakan lewat
+       IKONNYA saja; itu cukup untuk membedakan tanggal dari biaya, tanpa
+       tiga blok warna yang bersaing dengan ajakan utamanya.
+
+       KALIMAT DI SINI SENGAJA TIDAK MENYEBUT TULISAN TOMBOLNYA. Blok
+       <style> ikut terkirim ke peramban, jadi frasa apa pun di komentar ini
+       ADA di sumber halaman — dan uji `halaman selengkapnya tidak
+       menawarkan angkatan yang tutup` memastikan tulisan tombol itu TIDAK
+       muncul saat angkatannya tertutup. Menyebutnya di sini memerahkan uji
+       itu tanpa satu baris markah pun berubah; sudah terjadi 2 Nov 2026. */
     .cmp-fakta-butir {
         display: flex; align-items: flex-start; gap: 12px;
         padding: 14px 16px;
-        background: var(--kertas);
-        border: 2px solid var(--tinta); border-radius: 16px;
-        box-shadow: 4px 4px 0 var(--c, var(--jingga));
+        background: #fff;
+        border: 1px solid var(--garis); border-radius: 16px;
+        box-shadow: 0 6px 18px rgba(22, 35, 63, .05);
     }
     .cmp-fakta-ikon {
         flex: 0 0 auto;
@@ -121,15 +140,19 @@
         display: inline-flex; align-items: center; justify-content: center; gap: 11px;
         width: 100%; min-height: 58px; padding: 16px 26px;
         background: var(--jingga-kuat); color: #fff;
-        border: 2px solid var(--tinta); border-radius: 999px;
-        box-shadow: 5px 5px 0 var(--tinta);
+        border: 0; border-radius: 999px;
+        box-shadow: 0 10px 24px rgba(184, 82, 19, .28);
         font-weight: 800; font-size: 1.1rem;
-        transition: transform .17s ease, box-shadow .17s ease;
+        transition: translate .17s ease, box-shadow .17s ease, background .17s ease;
     }
+    /* `translate`, bukan `transform`: halaman ini memakai AOS, yang memasang
+       transform sendiri pada unsur yang sama dan mengalahkan aturan :hover —
+       jebakan yang sudah terukur di kartu angkatan halaman daftar. */
     .cmp-tombol:hover {
-        color: #fff; background: var(--tinta);
-        transform: translate(-2px, -2px); box-shadow: 8px 8px 0 var(--tinta);
+        color: #fff; background: var(--jingga);
+        translate: 0 -2px; box-shadow: 0 14px 30px rgba(184, 82, 19, .34);
     }
+    .cmp-tombol:active { translate: 0 0; box-shadow: 0 6px 14px rgba(184, 82, 19, .28); }
     .cmp-tombol-mati {
         background: var(--tinta-2); border-color: var(--tinta-2);
         box-shadow: none; cursor: not-allowed;
@@ -147,40 +170,115 @@
     .cmp-flyer {
         margin: 0; padding: 12px;
         background: var(--kertas);
-        border: 2px solid var(--tinta); border-radius: 18px;
-        box-shadow: 9px 9px 0 var(--jingga);
+        border: 1px solid var(--garis); border-radius: 18px;
+        box-shadow: 0 18px 38px rgba(22, 35, 63, .14);
         transform: rotate(1.4deg);
     }
     .cmp-flyer img { width: 100%; height: auto; display: block; border-radius: 10px; }
 
     /* ==================================================== pita tinta */
-    .cmp-pita-tinta { padding: 52px 0; background: var(--tinta); }
-    .cmp .cmp-judul-pita {
-        color: var(--kertas); font-size: 1.6rem; margin-bottom: 22px; text-align: center;
+    /* BUKAN LAGI PITA NAVY PEKAT.
+
+       Satu blok gelap selebar layar di tengah halaman kertas adalah benda
+       paling berat di seluruh halaman — matanya jatuh ke sana lebih dulu
+       daripada ke tombol daftarnya, dan kontras terang-gelap sebesar itu
+       yang bikin mata cepat lelah. Disamakan dengan kartu "Yang kamu dapat"
+       di halaman daftar: kartu putih bergaris tipis di atas kertas. */
+    .cmp-pita-tinta { padding: 10px 0 0; background: transparent; }
+    .cmp-pita-tinta > .container > .cmp-kartu-dapat {
+        padding: 24px 26px;
+        background: #fff;
+        border: 1px solid var(--garis); border-radius: 22px;
+        box-shadow: 0 8px 22px rgba(22, 35, 63, .06);
     }
+    .cmp .cmp-judul-pita {
+        color: var(--tinta); font-size: 1.28rem; margin-bottom: 14px;
+    }
+
+    /* Lebar lajurnya DIUKUR dari butir terpanjang, bukan dipatok tiga.
+
+       Tiga lajur tetap membuat butir panjang patah dua baris sementara
+       butir pendek menyisakan separuh lajurnya kosong — kosong dan sesak
+       bersebelahan pada kisi yang sama. Dengan auto-fit 390px, lajurnya
+       menyesuaikan sendiri dan tidak ada butir yang patah. */
     .cmp-fasilitas {
         list-style: none; padding: 0; margin: 0;
-        display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px;
+        display: grid; gap: 8px 20px;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 390px), 1fr));
     }
     .cmp-fasilitas li {
-        display: flex; gap: 11px; align-items: flex-start;
-        padding: 14px 16px;
-        background: rgba(251, 245, 233, .07);
-        border: 1px solid rgba(251, 245, 233, .18);
-        border-radius: 14px;
-        color: var(--kertas); line-height: 1.45; font-size: .98rem;
+        display: flex; gap: 9px; align-items: flex-start; padding: 2px 0;
+        color: var(--tinta); line-height: 1.5; font-size: .95rem;
     }
-    .cmp-fasilitas i { flex: 0 0 auto; margin-top: 3px; color: var(--stabilo); }
+
+    /* Kotak ikonnya setinggi SATU BARIS teks lalu isinya dipusatkan.
+       `margin-top` tetap tidak bisa benar — ia harus mengikuti tinggi
+       baris, dan di halaman daftar angka tetapnya terukur meleset 4px. */
+    .cmp-fasilitas i {
+        flex: 0 0 auto; color: var(--rumput);
+        display: inline-flex; align-items: center; justify-content: center;
+        height: 1.5em;
+    }
 
     /* ========================================================== isi */
     .cmp-bagian { padding: 52px 0; }
-    .cmp-kisi { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 40px; }
+    .cmp-kisi { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 32px; align-items: start; }
 
+    /* Lajur kanan MENEMPEL saat digulir.
+
+       Terukur: "Jadwal lain yang masih dibuka" berakhir di 1.090px
+       sementara kartu keterangan di sebelahnya berlanjut sampai 1.510px —
+       sekitar 420px lajur kanan bawah kosong melompong, dan panjangnya
+       ditentukan naskah yang diketik panitia sehingga tidak bisa ditutup
+       dengan menyetel tinggi.
+
+       Menempel, ia ikut turun bersama bacaan: ruang itu terisi sendiri, dan
+       jadwal lain tetap terlihat saat orang sudah jauh membaca. 96px dari
+       atas, sebab kepala situs berposisi fixed setinggi 82px. */
+    @media (min-width: 992px) {
+        .cmp-kisi > aside { position: sticky; top: 96px; }
+    }
+
+    /* ============================================ uraian yang dipendekkan */
+    /* Naskah keterangannya diketik panitia dan panjangnya tak tentu —
+       terukur 830px untuk angkatan ini saja, penyumbang gulir terbesar di
+       halaman. Dipotong di 22em dengan tombol pembuka; yang ingin membaca
+       seluruhnya tinggal menekannya sekali.
+
+       Dipotong lewat max-height, BUKAN -webkit-line-clamp: naskahnya
+       memakai `white-space: pre-line` dan sudah memuat baris kosong
+       sendiri, sementara line-clamp menghitung baris hasil rata kanan-kiri
+       dan memotong di tempat yang berbeda-beda tiap lebar layar. */
+    .cmp-uraian-bungkus { position: relative; }
+    .cmp-uraian-bungkus.terpotong .cmp-uraian {
+        max-height: 22em; overflow: hidden;
+    }
+    .cmp-uraian-bungkus.terpotong::after {
+        content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 5em;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0), #fff 86%);
+        pointer-events: none;
+    }
+    .cmp-uraian-lagi {
+        display: inline-flex; align-items: center; gap: 8px; margin-top: 14px;
+        padding: 9px 18px; border-radius: 999px; cursor: pointer;
+        background: var(--kertas-2); border: 1px solid var(--garis);
+        color: var(--jingga-tua); font-weight: 800; font-size: .92rem;
+        font-family: inherit;
+    }
+    .cmp-uraian-lagi:hover { border-color: var(--jingga); }
+    .cmp-uraian-lagi i { transition: transform .2s ease; }
+    .cmp-uraian-bungkus:not(.terpotong) + .cmp-uraian-lagi i { transform: rotate(180deg); }
+
+    /* Bayangan lembut, bukan jingga pekat bergeser 7px.
+
+       Bayangan jingga penuh membuat warna ajakan utama halaman ini tidak
+       lagi menonjol dari apa pun. (Tulisan tombolnya sengaja tidak disebut
+       di komentar mana pun berkas ini — lihat keterangan di .cmp-fakta-butir.) */
     .cmp-kartu {
-        padding: 26px 28px;
-        background: var(--kertas-2);
-        border: 2px solid var(--tinta); border-radius: 22px;
-        box-shadow: 7px 7px 0 var(--jingga-muda);
+        padding: 24px 26px;
+        background: #fff;
+        border: 1px solid var(--garis); border-radius: 22px;
+        box-shadow: 0 8px 22px rgba(22, 35, 63, .06);
     }
     .cmp .cmp-sub-judul {
         display: flex; align-items: center; gap: 10px;
@@ -199,8 +297,9 @@
     .cmp-langkah li {
         display: flex; align-items: flex-start; gap: 14px;
         padding: 16px 18px;
-        background: var(--kertas);
-        border: 2px solid var(--tinta); border-radius: 16px;
+        background: #fff;
+        border: 1px solid var(--garis); border-radius: 16px;
+        box-shadow: 0 6px 18px rgba(22, 35, 63, .05);
     }
     .cmp-langkah-nomor {
         flex: 0 0 auto;
@@ -216,9 +315,9 @@
     /* ================================================== bilah kanan */
     .cmp-panel {
         padding: 22px;
-        background: var(--kertas-2);
-        border: 2px solid var(--tinta); border-radius: 22px;
-        box-shadow: 6px 6px 0 rgba(22, 35, 63, .16);
+        background: #fff;
+        border: 1px solid var(--garis); border-radius: 22px;
+        box-shadow: 0 8px 22px rgba(22, 35, 63, .06);
     }
     .cmp .cmp-panel h2 { font-size: 1.1rem; margin-bottom: 14px; }
     .cmp-lain { display: flex; flex-direction: column; gap: 10px; }
@@ -226,11 +325,14 @@
         display: grid; grid-template-columns: 58px minmax(0, 1fr); gap: 12px;
         align-items: center; padding: 11px 13px;
         background: var(--kertas);
-        border: 2px solid var(--tinta); border-radius: 14px;
+        border: 1px solid var(--garis); border-radius: 14px;
         color: var(--tinta);
-        transition: transform .16s ease, box-shadow .16s ease;
+        transition: translate .16s ease, box-shadow .16s ease, border-color .16s ease;
     }
-    .cmp-lain-butir:hover { color: var(--tinta); transform: translate(-2px, -2px); box-shadow: 4px 4px 0 var(--jingga); }
+    .cmp-lain-butir:hover {
+        color: var(--tinta); translate: 0 -2px;
+        border-color: var(--jingga); box-shadow: 0 8px 18px rgba(231, 109, 32, .16);
+    }
     .cmp-lain-tgl {
         display: flex; flex-direction: column; align-items: center; justify-content: center;
         padding: 7px 3px; border-radius: 11px;
@@ -469,12 +571,14 @@
     @if (! empty($item->daftar_fasilitas))
         <section class="cmp-pita-tinta">
             <div class="container">
+                <div class="cmp-kartu-dapat">
                 <h2 class="cmp-judul-pita">Yang kamu dapat</h2>
                 <ul class="cmp-fasilitas">
                     @foreach ($item->daftar_fasilitas as $butir)
                         <li><i class="bi bi-check-circle-fill"></i> <span>{{ $butir }}</span></li>
                     @endforeach
                 </ul>
+                </div>
             </div>
         </section>
     @endif
@@ -490,7 +594,18 @@
                             <h2 class="cmp-sub-judul"><i class="bi bi-info-circle"></i> Keterangan kegiatan</h2>
                             {{-- desc_promo: harga di dalam naskahnya ikut
                                  menyesuaikan promo yang sedang berjalan. --}}
-                            <p class="cmp-uraian">{{ $item->desc_promo }}</p>
+                            {{-- Kelas `terpotong` dipasang SKRIP, bukan ditulis
+                                 di sini. Tanpa skrip — peramban lama, JS
+                                 gagal dimuat — naskahnya tampil utuh apa
+                                 adanya; dipasang di markah, naskahnya
+                                 terpotong selamanya tanpa ada tombol yang
+                                 bisa membukanya. --}}
+                            <div class="cmp-uraian-bungkus" id="cmpUraian">
+                                <p class="cmp-uraian">{{ $item->desc_promo }}</p>
+                            </div>
+                            <button type="button" class="cmp-uraian-lagi" id="cmpUraianLagi" hidden>
+                                <span>Selengkapnya</span> <i class="bi bi-chevron-down"></i>
+                            </button>
                         </article>
                     @endif
 
@@ -623,6 +738,50 @@
         new IntersectionObserver(function (entri) {
             tampilkan(!entri[0].isIntersecting);
         }, { threshold: 0 }).observe(tombolAtas);
+    })();
+
+    /*
+     * Pemotong naskah keterangan.
+     *
+     * Dipotong HANYA kalau naskahnya memang lebih panjang daripada
+     * potongannya. Dipasang tanpa syarat, angkatan yang keterangannya cuma
+     * tiga baris ikut mendapat tombol "Selengkapnya" yang begitu ditekan
+     * tidak menambah satu baris pun — tombol yang berbohong tentang adanya
+     * isi yang disembunyikan.
+     */
+    (function () {
+        var bungkus = document.getElementById('cmpUraian');
+        var tombol = document.getElementById('cmpUraianLagi');
+
+        if (! bungkus || ! tombol) {
+            return;
+        }
+
+        // Diukur SEBELUM dipotong: sesudahnya tinggi yang terbaca tinggi
+        // potongannya, dan perbandingannya selalu bilang "tidak perlu".
+        var batas = parseFloat(getComputedStyle(bungkus).fontSize) * 22;
+
+        if (bungkus.scrollHeight <= batas + 24) {
+            return;
+        }
+
+        bungkus.classList.add('terpotong');
+        tombol.hidden = false;
+
+        tombol.addEventListener('click', function () {
+            var terpotong = bungkus.classList.toggle('terpotong');
+
+            tombol.querySelector('span').textContent = terpotong
+                ? 'Selengkapnya'
+                : 'Tutup lagi';
+
+            // Dikembalikan ke kepala kartunya saat ditutup: tanpa ini,
+            // menutup naskah yang sudah digulir jauh meninggalkan orangnya
+            // di tengah halaman kosong yang tiba-tiba memendek.
+            if (terpotong) {
+                bungkus.scrollIntoView({ block: 'nearest' });
+            }
+        });
     })();
 </script>
 @stop
