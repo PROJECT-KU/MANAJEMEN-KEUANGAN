@@ -2240,7 +2240,30 @@ class TindakanPendaftaranTest extends TestCase
     {
         $orang = $this->akun(User::PERAN_ADMINISTRATOR);
 
+        $dicoba = 0;
+
         foreach (array_keys(Pendaftaran::katalog()) as $layanan) {
+            /*
+             * Layanan yang MEMANG tidak pernah menerima bukti dilewati.
+             *
+             * Bukan kelonggaran: Class Online dan Webinar Eksklusif
+             * membayar seluruhnya lewat gerbang, jadi tabelnya tidak punya
+             * kolom `gambar` sama sekali dan `bukti_folder`-nya null.
+             * Memaksanya ikut di sini berarti menuntut jalur unggah
+             * dihidupkan untuk layanan yang justru sengaja tidak punya —
+             * jalur yang sudah dicabut dari Scopus Camp dan Scopus Kafe
+             * karena berbahaya.
+             *
+             * Yang dijaga tetap "tiap layanan YANG BISA", dan jumlahnya
+             * dihitung di bawah supaya penyaring ini tidak diam-diam
+             * mengosongkan ujinya sendiri.
+             */
+            if ((Pendaftaran::sumber($layanan)['kolom']['bukti'] ?? null) === null) {
+                continue;
+            }
+
+            $dicoba++;
+
             [$baris] = $this->buat($layanan);
 
             $this->actingAs($orang)->post(
@@ -2266,6 +2289,10 @@ class TindakanPendaftaranTest extends TestCase
                 "Alamat bukti {$layanan} tidak bisa dirakit."
             );
         }
+
+        $this->assertGreaterThanOrEqual(4, $dicoba,
+            'Hanya ' . $dicoba . ' layanan yang benar-benar dicoba. Penyaring '
+            . 'di atas diam-diam mengosongkan ujinya sendiri.');
     }
 
     #[Test]
@@ -2543,9 +2570,13 @@ class TindakanPendaftaranTest extends TestCase
     {
         $tanda = Str::random(8);
 
-        if (in_array($layanan, ['scopus_camp', 'bibliometrik'], true)) {
+        if (in_array($layanan, ['scopus_camp', 'bibliometrik', 'online_training'], true)) {
             $angkatan = $this->angkatan($layanan);
-            $kelas = $layanan === 'scopus_camp' ? PendaftaranScopusCamp::class : AnalisisBibliometrik::class;
+            $kelas = match ($layanan) {
+                'scopus_camp' => PendaftaranScopusCamp::class,
+                'online_training' => \App\PendaftaranOnlineTraining::class,
+                default => AnalisisBibliometrik::class,
+            };
 
             return [$kelas::create(array_merge([
                 'id_transaksi' => 'T-' . $tanda,
@@ -2617,6 +2648,9 @@ class TindakanPendaftaranTest extends TestCase
 
             $halaman = $this->actingAs($orang)
                 ->get(route('account.pendaftaran-layanan.rincian', [$layanan, $baris->getKey()]));
+
+            $this->assertSame(200, $halaman->getStatusCode(),
+                'Rincian tidak terbuka untuk layanan: ' . $layanan);
 
             $halaman->assertOk();
             $halaman->assertSee('Rincian Pendaftaran');

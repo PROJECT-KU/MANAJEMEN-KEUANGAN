@@ -189,6 +189,95 @@ class PendaftaranSemuaLayanan
                 'grup' => 'group_wa',
             ],
         ],
+        /*
+         * CLASS ONLINE (Online Training).
+         *
+         * Layanannya sudah ada di katalog Layanan sejak awal, tetapi sampai
+         * 2 Nov 2026 tidak punya tabel pendaftaran sama sekali — menu
+         * "Class Online" di kepala situs menunjuk ke situs WordPress di luar
+         * aplikasi ini, jadi tidak ada satu pun pendaftarannya yang pernah
+         * tercatat di sini.
+         *
+         * Butirnya MENYALIN scopus_camp, termasuk kosakata statusnya: layar
+         * panitia, ekspor, dan perakit pesan membaca keenam layanan lewat
+         * satu peta yang sama, dan kosakata yang berbeda-beda berarti tiap
+         * tempat butuh cabang khususnya sendiri.
+         */
+        'online_training' => [
+            'nama' => 'Class Online',
+            'tabel' => 'online_training_pendaftaran',
+            'ikon' => 'fa-laptop',
+            'warna' => 'mis-biru',
+
+            // Tidak pernah mengunggah bukti: pembayarannya seluruhnya lewat
+            // gerbang sejak hari pertama, jadi tabelnya pun tidak punya
+            // kolom `gambar`.
+            'bukti_folder' => null,
+            'kolom_catatan' => 'note',
+            'status_awal' => 'diproses',
+            'nomor_awalan' => 'CO',
+            /*
+             * NULL untuk sekarang, dan itu bukan kelalaian.
+             *
+             * Halaman status publiknya belum dibuat. Katalog ini memang
+             * mengizinkan null untuk layanan yang tidak punya — "yang tidak
+             * punya tidak boleh diberi tautan tebakan: tautan yang mengantar
+             * ke halaman yang salah lebih buruk daripada tidak ada tautan,
+             * sebab yang menekannya mengira ia sudah memeriksa".
+             *
+             * Diisi nama rute yang belum ada, layar rincian panitia 500
+             * seketika — terukur begitu layanan ini didaftarkan. Diganti ke
+             * 'public.onlinetraining.status' begitu jalur publiknya jadi.
+             */
+            'rute_status' => null,
+            'pakai_gerbang' => true,
+            'pakai_kode_unik' => true,
+            'kolom_nomor' => 'id_transaksi',
+            'kode_unik_rentang' => self::KODE_UNIK,
+            'boleh_dibuat_panitia' => true,
+            'model' => \App\PendaftaranOnlineTraining::class,
+
+            /*
+             * CategoriesOnlineTraining, BUKAN KategoriLayanan telanjang.
+             *
+             * Barisnya hidup di tabel yang sama dengan kelima layanan lain,
+             * jadi yang menyaringnya global scope di kelas turunan itu.
+             * Ditunjuk ke kelas induknya, kuerinya memulangkan angkatan
+             * SEMUA layanan — terukur 380+ baris, dan satu berkas uji yang
+             * biasanya beberapa detik jadi lebih dari lima menit.
+             */
+            'angkatan_model' => \App\CategoriesOnlineTraining::class,
+            'berangkatan' => true,
+            'status' => [
+                'diproses' => 'Diproses',
+                'Pendaftaran Diterima' => 'Pendaftaran diterima',
+                'Pendaftaran Reschedule' => 'Dijadwalkan ulang',
+                'Pendaftaran Ditolak' => 'Pendaftaran ditolak',
+                'Pendaftaran Dibatalkan' => 'Pendaftaran dibatalkan',
+                'Pendaftaran Refund' => 'Dana dikembalikan',
+            ],
+            'surat' => [
+                'Pendaftaran Diterima' => \App\Mail\OnlineTrainingUpdateDiterimaMail::class,
+            ],
+            'kolom' => [
+                'nomor' => 'id_transaksi',
+                'nama_orang' => 'nama',
+                'email' => 'email',
+                'telp' => 'telp',
+                'affiliasi' => 'affiliasi',
+                'angkatan_id' => 'kategori_id',
+                'jumlah' => 'jumlah_pendaftar',
+                'total' => 'total_pembayaran',
+                'kode_unik' => 'kode_unik',
+                'kode_diskon' => 'kode_diskon',
+                'nominal_diskon' => 'nominal_diskon',
+                'promo' => 'promo_id',
+                'bukti' => null,
+                'cara_bayar' => 'cara_bayar',
+                'catatan' => 'note',
+                'grup' => 'group_wa',
+            ],
+        ],
         'webinar_eksklusif' => [
             'nama' => 'Webinar Eksklusif',
             'ikon' => 'fa-star',
