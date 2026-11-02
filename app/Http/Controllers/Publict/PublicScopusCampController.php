@@ -956,7 +956,7 @@ class PublicScopusCampController extends Controller
         try {
             $save = DB::transaction(function () use (
                 $kategori, $data, $jumlahPendaftarBaru, $bayarDaring,
-                $imagePath, $kodeDiskon, $nominalDiskon, $harga,
+                $imagePath, $kodeDiskon, $nominalDiskon, $harga, $hasilKode,
                 $cleanPPN, $cleanTotalPembayaran, $request
             ) {
                 $terkunci = CategoriesScopusCamp::whereKey($kategori->getKey())
@@ -988,7 +988,26 @@ class PublicScopusCampController extends Controller
                     'nominal_diskon'                                            => $nominalDiskon,
                     'total_pembayaran'                                          => $cleanTotalPembayaran,
             // Tali ke promo yang memotong harganya; dibaca layar dampak promo.
-                    'promo_id'                                                  => $harga['promo']?->getKey(),
+                    /*
+                     * PROMO BERKODE ikut tercatat, bukan cuma yang otomatis.
+                     *
+                     * Sampai 2 Nov 2026 kolom ini hanya diisi dari promo
+                     * otomatis. Promo yang dipakai LEWAT KODE memotong
+                     * harganya tetapi tidak meninggalkan jejak apa pun —
+                     * terukur: promo berkuota 2 dipakai sekali lalu
+                     * `terpakai` tetap 0 dan `kuotaHabis()` tetap false.
+                     * Artinya kuota promo berkode tidak membatasi apa pun,
+                     * dan layar Dampak Promo tidak pernah menampilkannya.
+                     *
+                     * Yang berkode didahulukan saat keduanya ada: ia yang
+                     * dipilih orangnya dengan sengaja, dan ia yang punya
+                     * kuota untuk dijaga. Kolomnya cuma satu, jadi promo
+                     * otomatis yang kebetulan menyertainya memang tidak
+                     * ikut tercatat — disebut di sini supaya tidak dikira
+                     * terlewat.
+                     */
+                    'promo_id'                                                  => $hasilKode['promo']?->getKey()
+                        ?? $harga['promo']?->getKey(),
 
             /*
              * Statusnya DIPUTUSKAN DI SINI, tidak lagi diterima dari borang.
