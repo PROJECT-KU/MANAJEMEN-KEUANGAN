@@ -224,7 +224,11 @@ class PublicAnalisisBibliometrikController extends Controller
             'nominal_diskon'                                            => $nominalDiskon,
             'total_pembayaran'                                          => $cleanTotalPembayaran,
             // Tali ke promo yang memotong harganya; dibaca layar dampak promo.
-            'promo_id'                                                  => $harga['promo']?->getKey(),
+            // Promo BERKODE ikut tercatat, bukan cuma yang otomatis; tanpa
+            // ini kuota promo berkode tidak membatasi apa pun. Alasannya
+            // sama persis dengan Scopus Camp.
+            'promo_id'                                                  => $hasilKode['promo']?->getKey()
+                ?? $harga['promo']?->getKey(),
             'status'                                                    => $request->input('status') ?? 'diproses',
             'note'                                                      => $request->input('note'),
         ]);
