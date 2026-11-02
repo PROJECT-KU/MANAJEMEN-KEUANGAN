@@ -399,16 +399,46 @@ class PublicScopusKafeController extends Controller
         ]);
 
         if (! $hasil['berhasil'] || ! $hasil['url']) {
+            /*
+             * CATATANNYA TIDAK MENUMPUK.
+             *
+             * Sampai 3 Nov 2026 kalimatnya ditempelkan apa adanya ke `note`
+             * tiap percobaan. Terukur pada pendaftaran sungguhan sesudah DUA
+             * percobaan: kolom catatan panitia berisi kalimat yang sama dua
+             * kali, kata demi kata. Lima percobaan berarti lima salinan, dan
+             * catatan panitia sendiri tenggelam di bawahnya.
+             */
+            $catatanBaru = 'Tagihan daring gagal dibuat: ' . ($hasil['pesan'] ?? 'tidak diketahui');
+            $catatanLama = trim((string) $pemesanan->note);
+
             $pemesanan->forceFill([
                 'bayar_status' => 'gagal-dibuat',
-                'note' => trim((string) $pemesanan->note . ' Tagihan daring gagal dibuat: '
-                    . ($hasil['pesan'] ?? 'tidak diketahui')),
+                'note' => str_ends_with($catatanLama, $catatanBaru)
+                    ? $catatanLama
+                    : trim($catatanLama . ' ' . $catatanBaru),
             ])->save();
 
-            return redirect()->route('public.scopuskafe.status', $pemesanan->getKey())
-                ->with('error', 'Pembayaran daring sedang bermasalah. Pemesanan Anda SUDAH '
+            /*
+             * DUA KALIMAT, menurut sebabnya.
+             *
+             * "Sedang bermasalah, hubungi panitia" salah untuk 5xx: yang
+             * sedang mati peladen DOKU, dan panitia tidak bisa berbuat
+             * apa-apa atasnya. Yang tepat menunggu beberapa menit lalu
+             * menekan tombolnya lagi. Terukur 3 Nov 2026 — sandbox DOKU
+             * menjawab 503 dari penyeimbang bebannya sendiri, dan
+             * halamannya menyuruh orangnya menghubungi panitia.
+             */
+            $pesanLayar = ($hasil['sementara'] ?? false)
+                ? 'Penyedia pembayarannya sedang bermasalah di pihak mereka, bukan di '
+                    . 'pendaftaran Anda. Pendaftaran Anda SUDAH tersimpan dan kursinya '
+                    . 'ditahan — tunggu beberapa menit, lalu buat tagihannya lagi lewat '
+                    . 'tombol di halaman ini.'
+                : 'Pembayaran daring sedang bermasalah. Pemesanan Anda SUDAH '
                     . 'tersimpan — silakan buat tagihan baru lewat tombol di halaman ini, '
-                    . 'atau hubungi panitia lewat WhatsApp.');
+                    . 'atau hubungi panitia lewat WhatsApp.';
+
+            return redirect()->route('public.scopuskafe.status', $pemesanan->getKey())
+                ->with('error', $pesanLayar);
         }
 
         $pemesanan->forceFill([
