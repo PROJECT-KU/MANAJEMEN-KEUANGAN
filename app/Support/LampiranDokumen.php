@@ -61,6 +61,10 @@ class LampiranDokumen
             'cetakan' => 'public.scopus_kafe.dokumen_pdf',
             'nomor' => 'id_pemesanan', 'total' => 'total_keseluruhan_pembayaran', 'awalan' => 'KAFE-',
         ],
+        'online_training' => [
+            'cetakan' => 'public.online_training.dokumen_pdf',
+            'nomor' => 'id_transaksi', 'total' => 'total_pembayaran', 'awalan' => 'CO-',
+        ],
     ];
 
     /**

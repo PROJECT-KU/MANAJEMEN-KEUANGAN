@@ -130,6 +130,32 @@ class KabariWhatsApp
             'kelanjutan' => 'Jadwal dan tautan sesinya dibagikan panitia lewat grup peserta di WhatsApp.',
         ],
 
+        'online_training' => [
+            'daftar' => 'public.onlinetraining.formpendaftaran',
+
+            /*
+             * lepas_tempat: kursinya memang DITAHAN lalu dilepas, sama
+             * seperti Scopus Camp — kuotanya dipotong saat orang menekan
+             * "Lanjut ke pembayaran", bukan saat ia membayar. Kalimat "kursi
+             * Anda dilepas" karena itu benar di layanan ini.
+             */
+            'lepas_tempat' => true,
+            'daftar_berangkatan' => true,
+            'indeks' => 'public.onlinetraining.index',
+
+            /*
+             * 'kedaluwarsa' TIDAK di sini, sebabnya sama dengan Scopus Camp:
+             * pesannya menyebut sebab yang tegas — "batas waktu
+             * pembayarannya telah terlewat" — dan satu-satunya tempat yang
+             * memastikannya perintah online-training:kedaluwarsakan, yang
+             * memanggil kursiDilepas() sendiri.
+             */
+            'kabar_status' => ['lunas', 'jadwal', 'ditolak', 'refund', 'dibatalkan'],
+
+            // Tidak ada tempat yang didatangi: yang menyusul tautan sesinya.
+            'kelanjutan' => 'Tautan masuk kelasnya dibagikan panitia lewat grup peserta di WhatsApp.',
+        ],
+
         /*
          * Clinik Scopus TIDAK ada di sini, dan itu bukan kelupaan.
          *

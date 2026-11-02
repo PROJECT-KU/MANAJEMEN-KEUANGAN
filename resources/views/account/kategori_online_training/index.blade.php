@@ -1,0 +1,305 @@
+@extends('layouts.account')
+@extends('layouts.loader')
+
+@section('title')
+Kategori Class Online | MIS
+@stop
+
+@section('content')
+<div class="main-content">
+    <section class="section">
+        <div class="section-header">
+            <h1>KATEGORI SCOPUS CAMP</h1>
+        </div>
+
+        <div class="section-body">
+
+            <!--================== DATA KATEGORI ==================-->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4><i class="fas fa-list"></i> Data Kategori Class Online</h4>
+
+                    <!--================== FILTER ==================-->
+                    <div class="d-flex justify-content-end align-items-center mb-3" style="gap: 10px;">
+
+                        <!-- CREATE DATA -->
+                        @if (Auth::user()->adalahAdministrator())
+                        <a href="{{ route('account.kategorionlinetraining.create') }}" class="btn btn-primary btn-block rounded-pill">
+                            <i class="fa fa-plus-circle"></i> TAMBAH KATEGORI
+                        </a>
+                        @endif
+                        <!-- END -->
+
+                        <div class="dropdown card-header-action">
+                            <button type="button" data-toggle="dropdown" class="btn btn-primary dropdown-toggle">
+                                <i class="fas fa-download"></i> FILTER
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-right p-3" style="min-width: 300px;">
+
+                                <!-- FILTER TANGGAL -->
+                                <form action="{{ route('account.kategorionlinetraining.filter') }}" method="GET">
+                                    <div class="form-group">
+                                        <label>Tanggal Awal</label>
+                                        <input type="date" name="tanggal_awal" value="{{ request('tanggal_awal') }}" class="form-control">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Tanggal Akhir</label>
+                                        <input type="date" name="tanggal_akhir" value="{{ request('tanggal_akhir') }}" class="form-control">
+                                    </div>
+
+                                    @if (request()->has('tanggal_awal') && request()->has('tanggal_akhir'))
+                                    <div class="btn-group" style="width: 100%;">
+                                        <button class="btn btn-info mr-1" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
+                                        <a href="{{ route('account.kategorionlinetraining.index') }}" class="btn btn-danger" style="margin-top: 30px;">
+                                            <i class="fa fa-trash mt-2"></i> HAPUS
+                                        </a>
+                                    </div>
+                                    @else
+                                    <button class="btn btn-info mr-1 btn-block" type="submit" style="margin-top: 30px;"><i class="fa fa-filter"></i> FILTER</button>
+                                    @endif
+                                </form>
+                                <!-- END -->
+
+                                {{-- TOMBOL UNDUH TIDAK ADA DI SINI, dan itu bukan
+                                     kelupaan.
+
+                                     Salinan layar ini di Class Offline memasang
+                                     "Unduh EXCEL" yang menunjuk rute
+                                     account.ketegori.download-excel —
+                                     CategoriesAnalisisBibliometrikController. Jadi
+                                     panitia yang menekannya di layar angkatan Camp
+                                     menerima angkatan ANALISIS BIBLIOMETRIK, dengan
+                                     nama berkas "Kategori-Analisis_…", tanpa satu
+                                     pun galat.
+
+                                     Tombol yang mengunduh data layanan lain lebih
+                                     buruk daripada tidak ada tombol: yang
+                                     menerimanya mengira itu datanya. Dilaporkan ke
+                                     pemiliknya 2 Nov 2026; dipasang di sini begitu
+                                     pengunduhnya punya saringan layanan sendiri. --}}
+
+                            </div>
+                        </div>
+
+                        <!-- SEARCH -->
+                        <div style="max-width: 250px; width: 100%;">
+                            <input type="text" id="liveSearch" class="form-control" placeholder="Pencarian..." autocomplete="off">
+                        </div>
+                        <!-- END -->
+
+                    </div>
+                    <!--================== END FILTER ==================-->
+                </div>
+
+                <div class="card-body" style="font-size: 11px;">
+                    <div class="table-responsive">
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th scope="col" rowspan="2" style="text-align: center;width: 6%">NO.</th>
+                                        <th scope="col" rowspan="2" class="column-width" style="text-align: center;">NAMA KATEGORI</th>
+                                        <th scope="col" colspan="2" class="column-width" style="text-align: center;">TANGGAL</th>
+                                        <th scope="col" rowspan="2" class="column-width" style="text-align: center;">TOTAL KUOTA</th>
+                                        <th scope="col" rowspan="2" class="column-width" style="text-align: center;">SISA KUOTA</th>
+                                        <th scope="col" rowspan="2" class="column-width" style="text-align: center;">STATUS</th>
+                                        <th scope="col" rowspan="2" style="width: 15%;text-align: center">AKSI</th>
+                                    </tr>
+                                    <tr>
+                                        <th scope="col" class="column-width" style="text-align: center;">MULAI</th>
+                                        <th scope="col" class="column-width" style="text-align: center;">SELESAI</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody id="OnlineTrainingTable">
+                                    @php
+                                    $no = 1;
+                                    $terbayarCount = 0; // Count of terbayar records
+                                    @endphp
+                                    @foreach ($categories as $hasil)
+
+                                    <tr>
+                                        <th scope="row" style="text-align: center">{{ $no }}</th>
+                                        <td class="column-width" style="text-align: center;">{{ strtoupper($hasil->nama) }} #{{ $hasil->nama_ke }}</td>
+                                        <td class="column-width" style="text-align: center;">{{ strftime('%d %B %Y', strtotime($hasil->mulai)) }}</td>
+                                        <td class="column-width" style="text-align: center;">{{ strftime('%d %B %Y', strtotime($hasil->selesai)) }}</td>
+                                        <td class="column-width" style="text-align: center;">{{ $hasil->total_kuota }}</td>
+                                        <td class="column-width" style="text-align: center;">{{ $hasil->sisa_kuota }}</td>
+                                        <td class="column-width" style="text-align: center;">
+                                            @if($hasil->status == 'active')
+                                            <span class="badge badge-success">Active</span>
+                                            @else
+                                            <span class="badge badge-danger">Non Active</span>
+                                            @endif
+                                        </td>
+                                        <td style="text-align: center;">
+                                            <a style="margin-right: 5px; margin-bottom:5px;" href="{{ route('account.kategorionlinetraining.edit', ['id' => $hasil->id]) }}" class="btn btn-sm btn-warning">
+                                                <i class="fa fa-pencil-alt"></i>
+                                            </a>
+                                            <button onclick="Delete('{{ $hasil->id }}')" class="btn btn-sm btn-danger mb-2">
+                                                <i class="fa fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    @php
+                                    $no++;
+                                    @endphp
+                                    @endforeach
+                                </tbody>
+                            </table>
+                            <div style="text-align: center;">
+                                <style>
+                                    @media (max-width: 767px) {
+                                        .pagination {
+                                            margin-left: 480px;
+                                            /* Adjust the margin value as needed for mobile devices */
+                                        }
+                                    }
+
+                                    @media (min-width: 768px) and (max-width: 991px) {
+                                        .pagination {
+                                            margin-left: 300px;
+                                            /* Adjust the margin value as needed for iPads */
+                                        }
+                                    }
+                                </style>
+                                {{ $categories->appends(['tanggal_awal' => $startDate, 'tanggal_akhir' => $endDate])->links("vendor.pagination.bootstrap-4") }}
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--================== END ==================-->
+
+        </div>
+    </section>
+</div>
+
+{{-- Skrip pengunduh EXCEL ikut DIBUANG bersama tombolnya.
+
+     Dibiarkan, getElementById('downloadExcelBtn') memulangkan null dan
+     .addEventListener padanya melempar TypeError — yang mematikan SELURUH
+     penangan DOMContentLoaded itu, bukan cuma barisnya. Tidak ada galat di
+     layar; yang hilang diam-diam fungsi lain yang kebetulan ikut di dalamnya. --}}
+
+<!--================== LIVE SEARCH ==================-->
+<script>
+    let timer;
+
+    document.getElementById('liveSearch').addEventListener('keyup', function() {
+        clearTimeout(timer);
+        const query = this.value;
+
+        timer = setTimeout(() => {
+            const newUrl = new URL(window.location.href);
+            if (query) {
+                newUrl.searchParams.set('q', query);
+            } else {
+                newUrl.searchParams.delete('q');
+            }
+            window.history.pushState({}, '', newUrl);
+
+            // Tombol PDF tidak ada di layar ini — rutenya pun milik Analisis
+            // Bibliometrik, sama dengan yang EXCEL. Blok penyegarnya dibuang
+            // bersamaan; ia memang sudah berpagar if (pdfButton), jadi yang
+            // dihapus kode mati, bukan kode yang bekerja.
+
+            // Fetch data tabel
+            fetch(`{{ route('account.kategorionlinetraining.search') }}?q=${encodeURIComponent(query)}`)
+                .then(response => response.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newTableBody = doc.querySelector('#OnlineTrainingTable');
+                    if (newTableBody) {
+                        document.getElementById('OnlineTrainingTable').innerHTML = newTableBody.innerHTML;
+                    }
+                });
+        }, 300);
+    });
+</script>
+<!--================== END ==================-->
+
+<!--================== RELOAD KETIKA DATA SUKSES ==================-->
+<script>
+    @if(Session::has('success'))
+    // Menggunakan setTimeout untuk menunggu pesan sukses muncul sebelum melakukan refresh
+    setTimeout(function() {
+        window.location.reload();
+    }, 1000); // Refresh halaman setelah 2 detik
+    @endif
+</script>
+<!--================== END ==================-->
+
+<!--================== SWEET ALERT JIKA FIELDS KOSONG ==================-->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.getElementById("searchButton").addEventListener("click", function() {
+            var searchInputValue = document.querySelector("input[name='q']").value.trim();
+
+            if (searchInputValue === "") {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Peringatan',
+                    text: 'Harap isi field pencarian terlebih dahulu!',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK'
+                });
+            } else {
+                // If not empty, submit the form
+                document.getElementById("searchForm").submit();
+            }
+        });
+    });
+</script>
+<!--================== END ==================-->
+
+<!--================== SWEET ALERT DELETE ==================-->
+<script>
+    function Delete(id) {
+        let token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        Swal.fire({
+            title: 'APAKAH KAMU YAKIN?',
+            text: 'INGIN MENGHAPUS DATA INI!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'YA',
+            cancelButtonText: 'TIDAK',
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: "/account/scopus-camp/kategori/delete/" + id,
+                    type: "POST",
+                    data: {
+                        _token: token,
+                        _method: "DELETE"
+                    },
+                    success: function(response) {
+                        Swal.fire({
+                            title: 'BERHASIL!',
+                            text: response.message,
+                            icon: 'success',
+                            timer: 1200,
+                            showConfirmButton: false
+                        }).then(() => location.reload());
+                    },
+                    error: function(xhr) {
+                        Swal.fire(
+                            'GAGAL!',
+                            xhr.responseJSON?.message ?? 'Terjadi kesalahan',
+                            'error'
+                        );
+                    }
+                });
+            }
+        });
+    }
+</script>
+
+<!--================== END ==================-->
+@stop

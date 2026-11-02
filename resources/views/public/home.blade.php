@@ -1637,7 +1637,7 @@ Beranda | Rumah Scopus
             <div class="bnd-kisi-3">
                 @foreach ([
                     ['scopus_camp', 'var(--jingga)', 'HomeScopusCamp.png', 'Offline · 3 hari', 'Scopus Camp', 'Tiga hari ketemu langsung di Jogja, naskahmu dibedah sampai kelar. Habis itu masih ditemani setahun penuh.', url('/Scopus-Camp')],
-                    ['online_training', 'var(--langit)', 'HomeOnlineTraining.png', 'Online · 8 sesi', 'Online Training', 'Delapan kali ketemu daring bareng trainer. Cocok buat yang susah ninggalin kampus.', 'https://rumahscopus.com/courses/online-class/'],
+                    ['online_training', 'var(--langit)', 'HomeOnlineTraining.png', 'Online · 8 sesi', 'Class Online', 'Delapan kali ketemu daring bareng trainer. Cocok buat yang susah ninggalin kampus.', url('/Class-Online')],
                     ['scopus_kafe', 'var(--ungu)', 'HomeScopusKafe.png', 'Privat · 5 jam', 'Scopus Kafe', 'Lima jam berdua sama trainer. Buat naskah yang sudah jalan tapi mentok di satu bagian.', url('/Scopus-Kafe')],
                     ['bibliometrik', 'var(--rumput)', 'HomeBibliometrik.png', 'Online · 8 sesi', 'Analisis Bibliometrik', 'Belajar baca peta riset: mana yang sudah ramai, mana celah yang belum digarap orang.', url('/Analisis-Bibliometrik')],
                     ['clinik_scopus', '#b45309', 'HomeScopusClinic.png', 'Chat · 50 menit', 'Clinik Scopus', 'Lagi mentok satu pertanyaan saja? Ngobrol lewat chat lima puluh menit, langsung dapat jalan keluarnya.', url('/Clinik-Scopus')],
