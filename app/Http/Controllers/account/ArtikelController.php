@@ -13,6 +13,19 @@ use Illuminate\Support\Facades\DB;
 
 class ArtikelController extends Controller
 {
+    use \App\Http\Controllers\account\Concerns\JagaPeran;
+
+    /**
+     * Bilah sisi: administrator atau akun 83/87 (penulis artikel).
+     *
+     * Terukur 3 Nov 2026 layar ini menjawab HTTP 200 untuk akun
+     * berperan `user`. Lihat sebabnya di trait JagaPeran.
+     */
+    public function __construct()
+    {
+        $this->jagaAdministratorAtau([83, 87]);
+    }
+
 
     function generateRandomToken($length)
     {

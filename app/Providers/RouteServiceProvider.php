@@ -200,12 +200,55 @@ class RouteServiceProvider extends ServiceProvider
          * tidak akan menyentuhnya, dan pengulangan yang tidak wajar tetap
          * terpotong.
          */
+        /*
+         * DIHITUNG PER PENDAFTARAN, bukan hanya per IP — sejak 3 Nov 2026.
+         *
+         * Per IP saja, orang-orang yang BERBEDA di belakang satu alamat
+         * berbagi satu jatah. Itu bukan kemungkinan teoretis: sasaran
+         * layanan ini dosen dan mahasiswa, yang membukanya dari jaringan
+         * kampus ber-NAT. Tiga orang yang kebetulan sedang menunggu
+         * pembayarannya masing-masing sudah 36 permintaan per menit, dan
+         * yang ketiga ditolak 429 karena kelakuan dua orang yang tidak ia
+         * kenal.
+         *
+         * Lebih buruk lagi, penolakannya DIAM: pollernya memeriksa
+         * `jawab.ok ? jawab.json() : null` lalu berhenti, jadi halamannya
+         * tetap berkata "menunggu pembayaran" selamanya walau uangnya sudah
+         * masuk. (Pollernya sendiri sudah diperbaiki agar mundur teratur dan
+         * memberi tahu; lihat status.blade.php.)
+         *
+         * Dikunci ke pendaftarannya, tiap orang punya jatahnya sendiri —
+         * dan satu orang tetap tidak bisa membanjiri satu pendaftaran.
+         * Langit-langit per IP tetap ada supaya satu alamat tidak bisa
+         * menyapu BANYAK pendaftaran sekaligus, cuma dinaikkan ke angka yang
+         * tidak mungkin dicapai pemakaian wajar.
+         *
+         * Kunci rutenya bernama {id} di ketiga layanan yang memakai pembatas
+         * ini. Kalau tidak ada, jatuh ke IP — bukan ke "tanpa batas".
+         */
         RateLimiter::for('camp-status', function (Request $request) {
-            return Limit::perMinute(60)->by($request->ip());
+            $daftar = (string) ($request->route('id') ?? '');
+
+            return [
+                Limit::perMinute(30)->by('status-daftar:' . ($daftar ?: $request->ip())),
+                Limit::perMinute(240)->by('status-ip:' . $request->ip()),
+            ];
         });
 
         RateLimiter::for('camp-keadaan', function (Request $request) {
-            return Limit::perMinute(30)->by($request->ip());
+            $daftar = (string) ($request->route('id') ?? '');
+
+            /*
+             * 40 per menit per pendaftaran: pollernya sendiri 12 per menit,
+             * jadi tiga tab atas pendaftaran yang sama pun masih muat.
+             * Pollernya berhenti sendiri sesudah ±3 menit dan diam saat
+             * tabnya tidak terlihat, jadi angka ini tidak pernah tersentuh
+             * pemakaian wajar.
+             */
+            return [
+                Limit::perMinute(40)->by('keadaan-daftar:' . ($daftar ?: $request->ip())),
+                Limit::perMinute(240)->by('keadaan-ip:' . $request->ip()),
+            ];
         });
 
         RateLimiter::for('camp-tautan-saya', function (Request $request) {
