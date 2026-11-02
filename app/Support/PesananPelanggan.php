@@ -104,6 +104,29 @@ class PesananPelanggan
         ],
         [
             /*
+             * Class Online — terlewat dengan sebab yang SAMA PERSIS seperti
+             * Webinar Eksklusif di bawah: layanannya lahir sesudah daftar ini
+             * dibuat. Akibatnya juga sama: pendaftaran Class Online seseorang
+             * tidak pernah muncul di halaman pelanggannya, dan jumlah
+             * pesanannya terhitung kurang.
+             *
+             * Dua kali kejadian yang sama membuatnya bukan kebetulan lagi;
+             * dijaga PesananLengkapTest supaya layanan ketujuh tidak
+             * mengulanginya.
+             */
+            'layanan' => 'Class Online',
+            'tabel' => 'online_training_pendaftaran',
+            'nomor' => 'id_transaksi',
+            'nilai' => 'total_pembayaran',
+            'telp' => 'telp',
+            'email' => 'email',
+            'nama' => 'nama',
+            'customer_id' => null,
+            'ikon' => 'fa-laptop',
+            'warna' => 'mis-biru',
+        ],
+        [
+            /*
              * Webinar Eksklusif, yang sebelumnya TIDAK ADA di daftar ini sama
              * sekali — jadi pendaftaran webinar seseorang tidak pernah muncul
              * di halaman pelanggannya, dan jumlah pesanannya terhitung kurang.
