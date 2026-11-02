@@ -989,8 +989,21 @@
             return;
         }
 
+        /*
+         * Nomor dan jumlah peserta IKUT DIKIRIM.
+         *
+         * Promo boleh menuntut pendaftarnya pernah lunas di layanan lain,
+         * dan potongannya dihitung dari subtotal — bukan dari satu kursi.
+         * Tanpa keduanya, pratinjau ini menjawab berbeda dari yang nanti
+         * ditagih, dan selisih itu baru ketahuan setelah orangnya membayar.
+         */
+        var kotakTelp = document.getElementById('telp');
+        var kotakJumlah = document.querySelector('[name="jumlah_pendaftar"]');
+
         fetch('/Scopus-Camp/cek-kode-diskon/' + encodeURIComponent(id) +
-                '?kode_diskon=' + encodeURIComponent(kode))
+                '?kode_diskon=' + encodeURIComponent(kode) +
+                '&telp=' + encodeURIComponent(kotakTelp ? kotakTelp.value : '') +
+                '&jumlah=' + encodeURIComponent(kotakJumlah ? kotakJumlah.value : 1))
             .then(function (jawab) { return jawab.json(); })
             .then(function (data) {
                 if (data.status === 'success') {
