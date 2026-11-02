@@ -129,6 +129,12 @@ class RingkasBeranda
     {
         return match ($s->layanan) {
             'scopus_camp' => route('public.scopuscamp.Selengkapnya', ['id' => $s->getKey()]),
+
+            // Class Online punya halaman per angkatan sejak 2 Nov 2026.
+            // Tanpa baris ini ia jatuh ke `default` dan kartunya mengantar
+            // ke BERANDA — orang yang menekan jadwal yang ia incar mendarat
+            // kembali di tempat ia menekannya.
+            'online_training' => route('public.onlinetraining.Selengkapnya', ['id' => $s->getKey()]),
             'bibliometrik' => route('public.analisisbibliometrik.Selengkapnya', ['id' => $s->getKey()]),
             'webinar_eksklusif' => route('public.webinareksklusif.daftar', ['id' => $s->getKey()]),
             'scopus_kafe' => url('/Scopus-Kafe'),

@@ -180,8 +180,15 @@ class UbahStatusPendaftaran
      * tabnya masih terbuka bisa tetap membayar kursi yang sudah dikembalikan
      * ke kuota — lalu diberikan kepada orang lain.
      *
-     * Hanya layanan yang PUNYA kolom tagihan: Webinar Eksklusif dan Scopus
-     * Camp. Ketiga sisanya belum memakai gerbang pembayaran sama sekali.
+     * Hanya layanan yang PUNYA kolom tagihan: Webinar Eksklusif, Scopus
+     * Camp, dan Class Online. Sisanya belum memakai gerbang pembayaran.
+
+     * Class Online TERLEWAT saat layanan itu dibuka 2 Nov 2026, dan
+     * akibatnya tepat seperti yang ditulis di atas: membatalkan di layar
+     * panitia tidak sampai ke DOKU sama sekali, tagihannya hidup sampai
+     * tenggatnya habis, dan pendaftar yang tabnya masih terbuka bisa tetap
+     * membayar kursi yang sudah dikembalikan ke kuota — lalu diberikan
+     * kepada orang lain. Uang masuk untuk kursi yang tidak ada.
      *
      * Status "tidak aktif"-nya berbeda per layanan karena kosakatanya memang
      * berbeda — dan itu sebabnya daftarnya ditulis per layanan di sini, bukan
@@ -193,6 +200,12 @@ class UbahStatusPendaftaran
     private const TIDAK_AKTIF = [
         'webinar_eksklusif' => ['cancel', 'expired'],
         'scopus_camp' => ['Pendaftaran Dibatalkan', 'Pendaftaran Ditolak'],
+
+        // Kosakatanya SAMA dengan Scopus Camp — katalognya memang menyalin
+        // layanan itu — tetapi tetap ditulis sendiri, bukan diwariskan:
+        // dua layanan yang kebetulan sama kata hari ini tidak dijamin sama
+        // besok, dan yang menanggung selisihnya tagihan yang tidak tertutup.
+        'online_training' => ['Pendaftaran Dibatalkan', 'Pendaftaran Ditolak'],
     ];
 
     private function tutupTagihanGerbang(

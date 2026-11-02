@@ -53,6 +53,27 @@ class UbahDataPendaftaran
             'total_pembayaran' => 'uang', 'kode_diskon' => 'teks',
             'note' => 'teks',
         ],
+
+        /*
+         * Class Online — medannya SAMA dengan Scopus Camp, sebab tabelnya
+         * memang menyalin tabel itu kolom demi kolom.
+         *
+         * Tanpa butir ini layanannya tidak bisa disunting SAMA SEKALI:
+         * medanUntuk() memulangkan daftar kosong, jadi salah ketik nama atau
+         * email pada pendaftaran yang sudah dibayar hanya bisa diperbaiki
+         * lewat basis data. Terukur 2 Nov 2026, tepat seperti itu.
+         *
+         * group_wa dan tanggal_reschedule sengaja TIDAK ada, sama seperti
+         * Scopus Camp: surat "diterima" maupun "reschedule" mengambil tautan
+         * grupnya dari ANGKATAN, bukan dari baris pendaftarannya.
+         */
+        'online_training' => [
+            'nama' => 'teks', 'email' => 'teks', 'telp' => 'teks', 'affiliasi' => 'teks',
+            'kategori_id' => 'teks', 'jumlah_pendaftar' => 'angka',
+            'ppn' => 'uang', 'kode_unik' => 'uang', 'nominal_diskon' => 'uang',
+            'total_pembayaran' => 'uang', 'kode_diskon' => 'teks',
+            'note' => 'teks',
+        ],
         /*
          * group_wa DIPERTAHANKAN di sini, dan hanya di sini.
          *
