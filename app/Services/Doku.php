@@ -264,24 +264,68 @@ class Doku
 
         $json = json_encode($isi, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 
-        try {
-            $jawab = Http::timeout(20)
-                ->withHeaders([
-                    'Client-Id' => $this->clientId(),
-                    'Request-Id' => $requestId,
-                    'Request-Timestamp' => $waktu,
-                    'Signature' => $this->tandaTangan($jalur, $requestId, $waktu, $json),
-                    'Content-Type' => 'application/json',
-                ])
-                ->withBody($json, 'application/json')
-                ->post($this->pangkalan() . $jalur);
-        } catch (\Throwable $e) {
-            report($e);
+        /*
+         * DICOBA DUA KALI, dan HANYA untuk 502/503/504.
+         *
+         * Terukur 3 Nov 2026 pada pendaftaran sungguhan: DOKU sandbox
+         * menjawab
+         *
+         *     HTTP 503 Service Temporarily Unavailable
+         *     <hr><center>alb</center>
+         *
+         * — halaman galat dari penyeimbang beban (AWS ALB) MEREKA, bukan
+         * dari aplikasi DOKU. Permintaannya tidak pernah sampai ke sana,
+         * jadi tidak ada tagihan yang terlanjur dibuat, jadi mengulangnya
+         * aman.
+         *
+         * YANG TIDAK DIULANG, dan ini yang membedakan:
+         *
+         *   - lemparan jaringan dan waktu habis. Di sana permintaannya
+         *     MUNGKIN sampai dan tagihannya mungkin sudah terbit; mengulang
+         *     bisa melahirkan tagihan kedua atas satu kursi, dan sebagian
+         *     orang membayar keduanya;
+         *   - 4xx. Itu penolakan yang disengaja — bentuk datanya salah,
+         *     kuncinya salah, atau nomornya sudah terpakai — dan mengulang
+         *     hal yang sama menghasilkan penolakan yang sama.
+         *
+         * Nomor tagihannya SENGAJA sama pada percobaan kedua. Kalau ternyata
+         * yang pertama sempat terbit, DOKU menolaknya dengan "INVOICE
+         * ALREADY USED" — sebuah 4xx, yang langsung menghentikan ulangan.
+         */
+        $jawab = null;
 
-            return [
-                'berhasil' => false, 'url' => null, 'rujukan' => null, 'permintaan_id' => null,
-                'pesan' => 'Tidak bisa menghubungi penyedia pembayaran.',
-            ];
+        foreach ([0, 1] as $percobaan) {
+            if ($percobaan > 0) {
+                // Satu detik, sekali saja. Yang menunggu ORANG di layarnya;
+                // jeda panjang membuatnya mengira halamannya menggantung lalu
+                // menekan tombolnya lagi.
+                usleep(1_000_000);
+            }
+
+            try {
+                $jawab = Http::timeout(20)
+                    ->withHeaders([
+                        'Client-Id' => $this->clientId(),
+                        'Request-Id' => $requestId,
+                        'Request-Timestamp' => $waktu,
+                        'Signature' => $this->tandaTangan($jalur, $requestId, $waktu, $json),
+                        'Content-Type' => 'application/json',
+                    ])
+                    ->withBody($json, 'application/json')
+                    ->post($this->pangkalan() . $jalur);
+            } catch (\Throwable $e) {
+                report($e);
+
+                return [
+                    'berhasil' => false, 'url' => null, 'rujukan' => null, 'permintaan_id' => null,
+                    'pesan' => 'Tidak bisa menghubungi penyedia pembayaran.',
+                    'sementara' => true,
+                ];
+            }
+
+            if (! in_array($jawab->status(), [502, 503, 504], true)) {
+                break;
+            }
         }
 
         if (! $jawab->successful()) {
@@ -296,9 +340,25 @@ class Doku
                 'jawaban' => Str::limit($jawab->body(), 500),
             ]);
 
+            /*
+             * "Sedang bermasalah" BERBEDA dari "menolak", dan bedanya
+             * menentukan apa yang harus dikerjakan orangnya.
+             *
+             * 5xx berarti layanan DOKU-nya yang sedang tidak hidup: tidak ada
+             * yang salah dengan pendaftarannya, dan yang tepat adalah mencoba
+             * lagi beberapa menit. Sampai 3 Nov 2026 keduanya memulangkan
+             * kalimat yang sama — "menolak tagihan ini" — jadi orang yang
+             * sebenarnya cuma perlu menunggu malah menghubungi panitia, dan
+             * panitia pun tidak bisa berbuat apa-apa atas peladen DOKU.
+             */
+            $sementara = $jawab->status() >= 500;
+
             return [
                 'berhasil' => false, 'url' => null, 'rujukan' => null, 'permintaan_id' => null,
-                'pesan' => 'Penyedia pembayaran menolak tagihan ini.',
+                'pesan' => $sementara
+                    ? 'Penyedia pembayaran sedang tidak bisa melayani (kode ' . $jawab->status() . ').'
+                    : 'Penyedia pembayaran menolak tagihan ini.',
+                'sementara' => $sementara,
             ];
         }
 
