@@ -372,7 +372,21 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                         Potongannya dihitung ULANG di peladen dari angkatannya;
                         yang di sini hanya kotak ketik.
                     --}}
-                    @if (trim((string) $sesi->kode_diskon) !== '')
+                    {{-- "ADA KODE" BUKAN HANYA KODE MILIK ANGKATANNYA.
+
+                         Sampai 8 Nov 2026 pagarnya berbunyi
+                         `trim($sesi->kode_diskon) !== ''` — kode gaya lama yang
+                         menempel di angkatan. Promo BERKODE di layar Promo
+                         Layanan tidak terhitung, jadi terukur pada "testing
+                         webinar eksklusif 3": promo EKSKLUSIF menyasar angkatan
+                         itu, peladennya memotong Rp 51.000 dengan benar, dan
+                         kotak isiannya TIDAK PERNAH DIGAMBAR — kodenya tidak
+                         bisa diketik siapa pun. Promo yang hidup di peladen,
+                         mati di layar, tanpa satu galat pun.
+
+                         Dijawab PotonganKode::mungkinAdaKode(), rakitan yang
+                         sama dengan yang menagih. --}}
+                    @if (\App\Support\PotonganKode::mungkinAdaKode($sesi))
                         <div class="ses-isian">
                             <label for="ses-kode">Kode diskon <span class="ses-opsional">opsional</span></label>
                             <input type="text" id="ses-kode" name="kode_diskon" maxlength="40"
@@ -2000,8 +2014,12 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
             var baris = document.getElementById('ses-potongan');
             var nilaiPotongan = document.getElementById('ses-potongan-nilai');
 
-            // Isian kodenya hanya ada kalau angkatannya memang punya kode.
+            // Isian kodenya hanya ada kalau memang ada kode yang mungkin
+            // dipakai — dari angkatannya sendiri ATAU dari promo berkode.
             if (!kode || !kabar || !window.fetch) return;
+
+            // Nomornya ikut dikirim; lihat alasannya di periksa().
+            var telp = document.getElementById('ses-telp');
 
             var ALAMAT = @json(route('public.webinareksklusif.cekdiskon', $sesi->id));
             var CSRF = document.querySelector('meta[name=csrf-token]');
@@ -2020,7 +2038,28 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
 
                 if (k === '') { terakhir = null; bersih(); return; }
 
-                var kunci = k + '|' + jumlah.value;
+                /*
+                 * NOMORNYA IKUT DIKIRIM, dan tanpa itu pratinjaunya berbohong.
+                 *
+                 * Promo boleh menuntut pendaftarnya PERNAH LUNAS di layanan
+                 * tertentu — "hanya untuk yang pernah ikut". Pemeriksaannya
+                 * butuh nomor, dan cekDiskon() di peladen memang sudah
+                 * membacanya (`$request->input('telp')`) sejak awal. Yang
+                 * tidak mengirimkannya JavaScript ini.
+                 *
+                 * Akibatnya terukur 8 Nov 2026 pada promo EKSKLUSIF: peladen
+                 * memotong Rp 51.000 saat borangnya dikirim, tetapi pratinjau
+                 * di layar menjawab "Kode itu tidak cocok untuk sesi ini".
+                 * Layar dan tagihan berselisih, dan yang membacanya menghapus
+                 * kodenya sebelum sempat tahu potongannya ada.
+                 *
+                 * Nomornya masuk ke KUNCI dedupe juga: tanpa itu, mengisi
+                 * nomor SESUDAH kodenya tidak memicu pemeriksaan ulang — dan
+                 * itu urutan yang wajar, sebab kotak kodenya ada di bawah.
+                 */
+                var nomor = telp ? telp.value.trim() : '';
+                var kunci = k + '|' + jumlah.value + '|' + nomor;
+
                 if (kunci === terakhir) return;
                 terakhir = kunci;
 
@@ -2031,7 +2070,7 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
                         'Accept': 'application/json',
                         'X-CSRF-TOKEN': CSRF ? CSRF.getAttribute('content') : ''
                     },
-                    body: JSON.stringify({ kode: k, jumlah: jumlah.value })
+                    body: JSON.stringify({ kode: k, jumlah: jumlah.value, telp: nomor })
                 })
                     .then(function (r) { return r.ok ? r.json() : null; })
                     .then(function (d) {
@@ -2066,6 +2105,19 @@ Daftar {{ $sesi->nama }} | Rumah Scopus
             // Jumlah peserta berubah -> potongannya diperiksa ulang, sebab
             // nilainya bisa bergantung total.
             jumlah.addEventListener('change', function () { terakhir = null; periksa(); });
+
+            /*
+             * Nomor berubah -> kodenya diperiksa ULANG.
+             *
+             * Orang mengisi borang dari atas ke bawah, dan kotak kodenya ada
+             * DI BAWAH nomor — tetapi sebagian menempelkan kodenya lebih dulu
+             * lalu naik mengisi nomornya. Tanpa pendengar ini, jawaban "tidak
+             * cocok" yang terlanjur muncul tidak pernah diperbarui.
+             */
+            if (telp) {
+                telp.addEventListener('change', periksa);
+                telp.addEventListener('blur', periksa);
+            }
         })();
 
         jumlah.addEventListener('input', hitung);
