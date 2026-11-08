@@ -144,8 +144,31 @@ class TabRincianDileburTest extends TestCase
          * "Jumlah pendaftarnya melebihi sisa kuota angkatan itu — tersisa 0
          * kursi" — padahal yang ia ubah cuma ejaan nama.
          */
-        $this->refreshApplication();
-
+        /*
+         * TIDAK ADA refreshApplication() DI SINI, dan itu bukan kelupaan.
+         *
+         * Baris itu dulu berdiri tepat di sini tanpa satu kata penjelasan.
+         * Ia MERAKIT ULANG wadah aplikasinya di tengah uji — dan bersamanya
+         * sambungan basis data yang sedang memegang transaksi milik
+         * DatabaseTransactions. Semua yang dibuat sesudahnya TERSIMPAN
+         * PERMANEN; tidak ada yang mengembalikannya.
+         *
+         * Terukur 8 Nov 2026: 418 angkatan "Angkatan Penuh …" dan 188
+         * pendaftaran yatim menumpuk di basis data pengembangan sejak 23
+         * Okt, bertambah SATU tiap kali rangkaian ujinya dijalankan.
+         *
+         * Akibatnya bukan sekadar sampah. Angkatan bocoran itu `active` dan
+         * tanggal mulainya di masa depan, jadi ia IKUT TERPAJANG di halaman
+         * daftar Scopus Camp dan di beranda — dan karena jumlahnya ratusan,
+         * ia memenuhi halaman pertama. Uji lain yang membuat angkatannya
+         * sendiri lalu mencarinya di halaman itu jadi merah, dan merahnya
+         * menunjuk halaman daftar yang tidak bersalah.
+         *
+         * Dibuktikan dengan memasangnya kembali: satu jalan, satu baris
+         * bocor. Dicabut, nol.
+         *
+         * Dijaga UjiTidakMerakitUlangAplikasiTest.
+         */
         $angkatan = \App\KategoriLayanan::create([
             'layanan' => 'scopus_camp', 'nama' => 'Angkatan Penuh ' . \Illuminate\Support\Str::random(6),
             'mulai' => now()->addMonth()->toDateString(),
