@@ -29,6 +29,10 @@ class VerifyCsrfToken extends Middleware
          * itu diperiksa paling awal di PublicWebinarEksklusifController
          * sebelum satu pun status diubah.
          */
+        // Satu alamat untuk semua layanan; yang didaftarkan di dasbor DOKU.
+        'pemberitahuan/doku',
+
+        // Alamat per-layanan, dipertahankan untuk yang terlanjur terdaftar.
         'Webinar-Eksklusif/pemberitahuan/doku',
         'Scopus-Camp/pemberitahuan/doku',
         'Scopus-Kafe/pemberitahuan/doku',
