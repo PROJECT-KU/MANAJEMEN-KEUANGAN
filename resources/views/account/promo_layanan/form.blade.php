@@ -220,6 +220,13 @@
 
     /* Kotak centang syarat riwayat: sebaris, membungkus di layar sempit. */
     .prf-syarat { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+
+    /* Catatan syarat di kotak pratinjau. Namanya SENGAJA bukan .prf-syarat:
+       nama itu milik daftar centang di atas dan bergaya flex. */
+    .prf-pratinjau-syarat {
+        display: block; margin-top: 6px;
+        font-weight: 600; color: #7a5312;
+    }
     .prf-syarat-butir {
         display: inline-flex; align-items: center; gap: 8px;
         padding: 8px 14px; border-radius: 999px; cursor: pointer;
@@ -909,6 +916,19 @@
             return { harga: 1000000, nyata: false };
         }
 
+        /*
+         * Kode dan centang syarat ikut memicu hitung ulang: kalimat
+         * pratinjaunya kini menyebut keduanya, jadi ia harus berubah saat
+         * keduanya berubah.
+         */
+        document.addEventListener('input', function (e) {
+            if (e.target && e.target.id === 'prf-kode') { hitungUlang(); }
+        });
+
+        document.addEventListener('change', function (e) {
+            if (e.target && e.target.name === 'syarat_layanan[]') { hitungUlang(); }
+        });
+
         function hitungUlang() {
             var contoh = hargaContoh();
             var potong = potongan(contoh.harga);
@@ -947,6 +967,53 @@
                 var hemat = document.createElement('span');
                 hemat.textContent = ' per peserta, hemat ' + rupiah(potong) + '.';
                 pratinjau.appendChild(hemat);
+
+                /*
+                 * SYARATNYA IKUT DISEBUT, dan tanpa itu kalimat di atas
+                 * BERBOHONG kepada panitia yang menyusunnya.
+                 *
+                 * Terukur 8 Nov 2026 pada promo "Promo Eksklusif": kotak ini
+                 * berbunyi "harga Rp 150.000 jadi Rp 99.000 per peserta" —
+                 * tetapi promonya BERKODE dan bersyarat alumni, jadi harga
+                 * publiknya tetap Rp 150.000 dan Rp 99.000 hanya berlaku bagi
+                 * yang mengetik kodenya DAN pernah lunas di layanan yang
+                 * dicentang. Pemiliknya membuka halaman umum, melihat
+                 * Rp 150.000, dan mengira promonya tidak terbaca.
+                 *
+                 * Dibaca dari medan borangnya sendiri, bukan dihitung ulang
+                 * di peladen: yang perlu diketahui penyusunnya adalah akibat
+                 * dari apa yang SEDANG ia ketik.
+                 */
+                var medanKode = document.getElementById('prf-kode');
+                var adaKode = medanKode && medanKode.value.trim() !== '';
+                var adaSyarat = borang.querySelectorAll('input[name="syarat_layanan[]"]:checked').length > 0;
+
+                if (adaKode || adaSyarat) {
+                    var syarat = document.createElement('span');
+                    /*
+                     * BUKAN 'prf-syarat' — nama itu SUDAH DIPAKAI daftar
+                     * centang layanan, yang bergaya `display: flex`. Dipakai
+                     * ulang di sini, kalimatnya pecah jadi kotak-kotak
+                     * melayang tanpa satu galat pun.
+                     */
+                    syarat.className = 'prf-pratinjau-syarat';
+
+                    var bunyi = [];
+
+                    if (adaKode) {
+                        bunyi.push('hanya kalau pendaftar mengetik kode '
+                            + medanKode.value.trim().toUpperCase());
+                    }
+
+                    if (adaSyarat) {
+                        bunyi.push('hanya untuk yang pernah lunas di layanan yang dicentang');
+                    }
+
+                    syarat.textContent = ' Harga di halaman umum TIDAK berubah — '
+                        + bunyi.join(', dan ') + '.';
+
+                    pratinjau.appendChild(syarat);
+                }
             }
 
             segarkanHarga();

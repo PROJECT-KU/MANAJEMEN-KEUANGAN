@@ -35,6 +35,59 @@ use App\PromoLayanan;
 class PotonganKode
 {
     /**
+     * Angkatan ini BISA menerima kode diskon dari mana pun.
+     *
+     * -----------------------------------------------------------------
+     * Kenapa ini ada
+     * -----------------------------------------------------------------
+     *
+     * Borang pendaftaran menggambar kotak "kode diskon" hanya kalau ada
+     * kode yang mungkin dipakai — kotak yang tidak bisa diisi apa pun cuma
+     * membuat orang mengira ia kehilangan sesuatu. Sampai 8 Nov 2026
+     * pertanyaannya dijawab `$angkatan->kode_diskon !== ''`, yaitu kode
+     * gaya lama yang menempel di angkatannya sendiri.
+     *
+     * Itu MELEWATKAN promo berkode. Terukur pada "testing webinar eksklusif
+     * 3": promo "Promo Eksklusif" berkode EKSKLUSIF menyasar angkatan itu
+     * dan peladennya memang memotong Rp 51.000 untuk nomor yang memenuhi
+     * syaratnya — tetapi `kode_diskon` angkatannya NULL, jadi kotak
+     * isiannya tidak pernah digambar dan kodenya tidak bisa diketik
+     * siapa pun. Promo yang berfungsi sempurna di peladen, mati di layar.
+     *
+     * -----------------------------------------------------------------
+     * Yang TIDAK diperiksa di sini, dan itu disengaja
+     * -----------------------------------------------------------------
+     *
+     * Syarat riwayat ("hanya untuk yang pernah ikut") TIDAK diperiksa.
+     * Saat borangnya digambar, nomor pendaftarnya belum diketik — jadi
+     * memeriksanya di sini berarti menyembunyikan kotak isian dari orang
+     * yang justru berhak. Yang menentukan tetap hitung(), saat kodenya
+     * benar-benar dikirim bersama nomornya.
+     *
+     * Jadi jawabannya "mungkin ada kode", bukan "pasti dapat potongan".
+     */
+    public static function mungkinAdaKode(KategoriLayanan $angkatan): bool
+    {
+        if (trim((string) $angkatan->kode_diskon) !== '') {
+            return true;
+        }
+
+        $id = (string) $angkatan->getKey();
+
+        if ($id === '') {
+            return false;
+        }
+
+        return PromoLayanan::query()
+            ->berjalan()
+            ->whereNotNull('kode')
+            ->whereRaw("TRIM(kode) <> ''")
+            ->whereHas('angkatan', fn ($q) => $q->where('kategori_layanan.id', $id))
+            ->get()
+            ->contains(fn (PromoLayanan $p) => ! $p->kuotaHabis());
+    }
+
+    /**
      * @return array{kode: ?string, potongan: int, promo: ?PromoLayanan, label: ?string}
      */
     public static function hitung(
