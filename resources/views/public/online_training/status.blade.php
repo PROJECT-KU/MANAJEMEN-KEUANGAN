@@ -102,6 +102,31 @@
      */
     $bisaLanjut = $masihBisaBayar || $bolehBayarUlang;
 
+    /*
+     * BARU PULANG DARI GERBANG — keadaan KETIGA, bukan "lunas" dan bukan
+     * "belum bayar".
+     *
+     * Halaman ini dulu cuma punya dua jawaban, dan dua orang yang keadaannya
+     * SAMA PERSIS di basis data tergambar sama: yang belum pernah membayar,
+     * dan yang BARU SAJA membayar sementara gerbangnya belum menjawab.
+     * Keduanya dibacakan "Tinggal satu langkah lagi — yang tersisa hanya
+     * menyelesaikan pembayaran", lengkap dengan tombol bayar.
+     *
+     * Kalimat itu PERNYATAAN bahwa uangnya belum masuk. Kepada orang yang
+     * baru saja membayar, ia mengundang pembayaran kedua — dan uang kedua
+     * itu benar-benar masuk, sebab "Buat tagihan baru" menerbitkan tagihan
+     * yang sah. Dilaporkan pemiliknya 8 Nov 2026 dengan kalimatnya sendiri:
+     * "user mengira belum membayar dan akan membayar 2x".
+     *
+     * Penandanya `?dari=gerbang`, dipasang mulaiBayar() pada alamat kembali
+     * yang diberikan ke DOKU. Ia CUMA petunjuk tampilan: tidak satu pun
+     * keputusan uang membacanya, jadi tidak masalah ia bisa diketik siapa
+     * pun sendiri. Yang paling buruk bisa terjadi, seseorang melihat
+     * "sedang dipastikan" untuk pembayaran yang memang tidak pernah ada —
+     * dan pollernya tetap akan mengoreksi kalimat itu.
+     */
+    $baruDariGerbang = request()->query('dari') === 'gerbang' && $bisaLanjut;
+
     $wa = \App\Support\TautanWa::kirim(
         config('panitia.whatsapp'),
         'Halo, saya mau bertanya soal pendaftaran Class Online nomor '
@@ -745,6 +770,19 @@
                             Merasa sudah membayar, atau ingin menanyakan jalan lain? Hubungi
                             panitia dengan menyebut nomor pendaftaran di bawah.
                         </p>
+                    @elseif ($baruDariGerbang)
+                        {{-- Baru pulang dari gerbang, dan jawabannya belum sampai.
+                             Yang TIDAK boleh dikatakan di sini: bahwa uangnya belum
+                             masuk. Kita memang belum tahu. --}}
+                        <span class="sts-meterai tunggu"><i class="fas fa-hourglass-half"></i></span>
+                        <h1 class="sts-judul">Kami sedang memastikan pembayaran Anda</h1>
+                        <p class="sts-kata">
+                            <strong>Jangan membayar lagi.</strong> Kalau pembayarannya
+                            sudah Anda selesaikan, halaman ini berubah sendiri dalam
+                            beberapa saat — biasanya kurang dari satu menit. Bank dan
+                            penyedia pembayaran kadang butuh waktu mengabarkannya
+                            kepada kami.
+                        </p>
                     @else
                         <span class="sts-meterai tunggu"><i class="fas fa-hourglass-half"></i></span>
                         <h1 class="sts-judul">Tinggal satu langkah lagi</h1>
@@ -925,14 +963,40 @@
 
                 <div class="sts-aksi">
                     @if ($masihBisaBayar)
-                        <a href="{{ $pendaftaran->bayar_url }}" class="sts-tombol">
-                            <i class="fas fa-credit-card"></i> Bayar sekarang
-                        </a>
-                        <div class="sts-catatan">
-                            <i class="fas fa-info-circle"></i>
-                            <span>Begitu pembayaran Anda masuk, halaman ini berubah sendiri —
-                                tidak perlu mengirim bukti transfer.</span>
-                        </div>
+                        {{-- "BAYAR SEKARANG" DIREDAM saat kita belum tahu.
+
+                             Inilah tombol yang paling berbahaya di halaman ini.
+                             Tagihannya masih HIDUP, jadi tautannya mengantar ke
+                             halaman DOKU yang sama — dan orang yang baru saja
+                             membayar lewat VA, lalu kembali ke sini dan membaca
+                             "Tinggal satu langkah lagi" di atas tombol bergradien
+                             bertuliskan "Bayar sekarang", wajar mengira
+                             pembayarannya gagal.
+
+                             Tidak dibuang: yang memang belum sempat membayar tetap
+                             membutuhkannya, dan menyembunyikannya membuat ia
+                             menghubungi panitia. Yang berubah bobot dan
+                             kalimatnya — dari ajakan jadi jalan keluar. --}}
+                        @if ($baruDariGerbang)
+                            <a href="{{ $pendaftaran->bayar_url }}" class="sts-tombol-kecil" style="width: 100%;">
+                                <i class="fas fa-credit-card"></i>
+                                <span>Belum sempat membayar? Buka lagi halaman pembayarannya</span>
+                            </a>
+                            <div class="sts-catatan">
+                                <i class="fas fa-info-circle"></i>
+                                <span>Kalau Anda sudah membayar, abaikan tombol itu — halaman
+                                    ini berubah sendiri begitu pembayarannya tercatat.</span>
+                            </div>
+                        @else
+                            <a href="{{ $pendaftaran->bayar_url }}" class="sts-tombol">
+                                <i class="fas fa-credit-card"></i> Bayar sekarang
+                            </a>
+                            <div class="sts-catatan">
+                                <i class="fas fa-info-circle"></i>
+                                <span>Begitu pembayaran Anda masuk, halaman ini berubah sendiri —
+                                    tidak perlu mengirim bukti transfer.</span>
+                            </div>
+                        @endif
                     @elseif ($bolehBayarUlang)
                         {{-- TAGIHAN BARU, dibuat pendaftarnya sendiri.
 
@@ -949,10 +1013,29 @@
                              terpicu oleh pengambil pratayang tautan. --}}
                         <form method="POST" action="{{ route('public.onlinetraining.bayarulang', $pendaftaran->id) }}">
                             @csrf
-                            <button type="submit" class="sts-tombol" style="width: 100%; border: 0;">
-                                <i class="fas fa-redo"></i>
-                                {{ $gagalBayar || $habisWaktu ? 'Buat tagihan baru' : 'Lanjutkan pembayaran' }}
-                            </button>
+                            {{-- TOMBOLNYA DIREDAM saat kita belum tahu.
+
+                                 Tombol bergradien selebar penuh bertuliskan
+                                 "Lanjutkan pembayaran" adalah ajakan — dan kepada
+                                 orang yang baru saja membayar, ajakan itu berakhir
+                                 sebagai tagihan kedua yang sah dan uang kedua yang
+                                 benar-benar masuk.
+
+                                 Di keadaan ini ia jadi tombol garis dengan kalimat
+                                 yang menyebut syaratnya sendiri. Tidak dibuang:
+                                 yang memang BELUM membayar tetap butuh jalan, dan
+                                 menyembunyikannya membuat ia menghubungi panitia. --}}
+                            @if ($baruDariGerbang)
+                                <button type="submit" class="sts-tombol-kecil" style="width: 100%;">
+                                    <i class="fas fa-redo"></i>
+                                    <span>Belum sempat membayar? Buka lagi halaman pembayarannya</span>
+                                </button>
+                            @else
+                                <button type="submit" class="sts-tombol" style="width: 100%; border: 0;">
+                                    <i class="fas fa-redo"></i>
+                                    {{ $gagalBayar || $habisWaktu ? 'Buat tagihan baru' : 'Lanjutkan pembayaran' }}
+                                </button>
+                            @endif
                         </form>
                         <div class="sts-catatan">
                             <i class="fas fa-info-circle"></i>

@@ -1190,7 +1190,26 @@ class PublicOnlineTrainingController extends Controller
             'nama' => $pendaftaran->nama,
             'email' => $pendaftaran->email,
             'telp' => $pendaftaran->telp,
-            'kembali' => route('public.onlinetraining.status', $pendaftaran->getKey()),
+            /*
+             * PENANDA "BARU PULANG DARI GERBANG" ikut di alamatnya.
+             *
+             * Tanpa ini halaman status tidak bisa membedakan dua orang yang
+             * keadaannya sama persis di basis data: yang BELUM pernah
+             * membayar, dan yang BARU SAJA membayar sementara gerbangnya
+             * belum sempat menjawab. Keduanya tergambar "Tinggal satu
+             * langkah lagi — yang tersisa hanya menyelesaikan pembayaran",
+             * lengkap dengan tombol bayar.
+             *
+             * Kalimat itu PERNYATAAN bahwa uangnya belum masuk, dan kepada
+             * orang yang baru saja membayar ia mengundang pembayaran kedua.
+             * Dilaporkan pemiliknya 8 Nov 2026 dengan kalimatnya sendiri:
+             * "user mengira belum membayar dan akan membayar 2x".
+             *
+             * Penandanya cuma petunjuk tampilan — tidak satu pun keputusan
+             * uang bergantung padanya, jadi aman walau bisa dipalsukan
+             * siapa pun yang menambahkannya sendiri ke alamat.
+             */
+            'kembali' => route('public.onlinetraining.status', [$pendaftaran->getKey(), 'dari' => 'gerbang']),
 
             /*
              * HANYA QRIS dan Virtual Account, atas keputusan pemiliknya
