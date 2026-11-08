@@ -185,6 +185,25 @@ Route::post('/Scopus-Camp/pemberitahuan/doku', 'Publict\PublicScopusCampControll
     ->name('public.scopuscamp.pemberitahuan');
 
 /*
+ * SATU ALAMAT PEMBERITAHUAN DOKU UNTUK SEMUA LAYANAN.
+ *
+ * Dasbor DOKU hanya menyediakan SATU kolom "Notification URL" per KANAL
+ * pembayaran — bukan satu per layanan. Keempat layanan kita memakai akun
+ * dan kanal yang sama, jadi keempat alamat per-layanan di bawah tidak
+ * mungkin didaftarkan bersamaan; yang terpasang hanya satu, dan tiga
+ * sisanya tidak pernah diberi tahu.
+ *
+ * Alamat INI yang didaftarkan di dasbor. Ia memilah menurut awalan nomor
+ * tagihannya lalu meneruskan ke pengendali layanan yang memilikinya.
+ *
+ * Alamat per-layanan TIDAK dibuang: yang terlanjur terdaftar tidak boleh
+ * mati hanya karena ada jalan baru.
+ */
+Route::post('/pemberitahuan/doku', \App\Http\Controllers\Publict\PemberitahuanDokuController::class)
+    ->middleware('throttle:gerbang-pemberitahuan')
+    ->name('public.pemberitahuan.doku');
+
+/*
  * CLASS ONLINE PUBLIC
  *
  * Bentuknya SAMA dengan Scopus Camp — berangkatan, bergerbang, berhalaman
