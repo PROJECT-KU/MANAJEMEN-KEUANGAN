@@ -80,16 +80,36 @@
                          orangnya sudah mengetik yang tidak perlu ia ketik. --}}
                     <input type="tel" id="kfbTelp" name="telp" class="kfb-isian" required
                         inputmode="tel" autocomplete="tel" placeholder="08xxxxxxxxxx"
-                        value="{{ old('telp', $akun->phone ?? '') }}">
-                    <p class="kfb-bantu" id="kfbKabarIsi"></p>
+                        value="{{ old('telp', $isiAwal['telp'] ?? '') }}">
+
+                    {{-- Pita kabar isi otomatis.
+
+                         Dirender TERISI di sini kalau orangnya sudah masuk akun,
+                         dan diisi skrip kalau tamu mengetik nomor yang pernah
+                         memesan. Dua jalan, satu kotak: borang yang terisi
+                         sendiri tanpa mengatakan apa-apa terbaca seperti data
+                         orang lain yang tertinggal di peramban — dan yang
+                         membacanya begitu akan menghapusnya lalu mengetik ulang,
+                         yaitu tepat yang fitur ini dibuat untuk dihindari.
+
+                         `hidden` selama belum ada yang perlu dikatakan: kotak
+                         kosong tepat di bawah isian pertama bukan kabar. --}}
+                    <div class="kfb-kabar-isi" id="kfbKabarIsi" role="status"
+                        @if (empty($isiAwal)) hidden @endif>
+                        @if (! empty($isiAwal))
+                        <i class="bi bi-stars" aria-hidden="true"></i>
+                        <span>Isian di bawah kami isikan dari data Anda. Periksa dulu,
+                            ubah kalau ada yang berbeda.</span>
+                        @endif
+                    </div>
 
                     <label class="kfb-label" for="kfbNama">Nama lengkap <span class="kfb-wajib">*</span></label>
                     <input type="text" id="kfbNama" name="nama" class="kfb-isian" required
-                        autocomplete="name" value="{{ old('nama', $akun->full_name ?? '') }}">
+                        autocomplete="name" value="{{ old('nama', $isiAwal['nama'] ?? '') }}">
 
                     <label class="kfb-label" for="kfbEmail">Email <span class="kfb-wajib">*</span></label>
                     <input type="email" id="kfbEmail" name="email" class="kfb-isian" required
-                        autocomplete="email" value="{{ old('email', $akun->email ?? '') }}">
+                        autocomplete="email" value="{{ old('email', $isiAwal['email'] ?? '') }}">
                     <p class="kfb-bantu">Bukti pemesanan dan fakturnya dikirim ke sini.</p>
                 </div>
 
@@ -225,7 +245,25 @@
     </div>
 </section>
 
+{{--
+    `sudahTerisi`: yang sudah login TIDAK ikut mencari lewat nomor — borangnya
+    sudah terisi dari peladen, dan jalur pencarian itu dibatasi lajunya (4 per
+    menit per IP, 25 per hari per IP, 8 per hari per nomor). Tidak ada alasan
+    yang sudah login ikut memakan jatah yang disediakan untuk tamu, demi
+    jawaban yang sudah dipegang peladen.
+
+    Batas panjang nomornya diteruskan dari peladen, tidak ditulis ulang di
+    skripnya: dua angka terpisah akan berselisih perlahan, dan selisihnya
+    berupa pencarian yang tidak pernah terkirim.
+
+    Keterangannya ditaruh DI LUAR senarai argumennya. Komentar Blade di dalam
+    senarai argumen pernah membuat halaman di proyek ini menggantung sampai
+    500, dengan galat yang tidak menyebut sebabnya.
+--}}
 @include('public.scopus_kafe.partials.skrip-borang', [
     'alamatCari' => route('public.scopuscamp.caripendaftar'),
+    'sudahTerisi' => ! empty($isiAwal),
+    'nomorMin' => $nomorMin,
+    'nomorMaks' => $nomorMaks,
 ])
 @stop

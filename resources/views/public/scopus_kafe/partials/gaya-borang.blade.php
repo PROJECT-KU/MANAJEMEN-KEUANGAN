@@ -93,6 +93,59 @@
     .kfb .kfb-bantu { font-size: .86rem; margin-top: 8px; }
     .kfb .kfb-bantu.galat { color: var(--merah); font-weight: 700; }
 
+    /* ---------------------------------------------------- kabar isi otomatis
+
+       Pitanya ditaruh tepat di bawah isian nomor, sebab nomor itulah yang
+       mengisi sisanya. Borang yang terisi sendiri tanpa mengatakan apa pun
+       terbaca seperti data orang lain yang tertinggal di peramban. */
+    .kfb-kabar-isi {
+        display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap;
+        margin-top: 10px; padding: 11px 13px;
+        border: 1px solid #a7e3d6; border-radius: 13px;
+        background: #eafaf6; color: #0b5a52;
+        font-size: .88rem; line-height: 1.6;
+    }
+
+    /* `[hidden]` HARUS ditimpa di sini.
+
+       Atribut itu bekerja lewat `display: none` di lembar gaya BAWAAN
+       PERAMBAN, dan lembar gaya bawaan selalu kalah terhadap lembar gaya
+       halaman — bobot pemilihnya tidak ikut menentukan. Tanpa baris ini
+       `display: flex` di atas menang, dan pita kabarnya tampil KOSONG
+       sepanjang waktu: sebuah kotak hijau tanpa sepatah kata, tepat di bawah
+       isian pertama. Pola yang sama sudah pernah membuat tanda "menyimpan…"
+       di proyek ini tampil terus-menerus. */
+    .kfb-kabar-isi[hidden] { display: none; }
+
+    .kfb-kabar-isi i { flex: 0 0 auto; margin-top: 2px; font-size: 16px; }
+    .kfb-kabar-isi span { flex: 1 1 190px; }
+
+    /* Sedang dibatasi pembatas laju: kabar, bukan keberhasilan. Warnanya
+       dibedakan supaya yang sekilas melihatnya tidak menyangka isiannya
+       sudah terisi. */
+    .kfb-kabar-isi.kfb-kabar-tertahan {
+        border-color: #e8cf9a; background: #fdf6e6; color: #7a5410;
+    }
+
+    .kfb-kabar-batal {
+        flex: 0 0 auto; border: 1px solid currentColor; border-radius: 9px;
+        background: transparent; color: inherit;
+        padding: 5px 11px; font: inherit; font-weight: 700; font-size: .82rem;
+        cursor: pointer;
+    }
+    .kfb-kabar-batal:hover { background: rgba(0, 0, 0, .06); }
+    .kfb-kabar-batal:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+
+    /* Isian yang baru saja diisikan skrip ditandai — supaya terlihat MANA
+       yang bukan ketikan orangnya sendiri, dan karena itu mana yang perlu
+       diperiksa. Tandanya tidak hanya warna latar: ia ikut menebalkan
+       garisnya, sebab sebagian pembaca layar ini membedakan warna dengan
+       susah. */
+    .kfb-isian.kfb-baru-diisi {
+        border-color: #a7e3d6; background: #f3fbf8;
+        box-shadow: inset 0 0 0 1px #a7e3d6;
+    }
+
     /* ============================================================ sesi */
     /* Pilihan varian: bentuknya meminjam butir sesi supaya dua kelompok
        pilihan yang berurutan tidak terbaca sebagai dua gaya yang berbeda. */
