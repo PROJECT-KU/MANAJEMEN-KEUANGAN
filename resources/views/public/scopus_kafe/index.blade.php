@@ -68,40 +68,45 @@
                 Datang dengan naskahmu, pulang dengan <span class="kfd-stabilo">jalan keluarnya</span>
             </h1>
 
+            {{-- KAPAN-nya DILIPAT ke kalimat ini, bukan pita tersendiri.
+
+                 Ini layanan tanpa angkatan, jadi "kapan bisanya?" pertanyaan
+                 pertama yang muncul dan harus terjawab di layar pertama —
+                 itu tidak berubah. Yang berubah bentuknya.
+
+                 Sampai 9 Nov 2026 ia berdiri sebagai pita sendiri di bawah
+                 kalimat pembuka: terukur 56px kotaknya ditambah 34px jarak
+                 atas-bawahnya, 90px untuk dua potong keterangan yang muat
+                 dalam satu kalimat. Scopus Camp — yang halaman ini memang
+                 diminta mengikutinya — melipat keterangan serupa ("Ada 1
+                 angkatan yang sedang dibuka") ke ujung kalimat pembukanya,
+                 bukan memberinya kotak sendiri. --}}
             <p class="kfd-sub">
                 Lima jam berdua dengan trainer Rumah Scopus — bukan kelas, bukan ceramah.
                 Naskahmu sendiri yang dibedah, pertanyaanmu sendiri yang dijawab.
+                Dibuka setiap <strong>{{ $hariBuka }}</strong>; yang terdekat
+                <strong>{{ $tanggalBerikutnya->locale('id')->translatedFormat('j F Y') }}</strong>.
             </p>
-
-            {{-- KAPAN-nya satu pita terpusat, bukan kotak di pojok.
-
-                 Ini layanan tanpa angkatan, jadi "kapan bisanya?" pertanyaan
-                 pertama yang muncul — dan bentuk lamanya tidak menjawabnya
-                 sama sekali sampai orangnya membuka borang. --}}
-            <div class="kfd-kapan">
-                <span class="kfd-kapan-butir">
-                    <i class="bi bi-calendar-week"></i>
-                    Setiap <strong>{{ $hariBuka }}</strong>
-                </span>
-                <span class="kfd-kapan-pisah"></span>
-                <span class="kfd-kapan-butir">
-                    <i class="bi bi-arrow-right-circle"></i>
-                    Terdekat <strong>{{ $tanggalBerikutnya->locale('id')->translatedFormat('j F Y') }}</strong>
-                </span>
-            </div>
         </div>
     </section>
 
     <section class="kfd-bagian">
         <div class="container">
 
-            @if ($varian !== [])
-                <h2 class="kfd-bagian-judul">Pilih bentuk dan sesinya</h2>
-                <p class="kfd-bagian-kata">
-                    Tatap muka dan daring punya jam serta biaya sendiri. Boleh ambil
-                    lebih dari satu sesi — tagihannya dijumlahkan jadi satu.
-                </p>
+            {{-- TANPA judul bagian "Pilih bentuk dan sesinya" beserta
+                 kalimat bawahnya.
 
+                 Scopus Camp melompat dari kalimat pembuka langsung ke
+                 kartunya; judul kedua di antaranya cuma mengulang apa yang
+                 sudah terbaca dari kartu-kartu di bawahnya sendiri. Terukur
+                 110px untuk judul dan dua baris yang tidak menambah satu
+                 keterangan pun.
+
+                 Yang BENAR-BENAR baru di kalimat itu — boleh ambil lebih
+                 dari satu sesi, tagihannya dijumlahkan — dipindahkan ke
+                 kalimat di bawah tombol pesan, tempat ia benar-benar
+                 dibutuhkan. --}}
+            @if ($varian !== [])
                 {{-- Dikelompokkan per varian, bukan satu deret kartu.
 
                      Sampai 31 Okt 2026 halaman ini memajang SATU daftar sesi
@@ -111,15 +116,23 @@
                      tertulis cuma salah satunya. --}}
                 @foreach ($varian as $v)
                     <section class="kfd-varian">
+                        {{-- SATU BARIS, bukan judul bertingkat.
+
+                             Nama varian, tempatnya, dan harganya sebelumnya
+                             mengambil dua blok (h3 + paragraf) — 240px per
+                             varian, dua varian jadi 480px untuk enam potong
+                             keterangan yang semuanya pendek. Dijadikan satu
+                             baris, ketiganya tetap terbaca dan halamannya
+                             memendek. --}}
                         <header class="kfd-varian-kepala">
                             <h3 class="kfd-varian-nama">
                                 <i class="bi {{ $v['kunci'] === 'online' ? 'bi-laptop' : 'bi-geo-alt' }}"></i>
                                 {{ $v['nama'] }}
+                                <span class="kfd-varian-ket">
+                                    {{ $v['lokasi'] }} ·
+                                    <strong>Rp {{ number_format($v['biaya'], 0, ',', '.') }}</strong> per sesi
+                                </span>
                             </h3>
-                            <p class="kfd-varian-ket">
-                                {{ $v['lokasi'] }} ·
-                                <strong>Rp {{ number_format($v['biaya'], 0, ',', '.') }}</strong> per sesi
-                            </p>
                         </header>
 
                         <div class="kfd-sesi">
@@ -162,8 +175,9 @@
                             <i class="bi bi-pencil-square"></i> Pesan sekarang
                         </a>
                         <p class="kfd-ajak-kata">
-                            Isinya sebentar saja — lalu Anda langsung diantar ke halaman
-                            pembayaran.
+                            Boleh ambil lebih dari satu sesi — tagihannya dijumlahkan jadi
+                            satu. Isinya sebentar saja, lalu Anda langsung diantar ke
+                            halaman pembayaran.
                         </p>
                     @else
                         {{-- Tanpa gerbang, borangnya memang dipantulkan
@@ -187,30 +201,38 @@
                 </div>
             @endif
 
-            <h2 class="kfd-bagian-judul kfd-renggang">Yang kamu dapat</h2>
-
             {{-- Dua blok penutup SEJAJAR di layar lebar — susunan yang sama
                  dengan Scopus Camp. Ditumpuk, keduanya memakan dua blok penuh
                  padahal kartu lacak cuma setinggi satu isian dan separuh
                  lebarnya kosong. --}}
             <div class="kfd-bawah">
 
-            {{-- Empat ubin sejajar, bukan daftar centang di lajur sempit:
-                 keempatnya sederajat, dan ditumpuk ke bawah di kiri halaman
-                 ia terbaca seperti syarat dan ketentuan. --}}
-            <div class="kfd-ubin">
-                @foreach ([
-                    ['bi-hourglass-split', 'Lima jam penuh', 'Satu sesi utuh, bukan konsultasi sepuluh menit.'],
-                    ['bi-file-earmark-text', 'Naskahmu yang dibedah', 'Bukan materi umum — yang dibuka naskah yang kamu bawa.'],
-                    ['bi-person-check', 'Trainer berpengalaman', 'Pendamping yang sudah menembus jurnal terindeks Scopus.'],
-                    ['bi-cup-hot', 'Tempat dan kopinya', 'Di Rumah Scopus Pusat, Yogyakarta.'],
-                ] as [$ikon, $judul, $kata])
-                    <div class="kfd-ubin-butir">
-                        <span class="kfd-ubin-ikon"><i class="bi {{ $ikon }}"></i></span>
-                        <h3>{{ $judul }}</h3>
-                        <p>{{ $kata }}</p>
-                    </div>
-                @endforeach
+            {{-- DAFTAR CENTANG DI DALAM SATU KARTU, bukan empat ubin berikon.
+
+                 Bentuk ubinnya — ikon besar, judul, kalimat, masing-masing
+                 berkotak sendiri — terukur 422px, dan dengan judul bagian di
+                 atasnya 502px. Scopus Camp menyampaikan tujuh butir yang
+                 setara dalam satu kartu setinggi 211px, sebab butirnya cuma
+                 satu baris bertanda centang dan kartunya berlajur dua.
+
+                 Halaman ini diminta mengikuti bentuk itu, dan isinya memang
+                 cocok: keempat butir di bawah kalimat pendek semua. Ikonnya
+                 tidak hilang — ia jadi tanda centang yang sama untuk semua,
+                 sebab yang membedakan keempatnya teksnya, bukan gambarnya. --}}
+            <div class="kfd-panel">
+                <div class="kfd-panel-kartu">
+                    <h2>Yang kamu dapat</h2>
+                    <ul class="kfd-fasilitas">
+                        @foreach ([
+                            'Lima jam penuh — satu sesi utuh, bukan konsultasi sepuluh menit',
+                            'Naskahmu sendiri yang dibedah, bukan materi umum',
+                            'Trainer yang sudah menembus jurnal terindeks Scopus',
+                            'Tempat dan kopinya di Rumah Scopus Pusat, Yogyakarta',
+                        ] as $butir)
+                            <li><i class="bi bi-check-circle-fill"></i> <span>{{ $butir }}</span></li>
+                        @endforeach
+                    </ul>
+                </div>
             </div>
 
             {{-- Jalan kembali bagi yang kehilangan tautannya.
@@ -222,10 +244,16 @@
                  menebak alamat email orang lain bisa membuka pemesanannya. --}}
             <form method="POST" action="{{ route('public.scopuskafe.tautansaya') }}" class="kfd-lacak">
                 @csrf
-                <span class="kfd-lacak-ikon"><i class="bi bi-ticket-detailed"></i></span>
-                <div class="kfd-lacak-kata">
-                    <strong>Sudah pernah memesan?</strong>
-                    <span>Masukkan email Anda, tautan pemesanannya kami kirim ke sana.</span>
+                {{-- Ikon dan kata dibungkus satu baris, seperti kartu lacak
+                     Scopus Camp: ikon di kiri, judul dan kalimatnya di
+                     kanan. Terpusat dan bertingkat, kartunya lebih tinggi
+                     tanpa memuat apa pun yang tambahan. --}}
+                <div class="kfd-lacak-sapa">
+                    <span class="kfd-lacak-ikon"><i class="bi bi-ticket-detailed"></i></span>
+                    <div class="kfd-lacak-kata">
+                        <strong>Sudah pernah memesan?</strong>
+                        <span>Masukkan email Anda, tautan pemesanannya kami kirim ke sana.</span>
+                    </div>
                 </div>
                 <div class="kfd-lacak-isian">
                     <label for="kfdLacakEmail" class="visually-hidden">Alamat email</label>
