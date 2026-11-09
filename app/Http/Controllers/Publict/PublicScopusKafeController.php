@@ -97,7 +97,7 @@ class PublicScopusKafeController extends Controller
 
     // <!--================== BORANG ==================-->
 
-    public function FormPendaftaran()
+    public function FormPendaftaran(\App\Support\IsiOtomatisDariNomor $pencari)
     {
         /*
          * TANPA GERBANG, BORANGNYA TIDAK DIGAMBAR SAMA SEKALI.
@@ -134,8 +134,79 @@ class PublicScopusKafeController extends Controller
              * sudah ada di sesi; menunggu ia mengetik ulang berarti meminta
              * keterangan yang kita pegang.
              */
-            'akun' => auth()->user(),
+            'isiAwal' => $this->isiAwalUntukAkun($pencari),
+
+            /*
+             * Batas panjang nomor, DARI SATU TEMPAT.
+             *
+             * Skrip borangnya memutuskan kapan nomornya sudah cukup lengkap
+             * untuk dicari, dan peladennya memutuskan kapan ia cukup lengkap
+             * untuk dipakai. Dua angka yang ditulis terpisah akan berselisih
+             * perlahan, dan selisihnya berupa pencarian yang tidak pernah
+             * terkirim — atau yang terkirim lalu selalu dijawab kosong.
+             */
+            'nomorMin' => \App\Support\NomorTelepon::MINIMAL,
+            'nomorMaks' => \App\Support\NomorTelepon::MAKSIMAL,
         ]);
+    }
+
+    /**
+     * Isi awal borang untuk yang sudah masuk akun.
+     *
+     * Dirender TERISI dari peladen, bukan lewat jalur pencarian nomor di
+     * peramban. Dua sebabnya:
+     *
+     *   1. datanya memang sudah ada di sesi — menunggu ia mengetik nomornya
+     *      sendiri dulu berarti meminta keterangan yang kita pegang;
+     *   2. jalur pencarian itu DIBATASI LAJUNYA (4 per menit per IP, 25 per
+     *      hari per IP, 8 per hari per nomor). Yang sudah login tidak punya
+     *      alasan ikut menghabiskan jatah yang disediakan untuk tamu.
+     *
+     * PESANAN TERAKHIR MENANG atas isi akun, bukan sebaliknya. Nama di akun
+     * sering sekadar "admin" atau "staff" — terukur begitu di basis data ini
+     * — sementara nama di pesanan ditulis dalam bentuk yang memang diminta
+     * borang ini, lengkap dengan gelarnya. Alamat suratnya pun: yang dipakai
+     * di pesanan terakhir adalah yang terakhir ia pilih untuk menerima
+     * faktur, dan baris di bawah isian email ini menjanjikan fakturnya
+     * dikirim ke sana.
+     *
+     * Semuanya tetap bisa diubah, dan borangnya mengatakan isinya dari mana.
+     *
+     * @return array<string, string>
+     */
+    private function isiAwalUntukAkun(\App\Support\IsiOtomatisDariNomor $pencari): array
+    {
+        $akun = auth()->user();
+
+        if ($akun === null) {
+            return [];
+        }
+
+        /*
+         * `telp`, BUKAN `phone`.
+         *
+         * Borang ini membaca $akun->phone sejak 26 Okt 2026, dan kolom itu
+         * tidak ada di tabel users. Terukur 9 Nov 2026: NULL untuk seluruh
+         * 145 akun yang punya nomor. Akibatnya isian nomor — isian pertama,
+         * dan satu-satunya yang mencari sisanya — selalu kosong untuk yang
+         * sudah login. Kegagalannya diam: Blade memulangkan null untuk
+         * properti yang tidak ada, jadi `?? ''` selalu menang dan tidak ada
+         * galat apa pun yang terbit.
+         */
+        $isi = array_filter([
+            'nama' => (string) $akun->full_name,
+            'email' => (string) $akun->email,
+            'telp' => (string) $akun->telp,
+        ], static fn (string $nilai): bool => trim($nilai) !== '');
+
+        $ketemu = $pencari->cari($akun->telp);
+
+        if ($ketemu !== null && $ketemu['sumber'] === 'pesanan') {
+            $isi['nama'] = $ketemu['nama'];
+            $isi['email'] = $ketemu['email'];
+        }
+
+        return $isi;
     }
 
     // <!--================== SIMPAN ==================-->
