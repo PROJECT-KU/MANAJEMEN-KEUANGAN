@@ -341,6 +341,65 @@ class BerandaTest extends TestCase
     }
 
     #[Test]
+    public function baris_centang_hero_tidak_meninggalkan_satu_butir_sendirian(): void
+    {
+        /*
+         * Butir centang di hero bertambah jadi EMPAT, 9 Nov 2026.
+         *
+         * Dengan flex yang meluap apa adanya, terukur di 1440, 1280, dan
+         * 768px: tiga butir di baris pertama dan SATU sendirian di baris
+         * kedua. Yang sendirian itu justru butir yang baru ditambahkan, jadi
+         * ia terbaca seperti tempelan — bukan seperti bagian dari janji yang
+         * sama. Dua lajur membuatnya 2x2, dengan tinggi yang sama persis.
+         *
+         * Yang dijaga ATURANNYA, bukan jumlah butirnya: panitia boleh
+         * menambah atau mengurangi janji kapan saja, dan uji yang memaku
+         * empat cuma akan merah karena itu. Yang tidak boleh hilang aturan
+         * dua lajurnya — kalau hilang, butir ganjil berikutnya menggantung
+         * lagi tanpa ada yang tahu, sebab halamannya tetap 200 dan tidak ada
+         * satu pun galat yang terbit.
+         */
+        $sumber = $this->sumber();
+
+        $this->assertMatchesRegularExpression(
+            '/\.bnd-centang\s*\{[^}]*grid-template-columns:\s*repeat\(2,/s',
+            $sumber,
+            'Baris centang hero harus dipasang dua lajur di layar lebar. '
+            . 'Tanpa itu, butir keempat menggantung sendirian di baris kedua.'
+        );
+
+        /*
+         * Dan aturan itu harus ADA DI DALAM media query, bukan berlaku di
+         * semua lebar: di layar ponsel kolomnya cuma muat satu butir per
+         * baris, dan memaksa dua lajur di sana memotong kalimat
+         * terpanjangnya.
+         */
+        $this->assertMatchesRegularExpression(
+            '/@media\s*\(min-width:[^)]*\)\s*\{\s*\.bnd-centang/s',
+            $sumber,
+            'Dua lajurnya hanya untuk layar lebar — di ponsel ia memotong '
+            . 'kalimat terpanjangnya.'
+        );
+    }
+
+    #[Test]
+    public function janji_yang_sudah_dicabut_tidak_kembali_ke_hero(): void
+    {
+        /*
+         * "Trainernya publish sendiri" dicabut atas permintaan pemiliknya, 9
+         * Nov 2026, dan diganti "Trainer yang berpengalaman".
+         *
+         * Dijaga di sini karena kalimat hero adalah hal yang paling mudah
+         * kembali tanpa sengaja: ia berada di berkas yang sama dengan belasan
+         * perubahan rupa lain, dan penggabungan cabang yang memilih sisi yang
+         * salah mengembalikannya tanpa satu pun tanda — halamannya tetap 200,
+         * dan yang membacanya cuma pengunjung.
+         */
+        $this->assertStringNotContainsString('Trainernya publish sendiri', $this->sumber(),
+            'Janji itu sudah dicabut pemiliknya; ia tidak boleh kembali diam-diam.');
+    }
+
+    #[Test]
     public function tidak_ada_paragraf_rata_kiri_kanan(): void
     {
         /*

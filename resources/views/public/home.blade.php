@@ -282,6 +282,28 @@ Beranda | Rumah Scopus
     .bnd-aksi { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 32px; }
 
     .bnd-centang { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 30px; }
+
+    /* DUA LAJUR, bukan dibiarkan meluap sendiri.
+
+       Butirnya empat sejak 9 Nov 2026. Dengan flex yang meluap apa adanya,
+       terukur di 1440, 1280, dan 768px: TIGA di baris pertama dan SATU
+       sendirian di baris kedua — dan yang sendirian itu justru butir yang
+       baru ditambahkan, jadi ia terbaca seperti tempelan, bukan seperti
+       bagian dari janji yang sama.
+
+       Dua lajur membuatnya 2x2 di ketiga lebar itu, dengan tinggi yang sama
+       persis (52px) seperti bentuk 3+1 — jadi tidak ada yang bergeser, yang
+       berubah cuma bacaannya.
+
+       576px ke bawah dibiarkan satu lajur: di sana kolomnya memang hanya
+       muat satu butir per baris, dan memaksa dua lajur akan memotong
+       kalimat terpanjangnya. */
+    @media (min-width: 576px) {
+        .bnd-centang {
+            display: grid; grid-template-columns: repeat(2, max-content);
+            gap: 10px 26px;
+        }
+    }
     .bnd-centang span {
         display: inline-flex; align-items: center; gap: 8px;
         font-size: .92rem; font-weight: 600; color: var(--tinta);
@@ -1321,9 +1343,10 @@ Beranda | Rumah Scopus
                     </div>
 
                     <div class="bnd-centang">
-                        <span><i class="bi bi-check2-circle"></i> Trainernya publish sendiri</span>
+                        <span><i class="bi bi-check2-circle"></i> Trainernya berpengalaman</span>
                         <span><i class="bi bi-check2-circle"></i> Latihan pakai naskahmu</span>
                         <span><i class="bi bi-check2-circle"></i> Ditemani sampai terbit</span>
+                        <span><i class="bi bi-check2-circle"></i> Apa pun bidangmu, ada trainernya</span>
                     </div>
                 </div>
 
