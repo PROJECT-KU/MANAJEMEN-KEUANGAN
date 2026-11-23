@@ -6,6 +6,7 @@ use App\Actions\Webinar\BuatAkunPeserta;
 use App\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use PHPUnit\Framework\Attributes\Test;
@@ -91,6 +92,20 @@ class SandiBawaanDitahanTest extends TestCase
     {
         $akun = $this->akunBawaan();
 
+        /*
+         * Jawaban HaveIBeenPwned dipalsukan sebagai "tidak ada di daftar".
+         *
+         * Tanpa ini ujinya tetap hijau — TETAPI karena alasan yang salah:
+         * panggilan jaringannya gagal, Laravel menganggap sandinya aman, dan
+         * aturan uncompromised() diam-diam tidak diuji sama sekali. Hijau
+         * yang didapat dari kegagalan adalah hijau yang tidak menjaga apa pun.
+         */
+        Http::fake([
+            'api.pwnedpasswords.com/*' => Http::response(
+                "0018A45C4D1DEF81644B54AB7F969B88D65:1\n", 200
+            ),
+        ]);
+
         $this->actingAs($akun)
             ->post(route('account.sandi.wajib.simpan'), [
                 'password' => 'Jingga7Semesta2026',
@@ -114,7 +129,31 @@ class SandiBawaanDitahanTest extends TestCase
          * "Password123" ada di daftar kebocoran. Jadi halaman yang memaksa
          * mengganti sandi tidak bisa dilewati dengan mengetik ulang sandi
          * yang sama — yang memang seluruh gunanya.
+         *
+         * -------------------------------------------------------------------
+         * Jawaban HaveIBeenPwned DIPALSUKAN, dan itu bukan sekadar kerapian
+         * -------------------------------------------------------------------
+         *
+         * uncompromised() memanggil api.pwnedpasswords.com SUNGGUHAN lewat
+         * jaringan. Uji yang bergantung padanya akan MERAH saat jaringan mati,
+         * saat layanan itu lambat, atau — yang paling menyesatkan — HIJAU
+         * PALSU: kalau panggilannya gagal, Laravel menganggap sandinya aman
+         * dan validasinya lolos, sehingga ujinya diam-diam berhenti menguji
+         * apa pun.
+         *
+         * Dipalsukan dengan jawaban yang bentuknya persis seperti aslinya:
+         * daftar "SISA_SHA1:JUMLAH" per baris, dan sisa hash "Password123"
+         * ada di dalamnya.
          */
+        $sisa = substr(strtoupper(sha1(BuatAkunPeserta::SANDI_BAWAAN)), 5);
+
+        Http::fake([
+            'api.pwnedpasswords.com/*' => Http::response(
+                "0018A45C4D1DEF81644B54AB7F969B88D65:1\n" . $sisa . ":123456\n",
+                200
+            ),
+        ]);
+
         $this->actingAs($akun)
             ->post(route('account.sandi.wajib.simpan'), [
                 'password' => BuatAkunPeserta::SANDI_BAWAAN,

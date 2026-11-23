@@ -39,8 +39,37 @@ abstract class TestCase extends BaseTestCase
     protected function setUpTraits()
     {
         $this->pastikanTidakMenghapusBasisDataPengembangan();
+        $this->laranganPanggilanJaringan();
 
         return parent::setUpTraits();
+    }
+
+    /**
+     * Melarang uji menyentuh jaringan sungguhan.
+     *
+     * Terukur 23 Nov 2026: suite ini memanggil api-sandbox.doku.com
+     * SUNGGUHAN — 50 galat cURL dalam satu hari — dan akibatnya tidak
+     * berhenti di dalam uji. Akamai, yang berdiri di depan DOKU, mulai
+     * memutus sambungan dari alamat IP ini sesudah panggilan beruntun; lalu
+     * pendaftaran yang dicoba orang lewat peramban beberapa menit kemudian
+     * ikut ditolak, dan layarnya berbunyi "Pembayaran daring sedang
+     * bermasalah". Suite uji merusak lingkungan pengembangannya sendiri.
+     *
+     * Dua akibat lain yang sama-sama tidak terlihat:
+     *
+     *   - LAMBAT. Suite menunggu batas waktu jaringan berkali-kali; dengan
+     *     larangan ini 104 detik jadi 75;
+     *   - HIJAU PALSU. Aturan sandi uncompromised() memanggil
+     *     api.pwnedpasswords.com, dan Laravel menganggap sandinya AMAN kalau
+     *     panggilannya gagal. Uji yang mengandalkannya lolos justru ketika
+     *     jaringannya mati — berhenti menguji tanpa pernah berubah merah.
+     *
+     * Sesudah ini, panggilan HTTP yang tidak dipalsukan MELEMPAR galat yang
+     * menyebut alamatnya, bukan diam-diam keluar ke internet.
+     */
+    protected function laranganPanggilanJaringan(): void
+    {
+        \Illuminate\Support\Facades\Http::preventStrayRequests();
     }
 
     /**
