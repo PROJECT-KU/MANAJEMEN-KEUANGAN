@@ -73,5 +73,6 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'checkToken' => \App\Http\Middleware\CheckTokenMiddleware::class,
         'terverifikasi' => \App\Http\Middleware\EmailTerverifikasi::class,
+        'sandi.wajib' => \App\Http\Middleware\WajibGantiSandi::class,
     ];
 }

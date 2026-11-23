@@ -361,9 +361,28 @@ Route::post('/Clinik-Scopus/Pemesanan/upload-bukti', 'Publict\PublicClinikScopus
  * account
  */
 Route::prefix('account')
-    ->middleware(['auth', 'terverifikasi'])
+    /*
+     * 'sandi.wajib' menahan akun yang kata sandinya masih bawaan di halaman
+     * ganti sandi. Dipasang di GRUPNYA, bukan per rute: akun peserta webinar
+     * lahir dengan sandi yang sama untuk semua orang, dan satu rute yang
+     * terlewat adalah satu pintu yang tetap terbuka.
+     */
+    ->middleware(['auth', 'terverifikasi', 'sandi.wajib'])
     ->group(
         function () {
+
+            // ganti kata sandi sementara (akun yang dibuatkan sistem)
+            Route::get('/ganti-sandi', 'account\SandiWajibController@form')
+                ->name('account.sandi.wajib');
+            Route::post('/ganti-sandi', 'account\SandiWajibController@simpan')
+                ->middleware('throttle:6,1')
+                ->name('account.sandi.wajib.simpan');
+
+            // rekaman webinar untuk peserta yang sudah membayar
+            Route::get('/rekaman-webinar', 'account\RekamanWebinarController@index')
+                ->name('account.rekaman.index');
+            Route::get('/rekaman-webinar/{token}', 'account\RekamanWebinarController@tonton')
+                ->name('account.rekaman.tonton');
 
             // karir
             Route::get('/karir', 'account\KarirController@index')->name('karir.index');

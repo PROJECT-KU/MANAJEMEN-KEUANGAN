@@ -278,6 +278,64 @@ class WebinarEksklusifPendaftaran extends Model
                 $model->id_transaksi = self::nomorBaru();
             }
         });
+
+        /*
+         * Begitu pembayarannya lunas, pesertanya dibuatkan akun MIS dan
+         * dikirimi keterangan masuknya.
+         *
+         * DIPASANG DI MODEL, bukan di pengendali, dan itu bukan selera.
+         * Terukur 23 Nov 2026: ada EMPAT jalur yang bisa menandai lunas —
+         * tiga di PublicWebinarEksklusifController (pemberitahuan gerbang,
+         * pertanyaan balik ke gerbang, dan pelunasan saat mendaftar) dan satu
+         * di layar panitia lewat PendaftaranLayananController. Menyisipkan
+         * panggilan di satu tempat berarti tiga jalur lain DIAM: pesertanya
+         * membayar, tidak pernah menerima akun, dan tidak ada galat apa pun
+         * yang terbit.
+         *
+         * Keempatnya menyimpan lewat model, jadi kait ini menutup keempatnya
+         * sekaligus — termasuk jalur kelima yang belum ditulis siapa pun.
+         */
+        static::created(function (self $model) {
+            if ($model->status === 'paid') {
+                $model->kabariAkunPeserta();
+            }
+        });
+
+        static::updated(function (self $model) {
+            /*
+             * wasChanged(), BUKAN sekadar status === 'paid'.
+             *
+             * Baris yang sudah lunas disimpan lagi untuk hal lain — panitia
+             * membetulkan nomor telepon, gerbang menuliskan kanal bayarnya —
+             * dan tanpa penjaga ini tiap penyimpanan itu mengirim ulang
+             * keterangan akun ke seluruh rombongan.
+             */
+            if ($model->wasChanged('status') && $model->status === 'paid') {
+                $model->kabariAkunPeserta();
+            }
+        });
+    }
+
+    /**
+     * Membuatkan akun peserta dan mengirim keterangan masuknya.
+     *
+     * DIBUNGKUS try/catch. Yang memanggilnya jalur pemberitahuan gerbang
+     * pembayaran: galat di sini membuat kami menjawab bukan-200 ke DOKU,
+     * yang lalu mengirim ulang pemberitahuan yang sama berulang kali —
+     * sementara uangnya sudah masuk dan pendaftarannya sudah tersimpan.
+     * Yang pantas terjadi galatnya dicatat, bukan pembayaran yang
+     * dipertanyakan.
+     */
+    public function kabariAkunPeserta(): void
+    {
+        try {
+            app(\App\Actions\Webinar\KabariAkunPeserta::class)->untuk($this);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Gagal menyiapkan akun peserta webinar.', [
+                'pendaftaran' => $this->id_transaksi,
+                'sebab' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**

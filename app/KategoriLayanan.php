@@ -78,8 +78,21 @@ class KategoriLayanan extends Model
         'status',
         'group_wa',
         'gambar',
+
+        /*
+         * Rekaman webinar. HARUS ada di sini: kolom di luar $fillable dibuang
+         * Eloquent diam-diam — penyimpanan dilaporkan "berhasil", barisnya
+         * tidak berubah, dan tidak ada satu pun galat yang terbit.
+         */
+        'rekaman_url',
+        'rekaman_dipasang_pada',
+
         'created_at',
         'updated_at',
+    ];
+
+    protected $casts = [
+        'rekaman_dipasang_pada' => 'datetime',
     ];
 
     protected static function boot()

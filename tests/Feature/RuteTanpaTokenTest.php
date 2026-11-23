@@ -37,6 +37,17 @@ class RuteTanpaTokenTest extends TestCase
 
         // Dicari ke kolom token_update untuk menolak testimoni ganda.
         'account.peserta.testimoni' => 'token_update',
+
+        /*
+         * Dicari ke kolom token angkatan: KategoriLayanan::where('token', …).
+         *
+         * Dipakai, bukan hiasan — dan sengaja BUKAN id. Id angkatan berurutan,
+         * jadi alamat rekaman angkatan tetangga bisa dibuka cukup dengan
+         * menaikkan satu angka. Haknya memang tetap diperiksa di pengendali,
+         * tetapi alamat yang tidak bisa ditebak membuat percobaan itu tidak
+         * pernah dimulai.
+         */
+        'account.rekaman.tonton' => 'token',
     ];
 
     #[Test]

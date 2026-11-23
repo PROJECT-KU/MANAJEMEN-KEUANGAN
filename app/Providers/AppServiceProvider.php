@@ -95,6 +95,10 @@ class AppServiceProvider extends ServiceProvider
             'totalAssignTask' => 0,
             'countScopusPending' => 0,
             'countPaid' => 0,
+
+            // Rekaman webinar yang SIAP ditonton oleh orang ini. Menu di tata
+            // letak account menyembunyikan dirinya saat angkanya nol.
+            'jumlahRekamanSaya' => 0,
         ];
 
         if (! $user) {
@@ -102,6 +106,17 @@ class AppServiceProvider extends ServiceProvider
         }
 
         $pengelola = $user->adalahAdministrator();
+
+        /*
+         * Rekaman webinar yang siap ditonton.
+         *
+         * Ikut dihitung DI SINI, bersama lencana lain, bukan lewat composer
+         * sendiri: composer ini sudah berjalan sekali per permintaan, dan
+         * menambah composer kedua berarti pertanyaannya diulang di tiap view
+         * yang dirender — persis masalah yang composer ini dibuat untuk
+         * menyelesaikan.
+         */
+        $jumlahRekamanSaya = \App\Support\RekamanWebinarSaya::jumlahSiap($user);
 
         // --- perjalanan dinas yang menunggu
         $countAjukan = DB::table('perjalanan_dinas')
@@ -147,6 +162,7 @@ class AppServiceProvider extends ServiceProvider
             'totalAssignTask' => $tugas->count(),
             'countScopusPending' => (int) ($hitungPesanan->menunggu ?? 0),
             'countPaid' => (int) ($hitungPesanan->terbayar ?? 0),
+            'jumlahRekamanSaya' => $jumlahRekamanSaya,
         ];
     }
 }
