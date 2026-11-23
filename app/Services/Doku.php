@@ -278,21 +278,40 @@ class Doku
          * jadi tidak ada tagihan yang terlanjur dibuat, jadi mengulangnya
          * aman.
          *
-         * YANG TIDAK DIULANG, dan ini yang membedakan:
+         * SAMBUNGAN YANG PUTUS IKUT DIULANG sejak 23 Nov 2026.
          *
-         *   - lemparan jaringan dan waktu habis. Di sana permintaannya
-         *     MUNGKIN sampai dan tagihannya mungkin sudah terbit; mengulang
-         *     bisa melahirkan tagihan kedua atas satu kursi, dan sebagian
-         *     orang membayar keduanya;
+         * Semula tidak, dengan alasan "permintaannya mungkin sampai dan
+         * tagihannya mungkin sudah terbit". Alasan itu sudah dijawab oleh
+         * aturan di bawah: nomor tagihannya SENGAJA sama pada percobaan
+         * kedua, jadi kalau yang pertama sempat terbit, DOKU menolaknya
+         * dengan "INVOICE ALREADY USED" — 4xx, yang langsung menghentikan
+         * ulangan. Penjagaan yang sama persis dengan yang sudah dipercaya
+         * untuk 502/503/504.
+         *
+         * Yang membuatnya perlu: terukur 23 Nov 2026 di jaringan
+         * pengembangan, SATU DARI DUA PULUH panggilan keluar putus di tengah
+         * jabat tangan TLS (cURL 35, "Connection reset by peer") — 0% paket
+         * hilang, tetapi latensinya berayun 39–156 ms. Pendaftaran memanggil
+         * keluar tiga kali berurutan, jadi peluang satu di antaranya putus
+         * menumpuk. Tanpa ulangan, tiap putus sekejap itu LANGSUNG mematikan
+         * pembayaran: pendaftarannya tersimpan, kursinya tertahan, dan
+         * layarnya berbunyi "Pembayaran daring sedang bermasalah" padahal
+         * DOKU tidak pernah ditanya.
+         *
+         * YANG TETAP TIDAK DIULANG:
+         *
          *   - 4xx. Itu penolakan yang disengaja — bentuk datanya salah,
          *     kuncinya salah, atau nomornya sudah terpakai — dan mengulang
-         *     hal yang sama menghasilkan penolakan yang sama.
+         *     hal yang sama menghasilkan penolakan yang sama;
+         *   - galat selain sambungan. Itu cacat kita sendiri, dan
+         *     mengulangnya cuma menunda galatnya satu detik.
          *
          * Nomor tagihannya SENGAJA sama pada percobaan kedua. Kalau ternyata
          * yang pertama sempat terbit, DOKU menolaknya dengan "INVOICE
          * ALREADY USED" — sebuah 4xx, yang langsung menghentikan ulangan.
          */
         $jawab = null;
+        $sambunganPutus = null;
 
         foreach ([0, 1] as $percobaan) {
             if ($percobaan > 0) {
@@ -313,6 +332,15 @@ class Doku
                     ])
                     ->withBody($json, 'application/json')
                     ->post($this->pangkalan() . $jalur);
+            } catch (\Illuminate\Http\Client\ConnectionException $e) {
+                /*
+                 * Disimpan, bukan langsung dipulangkan: percobaan kedua
+                 * memakai nomor tagihan yang sama, jadi ia aman. Kalau yang
+                 * kedua berhasil, $sambunganPutus dikosongkan lagi di atas.
+                 */
+                $sambunganPutus = $e;
+
+                continue;
             } catch (\Throwable $e) {
                 report($e);
 
@@ -323,9 +351,21 @@ class Doku
                 ];
             }
 
+            $sambunganPutus = null;
+
             if (! in_array($jawab->status(), [502, 503, 504], true)) {
                 break;
             }
+        }
+
+        if ($sambunganPutus !== null) {
+            report($sambunganPutus);
+
+            return [
+                'berhasil' => false, 'url' => null, 'rujukan' => null, 'permintaan_id' => null,
+                'pesan' => 'Tidak bisa menghubungi penyedia pembayaran.',
+                'sementara' => true,
+            ];
         }
 
         if (! $jawab->successful()) {
