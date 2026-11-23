@@ -87,6 +87,23 @@ class LogoSuratSeragamTest extends TestCase
         'public/webinar_eksklusif/email_pengingat.blade.php',
 
         /*
+         * Keterangan akun MIS untuk peserta webinar yang sudah lunas,
+         * ditambahkan 23 Nov 2026.
+         *
+         * Ini surat AKUN — dan menurut aturan di atas, surat akun memang
+         * biasanya berlogo MIS karena pembacanya orang dalam. Yang ini
+         * perkecualian, dan sebabnya pembacanya: PESERTA WEBINAR, orang luar
+         * yang baru saja membayar ke Rumah Scopus dan belum pernah mendengar
+         * nama "MIS" sekali pun.
+         *
+         * Suratnya juga memuat KATA SANDI. Surat berisi kata sandi yang
+         * berlogo alat administrasi yang tidak dikenal pembacanya adalah
+         * bentuk yang paling mirip dengan surat penipuan — dan yang
+         * paling pantas ia abaikan.
+         */
+        'public/webinar_eksklusif/email_akun.blade.php',
+
+        /*
          * Kabar "batas bayar lewat, kursi Anda dilepas". Pembacanya orang
          * yang baru saja kehilangan kursinya dan sebagian masih mau ikut —
          * jadi suratnya harus terbaca datang dari penyelenggaranya, bukan

@@ -756,6 +756,38 @@
                             <input type="text" class="form-control-modern" id="brg-wa" name="group_wa"
                                 value="{{ old('group_wa', $angkatan->group_wa) }}" placeholder="Menyusul">
                         </div>
+
+                        {{-- Rekaman. Hanya untuk Webinar Eksklusif: layanan lain
+                             belum punya layar tontonannya, dan isian yang
+                             tersimpan tetapi tidak pernah dipakai di mana pun
+                             akan terbaca sebagai fitur yang rusak. --}}
+                        @if (old('layanan', $angkatan->layanan) === 'webinar_eksklusif')
+                            <div class="mis-isian brg-isian brg-penuh">
+                                <label class="mis-label" for="brg-rekaman">
+                                    Tautan rekaman YouTube
+                                </label>
+                                <input type="text" class="form-control-modern" id="brg-rekaman"
+                                    name="rekaman_url" inputmode="url"
+                                    value="{{ old('rekaman_url', $angkatan->rekaman_url) }}"
+                                    placeholder="https://youtu.be/xxxxxxxxxxx">
+
+                                @error('rekaman_url')
+                                    <p class="mis-galat">{{ $message }}</p>
+                                @enderror
+
+                                <p class="mis-bantu">
+                                    Diisi <strong>setelah webinarnya selesai</strong>. Begitu
+                                    tersimpan, rekamannya langsung bisa ditonton peserta angkatan
+                                    ini di menu Rekaman Webinar — peserta angkatan lain tidak.
+                                    Boleh ditempel apa adanya dari YouTube (youtu.be, watch?v=,
+                                    live, atau embed).
+                                    @if ($angkatan->rekaman_dipasang_pada)
+                                        <br><span class="text-muted">Dipasang
+                                        {{ $angkatan->rekaman_dipasang_pada->locale('id')->translatedFormat('j F Y, H:i') }}.</span>
+                                    @endif
+                                </p>
+                            </div>
+                        @endif
                     </div>
                 </div>
 
