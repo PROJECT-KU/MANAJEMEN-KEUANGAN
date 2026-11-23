@@ -984,6 +984,21 @@ class WebinarEksklusifTest extends TestCase
             'cara_bayar' => 'transfer', 'status' => 'paid',
         ]);
 
+        /*
+         * Difake ULANG sesudah umpannya dibuat.
+         *
+         * Sejak 23 Nov 2026 model ini menyiapkan akun peserta begitu barisnya
+         * lunas, dan umpan di atas memang dibuat dalam keadaan lunas — jadi
+         * satu surat keterangan akun sudah terkirim sebelum perintahnya
+         * dijalankan. Tanpa fake ulang, assertNothingSent() di bawah merah
+         * karena surat yang bukan urusan uji ini.
+         *
+         * Dan ini membuat klaimnya LEBIH tepat, bukan lebih longgar: yang
+         * diperiksa kini benar-benar "perintahnya tidak mengirim apa pun",
+         * bukan "tidak ada surat apa pun sepanjang uji".
+         */
+        \Illuminate\Support\Facades\Mail::fake();
+
         $this->artisan('webinar-eksklusif:ingatkan', ['--kering' => true]);
 
         \Illuminate\Support\Facades\Mail::assertNothingSent();

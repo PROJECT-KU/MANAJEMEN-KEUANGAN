@@ -442,6 +442,31 @@ $isStatusnonactive = Auth::check() && Auth::user()->status === 'nonactive';
                         @endif
                         <!--================== END ==================-->
 
+                        <!--================== REKAMAN WEBINAR ==================-->
+                        {{-- Ditampilkan HANYA kepada yang benar-benar punya
+                             rekaman untuk ditonton. Menu yang selalu ada lalu
+                             membuka halaman kosong terbaca seperti fitur yang
+                             rusak — dan sebagian besar pelanggan di sini tidak
+                             pernah ikut webinar.
+
+                             Hitungannya dipasang view composer (RekamanTersedia)
+                             supaya pertanyaannya tidak diulang di tiap layar
+                             yang memakai tata letak ini. --}}
+                        @if (($jumlahRekamanSaya ?? 0) > 0)
+                        <li class="{{ setActive('account/rekaman-webinar') }}">
+                            <a class="nav-link d-flex align-items-center justify-content-between"
+                                href="{{ route('account.rekaman.index') }}">
+                                <div>
+                                    <i class="fas fa-play-circle"></i> <span>Rekaman Webinar</span>
+                                </div>
+                                <span class="badge badge-success" style="font-size: 10px; padding: 2px 6px; border-radius: 5px;">
+                                    {{ $jumlahRekamanSaya }}
+                                </span>
+                            </a>
+                        </li>
+                        @endif
+                        <!--================== END ==================-->
+
                         <!--================== REDIRECT TO BERANDA ==================-->
                         @if (Auth::user()->adalahPelanggan())
                         <li><a class="nav-link" href="{{ route('public.clinikscopus.index') }}"><i class="fas fa-comment"></i> <span>Konsultasi Sekarang</span></a></li>

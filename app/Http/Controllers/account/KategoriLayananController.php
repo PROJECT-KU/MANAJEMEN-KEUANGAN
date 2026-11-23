@@ -522,6 +522,20 @@ class KategoriLayananController extends Controller
             $data['pemateri_foto'] = $foto;
         }
 
+        /*
+         * Waktu pemasangan rekaman dicatat SAAT TAUTANNYA BERUBAH.
+         *
+         * Dipakai untuk tahu angkatan mana yang sudah diurus, dan nanti untuk
+         * mengabari peserta "rekaman baru tersedia". Kalau ditulis setiap
+         * penyimpanan, tanggalnya bergerak tiap kali panitia membetulkan hal
+         * lain di borang yang sama — dan kabarnya terkirim ulang ke orang
+         * yang sudah menontonnya.
+         */
+        if (array_key_exists('rekaman_url', $data)
+            && (string) $data['rekaman_url'] !== (string) $angkatan->rekaman_url) {
+            $data['rekaman_dipasang_pada'] = filled($data['rekaman_url']) ? now() : null;
+        }
+
         $angkatan->update($data);
 
         return redirect()->route('account.kategori-layanan.index', ['layanan' => $angkatan->layanan])
@@ -556,6 +570,23 @@ class KategoriLayananController extends Controller
             // Harga memotret tarif induk; promo jadi fiturnya sendiri nanti.
             'ikuti_tarif' => ['nullable', 'boolean'],
             'group_wa' => ['nullable', 'string', 'max:255'],
+
+            /*
+             * Tautan rekaman YouTube, dipasang SESUDAH acaranya selesai.
+             *
+             * Divalidasi sebagai tautan YouTube yang bisa dibaca, bukan
+             * sekadar 'url'. Tautan apa pun yang lolos 'url' akan tersimpan
+             * rapi lalu menghasilkan pemutar KOSONG di layar peserta — tanpa
+             * galat, tanpa baris log, dan satu-satunya yang melihatnya orang
+             * yang sudah membayar.
+             */
+            'rekaman_url' => ['nullable', 'string', 'max:500', function ($medan, $nilai, $gagal) {
+                if (filled($nilai) && ! \App\Support\TautanYouTube::sah($nilai)) {
+                    $gagal('Tautan rekaman harus tautan video YouTube, '
+                        . 'misalnya https://youtu.be/xxxxxxxxxxx atau '
+                        . 'https://www.youtube.com/watch?v=xxxxxxxxxxx');
+                }
+            }],
             'desc' => ['nullable', 'string', 'max:20000'],
             'status' => ['required', Rule::in(['active', 'non active', 'draft'])],
             // Sampul: jenisnya dibatasi daftar tertutup. 4 MB cukup untuk
